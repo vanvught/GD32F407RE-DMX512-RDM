@@ -1,0 +1,7 @@
+DEFINES=NDEBUG
+
+EXTRA_INCLUDES=../lib-rdm/include ../lib-lightset/include ../lib-properties/include
+
+EXTRA_SRCDIR=
+
+include ../firmware-template-gd32/lib/Rules.mk

@@ -1,0 +1,10 @@
+DEFINES=DISABLE_RTC
+
+SRCDIR=firmware
+
+LIBS=
+
+include ../firmware-template-gd32/Rules.mk
+
+prerequisites:
+

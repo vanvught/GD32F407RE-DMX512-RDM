@@ -1,0 +1,8 @@
+DEFINES=USE_SPI_DMA
+#DEFINES+=NDEBUG
+
+EXTRA_INCLUDES=../lib-device/include ../lib-hal/include
+
+EXTRA_SRCDIR=src/gpio src/i2s
+
+include ../firmware-template-gd32/lib/Rules.mk

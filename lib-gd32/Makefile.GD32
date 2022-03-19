@@ -1,0 +1,34 @@
+$(info $$FAMILY [${FAMILY}])
+
+ifeq ($(FAMILY),)
+	FAMILY=gd32f20x
+endif
+
+$(info $$FAMILY [${FAMILY}])
+
+ifeq ($(findstring gd32f10x,$(FAMILY)), gd32f10x)
+	EXTRA_SRCDIR=gd32f10x/CMSIS/GD/GD32F10x/Source
+	EXTRA_SRCDIR+=gd32f10x/GD32F10x_standard_peripheral/Source
+endif
+
+ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)
+	EXTRA_SRCDIR=gd32f20x/CMSIS/GD/GD32F20x/Source
+	EXTRA_SRCDIR+=gd32f20x/GD32F20x_standard_peripheral/Source
+endif
+
+ifeq ($(findstring gd32f30x,$(FAMILY)), gd32f30x)
+	EXTRA_SRCDIR=gd32f30x/CMSIS/GD/GD32F30x/Source
+	EXTRA_SRCDIR+=gd32f30x/GD32F30x_standard_peripheral/Source
+endif
+
+ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
+	EXTRA_SRCDIR=gd32f4xx/CMSIS/GD/GD32F4xx/Source
+	EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_standard_peripheral/Source
+endif
+
+ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
+else
+	EXTRA_SRCDIR+=device/emac
+endif
+
+include ../firmware-template-gd32/lib/Rules.mk

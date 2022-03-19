@@ -1,0 +1,10 @@
+DEFINES=NDEBUG
+
+ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
+	EXTRA_SRCDIR=src/gd32/bsram
+else
+	EXTRA_SRCDIR=src/gd32/flashrom
+endif
+
+include ../firmware-template-gd32/lib/Rules.mk
+	

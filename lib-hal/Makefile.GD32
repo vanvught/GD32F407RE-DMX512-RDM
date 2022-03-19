@@ -1,0 +1,10 @@
+#DEFINES=NDEBUG
+
+ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring USE_LEDBLINK_BITBANGING595,$(MAKE_FLAGS)), USE_LEDBLINK_BITBANGING595)
+		EXTRA_SRCDIR=src/gd32/bitbanging
+	endif
+endif
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

@@ -1,0 +1,13 @@
+DEFINES=DISABLE_FS DISABLE_TFTP DISABLE_BIN 
+DEFINES+=NDEBUG
+
+ifneq ($(MAKE_FLAGS),)
+	ifneq (,$(findstring ENABLE_HTTPD,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=src/httpd
+	endif
+else
+	EXTRA_SRCDIR+=src/httpd
+endif
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

@@ -1,0 +1,6 @@
+DEFINES=DISABLE_FS DMX_WORKSHOP_DEFECT 
+DEFINES+=NDEBUG
+EXTRA_INCLUDES=
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

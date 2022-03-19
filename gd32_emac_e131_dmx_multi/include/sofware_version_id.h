@@ -1,0 +1,2 @@
+// Generated za 19 mrt 2022 15:42:49 CET
+constexpr uint32_t DEVICE_SOFTWARE_VERSION_ID=1647700969;
