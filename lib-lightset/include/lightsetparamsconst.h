@@ -2,7 +2,7 @@
  * @file lightsetparamsconst.h
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,10 @@
 #ifndef LIGHTSETPARAMSCONST_H_
 #define LIGHTSETPARAMSCONST_H_
 
+#if !defined (CONFIG_PIXELDMX_MAX_PORTS)
+# define CONFIG_PIXELDMX_MAX_PORTS	8
+#endif
+
 struct LightSetParamsConst {
 	static const char PARAMS_OUTPUT[];
 
@@ -37,7 +41,7 @@ struct LightSetParamsConst {
 
 	static const char DIRECTION[4][18];
 
-	static const char START_UNI_PORT[8][18];
+	static const char START_UNI_PORT[CONFIG_PIXELDMX_MAX_PORTS][20];
 
 	static const char DMX_START_ADDRESS[];
 	static const char DMX_SLOT_INFO[];

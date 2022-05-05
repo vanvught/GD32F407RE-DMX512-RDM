@@ -1,8 +1,8 @@
 /**
- * @file tftpfileserver.cpp
+ * @file storewpixeldmx.cpp
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,20 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
 #include <cassert>
 
-#include "h3/ubootheader.h"
-#include "remoteconfig.h"
+#include "storepixeldmx.h"
 
 #include "debug.h"
 
-namespace tftpfileserver {
-bool is_valid(const void *pBuffer) {
-	UBootHeader uImage(reinterpret_cast<uint8_t *>(const_cast<void*>(pBuffer)));
-	if (!uImage.IsValid()) {
-		DEBUG_PUTS("uImage is not valid");
-		return false;
-	}
-	return true;
+StorePixelDmx *StorePixelDmx::s_pThis;
+
+StorePixelDmx::StorePixelDmx() {
+	DEBUG_ENTRY
+
+	assert(s_pThis == nullptr);
+	s_pThis = this;
+
+	DEBUG_PRINTF("%p", reinterpret_cast<void *>(s_pThis));
+	DEBUG_EXIT
 }
-}  // namespace tftpfileserver

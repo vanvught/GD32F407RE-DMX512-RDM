@@ -45,8 +45,6 @@
 
 using namespace networkparams;
 
-TNetworkParams NetworkParams::m_tNetworkParams;
-
 NetworkParams::NetworkParams(NetworkParamsStore *pNetworkParamsStore): m_pNetworkParamsStore(pNetworkParamsStore) {
 	memset(&m_tNetworkParams, 0, sizeof(struct TNetworkParams));
 	m_tNetworkParams.bIsDhcpUsed = defaults::IS_DHCP_USED;

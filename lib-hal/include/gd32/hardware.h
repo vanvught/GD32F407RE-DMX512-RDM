@@ -2,7 +2,7 @@
  * @file hardware.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,7 +69,7 @@ public:
 	}
 
 	uint32_t GetUpTime() {
-		return Millis() / 1000;
+		return Millis() / 1000U;
 	}
 
 	bool SetTime(const struct tm *pTime);
@@ -100,7 +100,7 @@ public:
 	}
 
 	const char *GetWebsiteUrl() {
-		return "http://gd32-dmx.org";
+		return "https://gd32-dmx.org";
 	}
 
 	void WatchdogInit() {

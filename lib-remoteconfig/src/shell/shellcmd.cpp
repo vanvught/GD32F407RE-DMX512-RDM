@@ -44,8 +44,8 @@
 // Firmware specific BEGIN
 #if defined (LTC_READER)
 # include "ltc.h"
-# include "h3/ltcgenerator.h"
-# include "h3/systimereader.h"
+# include "ltcgenerator.h"
+# include "systimereader.h"
 #endif
 // Firmware specific BEGIN
 

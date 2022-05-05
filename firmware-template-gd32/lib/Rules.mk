@@ -6,13 +6,17 @@ AS	= $(CC)
 LD	= $(PREFIX)ld
 AR	= $(PREFIX)ar
 
-FAMILY?=gd32f4xx
 BOARD?=BOARD_GD32F407R
-MCU?=gd32f407
+#BOARD?=BOARD_BW_OPIDMX4
 
+MCU?=gd32f407
+FAMILY?=gd32f4xx
+
+MCU_UC:=$(shell echo $(MCU_UC) | tr a-w A-W)
 FAMILY:=$(shell echo $(FAMILY) | tr A-Z a-z)
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
 
+$(info $$FAMILY_UC [${MCU_UC}])
 $(info $$FAMILY [${FAMILY}])
 $(info $$FAMILY_UC [${FAMILY_UC}])
 

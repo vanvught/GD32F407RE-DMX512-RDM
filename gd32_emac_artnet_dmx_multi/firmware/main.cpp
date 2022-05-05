@@ -70,7 +70,7 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-void main(void) {
+void main() {
 	Hardware hw;
 	Network nw;
 	LedBlink lb;

@@ -24,7 +24,7 @@
  */
 
 #include <cstdint>
-#include <stdio.h>
+#include <cstdio>
 #include <cassert>
 
 #include "flashrom.h"
@@ -55,7 +55,7 @@ FlashRom::FlashRom() {
 	DEBUG_EXIT
 }
 
-const char *FlashRom::GetName() const{
+const char *FlashRom::GetName() const {
 	return GD32_MCU_NAME;
 }
 
@@ -67,18 +67,10 @@ uint32_t FlashRom::GetSectorSize() const {
 	return FLASH_SECTOR_SIZE;
 }
 
-bool FlashRom::Read(uint32_t nOffset, uint32_t nLength, uint8_t *pBuffer, flashrom::result& nResult) {
+bool FlashRom::Read(__attribute__((unused)) uint32_t nOffset, __attribute__((unused)) uint32_t nLength, __attribute__((unused)) uint8_t *pBuffer, flashrom::result& nResult) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("offset=%p[%d], len=%u[%d], data=%p[%d]", nOffset, (((uint32_t)(nOffset) & 0x3) == 0), nLength, (((uint32_t)(nLength) & 0x3) == 0), pBuffer, (((uint32_t)(pBuffer) & 0x3) == 0));
 	assert((nOffset + nLength) <= BSRAM_SIZE);
-
-	const auto *pSrc = reinterpret_cast<uint32_t *>(nOffset + BKPSRAM_BASE);
-	auto *pDst = reinterpret_cast<uint32_t *>(pBuffer);
-
-	while (nLength > 0) {
-		*pDst++ = *pSrc++;
-		nLength -= 4;
-	}
 
 	nResult = result::OK;
 
@@ -86,7 +78,7 @@ bool FlashRom::Read(uint32_t nOffset, uint32_t nLength, uint8_t *pBuffer, flashr
 	return true;
 }
 
-bool FlashRom::Erase(uint32_t nOffset, uint32_t nLength, flashrom::result& nResult) {
+bool FlashRom::Erase(__attribute__((unused)) uint32_t nOffset, __attribute__((unused)) uint32_t nLength, flashrom::result& nResult) {
 	DEBUG_ENTRY
 
 	nResult = result::OK;
@@ -95,18 +87,10 @@ bool FlashRom::Erase(uint32_t nOffset, uint32_t nLength, flashrom::result& nResu
 	return true;
 }
 
-bool FlashRom::Write(uint32_t nOffset, uint32_t nLength, const uint8_t *pBuffer, flashrom::result& nResult) {
+bool FlashRom::Write(__attribute__((unused)) uint32_t nOffset, __attribute__((unused)) uint32_t nLength, __attribute__((unused)) const uint8_t *pBuffer, flashrom::result& nResult) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("offset=%p[%d], len=%u[%d], data=%p[%d]", nOffset, (((uint32_t)(nOffset) & 0x3) == 0), nLength, (((uint32_t)(nLength) & 0x3) == 0), pBuffer, (((uint32_t)(pBuffer) & 0x3) == 0));
 	assert((nOffset + nLength) <= BSRAM_SIZE);
-
-	const auto *pSrc = reinterpret_cast<const uint32_t *>(pBuffer);
-	auto *pDst = reinterpret_cast<uint32_t *>(nOffset + BKPSRAM_BASE);
-
-	while (nLength > 0) {
-		*pDst++ = *pSrc++;
-		nLength -= 4;
-	}
 
 	nResult = result::OK;
 

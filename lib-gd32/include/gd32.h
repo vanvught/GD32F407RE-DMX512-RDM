@@ -53,7 +53,7 @@ extern "C" {
 # define GD32F30X
 # include "gd32f30x.h"
 # include "gd32f30x_libopt.h"
-#elif defined  (GD32F407)
+#elif defined (GD32F407) || defined (GD32F450)
 # define GD32F4XX
 # include "gd32f4xx.h"
 # include "gd32f4xx_libopt.h"

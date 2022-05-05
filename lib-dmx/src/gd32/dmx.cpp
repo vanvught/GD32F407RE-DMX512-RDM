@@ -144,12 +144,13 @@ static RxData s_RxBuffer[config::max::IN] ALIGNED;
 
 // DMX TX
 
+static volatile uint16_t sv_nUartsSending;
+
 static TxData s_TxBuffer[config::max::OUT];
 
 static uint32_t s_nDmxTransmitBreakTime { dmx::transmit::BREAK_TIME_MIN };
 static uint32_t s_nDmxTransmitMabTime { dmx::transmit::MAB_TIME_MIN };		///< MAB_TIME_MAX = 1000000U;
 static uint32_t s_nDmxTransmitPeriod { dmx::transmit::PERIOD_DEFAULT };
-static uint16_t s_nUartsSending;
 
 static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortIndex) {
 	__DMB();
@@ -221,6 +222,7 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			break;
 		}
 
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 #if DMX_MAX_PORTS >= 5
 		if (nPortIndex <= 3) {
 #endif
@@ -281,6 +283,7 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 		        break;
 		    }
 		}
+#endif
 		break;
 	case TxRxState::RDMDATA: {
 		nIndex = s_RxBuffer[nPortIndex].Rdm.nIndex;
@@ -450,6 +453,7 @@ static void timer1_config() {
 }
 
 static void timer2_config() {
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	rcu_periph_clock_enable(RCU_TIMER2);
 	timer_deinit(TIMER2);
 
@@ -475,9 +479,11 @@ static void timer2_config() {
 	NVIC_EnableIRQ(TIMER2_IRQn);
 
 	timer_enable(TIMER2);
+#endif
 }
 
 static void timer3_config() {
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 #if DMX_MAX_PORTS >= 5
 	rcu_periph_clock_enable(RCU_TIMER3);
 	timer_deinit(TIMER3);
@@ -505,9 +511,11 @@ static void timer3_config() {
 
 	timer_enable(TIMER3);
 #endif
+#endif
 }
 
 static void timer6_config() {
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	rcu_periph_clock_enable(RCU_TIMER6);
 	timer_deinit(TIMER6);
 
@@ -525,6 +533,7 @@ static void timer6_config() {
 	NVIC_EnableIRQ(TIMER6_IRQn);
 
 	timer_enable(TIMER6);
+#endif
 }
 
 static void usart_dma_config(void) {
@@ -624,8 +633,9 @@ static void usart_dma_config(void) {
 	dma_channel_subperipheral_select(UART3_DMA, UART3_TX_DMA_CH, UART3_TX_DMA_SUBPERIx);
 # endif
 #endif
+
 #if defined (DMX_USE_UART4)
-	dma_deinit(DMA1, DMA_CH3);
+	dma_deinit(UART4_DMA, UART4_TX_DMA_CH);
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
 #if !defined (GD32F4XX)
@@ -639,14 +649,15 @@ static void usart_dma_config(void) {
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
-	dma_init(DMA1, DMA_CH3, &dma_init_struct);
+	dma_init(UART4_DMA, UART4_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
-	dma_circulation_disable(DMA1, DMA_CH3);
-	dma_memory_to_memory_disable(DMA1, DMA_CH3);
+	dma_circulation_disable(UART4_DMA, UART4_TX_DMA_CH);
+	dma_memory_to_memory_disable(UART4_DMA, UART4_TX_DMA_CH);
 # if defined (GD32F4XX)
 	dma_channel_subperipheral_select(UART4_DMA, UART4_TX_DMA_CH, UART4_TX_DMA_SUBPERIx);
 # endif
 #endif
+
 #if defined (DMX_USE_USART5)
 	dma_deinit(USART5_DMA, USART5_TX_DMA_CH);
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
@@ -722,62 +733,62 @@ extern "C" {
 void TIMER1_IRQHandler() {
 	__DMB();
 	const auto nIntFlag = TIMER_INTF(TIMER1);
-	const auto nUartsSending = s_nUartsSending;
+	const auto nUartsSending = sv_nUartsSending;
 	logic_analyzer::ch0_set();
 
 	if ((nIntFlag & TIMER_INT_FLAG_CH0) == TIMER_INT_FLAG_CH0) {		// Start break
 #if defined (DMX_USE_USART0)
 		if (nUartsSending & (1U << config::USART0_PORT)) {
-			s_nUartsSending |= (1U << (config::USART0_PORT + 8));
+			sv_nUartsSending |= (1U << (config::USART0_PORT + 8));
 			_gpio_mode_output(USART0_GPIO_PORT, USART0_TX_PIN);
 			GPIO_BC(USART0_GPIO_PORT) = USART0_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_USART1)
 		if (nUartsSending & (1U << config::USART1_PORT)) {
-			s_nUartsSending |= (1U << (config::USART1_PORT + 8));
+			sv_nUartsSending |= (1U << (config::USART1_PORT + 8));
 			_gpio_mode_output(USART1_GPIO_PORT, USART1_TX_PIN);
 			GPIO_BC(USART1_GPIO_PORT) = USART1_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_USART2)
 		if (nUartsSending & (1U << config::USART2_PORT)) {
-			s_nUartsSending |= (1U << (config::USART2_PORT + 8));
+			sv_nUartsSending |= (1U << (config::USART2_PORT + 8));
 			_gpio_mode_output(USART2_GPIO_PORT, USART2_TX_PIN);
 			GPIO_BC(USART2_GPIO_PORT) = USART2_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_UART3)
 		if (nUartsSending & (1U << config::UART3_PORT)) {
-			s_nUartsSending |= (1U << (config::UART3_PORT + 8));
+			sv_nUartsSending |= (1U << (config::UART3_PORT + 8));
 			_gpio_mode_output(UART3_GPIO_PORT, UART3_TX_PIN);
 			GPIO_BC(UART3_GPIO_PORT) = UART3_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_UART4)
 		if (nUartsSending & (1U << config::UART4_PORT)) {
-			s_nUartsSending |= (1U << (config::UART4_PORT + 8));
+			sv_nUartsSending |= (1U << (config::UART4_PORT + 8));
 			_gpio_mode_output(UART4_GPIO_TX_PORT, UART4_TX_PIN);
 			GPIO_BC(UART4_GPIO_TX_PORT) = UART4_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_USART5)
 		if (nUartsSending & (1U << config::USART5_PORT)) {
-			s_nUartsSending |= (1U << (config::USART5_PORT + 8));
+			sv_nUartsSending |= (1U << (config::USART5_PORT + 8));
 			_gpio_mode_output(USART5_GPIO_PORT, USART5_TX_PIN);
 			GPIO_BC(USART5_GPIO_PORT) = USART5_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_UART6)
 		if (nUartsSending & (1U << config::UART6_PORT)) {
-			s_nUartsSending |= (1U << (config::UART6_PORT + 8));
+			sv_nUartsSending |= (1U << (config::UART6_PORT + 8));
 			_gpio_mode_output(UART6_GPIO_PORT, UART6_TX_PIN);
 			GPIO_BC(UART6_GPIO_PORT) = UART6_TX_PIN;
 		}
 #endif
 #if defined (DMX_USE_UART7)
 		if (nUartsSending & (1U << config::UART7_PORT)) {
-			s_nUartsSending |= (1U << (config::UART7_PORT + 8));
+			sv_nUartsSending |= (1U << (config::UART7_PORT + 8));
 			_gpio_mode_output(UART7_GPIO_PORT, UART7_TX_PIN);
 			GPIO_BC(UART7_GPIO_PORT) = UART7_TX_PIN;
 		}
@@ -914,6 +925,7 @@ void TIMER1_IRQHandler() {
 	__DMB();
 }
 
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 void TIMER2_IRQHandler() {
 	__DMB();
 	const auto nIntFlag = TIMER_INTF(TIMER2);
@@ -1005,6 +1017,7 @@ void TIMER6_IRQHandler() {
 	timer_interrupt_flag_clear(TIMER6, TIMER_INT_FLAG_UP);
 	 __DMB();
 }
+#endif
 }
 
 static void uart_dmx_config(uint32_t usart_periph) {
@@ -1019,7 +1032,7 @@ Dmx::Dmx() {
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
-	s_nUartsSending = 0;
+	sv_nUartsSending = 0;
 
 	for (auto i = 0; i < DMX_MAX_PORTS; i++) {
 #if !defined (GD32F4XX)
@@ -1027,6 +1040,7 @@ Dmx::Dmx() {
 #else
 	    gpio_mode_set(s_DirGpio[i].nPort, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, s_DirGpio[i].nPin);
 	    gpio_output_options_set(s_DirGpio[i].nPort, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, s_DirGpio[i].nPin);
+	    gpio_af_set(s_DirGpio[i].nPort, GPIO_AF_0, s_DirGpio[i].nPin);
 #endif
 		ClearData(i);
 		sv_PortState[i] = PortState::IDLE;
@@ -1084,7 +1098,9 @@ void Dmx::SetPortDirection(uint32_t nPortIndex, PortDirection tPortDirection, bo
 
 	if (m_tDmxPortDirection[nPortIndex] != tPortDirection) {
 		m_tDmxPortDirection[nPortIndex] = tPortDirection;
+
 		StopData(nUart, nPortIndex);
+
 		if (tPortDirection == PortDirection::OUTP) {
 			GPIO_BOP(s_DirGpio[nPortIndex].nPort) = s_DirGpio[nPortIndex].nPin;
 		} else if (tPortDirection == PortDirection::INP) {
@@ -1119,10 +1135,10 @@ void Dmx::StartData(uint32_t nUart, uint32_t nPortIndex) {
 	assert(sv_PortState[nPortIndex] == PortState::IDLE);
 
 	if (m_tDmxPortDirection[nPortIndex] == PortDirection::OUTP) {
-		if (s_nUartsSending == 0) {
+		if (sv_nUartsSending == 0) {
 			timer1_config();
 		}
-		s_nUartsSending |= (1U << nPortIndex);
+		sv_nUartsSending |= (1U << nPortIndex);
 		sv_PortState[nPortIndex] = PortState::TX;
 	} else if (m_tDmxPortDirection[nPortIndex] == PortDirection::INP) {
 		s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
@@ -1135,6 +1151,7 @@ void Dmx::StartData(uint32_t nUart, uint32_t nPortIndex) {
 
 	    sv_PortState[nPortIndex] = PortState::RX;
 
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 		switch (nPortIndex) {
 		case 0:
 			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH0;
@@ -1179,6 +1196,7 @@ void Dmx::StartData(uint32_t nUart, uint32_t nPortIndex) {
 			__builtin_unreachable();
 			break;
 		}
+#endif
 	} else {
 		assert(0);
 		__builtin_unreachable();
@@ -1197,11 +1215,25 @@ void Dmx::StopData(uint32_t nUart, uint32_t nPortIndex) {
 	}
 
 	if (m_tDmxPortDirection[nPortIndex] == PortDirection::OUTP) {
-		s_nUartsSending &= ~((1U << nPortIndex) | (1U << (nPortIndex + 8)));
+		sv_nUartsSending &= ~ (1U << nPortIndex);
+
+		auto isIdle = false;
+
+		do {
+			__DMB();
+			if ((sv_nUartsSending & (1U << (nPortIndex + 8))) == (1U << (nPortIndex + 8))) {
+				while (SET != usart_flag_get(nUart, USART_FLAG_TBE));
+			}
+		} while (isIdle);
+
+		sv_nUartsSending &= ~ (1U << (nPortIndex + 8));
+		__DSB();
+
 	} else if (m_tDmxPortDirection[nPortIndex] == PortDirection::INP) {
 		usart_interrupt_disable(nUart, USART_INT_RBNE);
 		s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
 
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 		switch (nPortIndex) {
 		case 0:
 			TIMER_DMAINTEN(TIMER2) &= (~(uint32_t) TIMER_INT_CH0);
@@ -1246,6 +1278,7 @@ void Dmx::StopData(uint32_t nUart, uint32_t nPortIndex) {
 			__builtin_unreachable();
 			break;
 		}
+#endif
 	} else {
 		assert(0);
 		__builtin_unreachable();
@@ -1283,11 +1316,14 @@ void Dmx::SetDmxPeriodTime(uint32_t nPeriod) {
 
 	auto nPackageLengthMicroSeconds = s_nDmxTransmitBreakTime + s_nDmxTransmitMabTime + (nLengthMax * 44U);
 
+	// The GD32F4xx Timer 1 has a 32-bit counter
+#if ! defined(GD32F4XX)
 	if (nPackageLengthMicroSeconds > (static_cast<uint16_t>(~0) - 44U)) {
 		s_nDmxTransmitBreakTime = std::min(transmit::BREAK_TIME_TYPICAL, s_nDmxTransmitBreakTime);
 		s_nDmxTransmitMabTime = transmit::MAB_TIME_MIN;
 		nPackageLengthMicroSeconds = s_nDmxTransmitBreakTime + s_nDmxTransmitMabTime + (nLengthMax * 44U);
 	}
+#endif
 
 	if (nPeriod != 0) {
 		if (nPeriod < nPackageLengthMicroSeconds) {
@@ -1355,6 +1391,7 @@ void Dmx::SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, ui
 // DMX Receive
 
 const uint8_t* Dmx::GetDmxChanged(uint32_t nPortIndex) {
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	const auto *p = GetDmxAvailable(nPortIndex);
 
 	if (p == nullptr) {
@@ -1376,11 +1413,14 @@ const uint8_t* Dmx::GetDmxChanged(uint32_t nPortIndex) {
 	}
 
 	return (isChanged ? p : nullptr);
+#else
+	return nullptr;
+#endif
 }
 
 const uint8_t *Dmx::GetDmxAvailable(uint32_t nPortIndex)  {
 	assert(nPortIndex < DMX_MAX_PORTS);
-
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	if ((s_RxBuffer[nPortIndex].Dmx.nSlotsInPacket & 0x8000) != 0x8000) {
 		return nullptr;
 	}
@@ -1389,6 +1429,9 @@ const uint8_t *Dmx::GetDmxAvailable(uint32_t nPortIndex)  {
 	s_RxBuffer[nPortIndex].Dmx.nSlotsInPacket--;	// Remove SC from length
 
 	return s_RxBuffer[nPortIndex].data;
+#else
+	return nullptr;
+#endif
 }
 
 const uint8_t* Dmx::GetDmxCurrentData(uint32_t nPortIndex) {
@@ -1397,8 +1440,12 @@ const uint8_t* Dmx::GetDmxCurrentData(uint32_t nPortIndex) {
 
 uint32_t Dmx::GetUpdatesPerSecond(uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	__DMB();
 	return sv_nRxDmxPackets[nPortIndex].nPerSecond;
+#else
+	return 0;
+#endif
 }
 
 // RDM Send

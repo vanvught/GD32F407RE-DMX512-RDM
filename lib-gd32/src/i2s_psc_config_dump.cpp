@@ -50,7 +50,7 @@ void i2s_psc_config_dump(uint32_t spi_periph, uint32_t audiosample, uint32_t fra
 	uint32_t clks = 0U;
 	uint32_t i2sclock = 0U;
 
-#if defined (GD32F20X_CL)
+#if defined (GD32F10X_CL) || defined (GD32F20X_CL)
 	/* get the I2S clock source */
 	if (SPI1 == ((uint32_t) spi_periph)) {
 		/* I2S1 clock source selection */

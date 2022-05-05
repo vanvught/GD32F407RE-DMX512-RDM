@@ -32,6 +32,8 @@
 
 #include "hardware.h"
 
+#include "platform_spiflashstore.h"
+
 #include "debug.h"
 
 using namespace spiflashstore;
@@ -51,7 +53,7 @@ State SpiFlashStore::s_State;
 uint32_t SpiFlashStore::s_nStartAddress;
 uint32_t SpiFlashStore::s_nSpiFlashStoreSize;
 
-uint8_t SpiFlashStore::s_SpiFlashData[FlashStore::SIZE];
+uint8_t SpiFlashStore::s_SpiFlashData[FlashStore::SIZE] SECTION_FLASHSTORE;
 
 uint32_t SpiFlashStore::s_nWaitMillis;
 
@@ -96,7 +98,9 @@ bool SpiFlashStore::Init() {
 	s_nStartAddress = FlashRom::Get()->GetSize() - nEraseSize;
 
 #if !defined (GD32F4XX)	//FIXME Remove #if !defined (GD32F4XX)
+# if !defined (CONFIG_FLASHROM_USE_I2C)
 	assert(s_nStartAddress != 0);
+# endif
 	assert(!(s_nStartAddress % nEraseSize));
 #endif
 

@@ -57,7 +57,24 @@ Hardware::Hardware() {
 	s_pThis = this;
 
 	console_init();
-    systick_config();
+
+#if !defined (GD32F4XX)
+#else
+	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
+#endif
+
+#ifndef NDEBUG
+	const auto nSYS = rcu_clock_freq_get(CK_SYS);
+	const auto nAHB = rcu_clock_freq_get(CK_AHB);
+	const auto nAPB1 = rcu_clock_freq_get(CK_APB1);
+	const auto nAPB2 = rcu_clock_freq_get(CK_APB2);
+	printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", nSYS, nAHB, nAPB1, nAPB2);
+	assert(nSYS == MCU_CLOCK_FREQ);
+	assert(nAPB1 == APB1_CLOCK_FREQ);
+	assert(nAPB2 == APB2_CLOCK_FREQ);
+#endif
+
+	systick_config();
     udelay_init();
     micros_init();
 
@@ -65,7 +82,6 @@ Hardware::Hardware() {
 	rcu_periph_clock_enable (RCU_BKPI);
 	rcu_periph_clock_enable (RCU_PMU);
 	pmu_backup_write_enable();
-	bkp_deinit();
 #else
 	rcu_periph_clock_enable(RCU_PMU);
 	pmu_backup_ldo_config(PMU_BLDOON_ON);

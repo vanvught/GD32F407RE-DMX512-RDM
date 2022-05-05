@@ -45,26 +45,27 @@ typedef enum GD32_SPI_CS {
 	GD32_SPI_CS_NONE				///< No CS, control it yourself
 } gd32_spi_chip_select_t;
 
-void gd32_spi_begin(void);
-void gd32_spi_end(void);
+void gd32_spi_begin();
+void gd32_spi_end();
 
-void gd32_spi_set_speed_hz(uint32_t speed_hz);
-void gd32_spi_setDataMode(uint8_t mode);
-void gd32_spi_chipSelect(uint8_t chip_select);
+void gd32_spi_set_speed_hz(uint32_t nSpeedHz);
+void gd32_spi_setDataMode(uint8_t nMode);
+void gd32_spi_chipSelect(uint8_t nChipSelect);
 
-void gd32_spi_transfern(char *tx_buffer, uint32_t data_length);
+void gd32_spi_transfernb(const char *pTxBuffer, char *pRxBuffer, uint32_t nDataLength);
+void gd32_spi_transfern(char *pTxBuffer, uint32_t nDataLength);
 
-void gd32_spi_write(uint16_t data);
-void gd32_spi_writenb(const char *tx_buffer, uint32_t data_length);
+void gd32_spi_write(const uint16_t nData);
+void gd32_spi_writenb(const char *pTxBuffer, uint32_t nDataLength);
 
 /*
  * DMA support
  */
 
-void gd32_spi_dma_begin(void);
+void gd32_spi_dma_begin();
 void gd32_spi_dma_set_speed_hz(uint32_t speed_hz);
 const uint8_t *gd32_spi_dma_tx_prepare(uint32_t *data_length);
 void gd32_spi_dma_tx_start(const uint8_t *tx_buffer, uint32_t length);
-bool gd32_spi_dma_tx_is_active(void);
+bool gd32_spi_dma_tx_is_active();
 
 #endif /* GD32_SPI_H_ */

@@ -138,8 +138,8 @@
 
 #if defined (OUTPUT_DMX_PIXEL)
 /* devices.txt */
-# include "ws28xxdmxparams.h"
-# include "storews28xxdmx.h"
+# include "pixeldmxparams.h"
+# include "storepixeldmx.h"
 #endif
 #if defined (OUTPUT_DMX_TLC59711)
 /* devices.txt */
@@ -735,8 +735,8 @@ void RemoteConfig::HandleGetDevicesTxt(uint32_t& nSize) {
 	if (!bIsSetLedType) {
 # endif
 #if defined (OUTPUT_DMX_PIXEL)
-		WS28xxDmxParams ws28xxparms(StoreWS28xxDmx::Get());
-		ws28xxparms.Save(s_pUdpBuffer, udp::BUFFER_SIZE, nSize);
+		PixelDmxParams pixelDmxParams(StorePixelDmx::Get());
+		pixelDmxParams.Save(s_pUdpBuffer, udp::BUFFER_SIZE, nSize);
 #endif
 # if defined (OUTPUT_DMX_TLC59711)
 	}
@@ -1171,7 +1171,7 @@ void RemoteConfig::HandleSetDevicesTxt() {
 
 # if defined (OUTPUT_DMX_TLC59711)
 #  if defined (OUTPUT_DMX_PIXEL)
-	static_assert(sizeof(struct TTLC59711DmxParams) != sizeof(struct TWS28xxDmxParams), "");
+	static_assert(sizeof(struct TTLC59711DmxParams) != sizeof(struct PixelDmxParams), "");
 #  endif
 	TLC59711DmxParams tlc59711params(StoreTLC59711::Get());
 
@@ -1197,13 +1197,13 @@ void RemoteConfig::HandleSetDevicesTxt() {
 	if (!tlc59711params.IsSetLedType()) {
 # endif
 #if defined (OUTPUT_DMX_PIXEL)
-		WS28xxDmxParams ws28xxparms(StoreWS28xxDmx::Get());
+		PixelDmxParams pixelDmxParams(StorePixelDmx::Get());
 
 #if !defined(DISABLE_BIN)
 		if (m_tHandleMode == HandleMode::BIN) {
-			if (m_nBytesReceived == sizeof(struct TWS28xxDmxParams)) {
+			if (m_nBytesReceived == sizeof(struct PixelDmxParams)) {
 				uint32_t nSize;
-				ws28xxparms.Builder(reinterpret_cast<const struct TWS28xxDmxParams *>(s_StoreBuffer), s_pUdpBuffer, udp::BUFFER_SIZE, nSize);
+				pixelDmxParams.Builder(reinterpret_cast<const struct PixelDmxParams *>(s_StoreBuffer), s_pUdpBuffer, udp::BUFFER_SIZE, nSize);
 				m_nBytesReceived = nSize;
 			} else {
 				DEBUG_EXIT
@@ -1211,9 +1211,9 @@ void RemoteConfig::HandleSetDevicesTxt() {
 			}
 		}
 #  endif
-		ws28xxparms.Load(s_pUdpBuffer, m_nBytesReceived);
+		pixelDmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #  ifndef NDEBUG
-		ws28xxparms.Dump();
+		pixelDmxParams.Dump();
 #  endif
 # endif
 # if defined (OUTPUT_DMX_TLC59711)

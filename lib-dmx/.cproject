@@ -45,6 +45,8 @@
 									<listOptionValue builtIn="false" value="ARM_MATH_CM4"/>
 									<listOptionValue builtIn="false" value="__FPU_PRESENT=1"/>
 									<listOptionValue builtIn="false" value="__GNUC__"/>
+									<listOptionValue builtIn="false" value="DMX_USE_USART0"/>
+									<listOptionValue builtIn="false" value="DMX_USE_UART4"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.326631215" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -75,6 +77,8 @@
 									<listOptionValue builtIn="false" value="ARM_MATH_CM4"/>
 									<listOptionValue builtIn="false" value="__FPU_PRESENT=1"/>
 									<listOptionValue builtIn="false" value="__GNUC__"/>
+									<listOptionValue builtIn="false" value="DMX_USE_USART0"/>
+									<listOptionValue builtIn="false" value="DMX_USE_UART4"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.315032740" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

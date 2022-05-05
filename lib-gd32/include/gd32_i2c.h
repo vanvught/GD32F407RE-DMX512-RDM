@@ -35,11 +35,15 @@ typedef enum GD32_I2C_BAUDRATE {
 
 typedef enum GD32_I2C_RC {
 	GD32_I2C_OK = 0,
-	GD32_I2C_NOK = 1,
-	GD32_I2C_NACK = 2,
-	GD32_I2C_NOK_LA = 3,
-	GD32_I2C_NOK_TOUT = 4
+	GD32_I2C_NOK,
+	GD32_I2C_NACK,
+	GD32_I2C_NOK_LA,
+	GD32_I2C_NOK_TOUT
 } gd32_i2c_rc_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void gd32_i2c_begin(void);
 void gd32_i2c_end(void);
@@ -47,5 +51,9 @@ extern uint8_t gd32_i2c_write(const char *pBuffer, uint32_t nLength);
 uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength);
 void gd32_i2c_set_baudrate(uint32_t nBaudrate);
 void gd32_i2c_set_address(uint8_t nAddress);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* GD32_I2C_H_ */

@@ -102,7 +102,11 @@ void gd32_spi_dma_begin() {
 	}
 # endif
 #else
-    gpio_af_set(SPI_GPIOx, GPIO_AF_5, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
+	if (SPI_PERIPH == SPI2) {
+		gpio_af_set(SPI_GPIOx, GPIO_AF_6, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
+	} else {
+		gpio_af_set(SPI_GPIOx, GPIO_AF_5, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
+	}
     gpio_mode_set(SPI_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
     gpio_output_options_set(SPI_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
 
@@ -110,18 +114,23 @@ void gd32_spi_dma_begin() {
     gpio_output_options_set(SPI_NSS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #endif
 
-#if defined (GD32F20X_CL)
+#if defined (GD32F10X_CL) || defined (GD32F20X_CL)
 	/**
 	 * Setup PLL2
 	 *
-	 * clks=14
 	 * i2sclock=160000000
 	 * i2sdiv=12, i2sof=256
 	 */
-	rcu_pll2_config(RCU_PLL2_MUL16);
+
+    RCU_CTL &= ~RCU_CTL_PLL2EN;
+
+    rcu_pll2_config(RCU_PLL2_MUL16);
+
 	RCU_CTL |= RCU_CTL_PLL2EN;
+
 	while ((RCU_CTL & RCU_CTL_PLL2STB) == 0U) {
 	}
+
 	if (SPI_PERIPH == SPI2) {
 		rcu_i2s2_clock_config(RCU_I2S2SRC_CKPLL2_MUL2);
 	} else {

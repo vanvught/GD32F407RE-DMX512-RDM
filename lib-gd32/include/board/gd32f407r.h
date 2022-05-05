@@ -30,7 +30,7 @@
 # error This file should not be included
 #endif
 
-#if defined (MCU_GD32F407_H_)
+#if defined (MCU_GD32F407_MCU_H_)
 # error This file should be included later
 #endif
 
@@ -86,9 +86,9 @@
 #define KEY3_GPIOx						GPIOA
 #define KEY3_RCU_GPIOx					RCU_GPIOA
 
-#define KEY_BOOTLOADER_TFTP_GPIO_PINx	KEY3_PINx
-#define KEY_BOOTLOADER_TFTP_GPIOx		KEY3_GPIOx
-#define KEY_BOOTLOADER_TFTP_RCU_GPIOx	KEY3_RCU_GPIOx
+#define KEY_BOOTLOADER_TFTP_GPIO_PINx	KEY1_PINx
+#define KEY_BOOTLOADER_TFTP_GPIOx		KEY1_GPIOx
+#define KEY_BOOTLOADER_TFTP_RCU_GPIOx	KEY1_RCU_GPIOx
 
 /**
  * I2C

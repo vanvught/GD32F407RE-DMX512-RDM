@@ -42,6 +42,10 @@ namespace config {
 # include "board_gd32f303r.h"
 #elif defined (BOARD_GD32F407R)
 # include "board_gd32f407r.h"
+#elif defined (BOARD_GD32F450V)
+# include "board_gd32f450v.h"
+#elif defined (BOARD_BW_OPIDMX4)
+# include "board_bw_opidmx4.h"
 #else
 # error
 #endif

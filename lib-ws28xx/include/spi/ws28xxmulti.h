@@ -79,7 +79,7 @@ private:
 	void SetupSPI(uint32_t nSpeedHz);
 	bool SetupCPLD();
 	void SetupBuffers();
-	void SetColour(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nColour1, uint8_t nColour2, uint8_t nColour3);
+	void SetColourRTZ(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nColour1, uint8_t nColour2, uint8_t nColour3);
 
 private:
 	bool m_hasCPLD { false };

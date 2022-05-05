@@ -26,6 +26,8 @@
 #ifndef GD32_MICROS_H_
 #define GD32_MICROS_H_
 
+#include <cstdint>
+
 #include "gd32.h"
 
 #if defined (GD32F20X_CL)
@@ -36,6 +38,10 @@ static inline uint32_t micros() {
 		lsw = TIMER_CNT(TIMER8);
 	} while (msw != TIMER_CNT(TIMER9));
 	return (msw << 16) | lsw;
+}
+#elif defined (GD32F4XX)
+static inline uint32_t micros() {
+	return TIMER_CNT(TIMER4);
 }
 #else
 static inline uint32_t micros() {

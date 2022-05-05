@@ -1,10 +1,23 @@
 DEFINES=NDEBUG
 
-ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
-	EXTRA_SRCDIR=src/gd32/bsram
+COND=
+
+ifneq ($(MAKE_FLAGS),)
+	ifneq (,$(findstring CONFIG_FLASHROM_USE_I2C,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=src/i2c
+	else
+		COND=1
+	endif
 else
-	EXTRA_SRCDIR=src/gd32/flashrom
+	COND=1
+endif
+
+ifdef COND
+	ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
+		EXTRA_SRCDIR=src/gd32/bsram
+	else
+		EXTRA_SRCDIR=src/gd32/fmc
+	endif
 endif
 
 include ../firmware-template-gd32/lib/Rules.mk
-	

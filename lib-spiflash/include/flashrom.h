@@ -34,7 +34,12 @@ enum class result {
 };
 }  // namespace flashrom
 
+#if defined (CONFIG_FLASHROM_USE_I2C)
+# include "i2c/at24cxx.h"
+class FlashRom: AT24C32 {
+#else
 class FlashRom {
+#endif
 public:
 	FlashRom();
 

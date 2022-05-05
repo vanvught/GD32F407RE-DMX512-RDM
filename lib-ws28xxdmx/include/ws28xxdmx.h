@@ -26,13 +26,12 @@
 #ifndef WS28XXDMX_H_
 #define WS28XXDMX_H_
 
+#include <pixeldmxstore.h>
 #include <cstdint>
 
 #include "lightset.h"
 
 #include "ws28xx.h"
-#include "ws28xxdmxstore.h"
-
 #include "pixeldmxconfiguration.h"
 #include "pixelpatterns.h"
 
@@ -52,7 +51,7 @@ public:
 
 	void Blackout(bool bBlackout) override;
 
-	void SetWS28xxDmxStore(WS28xxDmxStore *pWS28xxDmxStore) {
+	void SetWS28xxDmxStore(PixelDmxStore *pWS28xxDmxStore) {
 		m_pWS28xxDmxStore = pWS28xxDmxStore;
 	}
 
@@ -120,7 +119,7 @@ private:
 	uint16_t m_nDmxFootprint { 170 * 3 };
 
 	WS28xx *m_pWS28xx { nullptr };
-	WS28xxDmxStore *m_pWS28xxDmxStore { nullptr };
+	PixelDmxStore *m_pWS28xxDmxStore { nullptr };
 	PixelDmxHandler *m_pPixelDmxHandler { nullptr };
 
 	bool m_bIsStarted { false };

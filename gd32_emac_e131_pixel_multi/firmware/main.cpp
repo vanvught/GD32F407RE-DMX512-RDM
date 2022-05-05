@@ -48,7 +48,8 @@
 #include "pixeldmxconfiguration.h"
 #include "pixeltype.h"
 #include "pixeltestpattern.h"
-#include "ws28xxdmxparams.h"
+#include "ws28xxmulti.h"
+#include "pixeldmxparams.h"
 #include "ws28xxdmxmulti.h"
 #include "ws28xxdmxstartstop.h"
 
@@ -73,7 +74,7 @@
 # include "storerdmdevice.h"
 #endif
 #include "storeremoteconfig.h"
-#include "storews28xxdmx.h"
+#include "storepixeldmx.h"
 
 #include "firmwareversion.h"
 #include "software_version.h"
@@ -86,7 +87,7 @@ public:
 	}
 };
 
-void main(void) {
+void main() {
 	Hardware hw;
 	Network nw;
 	LedBlink lb;
@@ -132,12 +133,12 @@ void main(void) {
 
 	PixelDmxConfiguration pixelDmxConfiguration;
 
-	StoreWS28xxDmx storeWS28xxDmx;
-	WS28xxDmxParams ws28xxparms(&storeWS28xxDmx);
+	StorePixelDmx storePixelDmx;
+	PixelDmxParams pixelDmxParams(&storePixelDmx);
 
-	if (ws28xxparms.Load()) {
-		ws28xxparms.Set(&pixelDmxConfiguration);
-		ws28xxparms.Dump();
+	if (pixelDmxParams.Load()) {
+		pixelDmxParams.Set(&pixelDmxConfiguration);
+		pixelDmxParams.Dump();
 	}
 
 	WS28xxDmxMulti pixelDmxMulti(pixelDmxConfiguration);
@@ -150,7 +151,7 @@ void main(void) {
 
 	for (uint32_t nOutportIndex = 0; nOutportIndex < nActivePorts; nOutportIndex++) {
 		bool isPixelUniverseSet;
-		const auto nStartUniversePort = ws28xxparms.GetStartUniversePort(nOutportIndex, isPixelUniverseSet);
+		const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isPixelUniverseSet);
 
 		for (uint32_t u = 0; u < nUniverses; u++) {
 			if (isPixelUniverseSet) {
@@ -160,7 +161,7 @@ void main(void) {
 		}
 	}
 
-	const auto nTestPattern = static_cast<pixelpatterns::Pattern>(ws28xxparms.GetTestPattern());
+	const auto nTestPattern = static_cast<pixelpatterns::Pattern>(pixelDmxParams.GetTestPattern());
 	PixelTestPattern *pPixelTestPattern = nullptr;
 
 	if (nTestPattern != pixelpatterns::Pattern::NONE) {
@@ -202,7 +203,7 @@ void main(void) {
 	bridge.Print();
 	pixelDmxMulti.Print();
 
-	display.SetTitle("sACN Pixel %ux4U", nActivePorts);
+	display.SetTitle("sACN Pixel 8:%dx%d", nActivePorts, WS28xxMulti::Get()->GetCount());
 	display.Set(2, displayudf::Labels::IP);
 	display.Set(3, displayudf::Labels::HOSTNAME);
 	display.Set(4, displayudf::Labels::VERSION);

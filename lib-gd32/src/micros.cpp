@@ -23,30 +23,28 @@
  * THE SOFTWARE.
  */
 
+
 #include <cstdint>
-#include <cassert>
 
 #include "gd32.h"
 
 #if defined (GD32F20X_CL)
-
 /**
  * Timer 9 is Master -> TIMER9_TRGO
  * Timer 8 is Slave -> ITI2
  */
 
-static void _master_init(void) {
-	timer_parameter_struct timer_initpara;
-
+static void _master_init() {
 	rcu_periph_clock_enable(RCU_TIMER9);
 
 	timer_deinit(TIMER9);
 	TIMER_CNT(TIMER9) = 0;
 
-	timer_initpara.prescaler = 119;	///< TIMER9CLK = SystemCoreClock / 120 = 1MHz => us ticker
+	timer_parameter_struct timer_initpara;
+	timer_initpara.prescaler = TIMER_PSC_1MHZ;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
 	timer_initpara.counterdirection = TIMER_COUNTER_UP;
-	timer_initpara.period = (uint32_t)(~0);
+	timer_initpara.period = static_cast<uint32_t>(~0);
 	timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
 
 	timer_init(TIMER9, &timer_initpara);
@@ -57,18 +55,17 @@ static void _master_init(void) {
 	timer_enable(TIMER9);
 }
 
-static void _slave_init(void) {
-	timer_parameter_struct timer_initpara;
-
+static void _slave_init() {
 	rcu_periph_clock_enable(RCU_TIMER8);
 
 	timer_deinit(TIMER8);
 	TIMER_CNT(TIMER8) = 0;
 
+	timer_parameter_struct timer_initpara;
 	timer_initpara.prescaler = 0;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
 	timer_initpara.counterdirection = TIMER_COUNTER_UP;
-	timer_initpara.period = (uint32_t)(~0);
+	timer_initpara.period = static_cast<uint32_t>(~0);
 	timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
 
 	timer_init(TIMER8, &timer_initpara);
@@ -84,7 +81,25 @@ void micros_init(void) {
 	_slave_init();
 	_master_init();
 }
+#elif defined (GD32F4XX)
+void micros_init() {
+	rcu_periph_clock_enable(RCU_TIMER4);
+
+	timer_deinit(TIMER4);
+	TIMER_CNT(TIMER4) = 0;
+
+	timer_parameter_struct timer_initpara;
+	timer_initpara.prescaler = TIMER_PSC_1MHZ;
+	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
+	timer_initpara.counterdirection = TIMER_COUNTER_UP;
+	timer_initpara.period = static_cast<uint32_t>(~0);
+	timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
+
+	timer_init(TIMER4, &timer_initpara);
+
+	timer_enable(TIMER4);
+}
 #else
-void micros_init(void) {
+void micros_init() {
 }
 #endif

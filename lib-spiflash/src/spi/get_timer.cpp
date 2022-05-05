@@ -1,8 +1,8 @@
 /**
- * @file storews28xxdmx.cpp
+ * @file get_timer.cpp
  *
  */
-/* Copyright (C) 2018-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,14 @@
  * THE SOFTWARE.
  */
 
-#include <cassert>
+#include <cstdint>
+#include <cstddef>
+#include <time.h>
 
-#include "storews28xxdmx.h"
+uint32_t get_timer(uint32_t base) {
+	if (0 == base) {
+		return static_cast<uint32_t>(time(nullptr));
+	}
 
-#include "debug.h"
-
-StoreWS28xxDmx *StoreWS28xxDmx::s_pThis = nullptr;
-
-StoreWS28xxDmx::StoreWS28xxDmx() {
-	DEBUG_ENTRY
-
-	assert(s_pThis == nullptr);
-	s_pThis = this;
-
-	DEBUG_PRINTF("%p", reinterpret_cast<void *>(s_pThis));
-	DEBUG_EXIT
+	return static_cast<uint32_t>(time(nullptr)) - base;
 }

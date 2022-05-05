@@ -30,8 +30,9 @@
  * Below is for (backwards) compatibility with Orange Pi Zero board.
  */
 
-#define	EXT_UART_NUMBER 2
-#define EXT_UART_BASE	USART2
+#define	EXT_UART_NUMBER 	2
+#define EXT_UART_BASE		USART2
+#define EXT_MIDI_UART_BASE	USART5
 
 typedef enum GD32_BOARD_GPIO_HEADER {
 	// 1 3V3

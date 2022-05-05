@@ -6,13 +6,17 @@ AS	 = $(CC)
 LD	 = $(PREFIX)ld
 AR	 = $(PREFIX)ar
 
-FAMILY?=gd32f4xx
 BOARD?=BOARD_GD32F407R
-MCU?=gd32f407
+#BOARD?=BOARD_BW_OPIDMX4
 
+MCU?=gd32f407
+FAMILY?=gd32f4xx
+
+MCU_UC:=$(shell echo $(MCU_UC) | tr a-w A-W)
 FAMILY:=$(shell echo $(FAMILY) | tr A-Z a-z)
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
 
+$(info $$FAMILY_UC [${MCU_UC}])
 $(info $$FAMILY [${FAMILY}])
 $(info $$FAMILY_UC [${FAMILY_UC}])
 
@@ -34,6 +38,10 @@ LIBS+=c++ c gd32
 $(info [${LIBS}])
 	
 DEFINES:=$(addprefix -D,$(DEFINES))
+
+ifeq ($(findstring BOARD_BW_OPIDMX4,$(BOARD)), BOARD_BW_OPIDMX4)
+	DEFINES+=-DCONSOLE_I2C
+endif
 
 include ../firmware-template-gd32/Includes.mk
 
@@ -57,7 +65,7 @@ COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(BOARD)
 COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES)
 COPS+=$(LIBINCDIRS)
 COPS+=-Os -mcpu=cortex-m4 -mthumb -g -mfloat-abi=hard -fsingle-precision-constant -mfpu=fpv4-sp-d16
-COPS+=-DARM_MATH_CM4  -D__FPU_PRESENT=1
+COPS+=-DARM_MATH_CM4 -D__FPU_PRESENT=1
 COPS+=-nostartfiles -ffreestanding -nostdlib
 COPS+=-fstack-usage
 COPS+=-Wstack-usage=10240

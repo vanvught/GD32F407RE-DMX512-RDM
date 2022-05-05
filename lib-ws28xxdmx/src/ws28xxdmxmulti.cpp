@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include <pixeldmxparams.h>
 #include <cstdint>
 #include <cstdio>
 #include <algorithm>
@@ -30,7 +31,6 @@
 
 #include "ws28xxdmxmulti.h"
 #include "ws28xxmulti.h"
-#include "ws28xxdmxparams.h"
 #include "ws28xx.h"
 
 #include "pixeldmxconfiguration.h"
