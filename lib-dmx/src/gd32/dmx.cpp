@@ -1217,14 +1217,11 @@ void Dmx::StopData(uint32_t nUart, uint32_t nPortIndex) {
 	if (m_tDmxPortDirection[nPortIndex] == PortDirection::OUTP) {
 		sv_nUartsSending &= ~ (1U << nPortIndex);
 
-		auto isIdle = false;
 
-		do {
-			__DMB();
-			if ((sv_nUartsSending & (1U << (nPortIndex + 8))) == (1U << (nPortIndex + 8))) {
-				while (SET != usart_flag_get(nUart, USART_FLAG_TBE));
-			}
-		} while (isIdle);
+		__DMB();
+		if ((sv_nUartsSending & (1U << (nPortIndex + 8))) == (1U << (nPortIndex + 8))) {
+			while (SET != usart_flag_get(nUart, USART_FLAG_TBE));
+		}
 
 		sv_nUartsSending &= ~ (1U << (nPortIndex + 8));
 		__DSB();
@@ -1386,6 +1383,60 @@ void Dmx::SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, ui
 		m_nDmxTransmissionLength[nPortIndex] = nLength;
 		SetDmxPeriodTime(m_nDmxTransmitPeriodRequested);
 	}
+}
+
+void Dmx::Blackout() {
+	DEBUG_ENTRY
+
+	if (sv_nUartsSending == 0) {
+		return;
+	}
+
+	for (uint32_t nPortIndex = 0; nPortIndex < DMX_MAX_PORTS; nPortIndex++) {
+		const auto nUart = _port_to_uart(nPortIndex);
+		__DMB();
+		if ((sv_nUartsSending & (1U << (nPortIndex + 8))) == (1U << (nPortIndex + 8))) {
+			while (SET != usart_flag_get(nUart, USART_FLAG_TBE));
+
+			auto *p = &s_TxBuffer[nPortIndex];
+			auto *p16 = reinterpret_cast<uint16_t *>(p->data);
+
+			for (auto i = 0; i < dmx::buffer::SIZE / 2; i++) {
+				*p16++ = 0;
+			}
+
+			p->data[0] = dmx::START_CODE;
+		}
+	}
+
+	DEBUG_EXIT
+}
+
+void Dmx::FullOn() {
+	DEBUG_ENTRY
+
+	if (sv_nUartsSending == 0) {
+		return;
+	}
+
+	for (uint32_t nPortIndex = 0; nPortIndex < DMX_MAX_PORTS; nPortIndex++) {
+		const auto nUart = _port_to_uart(nPortIndex);
+		__DMB();
+		if ((sv_nUartsSending & (1U << (nPortIndex + 8))) == (1U << (nPortIndex + 8))) {
+			while (SET != usart_flag_get(nUart, USART_FLAG_TBE));
+
+			auto *p = &s_TxBuffer[nPortIndex];
+			auto *p16 = reinterpret_cast<uint16_t *>(p->data);
+
+			for (auto i = 0; i < dmx::buffer::SIZE / 2; i++) {
+				*p16++ = static_cast<uint16_t>(~0);
+			}
+
+			p->data[0] = dmx::START_CODE;
+		}
+	}
+
+	DEBUG_EXIT
 }
 
 // DMX Receive

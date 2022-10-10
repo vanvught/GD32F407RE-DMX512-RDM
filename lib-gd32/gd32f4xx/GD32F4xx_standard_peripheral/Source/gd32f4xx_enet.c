@@ -365,6 +365,7 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
         if(PHY_READ_TO == timeout){
             return enet_state;
         }
+
         /* reset timeout counter */
         timeout = 0U;
 
@@ -386,6 +387,7 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
         if(PHY_READ_TO == timeout){
             return enet_state;
         }
+
         /* reset timeout counter */
         timeout = 0U;
 
@@ -397,12 +399,17 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
         }else{
             media_temp = ENET_MODE_HALFDUPLEX;
         }
+
         /* configure the communication speed of MAC following the auto-negotiation result */
-        if((uint16_t)RESET !=(phy_value & PHY_SPEED_STATUS)){
-            media_temp |= ENET_SPEEDMODE_10M;
-        }else{
-            media_temp |= ENET_SPEEDMODE_100M;
-        }    
+#if(PHY_TYPE == RTL8201F)	/** AvV **/
+		if ((uint16_t) RESET == (phy_value & PHY_SPEED_STATUS)) {
+#else
+        if ((uint16_t) RESET != (phy_value & PHY_SPEED_STATUS)) {
+#endif
+			media_temp |= ENET_SPEEDMODE_10M;
+		} else {
+			media_temp |= ENET_SPEEDMODE_100M;
+		}
     }else{
         phy_value = (uint16_t)((media_temp & ENET_MAC_CFG_DPM) >> 3);
         phy_value |= (uint16_t)((media_temp & ENET_MAC_CFG_SPD) >> 1);

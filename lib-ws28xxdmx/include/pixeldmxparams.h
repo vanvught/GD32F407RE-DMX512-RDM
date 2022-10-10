@@ -1,5 +1,5 @@
 /**
- * @file ws28xxdmxparams.h
+ * @file pixeldmxparams.h
  *
  */
 /* Copyright (C) 2017-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
@@ -23,17 +23,18 @@
  * THE SOFTWARE.
  */
 
-#ifndef WS28XXDMXPARAMS_H_
-#define WS28XXDMXPARAMS_H_
+#ifndef PIXELDMXPARAMS_H_
+#define PIXELDMXPARAMS_H_
 
 #include <cstdint>
 
 #include "pixeldmxconfiguration.h"
 
-namespace pixeldmxparams {
 #if !defined (CONFIG_PIXELDMX_MAX_PORTS)
-# define CONFIG_PIXELDMX_MAX_PORTS	8
+# error CONFIG_PIXELDMX_MAX_PORTS is not defined
 #endif
+
+namespace pixeldmxparams {
 static constexpr auto MAX_PORTS = CONFIG_PIXELDMX_MAX_PORTS;
 
 struct Params {
@@ -41,7 +42,7 @@ struct Params {
 	uint8_t nType;											///< 1	   5
 	uint16_t nCount;										///< 2	   7
 	uint16_t nDmxStartAddress;								///< 2	   9
-	uint8_t NotUsed0;										///< 1	  10
+	uint8_t nGammaValue;									///< 1	  10
 	uint32_t nSpiSpeedHz;									///< 4	  14
 	uint8_t nGlobalBrightness;								///< 1	  15
 	uint8_t nActiveOutputs;									///< 1	  16
@@ -63,7 +64,7 @@ struct Mask {
 	static constexpr auto SPI_SPEED = (1U << 4);
 	static constexpr auto GLOBAL_BRIGHTNESS = (1U << 5);
 	static constexpr auto ACTIVE_OUT = (1U << 6);
-	static constexpr auto USE_SI5351A = (1U << 7);
+	static constexpr auto GAMMA_CORRECTION = (1U << 7);
 	static constexpr auto GROUPING_COUNT = (1U << 8);
 	static constexpr auto MAP = (1U << 9);
 	static constexpr auto LOW_CODE = (1U << 10);
@@ -124,4 +125,4 @@ private:
     pixeldmxparams::Params m_pixelDmxParams;
 };
 
-#endif /* WS28XXDMXPARAMS_H_ */
+#endif /* PIXELDMXPARAMS_H_ */

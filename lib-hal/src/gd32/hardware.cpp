@@ -97,7 +97,12 @@ Hardware::Hardware() {
 	extern unsigned char _stcmsram;
 	extern unsigned char _etcmsram;
 	DEBUG_PRINTF("%p:%u", &_stcmsram, &_etcmsram - &_stcmsram);
-	memset (&_stcmsram, 0, &_etcmsram - &_stcmsram);
+	memset(&_stcmsram, 0, &_etcmsram - &_stcmsram);
+	// clear RAMADD SRAM
+	extern unsigned char _sramadd;
+	extern unsigned char _eramadd;
+	DEBUG_PRINTF("%p:%u", &_sramadd, &_eramadd - &_sramadd);
+	memset(&_sramadd, 0, &_eramadd - &_sramadd);
 #endif
 
 	rcu_periph_clock_enable(RCU_TIMER5);
@@ -196,10 +201,9 @@ void Hardware::GetTime(struct tm *pTime) {
 }
 
 bool Hardware::Reboot() {
-	if (m_pRebootHandler != 0) {
-		WatchdogStop();
-		m_pRebootHandler->Run();
-	}
+	WatchdogStop();
+	
+	RebootHandler();
 
 	WatchdogInit();
 

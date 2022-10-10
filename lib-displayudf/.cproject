@@ -28,7 +28,7 @@
 									<listOptionValue builtIn="false" value="GD32"/>
 									<listOptionValue builtIn="false" value="DISABLE_FS"/>
 									<listOptionValue builtIn="false" value="DISABLE_TFTP"/>
-									<listOptionValue builtIn="false" value="BOARD_GD32F407R"/>
+									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="GD32F407"/>
 									<listOptionValue builtIn="false" value="NODE_ARTNET"/>
 								</option>
@@ -58,7 +58,7 @@
 									<listOptionValue builtIn="false" value="DISABLE_FS"/>
 									<listOptionValue builtIn="false" value="DISABLE_TFTP"/>
 									<listOptionValue builtIn="false" value="GD32F407"/>
-									<listOptionValue builtIn="false" value="BOARD_GD32F407R"/>
+									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="NODE_ARTNET"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1110313113" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>

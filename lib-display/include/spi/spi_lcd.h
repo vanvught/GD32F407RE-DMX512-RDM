@@ -38,31 +38,31 @@ inline static void ms_delay(const uint32_t ms) {
 }
 
 inline static void CS_Set() {
-#if defined(DEV_HAVE_CS)
-	FUNC_PREFIX(gpio_set(DEV_CS_PIN));
+#if defined(SPI_LCD_HAVE_CS_PIN)
+	FUNC_PREFIX(gpio_set(SPI_LCD_CS_PIN));
 #endif
 }
 
 inline static void CS_Clear() {
-#if defined(DEV_HAVE_CS)
-	FUNC_PREFIX(gpio_clr(DEV_CS_PIN));
+#if defined(SPI_LCD_HAVE_CS_PIN)
+	FUNC_PREFIX(gpio_clr(SPI_LCD_CS_PIN));
 #endif
 }
 
 inline static void DC_Set() {
-	FUNC_PREFIX(gpio_set(DEV_DC_PIN));
+	FUNC_PREFIX(gpio_set(SPI_LCD_DC_PIN));
 }
 
 inline static void DC_Clear() {
-	FUNC_PREFIX(gpio_clr(DEV_DC_PIN));
+	FUNC_PREFIX(gpio_clr(SPI_LCD_DC_PIN));
 }
 
 inline static void HW_Reset(void) {
-#if defined (DEV_RST_PIN)
+#if defined (SPI_LCD_RST_PIN)
 	ms_delay(200);
-	FUNC_PREFIX(gpio_clr(DEV_RST_PIN));
+	FUNC_PREFIX(gpio_clr(SPI_LCD_RST_PIN));
 	ms_delay(200);
-	FUNC_PREFIX(gpio_set(DEV_RST_PIN));
+	FUNC_PREFIX(gpio_set(SPI_LCD_RST_PIN));
 	ms_delay(200);
 #endif
 }

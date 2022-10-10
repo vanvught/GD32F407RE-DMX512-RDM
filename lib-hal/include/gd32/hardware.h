@@ -40,8 +40,8 @@ class Hardware {
 public:
 	Hardware();
 
-	void SetLed(hardware::LedStatus tLedStatus) {
-		switch (tLedStatus) {
+	void SetLed(hardware::LedStatus ledStatus) {
+		switch (ledStatus) {
 			case hardware::LedStatus::OFF:
 				GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 				break;
@@ -126,10 +126,6 @@ public:
 
 	bool Reboot();
 
-	void SetRebootHandler(RebootHandler *pRebootHandler) {
-		m_pRebootHandler = pRebootHandler;
-	}
-
 	float GetCoreTemperature() {
 		return gd32_adc_gettemp();
 	}
@@ -147,10 +143,12 @@ public:
 	}
 
 private:
+	void RebootHandler();
+
+private:
 #if !defined(DISABLE_RTC)
 	HwClock m_HwClock;
 #endif
-	RebootHandler *m_pRebootHandler { nullptr };
 	bool m_bIsWatchdog { false };
 
 	static Hardware *s_pThis;

@@ -23,8 +23,6 @@
  * THE SOFTWARE.
  */
 
-#undef NDEBUG
-
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
@@ -118,7 +116,6 @@ WS28xxMulti::WS28xxMulti(PixelConfiguration& pixelConfiguration): m_PixelConfigu
 
 	uint32_t nLedsPerPixel;
 	pixelConfiguration.Validate(nLedsPerPixel);
-	pixelConfiguration.Dump();
 
 	const auto Type = m_PixelConfiguration.GetType();
 
@@ -572,13 +569,21 @@ void WS28xxMulti::Setup(uint32_t nFrequency) {
 
 void WS28xxMulti::Print() {
 	const auto Type = m_PixelConfiguration.GetType();
-	const auto Map = m_PixelConfiguration.GetMap();
 
 	printf("Pixel\n");
-	printf(" Type  : %s [%d] - %s [%d]\n", PixelType::GetType(Type), static_cast<int>(Type), PixelType::GetMap(Map), static_cast<int>(Map));
+	printf(" Type  : %s [%d]\n", PixelType::GetType(Type), static_cast<int>(Type));
 	printf(" Count : %d\n", m_PixelConfiguration.GetCount());
+
 	if (!m_PixelConfiguration.IsRTZProtocol()) {
 		printf(" Clock : %u Hz\n", m_PixelConfiguration.GetClockSpeedHz());
+	} else {
+		const auto Map = m_PixelConfiguration.GetMap();
+		const auto nLowCode = m_PixelConfiguration.GetLowCode();
+		const auto nHighCode = m_PixelConfiguration.GetHighCode();
+
+		printf(" Mapping : %s [%d]\n", PixelType::GetMap(Map), static_cast<int>(Map));
+		printf(" T0H     : %.2f [0x%X]\n", PixelType::ConvertTxH(nLowCode), nLowCode);
+		printf(" T1H     : %.2f [0x%X]\n", PixelType::ConvertTxH(nHighCode), nHighCode);
 	}
 }
 
@@ -643,13 +648,17 @@ void WS28xxMulti::Update() {
 void WS28xxMulti::Blackout() {
 	DEBUG_ENTRY
 
+	/**
+	 * Can be called any time. Make sure the previous transmit is ended.
+	 */
+
 	do {
 		__DMB();
 	} while (sv_isRunning);
 
 	if (m_PixelConfiguration.IsRTZProtocol()) {
 		for (auto i = 0; i < DMA_BUFFER_SIZE / 2; i++) {
-			s_pT0H[i] = (GPIO_PINx << 16) || GPIO_PINx;
+			s_pT0H[i] = GPIO_PINx | (static_cast<uint32_t>(GPIO_PINx) << 16);
 		}
 	} else {
 		const auto Type = m_PixelConfiguration.GetType();
@@ -681,6 +690,61 @@ void WS28xxMulti::Blackout() {
 
 	/**
 	 * A blackout may not be interrupted.
+	 */
+
+	do {
+		__DMB();
+	} while (sv_isRunning);
+
+	DEBUG_EXIT
+}
+
+
+void WS28xxMulti::FullOn() {
+	DEBUG_ENTRY
+
+	/**
+	 * Can be called any time. Make sure the previous transmit is ended.
+	 */
+
+	do {
+		__DMB();
+	} while (sv_isRunning);
+
+	if (m_PixelConfiguration.IsRTZProtocol()) {
+		for (auto i = 0; i < DMA_BUFFER_SIZE / 2; i++) {
+			s_pT0H[i] = 0;
+		}
+	} else {
+		const auto Type = m_PixelConfiguration.GetType();
+		if ((Type == Type::APA102) || (Type == Type::SK9822) || (Type == Type::P9813)) {
+			const auto nCount = m_PixelConfiguration.GetCount();
+			for (auto nPortIndex = 0; nPortIndex < PORT_COUNT; nPortIndex++) {
+				SetPixel4Bytes(nPortIndex, 0, 0, 0, 0, 0);
+
+				for (auto nPixelIndex = 1; nPixelIndex <= nCount; nPixelIndex++) {
+					SetPixel4Bytes(nPortIndex, nPixelIndex, 0xE0, 0xFF, 0xFF, 0xFF);
+				}
+
+				if ((Type == Type::APA102) || (Type == Type::SK9822)) {
+					SetPixel4Bytes(nPortIndex, 1U + nCount, 0xFF, 0xFF, 0xFF, 0xFF);
+				} else {
+					SetPixel4Bytes(nPortIndex, 1U + nCount, 0, 0, 0, 0);
+				}
+			}
+		} else {
+			assert(Type == Type::WS2801);
+			auto *p = reinterpret_cast<uint32_t *>(&s_DmaBuffer[0]);
+			for (auto i = 0; i < DMA_BUFFER_SIZE / 2; i++) {
+				p[i] = 0xFF;
+			}
+		}
+	}
+
+	Update();
+
+	/**
+	 * May not be interrupted.
 	 */
 
 	do {
@@ -805,7 +869,11 @@ void WS28xxMulti::SetPixel4Bytes(uint32_t nPortIndex, uint32_t nPixelIndex, uint
 }
 
 void WS28xxMulti::SetPixel(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nRed, uint8_t nGreen, uint8_t nBlue) {
-	const auto Type = m_PixelConfiguration.GetType();
+	const auto pGammaTable = m_PixelConfiguration.GetGammaTable();
+
+	nRed = pGammaTable[nRed];
+	nGreen = pGammaTable[nGreen];
+	nBlue = pGammaTable[nBlue];
 
 	if (m_PixelConfiguration.IsRTZProtocol()) {
 		switch (m_PixelConfiguration.GetMap()) {
@@ -835,7 +903,9 @@ void WS28xxMulti::SetPixel(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nR
 		return;
 	}
 
-	if (Type == Type::WS2801) {
+	const auto type = m_PixelConfiguration.GetType();
+
+	if (type == Type::WS2801) {
 		switch (m_PixelConfiguration.GetMap()) {
 		case Map::RGB:
 			SetColourWS2801(nPortIndex, nPixelIndex, nRed, nGreen, nBlue);
@@ -863,12 +933,12 @@ void WS28xxMulti::SetPixel(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nR
 		return;
 	}
 
-	if ((Type == Type::APA102) || (Type == Type::SK9822)) {
+	if ((type == Type::APA102) || (type == Type::SK9822)) {
 		SetPixel4Bytes(nPortIndex, 1 + nPixelIndex, m_PixelConfiguration.GetGlobalBrightness(), nBlue, nGreen, nRed);
 		return;
 	}
 
-	if (Type == Type::P9813) {
+	if (type == Type::P9813) {
 		const auto nFlag = static_cast<uint8_t>(0xC0 | ((~nBlue & 0xC0) >> 2) | ((~nGreen & 0xC0) >> 4) | ((~nRed & 0xC0) >> 6));
 		SetPixel4Bytes(nPortIndex, 1 + nPixelIndex, nFlag, nBlue, nGreen, nRed);
 		return;
@@ -883,10 +953,18 @@ void WS28xxMulti::SetPixel(uint32_t nPortIndex, uint32_t nPixelIndex, uint8_t nR
 	assert(nPortIndex < 16);
 	assert(nPixelIndex < m_nBufSize / 8);	//FIXME 8
 
-	uint32_t j = 0;
+	const auto pGammaTable = m_PixelConfiguration.GetGammaTable();
+
+	nRed = pGammaTable[nRed];
+	nGreen = pGammaTable[nGreen];
+	nBlue = pGammaTable[nBlue];
+	nWhite = pGammaTable[nWhite];
+
 	const auto k = nPixelIndex * pixel::single::RGBW;
 	const auto nBit = nPortIndex + GPIO_PIN_OFFSET;
+
 	auto *p = &s_DmaBuffer[k];
+	uint32_t j = 0;
 
 	for (uint8_t mask = 0x80; mask != 0; mask = static_cast<uint8_t>(mask >> 1)) {
 		// GRBW

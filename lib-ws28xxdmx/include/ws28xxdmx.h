@@ -2,7 +2,7 @@
  * @file ws28xxdmx.h
  *
  */
-/* Copyright (C) 2016-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,14 +42,17 @@ public:
 	WS28xxDmx(PixelDmxConfiguration& pixelDmxConfiguration);
 	~WS28xxDmx() override;
 
-	void Initialize();
-
-	void Start(uint32_t nPortIndex = 0) override;
-	void Stop(uint32_t nPortIndex = 0) override;
+	void Start(uint32_t nPortIndex) override;
+	void Stop(uint32_t nPortIndex) override;
 
 	void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) override;
 
 	void Blackout(bool bBlackout) override;
+	void FullOn() override;
+
+	void Print() override {
+		m_pixelDmxConfiguration.Print();
+	}
 
 	void SetWS28xxDmxStore(PixelDmxStore *pWS28xxDmxStore) {
 		m_pWS28xxDmxStore = pWS28xxDmxStore;
@@ -59,31 +62,29 @@ public:
 		m_pPixelDmxHandler = pPixelDmxHandler;
 	}
 
-	uint32_t GetUniverses() const {
-		return m_nUniverses;
-	}
-
 	pixel::Type GetType() const {
-		return m_pWS28xx->GetType();
-	}
-
-	uint32_t GetCount() const {
-		return m_nGroups * m_nGroupingCount;
+		return m_pixelDmxConfiguration.GetType();
 	}
 
 	pixel::Map GetMap() const {
-		return m_pWS28xx->GetMap();
+		return m_pixelDmxConfiguration.GetMap();
+	}
+
+	uint32_t GetCount() const {
+		return m_pixelDmxConfiguration.GetCount();;
 	}
 
 	uint32_t GetGroups() const {
-		return m_nGroups;
+		return m_pixelDmxConfiguration.GetGroups();
 	}
 
 	uint32_t GetGroupingCount() const {
-		return m_nGroupingCount;
+		return m_pixelDmxConfiguration.GetGroupingCount();
 	}
 
-	void Print() override;
+	uint32_t GetUniverses() const {
+		return m_pixelDmxConfiguration.GetUniverses();
+	}
 
 // RDM
 	bool SetDmxStartAddress(uint16_t nDmxStartAddress) override;
@@ -103,20 +104,12 @@ public:
 	}
 
 private:
+	PixelDmxConfiguration m_pixelDmxConfiguration;
 	pixeldmxconfiguration::PortInfo m_PortInfo;
-	uint32_t m_nGroups;
-	uint32_t m_nGroupingCount;
-	uint32_t m_nUniverses;
 	uint32_t m_nChannelsPerPixel;
 
-	uint8_t m_nLowCode { 0 };
-	uint8_t m_nHighCode { 0 };
-
-	uint32_t m_nClockSpeedHz { 0 };
-	uint8_t m_nGlobalBrightness { 0xFF };
-
-	uint16_t m_nDmxStartAddress { lightset::Dmx::START_ADDRESS_DEFAULT };
-	uint16_t m_nDmxFootprint { 170 * 3 };
+	uint16_t m_nDmxStartAddress;
+	uint16_t m_nDmxFootprint;
 
 	WS28xx *m_pWS28xx { nullptr };
 	PixelDmxStore *m_pWS28xxDmxStore { nullptr };

@@ -1,4 +1,4 @@
-DEFINES=DISABLE_TFTP NDEBUG
+DEFINES= HAVE_FLASHROM NDEBUG
 
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

@@ -103,14 +103,43 @@
  * U(S)ART
  */
 
+// #define USART0_REMAP
+// #define USART1_REMAP
 #define USART2_PARTIAL_REMAP
+// #define UART3_REMAP
+
+/**
+ * Panel LEDs
+ */
+#ifdef __cplusplus
+namespace hal {
+namespace panelled {
+static constexpr uint32_t ACTIVITY = 0;
+static constexpr uint32_t ARTNET = 0;
+static constexpr uint32_t DDP = 0;
+static constexpr uint32_t SACN = 0;
+static constexpr uint32_t LTC_IN = 0;
+static constexpr uint32_t LTC_OUT = 0;
+static constexpr uint32_t MIDI_IN = 0;
+static constexpr uint32_t MIDI_OUT = 0;
+static constexpr uint32_t OSC_IN = 0;
+static constexpr uint32_t OSC_OUT = 0;
+static constexpr uint32_t TCNET = 0;
+// DMX
+static constexpr uint32_t PORT_A_RX = 0;
+static constexpr uint32_t PORT_A_TX = 0;
+//
+static constexpr uint32_t INVERTED = 0;
+}  // namespace panelled
+}  // namespace hal
+#endif
 
 #if defined (GD32F20X_CL)
 # include "mcu/gd32f20x_mcu.h"
-# define GD32_MCU_NAME	"GD32F207R"
+# define GD32_MCU_NAME	"GD32F207RG"
 #elif defined (GD32F407)
 # include "mcu/gd32f407_mcu.h"
-# define GD32_MCU_NAME	"GD32F407R"
+# define GD32_MCU_NAME	"GD32F407RE"
 #else
 # error MCU is not supported
 #endif

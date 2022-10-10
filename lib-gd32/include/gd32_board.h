@@ -26,20 +26,24 @@
 #ifndef GD32_BOARD_H_
 #define GD32_BOARD_H_
 
-#if defined (BOARD_GD32F103R)
-# include "board/gd32f103r.h"
-#elif defined (BOARD_GD32F107R)
-# include "board/gd32f107r.h"
-#elif defined (BOARD_GD32F207R)
-# include "board/gd32f207r.h"
+#if defined (BOARD_GD32F103RC)
+# include "board/gd32f103rc.h"
+#elif defined (BOARD_GD32F107RC)
+# include "board/gd32f107rc.h"
+#elif defined (BOARD_GD32F207RG)
+# include "board/gd32f207rg.h"
+#elif defined (BOARD_GD32F207VC)
+# include "board/gd32f207vc.h"
+#elif defined (BOARD_GD32F303RC)
+# include "board/gd32f303rc.h"
+#elif defined (BOARD_GD32F407RE)
+# include "board/gd32f407re.h"
+#elif defined (BOARD_GD32F450VE)
+# include "board/gd32f450ve.h"
+#elif defined (BOARD_GD32F450VI)
+# include "board/gd32f450vi.h"
 #elif defined (BOARD_GD32F207C_EVAL)
 # include "board/gd32f207c_eval.h"
-#elif defined (BOARD_GD32F303R)
-# include "board/gd32f303r.h"
-#elif defined (BOARD_GD32F407R)
-# include "board/gd32f407r.h"
-#elif defined (BOARD_GD32F450V)
-# include "board/gd32f450v.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "board/bw_opidmx4.h"
 #else
