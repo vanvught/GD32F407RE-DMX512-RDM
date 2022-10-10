@@ -44,6 +44,7 @@ public:
 
 	void Update();
 	void Blackout();
+	void FullOn();
 
 	pixel::Type GetType() const {
 		return m_PixelConfiguration.GetType();

@@ -1,5 +1,5 @@
 /**
- * @file panel_led.h
+ * @file panel_led
  *
  */
 /* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -26,33 +26,41 @@
 #ifndef GD32_PANEL_LED_H_
 #define GD32_PANEL_LED_H_
 
-#include <cstdint>
+#include "gd32_bitbanging595.h"
 
 namespace hal {
-namespace panelled {
-static constexpr uint32_t ACTIVITY = 0;
-static constexpr uint32_t ARTNET = 0;
-static constexpr uint32_t DDP = 0;
-static constexpr uint32_t SACN = 0;
-static constexpr uint32_t LTC_IN = 0;
-static constexpr uint32_t LTC_OUT = 0;
-static constexpr uint32_t MIDI_IN = 0;
-static constexpr uint32_t MIDI_OUT = 0;
-static constexpr uint32_t OSC_IN = 0;
-static constexpr uint32_t OSC_OUT = 0;
-static constexpr uint32_t TCNET = 0;
-// DMX
-static constexpr uint32_t PORT_A_RX = 0;
-static constexpr uint32_t PORT_A_TX = 0;
-//
-static constexpr uint32_t INVERTED = 0;
-}  // namespace panelled
+#if defined(BOARD_GD32F207VC) || defined(BOARD_GD32F450VE)
+inline static void panel_led_on(uint32_t on) {
+	const uint32_t nDMX = on & 0xFFFF;
 
+	if (nDMX != 0) {
+		const uint32_t nShift =  (__CLZ(nDMX) - 23) * 2;
+		on &= ~(0xFFFF);
+		on |= (1 << nShift);
+	}
+
+	BitBanging595::Get()->SetOn(on);
+}
+
+inline static void panel_led_off(uint32_t off) {
+	const uint32_t nDMX = off & 0xFFFF;
+
+	if (nDMX != 0) {
+		const uint32_t nShift =  (__CLZ(nDMX) - 23) * 2;
+		off &= ~(0xFFFF);
+		off |= (1 << nShift);
+
+	}
+
+	BitBanging595::Get()->SetOff(off);
+}
+#else
 inline static void panel_led_on(uint32_t __attribute__((unused)) on) {
 }
 
 inline static void panel_led_off(uint32_t __attribute__((unused)) off) {
 }
+#endif
 }  // namespace hal
 
 #endif /* GD32_PANEL_LED_H_ */

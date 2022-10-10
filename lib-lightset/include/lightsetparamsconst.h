@@ -26,10 +26,6 @@
 #ifndef LIGHTSETPARAMSCONST_H_
 #define LIGHTSETPARAMSCONST_H_
 
-#if !defined (CONFIG_PIXELDMX_MAX_PORTS)
-# define CONFIG_PIXELDMX_MAX_PORTS	8
-#endif
-
 struct LightSetParamsConst {
 	static const char PARAMS_OUTPUT[];
 
@@ -41,12 +37,16 @@ struct LightSetParamsConst {
 
 	static const char DIRECTION[4][18];
 
-	static const char START_UNI_PORT[CONFIG_PIXELDMX_MAX_PORTS][20];
-
 	static const char DMX_START_ADDRESS[];
 	static const char DMX_SLOT_INFO[];
 
-	static const char TEST_PATTERN[];
+	static const char DISABLE_MERGE_TIMEOUT[];
+
+	static const char FAILSAFE[];
+
+#if defined (CONFIG_PIXELDMX_MAX_PORTS)
+	static const char START_UNI_PORT[CONFIG_PIXELDMX_MAX_PORTS][20];
+#endif
 };
 
 #endif /* LIGHTSETPARAMSCONST_H_ */

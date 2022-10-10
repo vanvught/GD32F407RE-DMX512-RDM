@@ -18,5 +18,5 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 	endif
 else
-	EXTRA_SRCDIR+=console/uart0	rtc debug
+	EXTRA_SRCDIR+=console/i2c console/uart0 rtc debug
 endif

@@ -31,4 +31,9 @@ else
 	EXTRA_SRCDIR+=device/emac
 endif
 
+ifeq ($(findstring DISABLE_FS,$(MAKE_FLAGS)), DISABLE_FS)
+else
+	EXTRA_SRCDIR+=device/sdio
+endif
+
 include ../firmware-template-gd32/lib/Rules.mk

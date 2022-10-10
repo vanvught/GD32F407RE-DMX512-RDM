@@ -30,9 +30,10 @@
 #include "networkconst.h"
 #include "ledblink.h"
 
+#include "mdns.h"
+#include "mdnsservices.h"
 #if defined (ENABLE_HTTPD)
-# include "mdns.h"
-# include "mdnsservices.h"
+# include "httpd/httpd.h"
 #endif
 
 #include "displayudf.h"
@@ -49,10 +50,10 @@
 #include "pixeldmxconfiguration.h"
 #include "pixeltype.h"
 #include "pixeltestpattern.h"
-#include "ws28xxmulti.h"
 #include "pixeldmxparams.h"
+#include "pixeldmxstartstop.h"
+#include "ws28xxmulti.h"
 #include "ws28xxdmxmulti.h"
-#include "ws28xxdmxstartstop.h"
 
 #if defined (NODE_RDMNET_LLRP_ONLY)
 # include "rdmdeviceparams.h"
@@ -80,13 +81,10 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-class Reboot final: public RebootHandler {
-public:
-	void Run() override {
-		ArtNet4Node::Get()->Stop();
-		WS28xxMulti::Get()->Blackout();
-	}
-};
+void Hardware::RebootHandler() {
+	WS28xxMulti::Get()->Blackout();
+	ArtNet4Node::Get()->Stop();
+}
 
 void main() {
 	Hardware hw;
@@ -98,10 +96,9 @@ void main() {
 	FlashRom flashRom;
 	SpiFlashStore spiFlashStore;
 
-	fw.Print("Art-Net 4 " "\x1b[32m" "Pixel controller {8x 4 Universes}" "\x1b[37m");
+	fw.Print("\x1b[32m" "Art-Net 4 Pixel controller {8x 4 Universes}" "\x1b[37m");
 
 	hw.SetLed(hardware::LedStatus::ON);
-	hw.SetRebootHandler(new Reboot);
 	lb.SetLedBlinkDisplay(new DisplayHandler);
 
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
@@ -111,16 +108,36 @@ void main() {
 	nw.Init(&storeNetwork);
 	nw.Print();
 
-#if defined (ENABLE_HTTPD)
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
 	MDNS mDns;
 	mDns.Start();
 	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_CONFIG, 0x2905);
+#if defined (ENABLE_HTTPD)
 	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_HTTP, 80, mdns::Protocol::TCP, "node=Art-Net Pixel");
+#endif
 	mDns.Print();
+
+#if defined (ENABLE_HTTPD)
+	HttpDaemon httpDaemon;
+	httpDaemon.Start();
 #endif
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
+
+	ArtNet4Node node;
+
+	StoreArtNet storeArtNet;
+	ArtNetParams artnetParams(&storeArtNet);
+
+	if (artnetParams.Load()) {
+		artnetParams.Dump();
+		artnetParams.Set();
+	}
+
+	node.SetArtNetStore(&storeArtNet);
+
+	DisplayUdfHandler displayUdfHandler;
+	node.SetArtNetDisplay(&displayUdfHandler);
 
 	PixelDmxConfiguration pixelDmxConfiguration;
 
@@ -128,30 +145,14 @@ void main() {
 	PixelDmxParams pixelDmxParams(&storePixelDmx);
 
 	if (pixelDmxParams.Load()) {
-		pixelDmxParams.Set(&pixelDmxConfiguration);
 		pixelDmxParams.Dump();
+		pixelDmxParams.Set(&pixelDmxConfiguration);
 	}
 
 	WS28xxDmxMulti pixelDmxMulti(pixelDmxConfiguration);
 	pixelDmxMulti.SetPixelDmxHandler(new PixelDmxStartStop);
 
 	const auto nActivePorts = pixelDmxMulti.GetOutputPorts();
-
-	ArtNet4Node node(static_cast<uint8_t>(nActivePorts));
-
-	StoreArtNet storeArtNet;
-	ArtNetParams artnetParams(&storeArtNet);
-
-	if (artnetParams.Load()) {
-		artnetParams.Set(&node);
-		artnetParams.Dump();
-	}
-	
-	node.SetArtNetStore(&storeArtNet);
-
-	DisplayUdfHandler displayUdfHandler;
-	node.SetArtNetDisplay(&displayUdfHandler);
-
 	const auto nUniverses = pixelDmxMulti.GetUniverses();
 
 	uint32_t nPortProtocolIndex = 0;
@@ -164,9 +165,9 @@ void main() {
 				node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
 				nPortProtocolIndex++;
 			}
-			nPortProtocolIndex = nPortProtocolIndex + static_cast<uint8_t>(ArtNet::PORTS - nUniverses);
+			nPortProtocolIndex = nPortProtocolIndex + static_cast<uint8_t>(artnet::PORTS - nUniverses);
 		} else {
-			nPortProtocolIndex = nPortProtocolIndex + ArtNet::PORTS;
+			nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS;
 		}
 	}
 
@@ -216,7 +217,7 @@ void main() {
 	node.Print();
 	pixelDmxMulti.Print();
 
-	display.SetTitle("ArtNet Pixel 8:%dx%d", nActivePorts, WS28xxMulti::Get()->GetCount());
+	display.SetTitle("ArtNet Pixel %dx%d", nActivePorts, WS28xxMulti::Get()->GetCount());
 	display.Set(2, displayudf::Labels::IP);
 	display.Set(3, displayudf::Labels::NODE_NAME);
 	display.Set(4, displayudf::Labels::VERSION);
@@ -249,8 +250,8 @@ void main() {
 	RemoteConfigParams remoteConfigParams(&storeRemoteConfig);
 
 	if(remoteConfigParams.Load()) {
-		remoteConfigParams.Set(&remoteConfig);
 		remoteConfigParams.Dump();
+		remoteConfigParams.Set(&remoteConfig);
 	}
 
 	while (spiFlashStore.Flash())
@@ -277,17 +278,18 @@ void main() {
 		nw.Run();
 		node.Run();
 		remoteConfig.Run();
-#if defined (NODE_RDMNET_LLRP_ONLY)
-		llrpOnlyDevice.Run();
-#endif
 		spiFlashStore.Flash();
-		lb.Run();
-		display.Run();
 		if (__builtin_expect((PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE), 0)) {
 			pixelTestPattern.Run();
 		}
-#if defined (ENABLE_HTTPD)
 		mDns.Run();
+#if defined (NODE_RDMNET_LLRP_ONLY)
+		llrpOnlyDevice.Run();
 #endif
+#if defined (ENABLE_HTTPD)
+		httpDaemon.Run();
+#endif
+		display.Run();
+		lb.Run();
 	}
 }

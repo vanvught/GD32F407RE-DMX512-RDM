@@ -33,3 +33,7 @@ The ready to use firmware is build to use with the bootloader TFTP server -> [ht
 * Full sACN E1.31 implementation
 * No FPS limitation, except for what there is with the pixel chip protocol
 * RDMNet LLRP Device only
+
+## Remote Configuration Manager
+[https://github.com/vanvught/Remote-Config-UI/releases](https://github.com/vanvught/Remote-Config-UI/releases)<br>
+<img alt="GitHub release" src="https://img.shields.io/github/v/release/vanvught/Remote-Config-UI">

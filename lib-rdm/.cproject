@@ -28,7 +28,7 @@
 									<listOptionValue builtIn="false" value="GD32"/>
 									<listOptionValue builtIn="false" value="DISABLE_FS"/>
 									<listOptionValue builtIn="false" value="DISABLE_TFTP"/>
-									<listOptionValue builtIn="false" value="BOARD_GD32F407R"/>
+									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="GD32F407"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1563139810" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -58,7 +58,7 @@
 									<listOptionValue builtIn="false" value="DISABLE_FS"/>
 									<listOptionValue builtIn="false" value="DISABLE_TFTP"/>
 									<listOptionValue builtIn="false" value="GD32F407"/>
-									<listOptionValue builtIn="false" value="BOARD_GD32F407R"/>
+									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="ENABLE_RDM_SELF_TEST"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1906657905" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>

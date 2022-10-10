@@ -46,26 +46,25 @@ WS28xx::WS28xx(PixelConfiguration& pixelConfiguration) {
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
+	m_PixelConfiguration = pixelConfiguration;
+
 	uint32_t nLedsPerPixel;
 	pixelConfiguration.Validate(nLedsPerPixel);
 	pixelConfiguration.Dump();
 
-	m_Type = pixelConfiguration.GetType();
-	m_nCount = pixelConfiguration.GetCount();
-	m_Map = pixelConfiguration.GetMap();
-	m_nLowCode = pixelConfiguration.GetLowCode();
-	m_nHighCode = pixelConfiguration.GetHighCode();
-	m_bIsRTZProtocol = pixelConfiguration.IsRTZProtocol();
-	m_nGlobalBrightness = pixelConfiguration.GetGlobalBrightness();
-	m_nBufSize = m_nCount * nLedsPerPixel;
+	const auto nCount = m_PixelConfiguration.GetCount();
 
-	if (m_bIsRTZProtocol) {
+	m_nBufSize = nCount * nLedsPerPixel;
+
+	if (m_PixelConfiguration.IsRTZProtocol()) {
 		m_nBufSize *= 8;
 		m_nBufSize += 1;
 	}
 
-	if ((m_Type == Type::APA102) || (m_Type == Type::SK9822) || (m_Type == Type::P9813)) {
-		m_nBufSize += m_nCount;
+	const auto type = m_PixelConfiguration.GetType();
+
+	if ((type == Type::APA102) || (type == Type::SK9822) || (type == Type::P9813)) {
+		m_nBufSize += nCount;
 		m_nBufSize += 8;
 	}
 
@@ -125,35 +124,80 @@ void WS28xx::Update() {
 void WS28xx::Blackout() {
 	DEBUG_ENTRY
 
-	auto *pBuffer = m_pBuffer;
-	m_pBuffer = m_pBlackoutBuffer;
-
 	// A blackout can be called any time. Make sure the previous transmit is ended.
-
 	do {
 		__ISB();
 	} while (FUNC_PREFIX(spi_dma_tx_is_active()));
 
-	if ((m_Type == Type::APA102) || (m_Type == Type::SK9822) || (m_Type == Type::P9813)) {
+	auto *pBuffer = m_pBuffer;
+	m_pBuffer = m_pBlackoutBuffer;
+
+	const auto type = m_PixelConfiguration.GetType();
+	const auto nCount = m_PixelConfiguration.GetCount();
+
+	if ((type == Type::APA102) || (type == Type::SK9822) || (type == Type::P9813)) {
 		memset(m_pBuffer, 0, 4);
 
-		for (auto i = 0; i < m_nCount; i++) {
-			SetPixel(i, 0, 0, 0);
+		for (auto nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
+			SetPixel(nPixelIndex, 0, 0, 0);
 		}
 
-		if ((m_Type == Type::APA102) || (m_Type == Type::SK9822)) {
+		if ((type == Type::APA102) || (type == Type::SK9822)) {
 			memset(&m_pBuffer[m_nBufSize - 4], 0xFF, 4);
 		} else {
 			memset(&m_pBuffer[m_nBufSize - 4], 0, 4);
 		}
 	} else {
 		m_pBuffer[0] = 0x00;
-		memset(&m_pBuffer[1], m_Type == Type::WS2801 ? 0 : m_nLowCode, m_nBufSize);
+		memset(&m_pBuffer[1], type == Type::WS2801 ? 0 : m_PixelConfiguration.GetLowCode(), m_nBufSize);
 	}
 
 	Update();
 
 	// A blackout may not be interrupted.
+	do {
+		__ISB();
+	} while (FUNC_PREFIX(spi_dma_tx_is_active()));
+
+	m_pBuffer = pBuffer;
+
+	DEBUG_EXIT
+}
+
+void WS28xx::FullOn() {
+	DEBUG_ENTRY
+
+	// Can be called any time. Make sure the previous transmit is ended.
+	do {
+		__ISB();
+	} while (FUNC_PREFIX(spi_dma_tx_is_active()));
+
+	auto *pBuffer = m_pBuffer;
+	m_pBuffer = m_pBlackoutBuffer;
+
+	const auto type = m_PixelConfiguration.GetType();
+	const auto nCount = m_PixelConfiguration.GetCount();
+
+	if ((type == Type::APA102) || (type == Type::SK9822) || (type == Type::P9813)) {
+		memset(m_pBuffer, 0, 4);
+
+		for (auto nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
+			SetPixel(nPixelIndex, 0xFF, 0xFF, 0xFF);
+		}
+
+		if ((type == Type::APA102) || (type == Type::SK9822)) {
+			memset(&m_pBuffer[m_nBufSize - 4], 0xFF, 4);
+		} else {
+			memset(&m_pBuffer[m_nBufSize - 4], 0, 4);
+		}
+	} else {
+		m_pBuffer[0] = 0x00;
+		memset(&m_pBuffer[1], type == Type::WS2801 ? 0xFF : m_PixelConfiguration.GetHighCode(), m_nBufSize);
+	}
+
+	Update();
+
+	// May not be interrupted.
 	do {
 		__ISB();
 	} while (FUNC_PREFIX(spi_dma_tx_is_active()));

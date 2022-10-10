@@ -6,7 +6,7 @@ AS	 = $(CC)
 LD	 = $(PREFIX)ld
 AR	 = $(PREFIX)ar
 
-BOARD?=BOARD_GD32F407R
+BOARD?=BOARD_GD32F407RE
 #BOARD?=BOARD_BW_OPIDMX4
 
 MCU?=gd32f407
@@ -29,7 +29,7 @@ BUILD=build_gd32/
 # Input
 SOURCE = ./
 FIRMWARE_DIR = ./../firmware-template-gd32/
-LINKER = $(FIRMWARE_DIR)/gd32f407_flash.ld
+LINKER = $(FIRMWARE_DIR)/gd32f407re_flash.ld
 
 include ../firmware-template/libs.mk
 
