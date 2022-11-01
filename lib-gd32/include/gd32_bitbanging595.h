@@ -85,17 +85,14 @@ public:
 	    ShiftOut();
 	}
 
-	// TODO bit-banging ?
 	void SetOn(uint32_t nData) {
 		s_nData |= nData;
-		s_nData ^=  hal::panelled::INVERTED;
+//		s_nData ^=  hal::panelled::INVERTED;
 	}
 
-	// TODO bit-banging ?
 	void SetOff(uint32_t nData) {
 		s_nData &= ~nData;
-		s_nData ^=  hal::panelled::INVERTED;
-
+//		s_nData ^=  hal::panelled::INVERTED;
 	}
 
 	void Run() {

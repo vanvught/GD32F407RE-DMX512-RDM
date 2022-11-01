@@ -67,6 +67,8 @@
 # include "enet_config_common.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "enet_config_common.h"
+#elif defined (BOARD_DMX4)
+# include "enet_config_common.h"
 #else
 # error Board is unknown / not defined
 #endif

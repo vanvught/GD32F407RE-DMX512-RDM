@@ -159,6 +159,13 @@ struct InputPort {
 	uint32_t nDestinationIp;
 	uint8_t nSequenceNumber;
 };
+
+inline static FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
+	const auto fs = static_cast<FailSafe>(static_cast<uint32_t>(failsafe) + static_cast<uint32_t>(FailSafe::LAST));
+	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
+	return fs;
+}
+
 }  // namespace artnetnode
 
 class ArtNetNode {
@@ -393,6 +400,9 @@ private:
 	void SendTod(uint32_t nPortIndex);
 
 	void SetNetworkDataLossCondition();
+
+	void FailSafeRecord();
+	void FailSafePlayback();
 
 private:
 	int32_t m_nHandle { -1 };

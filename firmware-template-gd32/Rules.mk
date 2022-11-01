@@ -8,6 +8,7 @@ AR	 = $(PREFIX)ar
 
 BOARD?=BOARD_GD32F407RE
 #BOARD?=BOARD_BW_OPIDMX4
+#BOARD?=BOARD_DMX4
 
 MCU?=gd32f407
 FAMILY?=gd32f4xx
@@ -39,7 +40,7 @@ $(info [${LIBS}])
 	
 DEFINES:=$(addprefix -D,$(DEFINES))
 
-ifeq ($(findstring BOARD_BW_OPIDMX4,$(BOARD)), BOARD_BW_OPIDMX4)
+ifeq ($(findstring DMX4,$(BOARD)), DMX4)
 	DEFINES+=-DCONSOLE_I2C
 endif
 

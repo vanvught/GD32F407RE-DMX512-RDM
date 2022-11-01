@@ -26,12 +26,18 @@
 #ifndef DMXCONFIGUDP_H_
 #define DMXCONFIGUDP_H_
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
 #include <cstdint>
 #include <cstring>
 #include <cassert>
 
 #include "network.h"
 #include "dmx.h"
+
+#include "debug.h"
 
 /**
  * Example's udp message: dmx!break#100  dmx!refresh#30 dmx!mab#20 dmx!slots#128
@@ -66,13 +72,19 @@ static uint32_t atoi(const char *pBuffer, uint32_t nSize) {
 class DmxConfigUdp {
 public:
 	DmxConfigUdp() {
+		DEBUG_ENTRY
+		DEBUG_PRINTF("%p", reinterpret_cast<void *>(&s_nHandle));
 		assert(s_nHandle == -1);
 		s_nHandle = Network::Get()->Begin(dmxconfigudp::UDP_PORT);
+		DEBUG_EXIT
 	}
 
 	~DmxConfigUdp() {
+		DEBUG_ENTRY
 		assert(s_nHandle != -1);
-		s_nHandle = Network::Get()->End(dmxconfigudp::UDP_PORT);
+		Network::Get()->End(dmxconfigudp::UDP_PORT);
+		s_nHandle = -1;
+		DEBUG_EXIT
 	}
 
 	void Run() {

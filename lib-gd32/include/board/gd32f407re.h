@@ -55,7 +55,7 @@
 #define LED_BLINK_GPIO_CLK	LED1_RCU_GPIOx
 
 /**
- * LEDs bit-banging 595	--> Using SPI2 pin's: MOSI, SCK and NSS
+ * LEDs 595	--> Using SPI2 pin's: MOSI, SCK and NSS
  */
 
 #define LED595_DATA_GPIO_PINx	GPIO_PIN_5
@@ -163,6 +163,14 @@ static constexpr uint32_t INVERTED = 0;
 }  // namespace panelled
 }  // namespace hal
 #endif
+
+/**
+ * SPI flash
+ */
+
+#define SPI_FLASH_CS_GPIOx		GPIOB
+#define SPI_FLASH_CS_RCU_GPIOx	RCU_GPIOB
+#define SPI_FLASH_CS_GPIO_PINx	GPIO_PIN_1
 
 #include "mcu/gd32f407_mcu.h"
 #include "gd32_gpio.h"

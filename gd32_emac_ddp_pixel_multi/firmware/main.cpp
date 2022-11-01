@@ -65,9 +65,7 @@
 #include "remoteconfig.h"
 #include "remoteconfigparams.h"
 
-#include "flashrom.h"
-#include "spiflashstore.h"
-
+#include "configstore.h"
 #include "storedisplayudf.h"
 #include "storenetwork.h"
 #if defined (NODE_RDMNET_LLRP_ONLY)
@@ -91,8 +89,7 @@ void main() {
 	DisplayUdf display;
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
-	FlashRom flashRom;
-	SpiFlashStore spiFlashStore;
+	ConfigStore configStore;
 
 	fw.Print("\x1b[32m" "DDP Pixel controller {8x 4 Universes}" "\x1b[37m");
 
@@ -212,7 +209,7 @@ void main() {
 		remoteConfigParams.Dump();
 	}
 
-	while (spiFlashStore.Flash())
+	while (configStore.Flash())
 		;
 
 #if defined (NODE_RDMNET_LLRP_ONLY)
@@ -236,7 +233,7 @@ void main() {
 		nw.Run();
 		ddpDisplay.Run();
 		remoteConfig.Run();
-		spiFlashStore.Flash();
+		configStore.Flash();
 		if (__builtin_expect((PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE), 0)) {
 			pixelTestPattern.Run();
 		}

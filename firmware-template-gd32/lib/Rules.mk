@@ -8,6 +8,7 @@ AR	= $(PREFIX)ar
 
 BOARD?=BOARD_GD32F407RE
 #BOARD?=BOARD_BW_OPIDMX4
+#BOARD?=BOARD_DMX4
 
 MCU?=gd32f407
 FAMILY?=gd32f4xx
@@ -26,6 +27,10 @@ include ../firmware-template-gd32/Includes.mk
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 DEFINES+=-D_TIME_STAMP_YEAR_=$(shell date  +"%Y") -D_TIME_STAMP_MONTH_=$(shell date  +"%-m") -D_TIME_STAMP_DAY_=$(shell date  +"%-d")
+
+ifeq ($(findstring DMX4,$(BOARD)), DMX4)
+	DEFINES+=-DCONSOLE_I2C
+endif
 
 COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(BOARD)
 COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES)

@@ -1499,6 +1499,16 @@ uint32_t Dmx::GetUpdatesPerSecond(uint32_t nPortIndex) {
 #endif
 }
 
+uint32_t GetDmxReceivedCount(uint32_t nPortIndex) {
+	assert(nPortIndex < DMX_MAX_PORTS);
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
+	__DMB();
+	return sv_nRxDmxPackets[nPortIndex].nCount;
+#else
+	return 0;
+#endif
+}
+
 // RDM Send
 
 void Dmx::RdmSendRaw(uint32_t nPortIndex, const uint8_t* pRdmData, uint32_t nLength) {

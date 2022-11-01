@@ -8,7 +8,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 fi
 
 cd ../Board-tester
-make -f Makefile.GD32 clean
+make -f Makefile.GD32 -j $NPROC clean
 make -f Makefile.GD32 -j $NPROC
 retVal=$?
 if [ $retVal -ne 0 ]; then
@@ -20,6 +20,13 @@ cd -
 cd ..
 
 DIR=gd32_*
+MAKEFILE=Makefile*.GD32
+
+for f in $DIR
+do
+	rm -rf /tmp/$f
+	mkdir /tmp/$f
+done
 
 for f in $DIR
 do
@@ -27,16 +34,30 @@ do
 	if [ -d $f ]; then
 		cd "$f"
 		
-		make -f Makefile.GD32 clean
-		make -f Makefile.GD32 -j $NPROC
-		retVal=$?
-		if [ $retVal -ne 0 ]; then
-		 	echo "Error : " "$f"
-			exit $retVal
-		fi
-
-		cp gd32f4xx.bin /tmp/$f.bin
+		for m in $MAKEFILE
+		do
+			make -f $m -j $NPROC clean
+			make -f $m -j $NPROC
+			retVal=$?
+			
+			if [ $retVal -ne 0 ]; then
+			 	echo "Error : " "$f" " : " "$m"
+				exit $retVal
+			fi
+			
+			SUFFIX=$(echo $m | cut -d '-' -f 2 | cut -d '.' -f 1)
 		
+			if [ $SUFFIX == 'Makefile' ]
+			then
+				cp gd32f4xx.bin /tmp/$f
+			else
+				echo $SUFFIX
+				mkdir /tmp/$f/$SUFFIX
+				cp gd32f4xx*.bin /tmp/$f/$SUFFIX
+			fi
+				
+		done
+			
 		cd -
 	fi
 done

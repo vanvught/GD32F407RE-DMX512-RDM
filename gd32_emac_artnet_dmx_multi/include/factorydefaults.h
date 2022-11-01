@@ -29,7 +29,7 @@
 #include "rdmfactorydefaults.h"
 
 #include "remoteconfig.h"
-#include "spiflashstore.h"
+#include "configstore.h"
 #include "storenetwork.h"
 
 class FactoryDefaults: public RDMFactoryDefaults {
@@ -39,7 +39,7 @@ public:
 
 	void Set() {
 		RemoteConfig::Get()->SetDisable(false);
-		SpiFlashStore::Get()->ResetSetList(spiflashstore::Store::RDMDEVICE);
+		ConfigStore::Get()->ResetSetList(configstore::Store::RDMDEVICE);
 		StoreNetwork::Get()->SaveDhcp(true);
 	}
 };

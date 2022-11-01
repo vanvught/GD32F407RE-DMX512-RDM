@@ -157,7 +157,7 @@ SECTIONS
   	. = ALIGN(4);
     *(.bkpsram)
     *(.bkpsram*)
-    *(.flashstore*)
+    *(.configstore*)
   } >BKPSRAM AT>BKPSRAM
 
   /DISCARD/ :

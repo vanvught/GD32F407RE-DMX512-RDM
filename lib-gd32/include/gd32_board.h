@@ -46,6 +46,8 @@
 # include "board/gd32f207c_eval.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "board/bw_opidmx4.h"
+#elif defined (BOARD_DMX4)
+# include "board/dmx4.h"
 #else
 # error Board is unknown / not defined
 #endif

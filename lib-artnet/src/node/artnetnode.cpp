@@ -26,6 +26,10 @@
  * THE SOFTWARE.
  */
 
+#ifdef NDEBUG
+# undef NDEBUG
+#endif
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -40,7 +44,9 @@
 
 #include "hardware.h"
 #include "network.h"
+
 #include "ledblink.h"
+#include "panel_led.h"
 
 #include "artnetnode_internal.h"
 
@@ -51,13 +57,10 @@ using namespace artnetnode;
 
 static constexpr auto ARTNET_MIN_HEADER_SIZE = 12;
 
-ArtNetNode *ArtNetNode::s_pThis = nullptr;
+ArtNetNode *ArtNetNode::s_pThis;
 
 ArtNetNode::ArtNetNode() {
-	assert(Hardware::Get() != nullptr);
-	assert(Network::Get() != nullptr);
-	assert(LedBlink::Get() != nullptr);
-
+	assert(s_pThis == nullptr);
 	s_pThis = this;
 
 	DEBUG_PRINTF("PAGE_SIZE=%u, PAGES=%u, MAX_PORTS=%u", artnetnode::PAGE_SIZE, artnetnode::PAGES, artnetnode::MAX_PORTS);
@@ -135,6 +138,7 @@ void ArtNetNode::Start() {
 	}
 
 	LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
+	hal::panel_led_on(hal::panelled::ARTNET);
 
 	SendPollRelply(false);	// send a reply on startup
 }
@@ -161,6 +165,7 @@ void ArtNetNode::Stop() {
 	}
 
 	LedBlink::Get()->SetMode(ledblink::Mode::OFF_OFF);
+	hal::panel_led_off(hal::panelled::ARTNET);
 
 	m_Node.Status1 = static_cast<uint8_t>((m_Node.Status1 & ~Status1::INDICATOR_MASK) | Status1::INDICATOR_MUTE_MODE);
 	m_State.status = Status::STANDBY;
@@ -218,7 +223,7 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 	uint32_t nIpCount = 0;
 
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		nIpCount += m_OutputPort[i].sourceA.nIp + m_OutputPort[i].sourceB.nIp;
+		nIpCount += (m_OutputPort[i].sourceA.nIp + m_OutputPort[i].sourceB.nIp);
 		if (nIpCount != 0) {
 			break;
 		}
@@ -228,13 +233,9 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 		return;
 	}
 
-	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		m_OutputPort[i].sourceA.nIp = 0;
-		m_OutputPort[i].sourceB.nIp = 0;
-		lightset::Data::ClearLength(i);
-	}
-
 	const auto networkloss = (m_Node.Status3 & artnet::Status3::NETWORKLOSS_MASK);
+
+	DEBUG_PRINTF("networkloss=%x", networkloss);
 
 	switch (networkloss) {
 	case artnet::Status3::NETWORKLOSS_LAST_STATE:
@@ -246,12 +247,20 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 		m_pLightSet->FullOn();
 		break;
 	case artnet::Status3::NETWORKLOSS_PLAYBACK:
-		//TODO artnet::Status3::NETWORKLOSS_PLAYBACK
+#if defined(ARTNET_HAVE_FAILSAFE_RECORD)
+		FailSafePlayback();
+#endif
 		break;
 	default:
 		assert(0);
 		__builtin_unreachable();
 		break;
+	}
+
+	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
+		m_OutputPort[i].sourceA.nIp = 0;
+		m_OutputPort[i].sourceB.nIp = 0;
+		lightset::Data::ClearLength(i);
 	}
 }
 
@@ -285,6 +294,7 @@ void ArtNetNode::Run() {
 	if (__builtin_expect((nBytesReceived == 0), 1)) {
 		if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= artnet::NETWORK_DATA_LOSS_TIMEOUT * 1000) {
 			SetNetworkDataLossCondition();
+			hal::panel_led_off(hal::panelled::ARTNET);
 		}
 
 		if (m_State.SendArtPollReplyOnChange) {
@@ -408,4 +418,6 @@ void ArtNetNode::Run() {
 			}
 		}
 	}
+
+	hal::panel_led_on(hal::panelled::ARTNET);
 }
