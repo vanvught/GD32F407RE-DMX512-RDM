@@ -249,7 +249,6 @@ private:
 	char m_aIfName[IFNAMSIZ];
 
 	NetworkStore *m_pNetworkStore { nullptr };
-	NetworkDisplay m_NetworkDisplay;
 
 	void SetDefaultIp();
 

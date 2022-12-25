@@ -26,10 +26,6 @@
  * THE SOFTWARE.
  */
 
-#ifdef NDEBUG
-# undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -103,6 +99,19 @@ ArtNetNode::ArtNetNode() {
 	m_ArtDmx.OpCode = OP_DMX;
 	m_ArtDmx.ProtVerHi = 0;
 	m_ArtDmx.ProtVerLo = artnet::PROTOCOL_REVISION;
+
+	memcpy(m_ArtRdm.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
+	m_ArtRdm.OpCode = OP_RDM;
+	m_ArtRdm.ProtVerHi = 0;
+	m_ArtRdm.ProtVerLo = artnet::PROTOCOL_REVISION;
+	m_ArtRdm.RdmVer = 0x01; // Devices that support RDM STANDARD V1.0 set field to 0x01.
+	m_ArtRdm.Spare1 = 0;
+	m_ArtRdm.Spare2 = 0;
+	m_ArtRdm.Spare3 = 0;
+	m_ArtRdm.Spare4 = 0;
+	m_ArtRdm.Spare5 = 0;
+	m_ArtRdm.Spare6 = 0;
+	m_ArtRdm.Spare7 = 0;
 }
 
 ArtNetNode::~ArtNetNode() {
@@ -115,6 +124,10 @@ void ArtNetNode::Start() {
 	if (artnet::VERSION > 3) {
 		assert(m_pArtNet4Handler != nullptr);
 	}
+
+#if defined	(RDM_CONTROLLER) || defined	(RDM_RESPONDER)
+//	assert(m_pArtNetRdm != nullptr);
+#endif
 
 	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(Status2::IP_DHCP)) | (Network::Get()->IsDhcpUsed() ? Status2::IP_DHCP : Status2::IP_MANUALY));
 	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(Status2::DHCP_CAPABLE)) | (Network::Get()->IsDhcpCapable() ? Status2::DHCP_CAPABLE : 0));
@@ -137,10 +150,38 @@ void ArtNetNode::Start() {
 		}
 	}
 
+	SendPollRelply(false);	// send a reply on startup
+
+	if (m_pArtNetRdm != nullptr) {
+		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+			/* An Output Gateway will send the ArtTodData packet in the following circumstances:
+			 * - Upon power on or decice reset. 
+			 * - In response to an ArtTodRequest if the Port-Address matches.
+			 * - In response to an ArtTodControl if the Port-Address matches.
+			 * - When their ToD changes due to the addition or deletion of a UID.
+			 * - At the end of full RDM discovery.
+			 */
+			if ((m_OutputPort[nPortIndex].isRdmEnabled) && m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+				SendTod(nPortIndex);
+			}
+
+			/* A controller should periodically broadcast an ArtTodRequest
+			 * to the network in order to ensure its TODs are up to date. 
+			 * 
+			 * When to send:
+			 * - Upon power on or device reset.
+			 * - At regular intervals [10 minutes]. In theory not needed
+			 *   since Output Gateways will broadcast an ArtTodData if their
+			 *   ToD changes, however it is safe programming.
+			 */
+			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+				SendTodRequest(nPortIndex);
+			}
+		}
+	}
+
 	LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
 	hal::panel_led_on(hal::panelled::ARTNET);
-
-	SendPollRelply(false);	// send a reply on startup
 }
 
 void ArtNetNode::Stop() {
@@ -187,9 +228,8 @@ void ArtNetNode::SetShortName(const char *pShortName) {
 		if (m_pArtNetStore != nullptr) {
 			m_pArtNetStore->SaveShortName(m_Node.ShortName);
 		}
-		if (m_pArtNetDisplay != nullptr) {
-			m_pArtNetDisplay->ShowShortName(m_Node.ShortName);
-		}
+
+		artnet::display_shortname(m_Node.ShortName);
 	}
 
 	DEBUG_EXIT
@@ -208,9 +248,8 @@ void ArtNetNode::SetLongName(const char *pLongName) {
 		if (m_pArtNetStore != nullptr) {
 			m_pArtNetStore->SaveLongName(m_Node.LongName);
 		}
-		if (m_pArtNetDisplay != nullptr) {
-			m_pArtNetDisplay->ShowLongName(m_Node.LongName);
-		}
+
+		artnet::display_longname(m_Node.LongName);
 	}
 
 	DEBUG_EXIT
@@ -315,6 +354,10 @@ void ArtNetNode::Run() {
 			HandleDmxIn();
 		}
 
+		if (m_pArtNetRdm != nullptr) {
+			HandleRdmIn();
+		}
+
 		if ((((m_Node.Status1 & Status1::INDICATOR_MASK) == Status1::INDICATOR_NORMAL_MODE)) && (LedBlink::Get()->GetMode() != ledblink::Mode::FAST))  {
 			if (artnet::VERSION > 3) {
 				if (m_State.nReceivingDmx != 0) {
@@ -337,13 +380,13 @@ void ArtNetNode::Run() {
 	m_ArtNetPacket.nLength = nBytesReceived;
 	m_nPreviousPacketMillis = m_nCurrentPacketMillis;
 
-	GetType();
-
 	if (m_State.IsSynchronousMode) {
 		if (m_nCurrentPacketMillis - m_State.nArtSyncMillis >= (4 * 1000)) {
 			m_State.IsSynchronousMode = false;
 		}
 	}
+
+	GetType();
 
 	switch (m_ArtNetPacket.OpCode) {
 	case OP_POLL:
@@ -375,6 +418,11 @@ void ArtNetNode::Run() {
 			HandleTodRequest();
 		}
 		break;
+	case OP_TODDATA:
+		if (m_pArtNetRdm != nullptr) {
+			HandleTodData();
+		}
+		break;
 	case OP_TODCONTROL:
 		if (m_pArtNetRdm != nullptr) {
 			HandleTodControl();
@@ -401,6 +449,10 @@ void ArtNetNode::Run() {
 
 	if (m_pArtNetDmx != nullptr) {
 		HandleDmxIn();
+	}
+
+	if (m_pArtNetRdm != nullptr) {
+		HandleRdmIn();
 	}
 
 	if ((((m_Node.Status1 & Status1::INDICATOR_MASK) == Status1::INDICATOR_NORMAL_MODE)) && (LedBlink::Get()->GetMode() != ledblink::Mode::FAST)) {

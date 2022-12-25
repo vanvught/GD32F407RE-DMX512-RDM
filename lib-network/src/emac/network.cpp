@@ -70,7 +70,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 		params.Dump();
 	}
 	
-	m_NetworkDisplay.ShowEmacStart();
+	network::display_emac_start();
 
 	struct ip_info ipInfo;
 
@@ -137,13 +137,13 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 		}
 
 		if (m_IsDhcpUsed) {
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::RENEW);
+			network::display_dhcp_status(network::dhcp::ClientStatus::RENEW);
 		}
 
 		net_init(m_aNetMacaddr, &ipInfo, m_aHostName, &m_IsDhcpUsed, &m_IsZeroconfUsed);
 
 		if (m_IsZeroconfUsed) {
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::FAILED);
+			network::display_dhcp_status(network::dhcp::ClientStatus::FAILED);
 		}
 
 		const auto nRetryTime = params.GetDhcpRetryTime();
@@ -152,7 +152,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 		while (m_IsZeroconfUsed && (nRetryTime != 0) && bUseDhcp) {
 			LedBlink::Get()->SetMode(ledblink::Mode::FAST);
 
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::RETRYING);
+			network::display_dhcp_status(network::dhcp::ClientStatus::RETRYING);
 
 			DEBUG_PUTS("");
 			auto nTime = time(nullptr);
@@ -160,7 +160,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 				LedBlink::Get()->Run();
 			}
 
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::RENEW);
+			network::display_dhcp_status(network::dhcp::ClientStatus::RENEW);
 
 			LedBlink::Get()->SetMode(ledblink::Mode::OFF_ON);
 
@@ -192,7 +192,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 	m_nNetmask = ipInfo.netmask.addr;
 	m_nGatewayIp = ipInfo.gw.addr;
 
-	m_NetworkDisplay.ShowIp();
+	network::display_ip();
 
 	DEBUG_EXIT
 }
@@ -200,7 +200,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 void Network::Shutdown() {
 	DEBUG_ENTRY
 
-	m_NetworkDisplay.ShowShutdown();
+	network::display_emac_shutdown();
 
 	net_shutdown();
 
@@ -296,8 +296,8 @@ void Network::SetIp(uint32_t nIp) {
 		}
 	}
 
-	m_NetworkDisplay.ShowIp();
-	m_NetworkDisplay.ShowNetMask();
+	network::display_ip();
+	network::display_netmask();
 
 	DEBUG_EXIT
 }
@@ -316,8 +316,8 @@ void Network::SetNetmask(uint32_t nNetmask) {
 		m_pNetworkStore->SaveNetMask(nNetmask);
 	}
 
-	m_NetworkDisplay.ShowIp();
-	m_NetworkDisplay.ShowNetMask();
+	network::display_ip();
+	network::display_netmask();
 
 	DEBUG_EXIT
 }
@@ -336,7 +336,7 @@ void Network::SetGatewayIp(uint32_t nGatewayIp) {
 		m_pNetworkStore->SaveGatewayIp(nGatewayIp);
 	}
 
-	m_NetworkDisplay.ShowGatewayIp();
+	network::display_gateway();
 
 	DEBUG_EXIT
 }
@@ -351,7 +351,7 @@ void Network::SetHostName(const char *pHostName) {
 		m_pNetworkStore->SaveHostName(m_aHostName, static_cast<uint16_t>(strlen(m_aHostName)));
 	}
 
-	m_NetworkDisplay.ShowHostName();
+	network::display_hostname();
 
 	DEBUG_EXIT
 }
@@ -375,8 +375,8 @@ bool Network::SetZeroconf() {
 		}
 	}
 
-	m_NetworkDisplay.ShowIp();
-	m_NetworkDisplay.ShowNetMask();
+	network::display_ip();
+	network::display_netmask();
 
 	DEBUG_EXIT
 	return m_IsZeroconfUsed;
@@ -393,14 +393,14 @@ bool Network::EnableDhcp() {
 		Hardware::Get()->WatchdogStop();
 	}
 
-	m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::RENEW);
+	network::display_dhcp_status(network::dhcp::ClientStatus::RENEW);
 
 	m_IsDhcpUsed = net_set_dhcp(&tIpInfo, m_aHostName, &m_IsZeroconfUsed);
 
 		if (m_IsZeroconfUsed) {
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::FAILED);
+			network::display_dhcp_status(network::dhcp::ClientStatus::FAILED);
 		} else {
-			m_NetworkDisplay.ShowDhcpStatus(network::dhcp::ClientStatus::GOT_IP);
+			network::display_dhcp_status(network::dhcp::ClientStatus::GOT_IP);
 		}
 
 	DEBUG_PRINTF("m_IsDhcpUsed=%d, m_IsZeroconfUsed=%d", m_IsDhcpUsed, m_IsZeroconfUsed);
@@ -417,9 +417,9 @@ bool Network::EnableDhcp() {
 		m_pNetworkStore->SaveDhcp(m_IsDhcpUsed);
 	}
 
-	m_NetworkDisplay.ShowIp();
-	m_NetworkDisplay.ShowNetMask();
-	m_NetworkDisplay.ShowGatewayIp();
+	network::display_ip();
+	network::display_netmask();
+	network::display_gateway();
 
 	DEBUG_EXIT
 	return m_IsDhcpUsed;

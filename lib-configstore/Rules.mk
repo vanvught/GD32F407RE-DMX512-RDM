@@ -23,11 +23,14 @@ ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring CONFIG_STORE_USE_SPI,$(MAKE_FLAGS)))
 		EXTRA_SRCDIR+=device/spi
 	endif
+	
+	RDM=
 
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)), NODE_ARTNET)
 		EXTRA_SRCDIR+=src/artnet
 		EXTRA_INCLUDES+=../lib-artnet/include ../lib-artnet4/include
 		EXTRA_SRCDIR+=src/rdm
+		RDM=1
 		EXTRA_INCLUDES+=../lib-rdm/include ../lib-rdmsensor/include ../lib-rdmsubdevice/include
 	endif
 	
@@ -51,6 +54,11 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_INCLUDES+=../lib-e131/include
 	endif
 	
+	ifeq ($(findstring NODE_OSC_CLIENT,$(MAKE_FLAGS)), NODE_OSC_CLIENT)
+		EXTRA_SRCDIR+=src/oscclient
+		EXTRA_INCLUDES+=../lib-oscclient/include
+	endif
+	
 	ifeq ($(findstring OUTPUT_DMX_PIXEL,$(MAKE_FLAGS)), OUTPUT_DMX_PIXEL)
 		EXTRA_SRCDIR+=src/pixel
 		EXTRA_INCLUDES+=../lib-ws28xxdmx/include ../lib-ws28xx/include
@@ -62,16 +70,28 @@ ifneq ($(MAKE_FLAGS),)
 	endif
 	
 	ifeq ($(findstring RDM_CONTROLLER,$(MAKE_FLAGS)), RDM_CONTROLLER)
-		EXTRA_SRCDIR+=src/rdm
+		ifdef RDM
+		else
+			EXTRA_SRCDIR+=src/rdm
+			RDM=1
+		endif
 	endif
 	
 	ifeq ($(findstring RDM_RESPONDER,$(MAKE_FLAGS)), RDM_RESPONDER)
-		EXTRA_SRCDIR+=src/rdm
+		ifdef RDM
+		else
+			EXTRA_SRCDIR+=src/rdm
+			RDM=1
+		endif
 		EXTRA_INCLUDES+=../lib-rdmresponder/include
 	endif
 	
 	ifeq ($(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)), NODE_RDMNET_LLRP_ONLY)
-		EXTRA_SRCDIR+=src/rdm
+		ifdef RDM
+		else
+			EXTRA_SRCDIR+=src/rdm
+			RDM=1
+		endif
 		EXTRA_INCLUDES+=../lib-rdm/include ../lib-rdmsensor/include ../lib-rdmsubdevice/include		
 	endif
 	
@@ -108,7 +128,6 @@ EXTRA_INCLUDES+=../lib-dmxserial/include
 EXTRA_INCLUDES+=../lib-dmxmonitor/include
 EXTRA_INCLUDES+=../lib-dmxreceiver/include ../lib-dmx/include
 EXTRA_INCLUDES+=../lib-oscserver/include 
-EXTRA_INCLUDES+=../lib-oscclient/include
 EXTRA_INCLUDES+=../lib-rdm/include ../lib-rdmsensor/include ../lib-rdmsubdevice/include
 EXTRA_INCLUDES+=../lib-remoteconfig/include
 EXTRA_INCLUDES+=../lib-spiflashinstall/include

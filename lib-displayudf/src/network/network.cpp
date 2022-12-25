@@ -1,8 +1,8 @@
 /**
- * @file rdmfactorydefaults.h
+ * @file network.cpp
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,36 @@
  * THE SOFTWARE.
  */
 
-#ifndef RDMFACTORYDEFAULTS_H_
-#define RDMFACTORYDEFAULTS_H_
+#include "network.h"
+#include "displayudf.h"
 
-class RDMFactoryDefaults {
-public:
-	virtual ~RDMFactoryDefaults() {}
+namespace network {
+void display_emac_start() {
+	DisplayUdf::Get()->ShowEmacStart();
+}
 
-	virtual void Set()=0;
-};
+void display_ip() {
+	DisplayUdf::Get()->ShowIpAddress();
+}
 
-#endif /* RDMFACTORYDEFAULTS_H_ */
+void display_netmask() {
+	DisplayUdf::Get()->ShowNetmask();
+}
+
+void display_gateway() {
+	DisplayUdf::Get()->ShowGatewayIp();
+}
+
+void display_hostname() {
+	DisplayUdf::Get()->ShowHostName();
+}
+
+void display_emac_shutdown() {
+	DisplayUdf::Get()->ShowShutdown();
+}
+
+// DHCP Client
+void display_dhcp_status(network::dhcp::ClientStatus nStatus) {
+	DisplayUdf::Get()->ShowDhcpStatus(nStatus);
+}
+}  // namespace network

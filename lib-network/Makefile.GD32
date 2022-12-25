@@ -1,7 +1,8 @@
-DEFINES =DISABLE_FS
+DEFINES =DISABLE_FS 
 DEFINES+=NDEBUG
 
-EXTRA_INCLUDES=src/gd32 ../lib-properties/include
+EXTRA_INCLUDES=../lib-properties/include
+EXTRA_SRCDIR=src/emac/gd32
 
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

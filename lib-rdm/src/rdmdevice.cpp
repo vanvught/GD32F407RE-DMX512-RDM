@@ -74,10 +74,18 @@ RDMDevice::RDMDevice() {
 	uint8_t aMacAddress[network::MAC_SIZE];
 	Network::Get()->MacAddressCopyTo(aMacAddress);
 
+#if defined (NO_EMAC)
 	m_aUID[2] = aMacAddress[2];
 	m_aUID[3] = aMacAddress[3];
 	m_aUID[4] = aMacAddress[4];
 	m_aUID[5] = aMacAddress[5];
+#else //FIXME remove debug code
+	const auto nIp = Network::Get()->GetIp();
+	m_aUID[5] = static_cast<uint8_t>(nIp >> 24);
+	m_aUID[4] = (nIp >> 16) & 0xFF;
+	m_aUID[3] = (nIp >> 8) & 0xFF;
+	m_aUID[2] = nIp & 0xFF;
+#endif
 
 	m_aSN[0] = m_aUID[5];
 	m_aSN[1] = m_aUID[4];
