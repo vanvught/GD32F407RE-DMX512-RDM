@@ -36,10 +36,11 @@ StoreDevice::StoreDevice() {
 	if (spi_flash_probe(0, 0, 0) < 0) {
 		DEBUG_PUTS("No SPI flash chip");
 	} else {
-		printf("Detected %s with sector size %d total %d bytes\n",
+		printf("StoreDevice: Detected %s with sector size %u total %u bytes [%u kB]\n",
 				spi_flash_get_name(),
 				spi_flash_get_sector_size(),
-				spi_flash_get_size());
+				spi_flash_get_size(),
+				spi_flash_get_size() / 1024U);
 		m_IsDetected = true;
 	}
 

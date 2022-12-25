@@ -46,6 +46,10 @@ public:
 		s_pThis = nullptr;
 	}
 
+	bool isDetected() const {
+		return true;
+	}
+
 	void Cls(void);
 	void SetCursorPos(uint32_t nCol, uint32_t nRow);
 	void PutChar(int c);
@@ -84,17 +88,11 @@ public:
 		Text(pText, nLength);
 	}
 
-	void Status(Display7SegmentMessage nValue) {
-		printf("Status: %u\n", static_cast<uint32_t>(nValue));
-	}
+	void Status(__attribute__((unused)) Display7SegmentMessage nValue) { }
 
-	void Status(uint8_t nValue, bool bHex) {
-		printf("Status: %u:%d\n", nValue, bHex);
-	}
+	void Status(__attribute__((unused)) uint8_t nValue, __attribute__((unused)) bool bHex) {}
 
 	void Text(const char *pData, uint32_t nLength) {
-		DEBUG_ENTRY
-
 		if (nLength > m_nCols) {
 			nLength = m_nCols;
 		}
@@ -102,8 +100,6 @@ public:
 		for (uint32_t i = 0; i < nLength; i++) {
 			PutChar(pData[i]);
 		}
-
-		DEBUG_EXIT
 	}
 
 	int Write(uint32_t nLine, const char *pText) {

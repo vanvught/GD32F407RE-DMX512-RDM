@@ -25,7 +25,7 @@
 
 #include <cstdint>
 
-#include "../lib-network/include/emac/net_link_check.h"
+#include "emac/net_link_check.h"
 
 #include "gd32.h"
 #include "enet_config.h"

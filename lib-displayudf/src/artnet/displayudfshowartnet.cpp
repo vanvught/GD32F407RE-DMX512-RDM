@@ -2,7 +2,7 @@
  * @file displayudfshowartnet.cpp
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ void DisplayUdf::ShowUniverse(ArtNetNode *pArtNetNode) {
 
 	if (pArtNetNode->GetUniverseSwitch(0, nAddress, lightset::PortDir::OUTPUT)) {
 		Printf(m_aLabels[static_cast<uint32_t>(Labels::UNIVERSE)],
-				"O: %.2d:%d:%d %c %s",
+				"O: %.2d:%d:%d %s %s",
 				pArtNetNode->GetNetSwitch(0),
 				pArtNetNode->GetSubnetSwitch(0),
 				nAddress,
@@ -75,7 +75,7 @@ void DisplayUdf::ShowUniverse(ArtNetNode *pArtNetNode) {
 		if (pArtNetNode->GetUniverseSwitch(nPortIndex, nAddress, lightset::PortDir::OUTPUT)) {
 			const auto nPage = nPortIndex / artnet::PORTS;
 			Printf(m_aLabels[static_cast<uint32_t>(Labels::UNIVERSE_PORT_A) + nPortIndex],
-					"O%d: %.2d:%d:%d %c %s", (nPortIndex + 1),
+					"O%d: %.2d:%d:%d %s %s", (nPortIndex + 1),
 					pArtNetNode->GetNetSwitch(nPage),
 					pArtNetNode->GetSubnetSwitch(nPage),
 					nAddress,

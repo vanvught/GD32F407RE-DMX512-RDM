@@ -45,8 +45,7 @@
 #include "artnet4node.h"
 #include "artnetparams.h"
 #include "artnetmsgconst.h"
-#include "artnetdiscovery.h"
-#include "artnet/displayudfhandler.h"
+#include "artnetrdmcontroller.h"
 
 #include "dmxparams.h"
 #include "dmxsend.h"
@@ -121,9 +120,6 @@ void main() {
 		artnetParams.Set();
 	}
 
-	DisplayUdfHandler displayUdfHandler;
-	node.SetArtNetDisplay(&displayUdfHandler);
-
 	node.SetArtNetStore(&storeArtNet);
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
@@ -162,32 +158,31 @@ void main() {
 
 	StoreRDMDevice storeRdmDevice;
 
-	if (node.GetActiveOutputPorts() != 0) {
-		if (artnetParams.IsRdm()) {
-			auto pDiscovery = new ArtNetRdmController(node.GetActiveOutputPorts());
-			assert(pDiscovery != nullptr);
+	if (artnetParams.IsRdm()) {
+		auto pDiscovery = new ArtNetRdmController;
+		assert(pDiscovery != nullptr);
 
-			RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
+		RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
 
-			if (rdmDeviceParams.Load()) {
-				rdmDeviceParams.Dump();
-				rdmDeviceParams.Set(pDiscovery);
-			}
-
-			pDiscovery->Init();
-			pDiscovery->Print();
-
-			display.TextStatus(ArtNetMsgConst::RDM_RUN, Display7SegmentMessage::INFO_RDM_RUN, CONSOLE_YELLOW);
-
-			for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-				uint8_t nAddress;
-				if (node.GetUniverseSwitch(nPortIndex, nAddress, lightset::PortDir::OUTPUT)) {
-					pDiscovery->Full(nPortIndex);
-				}
-			}
-
-			node.SetRdmHandler(pDiscovery);
+		if (rdmDeviceParams.Load()) {
+			rdmDeviceParams.Dump();
+			rdmDeviceParams.Set(pDiscovery);
 		}
+
+		pDiscovery->Init();
+		pDiscovery->Print();
+
+		display.TextStatus(ArtNetMsgConst::RDM_RUN, Display7SegmentMessage::INFO_RDM_RUN, CONSOLE_YELLOW);
+
+		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+			uint8_t nAddress;
+
+			if (node.GetRdm(nPortIndex) && (node.GetUniverseSwitch(nPortIndex, nAddress, lightset::PortDir::OUTPUT))) {
+				pDiscovery->Full(nPortIndex);
+			}
+		}
+
+		node.SetRdmHandler(pDiscovery);
 	}
 
 	node.Print();

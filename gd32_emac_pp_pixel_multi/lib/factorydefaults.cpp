@@ -1,8 +1,8 @@
 /**
- * @file networkdisplay.cpp
+ * @file factorydefaults.cpp
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,25 @@
  * THE SOFTWARE.
  */
 
-#include "network.h"
-#include "displayudf.h"
+#ifndef FACTORYDEFAULTS_H_
+#define FACTORYDEFAULTS_H_
 
-void NetworkDisplay::ShowEmacStart() {
-	DisplayUdf::Get()->ShowEmacStart();
+#include "remoteconfig.h"
+#include "configstore.h"
+#include "storenetwork.h"
+
+namespace rdm {
+namespace device {
+namespace responder {
+
+void factorydefaults() {
+	RemoteConfig::Get()->SetDisable(false);
+	ConfigStore::Get()->ResetSetList(configstore::Store::RDMDEVICE);
+	StoreNetwork::Get()->SaveDhcp(true);
 }
 
-void NetworkDisplay::ShowIp() {
-	DisplayUdf::Get()->ShowIpAddress();
-}
+}  // namespace responder
+}  // namespace device
+}  // namespace rdm
 
-void NetworkDisplay::ShowNetMask() {
-	DisplayUdf::Get()->ShowNetmask();
-}
-
-void NetworkDisplay::ShowGatewayIp() {
-	DisplayUdf::Get()->ShowGatewayIp();
-}
-
-void NetworkDisplay::ShowHostName() {
-	DisplayUdf::Get()->ShowHostName();
-}
-
-void NetworkDisplay::ShowShutdown() {
-	DisplayUdf::Get()->ShowShutdown();
-}
-
-// DHCP Client
-void NetworkDisplay::ShowDhcpStatus(network::dhcp::ClientStatus nStatus) {
-	DisplayUdf::Get()->ShowDhcpStatus(nStatus);
-}
+#endif /* FACTORYDEFAULTS_H_ */

@@ -310,10 +310,6 @@ public:
 		m_pArtNetStore = pArtNetStore;
 	}
 
-	void SetArtNetDisplay(ArtNetDisplay *pArtNetDisplay) {
-		m_pArtNetDisplay = pArtNetDisplay;
-	}
-
 	void SetArtNetTrigger(ArtNetTrigger *pArtNetTrigger) {
 		m_pArtNetTrigger = pArtNetTrigger;
 	}
@@ -383,11 +379,13 @@ private:
 	void HandleAddress();
 	void HandleTimeCode();
 	void HandleTimeSync();
-	void HandleTodRequest();
 	void HandleTodControl();
+	void HandleTodData();
+	void HandleTodRequest();
 	void HandleRdm();
 	void HandleIpProg();
 	void HandleDmxIn();
+	void HandleRdmIn();
 	void HandleTrigger();
 
 	uint16_t MakePortAddress(uint16_t nUniverse, uint32_t nPage);
@@ -398,6 +396,7 @@ private:
 	void ProcessPollRelply(uint32_t nPortIndex, uint32_t nPortIndexStart, uint32_t& NumPortsLo);
 	void SendPollRelply(bool);
 	void SendTod(uint32_t nPortIndex);
+	void SendTodRequest(uint32_t nPortIndex);
 
 	void SetNetworkDataLossCondition();
 
@@ -415,13 +414,13 @@ private:
 	ArtNetTrigger *m_pArtNetTrigger { nullptr };
 	ArtNet4Handler *m_pArtNet4Handler { nullptr };
 	ArtNetStore *m_pArtNetStore { nullptr };
-	ArtNetDisplay *m_pArtNetDisplay { nullptr };
 
 	artnetnode::Node m_Node;
 
 	TArtNetPacket m_ArtNetPacket;
 	TArtPollReply m_PollReply;
 	TArtDmx m_ArtDmx;
+	TArtRdm m_ArtRdm;
 #if defined ( ENABLE_SENDDIAG )
 	TArtDiagData m_DiagData;
 #endif

@@ -1,8 +1,8 @@
 /**
- * @file factorydefaults.h
+ * enet_config.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,28 @@
  * THE SOFTWARE.
  */
 
-#ifndef FACTORYDEFAULTS_H_
-#define FACTORYDEFAULTS_H_
+#ifndef ENET_CONFIG_H_
+#define ENET_CONFIG_H_
 
-#include "rdmfactorydefaults.h"
+#if !defined (GD32_H_)
+# error gd32.h should be included first
+#endif
 
-#include "remoteconfig.h"
-#include "configstore.h"
-#include "storenetwork.h"
+#if(PHY_TYPE == LAN8700)
 
-class FactoryDefaults: public RDMFactoryDefaults {
-public:
-	FactoryDefaults() {}
-	~FactoryDefaults() {}
+#elif(PHY_TYPE == DP83848)
+# define PHY_REG_MICR				0x11U
+# define PHY_REG_MISR				0x12U
+# define PHY_INT_AND_OUTPUT_ENABLE	0x03U
+# define PHY_LINK_INT_ENABLE		0x20U
+#elif(PHY_TYPE == RTL8201F)
+# define PHY_REG_IER				0x13
+# define PHY_REG_IER_INT_ENABLE		BIT(13)
+# define PHY_REG_ISR				0x1e
+# define PHY_REG_ISR_LINK			BIT(11)
+# define PHY_REG_PAGE_SELECT		0x1f
+#else
+#error PHY_TYPE is not set
+#endif
 
-	void Set() {
-		RemoteConfig::Get()->SetDisable(false);
-		ConfigStore::Get()->ResetSetList(configstore::Store::RDMDEVICE);
-		StoreNetwork::Get()->SaveDhcp(true);
-	}
-};
-
-#endif /* FACTORYDEFAULTS_H_ */
+#endif /* ENET_CONFIG_H_ */

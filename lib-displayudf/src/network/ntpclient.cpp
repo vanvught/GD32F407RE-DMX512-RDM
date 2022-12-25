@@ -1,8 +1,8 @@
 /**
- * @file factorydefaults.h
+ * @file ntpclient.cpp
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,19 @@
  * THE SOFTWARE.
  */
 
-#ifndef FACTORYDEFAULTS_H_
-#define FACTORYDEFAULTS_H_
+#include "ntpclient.h"
+#include "display.h"
 
-#include "rdmfactorydefaults.h"
-
-#include "remoteconfig.h"
-#include "configstore.h"
-#include "storenetwork.h"
-
-class FactoryDefaults: public RDMFactoryDefaults {
-public:
-	FactoryDefaults() {}
-	~FactoryDefaults() {}
-
-	void Set() {
-		RemoteConfig::Get()->SetDisable(false);
-		ConfigStore::Get()->ResetSetList(configstore::Store::RDMDEVICE);
-		StoreNetwork::Get()->SaveDhcp(true);
+namespace ntpclient {
+void display_status(ntpclient::Status nStatus) {
+	if (nStatus == ntpclient::Status::IDLE) {
+		Display::Get()->TextStatus("NTP Client", Display7SegmentMessage::INFO_NTP);
+		return;
 	}
-};
 
-#endif /* FACTORYDEFAULTS_H_ */
+	if (nStatus == ntpclient::Status::FAILED) {
+		Display::Get()->TextStatus("Error: NTP", Display7SegmentMessage::ERROR_NTP);
+		return;
+	}
+}
+}  // namespace ntpclient

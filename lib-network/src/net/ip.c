@@ -68,7 +68,7 @@ __attribute__((hot)) void ip_handle(struct t_ip4 *p_ip4) {
 		if (p_ip4->ip4.proto == IPv4_PROTO_IGMP) {
 			igmp_handle((struct t_igmp *) p_ip4);
 		} else {
-			DEBUG_PRINTF("p_ip4->ip4.ver_ihl=0x%x\n", p_ip4->ip4.ver_ihl);
+			DEBUG_PRINTF("p_ip4->ip4.ver_ihl=0x%x", p_ip4->ip4.ver_ihl);
 		}
 		return;
 	}
