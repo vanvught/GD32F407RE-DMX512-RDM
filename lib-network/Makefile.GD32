@@ -4,5 +4,9 @@ DEFINES+=NDEBUG
 EXTRA_INCLUDES=../lib-properties/include
 EXTRA_SRCDIR=src/emac/gd32
 
+ifeq ($(findstring RTL8201F,$(MAKE_FLAGS)), RTL8201F)
+	EXTRA_SRCDIR+=src/emac/gd32/rtl8201f
+endif
+
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

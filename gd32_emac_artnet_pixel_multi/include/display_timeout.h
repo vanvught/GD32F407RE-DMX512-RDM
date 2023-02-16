@@ -2,7 +2,7 @@
  * @file display_timeout.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,7 @@ namespace display {
 namespace timeout {
 
 void gpio_init() {
-    rcu_periph_clock_enable(KEY2_RCU_GPIOx);
-#if !defined (GD32F4XX)
-    ::gpio_init(KEY2_GPIOx, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, KEY2_PINx);
-#else
-    gpio_mode_set(KEY2_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, KEY2_PINx);
-#endif
+	gpio_fsel(KEY2_GPIOx, KEY2_PINx, GPIO_FSEL_INPUT);
 }
 
 bool gpio_renew() {

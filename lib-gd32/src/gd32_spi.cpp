@@ -2,7 +2,7 @@
  * @file gd32_spi.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,14 +58,12 @@ static uint8_t _send_byte(uint8_t byte) {
 
 void gd32_spi_begin()  {
 	rcu_periph_clock_enable(SPI_RCU_GPIOx);
-	rcu_periph_clock_enable(SPI_NSS_RCU_GPIOx);
 	rcu_periph_clock_enable(SPI_RCU_CLK);
 
 #if !defined (GD32F4XX)
 	rcu_periph_clock_enable(RCU_AF);
 
 	gpio_init(SPI_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
-	gpio_init(SPI_NSS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 
 # if defined (SPI_REMAP)
 	gpio_pin_remap_config(SPI_REMAP, ENABLE);
@@ -80,12 +78,12 @@ void gd32_spi_begin()  {
 	} else {
 		gpio_af_set(SPI_GPIOx, GPIO_AF_5, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
 	}
+
 	gpio_mode_set(SPI_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
     gpio_output_options_set(SPI_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
-
-    gpio_mode_set(SPI_NSS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, SPI_NSS_GPIO_PINx);
-    gpio_output_options_set(SPI_NSS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #endif
+
+    gpio_fsel(SPI_NSS_GPIOx, SPI_NSS_GPIO_PINx, GPIO_FSEL_OUTPUT);
 
 	_cs_high();
 

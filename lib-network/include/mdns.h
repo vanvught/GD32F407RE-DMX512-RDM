@@ -2,7 +2,7 @@
  * @file mdns.h
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,6 @@
 #define MDNS_H_
 
 #include <cstdint>
-
-#include "network.h"
 
 #include "../config/apps_config.h"
 
@@ -77,10 +75,7 @@ public:
 	~MDNS();
 
 	void Start();
-	void Stop() {
-		Network::Get()->End(mdns::UDP_PORT);
-		s_nHandle = -1;
-	}
+	void Stop();
 
 	void Run();
 

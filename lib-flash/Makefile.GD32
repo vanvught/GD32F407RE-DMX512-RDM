@@ -1,4 +1,4 @@
-DEFINES =NDEBUG
+#DEFINES =NDEBUG
 
 EXTRA_INCLUDES=../lib-gd32/include ../lib-gd32/src
 

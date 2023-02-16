@@ -40,6 +40,7 @@
 #elif(PHY_TYPE == RTL8201F)
 # define PHY_REG_IER				0x13
 # define PHY_REG_IER_INT_ENABLE		BIT(13)
+# define PHY_REG_IER_CUSTOM_LED		BIT(3)
 # define PHY_REG_ISR				0x1e
 # define PHY_REG_ISR_LINK			BIT(11)
 # define PHY_REG_PAGE_SELECT		0x1f

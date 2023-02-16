@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2016-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@
 #include "debug.h"
 
 void ArtNetNode::HandleTimeCode() {
-	const auto *pArtTimeCode = &(m_ArtNetPacket.ArtPacket.ArtTimeCode);
+	const auto *const pArtTimeCode = &(m_ArtNetPacket.ArtPacket.ArtTimeCode);
 
 	m_pArtNetTimeCode->Handler(reinterpret_cast<const struct TArtNetTimeCode*>(&pArtTimeCode->Frames));
 }
@@ -61,7 +61,7 @@ void ArtNetNode::SendTimeCode(const struct TArtNetTimeCode *pArtNetTimeCode) {
 	assert(pArtNetTimeCode->Seconds < 60);
 	assert(pArtNetTimeCode->Type < 4);
 
-	auto *pArtTimeCode = &(m_ArtNetPacket.ArtPacket.ArtTimeCode);
+	auto *const pArtTimeCode = &(m_ArtNetPacket.ArtPacket.ArtTimeCode);
 
 	memcpy(pArtTimeCode->Id, artnet::NODE_ID, sizeof(pArtTimeCode->Id));
 	pArtTimeCode->OpCode = OP_TIMECODE;

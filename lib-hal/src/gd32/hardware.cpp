@@ -2,7 +2,7 @@
  * @file hardware.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@
 #include <cassert>
 
 #include "hardware.h"
-#include "ledblink.h"
 
 #include "gd32.h"
 #include "gd32_i2c.h"
@@ -142,6 +141,17 @@ Hardware::Hardware() {
 	m_HwClock.Print();
 	m_HwClock.HcToSys();
 #endif
+
+#if !defined(USE_LEDBLINK_BITBANGING595)
+	rcu_periph_clock_enable(LED_BLINK_GPIO_CLK);
+# if !defined (GD32F4XX)
+	gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
+# else
+	gpio_mode_set(LED_BLINK_GPIO_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_BLINK_PIN);
+	gpio_output_options_set(LED_BLINK_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
+# endif
+	GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+#endif
 }
 
 typedef union pcast32 {
@@ -200,17 +210,20 @@ void Hardware::GetTime(struct tm *pTime) {
 	pTime->tm_sec = local_time->tm_sec;
 }
 
+#include <cstdio>
+
 bool Hardware::Reboot() {
+	printf("Rebooting ...\n");
 	WatchdogStop();
 	
 	RebootHandler();
 
 	WatchdogInit();
 
-	LedBlink::Get()->SetFrequency(8);
+	SetMode(hardware::ledblink::Mode::REBOOT);
 
 	for (;;) {
-		LedBlink::Get()->Run();
+		Run();
 	}
 
 	__builtin_unreachable();

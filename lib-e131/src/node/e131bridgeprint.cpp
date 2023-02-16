@@ -2,7 +2,7 @@
  * @file e131bridgeprint.cpp
  *
  */
-/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +38,6 @@
 
 static constexpr auto  UUID_STRING_LENGTH =	36;
 
-using namespace e131;
-
 void E131Bridge::Print() {
 	char uuid_str[UUID_STRING_LENGTH + 1];
 	uuid_str[UUID_STRING_LENGTH] = '\0';
@@ -60,6 +58,7 @@ void E131Bridge::Print() {
 		}
 	}
 
+#if defined (E131_HAVE_DMXIN)
 	if (m_State.nActiveInputPorts != 0) {
 		printf(" Input\n");
 
@@ -70,6 +69,7 @@ void E131Bridge::Print() {
 			}
 		}
 	}
+#endif
 
 	if (m_State.bDisableSynchronize) {
 		printf(" Synchronize is disabled\n");

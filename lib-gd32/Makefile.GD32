@@ -26,6 +26,8 @@ ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
 	EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_standard_peripheral/Source
 endif
 
+$(info $$MAKE_FLAGS [${MAKE_FLAGS}])
+
 ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
 else
 	EXTRA_SRCDIR+=device/emac

@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2016-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,7 +71,6 @@ static constexpr uint16_t portdir_clear(const uint32_t i) {
 }
 }  // namespace artnetparams
 
-using namespace artnet;
 using namespace artnetparams;
 
 ArtNetParams::ArtNetParams(ArtNetParamsStore *pArtNetParamsStore): m_pArtNetParamsStore(pArtNetParamsStore) {
@@ -235,10 +234,10 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 		nLength = 4;
 		if (Sscan::Char(pLine, ArtNetParamsConst::PROTOCOL_PORT[i], value, nLength) == Sscan::OK) {
 			if (memcmp(value, "sacn", 4) == 0) {
-				m_Params.nProtocolPort[i] = static_cast<uint8_t>(PortProtocol::SACN);
+				m_Params.nProtocolPort[i] = static_cast<uint8_t>(artnet::PortProtocol::SACN);
 				m_Params.nSetList |= (Mask::PROTOCOL_A << i);
 			} else {
-				m_Params.nProtocolPort[i] = static_cast<uint8_t>(PortProtocol::ARTNET);
+				m_Params.nProtocolPort[i] = static_cast<uint8_t>(artnet::PortProtocol::ARTNET);
 				m_Params.nSetList &= ~(Mask::PROTOCOL_A << i);
 			}
 			return;
@@ -444,7 +443,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 		return;
 	}
 
-	auto *p = ArtNetNode::Get();
+	auto *const p = ArtNetNode::Get();
 	assert(p != nullptr);
 
 	if (isMaskSet(Mask::SHORT_NAME)) {
@@ -472,7 +471,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 		}
 
 		if (isMaskSet(Mask::PROTOCOL_A << nPortIndex)) {
-			p->SetPortProtocol(nOffset, static_cast<PortProtocol>(m_Params.nProtocolPort[nPortIndex]));
+			p->SetPortProtocol(nOffset, static_cast<artnet::PortProtocol>(m_Params.nProtocolPort[nPortIndex]));
 		}
 
 		if (isMaskSet(Mask::MERGE_MODE_A << nPortIndex)) {

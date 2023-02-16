@@ -2,7 +2,7 @@
  * @file network.h
  *
  */
-/* Copyright (C) 2017-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,16 +32,14 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cassert>
 #include <net/if.h>
 
 #include "networkparams.h"
 
 #include "../src/net/net.h"
-#include "emac/net_link_check.h"
 
-extern "C" {
-	void net_handle(void);
-}
+#include "emac/net_link_check.h"
 
 #define HAVE_NET_HANDLE
 
@@ -54,36 +52,48 @@ public:
 
 	void Print();
 
-	void Shutdown();
+	void Shutdown() {
+		network::display_emac_shutdown();
+		net_shutdown();
+	}
 
-	int32_t Begin(uint16_t nPort);
-	int32_t End(uint16_t nPort);
+	int32_t Begin(uint16_t nPort) {
+		const auto nIdx = udp_begin(nPort);
+		assert(nIdx != -1);
+		return nIdx;
+	}
 
-	void MacAddressCopyTo(uint8_t *pMacAddress);
+	int32_t End(uint16_t nPort) {
+		const auto n = udp_end(nPort);
+		assert(n == 0);
+		return n;
+	}
 
-	void JoinGroup(int32_t nHandle, uint32_t nIp);
-	void LeaveGroup(int32_t nHandle, uint32_t nIp);
+	void MacAddressCopyTo(uint8_t *pMacAddress) {
+		for (uint32_t i =  0; i < network::MAC_SIZE; i++) {
+			pMacAddress[i] = m_aNetMacaddr[i];
+		}
+	}
+
+	void JoinGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
+		igmp_join(nIp);
+	}
+
+	void LeaveGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
+		igmp_leave(nIp);
+	}
 
 	uint16_t RecvFrom(int32_t nHandle, void *pBuffer, uint16_t nLength, uint32_t *from_ip, uint16_t *from_port) {
-		return udp_recv(static_cast<uint8_t>(nHandle), reinterpret_cast<uint8_t*>(pBuffer), nLength, from_ip, from_port);
+		return udp_recv1(nHandle, reinterpret_cast<uint8_t*>(pBuffer), nLength, from_ip, from_port);
 	}
 
 	uint16_t RecvFrom(int32_t nHandle, const void **ppBuffer, uint32_t *pFromIp, uint16_t *pFromPort) {
-		return udp_recv2(static_cast<uint8_t>(nHandle), reinterpret_cast<const uint8_t **>(ppBuffer), pFromIp, pFromPort);
+		return udp_recv2(nHandle, reinterpret_cast<const uint8_t **>(ppBuffer), pFromIp, pFromPort);
 	}
 
 	void SendTo(int32_t nHandle, const void *pBuffer, uint16_t nLength, uint32_t to_ip, uint16_t remote_port) {
-		udp_send(static_cast<uint8_t>(nHandle), reinterpret_cast<const uint8_t*>(pBuffer), nLength, to_ip, remote_port);
+		udp_send(nHandle, reinterpret_cast<const uint8_t*>(pBuffer), nLength, to_ip, remote_port);
 	}
-
-	/*
-	 * Experimental TCP
-	 */
-
-	int32_t TcpBegin(uint16_t nLocalPort);
-	uint16_t TcpRead(const int32_t nHandle, const uint8_t **ppBuffer);
-	void TcpWrite(const int32_t nHandle, const uint8_t *pBuffer, uint16_t nLength);
-	int32_t TcpEnd(const int32_t nHandle);
 
 	void SetIp(uint32_t nIp);
 	void SetNetmask(uint32_t nNetmask);
@@ -202,15 +212,6 @@ public:
 		return (m_nLocalIp & m_nNetmask) == (nIp & m_nNetmask);
 	}
 
-	static uint32_t CIDRToNetmask(uint8_t nCDIR) {
-		if (nCDIR != 0) {
-			const auto nNetmask = __builtin_bswap32(static_cast<uint32_t>(~0x0) << (32 - nCDIR));
-			return nNetmask;
-		}
-
-		return 0;
-	}
-
 	void Run() {
 		net_handle();
 #if defined (ENET_LINK_CHECK_USE_PIN_POLL)
@@ -228,6 +229,24 @@ public:
 	static Network *Get() {
 		return s_pThis;
 	}
+
+	/*
+	 * Experimental TCP
+	 */
+
+	int32_t TcpBegin(const uint16_t nLocalPort) {
+		return tcp_begin(nLocalPort);
+	}
+
+	uint16_t TcpRead(const int32_t nHandleListen, const uint8_t **ppBuffer, uint32_t &HandleConnection) {
+		return tcp_read(nHandleListen, ppBuffer, HandleConnection);
+	}
+
+	void TcpWrite(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLength, const uint32_t HandleConnection) {
+		tcp_write(nHandleListen, pBuffer, nLength, HandleConnection);
+	}
+
+	int32_t TcpEnd(const int32_t nHandle);
 
 private:
 	net::Link s_lastState { net::Link::STATE_DOWN };
@@ -250,7 +269,14 @@ private:
 
 	NetworkStore *m_pNetworkStore { nullptr };
 
-	void SetDefaultIp();
+	void SetDefaultIp() {
+		m_nLocalIp = 2
+				+ ((static_cast<uint32_t>(m_aNetMacaddr[3])) << 8)
+				+ ((static_cast<uint32_t>(m_aNetMacaddr[4])) << 16)
+				+ ((static_cast<uint32_t>(m_aNetMacaddr[5])) << 24);
+		m_nNetmask = 255;
+		m_nGatewayIp = m_nLocalIp;
+	}
 
 	struct QueuedConfig {
 		static constexpr uint32_t NONE = 0;

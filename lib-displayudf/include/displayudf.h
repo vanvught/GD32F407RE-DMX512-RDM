@@ -2,7 +2,7 @@
  * @file displayudf.h
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ enum class Labels {
 	BOARDNAME,
 	IP,
 	VERSION,
-	UNIVERSE,
+	NOT_USED,
 	AP,
 	NODE_NAME,
 	HOSTNAME,
@@ -194,7 +194,7 @@ public:
 	 */
 
 #if defined (NODE_ARTNET)
-	void Show(ArtNetNode *pArtNetNode);
+	void Show(ArtNetNode *pArtNetNode, uint32_t nPortIndexOffset = 0);
 	void ShowNodeName(ArtNetNode *pArtNetNode);
 	void ShowUniverse(ArtNetNode *pArtNetNode);
 	void ShowDestinationIp(ArtNetNode *pArtNetNode);
@@ -205,7 +205,7 @@ public:
 	 */
 
 #if defined (NODE_E131)
-	void Show(E131Bridge *pE131Bridge);
+	void Show(E131Bridge *pE131Bridge, uint32_t nPortIndexOffset = 0);
 #endif
 
 	/**
@@ -252,6 +252,7 @@ public:
 private:
 	char m_aTitle[32];
 	uint8_t m_aLabels[static_cast<uint32_t>(displayudf::Labels::UNKNOWN)];
+	uint32_t m_nPortIndexOffset { 0 };
 
 #if defined (DISPLAYUDF_DMX_INFO)
 	struct DmxInfo {
