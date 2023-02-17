@@ -7,11 +7,9 @@ LD	 = $(PREFIX)ld
 AR	 = $(PREFIX)ar
 
 BOARD?=BOARD_GD32F407RE
-#BOARD?=BOARD_BW_OPIDMX4
-#BOARD?=BOARD_DMX4
-
-MCU?=gd32f407
+ENET_PHY?=DP83848
 FAMILY?=gd32f4xx
+MCU?=gd32f407
 
 MCU_UC:=$(shell echo $(MCU_UC) | tr a-w A-W)
 FAMILY:=$(shell echo $(FAMILY) | tr A-Z a-z)
@@ -62,14 +60,12 @@ LIBDEP=$(addprefix ../lib-,$(LIBS))
 
 $(info $$LIBDEP [${LIBDEP}])
 
-COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(BOARD)
-COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES)
-COPS+=$(LIBINCDIRS)
+COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
+COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES) $(LIBINCDIRS)
 COPS+=-Os -mcpu=cortex-m4 -mthumb -g -mfloat-abi=hard -fsingle-precision-constant -mfpu=fpv4-sp-d16
 COPS+=-DARM_MATH_CM4 -D__FPU_PRESENT=1
 COPS+=-nostartfiles -ffreestanding -nostdlib
-COPS+=-fstack-usage
-COPS+=-Wstack-usage=10240
+COPS+=-fstack-usage -Wstack-usage=10240
 COPS+=-ffunction-sections -fdata-sections
 
 CPPOPS=-std=c++11 
@@ -127,7 +123,7 @@ clean: $(LIBDEP)
 lisdep: $(LIBDEP)
 
 $(LIBDEP):
-	$(MAKE) -f Makefile.GD32 $(MAKECMDGOALS) 'FAMILY=${FAMILY}' 'BOARD=${BOARD}' 'MAKE_FLAGS=$(DEFINES)' -C $@ 
+	$(MAKE) -f Makefile.GD32 $(MAKECMDGOALS) 'FAMILY=${FAMILY}' 'BOARD=${BOARD}' 'PHY_TYPE=${ENET_PHY}' 'MAKE_FLAGS=$(DEFINES)' -C $@ 
 
 # Build bin
 
