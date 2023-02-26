@@ -231,12 +231,14 @@ public:
 
 	void SetShortName(const char *);
 
+	void GetShortNameDefault(char *);
 	const char *GetShortName() const {
 		return m_Node.ShortName;
 	}
 
 	void SetLongName(const char *);
 
+	void GetLongNameDefault(char *);
 	const char *GetLongName() const {
 		return m_Node.LongName;
 	}
@@ -418,15 +420,10 @@ private:
 private:
 	int32_t m_nHandle { -1 };
 
-	LightSet *m_pLightSet { nullptr };
-
-	ArtNetTimeCode *m_pArtNetTimeCode { nullptr };
-	ArtNetRdm *m_pArtNetRdm { nullptr };
-	ArtNetTrigger *m_pArtNetTrigger { nullptr };
-	ArtNet4Handler *m_pArtNet4Handler { nullptr };
-	ArtNetStore *m_pArtNetStore { nullptr };
-
 	artnetnode::Node m_Node;
+	artnetnode::State m_State;
+	artnetnode::OutputPort m_OutputPort[artnetnode::MAX_PORTS];
+	artnetnode::InputPort m_InputPort[artnetnode::MAX_PORTS];
 
 	TArtNetPacket m_ArtNetPacket;
 	TArtPollReply m_PollReply;
@@ -441,12 +438,13 @@ private:
 
 	bool m_IsRdmResponder { false };
 
-	char m_aSysName[16];
-	char m_aDefaultNodeLongName[artnet::LONG_NAME_LENGTH];
+	LightSet *m_pLightSet { nullptr };
 
-	artnetnode::State m_State;
-	artnetnode::OutputPort m_OutputPort[artnetnode::MAX_PORTS];
-	artnetnode::InputPort m_InputPort[artnetnode::MAX_PORTS];
+	ArtNetTimeCode *m_pArtNetTimeCode { nullptr };
+	ArtNetRdm *m_pArtNetRdm { nullptr };
+	ArtNetTrigger *m_pArtNetTrigger { nullptr };
+	ArtNet4Handler *m_pArtNet4Handler { nullptr };
+	ArtNetStore *m_pArtNetStore { nullptr };
 
 	static ArtNetNode *s_pThis;
 };

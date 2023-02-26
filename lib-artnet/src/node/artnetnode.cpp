@@ -47,7 +47,6 @@
 
 #include "debug.h"
 
-using namespace artnet;
 using namespace artnetnode;
 
 static constexpr auto ARTNET_MIN_HEADER_SIZE = 12;
@@ -65,14 +64,14 @@ ArtNetNode::ArtNetNode() {
 	m_Node.IPAddressTimeCode = m_Node.IPAddressBroadcast;
 	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
 
-	m_Node.Status1 = Status1::INDICATOR_NORMAL_MODE | Status1::PAP_FRONT_PANEL;
-	m_Node.Status2 = Status2::PORT_ADDRESS_15BIT | (artnet::VERSION > 3 ? Status2::SACN_ABLE_TO_SWITCH : Status2::SACN_NO_SWITCH);
+	m_Node.Status1 = artnet::Status1::INDICATOR_NORMAL_MODE | artnet::Status1::PAP_FRONT_PANEL;
+	m_Node.Status2 = artnet::Status2::PORT_ADDRESS_15BIT | (artnet::VERSION > 3 ? artnet::Status2::SACN_ABLE_TO_SWITCH : artnet::Status2::SACN_NO_SWITCH);
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
-	m_Node.Status2 |= Status2::RDM_SWITCH;
+	m_Node.Status2 |= artnet::Status2::RDM_SWITCH;
 #endif
-	m_Node.Status3 = Status3::NETWORKLOSS_LAST_STATE | Status3::FAILSAFE_CONTROL;
+	m_Node.Status3 = artnet::Status3::NETWORKLOSS_LAST_STATE | artnet::Status3::FAILSAFE_CONTROL;
 #if defined (ARTNET_HAVE_DMXIN)
-	m_Node.Status3 |= Status3::OUTPUT_SWITCH;
+	m_Node.Status3 |= artnet::Status3::OUTPUT_SWITCH;
 #endif
 
 	memset(&m_State, 0, sizeof(struct State));
@@ -81,31 +80,21 @@ ArtNetNode::ArtNetNode() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
-		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
 		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED | artnet::GoodOutputB::STYLE_CONSTANT;
+		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
 		m_InputPort[nPortIndex].nDestinationIp = m_Node.IPAddressBroadcast;
 	}
 
-	char ShortName[artnet::SHORT_NAME_LENGTH];
-	snprintf(ShortName, artnet::SHORT_NAME_LENGTH - 1, IPSTR, IP2STR(Network::Get()->GetIp()));
-	SetShortName(ShortName);
+	SetShortName(nullptr);	// Default
+	SetLongName(nullptr);	// Default
 
-	uint8_t nBoardNameLength;
-	const auto *const pBoardName = Hardware::Get()->GetBoardName(nBoardNameLength);
-	const auto *const pWebsiteUrl = Hardware::Get()->GetWebsiteUrl();
-	snprintf(m_aDefaultNodeLongName, artnet::LONG_NAME_LENGTH, "%s %s %d %s", pBoardName, artnet::NODE_ID, artnet::VERSION, pWebsiteUrl);
-	SetLongName(m_aDefaultNodeLongName);
-
-	uint8_t nSysNameLenght;
-	const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
-	strncpy(m_aSysName, pSysName, (sizeof(m_aSysName)) - 1);
-	m_aSysName[(sizeof(m_aSysName)) - 1] = '\0';
-
+#if defined (ARTNET_HAVE_DMXIN)
 	memcpy(m_ArtDmx.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
 	m_ArtDmx.OpCode = OP_DMX;
 	m_ArtDmx.ProtVerHi = 0;
 	m_ArtDmx.ProtVerLo = artnet::PROTOCOL_REVISION;
-
+#endif
+#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	memcpy(m_ArtRdm.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
 	m_ArtRdm.OpCode = OP_RDM;
 	m_ArtRdm.ProtVerHi = 0;
@@ -118,6 +107,7 @@ ArtNetNode::ArtNetNode() {
 	m_ArtRdm.Spare5 = 0;
 	m_ArtRdm.Spare6 = 0;
 	m_ArtRdm.Spare7 = 0;
+#endif
 }
 
 ArtNetNode::~ArtNetNode() {
@@ -143,8 +133,8 @@ void ArtNetNode::Start() {
 	assert(m_pArtNetTimeCode != nullptr);
 #endif
 
-	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(Status2::IP_DHCP)) | (Network::Get()->IsDhcpUsed() ? Status2::IP_DHCP : Status2::IP_MANUALY));
-	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(Status2::DHCP_CAPABLE)) | (Network::Get()->IsDhcpCapable() ? Status2::DHCP_CAPABLE : 0));
+	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(artnet::Status2::IP_DHCP)) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
+	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(artnet::Status2::DHCP_CAPABLE)) | (Network::Get()->IsDhcpCapable() ? artnet::Status2::DHCP_CAPABLE : 0));
 
 	FillPollReply();
 #if defined ( ARTNET_ENABLE_SENDDIAG )
@@ -159,7 +149,7 @@ void ArtNetNode::Start() {
 #if defined (ARTNET_HAVE_DMXIN)
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
 		if (m_InputPort[i].genericPort.bIsEnabled) {
-			dmx_start(i);
+			artnet::dmx_start(i);
 		}
 	}
 #endif
@@ -205,7 +195,7 @@ void ArtNetNode::Stop() {
 	DEBUG_ENTRY
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].protocol == PortProtocol::ARTNET) {
+		if (m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) {
 			if (m_pLightSet != nullptr) {
 				m_pLightSet->Stop(nPortIndex);
 			}
@@ -215,9 +205,9 @@ void ArtNetNode::Stop() {
 	}
 
 #if defined (ARTNET_HAVE_DMXIN)
-	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
 		if (m_InputPort[i].genericPort.bIsEnabled) {
-			dmx_stop(i);
+			artnet::dmx_stop(i);
 		}
 	}
 #endif
@@ -225,18 +215,25 @@ void ArtNetNode::Stop() {
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::OFF_OFF);
 	hal::panel_led_off(hal::panelled::ARTNET);
 
-	m_Node.Status1 = static_cast<uint8_t>((m_Node.Status1 & ~Status1::INDICATOR_MASK) | Status1::INDICATOR_MUTE_MODE);
+	m_Node.Status1 = static_cast<uint8_t>((m_Node.Status1 & ~artnet::Status1::INDICATOR_MASK) | artnet::Status1::INDICATOR_MUTE_MODE);
 	m_State.status = Status::STANDBY;
 
 	DEBUG_EXIT
 }
 
+void ArtNetNode::GetShortNameDefault(char *pShortName) {
+	snprintf(pShortName, artnet::SHORT_NAME_LENGTH - 1, IPSTR, IP2STR(Network::Get()->GetIp()));
+}
+
 void ArtNetNode::SetShortName(const char *pShortName) {
 	DEBUG_ENTRY
 
-	assert(pShortName != nullptr);
+	if (pShortName == nullptr) {
+		GetShortNameDefault(m_Node.ShortName);
+	} else {
+		strncpy(m_Node.ShortName, pShortName, artnet::SHORT_NAME_LENGTH - 1);
+	}
 
-	strncpy(m_Node.ShortName, pShortName, artnet::SHORT_NAME_LENGTH - 1);
 	m_Node.ShortName[artnet::SHORT_NAME_LENGTH - 1] = '\0';
 
 	memcpy(m_PollReply.ShortName, m_Node.ShortName, artnet::SHORT_NAME_LENGTH);
@@ -249,14 +246,26 @@ void ArtNetNode::SetShortName(const char *pShortName) {
 		artnet::display_shortname(m_Node.ShortName);
 	}
 
+	DEBUG_PUTS(m_Node.ShortName);
 	DEBUG_EXIT
+}
+
+void ArtNetNode::GetLongNameDefault(char *pLongName) {
+	uint8_t nBoardNameLength;
+	const auto *const pBoardName = Hardware::Get()->GetBoardName(nBoardNameLength);
+	const auto *const pWebsiteUrl = Hardware::Get()->GetWebsiteUrl();
+	snprintf(pLongName, artnet::LONG_NAME_LENGTH - 1, "%s %s %d %s", pBoardName, artnet::NODE_ID, artnet::VERSION, pWebsiteUrl);
 }
 
 void ArtNetNode::SetLongName(const char *pLongName) {
 	DEBUG_ENTRY
-	assert(pLongName != nullptr);
 
-	strncpy(m_Node.LongName, pLongName, artnet::LONG_NAME_LENGTH - 1);
+	if (pLongName == nullptr) {
+		GetLongNameDefault(m_Node.LongName);
+	} else {
+		strncpy(m_Node.LongName, pLongName, artnet::LONG_NAME_LENGTH - 1);
+	}
+
 	m_Node.LongName[artnet::LONG_NAME_LENGTH - 1] = '\0';
 
 	memcpy(m_PollReply.LongName, m_Node.LongName, artnet::LONG_NAME_LENGTH);
@@ -269,6 +278,7 @@ void ArtNetNode::SetLongName(const char *pLongName) {
 		artnet::display_longname(m_Node.LongName);
 	}
 
+	DEBUG_PUTS(m_Node.LongName);
 	DEBUG_EXIT
 }
 
@@ -379,7 +389,7 @@ void ArtNetNode::Run() {
 #endif
 
 #if (LIGHTSET_PORTS > 0)
-		if ((((m_Node.Status1 & Status1::INDICATOR_MASK) == Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
+		if ((((m_Node.Status1 & artnet::Status1::INDICATOR_MASK) == artnet::Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
 			if (artnet::VERSION > 3) {
 				if (m_State.nReceivingDmx != 0) {
 					m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::DATA);
@@ -480,7 +490,7 @@ void ArtNetNode::Run() {
 #endif
 
 #if (LIGHTSET_PORTS > 0)
-	if ((((m_Node.Status1 & Status1::INDICATOR_MASK) == Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
+	if ((((m_Node.Status1 & artnet::Status1::INDICATOR_MASK) == artnet::Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
 		if (artnet::VERSION > 3) {
 			if (m_State.nReceivingDmx != 0) {
 				m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::DATA);

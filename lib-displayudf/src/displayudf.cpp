@@ -2,7 +2,7 @@
  * @file displayudf.cpp
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,19 +71,19 @@ void DisplayUdf::SetTitle(const char *format, ...) {
 	DEBUG_PUTS(m_aTitle);
 }
 
-void DisplayUdf::Set(uint8_t nLine, Labels tLabel) {
+void DisplayUdf::Set(uint32_t nLine, Labels label) {
 	if (!((nLine > 0) && (nLine <= LABEL_MAX_ROWS))) {
 		return;
 	}
 
 	for (uint32_t i = 0; i < static_cast<uint32_t>(Labels::UNKNOWN); i++) {
-		if (m_aLabels[i] == nLine) {
-			m_aLabels[i] = m_aLabels[static_cast<uint32_t>(tLabel)];
+		if (m_aLabels[i] == static_cast<uint8_t>(nLine)) {
+			m_aLabels[i] = m_aLabels[static_cast<uint32_t>(label)];
 			break;
 		}
 	}
 
-	m_aLabels[static_cast<uint32_t>(tLabel)] = nLine;
+	m_aLabels[static_cast<uint32_t>(label)] = static_cast<uint8_t>(nLine);
 }
 
 void DisplayUdf::Show() {
@@ -97,7 +97,7 @@ void DisplayUdf::Show() {
 		DEBUG_PRINTF("m_aLabels[%d]=%d", i, m_aLabels[i]);
 	}
 
-	for (uint8_t i = 1; i < LABEL_MAX_ROWS; i++) {
+	for (uint32_t i = 1; i < LABEL_MAX_ROWS; i++) {
 		ClearLine(i);
 	}
 

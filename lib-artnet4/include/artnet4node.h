@@ -57,6 +57,11 @@ public:
 
 	void SetLedBlinkMode(hardware::ledblink::Mode mode) override {
 		m_Bridge.SetEnableDataIndicator(mode == hardware::ledblink::Mode::NORMAL);
+		for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+			if (m_Bridge.IsTransmitting(nPortIndex)) {
+				return;
+			}
+		}
 		Hardware::Get()->SetMode(mode);
 	}
 

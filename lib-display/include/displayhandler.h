@@ -53,12 +53,15 @@ void display(const uint32_t nMode) {
 		case ledblink::Mode::FAST:
 			c = 'F';
 			break;
+		case ledblink::Mode::REBOOT:
+			c = 'R';
+			break;
 		default:
 			c = 'U';
 			break;
 		}
 
-		Display::Get()->SetCursorPos(static_cast<uint8_t>(Display::Get()->GetColumns() - 1U), static_cast<uint8_t>(Display::Get()->GetRows() - 1U));
+		Display::Get()->SetCursorPos(Display::Get()->GetColumns() - 1U, Display::Get()->GetRows() - 1U);
 		Display::Get()->PutChar(c);
 	}
 }

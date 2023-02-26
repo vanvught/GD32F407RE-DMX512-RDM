@@ -547,7 +547,7 @@ void ArtNetNode::HandleAddress() {
 		nPort = static_cast<uint8_t>(nPortIndex);
 		lightset::Data::OutputClear(m_pLightSet, nPort);
 		break;
-
+#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	case artnet::PortCommand::RDM_ENABLE0:
 	case artnet::PortCommand::RDM_ENABLE1:
 	case artnet::PortCommand::RDM_ENABLE2:
@@ -563,7 +563,7 @@ void ArtNetNode::HandleAddress() {
 		assert(isPortIndexOutput);
 		SetRmd(nPortIndex, false);
 		break;
-
+#endif
 	default:
 		DEBUG_PRINTF("> Not implemented: %u [%x]", pArtAddress->Command, pArtAddress->Command);
 		break;

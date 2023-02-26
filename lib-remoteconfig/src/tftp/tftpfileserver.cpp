@@ -2,7 +2,7 @@
  * @file tftpfileserver.cpp
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,15 +60,15 @@ bool TFTPFileServer::FileOpen(__attribute__((unused)) const char* pFileName, __a
 	DEBUG_ENTRY
 
 	DEBUG_EXIT
-	return (false);
+	return false;
 }
 
-bool TFTPFileServer::FileCreate(const char* pFileName, TFTPMode tMode) {
+bool TFTPFileServer::FileCreate(const char* pFileName, TFTPMode mode) {
 	DEBUG_ENTRY
 
 	assert(pFileName != nullptr);
 
-	if (tMode != TFTPMode::BINARY) {
+	if (mode != TFTPMode::BINARY) {
 		DEBUG_EXIT
 		return false;
 	}
@@ -122,13 +122,15 @@ size_t TFTPFileServer::FileWrite(const void *pBuffer, size_t nCount, unsigned nB
 		}
 	}
 
-	auto nOffset = (nBlockNumber - 1) * 512U;
+	const auto nOffset = (nBlockNumber - 1) * 512U;
 
 	assert((nOffset + nCount) <= m_nSize);
 
 	memcpy(&m_pBuffer[nOffset], pBuffer, nCount);
 
 	m_nFileSize += nCount; //FIXME BUG When in retry ?
+
+	Display::Get()->Progress();
 
 	return nCount;
 }

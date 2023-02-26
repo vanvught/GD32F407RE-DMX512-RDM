@@ -163,7 +163,9 @@ void ArtNetNode::SendPollRelply(bool bResponse) {
 
 		m_PollReply.NumPortsLo = static_cast<uint8_t>(std::max(nPortsInput, nPortsOutput));
 
-		snprintf(reinterpret_cast<char*>(m_PollReply.NodeReport), artnet::REPORT_LENGTH, "%04x [%04d] %s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), m_aSysName);
+		uint8_t nSysNameLenght;
+		const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
+		snprintf(reinterpret_cast<char*>(m_PollReply.NodeReport), artnet::REPORT_LENGTH, "%04x [%04d] %.*s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), nSysNameLenght, pSysName);
 
 		Network::Get()->SendTo(m_nHandle, &m_PollReply, sizeof(TArtPollReply), m_Node.IPAddressBroadcast, artnet::UDP_PORT);
 	}

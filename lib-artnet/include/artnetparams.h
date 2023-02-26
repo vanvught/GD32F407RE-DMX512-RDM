@@ -163,14 +163,6 @@ public:
 		return m_Params.nSubnet;
 	}
 
-	const uint8_t *GetShortName() const {
-		return m_Params.aShortName;
-	}
-
-	const uint8_t *GetLongName() const {
-		return m_Params.aLongName;
-	}
-
 	lightset::OutputType GetOutputType() const {
 		return static_cast<lightset::OutputType>(m_Params.nOutputType);
 	}

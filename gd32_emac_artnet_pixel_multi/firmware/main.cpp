@@ -78,6 +78,8 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
+static constexpr auto DMXPORT_OFFSET = 64U;
+
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
 	ArtNet4Node::Get()->Stop();
@@ -117,12 +119,12 @@ void main() {
 
 	ArtNet4Node node;
 
-	StoreArtNet storeArtNet;
+	StoreArtNet storeArtNet(DMXPORT_OFFSET);
 	ArtNetParams artnetParams(&storeArtNet);
 
 	if (artnetParams.Load()) {
 		artnetParams.Dump();
-		artnetParams.Set();
+		artnetParams.Set(DMXPORT_OFFSET);
 	}
 
 	node.SetArtNetStore(&storeArtNet);
@@ -235,11 +237,11 @@ void main() {
 	DisplayUdfParams displayUdfParams(&storeDisplayUdf);
 
 	if (displayUdfParams.Load()) {
-		displayUdfParams.Set(&display);
 		displayUdfParams.Dump();
+		displayUdfParams.Set(&display);
 	}
 
-	display.Show(&node);
+	display.Show(&node, DMXPORT_OFFSET);
 
 	if (nTestPattern != pixelpatterns::Pattern::NONE) {
 		display.ClearLine(6);

@@ -62,8 +62,8 @@ struct State {
 	uint16_t DiscoveryPacketLength;
 	uint16_t nSynchronizationAddressSourceA;
 	uint16_t nSynchronizationAddressSourceB;
-	uint8_t nActiveInputPorts;
-	uint8_t nActiveOutputPorts;
+	uint8_t nEnabledInputPorts;
+	uint8_t nEnableOutputPorts;
 	uint8_t nPriority;
 	uint8_t nReceivingDmx;
 	lightset::FailSafe failsafe;
@@ -146,11 +146,11 @@ public:
 	}
 
 	uint32_t GetActiveOutputPorts() const {
-		return m_State.nActiveOutputPorts;
+		return m_State.nEnableOutputPorts;
 	}
 
 	uint32_t GetActiveInputPorts() const {
-		return m_State.nActiveInputPorts;
+		return m_State.nEnabledInputPorts;
 	}
 
 	bool IsTransmitting(uint32_t nPortIndex) const {

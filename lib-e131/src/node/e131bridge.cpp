@@ -193,8 +193,8 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 				return;
 			}
 		} else {
-			m_State.nActiveInputPorts = static_cast<uint8_t>(m_State.nActiveInputPorts + 1);
-			assert(m_State.nActiveInputPorts <= e131bridge::MAX_PORTS);
+			m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts + 1);
+			assert(m_State.nEnabledInputPorts <= e131bridge::MAX_PORTS);
 			m_InputPort[nPortIndex].genericPort.bIsEnabled = true;
 		}
 
@@ -208,7 +208,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 		if (nPortIndex < e131bridge::MAX_PORTS) {
 			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
 				m_OutputPort[nPortIndex].genericPort.bIsEnabled = false;
-				m_State.nActiveOutputPorts = static_cast<uint8_t>(m_State.nActiveOutputPorts - 1);
+				m_State.nEnableOutputPorts = static_cast<uint8_t>(m_State.nEnableOutputPorts - 1);
 				LeaveUniverse(nPortIndex, nUniverse);
 			}
 		}
@@ -216,7 +216,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 		if (nPortIndex < e131bridge::MAX_PORTS) {
 			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
 				m_InputPort[nPortIndex].genericPort.bIsEnabled = false;
-				m_State.nActiveInputPorts = static_cast<uint8_t>(m_State.nActiveInputPorts - 1);
+				m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts - 1);
 			}
 		}
 
@@ -232,8 +232,8 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 			LeaveUniverse(nPortIndex, nUniverse);
 		}
 	} else {
-		m_State.nActiveOutputPorts = static_cast<uint8_t>(m_State.nActiveOutputPorts + 1);
-		assert(m_State.nActiveOutputPorts <= e131bridge::MAX_PORTS);
+		m_State.nEnableOutputPorts = static_cast<uint8_t>(m_State.nEnableOutputPorts + 1);
+		assert(m_State.nEnableOutputPorts <= e131bridge::MAX_PORTS);
 		m_OutputPort[nPortIndex].genericPort.bIsEnabled = true;
 	}
 
@@ -645,7 +645,7 @@ void E131Bridge::Run() {
 	m_nCurrentPacketMillis = Hardware::Get()->Millis();
 
 	if (__builtin_expect((nBytesReceived == 0), 1)) {
-		if (m_State.nActiveOutputPorts != 0) {
+		if (m_State.nEnableOutputPorts != 0) {
 			if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= static_cast<uint32_t>(e131::NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
 				if ((m_pLightSet != nullptr) && (!m_State.IsNetworkDataLoss)) {
 					SetNetworkDataLossCondition();
