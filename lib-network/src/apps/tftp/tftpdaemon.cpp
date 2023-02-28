@@ -2,7 +2,7 @@
  * @file tftpdaemon.cpp
  *
  */
-/* Copyright (C) 2019-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -98,9 +98,7 @@ struct TTFTPDataPacket {
 
 TFTPDaemon *TFTPDaemon::s_pThis = nullptr;
 
-TFTPDaemon::TFTPDaemon()
-		
-{
+TFTPDaemon::TFTPDaemon() {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("s_pThis=%p", reinterpret_cast<void *>(s_pThis));
 
@@ -122,7 +120,7 @@ TFTPDaemon::~TFTPDaemon() {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("s_pThis=%p", reinterpret_cast<void *>(s_pThis));
 
-	Network::Get()->End(TFTP_UDP_PORT);
+	Network::Get()->End(m_nFromPort);
 
 	s_pThis = nullptr;
 
@@ -135,12 +133,12 @@ bool TFTPDaemon::Run() {
 		if (m_nFromPort != 0) {
 			Network::Get()->End(m_nFromPort);
 			m_nIdx = -1;
-			m_nFromPort = 0;
 		}
 
 		m_nIdx = Network::Get()->Begin(TFTP_UDP_PORT);
 		DEBUG_PRINTF("m_nIdx=%d", m_nIdx);
 
+		m_nFromPort = TFTP_UDP_PORT;
 		m_nBlockNumber = 0;
 		m_nState = TFTPState::WAITING_RQ;
 		m_bIsLastBlock = false;
@@ -251,7 +249,7 @@ void TFTPDaemon::SendError (uint16_t nErrorCode, const char *pErrorMessage) {
 }
 
 void TFTPDaemon::DoRead() {
-	auto *pDataPacket = reinterpret_cast<struct TTFTPDataPacket*>(&m_Buffer);
+	auto *const pDataPacket = reinterpret_cast<struct TTFTPDataPacket*>(&m_Buffer);
 
 	if (m_nState == TFTPState::RRQ_SEND_PACKET) {
 		m_nDataLength = FileRead(pDataPacket->Data, max::DATA_LEN, ++m_nBlockNumber);
@@ -277,7 +275,7 @@ void TFTPDaemon::DoRead() {
 }
 
 void TFTPDaemon::HandleRecvAck() {
-	auto *pAckPacket = reinterpret_cast<struct TTFTPAckPacket*>(&m_Buffer);
+	const auto *const pAckPacket = reinterpret_cast<struct TTFTPAckPacket *>(&m_Buffer);
 
 	if (pAckPacket->OpCode == __builtin_bswap16(OP_CODE_ACK)) {
 
@@ -290,7 +288,7 @@ void TFTPDaemon::HandleRecvAck() {
 }
 
 void TFTPDaemon::DoWriteAck() {
-	auto *pAckPacket = reinterpret_cast<struct TTFTPAckPacket*>(&m_Buffer);
+	auto *const pAckPacket = reinterpret_cast<struct TTFTPAckPacket *>(&m_Buffer);
 
 	pAckPacket->OpCode = __builtin_bswap16(OP_CODE_ACK);
 	pAckPacket->BlockNumber =  __builtin_bswap16(m_nBlockNumber);
@@ -302,7 +300,7 @@ void TFTPDaemon::DoWriteAck() {
 }
 
 void TFTPDaemon::HandleRecvData() {
-	auto *pDataPacket = reinterpret_cast<struct TTFTPDataPacket*>(&m_Buffer);
+	const auto *const pDataPacket = reinterpret_cast<struct TTFTPDataPacket *>(&m_Buffer);
 
 	if (pDataPacket->OpCode == __builtin_bswap16(OP_CODE_DATA)) {
 		m_nDataLength = m_nLength - 4;

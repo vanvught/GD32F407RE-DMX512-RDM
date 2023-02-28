@@ -146,7 +146,7 @@ public:
 
 		va_end(arp);
 
-		m_LcdDisplay->TextLine(nLine, buffer, static_cast<uint16_t>(i));
+		m_LcdDisplay->TextLine(nLine, buffer, static_cast<uint32_t>(i));
 
 		return i;
 	}
@@ -296,7 +296,7 @@ public:
 		static uint32_t nSymbolsIndex;
 
 		Display::Get()->SetCursorPos(Display::Get()->GetColumns() - 1U, Display::Get()->GetRows() - 1U);
-		Display::Get()->PutChar(SYMBOLS[nSymbolsIndex]);
+		Display::Get()->PutChar(SYMBOLS[nSymbolsIndex++]);
 
 		if (nSymbolsIndex >= sizeof(SYMBOLS)) {
 			nSymbolsIndex = 0;

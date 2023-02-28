@@ -35,10 +35,8 @@ void RemoteConfig::PlatformHandleTftpSet() {
 
 	if (m_bEnableTFTP) {
 		bkp_data_write(BKP_DATA_1, 0xA5A5);
-		Display::Get()->TextStatus("TFTP On", Display7SegmentMessage::INFO_TFTP_ON);
 	} else {
 		bkp_data_write(BKP_DATA_1, 0x0);
-		Display::Get()->TextStatus("TFTP Off", Display7SegmentMessage::INFO_TFTP_OFF);
 	}
 
 	DEBUG_EXIT

@@ -41,6 +41,7 @@
 
 namespace net {
 void __attribute__((weak)) phy_customized_led() {}
+void __attribute__((weak)) phy_customized_timing() {}
 }  // namespace net
 
 #define TO_HEX(i)	static_cast<char>(((i) < 10) ? '0' + (i) : 'A' + ((i) - 10))
@@ -87,6 +88,7 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 
 	emac_start(m_aNetMacaddr);
 
+	net::phy_customized_timing();
 	net::phy_customized_led();
 
 	const auto *p = params.GetHostName();

@@ -153,7 +153,7 @@ static ErrStatus enet_mac_config(void) {
 		return ERROR;
 	}
 
-	ErrStatus enet_init_status = enet_init(ENET_AUTO_NEGOTIATION, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
+	ErrStatus enet_init_status = enet_init(ENET_AUTO_NEGOTIATION, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_BROADCAST_FRAMES_PASS);
 
     DEBUG_PRINTF("enet_init_status=%u", (uint32_t)enet_init_status);
 

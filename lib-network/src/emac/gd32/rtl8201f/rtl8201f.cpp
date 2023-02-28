@@ -60,4 +60,21 @@ void phy_customized_led() {
 #endif
 	DEBUG_EXIT
 }
+
+void phy_customized_timing() {
+	DEBUG_ENTRY
+#if defined (GD32F4XX)
+# define RMSR_RX_TIMING_SHIFT	4
+# define RMSR_RX_TIMING_MASK	0xF0
+# define RMSR_RX_TIMING_VAL		0x4
+# define RMSR_TX_TIMING_SHIFT	8
+# define RMSR_TX_TIMING_MASK	0xF00
+# define RMSR_TX_TIMING_VAL		0xF
+
+	constexpr uint16_t phy_value = (RMSR_RX_TIMING_VAL << RMSR_RX_TIMING_SHIFT)
+				       | (RMSR_TX_TIMING_VAL << RMSR_TX_TIMING_SHIFT);
+	phy_write_paged(0x7, PHY_REG_RMSR, phy_value, RMSR_RX_TIMING_MASK | RMSR_TX_TIMING_MASK);
+#endif
+	DEBUG_EXIT
+}
 }  // namespace net

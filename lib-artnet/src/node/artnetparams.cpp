@@ -63,7 +63,6 @@ static constexpr bool is_set(const uint16_t nValue, const uint32_t i) {
 	return (nValue & static_cast<uint16_t>(1U << (i + 8))) == static_cast<uint16_t>(1U << (i + 8));
 }
 #endif
-#if defined (ARTNET_HAVE_DMXIN)
 static constexpr uint16_t portdir_shift_left(const lightset::PortDir portDir, const uint32_t i) {
 	return static_cast<uint16_t>((static_cast<uint32_t>(portDir) & 0x3) << (i * 2));
 }
@@ -71,7 +70,6 @@ static constexpr uint16_t portdir_shift_left(const lightset::PortDir portDir, co
 static constexpr uint16_t portdir_clear(const uint32_t i) {
 	return static_cast<uint16_t>(~(0x3 << (i * 2)));
 }
-#endif
 }  // namespace artnetparams
 
 using namespace artnetparams;
@@ -281,7 +279,6 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 # pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
 #endif
 
-#if defined (ARTNET_HAVE_DMXIN)
 		nLength = 7;
 
 		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[i], value, nLength) == Sscan::OK) {
@@ -290,9 +287,12 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 
 			DEBUG_PRINTF("%u portDir=%u, m_Params.nDirection=%x", i, static_cast<uint32_t>(portDir), m_Params.nDirection);
 
+#if defined (ARTNET_HAVE_DMXIN)
 			if (portDir == lightset::PortDir::INPUT) {
 				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::INPUT, i);
-			} else if (portDir == lightset::PortDir::DISABLE) {
+			} else 
+#endif			
+			if (portDir == lightset::PortDir::DISABLE) {
 				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::DISABLE, i);
 			} else {
 				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::OUTPUT, i);
@@ -306,7 +306,7 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 #if __GNUC__ < 10
 # pragma GCC diagnostic pop
 #endif
-
+#if defined (ARTNET_HAVE_DMXIN)
 		uint32_t nValue32;
 
 		if (Sscan::IpAddress(pLine, ArtNetParamsConst::DESTINATION_IP_PORT[i], nValue32) == Sscan::OK) {
@@ -399,11 +399,9 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
 		builder.Add(LightSetParamsConst::UNIVERSE_PORT[nPortIndex], m_Params.nUniversePort[nPortIndex], isMaskSet(Mask::UNIVERSE_A << nPortIndex));
-#if defined (ARTNET_HAVE_DMXIN)
 		const auto portDir = static_cast<lightset::PortDir>(artnetparams::portdir_shif_right(m_Params.nDirection, nPortIndex));
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
 		builder.Add(LightSetParamsConst::DIRECTION[nPortIndex], lightset::get_direction(portDir), !isDefault);
-#endif
 	}
 
 	builder.AddComment("DMX Output");
