@@ -2,7 +2,7 @@
  * @file remoteconfig.cpp
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -176,6 +176,9 @@
  */
 
 #if defined (RDM_RESPONDER)
+/* rdm_device.txt */
+# include "rdmdeviceparams.h"
+# include "storerdmdevice.h"
 /* sensors.txt */
 # include "rdmsensorsparams.h"
 # include "storerdmsensors.h"
@@ -592,6 +595,17 @@ void RemoteConfig::HandleGetOscClntTxt(uint32_t& nSize) {
 
 	OscClientParams oscClientParams(StoreOscClient::Get());
 	oscClientParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
+
+	DEBUG_EXIT
+}
+#endif
+
+#if defined (RDM_RESPONDER)
+void RemoteConfig::HandleGetRdmDeviceTxt(uint32_t& nSize) {
+	DEBUG_ENTRY
+
+	RDMDeviceParams rdmDeviceParams(StoreRDMDevice::Get());
+	rdmDeviceParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
 }
@@ -1172,6 +1186,22 @@ void RemoteConfig::HandleSetNodeTxt(const node::Personality personality) {
 	nodeParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	nodeParams.Dump();
+#endif
+
+	DEBUG_EXIT
+}
+#endif
+
+#if defined (RDM_RESPONDER)
+void RemoteConfig::HandleSetRdmDeviceTxt() {
+	DEBUG_ENTRY
+
+	assert(StoreRDMDevice::Get() != nullptr);
+	RDMDeviceParams rdmDeviceParams(StoreRDMDevice::Get());
+
+	rdmDeviceParams.Load(s_pUdpBuffer, m_nBytesReceived);
+#ifndef NDEBUG
+	rdmDeviceParams.Dump();
 #endif
 
 	DEBUG_EXIT

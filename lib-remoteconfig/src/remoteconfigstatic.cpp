@@ -2,7 +2,7 @@
  * @file remoteconfigstatic.cpp
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,9 @@ const RemoteConfig::Txt RemoteConfig::s_TXT[] = {
 		{ &RemoteConfig::HandleGetNodeNodeTxt,   &RemoteConfig::HandleSetNodeNodeTxt,   "node.txt",     8,  Store::NODE },
 		{ &RemoteConfig::HandleGetNodeArtNetTxt, &RemoteConfig::HandleSetNodeArtNetTxt, "artnet.txt",   10, Store::NODE },
 		{ &RemoteConfig::HandleGetNodeE131Txt,   &RemoteConfig::HandleSetNodeE131Txt,   "e131.txt",     8,  Store::NODE },
+#endif
+#if defined (RDM_RESPONDER)
+		{ &RemoteConfig::HandleGetRdmDeviceTxt,  &RemoteConfig::HandleSetRdmDeviceTxt,  "rdm_device.txt", 14, Store::RDMDEVICE },
 #endif
 #if defined (OUTPUT_DMX_SEND)
 		{ &RemoteConfig::HandleGetParamsTxt,     &RemoteConfig::HandleSetParamsTxt,     "params.txt",   10, Store::DMXSEND },

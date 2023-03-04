@@ -891,7 +891,8 @@ typedef enum
 {
     ENET_PROMISCUOUS_MODE           = ENET_MAC_FRMF_PM,                             /*!< promiscuous mode enabled */
     ENET_RECEIVEALL                 = (int32_t)ENET_MAC_FRMF_FAR,                   /*!< all received frame are forwarded to application */
-    ENET_BROADCAST_FRAMES_PASS      = (uint32_t)0x00000000U,                        /*!< the address filters pass all received broadcast frames */
+	ENET_CUSTOM						= BIT(4),
+	ENET_BROADCAST_FRAMES_PASS      = (uint32_t)0x00000000U,                        /*!< the address filters pass all received broadcast frames */
     ENET_BROADCAST_FRAMES_DROP      = ENET_MAC_FRMF_BFRMD                           /*!< the address filters filter all incoming broadcast frames */
 }enet_frmrecept_enum;
 

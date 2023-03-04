@@ -380,16 +380,16 @@ Discarded input sections
  .text          0x0000000000000000        0x0 build_gd32/firmware/main.o
  .data          0x0000000000000000        0x0 build_gd32/firmware/main.o
  .bss           0x0000000000000000        0x0 build_gd32/firmware/main.o
- .debug_info    0x0000000000000000    0x10c48 build_gd32/firmware/main.o
+ .debug_info    0x0000000000000000    0x10c50 build_gd32/firmware/main.o
  .debug_abbrev  0x0000000000000000      0xe05 build_gd32/firmware/main.o
  .debug_loclists
                 0x0000000000000000     0x1172 build_gd32/firmware/main.o
  .debug_aranges
                 0x0000000000000000      0x140 build_gd32/firmware/main.o
  .debug_rnglists
-                0x0000000000000000      0x383 build_gd32/firmware/main.o
- .debug_line    0x0000000000000000     0x1d5c build_gd32/firmware/main.o
- .debug_str     0x0000000000000000     0xdbe7 build_gd32/firmware/main.o
+                0x0000000000000000      0x392 build_gd32/firmware/main.o
+ .debug_line    0x0000000000000000     0x1d76 build_gd32/firmware/main.o
+ .debug_str     0x0000000000000000     0xdbfd build_gd32/firmware/main.o
  .comment       0x0000000000000000       0x39 build_gd32/firmware/main.o
  .debug_frame   0x0000000000000000      0x3a4 build_gd32/firmware/main.o
  .group         0x0000000000000000        0xc build_gd32/lib/factorydefaults.o
@@ -481,7 +481,7 @@ Discarded input sections
                 0x0000000000000000       0x10 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .text._ZN12RemoteConfig8TftpExitEv
                 0x0000000000000000       0x14 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
- .debug_info    0x0000000000000000     0xb6ef ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+ .debug_info    0x0000000000000000     0xb6f0 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .debug_abbrev  0x0000000000000000      0xc49 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .debug_loclists
                 0x0000000000000000     0x114d ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
@@ -621,7 +621,7 @@ Discarded input sections
                 0x0000000000000000       0x40 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .debug_rnglists
                 0x0000000000000000       0x7c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
- .debug_line    0x0000000000000000      0x41b ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+ .debug_line    0x0000000000000000      0x41c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .debug_str     0x0000000000000000     0x33c0 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .comment       0x0000000000000000       0x39 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .debug_frame   0x0000000000000000       0x94 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
@@ -1270,27 +1270,25 @@ Discarded input sections
  .text._ZN15RDMDeviceParams4LoadEPKcj
                 0x0000000000000000       0x40 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .text._ZN15RDMDeviceParams16callbackFunctionEPKc
-                0x0000000000000000       0x78 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x0000000000000000       0x90 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .text._ZN15RDMDeviceParams22staticCallbackFunctionEPvPKc
                 0x0000000000000000        0x4 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .rodata._ZN15RDMDeviceParams7BuilderEPK16TRDMDeviceParamsPcjRj.str1.1
-                0x0000000000000000       0x1a ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .text._ZN15RDMDeviceParams7BuilderEPK16TRDMDeviceParamsPcjRj
-                0x0000000000000000      0x110 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .text._ZN15RDMDeviceParams7BuilderEPKN3rdm12deviceparams6ParamsEPcjRj
+                0x0000000000000000       0x98 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .text._ZN15RDMDeviceParams4SaveEPcjRj
                 0x0000000000000000       0x1a ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .debug_info    0x0000000000000000     0x1afe ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .debug_abbrev  0x0000000000000000      0x608 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .debug_info    0x0000000000000000     0x184f ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .debug_abbrev  0x0000000000000000      0x5e2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .debug_loclists
-                0x0000000000000000      0x6b7 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x0000000000000000      0x51b ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .debug_aranges
-                0x0000000000000000       0x68 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x0000000000000000       0x60 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .debug_rnglists
-                0x0000000000000000       0xc6 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .debug_line    0x0000000000000000      0x662 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .debug_str     0x0000000000000000     0x11c8 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x0000000000000000       0x9c ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .debug_line    0x0000000000000000      0x5de ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .debug_str     0x0000000000000000     0x1148 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .comment       0x0000000000000000       0x39 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
- .debug_frame   0x0000000000000000      0x124 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+ .debug_frame   0x0000000000000000      0x110 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .text          0x0000000000000000        0x0 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparamsconst.o)
  .data          0x0000000000000000        0x0 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparamsconst.o)
  .bss           0x0000000000000000        0x0 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparamsconst.o)
@@ -1694,8 +1692,8 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .data          0x0000000000000000        0x0 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .bss           0x0000000000000000        0x0 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
- .debug_info    0x0000000000000000      0xd96 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
- .debug_abbrev  0x0000000000000000      0x3f8 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+ .debug_info    0x0000000000000000      0xdac ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+ .debug_abbrev  0x0000000000000000      0x414 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .debug_loclists
                 0x0000000000000000      0x169 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .debug_aranges
@@ -1703,7 +1701,7 @@ Discarded input sections
  .debug_rnglists
                 0x0000000000000000       0x55 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .debug_line    0x0000000000000000      0x255 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
- .debug_str     0x0000000000000000      0xba7 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+ .debug_str     0x0000000000000000      0xbd6 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .comment       0x0000000000000000       0x39 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .debug_frame   0x0000000000000000       0xcc ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
  .group         0x0000000000000000       0x10 ../lib-configstore/lib_gd32/libconfigstore.a(storee131.o)
@@ -2642,7 +2640,7 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .text._ZN8Hardware7GetTimeEP2tm
                 0x0000000000000000       0x2e ../lib-hal/lib_gd32/libhal.a(hardware.o)
- .debug_info    0x0000000000000000     0x128a ../lib-hal/lib_gd32/libhal.a(hardware.o)
+ .debug_info    0x0000000000000000     0x1288 ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .debug_abbrev  0x0000000000000000      0x524 ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .debug_loclists
                 0x0000000000000000      0x217 ../lib-hal/lib_gd32/libhal.a(hardware.o)
@@ -2650,7 +2648,7 @@ Discarded input sections
                 0x0000000000000000       0x40 ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .debug_rnglists
                 0x0000000000000000       0x9c ../lib-hal/lib_gd32/libhal.a(hardware.o)
- .debug_line    0x0000000000000000      0x5be ../lib-hal/lib_gd32/libhal.a(hardware.o)
+ .debug_line    0x0000000000000000      0x5bf ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .debug_str     0x0000000000000000      0xf0f ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .comment       0x0000000000000000       0x39 ../lib-hal/lib_gd32/libhal.a(hardware.o)
  .debug_frame   0x0000000000000000       0x98 ../lib-hal/lib_gd32/libhal.a(hardware.o)
@@ -3065,7 +3063,7 @@ Discarded input sections
                 0x0000000000000000        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .rodata.enet_reg_tab
                 0x0000000000000000       0x74 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
- .debug_info    0x0000000000000000     0x2583 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+ .debug_info    0x0000000000000000     0x2589 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .debug_abbrev  0x0000000000000000      0x388 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .debug_loclists
                 0x0000000000000000     0x18b3 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
@@ -3074,7 +3072,7 @@ Discarded input sections
  .debug_rnglists
                 0x0000000000000000      0x1f9 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .debug_line    0x0000000000000000     0x211a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
- .debug_str     0x0000000000000000     0x2427 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+ .debug_str     0x0000000000000000     0x2433 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .comment       0x0000000000000000       0x39 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .debug_frame   0x0000000000000000      0x668 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .text          0x0000000000000000        0x0 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_exti.o)
@@ -3728,7 +3726,7 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .data          0x0000000000000000        0x0 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .bss           0x0000000000000000        0x0 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
- .debug_info    0x0000000000000000      0xd46 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
+ .debug_info    0x0000000000000000      0xd4c ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .debug_abbrev  0x0000000000000000      0x29f ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .debug_loclists
                 0x0000000000000000       0x61 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
@@ -3737,7 +3735,7 @@ Discarded input sections
  .debug_rnglists
                 0x0000000000000000       0x14 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .debug_line    0x0000000000000000      0x32a ../lib-gd32/lib_gd32/libgd32.a(emac.o)
- .debug_str     0x0000000000000000      0x9e4 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
+ .debug_str     0x0000000000000000      0x9f0 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .comment       0x0000000000000000       0x39 ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .debug_frame   0x0000000000000000       0x2c ../lib-gd32/lib_gd32/libgd32.a(emac.o)
  .text          0x0000000000000000        0x0 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
@@ -4945,1245 +4943,1242 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
  .text._ZN12RDMSubDevice18GetFactoryDefaultsEv
                 0x000000000800ee9e       0x1a ../lib-rdmsubdevice/lib_gd32/librdmsubdevice.a(rdmsubdevice.o)
                 0x000000000800ee9e                RDMSubDevice::GetFactoryDefaults()
- .text.memcpy.isra.0
-                0x000000000800eeb8        0x4 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
  .text._ZN15RDMDeviceParamsC2EP20RDMDeviceParamsStore
-                0x000000000800eebc       0x24 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
-                0x000000000800eebc                RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore*)
-                0x000000000800eebc                RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore*)
+                0x000000000800eeb8       0x2a ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x000000000800eeb8                RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore*)
+                0x000000000800eeb8                RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore*)
  .text._ZN15RDMDeviceParams4LoadEv
-                0x000000000800eee0       0x16 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
-                0x000000000800eee0                RDMDeviceParams::Load()
+                0x000000000800eee2       0x16 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x000000000800eee2                RDMDeviceParams::Load()
  .text._ZN15RDMDeviceParams3SetEP9RDMDevice
-                0x000000000800eef6       0x6e ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
-                0x000000000800eef6                RDMDeviceParams::Set(RDMDevice*)
+                0x000000000800eef8       0x6a ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x000000000800eef8                RDMDeviceParams::Set(RDMDevice*)
  .text._ZN15RDMDeviceParams4DumpEv
-                0x000000000800ef64        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
-                0x000000000800ef64                RDMDeviceParams::Dump()
+                0x000000000800ef62        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceparams.o)
+                0x000000000800ef62                RDMDeviceParams::Dump()
  .text._ZN18RDMDeviceResponder17PersonalityUpdateEP8LightSet
-                0x000000000800ef66        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800ef66                RDMDeviceResponder::PersonalityUpdate(LightSet*)
+                0x000000000800ef64        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800ef64                RDMDeviceResponder::PersonalityUpdate(LightSet*)
  .text._ZN18RDMDeviceResponder21DmxStartAddressUpdateEv
-                0x000000000800ef68        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800ef68                RDMDeviceResponder::DmxStartAddressUpdate()
- *fill*         0x000000000800ef6a        0x2 
+                0x000000000800ef66        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800ef66                RDMDeviceResponder::DmxStartAddressUpdate()
  .text._ZN18RDMDeviceResponderD2Ev
-                0x000000000800ef6c       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800ef6c                RDMDeviceResponder::~RDMDeviceResponder()
-                0x000000000800ef6c                RDMDeviceResponder::~RDMDeviceResponder()
+                0x000000000800ef68       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800ef68                RDMDeviceResponder::~RDMDeviceResponder()
+                0x000000000800ef68                RDMDeviceResponder::~RDMDeviceResponder()
  .text._ZN18RDMDeviceResponderD0Ev
-                0x000000000800ef8c       0x12 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800ef8c                RDMDeviceResponder::~RDMDeviceResponder()
- *fill*         0x000000000800ef9e        0x2 
+                0x000000000800ef88       0x12 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800ef88                RDMDeviceResponder::~RDMDeviceResponder()
+ *fill*         0x000000000800ef9a        0x2 
  .text._ZN18RDMDeviceResponderC2EPP14RDMPersonalityj
-                0x000000000800efa0       0x9c ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800efa0                RDMDeviceResponder::RDMDeviceResponder(RDMPersonality**, unsigned int)
-                0x000000000800efa0                RDMDeviceResponder::RDMDeviceResponder(RDMPersonality**, unsigned int)
+                0x000000000800ef9c       0x9c ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800ef9c                RDMDeviceResponder::RDMDeviceResponder(RDMPersonality**, unsigned int)
+                0x000000000800ef9c                RDMDeviceResponder::RDMDeviceResponder(RDMPersonality**, unsigned int)
  .text._ZN18RDMDeviceResponder4InitEv
-                0x000000000800f03c      0x128 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800f03c                RDMDeviceResponder::Init()
+                0x000000000800f038      0x128 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800f038                RDMDeviceResponder::Init()
  .text._ZN18RDMDeviceResponder5PrintEv
-                0x000000000800f164       0x9c ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000800f164                RDMDeviceResponder::Print()
- .text.memcmp   0x000000000800f200       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f160       0x9c ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000800f160                RDMDeviceResponder::Print()
+ .text.memcmp   0x000000000800f1fc       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
  .text.memcpy.isra.0
-                0x000000000800f220       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f21c       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
  .text._ZN9RDMDevice8SetLabelEPK18TRDMDeviceInfoData
-                0x000000000800f234       0x44 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f234                RDMDevice::SetLabel(TRDMDeviceInfoData const*)
+                0x000000000800f230       0x44 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f230                RDMDevice::SetLabel(TRDMDeviceInfoData const*)
  .text._ZN18RDMDeviceResponder18SetFactoryDefaultsEv
-                0x000000000800f278      0x100 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f278                RDMDeviceResponder::SetFactoryDefaults()
+                0x000000000800f274      0x100 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f274                RDMDeviceResponder::SetFactoryDefaults()
  .text._ZN10RDMHandlerC2Eb
-                0x000000000800f378        0xc ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f378                RDMHandler::RDMHandler(bool)
-                0x000000000800f378                RDMHandler::RDMHandler(bool)
+                0x000000000800f374        0xc ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f374                RDMHandler::RDMHandler(bool)
+                0x000000000800f374                RDMHandler::RDMHandler(bool)
  .text._ZN10RDMHandler12HandleStringEPKcj
-                0x000000000800f384       0x18 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f384                RDMHandler::HandleString(char const*, unsigned int)
+                0x000000000800f380       0x18 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f380                RDMHandler::HandleString(char const*, unsigned int)
  .text._ZN10RDMHandler20CreateRespondMessageEht
-                0x000000000800f39c       0x98 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f39c                RDMHandler::CreateRespondMessage(unsigned char, unsigned short)
+                0x000000000800f398       0x98 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f398                RDMHandler::CreateRespondMessage(unsigned char, unsigned short)
  .text._ZN10RDMHandler17RespondMessageAckEv
-                0x000000000800f434       0x12 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f434                RDMHandler::RespondMessageAck()
- *fill*         0x000000000800f446        0x2 
+                0x000000000800f430       0x12 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f430                RDMHandler::RespondMessageAck()
+ *fill*         0x000000000800f442        0x2 
  .text._ZN10RDMHandler13GetDeviceInfoEt
-                0x000000000800f448       0x68 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f448                RDMHandler::GetDeviceInfo(unsigned short)
+                0x000000000800f444       0x68 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f444                RDMHandler::GetDeviceInfo(unsigned short)
  .text._ZN10RDMHandler18GetFactoryDefaultsEt
-                0x000000000800f4b0       0x80 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f4b0                RDMHandler::GetFactoryDefaults(unsigned short)
+                0x000000000800f4ac       0x80 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f4ac                RDMHandler::GetFactoryDefaults(unsigned short)
  .text._ZN10RDMHandler25GetDeviceModelDescriptionEt
-                0x000000000800f530       0x1c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f530                RDMHandler::GetDeviceModelDescription(unsigned short)
+                0x000000000800f52c       0x1c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f52c                RDMHandler::GetDeviceModelDescription(unsigned short)
  .text._ZN10RDMHandler20GetManufacturerLabelEt
-                0x000000000800f54c       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f54c                RDMHandler::GetManufacturerLabel(unsigned short)
+                0x000000000800f548       0x20 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f548                RDMHandler::GetManufacturerLabel(unsigned short)
  .text._ZN10RDMHandler14GetDeviceLabelEt
-                0x000000000800f56c       0x3c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f56c                RDMHandler::GetDeviceLabel(unsigned short)
+                0x000000000800f568       0x3c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f568                RDMHandler::GetDeviceLabel(unsigned short)
  .text._ZN10RDMHandler17GetIdentifyDeviceEt
-                0x000000000800f5a8       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f5a8                RDMHandler::GetIdentifyDevice(unsigned short)
+                0x000000000800f5a4       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f5a4                RDMHandler::GetIdentifyDevice(unsigned short)
  .text._ZN10RDMHandler18RespondMessageNackEt
-                0x000000000800f5bc        0x8 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f5bc                RDMHandler::RespondMessageNack(unsigned short)
+                0x000000000800f5b8        0x8 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f5b8                RDMHandler::RespondMessageNack(unsigned short)
  .text._ZN10RDMHandler14SetResetDeviceEbt
-                0x000000000800f5c4       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f5c4                RDMHandler::SetResetDevice(bool, unsigned short)
+                0x000000000800f5c0       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f5c0                RDMHandler::SetResetDevice(bool, unsigned short)
  .text._ZN10RDMHandler17SetIdentifyDeviceEbt
-                0x000000000800f60c       0x7c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f60c                RDMHandler::SetIdentifyDevice(bool, unsigned short)
+                0x000000000800f608       0x7c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f608                RDMHandler::SetIdentifyDevice(bool, unsigned short)
  .text._ZN10RDMHandler18SetFactoryDefaultsEbt
-                0x000000000800f688       0x34 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f688                RDMHandler::SetFactoryDefaults(bool, unsigned short)
+                0x000000000800f684       0x34 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f684                RDMHandler::SetFactoryDefaults(bool, unsigned short)
  .text._ZN10RDMHandler14SetDeviceLabelEbt
-                0x000000000800f6bc       0x58 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f6bc                RDMHandler::SetDeviceLabel(bool, unsigned short)
+                0x000000000800f6b8       0x58 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f6b8                RDMHandler::SetDeviceLabel(bool, unsigned short)
  .text._ZN10RDMHandler8HandlersEbhtht
-                0x000000000800f714       0xe0 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f714                RDMHandler::Handlers(bool, unsigned char, unsigned short, unsigned char, unsigned short)
+                0x000000000800f710       0xe0 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f710                RDMHandler::Handlers(bool, unsigned char, unsigned short, unsigned char, unsigned short)
  .text._ZN10RDMHandler10HandleDataEPKhPh
-                0x000000000800f7f4      0x19c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000800f7f4                RDMHandler::HandleData(unsigned char const*, unsigned char*)
+                0x000000000800f7f0      0x19c ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000800f7f0                RDMHandler::HandleData(unsigned char const*, unsigned char*)
  .text._ZN11RDMIdentifyC2Ev
-                0x000000000800f990        0xc ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
-                0x000000000800f990                RDMIdentify::RDMIdentify()
-                0x000000000800f990                RDMIdentify::RDMIdentify()
+                0x000000000800f98c        0xc ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
+                0x000000000800f98c                RDMIdentify::RDMIdentify()
+                0x000000000800f98c                RDMIdentify::RDMIdentify()
  .text._ZN11RDMIdentify2OnEN3rdm8identify4ModeE
-                0x000000000800f99c        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
-                0x000000000800f99c                RDMIdentify::On(rdm::identify::Mode)
+                0x000000000800f998        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
+                0x000000000800f998                RDMIdentify::On(rdm::identify::Mode)
  .text._ZN11RDMIdentify3OffEN3rdm8identify4ModeE
-                0x000000000800f99e        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
-                0x000000000800f99e                RDMIdentify::Off(rdm::identify::Mode)
+                0x000000000800f99a        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmidentify.o)
+                0x000000000800f99a                RDMIdentify::Off(rdm::identify::Mode)
  .text.memcpy.constprop.0.isra.0
-                0x000000000800f9a0       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800f99c       0x14 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
  .text._ZN10RDMHandler16GetInterfaceListEt
-                0x000000000800f9b4       0x28 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800f9b4                RDMHandler::GetInterfaceList(unsigned short)
+                0x000000000800f9b0       0x28 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800f9b0                RDMHandler::GetInterfaceList(unsigned short)
  .text._ZN10RDMHandler16GetInterfaceNameEt
-                0x000000000800f9dc       0x4c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800f9dc                RDMHandler::GetInterfaceName(unsigned short)
+                0x000000000800f9d8       0x4c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800f9d8                RDMHandler::GetInterfaceName(unsigned short)
  .text._ZN10RDMHandler18GetHardwareAddressEt
-                0x000000000800fa28       0x40 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fa28                RDMHandler::GetHardwareAddress(unsigned short)
+                0x000000000800fa24       0x40 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fa24                RDMHandler::GetHardwareAddress(unsigned short)
  .text._ZN10RDMHandler11GetDHCPModeEt
-                0x000000000800fa68       0x2c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fa68                RDMHandler::GetDHCPMode(unsigned short)
+                0x000000000800fa64       0x2c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fa64                RDMHandler::GetDHCPMode(unsigned short)
  .text._ZN10RDMHandler11SetDHCPModeEbt
-                0x000000000800fa94       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fa94                RDMHandler::SetDHCPMode(bool, unsigned short)
+                0x000000000800fa90       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fa90                RDMHandler::SetDHCPMode(bool, unsigned short)
  .text._ZN10RDMHandler14GetNameServersEt
-                0x000000000800fadc       0x22 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fadc                RDMHandler::GetNameServers(unsigned short)
- *fill*         0x000000000800fafe        0x2 
+                0x000000000800fad8       0x22 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fad8                RDMHandler::GetNameServers(unsigned short)
+ *fill*         0x000000000800fafa        0x2 
  .text._ZN10RDMHandler11GetZeroconfEt
-                0x000000000800fb00       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fb00                RDMHandler::GetZeroconf(unsigned short)
+                0x000000000800fafc       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fafc                RDMHandler::GetZeroconf(unsigned short)
  .text._ZN10RDMHandler11SetZeroconfEbt
-                0x000000000800fb30       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fb30                RDMHandler::SetZeroconf(bool, unsigned short)
+                0x000000000800fb2c       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fb2c                RDMHandler::SetZeroconf(bool, unsigned short)
  .text._ZN10RDMHandler9RenewDhcpEbt
-                0x000000000800fb78       0x2c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fb78                RDMHandler::RenewDhcp(bool, unsigned short)
+                0x000000000800fb74       0x2c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fb74                RDMHandler::RenewDhcp(bool, unsigned short)
  .text._ZN10RDMHandler17GetAddressNetmaskEt
-                0x000000000800fba4       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fba4                RDMHandler::GetAddressNetmask(unsigned short)
+                0x000000000800fba0       0x48 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fba0                RDMHandler::GetAddressNetmask(unsigned short)
  .text._ZN10RDMHandler16GetStaticAddressEt
-                0x000000000800fbec       0x44 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fbec                RDMHandler::GetStaticAddress(unsigned short)
+                0x000000000800fbe8       0x44 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fbe8                RDMHandler::GetStaticAddress(unsigned short)
  .text._ZN10RDMHandler16SetStaticAddressEbt
-                0x000000000800fc30       0x4c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fc30                RDMHandler::SetStaticAddress(bool, unsigned short)
+                0x000000000800fc2c       0x4c ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fc2c                RDMHandler::SetStaticAddress(bool, unsigned short)
  .text._ZN10RDMHandler18ApplyConfigurationEbt
-                0x000000000800fc7c       0x28 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fc7c                RDMHandler::ApplyConfiguration(bool, unsigned short)
+                0x000000000800fc78       0x28 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fc78                RDMHandler::ApplyConfiguration(bool, unsigned short)
  .text._ZN10RDMHandler15GetDefaultRouteEt
-                0x000000000800fca4       0x38 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fca4                RDMHandler::GetDefaultRoute(unsigned short)
+                0x000000000800fca0       0x38 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fca0                RDMHandler::GetDefaultRoute(unsigned short)
  .text._ZN10RDMHandler15SetDefaultRouteEbt
-                0x000000000800fcdc        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fcdc                RDMHandler::SetDefaultRoute(bool, unsigned short)
- *fill*         0x000000000800fce2        0x2 
+                0x000000000800fcd8        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fcd8                RDMHandler::SetDefaultRoute(bool, unsigned short)
+ *fill*         0x000000000800fcde        0x2 
  .text._ZN10RDMHandler11GetHostNameEt
-                0x000000000800fce4       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fce4                RDMHandler::GetHostName(unsigned short)
+                0x000000000800fce0       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fce0                RDMHandler::GetHostName(unsigned short)
  .text._ZN10RDMHandler11SetHostNameEbt
-                0x000000000800fd14       0x34 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fd14                RDMHandler::SetHostName(bool, unsigned short)
+                0x000000000800fd10       0x34 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fd10                RDMHandler::SetHostName(bool, unsigned short)
  .text._ZN10RDMHandler13GetDomainNameEt
-                0x000000000800fd48       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fd48                RDMHandler::GetDomainName(unsigned short)
+                0x000000000800fd44       0x30 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fd44                RDMHandler::GetDomainName(unsigned short)
  .text._ZN10RDMHandler13SetDomainNameEbt
-                0x000000000800fd78        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
-                0x000000000800fd78                RDMHandler::SetDomainName(bool, unsigned short)
- *fill*         0x000000000800fd7e        0x2 
+                0x000000000800fd74        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandlere1372.o)
+                0x000000000800fd74                RDMHandler::SetDomainName(bool, unsigned short)
+ *fill*         0x000000000800fd7a        0x2 
  .text._ZN9RDMDeviceC2Ev
-                0x000000000800fd80       0xe8 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
-                0x000000000800fd80                RDMDevice::RDMDevice()
-                0x000000000800fd80                RDMDevice::RDMDevice()
+                0x000000000800fd7c       0xe8 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
+                0x000000000800fd7c                RDMDevice::RDMDevice()
+                0x000000000800fd7c                RDMDevice::RDMDevice()
  .text._ZN9RDMDevice5PrintEv
-                0x000000000800fe68       0x84 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
-                0x000000000800fe68                RDMDevice::Print()
+                0x000000000800fe64       0x84 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
+                0x000000000800fe64                RDMDevice::Print()
  .text.uuid_unparse_x
-                0x000000000800feec       0x86 ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
- *fill*         0x000000000800ff72        0x2 
+                0x000000000800fee8       0x86 ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
+ *fill*         0x000000000800ff6e        0x2 
  .text.uuid_unparse
-                0x000000000800ff74        0xc ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
-                0x000000000800ff74                uuid_unparse
+                0x000000000800ff70        0xc ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
+                0x000000000800ff70                uuid_unparse
  .text._ZN21PixelDmxConfiguration8ValidateEjRjRN21pixeldmxconfiguration8PortInfoE
-                0x000000000800ff80       0x86 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
-                0x000000000800ff80                PixelDmxConfiguration::Validate(unsigned int, unsigned int&, pixeldmxconfiguration::PortInfo&)
- *fill*         0x0000000008010006        0x2 
+                0x000000000800ff7c       0x86 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
+                0x000000000800ff7c                PixelDmxConfiguration::Validate(unsigned int, unsigned int&, pixeldmxconfiguration::PortInfo&)
+ *fill*         0x0000000008010002        0x2 
  .text._ZN21PixelDmxConfiguration5PrintEv
-                0x0000000008010008       0x30 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
-                0x0000000008010008                PixelDmxConfiguration::Print()
+                0x0000000008010004       0x30 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
+                0x0000000008010004                PixelDmxConfiguration::Print()
  .text._ZN14WS28xxDmxMulti18SetDmxStartAddressEt
-                0x0000000008010038        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x0000000008010038                WS28xxDmxMulti::SetDmxStartAddress(unsigned short)
+                0x0000000008010034        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010034                WS28xxDmxMulti::SetDmxStartAddress(unsigned short)
  .text._ZN14WS28xxDmxMulti18GetDmxStartAddressEv
-                0x000000000801003c        0x6 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x000000000801003c                WS28xxDmxMulti::GetDmxStartAddress()
+                0x0000000008010038        0x6 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010038                WS28xxDmxMulti::GetDmxStartAddress()
  .text._ZN14WS28xxDmxMulti15GetDmxFootprintEv
-                0x0000000008010042        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x0000000008010042                WS28xxDmxMulti::GetDmxFootprint()
+                0x000000000801003e        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x000000000801003e                WS28xxDmxMulti::GetDmxFootprint()
  .text._ZN14WS28xxDmxMulti5StartEj
-                0x0000000008010046       0x22 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x0000000008010046                WS28xxDmxMulti::Start(unsigned int)
+                0x0000000008010042       0x22 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010042                WS28xxDmxMulti::Start(unsigned int)
  .text._ZN14WS28xxDmxMultiD2Ev
-                0x0000000008010068       0x20 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x0000000008010068                WS28xxDmxMulti::~WS28xxDmxMulti()
-                0x0000000008010068                WS28xxDmxMulti::~WS28xxDmxMulti()
+                0x0000000008010064       0x20 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010064                WS28xxDmxMulti::~WS28xxDmxMulti()
+                0x0000000008010064                WS28xxDmxMulti::~WS28xxDmxMulti()
  .text._ZN14WS28xxDmxMultiD0Ev
-                0x0000000008010088       0x12 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x0000000008010088                WS28xxDmxMulti::~WS28xxDmxMulti()
+                0x0000000008010084       0x12 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010084                WS28xxDmxMulti::~WS28xxDmxMulti()
  .text._ZN14WS28xxDmxMulti8BlackoutEb
-                0x000000000801009a       0x28 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x000000000801009a                WS28xxDmxMulti::Blackout(bool)
+                0x0000000008010096       0x28 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010096                WS28xxDmxMulti::Blackout(bool)
  .text._ZN14WS28xxDmxMulti7SetDataEjPKhj
-                0x00000000080100c2      0x11a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x00000000080100c2                WS28xxDmxMulti::SetData(unsigned int, unsigned char const*, unsigned int)
+                0x00000000080100be      0x11a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x00000000080100be                WS28xxDmxMulti::SetData(unsigned int, unsigned char const*, unsigned int)
  .text._ZN14WS28xxDmxMulti6FullOnEv
-                0x00000000080101dc       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x00000000080101dc                WS28xxDmxMulti::FullOn()
+                0x00000000080101d8       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x00000000080101d8                WS28xxDmxMulti::FullOn()
  .text._ZN14WS28xxDmxMulti5PrintEv
-                0x00000000080101f4        0x6 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x00000000080101f4                WS28xxDmxMulti::Print()
+                0x00000000080101f0        0x6 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x00000000080101f0                WS28xxDmxMulti::Print()
  .text._ZN14WS28xxDmxMulti4StopEj
-                0x00000000080101fa       0x22 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x00000000080101fa                WS28xxDmxMulti::Stop(unsigned int)
+                0x00000000080101f6       0x22 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x00000000080101f6                WS28xxDmxMulti::Stop(unsigned int)
  .text._ZN14WS28xxDmxMultiC2ER21PixelDmxConfiguration
-                0x000000000801021c       0x5c ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x000000000801021c                WS28xxDmxMulti::WS28xxDmxMulti(PixelDmxConfiguration&)
-                0x000000000801021c                WS28xxDmxMulti::WS28xxDmxMulti(PixelDmxConfiguration&)
+                0x0000000008010218       0x5c ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x0000000008010218                WS28xxDmxMulti::WS28xxDmxMulti(PixelDmxConfiguration&)
+                0x0000000008010218                WS28xxDmxMulti::WS28xxDmxMulti(PixelDmxConfiguration&)
  .text._ZN17PropertiesBuilder3AddIhEEbPKcT_bj.isra.0
-                0x0000000008010278       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010274       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .text._ZN17PropertiesBuilder3AddItEEbPKcT_bj.isra.0
-                0x00000000080102c8       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x00000000080102c4       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .text._ZN17PropertiesBuilder3AddIPKcEEbS2_T_bj.isra.0
-                0x0000000008010318       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010314       0x50 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .text._ZN17PropertiesBuilder3AddIfEEbPKcT_bj.isra.0
-                0x0000000008010368       0x84 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010364       0x84 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .text._ZN14PixelDmxParamsC2EP19PixelDmxParamsStore
-                0x00000000080103ec       0x60 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x00000000080103ec                PixelDmxParams::PixelDmxParams(PixelDmxParamsStore*)
-                0x00000000080103ec                PixelDmxParams::PixelDmxParams(PixelDmxParamsStore*)
+                0x00000000080103e8       0x60 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x00000000080103e8                PixelDmxParams::PixelDmxParams(PixelDmxParamsStore*)
+                0x00000000080103e8                PixelDmxParams::PixelDmxParams(PixelDmxParamsStore*)
  .text._ZN14PixelDmxParams4LoadEv
-                0x000000000801044c       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x000000000801044c                PixelDmxParams::Load()
+                0x0000000008010448       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010448                PixelDmxParams::Load()
  .text._ZN14PixelDmxParams4LoadEPKcj
-                0x0000000008010464       0x40 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x0000000008010464                PixelDmxParams::Load(char const*, unsigned int)
+                0x0000000008010460       0x40 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010460                PixelDmxParams::Load(char const*, unsigned int)
  .text._ZN14PixelDmxParams16callbackFunctionEPKc
-                0x00000000080104a4      0x2ac ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x00000000080104a4                PixelDmxParams::callbackFunction(char const*)
+                0x00000000080104a0      0x2ac ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x00000000080104a0                PixelDmxParams::callbackFunction(char const*)
  .text._ZN14PixelDmxParams22staticCallbackFunctionEPvPKc
-                0x0000000008010750        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x0000000008010750                PixelDmxParams::staticCallbackFunction(void*, char const*)
+                0x000000000801074c        0x4 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x000000000801074c                PixelDmxParams::staticCallbackFunction(void*, char const*)
  .text._ZN14PixelDmxParams7BuilderEPKN14pixeldmxparams6ParamsEPcjRj
-                0x0000000008010754      0x2e8 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x0000000008010754                PixelDmxParams::Builder(pixeldmxparams::Params const*, char*, unsigned int, unsigned int&)
+                0x0000000008010750      0x2e8 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010750                PixelDmxParams::Builder(pixeldmxparams::Params const*, char*, unsigned int, unsigned int&)
  .text._ZN14PixelDmxParams4SaveEPcjRj
-                0x0000000008010a3c       0x1a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x0000000008010a3c                PixelDmxParams::Save(char*, unsigned int, unsigned int&)
+                0x0000000008010a38       0x1a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010a38                PixelDmxParams::Save(char*, unsigned int, unsigned int&)
  .text._ZN14PixelDmxParams3SetEP21PixelDmxConfiguration
-                0x0000000008010a56       0x8a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
-                0x0000000008010a56                PixelDmxParams::Set(PixelDmxConfiguration*)
+                0x0000000008010a52       0x8a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x0000000008010a52                PixelDmxParams::Set(PixelDmxConfiguration*)
  .text._ZN14PixelDmxParams4DumpEv
-                0x0000000008010ae0        0x2 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparamsdump.o)
-                0x0000000008010ae0                PixelDmxParams::Dump()
+                0x0000000008010adc        0x2 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparamsdump.o)
+                0x0000000008010adc                PixelDmxParams::Dump()
  .text._ZN18PixelConfiguration6GetTxHEN5pixel4TypeERhS2_
-                0x0000000008010ae2       0x1a ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
-                0x0000000008010ae2                PixelConfiguration::GetTxH(pixel::Type, unsigned char&, unsigned char&)
+                0x0000000008010ade       0x1a ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x0000000008010ade                PixelConfiguration::GetTxH(pixel::Type, unsigned char&, unsigned char&)
  .text._ZN18PixelConfiguration8ValidateERj
-                0x0000000008010afc      0x12c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
-                0x0000000008010afc                PixelConfiguration::Validate(unsigned int&)
+                0x0000000008010af8      0x12c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x0000000008010af8                PixelConfiguration::Validate(unsigned int&)
  .text._ZN18PixelConfiguration5PrintEv
-                0x0000000008010c28       0xd0 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
-                0x0000000008010c28                PixelConfiguration::Print()
+                0x0000000008010c24       0xd0 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x0000000008010c24                PixelConfiguration::Print()
  .text._ZN9PixelType7GetTypeEN5pixel4TypeE
-                0x0000000008010cf8       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010cf8                PixelType::GetType(pixel::Type)
+                0x0000000008010cf4       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010cf4                PixelType::GetType(pixel::Type)
  .text._ZN9PixelType7GetTypeEPKc
-                0x0000000008010d10       0x48 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010d10                PixelType::GetType(char const*)
+                0x0000000008010d0c       0x48 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010d0c                PixelType::GetType(char const*)
  .text._ZN9PixelType6GetMapEPKc
-                0x0000000008010d58       0x50 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010d58                PixelType::GetMap(char const*)
+                0x0000000008010d54       0x50 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010d54                PixelType::GetMap(char const*)
  .text._ZN9PixelType6GetMapEN5pixel3MapE
-                0x0000000008010da8       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010da8                PixelType::GetMap(pixel::Map)
+                0x0000000008010da4       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010da4                PixelType::GetMap(pixel::Map)
  .text._ZN9PixelType6GetMapEN5pixel4TypeE
-                0x0000000008010dc0       0x14 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010dc0                PixelType::GetMap(pixel::Type)
+                0x0000000008010dbc       0x14 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010dbc                PixelType::GetMap(pixel::Type)
  .text._ZN9PixelType10ConvertTxHEh
-                0x0000000008010dd4       0x5c ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010dd4                PixelType::ConvertTxH(unsigned char)
+                0x0000000008010dd0       0x5c ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010dd0                PixelType::ConvertTxH(unsigned char)
  .text._ZN9PixelType10ConvertTxHEf
-                0x0000000008010e30       0xac ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x0000000008010e30                PixelType::ConvertTxH(float)
+                0x0000000008010e2c       0xac ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x0000000008010e2c                PixelType::ConvertTxH(float)
  .text._ZN13PixelPatterns14SetPixelColourEjjj.isra.0
-                0x0000000008010edc       0x54 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010ed8       0x54 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
  .text._ZN13PixelPatterns5ClearEj.isra.0
-                0x0000000008010f30       0x24 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010f2c       0x24 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
  .text._ZN13PixelPatternsC2Ej
-                0x0000000008010f54       0x4c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008010f54                PixelPatterns::PixelPatterns(unsigned int)
-                0x0000000008010f54                PixelPatterns::PixelPatterns(unsigned int)
+                0x0000000008010f50       0x4c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010f50                PixelPatterns::PixelPatterns(unsigned int)
+                0x0000000008010f50                PixelPatterns::PixelPatterns(unsigned int)
  .text._ZN13PixelPatterns7GetNameEN13pixelpatterns7PatternE
-                0x0000000008010fa0       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008010fa0                PixelPatterns::GetName(pixelpatterns::Pattern)
+                0x0000000008010f9c       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010f9c                PixelPatterns::GetName(pixelpatterns::Pattern)
  .text._ZN13PixelPatterns12RainbowCycleEjjN13pixelpatterns9DirectionE
-                0x0000000008010fb8       0x2c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008010fb8                PixelPatterns::RainbowCycle(unsigned int, unsigned int, pixelpatterns::Direction)
+                0x0000000008010fb4       0x2c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010fb4                PixelPatterns::RainbowCycle(unsigned int, unsigned int, pixelpatterns::Direction)
  .text._ZN13PixelPatterns12TheaterChaseEjjjjN13pixelpatterns9DirectionE
-                0x0000000008010fe4       0x38 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008010fe4                PixelPatterns::TheaterChase(unsigned int, unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
+                0x0000000008010fe0       0x38 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008010fe0                PixelPatterns::TheaterChase(unsigned int, unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
  .text._ZN13PixelPatterns10ColourWipeEjjjN13pixelpatterns9DirectionE
-                0x000000000801101c       0x34 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x000000000801101c                PixelPatterns::ColourWipe(unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
+                0x0000000008011018       0x34 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011018                PixelPatterns::ColourWipe(unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
  .text._ZN13PixelPatterns7ScannerEjjj
-                0x0000000008011050       0x68 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008011050                PixelPatterns::Scanner(unsigned int, unsigned int, unsigned int)
+                0x000000000801104c       0x68 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x000000000801104c                PixelPatterns::Scanner(unsigned int, unsigned int, unsigned int)
  .text._ZN13PixelPatterns4FadeEjjjjjN13pixelpatterns9DirectionE
-                0x00000000080110b8       0x34 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x00000000080110b8                PixelPatterns::Fade(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
+                0x00000000080110b4       0x34 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x00000000080110b4                PixelPatterns::Fade(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, pixelpatterns::Direction)
  .text._ZN13PixelPatterns5WheelEh
-                0x00000000080110ec       0x4a ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x00000000080110ec                PixelPatterns::Wheel(unsigned char)
- *fill*         0x0000000008011136        0x2 
+                0x00000000080110e8       0x4a ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x00000000080110e8                PixelPatterns::Wheel(unsigned char)
+ *fill*         0x0000000008011132        0x2 
  .text._ZN13PixelPatterns9IncrementEj
-                0x0000000008011138       0x3c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008011138                PixelPatterns::Increment(unsigned int)
+                0x0000000008011134       0x3c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011134                PixelPatterns::Increment(unsigned int)
  .text._ZN13PixelPatterns18RainbowCycleUpdateEj
-                0x0000000008011174       0x58 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008011174                PixelPatterns::RainbowCycleUpdate(unsigned int)
+                0x0000000008011170       0x58 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011170                PixelPatterns::RainbowCycleUpdate(unsigned int)
  .text._ZN13PixelPatterns18TheaterChaseUpdateEj
-                0x00000000080111cc       0x60 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x00000000080111cc                PixelPatterns::TheaterChaseUpdate(unsigned int)
+                0x00000000080111c8       0x60 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x00000000080111c8                PixelPatterns::TheaterChaseUpdate(unsigned int)
  .text._ZN13PixelPatterns16ColourWipeUpdateEj
-                0x000000000801122c       0x28 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x000000000801122c                PixelPatterns::ColourWipeUpdate(unsigned int)
+                0x0000000008011228       0x28 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011228                PixelPatterns::ColourWipeUpdate(unsigned int)
  .text._ZN13PixelPatterns13ScannerUpdateEj
-                0x0000000008011254       0xb8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008011254                PixelPatterns::ScannerUpdate(unsigned int)
+                0x0000000008011250       0xb8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011250                PixelPatterns::ScannerUpdate(unsigned int)
  .text._ZN13PixelPatterns10FadeUpdateEj
-                0x000000000801130c       0x8c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x000000000801130c                PixelPatterns::FadeUpdate(unsigned int)
+                0x0000000008011308       0x8c ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011308                PixelPatterns::FadeUpdate(unsigned int)
  .text._ZN13PixelPatterns10PortUpdateEjj
-                0x0000000008011398       0x50 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x0000000008011398                PixelPatterns::PortUpdate(unsigned int, unsigned int)
+                0x0000000008011394       0x50 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x0000000008011394                PixelPatterns::PortUpdate(unsigned int, unsigned int)
  .text._ZN13PixelPatterns3RunEv
-                0x00000000080113e8       0x58 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
-                0x00000000080113e8                PixelPatterns::Run()
+                0x00000000080113e4       0x58 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x00000000080113e4                PixelPatterns::Run()
  .text._ZN11WS28xxMulti14SetPixel4BytesEjjhhhh.constprop.0
-                0x0000000008011440       0x8c ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x000000000801143c       0x8c ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
  .text.TIMER3_IRQHandler
-                0x00000000080114cc       0x68 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x00000000080114cc                TIMER3_IRQHandler
+                0x00000000080114c8       0x68 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x00000000080114c8                TIMER3_IRQHandler
  .text._ZN11WS28xxMultiD2Ev
-                0x0000000008011534        0xc ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011534                WS28xxMulti::~WS28xxMulti()
-                0x0000000008011534                WS28xxMulti::~WS28xxMulti()
+                0x0000000008011530        0xc ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011530                WS28xxMulti::~WS28xxMulti()
+                0x0000000008011530                WS28xxMulti::~WS28xxMulti()
  .text._ZN11WS28xxMulti5SetupEhh
-                0x0000000008011540      0x1f4 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011540                WS28xxMulti::Setup(unsigned char, unsigned char)
+                0x000000000801153c      0x1f4 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x000000000801153c                WS28xxMulti::Setup(unsigned char, unsigned char)
  .text._ZN11WS28xxMulti5SetupEj
-                0x0000000008011734      0x244 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011734                WS28xxMulti::Setup(unsigned int)
+                0x0000000008011730      0x244 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011730                WS28xxMulti::Setup(unsigned int)
  .text._ZN11WS28xxMultiC2ER18PixelConfiguration
-                0x0000000008011978       0xc4 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011978                WS28xxMulti::WS28xxMulti(PixelConfiguration&)
-                0x0000000008011978                WS28xxMulti::WS28xxMulti(PixelConfiguration&)
+                0x0000000008011974       0xc4 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011974                WS28xxMulti::WS28xxMulti(PixelConfiguration&)
+                0x0000000008011974                WS28xxMulti::WS28xxMulti(PixelConfiguration&)
  .text._ZN11WS28xxMulti6UpdateEv
-                0x0000000008011a3c      0x148 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011a3c                WS28xxMulti::Update()
+                0x0000000008011a38      0x148 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011a38                WS28xxMulti::Update()
  .text._ZN11WS28xxMulti8BlackoutEv
-                0x0000000008011b84       0xc8 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011b84                WS28xxMulti::Blackout()
+                0x0000000008011b80       0xc8 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011b80                WS28xxMulti::Blackout()
  .text._ZN11WS28xxMulti6FullOnEv
-                0x0000000008011c4c       0xc0 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011c4c                WS28xxMulti::FullOn()
+                0x0000000008011c48       0xc0 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011c48                WS28xxMulti::FullOn()
  .text._ZN11WS28xxMulti10IsUpdatingEv
-                0x0000000008011d0c       0x10 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011d0c                WS28xxMulti::IsUpdating()
+                0x0000000008011d08       0x10 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011d08                WS28xxMulti::IsUpdating()
  .text._ZN11WS28xxMulti12SetColourRTZEjjhhh
-                0x0000000008011d1c       0x7c ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011d1c                WS28xxMulti::SetColourRTZ(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
+                0x0000000008011d18       0x7c ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011d18                WS28xxMulti::SetColourRTZ(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
  .text._ZN11WS28xxMulti15SetColourWS2801Ejjhhh
-                0x0000000008011d98       0x78 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011d98                WS28xxMulti::SetColourWS2801(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
+                0x0000000008011d94       0x78 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011d94                WS28xxMulti::SetColourWS2801(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
  .text._ZN11WS28xxMulti8SetPixelEjjhhh
-                0x0000000008011e10      0x104 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011e10                WS28xxMulti::SetPixel(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
+                0x0000000008011e0c      0x104 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011e0c                WS28xxMulti::SetPixel(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char)
  .text._ZN11WS28xxMulti8SetPixelEjjhhhh
-                0x0000000008011f14       0x88 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
-                0x0000000008011f14                WS28xxMulti::SetPixel(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char, unsigned char)
+                0x0000000008011f10       0x88 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+                0x0000000008011f10                WS28xxMulti::SetPixel(unsigned int, unsigned int, unsigned char, unsigned char, unsigned char, unsigned char)
  .text._ZN11ConfigStore14GetStoreOffsetEN11configstore5StoreE
-                0x0000000008011f9c       0x1c ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x0000000008011f9c                ConfigStore::GetStoreOffset(configstore::Store)
+                0x0000000008011f98       0x1c ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x0000000008011f98                ConfigStore::GetStoreOffset(configstore::Store)
  .text._ZN11ConfigStore4InitEv
-                0x0000000008011fb8      0x124 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x0000000008011fb8                ConfigStore::Init()
+                0x0000000008011fb4      0x124 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x0000000008011fb4                ConfigStore::Init()
  .text._ZN11ConfigStoreC2Ev
-                0x00000000080120dc       0x48 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x00000000080120dc                ConfigStore::ConfigStore()
-                0x00000000080120dc                ConfigStore::ConfigStore()
+                0x00000000080120d8       0x48 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x00000000080120d8                ConfigStore::ConfigStore()
+                0x00000000080120d8                ConfigStore::ConfigStore()
  .text._ZN11ConfigStore12ResetSetListEN11configstore5StoreE
-                0x0000000008012124       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x0000000008012124                ConfigStore::ResetSetList(configstore::Store)
+                0x0000000008012120       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x0000000008012120                ConfigStore::ResetSetList(configstore::Store)
  .text._ZN11ConfigStore6UpdateEN11configstore5StoreEjPKvjjj
-                0x0000000008012148       0x80 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x0000000008012148                ConfigStore::Update(configstore::Store, unsigned int, void const*, unsigned int, unsigned int, unsigned int)
+                0x0000000008012144       0x80 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x0000000008012144                ConfigStore::Update(configstore::Store, unsigned int, void const*, unsigned int, unsigned int, unsigned int)
  .text._ZN11ConfigStore4CopyEN11configstore5StoreEPvjjb
-                0x00000000080121c8       0x64 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x00000000080121c8                ConfigStore::Copy(configstore::Store, void*, unsigned int, unsigned int, bool)
+                0x00000000080121c4       0x64 ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x00000000080121c4                ConfigStore::Copy(configstore::Store, void*, unsigned int, unsigned int, bool)
  .text._ZN11ConfigStore5FlashEv
-                0x000000000801222c       0xac ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
-                0x000000000801222c                ConfigStore::Flash()
+                0x0000000008012228       0xac ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x0000000008012228                ConfigStore::Flash()
  .text._ZN15StoreDisplayUdfD2Ev
-                0x00000000080122d8        0x2 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x00000000080122d8                StoreDisplayUdf::~StoreDisplayUdf()
-                0x00000000080122d8                StoreDisplayUdf::~StoreDisplayUdf()
- *fill*         0x00000000080122da        0x2 
+                0x00000000080122d4        0x2 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x00000000080122d4                StoreDisplayUdf::~StoreDisplayUdf()
+                0x00000000080122d4                StoreDisplayUdf::~StoreDisplayUdf()
+ *fill*         0x00000000080122d6        0x2 
  .text._ZN15StoreDisplayUdf4CopyEPN16displayudfparams6ParamsE
-                0x00000000080122dc       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x00000000080122dc                StoreDisplayUdf::Copy(displayudfparams::Params*)
+                0x00000000080122d8       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x00000000080122d8                StoreDisplayUdf::Copy(displayudfparams::Params*)
  .text._ZN15StoreDisplayUdf6UpdateEPKN16displayudfparams6ParamsE
-                0x0000000008012300       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x0000000008012300                StoreDisplayUdf::Update(displayudfparams::Params const*)
+                0x00000000080122fc       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x00000000080122fc                StoreDisplayUdf::Update(displayudfparams::Params const*)
  .text._ZN15StoreDisplayUdfD0Ev
-                0x0000000008012324        0xc ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x0000000008012324                StoreDisplayUdf::~StoreDisplayUdf()
+                0x0000000008012320        0xc ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x0000000008012320                StoreDisplayUdf::~StoreDisplayUdf()
  .text._ZN15StoreDisplayUdfC2Ev
-                0x0000000008012330       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x0000000008012330                StoreDisplayUdf::StoreDisplayUdf()
-                0x0000000008012330                StoreDisplayUdf::StoreDisplayUdf()
+                0x000000000801232c       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x000000000801232c                StoreDisplayUdf::StoreDisplayUdf()
+                0x000000000801232c                StoreDisplayUdf::StoreDisplayUdf()
  .text._ZN12StoreNetworkD2Ev
-                0x0000000008012344        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x0000000008012344                StoreNetwork::~StoreNetwork()
-                0x0000000008012344                StoreNetwork::~StoreNetwork()
-                0x0000000008012346                non-virtual thunk to StoreNetwork::~StoreNetwork()
- *fill*         0x000000000801234a        0x2 
+                0x0000000008012340        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x0000000008012340                StoreNetwork::~StoreNetwork()
+                0x0000000008012340                StoreNetwork::~StoreNetwork()
+                0x0000000008012342                non-virtual thunk to StoreNetwork::~StoreNetwork()
+ *fill*         0x0000000008012346        0x2 
  .text._ZN12StoreNetwork6UpdateEPKN13networkparams6ParamsE
-                0x000000000801234c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x000000000801234c                StoreNetwork::Update(networkparams::Params const*)
+                0x0000000008012348       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x0000000008012348                StoreNetwork::Update(networkparams::Params const*)
  .text._ZN12StoreNetwork13SaveGatewayIpEj
-                0x0000000008012370       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x0000000008012370                StoreNetwork::SaveGatewayIp(unsigned int)
-                0x0000000008012398                non-virtual thunk to StoreNetwork::SaveGatewayIp(unsigned int)
+                0x000000000801236c       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x000000000801236c                StoreNetwork::SaveGatewayIp(unsigned int)
+                0x0000000008012394                non-virtual thunk to StoreNetwork::SaveGatewayIp(unsigned int)
  .text._ZN12StoreNetwork11SaveNetMaskEj
-                0x00000000080123a0       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x00000000080123a0                StoreNetwork::SaveNetMask(unsigned int)
-                0x00000000080123c4                non-virtual thunk to StoreNetwork::SaveNetMask(unsigned int)
+                0x000000000801239c       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x000000000801239c                StoreNetwork::SaveNetMask(unsigned int)
+                0x00000000080123c0                non-virtual thunk to StoreNetwork::SaveNetMask(unsigned int)
  .text._ZN12StoreNetwork6SaveIpEj
-                0x00000000080123cc       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x00000000080123cc                StoreNetwork::SaveIp(unsigned int)
-                0x00000000080123f0                non-virtual thunk to StoreNetwork::SaveIp(unsigned int)
+                0x00000000080123c8       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x00000000080123c8                StoreNetwork::SaveIp(unsigned int)
+                0x00000000080123ec                non-virtual thunk to StoreNetwork::SaveIp(unsigned int)
  .text._ZN12StoreNetwork12SaveHostNameEPKcj
-                0x00000000080123f8       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x00000000080123f8                StoreNetwork::SaveHostName(char const*, unsigned int)
-                0x0000000008012424                non-virtual thunk to StoreNetwork::SaveHostName(char const*, unsigned int)
+                0x00000000080123f4       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x00000000080123f4                StoreNetwork::SaveHostName(char const*, unsigned int)
+                0x0000000008012420                non-virtual thunk to StoreNetwork::SaveHostName(char const*, unsigned int)
  .text._ZN12StoreNetworkD0Ev
-                0x000000000801242c       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x000000000801242c                StoreNetwork::~StoreNetwork()
-                0x0000000008012438                non-virtual thunk to StoreNetwork::~StoreNetwork()
- *fill*         0x000000000801243e        0x2 
+                0x0000000008012428       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x0000000008012428                StoreNetwork::~StoreNetwork()
+                0x0000000008012434                non-virtual thunk to StoreNetwork::~StoreNetwork()
+ *fill*         0x000000000801243a        0x2 
  .text._ZN12StoreNetwork4CopyEPN13networkparams6ParamsE
-                0x0000000008012440       0x20 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x0000000008012440                StoreNetwork::Copy(networkparams::Params*)
+                0x000000000801243c       0x20 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x000000000801243c                StoreNetwork::Copy(networkparams::Params*)
  .text._ZN12StoreNetworkC2Ev
-                0x0000000008012460       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x0000000008012460                StoreNetwork::StoreNetwork()
-                0x0000000008012460                StoreNetwork::StoreNetwork()
+                0x000000000801245c       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x000000000801245c                StoreNetwork::StoreNetwork()
+                0x000000000801245c                StoreNetwork::StoreNetwork()
  .text._ZN17StoreRemoteConfigD2Ev
-                0x0000000008012478        0x2 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x0000000008012478                StoreRemoteConfig::~StoreRemoteConfig()
-                0x0000000008012478                StoreRemoteConfig::~StoreRemoteConfig()
- *fill*         0x000000000801247a        0x2 
+                0x0000000008012474        0x2 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x0000000008012474                StoreRemoteConfig::~StoreRemoteConfig()
+                0x0000000008012474                StoreRemoteConfig::~StoreRemoteConfig()
+ *fill*         0x0000000008012476        0x2 
  .text._ZN17StoreRemoteConfig4CopyEP19TRemoteConfigParams
-                0x000000000801247c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x000000000801247c                StoreRemoteConfig::Copy(TRemoteConfigParams*)
+                0x0000000008012478       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x0000000008012478                StoreRemoteConfig::Copy(TRemoteConfigParams*)
  .text._ZN17StoreRemoteConfig6UpdateEPK19TRemoteConfigParams
-                0x00000000080124a0       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x00000000080124a0                StoreRemoteConfig::Update(TRemoteConfigParams const*)
+                0x000000000801249c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x000000000801249c                StoreRemoteConfig::Update(TRemoteConfigParams const*)
  .text._ZN17StoreRemoteConfigD0Ev
-                0x00000000080124c4        0xc ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x00000000080124c4                StoreRemoteConfig::~StoreRemoteConfig()
+                0x00000000080124c0        0xc ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x00000000080124c0                StoreRemoteConfig::~StoreRemoteConfig()
  .text._ZN17StoreRemoteConfigC2Ev
-                0x00000000080124d0       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x00000000080124d0                StoreRemoteConfig::StoreRemoteConfig()
-                0x00000000080124d0                StoreRemoteConfig::StoreRemoteConfig()
+                0x00000000080124cc       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x00000000080124cc                StoreRemoteConfig::StoreRemoteConfig()
+                0x00000000080124cc                StoreRemoteConfig::StoreRemoteConfig()
  .text._ZN11StoreDeviceC2Ev
-                0x00000000080124e4       0x4c ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x00000000080124e4                StoreDevice::StoreDevice()
-                0x00000000080124e4                StoreDevice::StoreDevice()
+                0x00000000080124e0       0x4c ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x00000000080124e0                StoreDevice::StoreDevice()
+                0x00000000080124e0                StoreDevice::StoreDevice()
  .text._ZNK11StoreDevice7GetSizeEv
-                0x0000000008012530        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x0000000008012530                StoreDevice::GetSize() const
+                0x000000000801252c        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x000000000801252c                StoreDevice::GetSize() const
  .text._ZNK11StoreDevice13GetSectorSizeEv
-                0x0000000008012534        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x0000000008012534                StoreDevice::GetSectorSize() const
+                0x0000000008012530        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x0000000008012530                StoreDevice::GetSectorSize() const
  .text._ZN11StoreDevice4ReadEjjPhRN11storedevice6resultE
-                0x0000000008012538       0x16 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x0000000008012538                StoreDevice::Read(unsigned int, unsigned int, unsigned char*, storedevice::result&)
+                0x0000000008012534       0x16 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x0000000008012534                StoreDevice::Read(unsigned int, unsigned int, unsigned char*, storedevice::result&)
  .text._ZN11StoreDevice5EraseEjjRN11storedevice6resultE
-                0x000000000801254e       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x000000000801254e                StoreDevice::Erase(unsigned int, unsigned int, storedevice::result&)
+                0x000000000801254a       0x14 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x000000000801254a                StoreDevice::Erase(unsigned int, unsigned int, storedevice::result&)
  .text._ZN11StoreDevice5WriteEjjPKhRN11storedevice6resultE
-                0x0000000008012562       0x16 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
-                0x0000000008012562                StoreDevice::Write(unsigned int, unsigned int, unsigned char const*, storedevice::result&)
+                0x000000000801255e       0x16 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+                0x000000000801255e                StoreDevice::Write(unsigned int, unsigned int, unsigned char const*, storedevice::result&)
  .text._ZN11StoreArtNet12SaveUniverseEjt
-                0x0000000008012578        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012578                StoreArtNet::SaveUniverse(unsigned int, unsigned short)
-                0x000000000801257a                non-virtual thunk to StoreArtNet::SaveUniverse(unsigned int, unsigned short)
+                0x0000000008012574        0x4 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012574                StoreArtNet::SaveUniverse(unsigned int, unsigned short)
+                0x0000000008012576                non-virtual thunk to StoreArtNet::SaveUniverse(unsigned int, unsigned short)
  .text._ZN11StoreArtNetD2Ev
-                0x000000000801257c        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x000000000801257c                StoreArtNet::~StoreArtNet()
-                0x000000000801257c                StoreArtNet::~StoreArtNet()
-                0x000000000801257e                non-virtual thunk to StoreArtNet::~StoreArtNet()
- *fill*         0x0000000008012582        0x2 
+                0x0000000008012578        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012578                StoreArtNet::~StoreArtNet()
+                0x0000000008012578                StoreArtNet::~StoreArtNet()
+                0x000000000801257a                non-virtual thunk to StoreArtNet::~StoreArtNet()
+ *fill*         0x000000000801257e        0x2 
  .text._ZN11StoreArtNet6UpdateEPKN12artnetparams6ParamsE
-                0x0000000008012584       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012584                StoreArtNet::Update(artnetparams::Params const*)
+                0x0000000008012580       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012580                StoreArtNet::Update(artnetparams::Params const*)
  .text._ZN11StoreArtNet18SaveUniverseSwitchEjh
-                0x00000000080125a8       0x40 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080125a8                StoreArtNet::SaveUniverseSwitch(unsigned int, unsigned char)
+                0x00000000080125a4       0x40 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080125a4                StoreArtNet::SaveUniverseSwitch(unsigned int, unsigned char)
  .text._ZThn4_N11StoreArtNet18SaveUniverseSwitchEjh
-                0x00000000080125e8        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080125e8                non-virtual thunk to StoreArtNet::SaveUniverseSwitch(unsigned int, unsigned char)
+                0x00000000080125e4        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080125e4                non-virtual thunk to StoreArtNet::SaveUniverseSwitch(unsigned int, unsigned char)
  .text._ZN11StoreArtNet13SaveNetSwitchEjh
-                0x00000000080125f0       0x28 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080125f0                StoreArtNet::SaveNetSwitch(unsigned int, unsigned char)
+                0x00000000080125ec       0x28 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080125ec                StoreArtNet::SaveNetSwitch(unsigned int, unsigned char)
  .text._ZThn4_N11StoreArtNet13SaveNetSwitchEjh
-                0x0000000008012618        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012618                non-virtual thunk to StoreArtNet::SaveNetSwitch(unsigned int, unsigned char)
+                0x0000000008012614        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012614                non-virtual thunk to StoreArtNet::SaveNetSwitch(unsigned int, unsigned char)
  .text._ZN11StoreArtNet16SaveSubnetSwitchEjh
-                0x0000000008012620       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012620                StoreArtNet::SaveSubnetSwitch(unsigned int, unsigned char)
+                0x000000000801261c       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x000000000801261c                StoreArtNet::SaveSubnetSwitch(unsigned int, unsigned char)
  .text._ZThn4_N11StoreArtNet16SaveSubnetSwitchEjh
-                0x000000000801264c        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x000000000801264c                non-virtual thunk to StoreArtNet::SaveSubnetSwitch(unsigned int, unsigned char)
+                0x0000000008012648        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012648                non-virtual thunk to StoreArtNet::SaveSubnetSwitch(unsigned int, unsigned char)
  .text._ZN11StoreArtNet13SaveMergeModeEjN8lightset9MergeModeE
-                0x0000000008012654       0x3c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012654                StoreArtNet::SaveMergeMode(unsigned int, lightset::MergeMode)
+                0x0000000008012650       0x3c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012650                StoreArtNet::SaveMergeMode(unsigned int, lightset::MergeMode)
  .text._ZThn4_N11StoreArtNet13SaveMergeModeEjN8lightset9MergeModeE
-                0x0000000008012690        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012690                non-virtual thunk to StoreArtNet::SaveMergeMode(unsigned int, lightset::MergeMode)
+                0x000000000801268c        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x000000000801268c                non-virtual thunk to StoreArtNet::SaveMergeMode(unsigned int, lightset::MergeMode)
  .text._ZN11StoreArtNet16SavePortProtocolEjN6artnet12PortProtocolE
-                0x0000000008012698       0x3c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012698                StoreArtNet::SavePortProtocol(unsigned int, artnet::PortProtocol)
+                0x0000000008012694       0x3c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012694                StoreArtNet::SavePortProtocol(unsigned int, artnet::PortProtocol)
  .text._ZThn4_N11StoreArtNet16SavePortProtocolEjN6artnet12PortProtocolE
-                0x00000000080126d4        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080126d4                non-virtual thunk to StoreArtNet::SavePortProtocol(unsigned int, artnet::PortProtocol)
+                0x00000000080126d0        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080126d0                non-virtual thunk to StoreArtNet::SavePortProtocol(unsigned int, artnet::PortProtocol)
  .text._ZN11StoreArtNet12SaveLongNameEPKc
-                0x00000000080126dc       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080126dc                StoreArtNet::SaveLongName(char const*)
-                0x0000000008012700                non-virtual thunk to StoreArtNet::SaveLongName(char const*)
+                0x00000000080126d8       0x2c ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080126d8                StoreArtNet::SaveLongName(char const*)
+                0x00000000080126fc                non-virtual thunk to StoreArtNet::SaveLongName(char const*)
  .text._ZN11StoreArtNet13SaveShortNameEPKc
-                0x0000000008012708       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012708                StoreArtNet::SaveShortName(char const*)
-                0x0000000008012730                non-virtual thunk to StoreArtNet::SaveShortName(char const*)
+                0x0000000008012704       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012704                StoreArtNet::SaveShortName(char const*)
+                0x000000000801272c                non-virtual thunk to StoreArtNet::SaveShortName(char const*)
  .text._ZN11StoreArtNet12SaveFailSafeEh
-                0x0000000008012738       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012738                StoreArtNet::SaveFailSafe(unsigned char)
-                0x0000000008012764                non-virtual thunk to StoreArtNet::SaveFailSafe(unsigned char)
+                0x0000000008012734       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012734                StoreArtNet::SaveFailSafe(unsigned char)
+                0x0000000008012760                non-virtual thunk to StoreArtNet::SaveFailSafe(unsigned char)
  .text._ZN11StoreArtNet14SaveRdmEnabledEjb
-                0x000000000801276c       0x78 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x000000000801276c                StoreArtNet::SaveRdmEnabled(unsigned int, bool)
+                0x0000000008012768       0x78 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012768                StoreArtNet::SaveRdmEnabled(unsigned int, bool)
  .text._ZThn4_N11StoreArtNet14SaveRdmEnabledEjb
-                0x00000000080127e4        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080127e4                non-virtual thunk to StoreArtNet::SaveRdmEnabled(unsigned int, bool)
+                0x00000000080127e0        0x8 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080127e0                non-virtual thunk to StoreArtNet::SaveRdmEnabled(unsigned int, bool)
  .text._ZN11StoreArtNet4CopyEPN12artnetparams6ParamsE
-                0x00000000080127ec       0x20 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x00000000080127ec                StoreArtNet::Copy(artnetparams::Params*)
+                0x00000000080127e8       0x20 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x00000000080127e8                StoreArtNet::Copy(artnetparams::Params*)
  .text._ZN11StoreArtNetD0Ev
-                0x000000000801280c       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x000000000801280c                StoreArtNet::~StoreArtNet()
-                0x0000000008012818                non-virtual thunk to StoreArtNet::~StoreArtNet()
- *fill*         0x000000000801281e        0x2 
+                0x0000000008012808       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x0000000008012808                StoreArtNet::~StoreArtNet()
+                0x0000000008012814                non-virtual thunk to StoreArtNet::~StoreArtNet()
+ *fill*         0x000000000801281a        0x2 
  .text._ZN11StoreArtNetC2Ej
-                0x0000000008012820       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x0000000008012820                StoreArtNet::StoreArtNet(unsigned int)
-                0x0000000008012820                StoreArtNet::StoreArtNet(unsigned int)
+                0x000000000801281c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x000000000801281c                StoreArtNet::StoreArtNet(unsigned int)
+                0x000000000801281c                StoreArtNet::StoreArtNet(unsigned int)
  .text._ZN14StoreRDMDeviceD2Ev
-                0x0000000008012844        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x0000000008012844                StoreRDMDevice::~StoreRDMDevice()
-                0x0000000008012844                StoreRDMDevice::~StoreRDMDevice()
-                0x0000000008012846                non-virtual thunk to StoreRDMDevice::~StoreRDMDevice()
- *fill*         0x000000000801284a        0x2 
- .text._ZN14StoreRDMDevice6UpdateEPK16TRDMDeviceParams
-                0x000000000801284c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x000000000801284c                StoreRDMDevice::Update(TRDMDeviceParams const*)
+                0x0000000008012840        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x0000000008012840                StoreRDMDevice::~StoreRDMDevice()
+                0x0000000008012840                StoreRDMDevice::~StoreRDMDevice()
+                0x0000000008012842                non-virtual thunk to StoreRDMDevice::~StoreRDMDevice()
+ *fill*         0x0000000008012846        0x2 
+ .text._ZN14StoreRDMDevice6UpdateEPKN3rdm12deviceparams6ParamsE
+                0x0000000008012848       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x0000000008012848                StoreRDMDevice::Update(rdm::deviceparams::Params const*)
  .text._ZN14StoreRDMDevice9SaveLabelEPKch
-                0x0000000008012870       0x44 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x0000000008012870                StoreRDMDevice::SaveLabel(char const*, unsigned char)
-                0x00000000080128ac                non-virtual thunk to StoreRDMDevice::SaveLabel(char const*, unsigned char)
+                0x000000000801286c       0x44 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x000000000801286c                StoreRDMDevice::SaveLabel(char const*, unsigned char)
+                0x00000000080128a8                non-virtual thunk to StoreRDMDevice::SaveLabel(char const*, unsigned char)
  .text._ZN14StoreRDMDeviceD0Ev
-                0x00000000080128b4       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x00000000080128b4                StoreRDMDevice::~StoreRDMDevice()
-                0x00000000080128c0                non-virtual thunk to StoreRDMDevice::~StoreRDMDevice()
- *fill*         0x00000000080128c6        0x2 
- .text._ZN14StoreRDMDevice4CopyEP16TRDMDeviceParams
-                0x00000000080128c8       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x00000000080128c8                StoreRDMDevice::Copy(TRDMDeviceParams*)
+                0x00000000080128b0       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x00000000080128b0                StoreRDMDevice::~StoreRDMDevice()
+                0x00000000080128bc                non-virtual thunk to StoreRDMDevice::~StoreRDMDevice()
+ *fill*         0x00000000080128c2        0x2 
+ .text._ZN14StoreRDMDevice4CopyEPN3rdm12deviceparams6ParamsE
+                0x00000000080128c4       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x00000000080128c4                StoreRDMDevice::Copy(rdm::deviceparams::Params*)
  .text._ZN14StoreRDMDeviceC2Ev
-                0x00000000080128ec       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x00000000080128ec                StoreRDMDevice::StoreRDMDevice()
-                0x00000000080128ec                StoreRDMDevice::StoreRDMDevice()
+                0x00000000080128e8       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x00000000080128e8                StoreRDMDevice::StoreRDMDevice()
+                0x00000000080128e8                StoreRDMDevice::StoreRDMDevice()
  .text._ZN13StorePixelDmxD2Ev
-                0x0000000008012904        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012904                StorePixelDmx::~StorePixelDmx()
-                0x0000000008012904                StorePixelDmx::~StorePixelDmx()
-                0x0000000008012906                non-virtual thunk to StorePixelDmx::~StorePixelDmx()
- *fill*         0x000000000801290a        0x2 
+                0x0000000008012900        0x6 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012900                StorePixelDmx::~StorePixelDmx()
+                0x0000000008012900                StorePixelDmx::~StorePixelDmx()
+                0x0000000008012902                non-virtual thunk to StorePixelDmx::~StorePixelDmx()
+ *fill*         0x0000000008012906        0x2 
  .text._ZN13StorePixelDmx6UpdateEPKN14pixeldmxparams6ParamsE
-                0x000000000801290c       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x000000000801290c                StorePixelDmx::Update(pixeldmxparams::Params const*)
+                0x0000000008012908       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012908                StorePixelDmx::Update(pixeldmxparams::Params const*)
  .text._ZN13StorePixelDmx19SaveDmxStartAddressEt
-                0x0000000008012930       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012930                StorePixelDmx::SaveDmxStartAddress(unsigned short)
-                0x000000000801295c                non-virtual thunk to StorePixelDmx::SaveDmxStartAddress(unsigned short)
+                0x000000000801292c       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x000000000801292c                StorePixelDmx::SaveDmxStartAddress(unsigned short)
+                0x0000000008012958                non-virtual thunk to StorePixelDmx::SaveDmxStartAddress(unsigned short)
  .text._ZN13StorePixelDmx15SaveTestPatternEh
-                0x0000000008012964       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012964                StorePixelDmx::SaveTestPattern(unsigned char)
-                0x0000000008012990                non-virtual thunk to StorePixelDmx::SaveTestPattern(unsigned char)
+                0x0000000008012960       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012960                StorePixelDmx::SaveTestPattern(unsigned char)
+                0x000000000801298c                non-virtual thunk to StorePixelDmx::SaveTestPattern(unsigned char)
  .text._ZN13StorePixelDmx7SaveMapEh
-                0x0000000008012998       0x38 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012998                StorePixelDmx::SaveMap(unsigned char)
-                0x00000000080129c8                non-virtual thunk to StorePixelDmx::SaveMap(unsigned char)
+                0x0000000008012994       0x38 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012994                StorePixelDmx::SaveMap(unsigned char)
+                0x00000000080129c4                non-virtual thunk to StorePixelDmx::SaveMap(unsigned char)
  .text._ZN13StorePixelDmx17SaveGroupingCountEt
-                0x00000000080129d0       0x38 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x00000000080129d0                StorePixelDmx::SaveGroupingCount(unsigned short)
-                0x0000000008012a00                non-virtual thunk to StorePixelDmx::SaveGroupingCount(unsigned short)
+                0x00000000080129cc       0x38 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x00000000080129cc                StorePixelDmx::SaveGroupingCount(unsigned short)
+                0x00000000080129fc                non-virtual thunk to StorePixelDmx::SaveGroupingCount(unsigned short)
  .text._ZN13StorePixelDmx9SaveCountEt
-                0x0000000008012a08       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012a08                StorePixelDmx::SaveCount(unsigned short)
-                0x0000000008012a34                non-virtual thunk to StorePixelDmx::SaveCount(unsigned short)
+                0x0000000008012a04       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012a04                StorePixelDmx::SaveCount(unsigned short)
+                0x0000000008012a30                non-virtual thunk to StorePixelDmx::SaveCount(unsigned short)
  .text._ZN13StorePixelDmx8SaveTypeEh
-                0x0000000008012a3c       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012a3c                StorePixelDmx::SaveType(unsigned char)
-                0x0000000008012a68                non-virtual thunk to StorePixelDmx::SaveType(unsigned char)
+                0x0000000008012a38       0x34 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012a38                StorePixelDmx::SaveType(unsigned char)
+                0x0000000008012a64                non-virtual thunk to StorePixelDmx::SaveType(unsigned char)
  .text._ZN13StorePixelDmxD0Ev
-                0x0000000008012a70       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012a70                StorePixelDmx::~StorePixelDmx()
-                0x0000000008012a7c                non-virtual thunk to StorePixelDmx::~StorePixelDmx()
- *fill*         0x0000000008012a82        0x2 
+                0x0000000008012a6c       0x12 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012a6c                StorePixelDmx::~StorePixelDmx()
+                0x0000000008012a78                non-virtual thunk to StorePixelDmx::~StorePixelDmx()
+ *fill*         0x0000000008012a7e        0x2 
  .text._ZN13StorePixelDmx4CopyEPN14pixeldmxparams6ParamsE
-                0x0000000008012a84       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012a84                StorePixelDmx::Copy(pixeldmxparams::Params*)
+                0x0000000008012a80       0x24 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012a80                StorePixelDmx::Copy(pixeldmxparams::Params*)
  .text._ZN13StorePixelDmxC2Ev
-                0x0000000008012aa8       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x0000000008012aa8                StorePixelDmx::StorePixelDmx()
-                0x0000000008012aa8                StorePixelDmx::StorePixelDmx()
+                0x0000000008012aa4       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x0000000008012aa4                StorePixelDmx::StorePixelDmx()
+                0x0000000008012aa4                StorePixelDmx::StorePixelDmx()
  .text.memcpy.isra.0
-                0x0000000008012ac0       0x14 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012abc       0x14 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .text._ZL12_send_reportj
-                0x0000000008012ad4       0x64 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012ad0       0x64 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .text._Z11igmp_set_ipv
-                0x0000000008012b38       0x34 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
-                0x0000000008012b38                igmp_set_ip()
+                0x0000000008012b34       0x34 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012b34                igmp_set_ip()
  .text._Z10igmp_timerv
-                0x0000000008012b6c       0x34 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
-                0x0000000008012b6c                igmp_timer()
+                0x0000000008012b68       0x34 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012b68                igmp_timer()
  .text._Z9igmp_joinj
-                0x0000000008012ba0       0x58 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
-                0x0000000008012ba0                igmp_join(unsigned int)
+                0x0000000008012b9c       0x58 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012b9c                igmp_join(unsigned int)
  .text._Z10igmp_leavej
-                0x0000000008012bf8       0x8c ../lib-network/lib_gd32/libnetwork.a(igmp.o)
-                0x0000000008012bf8                igmp_leave(unsigned int)
+                0x0000000008012bf4       0x8c ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008012bf4                igmp_leave(unsigned int)
  .text._Z10net_set_ipj
-                0x0000000008012c84       0x18 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008012c84                net_set_ip(unsigned int)
+                0x0000000008012c80       0x18 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008012c80                net_set_ip(unsigned int)
  .text._Z10net_set_gwj
-                0x0000000008012c9c        0xc ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008012c9c                net_set_gw(unsigned int)
+                0x0000000008012c98        0xc ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008012c98                net_set_gw(unsigned int)
  .text._Z12net_set_dhcpP7ip_infoPKcPb
-                0x0000000008012ca8       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008012ca8                net_set_dhcp(ip_info*, char const*, bool*)
+                0x0000000008012ca4       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008012ca4                net_set_dhcp(ip_info*, char const*, bool*)
  .text._Z16net_dhcp_releasev
-                0x0000000008012cf0       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008012cf0                net_dhcp_release()
+                0x0000000008012cec       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008012cec                net_dhcp_release()
  .text._Z16net_set_zeroconfP7ip_info
-                0x0000000008012d04       0x38 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008012d04                net_set_zeroconf(ip_info*)
+                0x0000000008012d00       0x38 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008012d00                net_set_zeroconf(ip_info*)
  .text._Z14net_timers_runv
-                0x0000000008012d3c       0x20 ../lib-network/lib_gd32/libnetwork.a(net_timers.o)
-                0x0000000008012d3c                net_timers_run()
+                0x0000000008012d38       0x20 ../lib-network/lib_gd32/libnetwork.a(net_timers.o)
+                0x0000000008012d38                net_timers_run()
  .text._Z7rfc3927v
-                0x0000000008012d5c       0x84 ../lib-network/lib_gd32/libnetwork.a(rfc3927.o)
-                0x0000000008012d5c                rfc3927()
+                0x0000000008012d58       0x84 ../lib-network/lib_gd32/libnetwork.a(rfc3927.o)
+                0x0000000008012d58                rfc3927()
  .text.memcpy.isra.0
-                0x0000000008012de0       0x14 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008012ddc       0x14 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL12scan_optionsP5t_tcpP3tcbi
-                0x0000000008012df4       0xb0 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008012df0       0xb0 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL8_bswap32P5t_tcp
-                0x0000000008012ea4       0x4a ../lib-network/lib_gd32/libnetwork.a(tcp.o)
- *fill*         0x0000000008012eee        0x2 
+                0x0000000008012ea0       0x4a ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+ *fill*         0x0000000008012eea        0x2 
  .text._ZL12send_packagePK3tcbRK8SendInfo
-                0x0000000008012ef0      0x174 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008012eec      0x174 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL9_init_tcbP3tcbt
-                0x0000000008013064       0x38 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008013060       0x38 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL10send_resetP5t_tcpPK3tcb
-                0x000000000801309c       0x60 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008013098       0x60 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._Z9tcp_begint
-                0x00000000080130fc       0x40 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x00000000080130fc                tcp_begin(unsigned short)
+                0x00000000080130f8       0x40 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x00000000080130f8                tcp_begin(unsigned short)
  .text._Z8tcp_readiPPKhRj
-                0x000000000801313c       0x68 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x000000000801313c                tcp_read(int, unsigned char const**, unsigned int&)
+                0x0000000008013138       0x68 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008013138                tcp_read(int, unsigned char const**, unsigned int&)
  .text._Z9tcp_writeiPKhtj
-                0x00000000080131a4       0x64 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x00000000080131a4                tcp_write(int, unsigned char const*, unsigned short, unsigned int)
+                0x00000000080131a0       0x64 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x00000000080131a0                tcp_write(int, unsigned char const*, unsigned short, unsigned int)
  .text.memcpy.isra.0
-                0x0000000008013208       0x14 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008013204       0x14 ../lib-network/lib_gd32/libnetwork.a(udp.o)
  .text._Z10net_memcpyPvPKvj
-                0x000000000801321c       0x3c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x000000000801321c                net_memcpy(void*, void const*, unsigned int)
+                0x0000000008013218       0x3c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008013218                net_memcpy(void*, void const*, unsigned int)
  .text._Z10udp_set_ipv
-                0x0000000008013258       0x38 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008013258                udp_set_ip()
+                0x0000000008013254       0x38 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008013254                udp_set_ip()
  .text._Z9udp_begint
-                0x0000000008013290       0x34 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008013290                udp_begin(unsigned short)
+                0x000000000801328c       0x34 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x000000000801328c                udp_begin(unsigned short)
  .text._Z7udp_endt
-                0x00000000080132c4       0x44 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x00000000080132c4                udp_end(unsigned short)
+                0x00000000080132c0       0x44 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x00000000080132c0                udp_end(unsigned short)
  .text._Z9udp_recv1iPhtPjPt
-                0x0000000008013308       0x48 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008013308                udp_recv1(int, unsigned char*, unsigned short, unsigned int*, unsigned short*)
+                0x0000000008013304       0x48 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008013304                udp_recv1(int, unsigned char*, unsigned short, unsigned int*, unsigned short*)
  .text._Z9udp_recv2iPPKhPjPt
-                0x0000000008013350       0x2c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008013350                udp_recv2(int, unsigned char const**, unsigned int*, unsigned short*)
+                0x000000000801334c       0x2c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x000000000801334c                udp_recv2(int, unsigned char const**, unsigned int*, unsigned short*)
  .text._Z8udp_sendiPKhtjt
-                0x000000000801337c      0x16c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x000000000801337c                udp_send(int, unsigned char const*, unsigned short, unsigned int, unsigned short)
+                0x0000000008013378      0x16c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008013378                udp_send(int, unsigned char const*, unsigned short, unsigned int, unsigned short)
  .text.strncpy.constprop.0.isra.0
-                0x00000000080134e8       0x20 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x00000000080134e4       0x20 ../lib-network/lib_gd32/libnetwork.a(network.o)
  .text._ZN7Network12SetDefaultIpEv
-                0x0000000008013508       0x22 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013508                Network::SetDefaultIp()
+                0x0000000008013504       0x22 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013504                Network::SetDefaultIp()
  .text._ZN3net18phy_customized_ledEv
-                0x000000000801352a        0x2 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x000000000801352a                net::phy_customized_led()
+                0x0000000008013526        0x2 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013526                net::phy_customized_led()
  .text._ZN3net21phy_customized_timingEv
-                0x000000000801352c        0x2 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x000000000801352c                net::phy_customized_timing()
- *fill*         0x000000000801352e        0x2 
+                0x0000000008013528        0x2 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013528                net::phy_customized_timing()
+ *fill*         0x000000000801352a        0x2 
  .text._ZN7NetworkC2Ev
-                0x0000000008013530       0x50 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013530                Network::Network()
-                0x0000000008013530                Network::Network()
+                0x000000000801352c       0x50 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801352c                Network::Network()
+                0x000000000801352c                Network::Network()
  .text._ZN7Network4InitEP18NetworkParamsStore
-                0x0000000008013580      0x288 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013580                Network::Init(NetworkParamsStore*)
+                0x000000000801357c      0x288 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801357c                Network::Init(NetworkParamsStore*)
  .text._ZN7Network5SetIpEj
-                0x0000000008013808       0x56 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013808                Network::SetIp(unsigned int)
+                0x0000000008013804       0x56 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013804                Network::SetIp(unsigned int)
  .text._ZN7Network10SetNetmaskEj
-                0x000000000801385e       0x24 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x000000000801385e                Network::SetNetmask(unsigned int)
+                0x000000000801385a       0x24 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801385a                Network::SetNetmask(unsigned int)
  .text._ZN7Network12SetGatewayIpEj
-                0x0000000008013882       0x2e ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013882                Network::SetGatewayIp(unsigned int)
+                0x000000000801387e       0x2e ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801387e                Network::SetGatewayIp(unsigned int)
  .text._ZN7Network11SetHostNameEPKc
-                0x00000000080138b0       0x3a ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x00000000080138b0                Network::SetHostName(char const*)
+                0x00000000080138ac       0x3a ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x00000000080138ac                Network::SetHostName(char const*)
  .text._ZN7Network11SetZeroconfEv
-                0x00000000080138ea       0x3a ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x00000000080138ea                Network::SetZeroconf()
+                0x00000000080138e6       0x3a ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x00000000080138e6                Network::SetZeroconf()
  .text._ZN7Network10EnableDhcpEv
-                0x0000000008013924       0x8c ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013924                Network::EnableDhcp()
+                0x0000000008013920       0x8c ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013920                Network::EnableDhcp()
  .text._ZN7Network17SetQueuedStaticIpEjj
-                0x00000000080139b0       0x1a ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x00000000080139b0                Network::SetQueuedStaticIp(unsigned int, unsigned int)
+                0x00000000080139ac       0x1a ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x00000000080139ac                Network::SetQueuedStaticIp(unsigned int, unsigned int)
  .text._ZN7Network17ApplyQueuedConfigEv
-                0x00000000080139ca       0x80 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x00000000080139ca                Network::ApplyQueuedConfig()
- *fill*         0x0000000008013a4a        0x2 
+                0x00000000080139c6       0x80 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x00000000080139c6                Network::ApplyQueuedConfig()
+ *fill*         0x0000000008013a46        0x2 
  .text._ZN7Network5PrintEv
-                0x0000000008013a4c       0xf8 ../lib-network/lib_gd32/libnetwork.a(network.o)
-                0x0000000008013a4c                Network::Print()
+                0x0000000008013a48       0xf8 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x0000000008013a48                Network::Print()
  .text._ZN13NetworkParamsC2EP18NetworkParamsStore
-                0x0000000008013b44       0x18 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013b44                NetworkParams::NetworkParams(NetworkParamsStore*)
-                0x0000000008013b44                NetworkParams::NetworkParams(NetworkParamsStore*)
+                0x0000000008013b40       0x18 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013b40                NetworkParams::NetworkParams(NetworkParamsStore*)
+                0x0000000008013b40                NetworkParams::NetworkParams(NetworkParamsStore*)
  .text._ZN13NetworkParams4LoadEv
-                0x0000000008013b5c       0x18 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013b5c                NetworkParams::Load()
+                0x0000000008013b58       0x18 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013b58                NetworkParams::Load()
  .text._ZN13NetworkParams4LoadEPKcj
-                0x0000000008013b74       0x40 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013b74                NetworkParams::Load(char const*, unsigned int)
+                0x0000000008013b70       0x40 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013b70                NetworkParams::Load(char const*, unsigned int)
  .text._ZN13NetworkParams16callbackFunctionEPKc
-                0x0000000008013bb4      0x12c ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013bb4                NetworkParams::callbackFunction(char const*)
+                0x0000000008013bb0      0x12c ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013bb0                NetworkParams::callbackFunction(char const*)
  .text._ZN13NetworkParams22staticCallbackFunctionEPvPKc
-                0x0000000008013ce0        0x4 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013ce0                NetworkParams::staticCallbackFunction(void*, char const*)
+                0x0000000008013cdc        0x4 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013cdc                NetworkParams::staticCallbackFunction(void*, char const*)
  .text._ZN13NetworkParams7BuilderEPKN13networkparams6ParamsEPcjRj
-                0x0000000008013ce4      0x214 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013ce4                NetworkParams::Builder(networkparams::Params const*, char*, unsigned int, unsigned int&)
+                0x0000000008013ce0      0x214 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013ce0                NetworkParams::Builder(networkparams::Params const*, char*, unsigned int, unsigned int&)
  .text._ZN13NetworkParams4SaveEPcjRj
-                0x0000000008013ef8       0x1a ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
-                0x0000000008013ef8                NetworkParams::Save(char*, unsigned int, unsigned int&)
+                0x0000000008013ef4       0x1a ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x0000000008013ef4                NetworkParams::Save(char*, unsigned int, unsigned int&)
  .text._ZN13NetworkParams4DumpEv
-                0x0000000008013f12        0x2 ../lib-network/lib_gd32/libnetwork.a(networkparamsdump.o)
-                0x0000000008013f12                NetworkParams::Dump()
- .text.strlen   0x0000000008013f14       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
- .text.strcmp   0x0000000008013f24       0x1a ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008013f0e        0x2 ../lib-network/lib_gd32/libnetwork.a(networkparamsdump.o)
+                0x0000000008013f0e                NetworkParams::Dump()
+ .text.strlen   0x0000000008013f10       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+ .text.strcmp   0x0000000008013f20       0x1a ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .text.strcpy.isra.0
-                0x0000000008013f3e       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008013f3a       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .text.strcat.isra.0
-                0x0000000008013f4e       0x18 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
- *fill*         0x0000000008013f66        0x2 
+                0x0000000008013f4a       0x18 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+ *fill*         0x0000000008013f62        0x2 
  .text._ZN4MDNSC2Ev
-                0x0000000008013f68       0x20 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008013f68                MDNS::MDNS()
-                0x0000000008013f68                MDNS::MDNS()
+                0x0000000008013f64       0x20 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008013f64                MDNS::MDNS()
+                0x0000000008013f64                MDNS::MDNS()
  .text._ZN4MDNS7SetNameEPKc
-                0x0000000008013f88       0x38 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008013f88                MDNS::SetName(char const*)
+                0x0000000008013f84       0x38 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008013f84                MDNS::SetName(char const*)
  .text._ZN4MDNS21DecodeDNSNameNotationEPKcPc
-                0x0000000008013fc0       0x84 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008013fc0                MDNS::DecodeDNSNameNotation(char const*, char*)
+                0x0000000008013fbc       0x84 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008013fbc                MDNS::DecodeDNSNameNotation(char const*, char*)
  .text._ZNK4MDNS21FindFirstDotFromRightEPKc
-                0x0000000008014044       0x1c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014044                MDNS::FindFirstDotFromRight(char const*) const
+                0x0000000008014040       0x1c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014040                MDNS::FindFirstDotFromRight(char const*) const
  .text._ZN4MDNS12WriteDnsNameEPKcPcb
-                0x0000000008014060       0x32 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014060                MDNS::WriteDnsName(char const*, char*, bool)
- *fill*         0x0000000008014092        0x2 
+                0x000000000801405c       0x32 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801405c                MDNS::WriteDnsName(char const*, char*, bool)
+ *fill*         0x000000000801408e        0x2 
  .text._ZN4MDNS26CreateAnswerLocalIpAddressEv
-                0x0000000008014094       0x58 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014094                MDNS::CreateAnswerLocalIpAddress()
+                0x0000000008014090       0x58 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014090                MDNS::CreateAnswerLocalIpAddress()
  .text._ZN4MDNS5StartEv
-                0x00000000080140ec       0x8c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x00000000080140ec                MDNS::Start()
+                0x00000000080140e8       0x8c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080140e8                MDNS::Start()
  .text._ZN4MDNS22CreateAnswerServiceSrvEjPh
-                0x0000000008014178       0x88 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014178                MDNS::CreateAnswerServiceSrv(unsigned int, unsigned char*)
+                0x0000000008014174       0x88 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014174                MDNS::CreateAnswerServiceSrv(unsigned int, unsigned char*)
  .text._ZN4MDNS22CreateAnswerServiceTxtEjPh
-                0x0000000008014200       0x80 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014200                MDNS::CreateAnswerServiceTxt(unsigned int, unsigned char*)
+                0x00000000080141fc       0x80 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080141fc                MDNS::CreateAnswerServiceTxt(unsigned int, unsigned char*)
  .text._ZN4MDNS22CreateAnswerServicePtrEjPh
-                0x0000000008014280       0x7c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014280                MDNS::CreateAnswerServicePtr(unsigned int, unsigned char*)
+                0x000000000801427c       0x7c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801427c                MDNS::CreateAnswerServicePtr(unsigned int, unsigned char*)
  .text._ZN4MDNS24CreateAnswerServiceDnsSdEjPh
-                0x00000000080142fc       0x58 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x00000000080142fc                MDNS::CreateAnswerServiceDnsSd(unsigned int, unsigned char*)
+                0x00000000080142f8       0x58 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080142f8                MDNS::CreateAnswerServiceDnsSd(unsigned int, unsigned char*)
  .text._ZN4MDNS17CreateMDNSMessageEj
-                0x0000000008014354       0x78 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014354                MDNS::CreateMDNSMessage(unsigned int)
+                0x0000000008014350       0x78 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014350                MDNS::CreateMDNSMessage(unsigned int)
  .text._ZN4MDNS16AddServiceRecordEPKcS1_tN4mdns8ProtocolES1_
-                0x00000000080143cc      0x12c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x00000000080143cc                MDNS::AddServiceRecord(char const*, char const*, unsigned short, mdns::Protocol, char const*)
+                0x00000000080143c8      0x12c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080143c8                MDNS::AddServiceRecord(char const*, char const*, unsigned short, mdns::Protocol, char const*)
  .text._ZN4MDNS13HandleRequestEt
-                0x00000000080144f8       0xf4 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x00000000080144f8                MDNS::HandleRequest(unsigned short)
+                0x00000000080144f4       0xf4 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080144f4                MDNS::HandleRequest(unsigned short)
  .text._ZN4MDNS5ParseEv
-                0x00000000080145ec       0x28 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x00000000080145ec                MDNS::Parse()
+                0x00000000080145e8       0x28 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x00000000080145e8                MDNS::Parse()
  .text._ZN4MDNS3RunEv
-                0x0000000008014614       0x48 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x0000000008014614                MDNS::Run()
+                0x0000000008014610       0x48 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014610                MDNS::Run()
  .text._ZN4MDNS5PrintEv
-                0x000000000801465c       0x7c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
-                0x000000000801465c                MDNS::Print()
+                0x0000000008014658       0x7c ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x0000000008014658                MDNS::Print()
  .text._ZN3net18link_register_readEv
-                0x00000000080146d8       0x22 ../lib-network/lib_gd32/libnetwork.a(net_link_check.o)
-                0x00000000080146d8                net::link_register_read()
+                0x00000000080146d4       0x22 ../lib-network/lib_gd32/libnetwork.a(net_link_check.o)
+                0x00000000080146d4                net::link_register_read()
  .text.memcpy.isra.0
-                0x00000000080146fa       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
- *fill*         0x000000000801470e        0x2 
+                0x00000000080146f6       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+ *fill*         0x000000000801470a        0x2 
  .text._Z12arp_announcev
-                0x0000000008014710       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008014710                arp_announce()
+                0x000000000801470c       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x000000000801470c                arp_announce()
  .text._Z18arp_handle_requestP5t_arp
-                0x0000000008014724       0x50 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008014724                arp_handle_request(t_arp*)
+                0x0000000008014720       0x50 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008014720                arp_handle_request(t_arp*)
  .text._Z16arp_handle_replyP5t_arp
-                0x0000000008014774        0x8 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008014774                arp_handle_reply(t_arp*)
+                0x0000000008014770        0x8 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008014770                arp_handle_reply(t_arp*)
  .text._Z16arp_send_requestj
-                0x000000000801477c       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x000000000801477c                arp_send_request(unsigned int)
+                0x0000000008014778       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008014778                arp_send_request(unsigned int)
  .text._Z16arp_cache_updatePKhj
-                0x0000000008014790       0x58 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
-                0x0000000008014790                arp_cache_update(unsigned char const*, unsigned int)
+                0x000000000801478c       0x58 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
+                0x000000000801478c                arp_cache_update(unsigned char const*, unsigned int)
  .text._Z16arp_cache_lookupjPh
-                0x00000000080147e8       0x94 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
-                0x00000000080147e8                arp_cache_lookup(unsigned int, unsigned char*)
+                0x00000000080147e4       0x94 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
+                0x00000000080147e4                arp_cache_lookup(unsigned int, unsigned char*)
  .text._ZL15_parse_responseiPKh.constprop.0
-                0x000000000801487c      0x174 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x0000000008014878      0x174 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
  .text.memcpy.isra.0
-                0x00000000080149f0       0x14 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x00000000080149ec       0x14 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
  .text._Z11dhcp_clientPKc
-                0x0000000008014a04      0x20c ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
-                0x0000000008014a04                dhcp_client(char const*)
+                0x0000000008014a00      0x20c ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x0000000008014a00                dhcp_client(char const*)
  .text._Z19dhcp_client_releasev
-                0x0000000008014c10       0x70 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
-                0x0000000008014c10                dhcp_client_release()
+                0x0000000008014c0c       0x70 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x0000000008014c0c                dhcp_client_release()
  .text._Z9ip_set_ipv
-                0x0000000008014c80        0xe ../lib-network/lib_gd32/libnetwork.a(ip.o)
-                0x0000000008014c80                ip_set_ip()
+                0x0000000008014c7c        0xe ../lib-network/lib_gd32/libnetwork.a(ip.o)
+                0x0000000008014c7c                ip_set_ip()
  .text._Z10net_chksumPKvj
-                0x0000000008014c8e       0x34 ../lib-network/lib_gd32/libnetwork.a(net_chksum.o)
-                0x0000000008014c8e                net_chksum(void const*, unsigned int)
+                0x0000000008014c8a       0x34 ../lib-network/lib_gd32/libnetwork.a(net_chksum.o)
+                0x0000000008014c8a                net_chksum(void const*, unsigned int)
  .text.memcpy.isra.0
-                0x0000000008014cc2       0x14 ../lib-network/lib_gd32/libnetwork.a(icmp.o)
+                0x0000000008014cbe       0x14 ../lib-network/lib_gd32/libnetwork.a(icmp.o)
  .text._ZN8LightSet11GetSlotInfoEtRN8lightset8SlotInfoE
-                0x0000000008014cd6        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetgetslotinfo.o)
-                0x0000000008014cd6                LightSet::GetSlotInfo(unsigned short, lightset::SlotInfo&)
+                0x0000000008014cd2        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetgetslotinfo.o)
+                0x0000000008014cd2                LightSet::GetSlotInfo(unsigned short, lightset::SlotInfo&)
  .text._ZN7Display5WriteEjPKc.isra.0
-                0x0000000008014ce0       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014cdc       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
  .text._ZN7Display9ClearLineEj.isra.0
-                0x0000000008014d02        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014cfe        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
  .text._ZN10DisplayUdfC2Ev
-                0x0000000008014d0c       0x30 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014d0c                DisplayUdf::DisplayUdf()
-                0x0000000008014d0c                DisplayUdf::DisplayUdf()
+                0x0000000008014d08       0x30 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014d08                DisplayUdf::DisplayUdf()
+                0x0000000008014d08                DisplayUdf::DisplayUdf()
  .text._ZN10DisplayUdf8SetTitleEPKcz
-                0x0000000008014d3c       0x26 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014d3c                DisplayUdf::SetTitle(char const*, ...)
+                0x0000000008014d38       0x26 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014d38                DisplayUdf::SetTitle(char const*, ...)
  .text._ZN10DisplayUdf3SetEjN10displayudf6LabelsE
-                0x0000000008014d62       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014d62                DisplayUdf::Set(unsigned int, displayudf::Labels)
- *fill*         0x0000000008014d96        0x2 
+                0x0000000008014d5e       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014d5e                DisplayUdf::Set(unsigned int, displayudf::Labels)
+ *fill*         0x0000000008014d92        0x2 
  .text._ZN10DisplayUdf13ShowEmacStartEv
-                0x0000000008014d98       0x20 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014d98                DisplayUdf::ShowEmacStart()
+                0x0000000008014d94       0x20 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014d94                DisplayUdf::ShowEmacStart()
  .text._ZN10DisplayUdf13ShowIpAddressEv
-                0x0000000008014db8       0x68 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014db8                DisplayUdf::ShowIpAddress()
+                0x0000000008014db4       0x68 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014db4                DisplayUdf::ShowIpAddress()
  .text._ZN10DisplayUdf11ShowNetmaskEv
-                0x0000000008014e20       0x3c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014e20                DisplayUdf::ShowNetmask()
+                0x0000000008014e1c       0x3c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014e1c                DisplayUdf::ShowNetmask()
  .text._ZN10DisplayUdf13ShowGatewayIpEv
-                0x0000000008014e5c       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014e5c                DisplayUdf::ShowGatewayIp()
+                0x0000000008014e58       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014e58                DisplayUdf::ShowGatewayIp()
  .text._ZN10DisplayUdf12ShowHostNameEv
-                0x0000000008014e9c       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014e9c                DisplayUdf::ShowHostName()
+                0x0000000008014e98       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014e98                DisplayUdf::ShowHostName()
  .text._ZN10DisplayUdf4ShowEv
-                0x0000000008014ec4       0x84 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014ec4                DisplayUdf::Show()
+                0x0000000008014ec0       0x84 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014ec0                DisplayUdf::Show()
  .text._ZN10DisplayUdf14ShowDhcpStatusEN7network4dhcp12ClientStatusE
-                0x0000000008014f48       0x70 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014f48                DisplayUdf::ShowDhcpStatus(network::dhcp::ClientStatus)
+                0x0000000008014f44       0x70 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014f44                DisplayUdf::ShowDhcpStatus(network::dhcp::ClientStatus)
  .text._ZN10DisplayUdf12ShowShutdownEv
-                0x0000000008014fb8       0x5c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008014fb8                DisplayUdf::ShowShutdown()
+                0x0000000008014fb4       0x5c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008014fb4                DisplayUdf::ShowShutdown()
  .text._ZN17PropertiesBuilder3AddIhEEbPKcT_bj.isra.0
-                0x0000000008015014       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015010       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
  .text._ZN16DisplayUdfParamsC2EP21DisplayUdfParamsStore
-                0x0000000008015064       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015064                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
-                0x0000000008015064                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
+                0x0000000008015060       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015060                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
+                0x0000000008015060                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
  .text._ZN16DisplayUdfParams4LoadEv
-                0x000000000801507e       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x000000000801507e                DisplayUdfParams::Load()
- *fill*         0x0000000008015096        0x2 
+                0x000000000801507a       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x000000000801507a                DisplayUdfParams::Load()
+ *fill*         0x0000000008015092        0x2 
  .text._ZN16DisplayUdfParams4LoadEPKcj
-                0x0000000008015098       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015098                DisplayUdfParams::Load(char const*, unsigned int)
+                0x0000000008015094       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015094                DisplayUdfParams::Load(char const*, unsigned int)
  .text._ZN16DisplayUdfParams16callbackFunctionEPKc
-                0x00000000080150d8       0xc8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x00000000080150d8                DisplayUdfParams::callbackFunction(char const*)
+                0x00000000080150d4       0xc8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x00000000080150d4                DisplayUdfParams::callbackFunction(char const*)
  .text._ZN16DisplayUdfParams22staticCallbackFunctionEPvPKc
-                0x00000000080151a0        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x00000000080151a0                DisplayUdfParams::staticCallbackFunction(void*, char const*)
+                0x000000000801519c        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x000000000801519c                DisplayUdfParams::staticCallbackFunction(void*, char const*)
  .text._ZN16DisplayUdfParams7BuilderEPKN16displayudfparams6ParamsEPcjRj
-                0x00000000080151a4      0x134 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x00000000080151a4                DisplayUdfParams::Builder(displayudfparams::Params const*, char*, unsigned int, unsigned int&)
+                0x00000000080151a0      0x134 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x00000000080151a0                DisplayUdfParams::Builder(displayudfparams::Params const*, char*, unsigned int, unsigned int&)
  .text._ZN16DisplayUdfParams4SaveEPcjRj
-                0x00000000080152d8       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x00000000080152d8                DisplayUdfParams::Save(char*, unsigned int, unsigned int&)
+                0x00000000080152d4       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x00000000080152d4                DisplayUdfParams::Save(char*, unsigned int, unsigned int&)
  .text._ZN16DisplayUdfParams3SetEP10DisplayUdf
-                0x00000000080152f2       0x66 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x00000000080152f2                DisplayUdfParams::Set(DisplayUdf*)
+                0x00000000080152ee       0x66 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x00000000080152ee                DisplayUdfParams::Set(DisplayUdf*)
  .text._ZN16DisplayUdfParams4DumpEv
-                0x0000000008015358        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015358                DisplayUdfParams::Dump()
- *fill*         0x000000000801535a        0x2 
+                0x0000000008015354        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015354                DisplayUdfParams::Dump()
+ *fill*         0x0000000008015356        0x2 
  .text._ZN6artnet17display_shortnameEPKc
-                0x000000000801535c       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x000000000801535c                artnet::display_shortname(char const*)
+                0x0000000008015358       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015358                artnet::display_shortname(char const*)
  .text._ZN6artnet16display_longnameEPKc
-                0x0000000008015370        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015370                artnet::display_longname(char const*)
- *fill*         0x0000000008015372        0x2 
+                0x000000000801536c        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x000000000801536c                artnet::display_longname(char const*)
+ *fill*         0x000000000801536e        0x2 
  .text._ZN6artnet23display_universe_switchEjh
-                0x0000000008015374       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015374                artnet::display_universe_switch(unsigned int, unsigned char)
+                0x0000000008015370       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015370                artnet::display_universe_switch(unsigned int, unsigned char)
  .text._ZN6artnet18display_merge_modeEjN8lightset9MergeModeE
-                0x0000000008015388       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015388                artnet::display_merge_mode(unsigned int, lightset::MergeMode)
+                0x0000000008015384       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015384                artnet::display_merge_mode(unsigned int, lightset::MergeMode)
  .text._ZN6artnet21display_port_protocolEjNS_12PortProtocolE
-                0x000000000801539c        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x000000000801539c                artnet::display_port_protocol(unsigned int, artnet::PortProtocol)
+                0x0000000008015398        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015398                artnet::display_port_protocol(unsigned int, artnet::PortProtocol)
  .text._ZN6artnet16display_failsafeEh
-                0x00000000080153a0        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x00000000080153a0                artnet::display_failsafe(unsigned char)
+                0x000000000801539c        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x000000000801539c                artnet::display_failsafe(unsigned char)
  .text._ZN7Display9ClearLineEj.isra.0
-                0x00000000080153a2        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x000000000801539e        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
  .text._ZN10DisplayUdf12ShowNodeNameEP10ArtNetNode
-                0x00000000080153ac       0x3e ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
-                0x00000000080153ac                DisplayUdf::ShowNodeName(ArtNetNode*)
- *fill*         0x00000000080153ea        0x2 
+                0x00000000080153a8       0x3e ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x00000000080153a8                DisplayUdf::ShowNodeName(ArtNetNode*)
+ *fill*         0x00000000080153e6        0x2 
  .text._ZN10DisplayUdf12ShowUniverseEP10ArtNetNode
-                0x00000000080153ec       0xb0 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
-                0x00000000080153ec                DisplayUdf::ShowUniverse(ArtNetNode*)
+                0x00000000080153e8       0xb0 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x00000000080153e8                DisplayUdf::ShowUniverse(ArtNetNode*)
  .text._ZN10DisplayUdf4ShowEP10ArtNetNodej
-                0x000000000801549c       0x78 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
-                0x000000000801549c                DisplayUdf::Show(ArtNetNode*, unsigned int)
+                0x0000000008015498       0x78 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x0000000008015498                DisplayUdf::Show(ArtNetNode*, unsigned int)
  .text._ZN7network18display_emac_startEv
-                0x0000000008015514        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008015514                network::display_emac_start()
+                0x0000000008015510        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008015510                network::display_emac_start()
  .text._ZN7network10display_ipEv
-                0x0000000008015520        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008015520                network::display_ip()
+                0x000000000801551c        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801551c                network::display_ip()
  .text._ZN7network15display_netmaskEv
-                0x000000000801552c        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x000000000801552c                network::display_netmask()
+                0x0000000008015528        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008015528                network::display_netmask()
  .text._ZN7network15display_gatewayEv
-                0x0000000008015538        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008015538                network::display_gateway()
+                0x0000000008015534        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008015534                network::display_gateway()
  .text._ZN7network16display_hostnameEv
-                0x0000000008015544        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008015544                network::display_hostname()
+                0x0000000008015540        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008015540                network::display_hostname()
  .text._ZN7network21display_emac_shutdownEv
-                0x0000000008015550        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008015550                network::display_emac_shutdown()
+                0x000000000801554c        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801554c                network::display_emac_shutdown()
  .text._ZN7network19display_dhcp_statusENS_4dhcp12ClientStatusE
-                0x000000000801555c       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x000000000801555c                network::display_dhcp_status(network::dhcp::ClientStatus)
+                0x0000000008015558       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008015558                network::display_dhcp_status(network::dhcp::ClientStatus)
  .text._ZL24spi_flash_cmd_wait_readym
-                0x000000000801556c       0x7c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015568       0x7c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._ZL20spi_flash_read_writePKhjS0_Phj
-                0x00000000080155e8       0x34 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080155e4       0x34 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._ZL22spi_flash_write_commonPKhjS0_jb
-                0x000000000801561c       0x60 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015618       0x60 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._Z18spi_flash_get_sizev
-                0x000000000801567c        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x000000000801567c                spi_flash_get_size()
+                0x0000000008015678        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015678                spi_flash_get_size()
  .text._Z25spi_flash_get_sector_sizev
-                0x0000000008015688        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008015688                spi_flash_get_sector_size()
+                0x0000000008015684        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015684                spi_flash_get_sector_size()
  .text._Z18spi_flash_get_namev
-                0x0000000008015694        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008015694                spi_flash_get_name()
+                0x0000000008015690        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015690                spi_flash_get_name()
  .text._Z25spi_flash_cmd_write_multijjPKh
-                0x00000000080156a0       0x74 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080156a0                spi_flash_cmd_write_multi(unsigned int, unsigned int, unsigned char const*)
+                0x000000000801569c       0x74 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x000000000801569c                spi_flash_cmd_write_multi(unsigned int, unsigned int, unsigned char const*)
  .text._Z23spi_flash_cmd_read_fastjjPh
-                0x0000000008015714       0x58 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008015714                spi_flash_cmd_read_fast(unsigned int, unsigned int, unsigned char*)
+                0x0000000008015710       0x58 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015710                spi_flash_cmd_read_fast(unsigned int, unsigned int, unsigned char*)
  .text._Z19spi_flash_cmd_erasejj
-                0x000000000801576c       0x70 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x000000000801576c                spi_flash_cmd_erase(unsigned int, unsigned int)
+                0x0000000008015768       0x70 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015768                spi_flash_cmd_erase(unsigned int, unsigned int)
  .text._Z26spi_flash_cmd_write_statush
-                0x00000000080157dc       0x28 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080157dc                spi_flash_cmd_write_status(unsigned char)
+                0x00000000080157d8       0x28 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080157d8                spi_flash_cmd_write_status(unsigned char)
  .text._Z15spi_flash_probejjj
-                0x0000000008015804       0x68 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008015804                spi_flash_probe(unsigned int, unsigned int, unsigned int)
+                0x0000000008015800       0x68 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015800                spi_flash_probe(unsigned int, unsigned int, unsigned int)
  .text._Z23spi_flash_probe_winbondP9spi_flashPh
-                0x000000000801586c       0x54 ../lib-flash/lib_gd32/libflash.a(winbond.o)
-                0x000000000801586c                spi_flash_probe_winbond(spi_flash*, unsigned char*)
+                0x0000000008015868       0x54 ../lib-flash/lib_gd32/libflash.a(winbond.o)
+                0x0000000008015868                spi_flash_probe_winbond(spi_flash*, unsigned char*)
  .text._Z8spi_initv
-                0x00000000080158c0       0x4c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080158c0                spi_init()
+                0x00000000080158bc       0x4c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080158bc                spi_init()
  .text._Z8spi_xferjPKhPhj
-                0x000000000801590c       0x48 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x000000000801590c                spi_xfer(unsigned int, unsigned char const*, unsigned char*, unsigned int)
+                0x0000000008015908       0x48 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008015908                spi_xfer(unsigned int, unsigned char const*, unsigned char*, unsigned int)
  .text._Z9get_timerj
-                0x0000000008015954       0x18 ../lib-flash/lib_gd32/libflash.a(get_timer.o)
-                0x0000000008015954                get_timer(unsigned int)
+                0x0000000008015950       0x18 ../lib-flash/lib_gd32/libflash.a(get_timer.o)
+                0x0000000008015950                get_timer(unsigned int)
  .text._Z26spi_flash_probe_gigadeviceP9spi_flashPh
-                0x000000000801596c       0x44 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
-                0x000000000801596c                spi_flash_probe_gigadevice(spi_flash*, unsigned char*)
+                0x0000000008015968       0x44 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
+                0x0000000008015968                spi_flash_probe_gigadevice(spi_flash*, unsigned char*)
  .text._Z24spi_flash_probe_macronixP9spi_flashPh
-                0x00000000080159b0       0x4c ../lib-flash/lib_gd32/libflash.a(macronix.o)
-                0x00000000080159b0                spi_flash_probe_macronix(spi_flash*, unsigned char*)
+                0x00000000080159ac       0x4c ../lib-flash/lib_gd32/libflash.a(macronix.o)
+                0x00000000080159ac                spi_flash_probe_macronix(spi_flash*, unsigned char*)
  .text._ZN10properties17convert_json_fileEPctb
-                0x00000000080159fc      0x164 ../lib-properties/lib_gd32/libproperties.a(properties.o)
-                0x00000000080159fc                properties::convert_json_file(char*, unsigned short, bool)
+                0x00000000080159f8      0x164 ../lib-properties/lib_gd32/libproperties.a(properties.o)
+                0x00000000080159f8                properties::convert_json_file(char*, unsigned short, bool)
  .text._ZN17PropertiesBuilderC2EPKcPcj
-                0x0000000008015b60       0x84 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x0000000008015b60                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned int)
-                0x0000000008015b60                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned int)
+                0x0000000008015b5c       0x84 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x0000000008015b5c                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned int)
+                0x0000000008015b5c                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned int)
  .text._ZN17PropertiesBuilder12AddIpAddressEPKcjb
-                0x0000000008015be4       0x88 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x0000000008015be4                PropertiesBuilder::AddIpAddress(char const*, unsigned int, bool)
+                0x0000000008015be0       0x88 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x0000000008015be0                PropertiesBuilder::AddIpAddress(char const*, unsigned int, bool)
  .text._ZN17PropertiesBuilder10AddCommentEPKc
-                0x0000000008015c6c       0x34 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x0000000008015c6c                PropertiesBuilder::AddComment(char const*)
+                0x0000000008015c68       0x34 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x0000000008015c68                PropertiesBuilder::AddComment(char const*)
  .text._ZN14ReadConfigFileC2EPFvPvPKcES0_
-                0x0000000008015ca0        0x6 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008015ca0                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
-                0x0000000008015ca0                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
+                0x0000000008015c9c        0x6 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008015c9c                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
+                0x0000000008015c9c                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
  .text._ZN14ReadConfigFileD2Ev
-                0x0000000008015ca6        0x2 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008015ca6                ReadConfigFile::~ReadConfigFile()
-                0x0000000008015ca6                ReadConfigFile::~ReadConfigFile()
+                0x0000000008015ca2        0x2 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008015ca2                ReadConfigFile::~ReadConfigFile()
+                0x0000000008015ca2                ReadConfigFile::~ReadConfigFile()
  .text._ZN14ReadConfigFile4ReadEPKcj
-                0x0000000008015ca8       0x68 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008015ca8                ReadConfigFile::Read(char const*, unsigned int)
+                0x0000000008015ca4       0x68 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008015ca4                ReadConfigFile::Read(char const*, unsigned int)
  .text._ZN5Sscan4CharEPKcS1_PcRj
-                0x0000000008015d10       0x32 ../lib-properties/lib_gd32/libproperties.a(sscanchar.o)
-                0x0000000008015d10                Sscan::Char(char const*, char const*, char*, unsigned int&)
+                0x0000000008015d0c       0x32 ../lib-properties/lib_gd32/libproperties.a(sscanchar.o)
+                0x0000000008015d0c                Sscan::Char(char const*, char const*, char*, unsigned int&)
  .text._ZN5Sscan5FloatEPKcS1_Rf
-                0x0000000008015d42       0xb6 ../lib-properties/lib_gd32/libproperties.a(sscanfloat.o)
-                0x0000000008015d42                Sscan::Float(char const*, char const*, float&)
+                0x0000000008015d3e       0xb6 ../lib-properties/lib_gd32/libproperties.a(sscanfloat.o)
+                0x0000000008015d3e                Sscan::Float(char const*, char const*, float&)
  .text._ZN5Sscan9IpAddressEPKcS1_Rj
-                0x0000000008015df8       0x82 ../lib-properties/lib_gd32/libproperties.a(sscanipaddress.o)
-                0x0000000008015df8                Sscan::IpAddress(char const*, char const*, unsigned int&)
+                0x0000000008015df4       0x82 ../lib-properties/lib_gd32/libproperties.a(sscanipaddress.o)
+                0x0000000008015df4                Sscan::IpAddress(char const*, char const*, unsigned int&)
  .text._ZN5Sscan6Uint16EPKcS1_Rt
-                0x0000000008015e7a       0x3e ../lib-properties/lib_gd32/libproperties.a(sscanuint16.o)
-                0x0000000008015e7a                Sscan::Uint16(char const*, char const*, unsigned short&)
+                0x0000000008015e76       0x3e ../lib-properties/lib_gd32/libproperties.a(sscanuint16.o)
+                0x0000000008015e76                Sscan::Uint16(char const*, char const*, unsigned short&)
  .text._ZN5Sscan6Uint32EPKcS1_Rj
-                0x0000000008015eb8       0x52 ../lib-properties/lib_gd32/libproperties.a(sscanuint32.o)
-                0x0000000008015eb8                Sscan::Uint32(char const*, char const*, unsigned int&)
+                0x0000000008015eb4       0x52 ../lib-properties/lib_gd32/libproperties.a(sscanuint32.o)
+                0x0000000008015eb4                Sscan::Uint32(char const*, char const*, unsigned int&)
  .text._ZN5Sscan5Uint8EPKcS1_Rh
-                0x0000000008015f0a       0x3c ../lib-properties/lib_gd32/libproperties.a(sscanuint8.o)
-                0x0000000008015f0a                Sscan::Uint8(char const*, char const*, unsigned char&)
+                0x0000000008015f06       0x3c ../lib-properties/lib_gd32/libproperties.a(sscanuint8.o)
+                0x0000000008015f06                Sscan::Uint8(char const*, char const*, unsigned char&)
  .text._ZN5Sscan9checkNameEPKcS1_
-                0x0000000008015f46       0x2a ../lib-properties/lib_gd32/libproperties.a(sscan.o)
-                0x0000000008015f46                Sscan::checkName(char const*, char const*)
+                0x0000000008015f42       0x2a ../lib-properties/lib_gd32/libproperties.a(sscan.o)
+                0x0000000008015f42                Sscan::checkName(char const*, char const*)
  .text._ZN7Display9PrintInfoEv.isra.0
-                0x0000000008015f70       0x14 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008015f6c       0x14 ../lib-display/lib_gd32/libdisplay.a(display.o)
  .text._ZN7HAL_I2C13WriteRegisterEht
-                0x0000000008015f84       0x2a ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008015f84                HAL_I2C::WriteRegister(unsigned char, unsigned short)
+                0x0000000008015f80       0x2a ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008015f80                HAL_I2C::WriteRegister(unsigned char, unsigned short)
  .text._ZN7HAL_I2C12IsConnected_Ehj
-                0x0000000008015fae       0x3c ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008015fae                HAL_I2C::IsConnected_(unsigned char, unsigned int)
+                0x0000000008015faa       0x3c ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008015faa                HAL_I2C::IsConnected_(unsigned char, unsigned int)
  .text._ZN7Display14Detect7SegmentEv
-                0x0000000008015fea       0x32 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008015fea                Display::Detect7Segment()
+                0x0000000008015fe6       0x32 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008015fe6                Display::Detect7Segment()
  .text._ZN7Display6DetectEN7display4TypeE
-                0x000000000801601c       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x000000000801601c                Display::Detect(display::Type)
+                0x0000000008016018       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016018                Display::Detect(display::Type)
  .text._ZN7DisplayC2Ev
-                0x0000000008016074       0x54 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016074                Display::Display()
-                0x0000000008016074                Display::Display()
+                0x0000000008016070       0x54 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016070                Display::Display()
+                0x0000000008016070                Display::Display()
  .text._ZN7Ssd1306D2Ev
-                0x00000000080160c8        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080160c8                Ssd1306::~Ssd1306()
-                0x00000000080160c8                Ssd1306::~Ssd1306()
+                0x00000000080160c4        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080160c4                Ssd1306::~Ssd1306()
+                0x00000000080160c4                Ssd1306::~Ssd1306()
  .text._ZN7Ssd13069SetCursorEj
-                0x00000000080160ca        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080160ca                Ssd1306::SetCursor(unsigned int)
+                0x00000000080160c6        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080160c6                Ssd1306::SetCursor(unsigned int)
  .text._ZN7Ssd13069PrintInfoEv
-                0x00000000080160cc       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080160cc                Ssd1306::PrintInfo()
+                0x00000000080160c8       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080160c8                Ssd1306::PrintInfo()
  .text._ZN7Ssd1306D0Ev
-                0x00000000080160f4        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080160f4                Ssd1306::~Ssd1306()
+                0x00000000080160f0        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080160f0                Ssd1306::~Ssd1306()
  .text._ZN7HAL_I2C5SetupEv
-                0x0000000008016100       0x14 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016100                HAL_I2C::Setup()
+                0x00000000080160fc       0x14 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080160fc                HAL_I2C::Setup()
  .text._ZN7Ssd13067PutCharEi
-                0x0000000008016114       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016114                Ssd1306::PutChar(int)
+                0x0000000008016110       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016110                Ssd1306::PutChar(int)
  .text._ZN7Ssd13069PutStringEPKc
-                0x0000000008016140       0x16 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016140                Ssd1306::PutString(char const*)
+                0x000000000801613c       0x16 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801613c                Ssd1306::PutString(char const*)
  .text._ZN7Ssd13064TextEPKcj
-                0x0000000008016156       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016156                Ssd1306::Text(char const*, unsigned int)
+                0x0000000008016152       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016152                Ssd1306::Text(char const*, unsigned int)
  .text._ZN7Ssd130611InitMembersEv
-                0x0000000008016178       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016178                Ssd1306::InitMembers()
- *fill*         0x000000000801619a        0x2 
+                0x0000000008016174       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016174                Ssd1306::InitMembers()
+ *fill*         0x0000000008016196        0x2 
  .text._ZN7Ssd1306C2E10TOledPanel
-                0x000000000801619c       0x30 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801619c                Ssd1306::Ssd1306(TOledPanel)
-                0x000000000801619c                Ssd1306::Ssd1306(TOledPanel)
+                0x0000000008016198       0x30 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016198                Ssd1306::Ssd1306(TOledPanel)
+                0x0000000008016198                Ssd1306::Ssd1306(TOledPanel)
  .text._ZN7Ssd130611SendCommandEh
-                0x00000000080161cc       0x20 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080161cc                Ssd1306::SendCommand(unsigned char)
+                0x00000000080161c8       0x20 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080161c8                Ssd1306::SendCommand(unsigned char)
  .text._ZN7Ssd130612SetCursorPosEjj
-                0x00000000080161ec       0x48 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080161ec                Ssd1306::SetCursorPos(unsigned int, unsigned int)
+                0x00000000080161e8       0x48 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080161e8                Ssd1306::SetCursorPos(unsigned int, unsigned int)
  .text._ZN7Ssd13068TextLineEjPKcj
-                0x0000000008016234       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016234                Ssd1306::TextLine(unsigned int, char const*, unsigned int)
+                0x0000000008016230       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016230                Ssd1306::TextLine(unsigned int, char const*, unsigned int)
  .text._ZN7Ssd13069ClearLineEj
-                0x000000000801625c       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801625c                Ssd1306::ClearLine(unsigned int)
+                0x0000000008016258       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016258                Ssd1306::ClearLine(unsigned int)
  .text._ZN7Ssd13068SetSleepEb
-                0x000000000801629c        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801629c                Ssd1306::SetSleep(bool)
+                0x0000000008016298        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016298                Ssd1306::SetSleep(bool)
  .text._ZN7Ssd130611SetContrastEh
-                0x00000000080162a8       0x1a ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080162a8                Ssd1306::SetContrast(unsigned char)
+                0x00000000080162a4       0x1a ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080162a4                Ssd1306::SetContrast(unsigned char)
  .text._ZN7Ssd130617SetFlipVerticallyEb
-                0x00000000080162c2       0x24 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080162c2                Ssd1306::SetFlipVertically(bool)
- *fill*         0x00000000080162e6        0x2 
+                0x00000000080162be       0x24 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080162be                Ssd1306::SetFlipVertically(bool)
+ *fill*         0x00000000080162e2        0x2 
  .text._ZN7Ssd130611CheckSH1106Ev
-                0x00000000080162e8       0xac ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080162e8                Ssd1306::CheckSH1106()
+                0x00000000080162e4       0xac ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080162e4                Ssd1306::CheckSH1106()
  .text._ZN7Ssd13063ClsEv
-                0x0000000008016394       0x78 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016394                Ssd1306::Cls()
+                0x0000000008016390       0x78 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016390                Ssd1306::Cls()
  .text._ZN7Ssd13065StartEv
-                0x000000000801640c       0xb4 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801640c                Ssd1306::Start()
+                0x0000000008016408       0xb4 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016408                Ssd1306::Start()
  .text.console_putc
-                0x00000000080164c0        0x4 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
-                0x00000000080164c0                console_putc
+                0x00000000080164bc        0x4 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
+                0x00000000080164bc                console_putc
  .text.console_puts
-                0x00000000080164c4        0x4 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
-                0x00000000080164c4                console_puts
+                0x00000000080164c0        0x4 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
+                0x00000000080164c0                console_puts
  .text.console_set_fg_color
-                0x00000000080164c8       0x44 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
-                0x00000000080164c8                console_set_fg_color
+                0x00000000080164c4       0x44 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
+                0x00000000080164c4                console_set_fg_color
  .text.console_error
-                0x000000000801650c       0x24 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
-                0x000000000801650c                console_error
+                0x0000000008016508       0x24 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
+                0x0000000008016508                console_error
  .text.console_status
-                0x0000000008016530       0x30 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
-                0x0000000008016530                console_status
+                0x000000000801652c       0x30 ../lib-hal/lib_gd32/libhal.a(console_uart0.o)
+                0x000000000801652c                console_status
  .text._ZN15FirmwareVersionC2EPKcS1_S1_
-                0x0000000008016560       0x70 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
-                0x0000000008016560                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
-                0x0000000008016560                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
+                0x000000000801655c       0x70 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
+                0x000000000801655c                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
+                0x000000000801655c                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
  .text._ZN8Hardware7SetModeEN8hardware8ledblink4ModeE
-                0x00000000080165d0       0x58 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x00000000080165d0                Hardware::SetMode(hardware::ledblink::Mode)
+                0x00000000080165cc       0x58 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x00000000080165cc                Hardware::SetMode(hardware::ledblink::Mode)
  .text._ZN8Hardware15SetModeWithLockEN8hardware8ledblink4ModeEb
-                0x0000000008016628       0x12 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x0000000008016628                Hardware::SetModeWithLock(hardware::ledblink::Mode, bool)
- *fill*         0x000000000801663a        0x2 
+                0x0000000008016624       0x12 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x0000000008016624                Hardware::SetModeWithLock(hardware::ledblink::Mode, bool)
+ *fill*         0x0000000008016636        0x2 
  .text._ZN8HardwareC2Ev
-                0x000000000801663c      0x11c ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x000000000801663c                Hardware::Hardware()
-                0x000000000801663c                Hardware::Hardware()
+                0x0000000008016638      0x120 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x0000000008016638                Hardware::Hardware()
+                0x0000000008016638                Hardware::Hardware()
  .text._ZN8Hardware7GetUuidEPh
                 0x0000000008016758       0x38 ../lib-hal/lib_gd32/libhal.a(hardware.o)
                 0x0000000008016758                Hardware::GetUuid(unsigned char*)

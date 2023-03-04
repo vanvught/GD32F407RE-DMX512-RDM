@@ -102,17 +102,17 @@ void main() {
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
-	StoreArtNet storeArtNet;
-	ArtNetParams artnetParams(&storeArtNet);
-
 	ArtNet4Node node;
+
+	StoreArtNet storeArtNet;
+	node.SetArtNetStore(&storeArtNet);
+
+	ArtNetParams artnetParams(&storeArtNet);
 
 	if (artnetParams.Load()) {
 		artnetParams.Dump();
 		artnetParams.Set();
 	}
-
-	node.SetArtNetStore(&storeArtNet);
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		bool bIsSet;

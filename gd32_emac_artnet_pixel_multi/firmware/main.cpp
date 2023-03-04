@@ -120,14 +120,14 @@ void main() {
 	ArtNet4Node node;
 
 	StoreArtNet storeArtNet(DMXPORT_OFFSET);
+	node.SetArtNetStore(&storeArtNet);
+
 	ArtNetParams artnetParams(&storeArtNet);
 
 	if (artnetParams.Load()) {
 		artnetParams.Dump();
 		artnetParams.Set(DMXPORT_OFFSET);
 	}
-
-	node.SetArtNetStore(&storeArtNet);
 
 	PixelDmxConfiguration pixelDmxConfiguration;
 

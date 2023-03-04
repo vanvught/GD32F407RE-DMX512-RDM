@@ -265,6 +265,10 @@ private:
 	}
 #endif
 
+#if defined (RDM_RESPONDER)
+	void HandleGetRdmDeviceTxt(uint32_t& nSize);
+#endif
+
 #if defined (OUTPUT_DMX_SEND)
 	void HandleGetParamsTxt(uint32_t& nSize);
 #endif
@@ -360,6 +364,10 @@ private:
 	void HandleSetNodeE131Txt() {
 		HandleSetNodeTxt(node::Personality::E131);
 	}
+#endif
+
+#if defined (RDM_RESPONDER)
+	void HandleSetRdmDeviceTxt();
 #endif
 
 #if defined (OUTPUT_DMX_SEND)
