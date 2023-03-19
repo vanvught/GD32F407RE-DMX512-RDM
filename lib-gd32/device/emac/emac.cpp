@@ -2,7 +2,7 @@
  * emac.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <cstdio>
 
 #include "gd32.h"
 
@@ -152,7 +153,7 @@ static ErrStatus enet_mac_config(void) {
 		return ERROR;
 	}
 
-	ErrStatus enet_init_status = enet_init(ENET_AUTO_NEGOTIATION, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
+	ErrStatus enet_init_status = enet_init(ENET_AUTO_NEGOTIATION, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
 
     DEBUG_PRINTF("enet_init_status=%u", (uint32_t)enet_init_status);
 
@@ -176,11 +177,11 @@ static ErrStatus enet_mac_config(void) {
 int emac_start(uint8_t mac_address[]) {
 	DEBUG_ENTRY
 #if(PHY_TYPE == LAN8700)
-	DEBUG_PUTS("LAN8700");
+	puts("LAN8700");
 #elif(PHY_TYPE == DP83848)
-	DEBUG_PUTS("DP83848");
+	puts("DP83848");
 #elif(PHY_TYPE == RTL8201F)
-	DEBUG_PUTS("RTL8201F");
+	puts("RTL8201F");
 #else
 #error PHY_TYPE is not set
 #endif

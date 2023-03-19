@@ -25,7 +25,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <netinet/in.h>
 #include <time.h>
 #include <cassert>
 
@@ -33,13 +32,17 @@
 #include "networkparams.h"
 
 #include "hardware.h"
-#include "ledblink.h"
 
 #include "../net/net.h"
 #include "../../config/net_config.h"
 #include "emac/net_link_check.h"
 
 #include "debug.h"
+
+namespace net {
+void __attribute__((weak)) phy_customized_led() {}
+void __attribute__((weak)) phy_customized_timing() {}
+}  // namespace net
 
 #define TO_HEX(i)	static_cast<char>(((i) < 10) ? '0' + (i) : 'A' + ((i) - 10))
 
@@ -84,6 +87,9 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 	m_fNtpUtcOffset = params.GetNtpUtcOffset();
 
 	emac_start(m_aNetMacaddr);
+
+	net::phy_customized_timing();
+	net::phy_customized_led();
 
 	const auto *p = params.GetHostName();
 
@@ -150,19 +156,19 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 		const auto bUseDhcp = params.isDhcpUsed();
 
 		while (m_IsZeroconfUsed && (nRetryTime != 0) && bUseDhcp) {
-			LedBlink::Get()->SetMode(ledblink::Mode::FAST);
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::FAST);
 
 			network::display_dhcp_status(network::dhcp::ClientStatus::RETRYING);
 
 			DEBUG_PUTS("");
 			auto nTime = time(nullptr);
 			while ((time(nullptr) - nTime) < (nRetryTime * 60)) {
-				LedBlink::Get()->Run();
+				Hardware::Get()->Run();
 			}
 
 			network::display_dhcp_status(network::dhcp::ClientStatus::RENEW);
 
-			LedBlink::Get()->SetMode(ledblink::Mode::OFF_ON);
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::OFF_ON);
 
 			m_IsDhcpUsed = true;
 			m_IsZeroconfUsed = false;
@@ -193,79 +199,6 @@ void Network::Init(NetworkParamsStore *pNetworkParamsStore) {
 	m_nGatewayIp = ipInfo.gw.addr;
 
 	network::display_ip();
-
-	DEBUG_EXIT
-}
-
-void Network::Shutdown() {
-	DEBUG_ENTRY
-
-	network::display_emac_shutdown();
-
-	net_shutdown();
-
-	DEBUG_EXIT
-}
-
-int32_t Network::Begin(uint16_t nPort) {
-	DEBUG_ENTRY
-
-	const auto nIdx = udp_bind(nPort);
-
-	assert(nIdx != -1);
-
-	return nIdx;
-
-	DEBUG_EXIT
-}
-
-int32_t Network::End(uint16_t nPort) {
-	DEBUG_ENTRY
-
-	const auto n = udp_unbind(nPort);
-
-	assert(n == 0);
-
-	return n;
-
-	DEBUG_EXIT
-}
-
-void Network::MacAddressCopyTo(uint8_t *pMacAddress) {
-	DEBUG_ENTRY
-
-	for (uint32_t i =  0; i < network::MAC_SIZE; i++) {
-		pMacAddress[i] = m_aNetMacaddr[i];
-	}
-
-	DEBUG_EXIT
-}
-
-void Network::JoinGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
-	DEBUG_ENTRY
-
-	igmp_join(nIp);
-
-	DEBUG_EXIT
-}
-
-void Network::LeaveGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
-	DEBUG_ENTRY
-
-	igmp_leave(nIp);
-
-	DEBUG_EXIT
-}
-
-void Network::SetDefaultIp() {
-	DEBUG_ENTRY
-
-	m_nLocalIp = 2
-			+ ((static_cast<uint32_t>(m_aNetMacaddr[3])) << 8)
-			+ ((static_cast<uint32_t>(m_aNetMacaddr[4])) << 16)
-			+ ((static_cast<uint32_t>(m_aNetMacaddr[5])) << 24);
-	m_nNetmask = 255;
-	m_nGatewayIp = m_nLocalIp;
 
 	DEBUG_EXIT
 }

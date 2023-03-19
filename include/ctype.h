@@ -62,6 +62,10 @@ inline static int toupper(int c) {
 	return ((islower(c) != 0) ? (c - 32) : c);
 }
 
+inline static int isspace(int c) {
+	return (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ' ? 1 : 0);
+}
+
 #ifdef __cplusplus
 }
 #endif

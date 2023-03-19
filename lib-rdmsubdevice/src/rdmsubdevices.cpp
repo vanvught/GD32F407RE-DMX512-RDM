@@ -195,3 +195,23 @@ void RDMSubDevices::SetFactoryDefaults() {
 		}
 	}
 }
+
+const char* RDMSubDevices::GetTypeString(rdm::subdevices::Types type) {
+	if (type < rdm::subdevices::Types::UNDEFINED) {
+		return RDMSubDevicesConst::TYPE[static_cast<uint8_t>(type)];
+	}
+
+	return "Unknown";
+}
+
+rdm::subdevices::Types RDMSubDevices::GetTypeString(const char *pValue) {
+	assert(pValue != nullptr);
+
+	for (uint32_t i = 0; i < static_cast<uint32_t>(rdm::subdevices::Types::UNDEFINED); i++) {
+		if (strcasecmp(pValue, RDMSubDevicesConst::TYPE[i]) == 0) {
+			return static_cast<rdm::subdevices::Types>(i);
+		}
+	}
+
+	return rdm::subdevices::Types::UNDEFINED;
+}

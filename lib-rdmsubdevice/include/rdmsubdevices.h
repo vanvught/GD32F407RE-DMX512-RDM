@@ -80,8 +80,8 @@ public:
 	void Stop();
 	void SetData(const uint8_t *pData, uint32_t nLength);
 
-	static const char *GetTypeString(rdm::subdevices::type tType);
-	static rdm::subdevices::type GetTypeString(const char *pValue);
+	static const char *GetTypeString(rdm::subdevices::Types tType);
+	static rdm::subdevices::Types GetTypeString(const char *pValue);
 
 	static RDMSubDevices* Get() {
 		return s_pThis;

@@ -2,7 +2,7 @@
  * @file e131bridge.h
  *
  */
-/* Copyright (C) 2016-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,11 @@
 
 namespace e131bridge {
 #if !defined(LIGHTSET_PORTS)
- static constexpr uint32_t MAX_PORTS = 4;
+# define LIGHTSET_PORTS	0
+#endif
+
+#if (LIGHTSET_PORTS == 0)
+ static constexpr uint32_t MAX_PORTS = 1;
 #else
  static constexpr uint32_t MAX_PORTS = LIGHTSET_PORTS;
 #endif
@@ -58,8 +62,8 @@ struct State {
 	uint16_t DiscoveryPacketLength;
 	uint16_t nSynchronizationAddressSourceA;
 	uint16_t nSynchronizationAddressSourceB;
-	uint8_t nActiveInputPorts;
-	uint8_t nActiveOutputPorts;
+	uint8_t nEnabledInputPorts;
+	uint8_t nEnableOutputPorts;
 	uint8_t nPriority;
 	uint8_t nReceivingDmx;
 	lightset::FailSafe failsafe;
@@ -142,11 +146,11 @@ public:
 	}
 
 	uint32_t GetActiveOutputPorts() const {
-		return m_State.nActiveOutputPorts;
+		return m_State.nEnableOutputPorts;
 	}
 
 	uint32_t GetActiveInputPorts() const {
-		return m_State.nActiveInputPorts;
+		return m_State.nEnabledInputPorts;
 	}
 
 	bool IsTransmitting(uint32_t nPortIndex) const {
@@ -187,10 +191,6 @@ public:
 	}
 	bool GetDisableSynchronize() const {
 		return m_State.bDisableSynchronize;
-	}
-
-	void SetE131Dmx(E131Dmx *pE131Dmx) {
-		m_pE131DmxIn = pE131Dmx;
 	}
 
 	void SetE131Sync(E131Sync *pE131Sync) {
@@ -265,7 +265,7 @@ private:
 
 	void CheckMergeTimeouts(uint32_t nPortIndex);
 	bool IsPriorityTimeOut(uint32_t nPortIndex) const;
-	bool isIpCidMatch(const struct e131bridge::Source *) const;
+	bool isIpCidMatch(const e131bridge::Source *const) const;
 	void UpdateMergeStatus(const uint32_t nPortIndex);
 
 	void HandleDmx();
@@ -290,7 +290,6 @@ private:
 	uint32_t m_nPreviousPacketMillis { 0 };
 
 	// Input
-	E131Dmx *m_pE131DmxIn { nullptr };
 	TE131DataPacket *m_pE131DataPacket { nullptr };
 	TE131DiscoveryPacket *m_pE131DiscoveryPacket { nullptr };
 	uint32_t m_DiscoveryIpAddress { 0 };

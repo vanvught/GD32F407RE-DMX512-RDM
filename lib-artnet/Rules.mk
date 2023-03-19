@@ -18,5 +18,8 @@ ifneq ($(MAKE_FLAGS),)
 else
 	EXTRA_SRCDIR+=src/node src/node/failsafe src/controller
 	EXTRA_INCLUDES+=src/node/failsafe
+	DEFINES+=ARTNET_HAVE_DMXIN
+	DEFINES+=ARTNET_HAVE_FAILSAFE_RECORD
+	DEFINES+=RDM_CONTROLLER
 	DEFINES+=LIGHTSET_PORTS=4
 endif

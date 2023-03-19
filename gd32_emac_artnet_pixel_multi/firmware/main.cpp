@@ -29,7 +29,6 @@
 #include "hardware.h"
 #include "network.h"
 #include "networkconst.h"
-#include "ledblink.h"
 
 #include "mdns.h"
 #include "mdnsservices.h"
@@ -79,6 +78,8 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
+static constexpr auto DMXPORT_OFFSET = 64U;
+
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
 	ArtNet4Node::Get()->Stop();
@@ -87,16 +88,12 @@ void Hardware::RebootHandler() {
 void main() {
 	Hardware hw;
 	Network nw;
-	LedBlink lb;
 	DisplayUdf display;
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
 	ConfigStore configStore;
 
-	fw.Print("\x1b[32m" "Art-Net 4 Pixel controller {8x 4 Universes}" "\x1b[37m");
-
-	hw.SetLed(hardware::LedStatus::ON);
-	lb.SetLedBlinkDisplay(new DisplayHandler);
+	fw.Print("Art-Net 4 Pixel controller {8x 4 Universes}");
 
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
 
@@ -116,22 +113,21 @@ void main() {
 
 #if defined (ENABLE_HTTPD)
 	HttpDaemon httpDaemon;
-	httpDaemon.Start();
 #endif
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
 	ArtNet4Node node;
 
-	StoreArtNet storeArtNet;
+	StoreArtNet storeArtNet(DMXPORT_OFFSET);
+	node.SetArtNetStore(&storeArtNet);
+
 	ArtNetParams artnetParams(&storeArtNet);
 
 	if (artnetParams.Load()) {
 		artnetParams.Dump();
-		artnetParams.Set();
+		artnetParams.Set(DMXPORT_OFFSET);
 	}
-
-	node.SetArtNetStore(&storeArtNet);
 
 	PixelDmxConfiguration pixelDmxConfiguration;
 
@@ -229,7 +225,7 @@ void main() {
 	display.Set(2, displayudf::Labels::IP);
 	display.Set(3, displayudf::Labels::NODE_NAME);
 	display.Set(4, displayudf::Labels::VERSION);
-	display.Set(5, displayudf::Labels::UNIVERSE);
+	display.Set(5, displayudf::Labels::UNIVERSE_PORT_A);
 	display.Set(6, displayudf::Labels::BOARDNAME);
 	display.Printf(7, "%s:%d G%d %s",
 		PixelType::GetType(pixelDmxConfiguration.GetType()),
@@ -241,11 +237,11 @@ void main() {
 	DisplayUdfParams displayUdfParams(&storeDisplayUdf);
 
 	if (displayUdfParams.Load()) {
-		displayUdfParams.Set(&display);
 		displayUdfParams.Dump();
+		displayUdfParams.Set(&display);
 	}
 
-	display.Show(&node);
+	display.Show(&node, DMXPORT_OFFSET);
 
 	if (nTestPattern != pixelpatterns::Pattern::NONE) {
 		display.ClearLine(6);
@@ -264,14 +260,6 @@ void main() {
 
 	while (configStore.Flash())
 		;
-
-#if defined (NODE_RDMNET_LLRP_ONLY)
-	display.TextStatus(RDMNetConst::MSG_START, Display7SegmentMessage::INFO_RDMNET_START, CONSOLE_YELLOW);
-
-	llrpOnlyDevice.Start();
-
-	display.TextStatus(RDMNetConst::MSG_STARTED, Display7SegmentMessage::INFO_RDMNET_STARTED, CONSOLE_GREEN);
-#endif
 
 	display.TextStatus(ArtNetMsgConst::START, Display7SegmentMessage::INFO_NODE_START, CONSOLE_YELLOW);
 
@@ -298,6 +286,6 @@ void main() {
 		httpDaemon.Run();
 #endif
 		display.Run();
-		lb.Run();
+		hw.Run();
 	}
 }

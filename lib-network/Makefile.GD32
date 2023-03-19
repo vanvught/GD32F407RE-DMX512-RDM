@@ -4,5 +4,13 @@ DEFINES+=NDEBUG
 EXTRA_INCLUDES=../lib-properties/include
 EXTRA_SRCDIR=src/emac/gd32
 
+ifeq ($(findstring RTL8201F,$(PHY_TYPE)), RTL8201F)
+	EXTRA_SRCDIR+=src/emac/gd32/rtl8201f
+	DEFINES+=RTL8201F_LED1_LINK_ALL
+	DEFINES+=ENET_LINK_CHECK_USE_INT
+else
+	#DEFINES+=ENET_LINK_CHECK_REG_POLL
+endif
+
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

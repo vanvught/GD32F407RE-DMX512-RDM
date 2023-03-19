@@ -2,7 +2,7 @@
  * @file remoteconfig.h
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,8 @@ enum class Node {
 	DDP,
 	PP,
 	NODE,
+	BOOTLOADER_TFTP,
+	RDMRESPONDER,
 	LAST
 };
 enum class Output {
@@ -142,6 +144,8 @@ public:
 		return s_RemoteConfigListBin.nActiveOutputs;
 	}
 
+	void SetDisplayName(const char *pDisplayName);
+
 	const char *GetDisplayName() const {
 		return s_RemoteConfigListBin.aDisplayName;
 	}
@@ -171,8 +175,6 @@ public:
 	bool IsEnableUptime() const {
 		return m_bEnableUptime;
 	}
-
-	void SetDisplayName(const char *pDisplayName);
 
 	void SetEnableFactory(bool bEnableFactory) {
 		m_bEnableFactory = bEnableFactory;
@@ -261,11 +263,19 @@ private:
 	}
 #endif
 
+#if defined (RDM_RESPONDER)
+	void HandleGetRdmDeviceTxt(uint32_t& nSize);
+	void HandleGetRdmSensorsTxt(uint32_t& nSize);
+# if defined (ENABLE_RDM_SUBDEVICES)
+	void HandleGetRdmSubdevTxt(uint32_t& nSize);
+# endif
+#endif
+
 #if defined (OUTPUT_DMX_SEND)
 	void HandleGetParamsTxt(uint32_t& nSize);
 #endif
 
-#if defined (OUTPUT_DMX_PIXEL) || (OUTPUT_DMX_TLC59711)
+#if defined (OUTPUT_DMX_PIXEL) || defined (OUTPUT_DMX_TLC59711)
 	void HandleGetDevicesTxt(uint32_t& nSize);
 #endif
 
@@ -358,11 +368,19 @@ private:
 	}
 #endif
 
+#if defined (RDM_RESPONDER)
+	void HandleSetRdmDeviceTxt();
+	void HandleSetRdmSensorsTxt();
+# if defined (ENABLE_RDM_SUBDEVICES)
+	void HandleSetRdmSubdevTxt();
+# endif
+#endif
+
 #if defined (OUTPUT_DMX_SEND)
 	void HandleSetParamsTxt();
 #endif
 
-#if defined (OUTPUT_DMX_PIXEL) || (OUTPUT_DMX_TLC59711)
+#if defined (OUTPUT_DMX_PIXEL) || defined (OUTPUT_DMX_TLC59711)
 	void HandleSetDevicesTxt();
 #endif
 
@@ -464,7 +482,6 @@ private:
 
 #if defined(ENABLE_TFTP_SERVER)
 	TFTPFileServer *m_pTFTPFileServer { nullptr };
-	uint8_t *m_pTFTPBuffer { nullptr };
 #endif
 	bool m_bEnableTFTP { false };
 

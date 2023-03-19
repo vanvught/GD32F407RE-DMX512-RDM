@@ -2,7 +2,7 @@
  * @file rdmsensorsparams.h
  *
  */
-/* Copyright (C) 2020-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,9 @@
 
 #include "rdmsensors.h"
 
-struct TRDMSensorsParams {
+namespace rdm {
+namespace sensorsparams {
+struct Params {
 	uint32_t nCount;
 	struct {
 		uint8_t nType;
@@ -38,16 +40,17 @@ struct TRDMSensorsParams {
 		uint8_t nReserved;
 	} __attribute__((packed)) Entry[rdm::sensors::max];
 } __attribute__((packed));
+}  // namespace sensorsparams
+}  // namespace rdm
 
-static_assert(sizeof(struct TRDMSensorsParams) <= rdm::sensors::store, "struct TRDMSensorsParams is too large");
+static_assert(sizeof(struct rdm::sensorsparams::Params) <= rdm::sensors::store, "struct rdm::sensorsparams::Params is too large");
 
 class RDMSensorsParamsStore {
 public:
-	virtual ~RDMSensorsParamsStore() {
-	}
+	virtual ~RDMSensorsParamsStore() {}
 
-	virtual void Update(const struct TRDMSensorsParams *pRDMSensorsParams)=0;
-	virtual void Copy(struct TRDMSensorsParams *pRDMSensorsParams)=0;
+	virtual void Update(const rdm::sensorsparams::Params *pParams)=0;
+	virtual void Copy(rdm::sensorsparams::Params *pParams)=0;
 };
 
 class RDMSensorsParams {
@@ -57,7 +60,7 @@ public:
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
-	void Builder(const struct TRDMSensorsParams *pRDMSensorsParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Builder(const rdm::sensorsparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
 	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize);
 
 	void Dump();
@@ -72,7 +75,7 @@ private:
 
 private:
 	RDMSensorsParamsStore *m_pRDMSensorsParamsStore;
-	TRDMSensorsParams m_tRDMSensorsParams;
+	rdm::sensorsparams::Params m_Params;
 };
 
 #endif /* RDMSENSORSPARAMS_H_ */

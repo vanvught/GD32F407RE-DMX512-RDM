@@ -2,7 +2,7 @@
  * @file net_packets.h
  *
  */
-/* Copyright (C) 2018-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -169,7 +169,7 @@ struct t_tcp_packet {
 	uint16_t checksum;				/* 18 */
 	uint16_t urgent;				/* 20 */
 #define TCP_HEADER_SIZE		20
-#define TCP_DATA_SIZE		(MTU_SIZE - TCP_HEADER_SIZE - (uint16_t) sizeof(struct ip4_header))
+#define TCP_DATA_SIZE		(MTU_SIZE - TCP_HEADER_SIZE - sizeof(struct ip4_header) - 20U)
 	uint8_t data[TCP_DATA_SIZE];
 } PACKED;
 

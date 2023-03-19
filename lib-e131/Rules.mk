@@ -10,5 +10,6 @@ ifneq ($(MAKE_FLAGS),)
 	endif
 else
 EXTRA_SRCDIR+=src/node src/controller
+DEFINES+=E131_HAVE_DMXIN
 DEFINES+=LIGHTSET_PORTS=4
 endif

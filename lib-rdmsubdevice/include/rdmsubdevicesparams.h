@@ -30,7 +30,9 @@
 
 #include "rdmsubdevices.h"
 
-struct TRDMSubDevicesParams {
+namespace rdm {
+namespace subdevicesparams {
+struct Params {
 	uint32_t nCount;
 	struct {
 		uint8_t nType;
@@ -40,16 +42,17 @@ struct TRDMSubDevicesParams {
 		uint32_t nSpeedHz;
 	} __attribute__((packed)) Entry[rdm::subdevices::max];
 } __attribute__((packed));
+}  // namespace subdevicesparams
+}  // namespace rdm
 
-static_assert(sizeof(struct TRDMSubDevicesParams) <= rdm::subdevices::store, "struct TRDMSubDevicesParams is too large");
+static_assert(sizeof(struct rdm::subdevicesparams::Params) <= rdm::subdevices::store, "struct rdm::subdevicesparams::Params is too large");
 
 class RDMSubDevicesParamsStore {
 public:
-	virtual ~RDMSubDevicesParamsStore() {
-	}
+	virtual ~RDMSubDevicesParamsStore() {}
 
-	virtual void Update(const struct TRDMSubDevicesParams *pTRDMSubDevicesParams)=0;
-	virtual void Copy(struct TRDMSubDevicesParams *pTRDMSubDevicesParams)=0;
+	virtual void Update(const rdm::subdevicesparams::Params *pParams)=0;
+	virtual void Copy(rdm::subdevicesparams::Params *pParams)=0;
 };
 
 class RDMSubDevicesParams {
@@ -59,7 +62,7 @@ public:
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
-	void Builder(const struct TRDMSubDevicesParams *pRDMSubDevicesParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Builder(const rdm::subdevicesparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
 	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize);
 
 	void Dump();
@@ -74,7 +77,7 @@ private:
 
 private:
     RDMSubDevicesParamsStore *m_pRDMSubDevicesParamsStore;
-	TRDMSubDevicesParams m_tRDMSubDevicesParams;
+    rdm::subdevicesparams::Params m_Params;
 };
 
 #endif /* RDMSUBDEVICESPARAMS_H_ */

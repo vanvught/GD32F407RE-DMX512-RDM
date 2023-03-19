@@ -88,7 +88,7 @@ static uint32_t _port_to_uart(const uint32_t nPort) {
 #if defined (GD32F4XX)
 // GPIO
 static void _gpio_mode_output(uint32_t gpio_periph, uint32_t pin) {
-	gpio_af_set(gpio_periph, GPIO_AF_0, pin);
+	gpio_af_set(gpio_periph, GPIO_AF_0, pin); //TODO This needs some research. Is it really needed?
 	gpio_mode_set(gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin);
 }
 static void _gpio_mode_af(const uint32_t gpio_periph, uint32_t pin, const uint32_t usart_periph) {

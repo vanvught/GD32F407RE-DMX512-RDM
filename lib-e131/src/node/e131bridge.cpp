@@ -2,7 +2,7 @@
  * @file e131bridge.cpp
  *
  */
-/* Copyright (C) 2016-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <cassert>
 
 #include "e131bridge.h"
@@ -41,40 +39,35 @@
 #include "hardware.h"
 #include "network.h"
 
-#include "ledblink.h"
 #include "panel_led.h"
 
 #include "debug.h"
-
-using namespace e131;
-using namespace e131bridge;
 
 E131Bridge *E131Bridge::s_pThis = nullptr;
 
 E131Bridge::E131Bridge() {
 	assert(Hardware::Get() != nullptr);
 	assert(Network::Get() != nullptr);
-	assert(LedBlink::Get() != nullptr);
 
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
 	for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
-		memset(&m_OutputPort[i], 0, sizeof(OutputPort));
-		memset(&m_InputPort[i], 0, sizeof(InputPort));
+		memset(&m_OutputPort[i], 0, sizeof(e131bridge::OutputPort));
+		memset(&m_InputPort[i], 0, sizeof(e131bridge::InputPort));
 		m_InputPort[i].nPriority = 100;
 	}
 
-	memset(&m_State, 0, sizeof(State));
-	m_State.nPriority = priority::LOWEST;
+	memset(&m_State, 0, sizeof(e131bridge::State));
+	m_State.nPriority = e131::priority::LOWEST;
 
 	char aSourceName[e131::SOURCE_NAME_LENGTH];
 	uint8_t nLength;
 	snprintf(aSourceName, e131::SOURCE_NAME_LENGTH, "%.48s %s", Network::Get()->GetHostName(), Hardware::Get()->GetBoardName(nLength));
 	SetSourceName(aSourceName);
 
-	m_nHandle = Network::Get()->Begin(e131::UDP_PORT); 	// This must be here (and not in Start)
-	assert(m_nHandle != -1);							// ToDO Rewrite SetUniverse
+	m_nHandle = Network::Get()->Begin(e131::UDP_PORT);
+	assert(m_nHandle != -1);
 
 	Hardware::Get()->GetUuid(m_Cid);
 }
@@ -86,29 +79,28 @@ E131Bridge::~E131Bridge() {
 }
 
 void E131Bridge::Start() {
-	if (m_pE131DmxIn != nullptr) {
-		if (m_pE131DataPacket == nullptr) {
-			struct in_addr addr;
-			static_cast<void>(inet_aton("239.255.0.0", &addr));
-			m_DiscoveryIpAddress = addr.s_addr | ((universe::DISCOVERY & static_cast<uint32_t>(0xFF)) << 24) | ((universe::DISCOVERY & 0xFF00) << 8);
-			// TE131DataPacket
-			m_pE131DataPacket = new TE131DataPacket;
-			assert(m_pE131DataPacket != nullptr);
-			FillDataPacket();
-			// TE131DiscoveryPacket
-			m_pE131DiscoveryPacket = new TE131DiscoveryPacket;
-			assert(m_pE131DiscoveryPacket != nullptr);
-			FillDiscoveryPacket();
-		}
-
-		for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
-				m_pE131DmxIn->Start(nPortIndex);
-			}
-		}
+#if defined (E131_HAVE_DMXIN)
+	if (m_pE131DataPacket == nullptr) {
+		const auto nIpMulticast = network::convert_to_uint(239, 255, 0, 0);
+		m_DiscoveryIpAddress = nIpMulticast | ((e131::universe::DISCOVERY & static_cast<uint32_t>(0xFF)) << 24) | ((e131::universe::DISCOVERY & 0xFF00) << 8);
+		// TE131DataPacket
+		m_pE131DataPacket = new TE131DataPacket;
+		assert(m_pE131DataPacket != nullptr);
+		FillDataPacket();
+		// TE131DiscoveryPacket
+		m_pE131DiscoveryPacket = new TE131DiscoveryPacket;
+		assert(m_pE131DiscoveryPacket != nullptr);
+		FillDiscoveryPacket();
 	}
 
-	LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
+	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+			e131::dmx_start(nPortIndex);
+		}
+	}
+#endif
+
+	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 }
 
 void E131Bridge::Stop() {
@@ -122,15 +114,15 @@ void E131Bridge::Stop() {
 		m_OutputPort[nPortIndex].IsDataPending = false;
 	}
 
-	if (m_pE131DmxIn != nullptr) {
-		for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
-				m_pE131DmxIn->Stop(nPortIndex);
-			}
+#if defined (E131_HAVE_DMXIN)
+	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+			e131::dmx_stop(nPortIndex);
 		}
 	}
+#endif
 
-	LedBlink::Get()->SetMode(ledblink::Mode::OFF_OFF);
+	Hardware::Get()->SetMode(hardware::ledblink::Mode::OFF_OFF);
 }
 
 void E131Bridge::SetSynchronizationAddress(bool bSourceA, bool bSourceB, uint16_t nSynchronizationAddress) {
@@ -164,7 +156,7 @@ void E131Bridge::SetSynchronizationAddress(bool bSourceA, bool bSourceB, uint16_
 		return;
 	}
 
-	Network::Get()->JoinGroup(m_nHandle, universe_to_multicast_ip(nSynchronizationAddress));
+	Network::Get()->JoinGroup(m_nHandle, e131::universe_to_multicast_ip(nSynchronizationAddress));
 
 	DEBUG_EXIT
 }
@@ -185,7 +177,7 @@ void E131Bridge::LeaveUniverse(uint32_t nPortIndex, uint16_t nUniverse) {
 		}
 	}
 
-	Network::Get()->LeaveGroup(m_nHandle, universe_to_multicast_ip(nUniverse));
+	Network::Get()->LeaveGroup(m_nHandle, e131::universe_to_multicast_ip(nUniverse));
 
 	DEBUG_EXIT
 }
@@ -193,7 +185,7 @@ void E131Bridge::LeaveUniverse(uint32_t nPortIndex, uint16_t nUniverse) {
 void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_t nUniverse) {
 	assert(nPortIndex < e131bridge::MAX_PORTS);
 	assert(dir <= lightset::PortDir::DISABLE);
-	assert((nUniverse >= universe::DEFAULT) && (nUniverse <=universe::MAX));
+	assert((nUniverse >= e131::universe::DEFAULT) && (nUniverse <= e131::universe::MAX));
 
 	if ((dir == lightset::PortDir::INPUT) && (nPortIndex < e131bridge::MAX_PORTS)) {
 		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
@@ -201,13 +193,13 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 				return;
 			}
 		} else {
-			m_State.nActiveInputPorts = static_cast<uint8_t>(m_State.nActiveInputPorts + 1);
-			assert(m_State.nActiveInputPorts <= e131bridge::MAX_PORTS);
+			m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts + 1);
+			assert(m_State.nEnabledInputPorts <= e131bridge::MAX_PORTS);
 			m_InputPort[nPortIndex].genericPort.bIsEnabled = true;
 		}
 
 		m_InputPort[nPortIndex].genericPort.nUniverse = nUniverse;
-		m_InputPort[nPortIndex].nMulticastIp = universe_to_multicast_ip(nUniverse);
+		m_InputPort[nPortIndex].nMulticastIp = e131::universe_to_multicast_ip(nUniverse);
 
 		return;
 	}
@@ -216,7 +208,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 		if (nPortIndex < e131bridge::MAX_PORTS) {
 			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
 				m_OutputPort[nPortIndex].genericPort.bIsEnabled = false;
-				m_State.nActiveOutputPorts = static_cast<uint8_t>(m_State.nActiveOutputPorts - 1);
+				m_State.nEnableOutputPorts = static_cast<uint8_t>(m_State.nEnableOutputPorts - 1);
 				LeaveUniverse(nPortIndex, nUniverse);
 			}
 		}
@@ -224,7 +216,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 		if (nPortIndex < e131bridge::MAX_PORTS) {
 			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
 				m_InputPort[nPortIndex].genericPort.bIsEnabled = false;
-				m_State.nActiveInputPorts = static_cast<uint8_t>(m_State.nActiveInputPorts - 1);
+				m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts - 1);
 			}
 		}
 
@@ -240,12 +232,12 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 			LeaveUniverse(nPortIndex, nUniverse);
 		}
 	} else {
-		m_State.nActiveOutputPorts = static_cast<uint8_t>(m_State.nActiveOutputPorts + 1);
-		assert(m_State.nActiveOutputPorts <= e131bridge::MAX_PORTS);
+		m_State.nEnableOutputPorts = static_cast<uint8_t>(m_State.nEnableOutputPorts + 1);
+		assert(m_State.nEnableOutputPorts <= e131bridge::MAX_PORTS);
 		m_OutputPort[nPortIndex].genericPort.bIsEnabled = true;
 	}
 
-	Network::Get()->JoinGroup(m_nHandle, universe_to_multicast_ip(nUniverse));
+	Network::Get()->JoinGroup(m_nHandle, e131::universe_to_multicast_ip(nUniverse));
 
 	m_OutputPort[nPortIndex].genericPort.nUniverse = nUniverse;
 }
@@ -282,7 +274,7 @@ void E131Bridge::CheckMergeTimeouts(uint32_t nPortIndex) {
 
 	const auto timeOutA = m_nCurrentPacketMillis - m_OutputPort[nPortIndex].sourceA.nMillis;
 
-	if (timeOutA > (MERGE_TIMEOUT_SECONDS * 1000U)) {
+	if (timeOutA > (e131::MERGE_TIMEOUT_SECONDS * 1000U)) {
 		m_OutputPort[nPortIndex].sourceA.nIp = 0;
 		memset(m_OutputPort[nPortIndex].sourceA.cid, 0, e131::CID_LENGTH);
 		m_OutputPort[nPortIndex].IsMerging = false;
@@ -290,7 +282,7 @@ void E131Bridge::CheckMergeTimeouts(uint32_t nPortIndex) {
 
 	const auto timeOutB = m_nCurrentPacketMillis - m_OutputPort[nPortIndex].sourceB.nMillis;
 
-	if (timeOutB > (MERGE_TIMEOUT_SECONDS * 1000U)) {
+	if (timeOutB > (e131::MERGE_TIMEOUT_SECONDS * 1000U)) {
 		m_OutputPort[nPortIndex].sourceB.nIp = 0;
 		memset(m_OutputPort[nPortIndex].sourceB.cid, 0, e131::CID_LENGTH);
 		m_OutputPort[nPortIndex].IsMerging = false;
@@ -315,17 +307,17 @@ bool E131Bridge::IsPriorityTimeOut(uint32_t nPortIndex) const {
 	const auto timeOutB = m_nCurrentPacketMillis - m_OutputPort[nPortIndex].sourceB.nMillis;
 
 	if ( (m_OutputPort[nPortIndex].sourceA.nIp != 0) && (m_OutputPort[nPortIndex].sourceB.nIp != 0) ) {
-		if ( (timeOutA < (PRIORITY_TIMEOUT_SECONDS * 1000U)) || (timeOutB < (PRIORITY_TIMEOUT_SECONDS * 1000U)) ) {
+		if ( (timeOutA < (e131::PRIORITY_TIMEOUT_SECONDS * 1000U)) || (timeOutB < (e131::PRIORITY_TIMEOUT_SECONDS * 1000U)) ) {
 			return false;
 		} else {
 			return true;
 		}
 	} else if ( (m_OutputPort[nPortIndex].sourceA.nIp != 0) && (m_OutputPort[nPortIndex].sourceB.nIp == 0) ) {
-		if (timeOutA > (PRIORITY_TIMEOUT_SECONDS * 1000U)) {
+		if (timeOutA > (e131::PRIORITY_TIMEOUT_SECONDS * 1000U)) {
 			return true;
 		}
 	} else if ( (m_OutputPort[nPortIndex].sourceA.nIp == 0) && (m_OutputPort[nPortIndex].sourceB.nIp != 0) ) {
-		if (timeOutB > (PRIORITY_TIMEOUT_SECONDS * 1000U)) {
+		if (timeOutB > (e131::PRIORITY_TIMEOUT_SECONDS * 1000U)) {
 			return true;
 		}
 	}
@@ -333,7 +325,7 @@ bool E131Bridge::IsPriorityTimeOut(uint32_t nPortIndex) const {
 	return false;
 }
 
-bool E131Bridge::isIpCidMatch(const struct Source *source) const {
+bool E131Bridge::isIpCidMatch(const e131bridge::Source *const source) const {
 	if (source->nIp != m_E131.IPAddressFrom) {
 		return false;
 	}
@@ -346,7 +338,7 @@ bool E131Bridge::isIpCidMatch(const struct Source *source) const {
 }
 
 void E131Bridge::HandleDmx() {
-	const auto *pDmxData = &m_E131.E131Packet.Data.DMPLayer.PropertyValues[1];
+	const auto *const pDmxData = &m_E131.E131Packet.Data.DMPLayer.PropertyValues[1];
 	const auto nDmxSlots = __builtin_bswap16(m_E131.E131Packet.Data.DMPLayer.PropertyValueCount) - 1U;
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
@@ -391,13 +383,13 @@ void E131Bridge::HandleDmx() {
 
 		// This bit, when set to 1, indicates that the data in this packet is intended for use in visualization or media
 		// server preview applications and shall not be used to generate live output.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & OptionsMask::PREVIEW_DATA) != 0) {
+		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::PREVIEW_DATA) != 0) {
 			continue;
 		}
 
 		// Upon receipt of a packet containing this bit set to a value of 1, receiver shall enter network data loss condition.
 		// Any property values in these packets shall be ignored.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & OptionsMask::STREAM_TERMINATED) != 0) {
+		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::STREAM_TERMINATED) != 0) {
 			if (isSourceA || isSourceB) {
 				SetNetworkDataLossCondition(isSourceA, isSourceB);
 			}
@@ -491,7 +483,7 @@ void E131Bridge::HandleDmx() {
 		// new packets until synchronization resumes. When set to 1, once synchronization has been lost,
 		// components that had been operating in a synchronized state need not wait for a new
 		// E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & OptionsMask::FORCE_SYNCHRONIZATION) == 0) {
+		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::FORCE_SYNCHRONIZATION) == 0) {
 			// 6.3.3.1 Synchronization Address Usage in an E1.31 Synchronization Packet
 			// An E1.31 Synchronization Packet is sent to synchronize the E1.31 data on a specific universe number.
 			// A Synchronization Address of 0 is thus meaningless, and shall not be transmitted.
@@ -537,7 +529,7 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 		m_State.IsMergeMode = false;
 		m_State.IsSynchronized = false;
 		m_State.IsForcedSynchronized = false;
-		m_State.nPriority = priority::LOWEST;
+		m_State.nPriority = e131::priority::LOWEST;
 
 		for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
 			if (m_OutputPort[i].IsTransmitting) {
@@ -592,7 +584,7 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 		}
 	}
 
-	LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
+	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 	hal::panel_led_off(hal::panelled::SACN);
 
 	m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::OUTPUT)));
@@ -607,8 +599,8 @@ bool E131Bridge::IsValidRoot() {
 		return false;
 	}
 	
-	if (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(vector::root::DATA)
-			 && (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(vector::root::EXTENDED)) ) {
+	if (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(e131::vector::root::DATA)
+			 && (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(e131::vector::root::EXTENDED)) ) {
 		return false;
 	}
 
@@ -653,11 +645,10 @@ void E131Bridge::Run() {
 	m_nCurrentPacketMillis = Hardware::Get()->Millis();
 
 	if (__builtin_expect((nBytesReceived == 0), 1)) {
-		if (m_State.nActiveOutputPorts != 0) {
-			if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= static_cast<uint32_t>(NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
+		if (m_State.nEnableOutputPorts != 0) {
+			if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= static_cast<uint32_t>(e131::NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
 				if ((m_pLightSet != nullptr) && (!m_State.IsNetworkDataLoss)) {
 					SetNetworkDataLossCondition();
-					DEBUG_PUTS("");
 				}
 			}
 
@@ -666,17 +657,17 @@ void E131Bridge::Run() {
 			}
 		}
 
-		if (m_pE131DmxIn != nullptr) {
-			HandleDmxIn();
-			SendDiscoveryPacket();
-		}
+#if defined (E131_HAVE_DMXIN)
+		HandleDmxIn();
+		SendDiscoveryPacket();
+#endif
 
-		// The ledblink::Mode::FAST is for RDM Identify (Art-Net 4)
-		if (m_bEnableDataIndicator && (LedBlink::Get()->GetMode() != ledblink::Mode::FAST)) {
+		// The hardware::ledblink::Mode::FAST is for RDM Identify (Art-Net 4)
+		if (m_bEnableDataIndicator && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
 			if (m_State.nReceivingDmx != 0) {
-				LedBlink::Get()->SetMode(ledblink::Mode::DATA);
+				Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
 			} else {
-				LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
+				Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 			}
 		}
 
@@ -691,7 +682,7 @@ void E131Bridge::Run() {
 	m_nPreviousPacketMillis = m_nCurrentPacketMillis;
 
 	if (m_State.IsSynchronized && !m_State.IsForcedSynchronized) {
-		if ((m_nCurrentPacketMillis - m_State.SynchronizationTime) >= static_cast<uint32_t>(NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
+		if ((m_nCurrentPacketMillis - m_State.SynchronizationTime) >= static_cast<uint32_t>(e131::NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
 			m_State.IsSynchronized = false;
 		}
 	}
@@ -701,14 +692,14 @@ void E131Bridge::Run() {
 	if (m_pLightSet != nullptr) {
 		const auto nRootVector = __builtin_bswap32(m_E131.E131Packet.Raw.RootLayer.Vector);
 
-		if (nRootVector == vector::root::DATA) {
+		if (nRootVector == e131::vector::root::DATA) {
 			if (IsValidDataPacket()) {
 				HandleDmx();
 				isActive = true;
 			}
-		} else if (nRootVector == vector::root::EXTENDED) {
+		} else if (nRootVector == e131::vector::root::EXTENDED) {
 			const auto nFramingVector = __builtin_bswap32(m_E131.E131Packet.Raw.FrameLayer.Vector);
-			if (nFramingVector == vector::extended::SYNCHRONIZATION) {
+			if (nFramingVector == e131::vector::extended::SYNCHRONIZATION) {
 				HandleSynchronization();
 				isActive = true;
 			}
@@ -717,18 +708,17 @@ void E131Bridge::Run() {
 		}
 	}
 
-	if (m_pE131DmxIn != nullptr) {
-		HandleDmxIn();
-		SendDiscoveryPacket();
-		isActive = true;
-	}
+#if defined (E131_HAVE_DMXIN)
+	HandleDmxIn();
+	SendDiscoveryPacket();
+#endif
 
-	// The ledblink::Mode::FAST is for RDM Identify (Art-Net 4)
-	if (m_bEnableDataIndicator && (LedBlink::Get()->GetMode() != ledblink::Mode::FAST)) {
+	// The hardware::ledblink::Mode::FAST is for RDM Identify (Art-Net 4)
+	if (m_bEnableDataIndicator && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
 		if (m_State.nReceivingDmx != 0) {
-			LedBlink::Get()->SetMode(ledblink::Mode::DATA);
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
 		} else {
-			LedBlink::Get()->SetMode(ledblink::Mode::NORMAL);
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 		}
 	}
 

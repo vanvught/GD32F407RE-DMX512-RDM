@@ -51,6 +51,13 @@ enum class ClientStatus {
 };
 }  // namespace dhcp
 
+static constexpr uint32_t convert_to_uint(const uint8_t a, const uint8_t b, const uint8_t c, const uint8_t d) {
+	return static_cast<uint32_t>(a)       |
+		   static_cast<uint32_t>(b) << 8  |
+		   static_cast<uint32_t>(c) << 16 |
+		   static_cast<uint32_t>(d) << 24;
+}
+
 inline static bool is_netmask_valid(uint32_t nNetMask) {
 	if (nNetMask == 0) {
 		return false;
@@ -94,6 +101,15 @@ inline static bool is_multicast_ip(const uint32_t nIp) {
 	}
 
 	return true;
+}
+
+inline static uint32_t cidr_to_netmask(uint8_t nCIDR) {
+	if (nCIDR != 0) {
+		const auto nNetmask = __builtin_bswap32(static_cast<uint32_t>(~0x0) << (32 - nCIDR));
+		return nNetmask;
+	}
+
+	return 0;
 }
 
 void display_emac_start();
