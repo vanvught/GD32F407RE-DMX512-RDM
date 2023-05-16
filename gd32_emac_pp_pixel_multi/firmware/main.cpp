@@ -97,10 +97,10 @@ void main() {
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
 
 	MDNS mDns;
-	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG);
+	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG, "node=PixelPusher");
 	mDns.AddServiceRecord(nullptr, mdns::Services::PP);
 #if defined (ENABLE_HTTPD)
-	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP, "node=PixelPusher");
+	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP);
 #endif
 	mDns.Print();
 

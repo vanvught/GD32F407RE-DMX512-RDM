@@ -1,8 +1,8 @@
 /**
- * @file stdint.h
+ * @file debug_print_bits.c
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,42 +23,26 @@
  * THE SOFTWARE.
  */
 
-#ifndef STDINT_H_
-#define STDINT_H_
+#include <stdio.h>
+#include <stdint.h>
 
-typedef unsigned char		uint8_t;
-typedef unsigned short		uint16_t;
-typedef unsigned int		uint32_t;
-typedef unsigned long long	uint64_t;
-
-typedef signed char			int8_t;
-typedef signed short		int16_t;
-typedef signed int			int32_t;
-typedef signed long long	int64_t;
-
-typedef int 				intptr_t;
-typedef unsigned int 		uintptr_t;
-
-#if !defined(UINT32_MAX)
- #ifdef __cplusplus
-  #define UINT32_MAX	(static_cast<uint32_t>(-1))
- #else
-  #define UINT32_MAX	((uint32_t)-1)
- #endif
+#if defined (H3)
+extern int uart0_printf(const char* fmt, ...);
+# define printf uart0_printf
 #endif
 
-#if !defined(UINT16_MAX)
- #ifdef __cplusplus
-  #define UINT16_MAX	(static_cast<uint16_t>(-1))
- #else
-  #define UINT16_MAX	((uint16_t)-1)
- #endif
-#endif
+void debug_print_bits(uint32_t u) {
+	uint32_t i;
 
+	uint32_t b = 1U << 31;
 
-#define INT16_MIN   (-0x7fff - 1)
+	for (i = 0; i < 32; i++) {
+		if ((b & u) == b) {
+			uint32_t bit_number = 31 - i;
+			printf("%-2d ", bit_number);
+		}
+		b = b >> 1;
+	}
 
-#define INT16_MAX   0x7fff
-
-#endif
-
+	printf("\n");
+}

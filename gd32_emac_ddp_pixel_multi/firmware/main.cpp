@@ -96,10 +96,10 @@ void main() {
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
 
 	MDNS mDns;
-	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG);
+	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG, "node=DDP Pixel");
 	mDns.AddServiceRecord(nullptr, mdns::Services::DDP, "type=display");
 #if defined (ENABLE_HTTPD)
-	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP, "node=DDP Pixel");
+	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP);
 #endif
 	mDns.Print();
 

@@ -86,9 +86,9 @@ void main() {
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
 
 	MDNS mDns;
-	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG);
+	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG, "node=Art-Net 4 DMX/RDM");
 #if defined (ENABLE_HTTPD)
-	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP, "node=Art-Net 4 DMX/RDM");
+	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP);
 #endif
 	mDns.Print();
 
