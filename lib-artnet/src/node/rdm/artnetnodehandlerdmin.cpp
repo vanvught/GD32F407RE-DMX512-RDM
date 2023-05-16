@@ -42,7 +42,7 @@
 #include "debug.h"
 
 void ArtNetNode::HandleRdmIn() {
-	auto *const pArtRdm = &(m_ArtNetPacket.ArtPacket.ArtRdm);
+	auto *const pArtRdm = &m_ArtTodPacket.ArtRdm;
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if (!m_InputPort[nPortIndex].genericPort.bIsEnabled) {

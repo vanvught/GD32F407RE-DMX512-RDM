@@ -45,10 +45,9 @@
 
 class Network {
 public:
-	Network();
+	Network(NetworkParamsStore *pNetworkParamsStore);
 	~Network() {}
 
-	void Init(NetworkParamsStore *pNetworkParamsStore = nullptr);
 
 	void Print();
 
@@ -57,34 +56,96 @@ public:
 		net_shutdown();
 	}
 
-	int32_t Begin(uint16_t nPort) {
-		const auto nIdx = udp_begin(nPort);
-		assert(nIdx != -1);
-		return nIdx;
-	}
-
-	int32_t End(uint16_t nPort) {
-		const auto n = udp_end(nPort);
-		assert(n == 0);
-		return n;
-	}
-
 	void MacAddressCopyTo(uint8_t *pMacAddress) {
 		for (uint32_t i =  0; i < network::MAC_SIZE; i++) {
 			pMacAddress[i] = m_aNetMacaddr[i];
 		}
 	}
 
-	void JoinGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
-		igmp_join(nIp);
+	void SetIp(uint32_t nIp);
+	uint32_t GetIp() const {
+		return m_ipInfo.ip.addr;
 	}
 
-	void LeaveGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
-		igmp_leave(nIp);
+	void SetNetmask(uint32_t nNetmask);
+	uint32_t GetNetmask() const {
+		return m_ipInfo.netmask.addr;
+	}
+
+	void SetGatewayIp(uint32_t nGatewayIp);
+	uint32_t GetGatewayIp() const {
+		return m_ipInfo.gw.addr;
+	}
+
+	/*
+	 * DHCP
+	 */
+
+	bool IsDhcpCapable() const {
+		return m_IsDhcpCapable;
+	}
+
+	bool EnableDhcp();
+
+	bool IsDhcpUsed() const {
+		return m_IsDhcpUsed;
+	}
+
+	bool IsDhcpKnown() const {
+		return true;
+	}
+
+	network::dhcp::Mode GetDhcpMode() const {
+		if (m_IsDhcpUsed) {
+			return network::dhcp::Mode::ACTIVE;
+		}
+
+		return network::dhcp::Mode::INACTIVE;
+	}
+
+	/*
+	 * Zeroconf
+	 */
+
+	bool IsZeroconfCapable() const {
+		return m_IsZeroconfCapable;
+	}
+	bool SetZeroconf();
+	bool IsZeroconfUsed() const {
+		return m_IsZeroconfUsed;
+	}
+
+	void SetHostName(const char *pHostName);
+	const char *GetHostName() const {
+		return m_aHostName;
+	}
+
+	void SetDomainName(const char *pDomainName) {
+		strncpy(m_aDomainName, pDomainName, network::DOMAINNAME_SIZE - 1);
+		m_aDomainName[network::DOMAINNAME_SIZE - 1] = '\0';
+	}
+	const char *GetDomainName() const {
+		return m_aDomainName;
+	}
+
+	/*
+	 * UDP/IP
+	 */
+
+	int32_t Begin(uint16_t nPort) {
+		const auto nIndex = udp_begin(nPort);
+		assert(nIndex != -1);
+		return nIndex;
+	}
+
+	int32_t End(uint16_t nPort) {
+		const auto nIndex = udp_end(nPort);
+		assert(nIndex == 0);
+		return nIndex;
 	}
 
 	uint16_t RecvFrom(int32_t nHandle, void *pBuffer, uint16_t nLength, uint32_t *from_ip, uint16_t *from_port) {
-		return udp_recv1(nHandle, reinterpret_cast<uint8_t*>(pBuffer), nLength, from_ip, from_port);
+		return udp_recv1(nHandle, reinterpret_cast<uint8_t *>(pBuffer), nLength, from_ip, from_port);
 	}
 
 	uint16_t RecvFrom(int32_t nHandle, const void **ppBuffer, uint32_t *pFromIp, uint16_t *pFromPort) {
@@ -92,32 +153,37 @@ public:
 	}
 
 	void SendTo(int32_t nHandle, const void *pBuffer, uint16_t nLength, uint32_t to_ip, uint16_t remote_port) {
-		udp_send(nHandle, reinterpret_cast<const uint8_t*>(pBuffer), nLength, to_ip, remote_port);
+		udp_send(nHandle, reinterpret_cast<const uint8_t *>(pBuffer), nLength, to_ip, remote_port);
 	}
 
-	void SetIp(uint32_t nIp);
-	void SetNetmask(uint32_t nNetmask);
-	void SetGatewayIp(uint32_t nGatewayIp);
-	bool SetZeroconf();
-	bool EnableDhcp();
+	/*
+	 * TCP/IP
+	 */
 
-	void SetHostName(const char *pHostName);
-
-	void SetDomainName(const char *pDomainName) {
-		strncpy(m_aDomainName, pDomainName, network::DOMAINNAME_SIZE - 1);
-		m_aDomainName[network::DOMAINNAME_SIZE - 1] = '\0';
+	int32_t TcpBegin(const uint16_t nLocalPort) {
+		return tcp_begin(nLocalPort);
 	}
 
-	uint32_t GetIp() const {
-		return m_nLocalIp;
+	int32_t TcpEnd(const int32_t nHandle);
+
+	uint16_t TcpRead(const int32_t nHandleListen, const uint8_t **ppBuffer, uint32_t &HandleConnection) {
+		return tcp_read(nHandleListen, ppBuffer, HandleConnection);
 	}
 
-	const char *GetHostName() const {
-		return m_aHostName;
+	void TcpWrite(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLength, const uint32_t HandleConnection) {
+		tcp_write(nHandleListen, pBuffer, nLength, HandleConnection);
 	}
 
-	const char *GetDomainName() const {
-		return m_aDomainName;
+	/*
+	 * IGMP
+	 */
+
+	void JoinGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
+		igmp_join(nIp);
+	}
+
+	void LeaveGroup(__attribute__((unused)) int32_t nHandle, uint32_t nIp) {
+		igmp_leave(nIp);
 	}
 
 	void SetQueuedStaticIp(uint32_t nLocalIp = 0, uint32_t nNetmask = 0);
@@ -130,36 +196,12 @@ public:
 
 	bool ApplyQueuedConfig();
 
-	uint32_t GetGatewayIp() const {
-		return m_nGatewayIp;
-	}
-
-	uint32_t GetNetmask() const {
-		return m_nNetmask;
-	}
-
 	uint32_t GetNetmaskCIDR() const {
-		return static_cast<uint32_t>(__builtin_popcount(m_nNetmask));
+		return static_cast<uint32_t>(__builtin_popcount(m_ipInfo.netmask.addr));
 	}
 
 	uint32_t GetBroadcastIp() const {
-		return m_nLocalIp | ~m_nNetmask;
-	}
-
-	bool IsDhcpCapable() const {
-		return m_IsDhcpCapable;
-	}
-
-	bool IsDhcpUsed() const {
-		return m_IsDhcpUsed;
-	}
-
-	bool IsZeroconfCapable() const {
-		return m_IsZeroconfCapable;
-	}
-
-	bool IsZeroconfUsed() const {
-		return m_IsZeroconfUsed;
+		return m_ipInfo.ip.addr | ~m_ipInfo.netmask.addr;
 	}
 
 	char GetAddressingMode() {
@@ -174,18 +216,6 @@ public:
 		}
 
 		return 'U';
-	}
-
-	bool IsDhcpKnown() const {
-		return true;
-	}
-
-	network::dhcp::Mode GetDhcpMode() const {
-		if (m_IsDhcpUsed) {
-			return network::dhcp::Mode::ACTIVE;
-		}
-
-		return network::dhcp::Mode::INACTIVE;
 	}
 
 	const char *GetIfName() const {
@@ -204,12 +234,8 @@ public:
 		return m_fNtpUtcOffset;
 	}
 
-	void SetNetworkStore(NetworkStore *pNetworkStore) {
-		m_pNetworkStore = pNetworkStore;
-	}
-
 	bool IsValidIp(uint32_t nIp) {
-		return (m_nLocalIp & m_nNetmask) == (nIp & m_nNetmask);
+		return (m_ipInfo.ip.addr & m_ipInfo.netmask.addr) == (nIp & m_ipInfo.netmask.addr);
 	}
 
 	void Run() {
@@ -230,24 +256,6 @@ public:
 		return s_pThis;
 	}
 
-	/*
-	 * Experimental TCP
-	 */
-
-	int32_t TcpBegin(const uint16_t nLocalPort) {
-		return tcp_begin(nLocalPort);
-	}
-
-	uint16_t TcpRead(const int32_t nHandleListen, const uint8_t **ppBuffer, uint32_t &HandleConnection) {
-		return tcp_read(nHandleListen, ppBuffer, HandleConnection);
-	}
-
-	void TcpWrite(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLength, const uint32_t HandleConnection) {
-		tcp_write(nHandleListen, pBuffer, nLength, HandleConnection);
-	}
-
-	int32_t TcpEnd(const int32_t nHandle);
-
 private:
 	net::Link s_lastState { net::Link::STATE_DOWN };
 	bool m_IsDhcpCapable { true };
@@ -258,9 +266,7 @@ private:
 	uint32_t m_nNtpServerIp { 0 };
 	float m_fNtpUtcOffset { 0 };
 
-	uint32_t m_nLocalIp { 0 };
-	uint32_t m_nGatewayIp { 0 };
-	uint32_t m_nNetmask { 0 };
+	struct IpInfo m_ipInfo;
 
 	char m_aHostName[network::HOSTNAME_SIZE];
 	char m_aDomainName[network::DOMAINNAME_SIZE];
@@ -270,12 +276,12 @@ private:
 	NetworkStore *m_pNetworkStore { nullptr };
 
 	void SetDefaultIp() {
-		m_nLocalIp = 2
+		m_ipInfo.ip.addr = 2
 				+ ((static_cast<uint32_t>(m_aNetMacaddr[3])) << 8)
 				+ ((static_cast<uint32_t>(m_aNetMacaddr[4])) << 16)
 				+ ((static_cast<uint32_t>(m_aNetMacaddr[5])) << 24);
-		m_nNetmask = 255;
-		m_nGatewayIp = m_nLocalIp;
+		m_ipInfo.netmask.addr = 255;
+		m_ipInfo.gw.addr = m_ipInfo.ip.addr;
 	}
 
 	struct QueuedConfig {
@@ -291,7 +297,7 @@ private:
 
 	QueuedConfig m_QueuedConfig;
 
-    bool isQueuedMaskSet(uint32_t nMask) {
+    bool isQueuedMaskSet(const uint32_t nMask) {
     	return (m_QueuedConfig.nMask & nMask) == nMask;
     }
 

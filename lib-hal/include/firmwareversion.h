@@ -49,7 +49,7 @@ public:
 		puts(s_Print);
 
 		if (pTitle != nullptr) {
-			printf("\x1b[32m%s\x1b[37m\n", pTitle);
+			printf("\x1b[32m%s\x1b[0m\n", pTitle);
 		}
 	}
 

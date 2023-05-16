@@ -379,7 +379,7 @@ bool ArtNetNode::GetPortIndexOutput(const uint32_t nPage, const uint32_t nPollRe
 }
 
 void ArtNetNode::HandleAddress() {
-	const auto *const pArtAddress = &(m_ArtNetPacket.ArtPacket.ArtAddress);
+	const auto *const pArtAddress = reinterpret_cast<TArtAddress *>(m_pReceiveBuffer);
 	uint8_t nPort = 0xFF;
 
 	m_State.reportCode = artnetnode::ReportCode::RCPOWEROK;

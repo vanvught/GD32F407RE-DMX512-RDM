@@ -29,9 +29,6 @@
 
 #include "net.h"
 #include "net_private.h"
-#include "net_packets.h"
-#include "net_platform.h"
-#include "net_debug.h"
 
 #include "../../config/net_config.h"
 
@@ -61,15 +58,19 @@ static uint8_t s_multicast_mac[ETH_ADDR_LEN] SECTION_NETWORK ALIGNED;
 static struct t_group_info s_groups[IGMP_MAX_JOINS_ALLOWED] SECTION_NETWORK ALIGNED;
 static uint16_t s_id SECTION_NETWORK ALIGNED;
 
-extern struct ip_info g_ip_info;
-extern uint8_t g_mac_address[ETH_ADDR_LEN];
+namespace net {
+namespace globals {
+extern struct IpInfo ipInfo;
+extern uint8_t macAddress[ETH_ADDR_LEN];
+}  // namespace globals
+}  // namespace net
 
-static void _send_report(uint32_t group_address);
+static void _send_report(uint32_t nGroupAddress);
 
 void igmp_set_ip() {
 	_pcast32 src;
 
-	src.u32 = g_ip_info.ip.addr;
+	src.u32 = net::globals::ipInfo.ip.addr;
 
 	memcpy(s_report.ip4.src, src.u8, IPv4_ADDR_LEN);
 	memcpy(s_leave.ip4.src, src.u8, IPv4_ADDR_LEN);
@@ -83,7 +84,7 @@ void __attribute__((cold)) igmp_init() {
 	s_multicast_mac[2] = 0x5E;
 
 	// Ethernet
-	memcpy(s_report.ether.src, g_mac_address, ETH_ADDR_LEN);
+	memcpy(s_report.ether.src, net::globals::macAddress, ETH_ADDR_LEN);
 	s_report.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
 
 	// IPv4
@@ -107,7 +108,7 @@ void __attribute__((cold)) igmp_init() {
 	s_leave.ether.dst[3] = 0x00;
 	s_leave.ether.dst[4] = 0x00;
 	s_leave.ether.dst[5] = 0x02;
-	memcpy(s_leave.ether.src, g_mac_address, ETH_ADDR_LEN);
+	memcpy(s_leave.ether.src, net::globals::macAddress, ETH_ADDR_LEN);
 	s_leave.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
 
 	// IPv4
@@ -155,11 +156,11 @@ void __attribute__((cold)) igmp_shutdown() {
 	DEBUG_EXIT
 }
 
-static void _send_report(uint32_t group_address) {
+static void _send_report(uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	_pcast32 multicast_ip;
 
-	multicast_ip.u32 = group_address;
+	multicast_ip.u32 = nGroupAddress;
 
 	s_multicast_mac[3] = multicast_ip.u8[1] & 0x7F;
 	s_multicast_mac[4] = multicast_ip.u8[2];
@@ -191,11 +192,11 @@ static void _send_report(uint32_t group_address) {
 	DEBUG_EXIT
 }
 
-static void _send_leave(uint32_t group_address) {
+static void _send_leave(uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	_pcast32 multicast_ip;
 
-	multicast_ip.u32 = group_address;
+	multicast_ip.u32 = nGroupAddress;
 
 	DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(nGroupAddress), MAC2STR(s_multicast_mac));
 

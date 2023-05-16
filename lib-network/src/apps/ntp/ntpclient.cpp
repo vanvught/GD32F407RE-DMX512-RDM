@@ -66,7 +66,7 @@ Transmit Timestamp    T3   time reply sent by server
 Destination Timestamp T4   time reply received by client
 */
 
-NtpClient *NtpClient::s_pThis = nullptr;
+NtpClient *NtpClient::s_pThis;
 
 NtpClient::NtpClient(uint32_t nServerIp): m_nServerIp(nServerIp) {
 	DEBUG_ENTRY
@@ -183,7 +183,7 @@ int NtpClient::SetTimeOfDay() {
 	struct timeval tv;
 
 	tv.tv_sec =	static_cast<time_t>(T4.nSeconds - JAN_1970)  + m_nOffsetSeconds + m_nUtcOffset;
-	tv.tv_usec = static_cast<suseconds_t>(static_cast<int32_t>(USEC(T4.nFraction)) + static_cast<int32_t>(m_nOffsetMicros));
+	tv.tv_usec = (static_cast<int32_t>(USEC(T4.nFraction)) + static_cast<int32_t>(m_nOffsetMicros));
 
 	if (tv.tv_usec >= 1000000) {
 		tv.tv_sec++;

@@ -78,7 +78,7 @@
  * KEYs
  */
 
-#define KEY2_PINx						GPIO_PIN_11
+#define KEY2_PINx						GPIO_PIN_14
 #define KEY2_GPIOx						GPIOA
 #define KEY2_RCU_GPIOx					RCU_GPIOA
 

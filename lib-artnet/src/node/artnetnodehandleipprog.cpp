@@ -37,14 +37,14 @@
 
 #include "debug.h"
 
-static constexpr uint8_t COMMAND_NONE = 0;
+//static constexpr uint8_t COMMAND_NONE = 0;
 static constexpr uint8_t COMMAND_ENABLE_PROGRAMMING = (1U << 7);
 static constexpr uint8_t COMMAND_ENABLE_DHCP		= ((1U << 6) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_PROGRAM_GATEWAY	= ((1U << 4) | COMMAND_ENABLE_PROGRAMMING); ///< Not documented!
 static constexpr uint8_t COMMAND_SET_TO_DEFAULT		= ((1U << 3) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_PROGRAM_IPADDRESS	= ((1U << 2) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_PROGRAM_SUBNETMASK	= ((1U << 1) | COMMAND_ENABLE_PROGRAMMING);
-static constexpr uint8_t COMMAND_PROGRAM_PORT		= ((1U << 0) | COMMAND_ENABLE_PROGRAMMING);
+//static constexpr uint8_t COMMAND_PROGRAM_PORT		= ((1U << 0) | COMMAND_ENABLE_PROGRAMMING);
 
 union uip {
 	uint32_t u32;
@@ -60,9 +60,9 @@ void ArtNetNode::HandleIpProg() {
 	}
 #endif
 
-	const auto *const pArtIpProg = &(m_ArtNetPacket.ArtPacket.ArtIpProg);
+	const auto *const pArtIpProg = reinterpret_cast<TArtIpProg *>(m_pReceiveBuffer);
 	const auto nCommand = pArtIpProg->Command;
-	auto *pArtIpProgReply = &(m_ArtNetPacket.ArtPacket.ArtIpProgReply);
+	auto *pArtIpProgReply = reinterpret_cast<TArtIpProgReply *>(m_pReceiveBuffer);
 	const auto isDhcp = Network::Get()->IsDhcpUsed();
 
 	pArtIpProgReply->OpCode = OP_IPPROGREPLY;
@@ -115,7 +115,7 @@ void ArtNetNode::HandleIpProg() {
 	pArtIpProgReply->Spare7 = 0;
 	pArtIpProgReply->Spare8 = 0;
 
-	Network::Get()->SendTo(m_nHandle, &(m_ArtNetPacket.ArtPacket.ArtIpProgReply), sizeof(struct TArtIpProgReply), m_ArtNetPacket.IPAddressFrom, artnet::UDP_PORT);
+	Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, sizeof(struct TArtIpProgReply), m_nIpAddressFrom, artnet::UDP_PORT);
 
 	if (isChanged) {
 		// Update Node network details

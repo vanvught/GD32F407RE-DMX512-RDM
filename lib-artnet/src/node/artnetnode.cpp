@@ -94,19 +94,14 @@ ArtNetNode::ArtNetNode() {
 	m_ArtDmx.ProtVerHi = 0;
 	m_ArtDmx.ProtVerLo = artnet::PROTOCOL_REVISION;
 #endif
-#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
-	memcpy(m_ArtRdm.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
-	m_ArtRdm.OpCode = OP_RDM;
-	m_ArtRdm.ProtVerHi = 0;
-	m_ArtRdm.ProtVerLo = artnet::PROTOCOL_REVISION;
-	m_ArtRdm.RdmVer = 0x01; // Devices that support RDM STANDARD V1.0 set field to 0x01.
-	m_ArtRdm.Spare1 = 0;
-	m_ArtRdm.Spare2 = 0;
-	m_ArtRdm.Spare3 = 0;
-	m_ArtRdm.Spare4 = 0;
-	m_ArtRdm.Spare5 = 0;
-	m_ArtRdm.Spare6 = 0;
-	m_ArtRdm.Spare7 = 0;
+
+#if defined (ARTNET_HAVE_TIMECODE)
+	memcpy(m_ArtTimeCode.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
+	m_ArtTimeCode.OpCode = OP_TIMECODE;
+	m_ArtTimeCode.ProtVerHi = 0;
+	m_ArtTimeCode.ProtVerLo = artnet::PROTOCOL_REVISION;
+	m_ArtTimeCode.Filler1 = 0;
+	m_ArtTimeCode.Filler2 = 0;
 #endif
 }
 
@@ -330,30 +325,30 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 	}
 }
 
-void ArtNetNode::GetType() {
-	const auto *const pPacket = reinterpret_cast<char*>(&(m_ArtNetPacket.ArtPacket));
+void ArtNetNode::GetType(const uint32_t nBytesReceived, enum TOpCodes& OpCode) {
+	const auto *const pPacket = reinterpret_cast<char *>(m_pReceiveBuffer);
 
-	if (m_ArtNetPacket.nLength < ARTNET_MIN_HEADER_SIZE) {
-		m_ArtNetPacket.OpCode = OP_NOT_DEFINED;
+	if (nBytesReceived < ARTNET_MIN_HEADER_SIZE) {
+		OpCode = OP_NOT_DEFINED;
 		return;
 	}
 
 	if ((pPacket[10] != 0) || (pPacket[11] != artnet::PROTOCOL_REVISION)) {
-		m_ArtNetPacket.OpCode = OP_NOT_DEFINED;
+		OpCode = OP_NOT_DEFINED;
 		return;
 	}
 
 	if (memcmp(pPacket, artnet::NODE_ID, 8) == 0) {
-		m_ArtNetPacket.OpCode = static_cast<TOpCodes>((static_cast<uint16_t>(pPacket[9] << 8)) + pPacket[8]);
+		OpCode = static_cast<TOpCodes>((static_cast<uint16_t>(pPacket[9] << 8)) + pPacket[8]);
 	} else {
-		m_ArtNetPacket.OpCode = OP_NOT_DEFINED;
+		OpCode = OP_NOT_DEFINED;
 	}
 }
 
 void ArtNetNode::Run() {
 	uint16_t nForeignPort;
 
-	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, &(m_ArtNetPacket.ArtPacket), sizeof(m_ArtNetPacket.ArtPacket), &m_ArtNetPacket.IPAddressFrom, &nForeignPort);
+	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void**>(reinterpret_cast<void **>(&m_pReceiveBuffer)), &m_nIpAddressFrom, &nForeignPort);
 
 	m_nCurrentPacketMillis = Hardware::Get()->Millis();
 
@@ -409,7 +404,6 @@ void ArtNetNode::Run() {
 		return;
 	}
 
-	m_ArtNetPacket.nLength = nBytesReceived;
 	m_nPreviousPacketMillis = m_nCurrentPacketMillis;
 
 	if (m_State.IsSynchronousMode) {
@@ -418,18 +412,20 @@ void ArtNetNode::Run() {
 		}
 	}
 
-	GetType();
+	enum TOpCodes OpCode;
+	GetType(nBytesReceived, OpCode);
 
-	switch (m_ArtNetPacket.OpCode) {
-	case OP_POLL:
-		HandlePoll();
-		break;
+	switch (OpCode) {
 #if (LIGHTSET_PORTS > 0)		
 	case OP_DMX:
-		HandleDmx();
+		if (m_pLightSet != nullptr) {
+			HandleDmx();
+		}
 		break;
 	case OP_SYNC:
-		HandleSync();
+		if (m_pLightSet != nullptr) {
+			HandleSync();
+		}
 		break;
 #endif		
 	case OP_ADDRESS:
@@ -437,7 +433,9 @@ void ArtNetNode::Run() {
 		break;
 #if defined (ARTNET_HAVE_TIMECODE)		
 	case OP_TIMECODE:
-		HandleTimeCode();
+		if (m_pArtNetTimeCode != nullptr) {
+			HandleTimeCode();
+		}
 		break;
 #endif		
 	case OP_TIMESYNC:
@@ -472,7 +470,10 @@ void ArtNetNode::Run() {
 	case OP_TRIGGER:
 		HandleTrigger();
 		break;
-#endif		
+#endif
+	case OP_POLL:
+		HandlePoll();
+		break;
 	default:
 		// ArtNet but OpCode is not implemented
 		// Just skip ... no error

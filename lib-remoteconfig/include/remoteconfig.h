@@ -73,6 +73,8 @@ enum class Node {
 	DDP,
 	PP,
 	NODE,
+	BOOTLOADER_TFTP,
+	RDMRESPONDER,
 	LAST
 };
 enum class Output {
@@ -142,6 +144,8 @@ public:
 		return s_RemoteConfigListBin.nActiveOutputs;
 	}
 
+	void SetDisplayName(const char *pDisplayName);
+
 	const char *GetDisplayName() const {
 		return s_RemoteConfigListBin.aDisplayName;
 	}
@@ -172,12 +176,6 @@ public:
 		return m_bEnableUptime;
 	}
 
-	void SetDisplayName(const char *pDisplayName);
-
-	static const char *GetDislayName() {
-		return s_RemoteConfigListBin.aDisplayName;
-	}
-
 	void SetEnableFactory(bool bEnableFactory) {
 		m_bEnableFactory = bEnableFactory;
 	}
@@ -200,13 +198,33 @@ public:
 	uint32_t HandleGet(void *pBuffer, uint32_t nBufferLength);
 	void HandleSet(void *pBuffer, uint32_t nBufferLength);
 
-	void Run();
+	void Run() {
+		if (__builtin_expect((m_bDisable), 1)) {
+			return;
+		}
+
+#if defined (ENABLE_TFTP_SERVER)
+		if (__builtin_expect((m_pTFTPFileServer != nullptr), 0)) {
+			m_pTFTPFileServer->Run();
+		}
+#endif
+
+		uint16_t nForeignPort;
+		m_nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void **>(reinterpret_cast<void **>(&s_pUdpBuffer)), &m_nIPAddressFrom, &nForeignPort);
+
+		if (__builtin_expect((m_nBytesReceived < 4), 1)) {
+			return;
+		}
+
+		HandleRequest();
+	}
 
 	static RemoteConfig *Get() {
 		return s_pThis;
 	}
 
 private:
+	void HandleRequest();
 	void HandleReboot();
 	void HandleFactory();
 	void HandleList();
@@ -267,13 +285,17 @@ private:
 
 #if defined (RDM_RESPONDER)
 	void HandleGetRdmDeviceTxt(uint32_t& nSize);
+	void HandleGetRdmSensorsTxt(uint32_t& nSize);
+# if defined (ENABLE_RDM_SUBDEVICES)
+	void HandleGetRdmSubdevTxt(uint32_t& nSize);
+# endif
 #endif
 
 #if defined (OUTPUT_DMX_SEND)
 	void HandleGetParamsTxt(uint32_t& nSize);
 #endif
 
-#if defined (OUTPUT_DMX_PIXEL) || (OUTPUT_DMX_TLC59711)
+#if defined (OUTPUT_DMX_PIXEL) || defined (OUTPUT_DMX_TLC59711)
 	void HandleGetDevicesTxt(uint32_t& nSize);
 #endif
 
@@ -368,13 +390,17 @@ private:
 
 #if defined (RDM_RESPONDER)
 	void HandleSetRdmDeviceTxt();
+	void HandleSetRdmSensorsTxt();
+# if defined (ENABLE_RDM_SUBDEVICES)
+	void HandleSetRdmSubdevTxt();
+# endif
 #endif
 
 #if defined (OUTPUT_DMX_SEND)
 	void HandleSetParamsTxt();
 #endif
 
-#if defined (OUTPUT_DMX_PIXEL) || (OUTPUT_DMX_TLC59711)
+#if defined (OUTPUT_DMX_PIXEL) || defined (OUTPUT_DMX_TLC59711)
 	void HandleSetDevicesTxt();
 #endif
 
@@ -476,7 +502,6 @@ private:
 
 #if defined(ENABLE_TFTP_SERVER)
 	TFTPFileServer *m_pTFTPFileServer { nullptr };
-	uint8_t *m_pTFTPBuffer { nullptr };
 #endif
 	bool m_bEnableTFTP { false };
 

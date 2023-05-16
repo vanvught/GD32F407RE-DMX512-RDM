@@ -174,8 +174,8 @@ public:
 		static constexpr char SYMBOLS[] = { '/' , '-', '\\' , '|' };
 		static uint32_t nSymbolsIndex;
 
-		Display::Get()->SetCursorPos(static_cast<uint8_t>(Display::Get()->GetColumns() - 1U), static_cast<uint8_t>(Display::Get()->GetRows() - 1U));
-		Display::Get()->PutChar(SYMBOLS[nSymbolsIndex]);
+		Display::Get()->SetCursorPos(Display::Get()->GetColumns() - 1U, Display::Get()->GetRows() - 1U);
+		Display::Get()->PutChar(SYMBOLS[nSymbolsIndex++]);
 
 		if (nSymbolsIndex >= sizeof(SYMBOLS)) {
 			nSymbolsIndex = 0;

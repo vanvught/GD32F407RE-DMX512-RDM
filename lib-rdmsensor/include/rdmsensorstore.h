@@ -1,8 +1,8 @@
 /**
- * @file climits
+ * @file rdmsensorstore.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,14 @@
  * THE SOFTWARE.
  */
 
-#ifndef CLIMITS_
-#define CLIMITS_
+#ifndef RDMSENSORSTORE_H_
+#define RDMSENSORSTORE_H_
 
-#ifdef __cplusplus
-# include <limits.h>
-#endif
+class RDMSensorStore {
+public:
+	virtual ~RDMSensorStore() {}
 
-#endif /* CLIMITS_ */
+	virtual void SaveCalibration(uint32_t nSensor, int32_t nCalibration)=0;
+};
+
+#endif /* RDMSENSORSTORE_H_ */

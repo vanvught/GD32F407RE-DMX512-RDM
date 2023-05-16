@@ -76,7 +76,7 @@ void ArtNetNode::CheckMergeTimeouts(uint32_t nPortIndex) {
 }
 
 void ArtNetNode::HandleDmx() {
-	const auto *const pArtDmx = &(m_ArtNetPacket.ArtPacket.ArtDmx);
+	const auto *const pArtDmx = reinterpret_cast<TArtDmx *>(m_pReceiveBuffer);
 
 	auto nDmxSlots = static_cast<uint16_t>( ((pArtDmx->LengthHi << 8) & 0xff00) | pArtDmx->Length);
 	nDmxSlots = std::min(nDmxSlots, artnet::DMX_LENGTH);
@@ -102,45 +102,45 @@ void ArtNetNode::HandleDmx() {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("1. first packet recv on this port", artnet::DP_LOW);
 #endif
-				m_OutputPort[nPortIndex].sourceA.nIp = m_ArtNetPacket.IPAddressFrom;
+				m_OutputPort[nPortIndex].sourceA.nIp = m_nIpAddressFrom;
 				m_OutputPort[nPortIndex].sourceA.nMillis = m_nCurrentPacketMillis;
 				lightset::Data::SetSourceA(nPortIndex, pArtDmx->Data, nDmxSlots);
-			} else if (ipA == m_ArtNetPacket.IPAddressFrom && ipB == 0) {
+			} else if (ipA == m_nIpAddressFrom && ipB == 0) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("2. continued transmission from the same ip (source A)", artnet::DP_LOW);
 #endif
 				m_OutputPort[nPortIndex].sourceA.nMillis = m_nCurrentPacketMillis;
 				lightset::Data::SetSourceA(nPortIndex, pArtDmx->Data, nDmxSlots);
-			} else if (ipA == 0 && ipB == m_ArtNetPacket.IPAddressFrom) {
+			} else if (ipA == 0 && ipB == m_nIpAddressFrom) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("3. continued transmission from the same ip (source B)", artnet::DP_LOW);
 #endif
 				m_OutputPort[nPortIndex].sourceB.nMillis = m_nCurrentPacketMillis;
 				lightset::Data::SetSourceB(nPortIndex, pArtDmx->Data, nDmxSlots);
-			} else if (ipA != m_ArtNetPacket.IPAddressFrom && ipB == 0) {
+			} else if (ipA != m_nIpAddressFrom && ipB == 0) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("4. new source, start the merge", artnet::DP_LOW);
 #endif
-				m_OutputPort[nPortIndex].sourceB.nIp = m_ArtNetPacket.IPAddressFrom;
+				m_OutputPort[nPortIndex].sourceB.nIp = m_nIpAddressFrom;
 				m_OutputPort[nPortIndex].sourceB.nMillis = m_nCurrentPacketMillis;
 				UpdateMergeStatus(nPortIndex);
 				lightset::Data::MergeSourceB(nPortIndex, pArtDmx->Data, nDmxSlots, mergeMode);
-			} else if (ipA == 0 && ipB != m_ArtNetPacket.IPAddressFrom) {
+			} else if (ipA == 0 && ipB != m_nIpAddressFrom) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("5. new source, start the merge", artnet::DP_LOW);
 #endif
-				m_OutputPort[nPortIndex].sourceA.nIp = m_ArtNetPacket.IPAddressFrom;
+				m_OutputPort[nPortIndex].sourceA.nIp = m_nIpAddressFrom;
 				m_OutputPort[nPortIndex].sourceA.nMillis = m_nCurrentPacketMillis;
 				UpdateMergeStatus(nPortIndex);
 				lightset::Data::MergeSourceA(nPortIndex, pArtDmx->Data, nDmxSlots, mergeMode);
-			} else if (ipA == m_ArtNetPacket.IPAddressFrom && ipB != m_ArtNetPacket.IPAddressFrom) {
+			} else if (ipA == m_nIpAddressFrom && ipB != m_nIpAddressFrom) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("6. continue merge", artnet::DP_LOW);
 #endif
 				m_OutputPort[nPortIndex].sourceA.nMillis = m_nCurrentPacketMillis;
 				UpdateMergeStatus(nPortIndex);
 				lightset::Data::MergeSourceA(nPortIndex, pArtDmx->Data, nDmxSlots, mergeMode);
-			} else if (ipA != m_ArtNetPacket.IPAddressFrom && ipB == m_ArtNetPacket.IPAddressFrom) {
+			} else if (ipA != m_nIpAddressFrom && ipB == m_nIpAddressFrom) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("7. continue merge", artnet::DP_LOW);
 #endif

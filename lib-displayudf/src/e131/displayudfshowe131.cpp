@@ -43,7 +43,7 @@ void DisplayUdf::Show(E131Bridge *pE131Bridge, uint32_t nDmxPortIndexOffset) {
 
 	Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::AP)], "AP: %d", pE131Bridge->GetActiveOutputPorts() + pE131Bridge->GetActiveInputPorts());
 
-	for (uint32_t nBridgePortIndex = 0; nBridgePortIndex < std::min(4U, e131bridge::MAX_PORTS); nBridgePortIndex++) {
+	for (uint32_t nBridgePortIndex = 0; nBridgePortIndex < std::min(static_cast<uint32_t>(4), e131bridge::MAX_PORTS); nBridgePortIndex++) {
 		const auto nPortIndex = nBridgePortIndex + m_nPortIndexOffset;
 		const auto nLabelIndex = static_cast<uint32_t>(displayudf::Labels::UNIVERSE_PORT_A) + nBridgePortIndex;
 

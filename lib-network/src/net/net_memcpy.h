@@ -25,8 +25,9 @@
 #define NET_MEMCPY_H_
 
 #include <cstdint>
+#include <cstddef>
 
-void *net_memcpy(void *__restrict__ dest, void const *__restrict__ src, size_t n) {
+inline void *net_memcpy(void *__restrict__ dest, void const *__restrict__ src, size_t n) {
 	auto *plDst = reinterpret_cast<uintptr_t *>(dest);
 	auto const *plSrc = reinterpret_cast<uintptr_t const *>(src);
 

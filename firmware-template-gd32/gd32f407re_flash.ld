@@ -137,7 +137,7 @@ SECTIONS
   .stack ORIGIN(TCMSRAM) + LENGTH(TCMSRAM) - __stack_size :
   {
 	. = ALIGN(4);
-    . = __stack_size;  
+    . = . + __stack_size;  
     PROVIDE( _sp = . ); 
     . = ALIGN(4);
   } >TCMSRAM AT>TCMSRAM

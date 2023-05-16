@@ -137,8 +137,8 @@ class ArtNetParamsStore {
 public:
 	virtual ~ArtNetParamsStore() {}
 
-	virtual void Update(const struct artnetparams::Params *pArtNetParams)=0;
-	virtual void Copy(struct artnetparams::Params *pArtNetParams)=0;
+	virtual void Update(const artnetparams::Params *pArtNetParams)=0;
+	virtual void Copy(artnetparams::Params *pArtNetParams)=0;
 };
 
 class ArtNetParams {

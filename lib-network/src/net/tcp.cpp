@@ -42,9 +42,6 @@
 
 #include "net.h"
 #include "net_private.h"
-#include "net_packets.h"
-#include "net_platform.h"
-#include "net_debug.h"
 
 #include "hardware.h"
 
@@ -59,8 +56,12 @@
 
 #define MAX_TCBS_ALLOWED				4
 
-extern struct ip_info g_ip_info;
-extern uint8_t g_mac_address[ETH_ADDR_LEN];
+namespace net {
+namespace globals {
+extern struct IpInfo ipInfo;
+extern uint8_t macAddress[ETH_ADDR_LEN];
+}  // namespace globals
+}  // namespace net
 
 /**
  * Transmission control block (TCB)
@@ -322,16 +323,34 @@ __attribute__((cold)) void tcp_init() {
 	_pcast32 src;
 
 	/* Ethernet */
-	memcpy(s_tcp.ether.src, g_mac_address, ETH_ADDR_LEN);
+	memcpy(s_tcp.ether.src, net::globals::macAddress, ETH_ADDR_LEN);
 	s_tcp.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
 	/* IPv4 */
-	src.u32 = g_ip_info.ip.addr;
+	src.u32 = net::globals::ipInfo.ip.addr;
 	memcpy(s_tcp.ip4.src, src.u8, IPv4_ADDR_LEN);
 	s_tcp.ip4.ver_ihl = 0x45;
 	s_tcp.ip4.tos = 0;
 	s_tcp.ip4.flags_froff = __builtin_bswap16(IPv4_FLAG_DF);
 	s_tcp.ip4.ttl = 64;
 	s_tcp.ip4.proto = IPv4_PROTO_TCP;
+
+	DEBUG_EXIT
+}
+
+void tcp_set_ip() {
+	DEBUG_ENTRY
+
+	_pcast32 src;
+
+	/* IPv4 */
+	src.u32 = net::globals::ipInfo.ip.addr;
+	memcpy(s_tcp.ip4.src, src.u8, IPv4_ADDR_LEN);
+
+	DEBUG_EXIT
+}
+
+void tcp_shutdown() {
+	DEBUG_ENTRY
 
 	DEBUG_EXIT
 }
@@ -356,7 +375,7 @@ static uint16_t _chksum(struct t_tcp *pTcp, const struct tcb *pTcb, uint16_t nLe
 	memcpy(buf, pseu, TCP_PSEUDO_LEN);
 
 	// Generate TCP psuedo header
-	memcpy(pseu->srcIp, &g_ip_info.ip.addr, IPv4_ADDR_LEN);
+	memcpy(pseu->srcIp, &net::globals::ipInfo.ip.addr, IPv4_ADDR_LEN);
 	memcpy(pseu->dstIp, &pTcb->nRemoteIp, IPv4_ADDR_LEN);
 	pseu->zero = 0;
 	pseu->proto = IPv4_PROTO_TCP;
@@ -504,7 +523,7 @@ static void scan_options(struct t_tcp *pTcp, struct tcb *pTcb, const int32_t nDa
 				const auto *p = &pOptions->Data;
 				auto nMSS = (p[0] << 8) + p[1];
 				// RFC 1122 section 4.2.2.6
-				nMSS = std::min((nMSS + 20), static_cast<int32_t>(TCP_TX_MSS)) - TCP_HEADER_SIZE; // - IP_OPTION_SIZE;
+				nMSS = std::min(static_cast<int32_t>(nMSS + 20), static_cast<int32_t>(TCP_TX_MSS)) - TCP_HEADER_SIZE; // - IP_OPTION_SIZE;
 				pTcb->SendMSS = static_cast<uint16_t>(nMSS);
 			}
 			pOptions = reinterpret_cast<struct Options *>(reinterpret_cast<uint8_t *>(pOptions) + pOptions->nLength);
@@ -829,7 +848,7 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			return;
 		}
 
-		// third check security and precedence. Nothing todo here
+		// third check security and precedence. No code needed here
 
 		/* fourth, check the SYN bit, *//* Page 71 */
 		if (pTcp->tcp.control & Control::SYN) {
@@ -941,7 +960,7 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			break;
 		}
 
-		// sixth, check the URG bit. Nothing todo here
+		// sixth, check the URG bit. No code needed here
 
 		// seventh, process the segment text
 		switch (pTCB->state) {
@@ -1125,7 +1144,7 @@ void tcp_write(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLe
 	assert(pBuffer != nullptr);
 	assert(nHandleConnection < MAX_TCBS_ALLOWED);
 
-	nLength = MIN(nLength, TCP_DATA_SIZE);
+	nLength = std::min(nLength, static_cast<uint16_t>(TCP_DATA_SIZE));
 
 	auto *pTCB = &s_Port[nHandleListen].TCB[nHandleConnection];
 

@@ -147,7 +147,7 @@ void WS28xxDmxMulti::SetData(uint32_t nPortIndex, const uint8_t* pData, uint32_t
 		for (uint32_t j = beginIndex; (j < endIndex) && (d < nLength); j++) {
 			auto const nPixelIndexStart = (j * nGroupingCount);
 			__builtin_prefetch(&pData[d]);
-			for (uint16_t k = 0; k < nGroupingCount; k++) {
+			for (uint32_t k = 0; k < nGroupingCount; k++) {
 				m_pWS28xxMulti->SetPixel(nOutIndex, nPixelIndexStart + k, pData[d], pData[d + 1], pData[d + 2]);
 			}
 			d = d + 3;
@@ -157,7 +157,7 @@ void WS28xxDmxMulti::SetData(uint32_t nPortIndex, const uint8_t* pData, uint32_t
 		for (uint32_t j = beginIndex; (j < endIndex) && (d < nLength); j++) {
 			auto const nPixelIndexStart = (j * nGroupingCount);
 			__builtin_prefetch(&pData[d]);
-			for (uint16_t k = 0; k < nGroupingCount; k++) {
+			for (uint32_t k = 0; k < nGroupingCount; k++) {
 				m_pWS28xxMulti->SetPixel(nOutIndex, nPixelIndexStart + k, pData[d], pData[d + 1], pData[d + 2], pData[d + 3]);
 			}
 			d = d + 4;

@@ -30,6 +30,7 @@
 #define ARTNETNODE_H_
 
 #include <cstdint>
+#include <cstring>
 #include <cassert>
 
 #include "artnet.h"
@@ -343,7 +344,18 @@ public:
 		return 0;
 	}
 
-	void SetRdmUID(const uint8_t *pUid, bool bSupportsLLRP = false);
+	/**
+	 * LLRP
+	 */
+	void SetRdmUID(const uint8_t *pUid, bool bSupportsLLRP = false) {
+		memcpy(m_Node.DefaultUidResponder, pUid, sizeof(m_Node.DefaultUidResponder));
+
+		if (bSupportsLLRP) {
+			m_Node.Status3 |= artnet::Status3::SUPPORTS_LLRP;
+		} else {
+			m_Node.Status3 &= static_cast<uint8_t>(~artnet::Status3::SUPPORTS_LLRP);
+		}
+	}
 
 	/**
 	 * Art-Net 4
@@ -382,7 +394,7 @@ private:
 	void FillDiagData(void);
 #endif
 
-	void GetType();
+	void GetType(const uint32_t nBytesReceived, enum TOpCodes& opCode);
 
 	void HandlePoll();
 	void HandleDmx();
@@ -395,7 +407,9 @@ private:
 	void HandleTodRequest();
 	void HandleRdm();
 	void HandleIpProg();
+#if defined (ARTNET_HAVE_DMXIN)
 	void HandleDmxIn();
+#endif
 	void HandleRdmIn();
 	void HandleTrigger();
 
@@ -425,19 +439,32 @@ private:
 	artnetnode::OutputPort m_OutputPort[artnetnode::MAX_PORTS];
 	artnetnode::InputPort m_InputPort[artnetnode::MAX_PORTS];
 
-	TArtNetPacket m_ArtNetPacket;
 	TArtPollReply m_PollReply;
+#if defined (ARTNET_HAVE_DMXIN)
 	TArtDmx m_ArtDmx;
-	TArtRdm m_ArtRdm;
-#if defined ( ARTNET_ENABLE_SENDDIAG )
+#endif
+#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
+	union UArtTodPacket {
+		struct TArtTodData ArtTodData;				///< ArtTodData packet
+		struct TArtTodRequest ArtTodRequest;		///< ArtTodRequest packet
+		struct TArtRdm ArtRdm;						///< ArtRdm packet
+	};
+	UArtTodPacket m_ArtTodPacket;
+#endif
+#if defined (ARTNET_HAVE_TIMECODE)
+	TArtTimeCode m_ArtTimeCode;
+#endif
+#if defined (ARTNET_ENABLE_SENDDIAG)
 	TArtDiagData m_DiagData;
 #endif
+
+	bool m_IsRdmResponder { false };
 
 	uint32_t m_nCurrentPacketMillis { 0 };
 	uint32_t m_nPreviousPacketMillis { 0 };
 
-	bool m_IsRdmResponder { false };
-
+	uint8_t *m_pReceiveBuffer { nullptr };
+	uint32_t m_nIpAddressFrom;
 	LightSet *m_pLightSet { nullptr };
 
 	ArtNetTimeCode *m_pArtNetTimeCode { nullptr };

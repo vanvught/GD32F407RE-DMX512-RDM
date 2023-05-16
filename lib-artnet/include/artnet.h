@@ -743,11 +743,4 @@ union UArtPacket {
 	struct TArtDirectoryReply ArtDirectoryReply;///< ArtDirectoryReply packet
 };
 
-struct TArtNetPacket {
-	union UArtPacket ArtPacket;
-	uint32_t IPAddressFrom;
-	uint16_t nLength;
-	TOpCodes OpCode;
-};
-
 #endif /* ARTNET_H_ */

@@ -31,7 +31,6 @@
 #include <cassert>
 
 #include "artnetnode.h"
-#include "artnetnode_internal.h"
 #include "artnetrdm.h"
 
 #include "network.h"
@@ -70,7 +69,7 @@ void ArtNetNode::SetRmd(const uint32_t nPortIndex, const bool bEnable) {
 void ArtNetNode::HandleTodControl() {
 	DEBUG_ENTRY
 
-	const auto *const pArtTodControl =  &(m_ArtNetPacket.ArtPacket.ArtTodControl);
+	const auto *const pArtTodControl =  reinterpret_cast<TArtTodControl *>(m_pReceiveBuffer);;
 	const auto portAddress = static_cast<uint16_t>((pArtTodControl->Net << 8)) | static_cast<uint16_t>((pArtTodControl->Address));
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
@@ -106,7 +105,7 @@ void ArtNetNode::HandleTodControl() {
 void ArtNetNode::HandleTodRequest() {
 	DEBUG_ENTRY
 
-	const auto *const pArtTodRequest = &(m_ArtNetPacket.ArtPacket.ArtTodRequest);
+	const auto *const pArtTodRequest = reinterpret_cast<TArtTodRequest *>(m_pReceiveBuffer);;
 	const auto nAddCount = pArtTodRequest->AddCount & 0x1f;
 
 	for (auto nCount = 0; nCount < nAddCount; nCount++) {
@@ -129,7 +128,7 @@ void ArtNetNode::HandleTodRequest() {
 void ArtNetNode::HandleTodData() {
 	DEBUG_ENTRY
 
-	const auto *const pArtTodData = &(m_ArtNetPacket.ArtPacket.ArtTodData);
+	const auto *const pArtTodData = reinterpret_cast<TArtTodData *>(m_pReceiveBuffer);;
 
 	if (pArtTodData->RdmVer != 0x01) {
 		DEBUG_EXIT
@@ -158,7 +157,7 @@ void ArtNetNode::HandleTodData() {
 
 /**
  * An Output Gateway will send the ArtTodData packet in the following circumstances:
- * - Upon power on or decice reset. 
+ * - Upon power on or device reset.
  * - In response to an ArtTodRequest if the Port-Address matches.
  * - In response to an ArtTodControl if the Port-Address matches.
  * - When their ToD changes due to the addition or deletion of a UID.
@@ -168,7 +167,7 @@ void ArtNetNode::SendTod(uint32_t nPortIndex) {
 	DEBUG_ENTRY
 	assert(nPortIndex < artnetnode::MAX_PORTS);
 
-	auto pTodData = &(m_ArtNetPacket.ArtPacket.ArtTodData);
+	auto *pTodData = &m_ArtTodPacket.ArtTodData;
 	const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
 
 	memcpy(pTodData->Id, artnet::NODE_ID, sizeof(pTodData->Id));
@@ -210,7 +209,7 @@ void ArtNetNode::SendTodRequest(uint32_t nPortIndex) {
 
 	m_pArtNetRdm->TodReset(nPortIndex);
 
-	auto *pTodRequest = &(m_ArtNetPacket.ArtPacket.ArtTodRequest);
+	auto *pTodRequest = &m_ArtTodPacket.ArtTodRequest;
 	const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
 
 	memcpy(pTodRequest->Id, artnet::NODE_ID, sizeof(pTodRequest->Id));
@@ -254,7 +253,7 @@ void ArtNetNode::SetRdmHandler(ArtNetRdm *pArtNetTRdm, bool IsResponder) {
 void ArtNetNode::HandleRdm() {
 	DEBUG_ENTRY
 
-	auto *const pArtRdm = &(m_ArtNetPacket.ArtPacket.ArtRdm);
+	auto *const pArtRdm = reinterpret_cast<TArtRdm *>(m_pReceiveBuffer);
 
 	if (pArtRdm->RdmVer != 0x01) {
 		DEBUG_EXIT
@@ -290,7 +289,7 @@ void ArtNetNode::HandleRdm() {
 
 				const auto nLength = sizeof(struct TArtRdm) - sizeof(pArtRdm->RdmPacket) + nMessageLength;
 
-				Network::Get()->SendTo(m_nHandle, pArtRdm, static_cast<uint16_t>(nLength), m_ArtNetPacket.IPAddressFrom, artnet::UDP_PORT);
+				Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, static_cast<uint16_t>(nLength), m_nIpAddressFrom, artnet::UDP_PORT);
 			} else {
 				DEBUG_PUTS("No RDM response");
 			}
@@ -318,14 +317,4 @@ void ArtNetNode::HandleRdm() {
 #endif
 
 	DEBUG_EXIT
-}
-
-void ArtNetNode::SetRdmUID(const uint8_t *pUid, bool bSupportsLLRP) {
-	memcpy(m_Node.DefaultUidResponder, pUid, sizeof(m_Node.DefaultUidResponder));
-
-	if (bSupportsLLRP) {
-		m_Node.Status3 |= artnet::Status3::SUPPORTS_LLRP;
-	} else {
-		m_Node.Status3 &= static_cast<uint8_t>(~artnet::Status3::SUPPORTS_LLRP);
-	}
 }

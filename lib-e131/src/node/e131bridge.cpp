@@ -46,9 +46,6 @@
 E131Bridge *E131Bridge::s_pThis = nullptr;
 
 E131Bridge::E131Bridge() {
-	assert(Hardware::Get() != nullptr);
-	assert(Network::Get() != nullptr);
-
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
@@ -61,15 +58,17 @@ E131Bridge::E131Bridge() {
 	memset(&m_State, 0, sizeof(e131bridge::State));
 	m_State.nPriority = e131::priority::LOWEST;
 
+#if defined (E131_HAVE_DMXIN)
 	char aSourceName[e131::SOURCE_NAME_LENGTH];
 	uint8_t nLength;
 	snprintf(aSourceName, e131::SOURCE_NAME_LENGTH, "%.48s %s", Network::Get()->GetHostName(), Hardware::Get()->GetBoardName(nLength));
 	SetSourceName(aSourceName);
 
+	Hardware::Get()->GetUuid(m_Cid);
+#endif
+
 	m_nHandle = Network::Get()->Begin(e131::UDP_PORT);
 	assert(m_nHandle != -1);
-
-	Hardware::Get()->GetUuid(m_Cid);
 }
 
 E131Bridge::~E131Bridge() {
@@ -326,11 +325,13 @@ bool E131Bridge::IsPriorityTimeOut(uint32_t nPortIndex) const {
 }
 
 bool E131Bridge::isIpCidMatch(const e131bridge::Source *const source) const {
-	if (source->nIp != m_E131.IPAddressFrom) {
+	if (source->nIp != m_nIpAddressFrom) {
 		return false;
 	}
 
-	if (memcmp(source->cid, m_E131.E131Packet.Raw.RootLayer.Cid, e131::CID_LENGTH) != 0) {
+	const auto *const pRaw = reinterpret_cast<TE131RawPacket *>(m_pReceiveBuffer);
+
+	if (memcmp(source->cid, pRaw->RootLayer.Cid, e131::CID_LENGTH) != 0) {
 		return false;
 	}
 
@@ -338,8 +339,9 @@ bool E131Bridge::isIpCidMatch(const e131bridge::Source *const source) const {
 }
 
 void E131Bridge::HandleDmx() {
-	const auto *const pDmxData = &m_E131.E131Packet.Data.DMPLayer.PropertyValues[1];
-	const auto nDmxSlots = __builtin_bswap16(m_E131.E131Packet.Data.DMPLayer.PropertyValueCount) - 1U;
+	const auto *const pData = reinterpret_cast<TE131DataPacket *>(m_pReceiveBuffer);
+	const auto *const pDmxData = &pData->DMPLayer.PropertyValues[1];
+	const auto nDmxSlots = __builtin_bswap16(pData->DMPLayer.PropertyValueCount) - 1U;
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		if (!m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
@@ -350,7 +352,7 @@ void E131Bridge::HandleDmx() {
 		// 8.2 Association of Multicast Addresses and Universe
 		// Note: The identity of the universe shall be determined by the universe number in the
 		// packet and not assumed from the multicast address.
-		if (m_E131.E131Packet.Data.FrameLayer.Universe != __builtin_bswap16(m_OutputPort[nPortIndex].genericPort.nUniverse)) {
+		if (pData->FrameLayer.Universe != __builtin_bswap16(m_OutputPort[nPortIndex].genericPort.nUniverse)) {
 			continue;
 		}
 
@@ -368,14 +370,14 @@ void E131Bridge::HandleDmx() {
 		// arrives. If, using signed 8-bit binary arithmetic, B – A is less than or equal to 0, but greater than -20 then
 		// the packet containing sequence number B shall be deemed out of sequence and discarded
 		if (isSourceA) {
-			const auto diff = static_cast<int8_t>(m_E131.E131Packet.Data.FrameLayer.SequenceNumber - pSourceA->nSequenceNumberData);
-			pSourceA->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			const auto diff = static_cast<int8_t>(pData->FrameLayer.SequenceNumber - pSourceA->nSequenceNumberData);
+			pSourceA->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			if ((diff <= 0) && (diff > -20)) {
 				continue;
 			}
 		} else if (isSourceB) {
-			const auto diff = static_cast<int8_t>(m_E131.E131Packet.Data.FrameLayer.SequenceNumber - pSourceB->nSequenceNumberData);
-			pSourceB->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			const auto diff = static_cast<int8_t>(pData->FrameLayer.SequenceNumber - pSourceB->nSequenceNumberData);
+			pSourceB->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			if ((diff <= 0) && (diff > -20)) {
 				continue;
 			}
@@ -383,13 +385,13 @@ void E131Bridge::HandleDmx() {
 
 		// This bit, when set to 1, indicates that the data in this packet is intended for use in visualization or media
 		// server preview applications and shall not be used to generate live output.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::PREVIEW_DATA) != 0) {
+		if ((pData->FrameLayer.Options & e131::OptionsMask::PREVIEW_DATA) != 0) {
 			continue;
 		}
 
 		// Upon receipt of a packet containing this bit set to a value of 1, receiver shall enter network data loss condition.
 		// Any property values in these packets shall be ignored.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::STREAM_TERMINATED) != 0) {
+		if ((pData->FrameLayer.Options & e131::OptionsMask::STREAM_TERMINATED) != 0) {
 			if (isSourceA || isSourceB) {
 				SetNetworkDataLossCondition(isSourceA, isSourceB);
 			}
@@ -402,60 +404,60 @@ void E131Bridge::HandleDmx() {
 			}
 		}
 
-		if (m_E131.E131Packet.Data.FrameLayer.Priority < m_State.nPriority ){
+		if (pData->FrameLayer.Priority < m_State.nPriority ){
 			if (!IsPriorityTimeOut(nPortIndex)) {
 				continue;
 			}
-			m_State.nPriority = m_E131.E131Packet.Data.FrameLayer.Priority;
-		} else if (m_E131.E131Packet.Data.FrameLayer.Priority > m_State.nPriority) {
+			m_State.nPriority = pData->FrameLayer.Priority;
+		} else if (pData->FrameLayer.Priority > m_State.nPriority) {
 			m_OutputPort[nPortIndex].sourceA.nIp = 0;
 			m_OutputPort[nPortIndex].sourceB.nIp = 0;
 			m_State.IsMergeMode = false;
-			m_State.nPriority = m_E131.E131Packet.Data.FrameLayer.Priority;
+			m_State.nPriority = pData->FrameLayer.Priority;
 		}
 
 		if ((ipA == 0) && (ipB == 0)) {
 			//printf("1. First package from Source\n");
-			pSourceA->nIp = m_E131.IPAddressFrom;
-			pSourceA->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
-			memcpy(pSourceA->cid, m_E131.E131Packet.Data.RootLayer.Cid, 16);
+			pSourceA->nIp = m_nIpAddressFrom;
+			pSourceA->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
+			memcpy(pSourceA->cid, pData->RootLayer.Cid, 16);
 			pSourceA->nMillis = m_nCurrentPacketMillis;
 			lightset::Data::SetSourceA(nPortIndex, pDmxData, nDmxSlots);
 		} else if (isSourceA && (ipB == 0)) {
 			//printf("2. Continue package from SourceA\n");
-			pSourceA->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			pSourceA->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			pSourceA->nMillis = m_nCurrentPacketMillis;
 			lightset::Data::SetSourceA(nPortIndex, pDmxData, nDmxSlots);
 		} else if ((ipA == 0) && isSourceB) {
 			//printf("3. Continue package from SourceB\n");
-			pSourceB->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			pSourceB->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			pSourceB->nMillis = m_nCurrentPacketMillis;
 			lightset::Data::SetSourceB(nPortIndex, pDmxData, nDmxSlots);
 		} else if (!isSourceA && (ipB == 0)) {
 			//printf("4. New ip, start merging\n");
-			pSourceB->nIp = m_E131.IPAddressFrom;
-			pSourceB->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
-			memcpy(pSourceB->cid, m_E131.E131Packet.Data.RootLayer.Cid, 16);
+			pSourceB->nIp = m_nIpAddressFrom;
+			pSourceB->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
+			memcpy(pSourceB->cid, pData->RootLayer.Cid, 16);
 			pSourceB->nMillis = m_nCurrentPacketMillis;
 			UpdateMergeStatus(nPortIndex);
 			lightset::Data::MergeSourceB(nPortIndex, pDmxData, nDmxSlots, m_OutputPort[nPortIndex].mergeMode);
 		} else if ((ipA == 0) && !isSourceB) {
 			//printf("5. New ip, start merging\n");
-			pSourceA->nIp = m_E131.IPAddressFrom;
-			pSourceA->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
-			memcpy(pSourceA->cid, m_E131.E131Packet.Data.RootLayer.Cid, 16);
+			pSourceA->nIp = m_nIpAddressFrom;
+			pSourceA->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
+			memcpy(pSourceA->cid, pData->RootLayer.Cid, 16);
 			pSourceA->nMillis = m_nCurrentPacketMillis;
 			UpdateMergeStatus(nPortIndex);
 			lightset::Data::MergeSourceA(nPortIndex, pDmxData, nDmxSlots, m_OutputPort[nPortIndex].mergeMode);
 		} else if (isSourceA && !isSourceB) {
 			//printf("6. Continue merging\n");
-			pSourceA->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			pSourceA->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			pSourceA->nMillis = m_nCurrentPacketMillis;
 			UpdateMergeStatus(nPortIndex);
 			lightset::Data::MergeSourceA(nPortIndex, pDmxData, nDmxSlots, m_OutputPort[nPortIndex].mergeMode);
 		} else if (!isSourceA && isSourceB) {
 			//printf("7. Continue merging\n");
-			pSourceB->nSequenceNumberData = m_E131.E131Packet.Data.FrameLayer.SequenceNumber;
+			pSourceB->nSequenceNumberData = pData->FrameLayer.SequenceNumber;
 			pSourceB->nMillis = m_nCurrentPacketMillis;
 			UpdateMergeStatus(nPortIndex);
 			lightset::Data::MergeSourceB(nPortIndex, pDmxData, nDmxSlots, m_OutputPort[nPortIndex].mergeMode);
@@ -483,17 +485,17 @@ void E131Bridge::HandleDmx() {
 		// new packets until synchronization resumes. When set to 1, once synchronization has been lost,
 		// components that had been operating in a synchronized state need not wait for a new
 		// E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
-		if ((m_E131.E131Packet.Data.FrameLayer.Options & e131::OptionsMask::FORCE_SYNCHRONIZATION) == 0) {
+		if ((pData->FrameLayer.Options & e131::OptionsMask::FORCE_SYNCHRONIZATION) == 0) {
 			// 6.3.3.1 Synchronization Address Usage in an E1.31 Synchronization Packet
 			// An E1.31 Synchronization Packet is sent to synchronize the E1.31 data on a specific universe number.
 			// A Synchronization Address of 0 is thus meaningless, and shall not be transmitted.
 			// Receivers shall ignore E1.31 Synchronization Packets containing a Synchronization Address of 0.
-			if (m_E131.E131Packet.Data.FrameLayer.SynchronizationAddress != 0) {
+			if (pData->FrameLayer.SynchronizationAddress != 0) {
 				if (!m_State.IsForcedSynchronized) {
 					if (!(isSourceA || isSourceB)) {
-						SetSynchronizationAddress((pSourceA->nIp != 0), (pSourceB->nIp != 0), __builtin_bswap16(m_E131.E131Packet.Data.FrameLayer.SynchronizationAddress));
+						SetSynchronizationAddress((pSourceA->nIp != 0), (pSourceB->nIp != 0), __builtin_bswap16(pData->FrameLayer.SynchronizationAddress));
 					} else {
-						SetSynchronizationAddress(isSourceA, isSourceB, __builtin_bswap16(m_E131.E131Packet.Data.FrameLayer.SynchronizationAddress));
+						SetSynchronizationAddress(isSourceA, isSourceB, __builtin_bswap16(pData->FrameLayer.SynchronizationAddress));
 					}
 					m_State.IsForcedSynchronized = true;
 					m_State.IsSynchronized = true;
@@ -593,14 +595,15 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 }
 
 bool E131Bridge::IsValidRoot() {
+	const auto *const pRaw = reinterpret_cast<TE131RawPacket *>(m_pReceiveBuffer);
 	// 5 E1.31 use of the ACN Root Layer Protocol
 	// Receivers shall discard the packet if the ACN Packet Identifier is not valid.
-	if (memcmp(m_E131.E131Packet.Raw.RootLayer.ACNPacketIdentifier, E117Const::ACN_PACKET_IDENTIFIER, e117::PACKET_IDENTIFIER_LENGTH) != 0) {
+	if (memcmp(pRaw->RootLayer.ACNPacketIdentifier, E117Const::ACN_PACKET_IDENTIFIER, e117::PACKET_IDENTIFIER_LENGTH) != 0) {
 		return false;
 	}
 	
-	if (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(e131::vector::root::DATA)
-			 && (m_E131.E131Packet.Raw.RootLayer.Vector != __builtin_bswap32(e131::vector::root::EXTENDED)) ) {
+	if (pRaw->RootLayer.Vector != __builtin_bswap32(e131::vector::root::DATA)
+			 && (pRaw->RootLayer.Vector != __builtin_bswap32(e131::vector::root::EXTENDED)) ) {
 		return false;
 	}
 
@@ -608,29 +611,25 @@ bool E131Bridge::IsValidRoot() {
 }
 
 bool E131Bridge::IsValidDataPacket() {
-	// DMP layer
-
+	const auto *const pData = reinterpret_cast<TE131DataPacket *>(m_pReceiveBuffer);
 	// The DMP Layer's Vector shall be set to 0x02, which indicates a DMP Set Property message by
 	// transmitters. Receivers shall discard the packet if the received value is not 0x02.
-	if (m_E131.E131Packet.Data.DMPLayer.Vector != e131::vector::dmp::SET_PROPERTY) {
+	if (pData->DMPLayer.Vector != e131::vector::dmp::SET_PROPERTY) {
 		return false;
 	}
-
 	// Transmitters shall set the DMP Layer's Address Type and Data Type to 0xa1. Receivers shall discard the
 	// packet if the received value is not 0xa1.
-	if (m_E131.E131Packet.Data.DMPLayer.Type != 0xa1) {
+	if (pData->DMPLayer.Type != 0xa1) {
 		return false;
 	}
-
 	// Transmitters shall set the DMP Layer's First Property Address to 0x0000. Receivers shall discard the
 	// packet if the received value is not 0x0000.
-	if (m_E131.E131Packet.Data.DMPLayer.FirstAddressProperty != __builtin_bswap16(0x0000)) {
+	if (pData->DMPLayer.FirstAddressProperty != __builtin_bswap16(0x0000)) {
 		return false;
 	}
-
 	// Transmitters shall set the DMP Layer's Address Increment to 0x0001. Receivers shall discard the packet if
 	// the received value is not 0x0001.
-	if (m_E131.E131Packet.Data.DMPLayer.AddressIncrement != __builtin_bswap16(0x0001)) {
+	if (pData->DMPLayer.AddressIncrement != __builtin_bswap16(0x0001)) {
 		return false;
 	}
 
@@ -640,7 +639,7 @@ bool E131Bridge::IsValidDataPacket() {
 void E131Bridge::Run() {
 	uint16_t nForeignPort;
 
-	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, &m_E131.E131Packet, sizeof(m_E131.E131Packet), &m_E131.IPAddressFrom, &nForeignPort) ;
+	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void **>(reinterpret_cast<void **>(&m_pReceiveBuffer)), &m_nIpAddressFrom, &nForeignPort) ;
 
 	m_nCurrentPacketMillis = Hardware::Get()->Millis();
 
@@ -690,7 +689,8 @@ void E131Bridge::Run() {
 	bool isActive = false;
 
 	if (m_pLightSet != nullptr) {
-		const auto nRootVector = __builtin_bswap32(m_E131.E131Packet.Raw.RootLayer.Vector);
+		const auto *const pRaw = reinterpret_cast<TE131RawPacket *>(m_pReceiveBuffer);
+		const auto nRootVector = __builtin_bswap32(pRaw->RootLayer.Vector);
 
 		if (nRootVector == e131::vector::root::DATA) {
 			if (IsValidDataPacket()) {
@@ -698,7 +698,7 @@ void E131Bridge::Run() {
 				isActive = true;
 			}
 		} else if (nRootVector == e131::vector::root::EXTENDED) {
-			const auto nFramingVector = __builtin_bswap32(m_E131.E131Packet.Raw.FrameLayer.Vector);
+			const auto nFramingVector = __builtin_bswap32(pRaw->FrameLayer.Vector);
 			if (nFramingVector == e131::vector::extended::SYNCHRONIZATION) {
 				HandleSynchronization();
 				isActive = true;

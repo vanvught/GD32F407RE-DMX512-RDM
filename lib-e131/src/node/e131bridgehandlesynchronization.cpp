@@ -40,7 +40,8 @@ void E131Bridge::HandleSynchronization() {
 	// NOTE: There is no multicast addresses (To Ip) available
 	// We just check if SynchronizationAddress is published by a Source
 
-	const auto nSynchronizationAddress = __builtin_bswap16(m_E131.E131Packet.Synchronization.FrameLayer.UniverseNumber);
+	const auto *const pSynchronizationPacket = reinterpret_cast<TE131SynchronizationPacket *>(m_pReceiveBuffer);
+	const auto nSynchronizationAddress = __builtin_bswap16(pSynchronizationPacket->FrameLayer.UniverseNumber);
 
 	if ((nSynchronizationAddress != m_State.nSynchronizationAddressSourceA) && (nSynchronizationAddress != m_State.nSynchronizationAddressSourceB)) {
 		Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);

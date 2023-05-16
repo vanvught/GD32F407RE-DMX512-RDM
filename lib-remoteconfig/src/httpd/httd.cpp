@@ -66,14 +66,7 @@ HttpDaemon::HttpDaemon() : m_pContentType(contentType[static_cast<uint32_t>(cont
 	DEBUG_EXIT
 }
 
-void HttpDaemon::Run() {
-	uint32_t nConnectionHandle;
-	m_nBytesReceived = Network::Get()->TcpRead(m_nHandle, const_cast<const uint8_t **>(reinterpret_cast<uint8_t **>(&m_RequestHeaderResponse)), nConnectionHandle);
-
-	if (__builtin_expect((m_nBytesReceived <= 0), 1)) {
-		return;
-	}
-
+void HttpDaemon::HandleRequest(const uint32_t nConnectionHandle) {
 	const char *pStatusMsg = "OK";
 
 	DEBUG_PRINTF("%u: m_Status=%u, m_RequestMethod=%u", nConnectionHandle, static_cast<uint32_t>(m_Status), static_cast<uint32_t>(m_RequestMethod));
@@ -157,7 +150,7 @@ Status HttpDaemon::ParseRequest() {
 	m_nRequestContentLength = 0;
 	m_nFileDataLength = 0;
 
-	for (uint16_t i = 0; i < static_cast<uint16_t>(m_nBytesReceived); i++) {
+	for (auto i = 0; i < m_nBytesReceived; i++) {
 		if (m_RequestHeaderResponse[i] == '\n') {
 			assert(i > 1);
 			m_RequestHeaderResponse[i - 1] = '\0';
@@ -167,7 +160,7 @@ Status HttpDaemon::ParseRequest() {
 			} else {
 				if (pLine[0] == '\0') {
 					assert((i + 1) <= m_nBytesReceived);
-					m_nFileDataLength = static_cast<uint16_t>(static_cast<uint16_t>(m_nBytesReceived) - 1U - i);
+					m_nFileDataLength = static_cast<uint16_t>(m_nBytesReceived - 1 - i);
 					if (m_nFileDataLength > 0) {
 						m_pFileData = &m_RequestHeaderResponse[i + 1];
 						m_pFileData[m_nFileDataLength] = '\0';

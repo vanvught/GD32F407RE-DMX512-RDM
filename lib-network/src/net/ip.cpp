@@ -27,16 +27,13 @@
 
 #include "net.h"
 #include "net_private.h"
-#include "net_packets.h"
-#include "net_debug.h"
-
-#include "debug.h"
 
 #include "../../config/net_config.h"
 
 void ip_set_ip() {
 	udp_set_ip();
 	igmp_set_ip();
+	tcp_set_ip();
 }
 
 void __attribute__((cold)) ip_init() {
@@ -44,6 +41,7 @@ void __attribute__((cold)) ip_init() {
 
 	udp_init();
 	igmp_init();
+	tcp_init();
 
 	DEBUG_EXIT
 }
@@ -51,6 +49,7 @@ void __attribute__((cold)) ip_init() {
 void __attribute__((cold)) ip_shutdown() {
 	DEBUG_ENTRY
 
+	tcp_shutdown();
 	igmp_shutdown();
 	udp_shutdown();
 

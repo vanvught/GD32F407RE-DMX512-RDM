@@ -15,10 +15,10 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 	endif
 	ifndef COND
-		EXTRA_SRCDIR+=src/net src/emac src/params
 		EXTRA_SRCDIR+=src/apps/mdns src/apps/ntp src/apps/tftp
+		EXTRA_SRCDIR+=src/emac src/params src/net
 	endif
 else
-	EXTRA_SRCDIR+=src/net src/emac
 	EXTRA_SRCDIR+=src/apps/mdns src/apps/ntp src/apps/tftp
+	EXTRA_SRCDIR+=src/emac src/net
 endif

@@ -214,7 +214,7 @@ public:
 	}
 
 	void SetSleepTimeout(uint32_t nSleepTimeout = display::Defaults::SEEP_TIMEOUT) {
-		m_nSleepTimeout = 1000 * 60 * nSleepTimeout;
+		m_nSleepTimeout = 1000U * 60U * nSleepTimeout;
 	}
 
 	uint32_t GetSleepTimeout() const {

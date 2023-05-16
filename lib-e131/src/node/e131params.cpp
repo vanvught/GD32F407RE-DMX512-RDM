@@ -194,7 +194,6 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 # pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
 #endif
 
-#if defined (E131_HAVE_DMXIN)
 		nLength = 7;
 
 		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[i], value, nLength) == Sscan::OK) {
@@ -203,9 +202,12 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 
 			DEBUG_PRINTF("%u portDir=%u, m_Params.nDirection=%x", i, static_cast<uint32_t>(portDir), m_Params.nDirection);
 
+#if defined (E131_HAVE_DMXIN)
 			if (portDir == lightset::PortDir::INPUT) {
 				m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::INPUT, i);
-			} else if (portDir == lightset::PortDir::DISABLE) {
+			} else
+#endif
+			if (portDir == lightset::PortDir::DISABLE) {
 				m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::DISABLE, i);
 			} else {
 				m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::OUTPUT, i);
@@ -220,6 +222,7 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 # pragma GCC diagnostic pop
 #endif
 
+#if defined (E131_HAVE_DMXIN)
 		if (Sscan::Uint8(pLine, E131ParamsConst::PRIORITY[i], value8) == Sscan::OK) {
 			if ((value8 >= e131::priority::LOWEST) && (value8 <= e131::priority::HIGHEST) && (value8 != e131::priority::DEFAULT)) {
 				m_Params.nPriority[i] = value8;

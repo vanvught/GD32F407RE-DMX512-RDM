@@ -31,7 +31,7 @@
 #include "networkconst.h"
 
 #include "mdns.h"
-#include "mdnsservices.h"
+
 #if defined (ENABLE_HTTPD)
 # include "httpd/httpd.h"
 #endif
@@ -72,27 +72,23 @@ void Hardware::RebootHandler() {
 
 void main() {
 	Hardware hw;
-	Network nw;
 	DisplayUdf display;
+	ConfigStore configStore;
+	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
+	StoreNetwork storeNetwork;
+	Network nw(&storeNetwork);
+	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, Display7SegmentMessage::INFO_NONE, CONSOLE_GREEN);
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
-	ConfigStore configStore;
-
 	fw.Print("Art-Net 4 DMX/RDM controller {4 Universes}");
-
-	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
-
-	StoreNetwork storeNetwork;
-	nw.SetNetworkStore(&storeNetwork);
-	nw.Init(&storeNetwork);
 	nw.Print();
 
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
+
 	MDNS mDns;
-	mDns.Start();
-	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_CONFIG, 0x2905);
+	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG);
 #if defined (ENABLE_HTTPD)
-	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_HTTP, 80, mdns::Protocol::TCP, "node=Art-Net 4 DMX/RDM");
+	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP, "node=Art-Net 4 DMX/RDM");
 #endif
 	mDns.Print();
 
@@ -131,16 +127,11 @@ void main() {
 	}
 
 	DmxSend dmxSend;
-
 	dmxSend.Print();
 
-	DmxConfigUdp *pDmxConfigUdp = nullptr;
+	node.SetOutput(&dmxSend);
 
-	if (node.GetActiveOutputPorts() != 0) {
-		node.SetOutput(&dmxSend);
-		pDmxConfigUdp = new DmxConfigUdp;
-		assert(pDmxConfigUdp != nullptr);
-	}
+	DmxConfigUdp dmxConfigUdp;
 
 	StoreRDMDevice storeRdmDevice;
 
@@ -219,8 +210,8 @@ void main() {
 		node.Run();
 		remoteConfig.Run();
 		configStore.Flash();
-		if (pDmxConfigUdp != nullptr) {
-			pDmxConfigUdp->Run();
+		if (node.GetActiveOutputPorts() != 0) {
+			dmxConfigUdp.Run();
 		}
 		mDns.Run();
 #if defined (ENABLE_HTTPD)

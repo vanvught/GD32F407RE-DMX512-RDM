@@ -28,6 +28,8 @@
 
 #include <cstdint>
 
+#include "network.h"
+
 #define BUFSIZE 1440
 
 namespace http {
@@ -51,9 +53,19 @@ enum class RequestMethod {
 class HttpDaemon {
 public:
 	HttpDaemon();
-	void Run();
+	void Run() {
+		uint32_t nConnectionHandle;
+		m_nBytesReceived = Network::Get()->TcpRead(m_nHandle, const_cast<const uint8_t **>(reinterpret_cast<uint8_t **>(&m_RequestHeaderResponse)), nConnectionHandle);
+
+		if (__builtin_expect((m_nBytesReceived <= 0), 1)) {
+			return;
+		}
+
+		HandleRequest(nConnectionHandle);
+	}
 
 private:
+	void HandleRequest(const uint32_t nConnectionHandle);
 	http::Status ParseRequest();
 	http::Status ParseMethod(char *pLine);
 	http::Status ParseHeaderField(char *pLine);

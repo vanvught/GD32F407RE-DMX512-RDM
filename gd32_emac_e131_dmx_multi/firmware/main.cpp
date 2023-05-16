@@ -24,14 +24,13 @@
  */
 
 #include <cstdint>
-#include <cassert>
 
 #include "hardware.h"
 #include "network.h"
 #include "networkconst.h"
 
 #include "mdns.h"
-#include "mdnsservices.h"
+
 #if defined (ENABLE_HTTPD)
 # include "httpd/httpd.h"
 #endif
@@ -81,27 +80,23 @@ void Hardware::RebootHandler() {
 
 void main() {
 	Hardware hw;
-	Network nw;
 	DisplayUdf display;
-	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
-	
 	ConfigStore configStore;
+	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
+	StoreNetwork storeNetwork;
+	Network nw(&storeNetwork);
+	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, Display7SegmentMessage::INFO_NONE, CONSOLE_GREEN);
+	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
 	fw.Print("sACN E1.31 DMX");
-
-	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
-
-	StoreNetwork storeNetwork;
-	nw.SetNetworkStore(&storeNetwork);
-	nw.Init(&storeNetwork);
 	nw.Print();
 
 	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
+
 	MDNS mDns;
-	mDns.Start();
-	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_CONFIG, 0x2905);
+	mDns.AddServiceRecord(nullptr, mdns::Services::CONFIG);
 #if defined (ENABLE_HTTPD)
-	mDns.AddServiceRecord(nullptr, MDNS_SERVICE_HTTP, 80, mdns::Protocol::TCP, "node=sACN E1.31 DMX");
+	mDns.AddServiceRecord(nullptr, mdns::Services::HTTP, "node=sACN E1.31 DMX");
 #endif
 	mDns.Print();
 
@@ -138,16 +133,11 @@ void main() {
 	}
 
 	DmxSend dmxSend;
-
 	dmxSend.Print();
 
-	DmxConfigUdp *pDmxConfigUdp = nullptr;
+	bridge.SetOutput(&dmxSend);
 
-	if (bridge.GetActiveOutputPorts() != 0) {
-		bridge.SetOutput(&dmxSend);
-		pDmxConfigUdp = new DmxConfigUdp;
-		assert(pDmxConfigUdp != nullptr);
-	}
+	DmxConfigUdp dmxConfigUdp;
 
 	const auto nActivePorts = static_cast<uint32_t>(bridge.GetActiveInputPorts() + bridge.GetActiveOutputPorts());
 
@@ -171,8 +161,8 @@ void main() {
 	RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
 
 	if (rdmDeviceParams.Load()) {
-		rdmDeviceParams.Set(&llrpOnlyDevice);
 		rdmDeviceParams.Dump();
+		rdmDeviceParams.Set(&llrpOnlyDevice);
 	}
 
 	llrpOnlyDevice.SetRDMDeviceStore(&storeRdmDevice);
@@ -225,8 +215,8 @@ void main() {
 		bridge.Run();
 		remoteConfig.Run();
 		configStore.Flash();
-		if (pDmxConfigUdp != nullptr) {
-			pDmxConfigUdp->Run();
+		if (bridge.GetActiveOutputPorts() != 0) {
+			dmxConfigUdp.Run();
 		}
 		mDns.Run();
 #if defined (NODE_RDMNET_LLRP_ONLY)

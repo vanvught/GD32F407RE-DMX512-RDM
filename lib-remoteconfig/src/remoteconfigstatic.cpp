@@ -36,6 +36,8 @@
 using namespace configstore;
 using namespace remoteconfig;
 
+#if !defined (CONFIG_REMOTECONFIG_MINIMUM)
+
 const RemoteConfig::Txt RemoteConfig::s_TXT[] = {
 		{ &RemoteConfig::HandleGetRconfigTxt,    &RemoteConfig::HandleSetRconfig,       "rconfig.txt",  11, Store::RCONFIG },
 		{ &RemoteConfig::HandleGetNetworkTxt,    &RemoteConfig::HandleSetNetworkTxt,    "network.txt",  11, Store::NETWORK },
@@ -71,11 +73,15 @@ const RemoteConfig::Txt RemoteConfig::s_TXT[] = {
 #endif
 #if defined (RDM_RESPONDER)
 		{ &RemoteConfig::HandleGetRdmDeviceTxt,  &RemoteConfig::HandleSetRdmDeviceTxt,  "rdm_device.txt", 14, Store::RDMDEVICE },
+		{ &RemoteConfig::HandleGetRdmSensorsTxt, &RemoteConfig::HandleSetRdmSensorsTxt, "sensors.txt",    11, Store::RDMSENSORS },
+# if defined (ENABLE_RDM_SUBDEVICES)
+		{ &RemoteConfig::HandleGetRdmSubdevTxt,  &RemoteConfig::HandleSetRdmSubdevTxt,  "subdev.txt",     10, Store::RDMSUBDEVICES },
+# endif
 #endif
 #if defined (OUTPUT_DMX_SEND)
 		{ &RemoteConfig::HandleGetParamsTxt,     &RemoteConfig::HandleSetParamsTxt,     "params.txt",   10, Store::DMXSEND },
 #endif
-#if defined (OUTPUT_DMX_PIXEL) || (OUTPUT_DMX_TLC59711)
+#if defined (OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_TLC59711)
 		{ &RemoteConfig::HandleGetDevicesTxt,    &RemoteConfig::HandleSetDevicesTxt,    "devices.txt",  11, Store::WS28XXDMX },
 #endif
 #if defined (OUTPUT_DMX_MONITOR)
@@ -122,3 +128,5 @@ int32_t RemoteConfig::GetIndex(const void *p, uint32_t& nLength) {
 	DEBUG_EXIT
 	return -1;
 }
+
+#endif
