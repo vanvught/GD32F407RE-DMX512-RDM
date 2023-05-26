@@ -432,19 +432,10 @@ static uint8_t *put_domain_name_as_labels(uint8_t *ptr, Domain const &domain) {
 	return ptr;
 }
 
-/*
- * Preventing Data abort on H2+/H3 -> unaligned memory access due compile optimization.
- */
-#if defined (__ARM_ARCH_7A__)
-# define VOLATILE	volatile
-#else
-# define VOLATILE
-#endif
-
 static uint8_t *add_question(uint8_t *pDestination, const Domain& domain, const Types type, const bool bFlush) {
 	auto *pDst = put_domain_name_as_labels(pDestination, domain);
 
-	*reinterpret_cast<VOLATILE uint16_t*>(pDst) = __builtin_bswap16(static_cast<uint16_t>(type));
+	*reinterpret_cast<volatile uint16_t*>(pDst) = __builtin_bswap16(static_cast<uint16_t>(type));
 	pDst += 2;
 	*reinterpret_cast<uint16_t*>(pDst) = __builtin_bswap16((bFlush ? Classes::Flush : static_cast<Classes>(0)) | Classes::Internet);
 	pDst += 2;

@@ -124,10 +124,6 @@ void ArtNetNode::Start() {
 	assert(m_pArtNetTrigger != nullptr);
 #endif	
 
-#if defined (ARTNET_HAVE_TIMECODE)
-	assert(m_pArtNetTimeCode != nullptr);
-#endif
-
 	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(artnet::Status2::IP_DHCP)) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
 	m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & ~(artnet::Status2::DHCP_CAPABLE)) | (Network::Get()->IsDhcpCapable() ? artnet::Status2::DHCP_CAPABLE : 0));
 

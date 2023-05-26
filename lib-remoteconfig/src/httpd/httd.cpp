@@ -27,10 +27,6 @@
 #include <cstdio>
 #include <cassert>
 
-#if defined ENABLE_CONTENT
-extern int get_file_content(const char *fileName, char *pDst);
-#endif
-
 #include "httpd/httpd.h"
 #include "remoteconfig.h"
 #include "remoteconfigjson.h"
@@ -44,19 +40,18 @@ extern int get_file_content(const char *fileName, char *pDst);
 
 #include "debug.h"
 
-char HttpDaemon::m_Content[BUFSIZE];
+#if defined ENABLE_CONTENT
+extern int get_file_content(const char *fileName, char *pDst, http::contentTypes& contentType);
+#endif
+
+char HttpDaemon::m_Content[http::BUFSIZE];
 
 using namespace http;
 
-enum class contentTypes {
-	TEXT_HTML, TEXT_CSS, TEXT_JS, APPLICATION_JSON, NOT_DEFINED
-};
-
-static constexpr char contentType[static_cast<uint32_t>(contentTypes::NOT_DEFINED)][32] =
+static constexpr char s_contentType[static_cast<uint32_t>(contentTypes::NOT_DEFINED)][32] =
 	{ "text/html", "text/css", "text/javascript", "application/json" };
 
-
-HttpDaemon::HttpDaemon() : m_pContentType(contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)]) {
+HttpDaemon::HttpDaemon() : m_pContentType(s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)]) {
 	DEBUG_ENTRY
 
 	assert(m_nHandle == -1);
@@ -116,7 +111,7 @@ void HttpDaemon::HandleRequest(const uint32_t nConnectionHandle) {
 			break;
 		}
 
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
 		m_nContentLength = static_cast<uint16_t>(snprintf(m_Content, BUFSIZE - 1U,
 				"<!DOCTYPE html>\n"
 				"<html>\n"
@@ -278,20 +273,8 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 Status HttpDaemon::HandleGet() {
 	int nLength = 0;
 
-#if defined(ENABLE_CONTENT)
-	if ((strcmp(m_pUri, "/") == 0) || (strcmp(m_pUri, "/index.html") == 0)) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
-		nLength = get_file_content("index.html", m_Content);
-	} else if (strcmp(m_pUri, "/styles.css") == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_CSS)];
-		nLength = get_file_content("styles.css", m_Content);
-	} else if (strcmp(m_pUri, "/index.js") == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_JS)];
-		nLength = get_file_content("index.js", m_Content);
-	} else
-#endif
 	if (memcmp(m_pUri, "/json/", 6) == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::APPLICATION_JSON)];
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::APPLICATION_JSON)];
 		const auto *pGet = &m_pUri[6];
 		if (strcmp(pGet, "list") == 0) {
 			nLength = remoteconfig::json_get_list(m_Content, sizeof(m_Content));
@@ -311,6 +294,17 @@ Status HttpDaemon::HandleGet() {
 			return HandleGetTxt();
 		}
 	}
+#if defined(ENABLE_CONTENT)
+	else if (strcmp(m_pUri, "/") == 0) {
+		http::contentTypes contentType;
+		nLength = get_file_content("index.html", m_Content, contentType);
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentType)];
+	} else {
+		http::contentTypes contentType;
+		nLength = get_file_content(&m_pUri[1], m_Content, contentType);
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentType)];
+	}
+#endif
 
 	if (nLength <= 0) {
 		DEBUG_EXIT
@@ -429,7 +423,7 @@ Status HttpDaemon::HandlePost(bool hasDataOnly) {
 		PropertiesConfig::EnableJSON(bIsJSON);
 	}
 
-	m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
+	m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
 	m_nContentLength = static_cast<uint16_t>(snprintf(m_Content, BUFSIZE - 1U,
 			"<!DOCTYPE html>\n"
 			"<html>\n"

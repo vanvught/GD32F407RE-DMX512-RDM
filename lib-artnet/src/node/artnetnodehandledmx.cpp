@@ -149,13 +149,13 @@ void ArtNetNode::HandleDmx() {
 				lightset::Data::MergeSourceB(nPortIndex, pArtDmx->Data, nDmxSlots, mergeMode);
 			}
 #ifndef NDEBUG
-			else if (ipA == m_ArtNetPacket.IPAddressFrom && ipB == m_ArtNetPacket.IPAddressFrom) {
+			else if (ipA == m_nIpAddressFrom && ipB == m_nIpAddressFrom) {
 # if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("8. Source matches both buffers, this shouldn't be happening!", artnet::DP_LOW);
 # endif
 				assert(0);
 				return;
-			} else if (ipA != m_ArtNetPacket.IPAddressFrom && ipB != m_ArtNetPacket.IPAddressFrom) {
+			} else if (ipA != m_nIpAddressFrom && ipB != m_nIpAddressFrom) {
 # if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("9. More than two sources, discarding data", artnet::DP_LOW);
 # endif
