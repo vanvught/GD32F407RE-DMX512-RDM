@@ -15,8 +15,8 @@ struct FilesContent {
 };
 
 static constexpr struct FilesContent HttpContent[] = {
-	{ "static.js", static_js, 1072, static_cast<http::contentTypes>(2) },
+	{ "static.js", static_js, 1065, static_cast<http::contentTypes>(2) },
 	{ "styles.css", styles_css, 411, static_cast<http::contentTypes>(1) },
-	{ "index.js", index_js, 1075, static_cast<http::contentTypes>(2) },
+	{ "index.js", index_js, 1063, static_cast<http::contentTypes>(2) },
 	{ "index.html", index_html, 611, static_cast<http::contentTypes>(0) },
 };

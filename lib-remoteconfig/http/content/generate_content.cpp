@@ -43,89 +43,94 @@ static http::contentTypes getContentType(const char *pFileName) {
 	return http::contentTypes::NOT_DEFINED;
 }
 
-static int convert_to_h(const char *file_name) {
-	FILE *file_in, *file_out;
+static int convert_to_h(const char *pFileName) {
+	printf("File to convert: %s, ", pFileName);
+
+	auto *pFileIn = fopen(pFileName, "r");
+
+	if (pFileIn == nullptr) {
+		return 0;
+	}
+
+	const auto nFileNameLength = strlen(pFileName);
+
+	auto *pFileNameOut = new char[nFileNameLength + 3];
+	assert(pFileNameOut != nullptr);
+
+	snprintf(pFileNameOut, nFileNameLength + 3, "%s.h", pFileName);
+
+	printf("Header file: \"%s\", ", pFileNameOut);
+
+	auto *pFileOut = fopen(pFileNameOut, "w");
+
+	if (pFileOut == nullptr) {
+		delete[] pFileNameOut;
+		fclose(pFileIn);
+		return 0;
+	}
+
 	char buffer[32];
-	int c, i;
-	unsigned offset;
-
-	printf("file_name=%s ", file_name);
-
-	file_in = fopen(file_name, "r");
-
-	if (file_in == nullptr) {
-		return 0;
-	}
-
-	char *file_out_name = new char[sizeof(file_name) + 3];
-	assert(file_out_name != nullptr);
-
-	strcpy(file_out_name, file_name);
-	strcat(file_out_name, ".h");
-
-	file_out = fopen(file_out_name, "w");
-
-	if (file_out == nullptr) {
-		delete[] file_out_name;
-		fclose(file_in);
-		return 0;
-	}
-
-	i = snprintf(buffer, sizeof(buffer) - 1, "#include \"%s\"\n", file_out_name);
+	auto i = snprintf(buffer, sizeof(buffer) - 1, "#include \"%s\"\n", pFileNameOut);
 	assert(i < static_cast<int>(sizeof(buffer)));
 
 	fwrite(buffer, sizeof(char), i, pFileIncludes);
 
-	fwrite("static constexpr char ", sizeof(char), 22, file_out);
+	fwrite("static constexpr char ", sizeof(char), 22, pFileOut);
 
-	char *const_name = new char[sizeof(file_name)];
-	assert(const_name != NULL);
+	char *pConstantName = new char[nFileNameLength + 1];
+	assert(pConstantName != nullptr);
 
-	strcpy(const_name, file_name);
-	char *p = strstr(const_name, ".");
+	strncpy(pConstantName, pFileName, nFileNameLength);
+
+	auto *p = strstr(pConstantName, ".");
+
 	if (p != nullptr) {
 		*p = '_';
 	}
 
-	printf("const_name=%s\n", const_name);
-	fwrite(const_name, sizeof(char), strlen(const_name), file_out);
-	fwrite(const_name, sizeof(char), strlen(const_name), pFileContent);
-	fwrite("[] = {\n", sizeof(char), 7, file_out);
+	printf("Constant name: %s, ", pConstantName);
 
-	offset = 0;
+	fwrite(pConstantName, sizeof(char), strlen(pConstantName), pFileOut);
+	fwrite(pConstantName, sizeof(char), strlen(pConstantName), pFileContent);
+	fwrite("[] = {\n", sizeof(char), 7, pFileOut);
 
-	int remove_white_spaces = 1;
-	int file_size = 0;
+	unsigned nOffset = 0;
+	auto doRemoveWhiteSpaces = true;
+	int nFileSize = 0;
+	int c;
 
-	while ((c = fgetc (file_in)) != EOF) {
-		if (remove_white_spaces) {
+	while ((c = fgetc (pFileIn)) != EOF) {
+		if (doRemoveWhiteSpaces) {
 			if (c < ' ') {
 				continue;
 			} else {
-				remove_white_spaces = 0;
+				doRemoveWhiteSpaces = false;
 			}
 		} else {
 			if (c == '\n') {
-				remove_white_spaces = 1;
+				doRemoveWhiteSpaces = true;
 			}
 		}
-		i = snprintf(buffer, sizeof(buffer) - 1, "0x%02X,%c", c, ++offset % 16 == 0 ? '\n' : ' ');
+
+		i = snprintf(buffer, sizeof(buffer) - 1, "0x%02X,%c", c, ++nOffset % 16 == 0 ? '\n' : ' ');
 		assert(i < static_cast<int>(sizeof(buffer)));
-		fwrite(buffer, sizeof(char), i, file_out);
-		file_size++;
+
+		fwrite(buffer, sizeof(char), i, pFileOut);
+
+		nFileSize++;
 	}
 
-	fwrite("0x00\n};\n", sizeof(char), 8, file_out);
+	fwrite("0x00\n};\n", sizeof(char), 8, pFileOut);
 
-	delete [] file_out_name;
-	delete [] const_name;
+	delete [] pFileNameOut;
+	delete [] pConstantName;
 
-	fclose(file_in);
-	fclose(file_out);
+	fclose(pFileIn);
+	fclose(pFileOut);
 
-	printf("file size = %d\n", file_size);
+	printf("File size: %d\n", nFileSize);
 
-	return file_size;
+	return nFileSize;
 }
 
 int main() {

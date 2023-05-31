@@ -185,7 +185,7 @@ Status HttpDaemon::ParseMethod(char *pLine) {
 	assert(pLine != nullptr);
 	char *pToken;
 
-	if ((pToken = strtok(pLine, " ")) == 0) {
+	if ((pToken = strtok(pLine, " ")) == nullptr) {
 		return Status::METHOD_NOT_IMPLEMENTED;
 	}
 
@@ -197,17 +197,17 @@ Status HttpDaemon::ParseMethod(char *pLine) {
 		return Status::METHOD_NOT_IMPLEMENTED;
 	}
 
-	if ((pToken = strtok(0, " ")) == 0) {
+	if ((pToken = strtok(nullptr, " ")) == nullptr) {
 		return Status::BAD_REQUEST;
 	}
 
 	m_pUri = pToken;
 
-	if ((pToken = strtok(0, "/")) == nullptr || strcmp(pToken, "HTTP") != 0) {
+	if ((pToken = strtok(nullptr, "/")) == nullptr || strcmp(pToken, "HTTP") != 0) {
 		return Status::BAD_REQUEST;
 	}
 
-	if ((pToken = strtok(0, " \n")) == nullptr) {
+	if ((pToken = strtok(nullptr, " \n")) == nullptr) {
 		return Status::BAD_REQUEST;
 	}
 
@@ -233,14 +233,14 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 	}
 
 	if (strcasecmp(pToken, "Content-Type") == 0) {
-		if ((pToken = strtok(0, " ;")) == nullptr) {
+		if ((pToken = strtok(nullptr, " ;")) == nullptr) {
 			return Status::BAD_REQUEST;
 		}
 		if (strcmp(pToken, "application/json") == 0) {
 			m_bContentTypeJson = true;
 		}
 	} else if (strcasecmp(pToken, "Content-Length") == 0) {
-		if ((pToken = strtok(0, " ")) == nullptr) {
+		if ((pToken = strtok(nullptr, " ")) == nullptr) {
 			return Status::BAD_REQUEST;
 		}
 

@@ -307,7 +307,7 @@ void PixelDmxParams::callbackFunction(const char *pLine) {
 	}
 
 	if (Sscan::Float(pLine, DevicesParamsConst::GAMMA_VALUE, fValue) == Sscan::OK) {
-		const uint8_t nValue = static_cast<uint8_t>(fValue * 10);
+		const auto nValue = static_cast<uint8_t>(fValue * 10);
 		if ((nValue < gamma::MIN) || (nValue > gamma::MAX)) {
 			m_pixelDmxParams.nGammaValue = 0;
 		} else {

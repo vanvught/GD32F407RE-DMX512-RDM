@@ -48,18 +48,16 @@ public:
 	Network(NetworkParamsStore *pNetworkParamsStore);
 	~Network() {}
 
-
 	void Print();
 
 	void Shutdown() {
 		network::display_emac_shutdown();
+		network::mdns_shutdown();
 		net_shutdown();
 	}
 
 	void MacAddressCopyTo(uint8_t *pMacAddress) {
-		for (uint32_t i =  0; i < network::MAC_SIZE; i++) {
-			pMacAddress[i] = m_aNetMacaddr[i];
-		}
+		memcpy(pMacAddress, m_aNetMacaddr, network::MAC_SIZE);
 	}
 
 	void SetIp(uint32_t nIp);

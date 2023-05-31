@@ -25,9 +25,9 @@ function save(sel) {
 	var d = {}
 	var inputs = document.getElementById("idTxt").getElementsByTagName("input")
 	for (var i = 0; i < inputs.length; i++) {
-		var key = inputs[i].id
-		var value = inputs[i].value
-		d[key] = value
+		var k = inputs[i].id
+		var v = inputs[i].value
+		d[k] = v
 	}
 	var out = {}
 	out[sel] = d

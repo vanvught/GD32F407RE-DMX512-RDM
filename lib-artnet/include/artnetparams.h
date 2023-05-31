@@ -153,7 +153,7 @@ public:
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}
 
-	void Set(uint32_t nPortIndexOffset = 0);
+	void Set(uint32_t nPortIndexOffset);
 
 	void Dump();
 

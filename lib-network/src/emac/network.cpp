@@ -46,9 +46,12 @@ void __attribute__((weak)) phy_customized_timing() {}
 
 namespace network {
 void __attribute__((weak)) mdns_announcement() {}
+void __attribute__((weak)) mdns_shutdown() {}
 }  // namespace network
 
-#define TO_HEX(i)	static_cast<char>(((i) < 10) ? '0' + (i) : 'A' + ((i) - 10))
+static constexpr char TO_HEX(const char i) {
+	return static_cast<char>(((i) < 10) ? '0' + (i) : 'A' + ((i) - 10));
+}
 
 int emac_start(uint8_t paddr[]);
 

@@ -78,7 +78,7 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-static constexpr auto DMXPORT_OFFSET = 64U;
+static constexpr uint32_t DMXPORT_OFFSET = 64U;
 
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
