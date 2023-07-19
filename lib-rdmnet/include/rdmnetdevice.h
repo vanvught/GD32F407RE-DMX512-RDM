@@ -57,7 +57,9 @@ public:
 	}
 
 	uint8_t *LLRPHandleRdmCommand(const uint8_t *pRdmDataNoSC) override {
+		DEBUG_ENTRY
 		m_RDMHandler.HandleData(pRdmDataNoSC, reinterpret_cast<uint8_t*>(&s_RdmCommand));
+		DEBUG_EXIT
 		return reinterpret_cast<uint8_t*>(&s_RdmCommand);
 	}
 

@@ -109,10 +109,6 @@ public:
 
 	void Dump();
 
-	lightset::OutputType GetOutputType() const {
-		return static_cast<lightset::OutputType>(m_Params.nOutputType);
-	}
-	
 	uint16_t GetUniverse(uint32_t nPortIndex, bool &IsSet) const {
 		if (nPortIndex < e131params::MAX_PORTS) {
 			IsSet = isMaskSet(e131params::Mask::UNIVERSE_A << nPortIndex);
@@ -129,6 +125,12 @@ public:
 		}
 		return lightset::PortDir::DISABLE;
 	}
+
+#if defined (ESP8266)
+	lightset::OutputType GetOutputType() const {
+		return static_cast<lightset::OutputType>(m_Params.nOutputType);
+	}
+#endif
 
     static void staticCallbackFunction(void *p, const char *s);
 

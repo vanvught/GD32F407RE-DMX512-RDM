@@ -25,9 +25,9 @@
 
 #include <cstdint>
 
-#include "lightset.h"
 #include "displayudf.h"
 #include "artnet.h"
+#include "lightset.h"
 
 namespace artnet {
 void display_shortname(__attribute__((unused)) const char *pShortName) {
@@ -50,6 +50,10 @@ void display_subnet_switch(__attribute__((unused))  uint8_t nAddress) {
 }
 
 void display_merge_mode(__attribute__((unused))  uint32_t nPortIndex, __attribute__((unused))  lightset::MergeMode mergeMode) {
+	DisplayUdf::Get()->ShowUniverse(ArtNetNode::Get());
+}
+
+void display_outputstyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const artnet::OutputStyle outputStyle) {
 	DisplayUdf::Get()->ShowUniverse(ArtNetNode::Get());
 }
 

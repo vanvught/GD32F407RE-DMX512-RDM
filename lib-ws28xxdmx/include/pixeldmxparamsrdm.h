@@ -46,9 +46,16 @@ public:
 
 	void Start(uint32_t nPortIndex) override;
 	void Stop(uint32_t nPortIndex) override;
-	void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) override;
+	void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate = true) override;
+	void Sync(__attribute__((unused)) const uint32_t nPortIndex) override {}
+	void Sync(__attribute__((unused)) const bool doForce) override {}
 
-	bool SetDmxStartAddress( __attribute__((unused)) uint16_t nDmxStartAddress) override {
+	void SetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const lightset::OutputStyle outputStyle) override {}
+	lightset::OutputStyle GetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex) const override {
+		return lightset::OutputStyle::DELTA;
+	}
+
+	bool SetDmxStartAddress(__attribute__((unused)) uint16_t nDmxStartAddress) override {
 		return false;
 	}
 

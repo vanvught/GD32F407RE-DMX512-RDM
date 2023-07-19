@@ -254,7 +254,7 @@ void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
 		} else {
 			i = nMid;
 			bFound = true;
-			break;;
+			break;
 		}
 	}
 

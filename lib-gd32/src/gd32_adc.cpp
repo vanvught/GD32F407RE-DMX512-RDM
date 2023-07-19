@@ -88,13 +88,13 @@ void gd32_adc_init(void) {
 
 float gd32_adc_gettemp(void) {
 	/* value convert  */
-	const float temperature = (1.43 - ADC_IDATA0(ADC0) * 3.3 / 4096) * 1000 / 4.3 + 25;
+	const float temperature = (1.43f - ADC_IDATA0(ADC0) * 3.3f / 4096) * 1000 / 4.3f + 25;
 	adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 	return temperature;
 }
 
 float gd32_adc_getvref(void) {
-	const float vref_value = (ADC_IDATA1(ADC0) * 3.3 / 4096);
+	const float vref_value = (ADC_IDATA1(ADC0) * 3.3f / 4096);
 	adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 	return vref_value;
 }

@@ -2,7 +2,7 @@
  * @file dmx.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,20 +29,48 @@
 #if defined (OUTPUT_DMX_SEND_MULTI)
 # if defined (H3)
 #  include "h3/multi/dmx.h"
+namespace dmx {
+namespace config {
+namespace max {
+static constexpr uint32_t OUT = dmxmulti::max::OUT;
+}  // namespace max
+}  // namespace config
+}  // namespace dmx
 # elif defined (GD32)
 #  include "gd32/dmx.h"
 # else
 #  include "linux/dmx.h"
+namespace dmx {
+namespace config {
+namespace max {
+static constexpr uint32_t OUT = dmxmulti::max::OUT;
+}  // namespace max
+}  // namespace config
+}  // namespace dmx
 # endif
 #else
 # if defined (H3)
 #  include "h3/single/dmx.h"
+namespace dmx {
+namespace config {
+namespace max {
+static constexpr uint32_t OUT = dmxsingle::max::OUT;
+}  // namespace max
+}  // namespace config
+}  // namespace dmx
 # elif defined (GD32)
 #  include "gd32/dmx.h"
 # elif defined(RPI1) || defined (RPI2)
 #  include "rpi/dmx.h"
 # else
 #  include "linux/dmx.h"
+namespace dmx {
+namespace config {
+namespace max {
+static constexpr uint32_t OUT = dmxmulti::max::OUT;
+}  // namespace max
+}  // namespace config
+}  // namespace dmx
 # endif
 #endif
 

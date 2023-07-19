@@ -57,6 +57,7 @@ E131Bridge::E131Bridge() {
 
 	memset(&m_State, 0, sizeof(e131bridge::State));
 	m_State.nPriority = e131::priority::LOWEST;
+	m_State.failsafe = lightset::FailSafe::HOLD;
 
 #if defined (E131_HAVE_DMXIN)
 	char aSourceName[e131::SOURCE_NAME_LENGTH];
@@ -505,14 +506,18 @@ void E131Bridge::HandleDmx() {
 			m_State.IsForcedSynchronized = false;
 		}
 
-		if ((!m_State.IsSynchronized) || (m_State.bDisableSynchronize)) {
+		const auto doUpdate = ((!m_State.IsSynchronized) || (m_State.bDisableSynchronize));
+
+		if (doUpdate) {
 			lightset::Data::Output(m_pLightSet, nPortIndex);
 
 			if (!m_OutputPort[nPortIndex].IsTransmitting) {
 				m_pLightSet->Start(nPortIndex);
-				m_State.IsChanged = true;
 				m_OutputPort[nPortIndex].IsTransmitting = true;
+				m_State.IsChanged = true;
 			}
+		} else {
+			lightset::Data::Set(m_pLightSet, nPortIndex);
 		}
 
 		m_State.nReceivingDmx |= (1U << static_cast<uint8_t>(lightset::PortDir::OUTPUT));
@@ -580,6 +585,7 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 			m_pLightSet->FullOn();
 			break;
 		default:
+			DEBUG_PRINTF("m_State.failsafe=%u", static_cast<uint32_t>(m_State.failsafe));
 			assert(0);
 			__builtin_unreachable();
 			break;

@@ -2,7 +2,7 @@
  * @file pixeldmxconfiguration.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <cassert>
 
 #include "pixeldmxconfiguration.h"
 
@@ -50,6 +51,8 @@ void PixelDmxConfiguration::Validate(uint32_t nPortsMax, uint32_t& nLedsPerPixel
 
 	PixelConfiguration::Validate(nLedsPerPixel);
 
+	assert((nLedsPerPixel == 3) && (PixelConfiguration::GetMap() != pixel::Map::UNDEFINED));
+
 	if (!IsRTZProtocol()) {
 		const auto type = GetType();
 		if (!((type == Type::WS2801) || (type == Type::APA102) || (type == Type::SK9822))) {
@@ -59,14 +62,16 @@ void PixelDmxConfiguration::Validate(uint32_t nPortsMax, uint32_t& nLedsPerPixel
 		PixelConfiguration::Validate(nLedsPerPixel);
 	}
 
+	portInfo.nBeginIndexPort[0] = 0;
+
 	if (GetType() == Type::SK6812W) {
-		portInfo.nBeginIndexPortId1 = 128;
-		portInfo.nBeginIndexPortId2 = 256;
-		portInfo.nBeginIndexPortId3 = 384;
+		portInfo.nBeginIndexPort[1] = 128;
+		portInfo.nBeginIndexPort[2] = 256;
+		portInfo.nBeginIndexPort[3] = 384;
 	} else {
-		portInfo.nBeginIndexPortId1 = 170;
-		portInfo.nBeginIndexPortId2 = 340;
-		portInfo.nBeginIndexPortId3 = 510;
+		portInfo.nBeginIndexPort[1] = 170;
+		portInfo.nBeginIndexPort[2] = 340;
+		portInfo.nBeginIndexPort[3] = 510;
 	}
 
 	if ((m_nGroupingCount == 0) || (m_nGroupingCount > GetCount())) {
@@ -76,10 +81,10 @@ void PixelDmxConfiguration::Validate(uint32_t nPortsMax, uint32_t& nLedsPerPixel
 	m_nGroups = GetCount() / m_nGroupingCount;
 
 	m_nOutputPorts = std::min(nPortsMax, m_nOutputPorts);
-	m_nUniverses = (1U + (m_nGroups  / (1U + portInfo.nBeginIndexPortId1)));
+	m_nUniverses = (1U + (m_nGroups  / (1U + portInfo.nBeginIndexPort[1])));
 
 	if (nPortsMax == 1) {
-		portInfo.nProtocolPortIndexLast = (m_nGroups / (1U + portInfo.nBeginIndexPortId1));
+		portInfo.nProtocolPortIndexLast = (m_nGroups / (1U + portInfo.nBeginIndexPort[1]));
 	} else {
 #if ((ARTNET_PAGE_SIZE==4) && defined (NODE_ARTNET)) || defined (NODE_DDP_DISPLAY)
 		portInfo.nProtocolPortIndexLast = (((m_nOutputPorts - 1U) * 4U) + m_nUniverses - 1U);

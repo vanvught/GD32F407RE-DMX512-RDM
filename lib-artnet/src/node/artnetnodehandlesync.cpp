@@ -35,22 +35,35 @@
 #include "hardware.h"
 
 void ArtNetNode::HandleSync() {
-	m_State.IsSynchronousMode = true;
 	m_State.nArtSyncMillis = Hardware::Get()->Millis();
+
+	if (!m_State.IsSynchronousMode) {
+		m_State.IsSynchronousMode = true;
+		/**
+		 * As the ArtSync is after the ArtDmx which are already processed
+		 * we need to do a forced sync
+		 */
+		m_pLightSet->Sync(true);
+		return;
+	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.bIsEnabled)) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 			SendDiag("Send pending data", ARTNET_DP_LOW);
 #endif
-			lightset::Data::Output(m_pLightSet, nPortIndex);
+			m_pLightSet->Sync(nPortIndex);
+		}
+	}
 
+	m_pLightSet->Sync();
+
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		if ((m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.bIsEnabled)) {
 			if (!m_OutputPort[nPortIndex].IsTransmitting) {
-				m_pLightSet->Start(nPortIndex);
 				m_OutputPort[nPortIndex].IsTransmitting = true;
+				m_State.IsChanged = true;
 			}
-
-			lightset::Data::ClearLength(nPortIndex);
 		}
 	}
 }

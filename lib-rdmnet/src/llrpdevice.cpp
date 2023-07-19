@@ -45,7 +45,7 @@
 # define SHOW_RDM_MESSAGE
 #endif
 
-int32_t LLRPDevice::s_nHandleLLRP { -1 };
+int32_t LLRPDevice::s_nHandleLLRP ;
 uint32_t LLRPDevice::s_nIpAddressFrom;
 uint8_t *LLRPDevice::s_pLLRP;
 
@@ -87,11 +87,11 @@ void LLRPDevice::HandleRdmCommand() {
 	auto *pRDMCommand = reinterpret_cast<struct LTRDMCommandPDUPacket *>(s_pLLRP);
 
 #ifdef SHOW_RDM_MESSAGE
-	const uint8_t *pRdmDataInNoSc = const_cast<uint8_t *>(pRDMCommand->RDMCommandPDU.RDMData)	;
-	RDMMessage::PrintNoSc(pRdmDataInNoSc);
+	const auto *pRdmDataInNoSc = const_cast<uint8_t *>(pRDMCommand->RDMCommandPDU.RDMData);
+ 	RDMMessage::PrintNoSc(pRdmDataInNoSc);
 #endif
 
-	const uint8_t *pReply = LLRPHandleRdmCommand(pRDMCommand->RDMCommandPDU.RDMData);
+	const auto *pReply = LLRPHandleRdmCommand(pRDMCommand->RDMCommandPDU.RDMData);
 
 	if ((pReply == nullptr) || (*pReply != E120_SC_RDM)) {
 		DEBUG_EXIT
@@ -117,6 +117,8 @@ void LLRPDevice::HandleRdmCommand() {
 	const auto nLength = sizeof(struct TRootLayerPreAmble) + RDM_ROOT_LAYER_LENGTH(nMessageLength);
 
 	Network::Get()->SendTo(s_nHandleLLRP, pRDMCommand, static_cast<uint16_t>(nLength) , llrp::device::IP_LLRP_RESPONSE, LLRP_PORT);
+
+	DEBUG_PUTS("");
 
 #ifdef SHOW_RDM_MESSAGE
 	RDMMessage::Print(pReply);

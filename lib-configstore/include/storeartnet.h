@@ -52,14 +52,6 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveFailSafe(uint8_t nFailSafe) override {
-		DEBUG_ENTRY
-
-		ConfigStore::Get()->Update(configstore::Store::ARTNET, __builtin_offsetof(struct artnetparams::Params, nFailSafe), &nFailSafe, sizeof(uint8_t), artnetparams::Mask::FAILSAFE);
-
-		DEBUG_EXIT
-	}
-
 	void SaveShortName(const char* pShortName) override {
 		DEBUG_ENTRY
 
@@ -76,25 +68,29 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveUniverseSwitch(uint32_t nPortIndex, uint8_t nAddress) override;
-	void SaveNetSwitch(uint32_t nPage, uint8_t nAddress) override;
-	void SaveSubnetSwitch(uint32_t nPage, uint8_t nAddress) override;
-
-	void SaveMergeMode(uint32_t nPortIndex, lightset::MergeMode tMerge) override;
-	void SavePortProtocol(uint32_t nPortIndex, artnet::PortProtocol tPortProtocol) override;
-
-	void SaveRdmEnabled(uint32_t nPortIndex, bool isEnabled) override;
-
-	// Not used
-	void SaveUniverse(__attribute__((unused)) uint32_t nPortIndex, __attribute__((unused)) uint16_t nUniverse) override {
+	void SaveFailSafe(const uint8_t nFailSafe) override {
 		DEBUG_ENTRY
-		DEBUG_PRINTF("nPortIndex=%u, nUniverse=%u", nPortIndex, nUniverse);
+
+		ConfigStore::Get()->Update(configstore::Store::ARTNET, __builtin_offsetof(struct artnetparams::Params, nFailSafe), &nFailSafe, sizeof(uint8_t), artnetparams::Mask::FAILSAFE);
+
 		DEBUG_EXIT
 	}
+
+	void SaveUniverseSwitch(uint32_t nPortIndex, const uint8_t nAddress) override;
+	void SaveNetSwitch(uint32_t nPage, const uint8_t nAddress) override;
+	void SaveSubnetSwitch(uint32_t nPage, const uint8_t nAddress) override;
+
+	void SaveMergeMode(uint32_t nPortIndex, const lightset::MergeMode tMerge) override;
+	void SavePortProtocol(uint32_t nPortIndex, const artnet::PortProtocol tPortProtocol) override;
+	void SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyle outputStyle) override;
+	void SaveRdmEnabled(uint32_t nPortIndex, bool isEnabled) override;
 
 	static StoreArtNet *Get() {
 		return s_pThis;
 	}
+
+private:
+	void SaveUniverse(uint32_t nPortIndex);
 
 private:
 	static uint32_t s_nPortIndexOffset;

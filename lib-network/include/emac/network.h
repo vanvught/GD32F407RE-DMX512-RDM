@@ -241,7 +241,7 @@ public:
 #if defined (ENET_LINK_CHECK_USE_PIN_POLL)
 		net::link_pin_poll();
 #elif defined (ENET_LINK_CHECK_REG_POLL)
-		const net::Link link_state = net::link_register_read();
+		const net::Link link_state = net::link_status_read();
 
 		if (link_state != s_lastState) {
 			s_lastState = link_state;

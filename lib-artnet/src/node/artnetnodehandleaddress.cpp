@@ -357,8 +357,8 @@ bool ArtNetNode::GetPortIndexInput(const uint32_t nPage, const uint32_t nPollRep
 		return false;
 	}
 
-	nPortIndex = 0;
-	return true;
+	nPortIndex = nPage;
+	return m_InputPort[nPortIndex].genericPort.bIsEnabled;
 }
 
 bool ArtNetNode::GetPortIndexOutput(const uint32_t nPage, const uint32_t nPollReplyIndex, uint32_t& nPortIndex) {
@@ -374,8 +374,8 @@ bool ArtNetNode::GetPortIndexOutput(const uint32_t nPage, const uint32_t nPollRe
 		return false;
 	}
 
-	nPortIndex = 0;
-	return true;
+	nPortIndex = nPage;
+	return m_OutputPort[nPortIndex].genericPort.bIsEnabled;
 }
 
 void ArtNetNode::HandleAddress() {
@@ -544,9 +544,31 @@ void ArtNetNode::HandleAddress() {
 	case artnet::PortCommand::CLR_2:
 	case artnet::PortCommand::CLR_3:
 		assert(isPortIndexOutput);
-		nPort = static_cast<uint8_t>(nPortIndex);
-		lightset::Data::OutputClear(m_pLightSet, nPort);
+		if (m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) {
+			lightset::Data::OutputClear(m_pLightSet, nPortIndex);
+		}
 		break;
+
+#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+	case artnet::PortCommand::STYLE_DELTA0:
+	case artnet::PortCommand::STYLE_DELTA1:
+	case artnet::PortCommand::STYLE_DELTA2:
+	case artnet::PortCommand::STYLE_DELTA3:
+		assert(isPortIndexOutput);
+		SetOutputStyle(nPortIndex, artnet::OutputStyle::DELTA);
+		m_pLightSet->SetOutputStyle(nPortIndex, lightset::OutputStyle::DELTA);
+		break;
+
+	case artnet::PortCommand::STYLE_CONSTANT0:
+	case artnet::PortCommand::STYLE_CONSTANT1:
+	case artnet::PortCommand::STYLE_CONSTANT2:
+	case artnet::PortCommand::STYLE_CONSTANT3:
+		assert(isPortIndexOutput);
+		SetOutputStyle(nPortIndex, artnet::OutputStyle::CONTINOUS);
+		m_pLightSet->SetOutputStyle(nPortIndex, lightset::OutputStyle::CONTINOUS);
+		break;
+#endif
+
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	case artnet::PortCommand::RDM_ENABLE0:
 	case artnet::PortCommand::RDM_ENABLE1:
@@ -576,7 +598,7 @@ void ArtNetNode::HandleAddress() {
 	}
 
 	if (m_pArtNet4Handler != nullptr) {
-		m_pArtNet4Handler->HandleAddress(pArtAddress->Command);
+		m_pArtNet4Handler->HandleAddress(pArtAddress->Command, nPortIndex);
 	}
 
 	SendPollRelply(true);

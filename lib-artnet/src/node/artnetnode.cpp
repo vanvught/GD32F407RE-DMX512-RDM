@@ -66,6 +66,9 @@ ArtNetNode::ArtNetNode() {
 
 	m_Node.Status1 = artnet::Status1::INDICATOR_NORMAL_MODE | artnet::Status1::PAP_FRONT_PANEL;
 	m_Node.Status2 = artnet::Status2::PORT_ADDRESS_15BIT | (artnet::VERSION > 3 ? artnet::Status2::SACN_ABLE_TO_SWITCH : artnet::Status2::SACN_NO_SWITCH);
+#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+	m_Node.Status2 |= artnet::Status2::OUTPUT_STYLE_SWITCH;
+#endif
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	m_Node.Status2 |= artnet::Status2::RDM_SWITCH;
 #endif
@@ -80,7 +83,7 @@ ArtNetNode::ArtNetNode() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
-		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED | artnet::GoodOutputB::STYLE_CONSTANT;
+		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
 		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
 		m_InputPort[nPortIndex].nDestinationIp = m_Node.IPAddressBroadcast;
 	}
@@ -145,7 +148,16 @@ void ArtNetNode::Start() {
 	}
 #endif
 
-	SendPollRelply(false);	// send a reply on startup
+	if (m_pLightSet != nullptr) {
+		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+				const auto lightsetOutputStyle = GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONTINOUS  ? lightset::OutputStyle::CONTINOUS : lightset::OutputStyle::DELTA;
+				m_pLightSet->SetOutputStyle(nPortIndex, lightsetOutputStyle);
+				const auto artnetOutputStyle = m_pLightSet->GetOutputStyle(nPortIndex) == lightset::OutputStyle::CONTINOUS ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
+				SetOutputStyle(nPortIndex, artnetOutputStyle);
+			}
+		}
+	}
 
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	if (m_pArtNetRdm != nullptr) {
@@ -180,6 +192,8 @@ void ArtNetNode::Start() {
 
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 	hal::panel_led_on(hal::panelled::ARTNET);
+
+	SendPollRelply(false);	// send a reply on startup
 }
 
 void ArtNetNode::Stop() {

@@ -54,7 +54,7 @@ extern void gd32_uart_set_baudrate(const uint32_t usart_periph, uint32_t baudrat
 extern void gd32_uart_transmit(const uint32_t usart_periph, const uint8_t *data, uint32_t length);
 extern void gd32_uart_transmit_string(const uint32_t uart_base, const char *data);
 
-static inline uint32_t gd32_uart_get_rx_fifo_level(const uint32_t usart_periph) {
+static inline uint32_t gd32_uart_get_rx_fifo_level(__attribute__((unused)) const uint32_t usart_periph) {
 	return 1;
 }
 

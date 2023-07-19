@@ -45,6 +45,10 @@ void ArtNetNode::Print() {
 	printf(" Firmware   : %d.%d\n", ArtNetConst::VERSION[0], ArtNetConst::VERSION[1]);
 	printf(" Short name : %s\n", m_Node.ShortName);
 	printf(" Long name  : %s\n", m_Node.LongName);
+#if defined (ARTNET_HAVE_TIMECODE)
+	printf(" TimeCode IP: " IPSTR "\n", IP2STR(m_Node.IPAddressTimeCode));
+#endif
+
 
 	if (m_State.nEnabledOutputPorts != 0) {
 		printf(" Output\n");

@@ -170,7 +170,9 @@ void ArtNetNode::HandleDmx() {
 				return;
 			}
 
-			if (!m_State.IsSynchronousMode) {
+			if (m_State.IsSynchronousMode) {
+				lightset::Data::Set(m_pLightSet, nPortIndex);
+			} else {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 				SendDiag("Send data", artnet::DP_LOW);
 #endif

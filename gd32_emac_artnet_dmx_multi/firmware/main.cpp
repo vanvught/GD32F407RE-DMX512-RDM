@@ -113,9 +113,7 @@ void main() {
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		bool bIsSet;
-		const auto nAddress = artnetParams.GetUniverse(nPortIndex, bIsSet);
-		node.SetUniverseSwitch(nPortIndex, artnetParams.GetDirection(nPortIndex), nAddress);
+		node.SetUniverseSwitch(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniversePort(nPortIndex));
 	}
 
 	StoreDmxSend storeDmxSend;
@@ -128,6 +126,17 @@ void main() {
 		dmxparams.Set(&dmx);
 	}
 
+	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		uint16_t nAddress;
+		const auto nDmxPortIndex = nPortIndex - DMXPORT_OFFSET;
+
+		if (node.GetPortAddress(nPortIndex, nAddress, lightset::PortDir::OUTPUT)) {
+			dmx.SetPortDirection(nDmxPortIndex, dmx::PortDirection::OUTP, false);
+		} else {
+			dmx.SetPortDirection(nDmxPortIndex, dmx::PortDirection::INP, false);
+		}
+	}
+
 	DmxSend dmxSend;
 	dmxSend.Print();
 
@@ -137,19 +146,18 @@ void main() {
 
 	StoreRDMDevice storeRdmDevice;
 
-	if (artnetParams.IsRdm()) {
-		auto pDiscovery = new ArtNetRdmController;
-		assert(pDiscovery != nullptr);
+	ArtNetRdmController artNetRdmController;
 
+	if (artnetParams.IsRdm()) {
 		RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
 
 		if (rdmDeviceParams.Load()) {
 			rdmDeviceParams.Dump();
-			rdmDeviceParams.Set(pDiscovery);
+			rdmDeviceParams.Set(&artNetRdmController);
 		}
 
-		pDiscovery->Init();
-		pDiscovery->Print();
+		artNetRdmController.Init();
+		artNetRdmController.Print();
 
 		display.TextStatus(ArtNetMsgConst::RDM_RUN, Display7SegmentMessage::INFO_RDM_RUN, CONSOLE_YELLOW);
 
@@ -157,11 +165,11 @@ void main() {
 			uint8_t nAddress;
 
 			if (node.GetRdm(nPortIndex) && (node.GetUniverseSwitch(nPortIndex, nAddress, lightset::PortDir::OUTPUT))) {
-				pDiscovery->Full(nPortIndex);
+				artNetRdmController.Full(nPortIndex);
 			}
 		}
 
-		node.SetRdmHandler(pDiscovery);
+		node.SetRdmHandler(&artNetRdmController);
 	}
 
 	node.Print();

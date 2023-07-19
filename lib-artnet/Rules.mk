@@ -30,12 +30,13 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_INCLUDES+=src/node/failsafe
 	endif
 else
-	EXTRA_SRCDIR+=src/node src/node/failsafe src/node/dmxin src/node/timecode
+	EXTRA_SRCDIR+=src/node src/node/failsafe src/node/dmxin src/node/rdm src/node/timecode
 	EXTRA_SRCDIR+=src/controller
 	EXTRA_INCLUDES+=src/node/failsafe
 	DEFINES+=ARTNET_HAVE_DMXIN
 	DEFINES+=ARTNET_HAVE_TIMECODE
 	DEFINES+=ARTNET_HAVE_FAILSAFE_RECORD
+	DEFINES+=ARTNET_OUTPUT_STYLE_SWITCH
 	DEFINES+=RDM_CONTROLLER
 	DEFINES+=LIGHTSET_PORTS=4
 endif

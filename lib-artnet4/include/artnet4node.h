@@ -32,7 +32,7 @@
 #include <cstdint>
 
 #if !defined(ARTNET_VERSION)
-# define ARTNET_VERSION	4
+# define ARTNET_VERSION 4
 #endif
 
 #include "artnetnode.h"
@@ -48,7 +48,7 @@ public:
 
 	void SetPort(uint32_t nPortIndex, lightset::PortDir dir) override;
 
-	void HandleAddress(uint8_t nCommand) override;
+	void HandleAddress(const uint8_t nCommand, const uint32_t nPortIndex) override;
 	uint8_t GetStatus(uint32_t nPortIndex) override;
 
 	bool IsStatusChanged() override {

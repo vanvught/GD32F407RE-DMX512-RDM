@@ -73,14 +73,14 @@ void stack_debug_print() {
 		} else {
 			printf("\x1b[34m");
 		}
-	}
 
 #ifndef NDEBUG
-	printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", nSize / (1024 / 4), pStart, p, pEnd, nUsedBytes, nFreeBytes, nFreePct);
+		printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", nSize / (1024 / 4), pStart, p, pEnd, nUsedBytes, nFreeBytes, nFreePct);
 #else
-	printf("Stack: Size %uKB, Used: %u, Free: %u", nSize / (1024 / 4), nUsedBytes, nFreeBytes);
+		printf("Stack: Size %uKB, Used: %u, Free: %u", nSize / (1024 / 4), nUsedBytes, nFreeBytes);
 #endif
-	printf("\x1b[39m\n");
+		printf("\x1b[39m\n");
+	}
 }
 
 #include <time.h>

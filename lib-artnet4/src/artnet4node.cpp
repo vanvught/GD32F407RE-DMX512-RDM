@@ -134,9 +134,9 @@ void ArtNet4Node::Run() {
 	}
 }
 
-void ArtNet4Node::HandleAddress(uint8_t nCommand) {
+void ArtNet4Node::HandleAddress(const uint8_t nCommand, const uint32_t nPortIndex) {
 	DEBUG_ENTRY
-	DEBUG_PRINTF("artnetnode::PAGES=%u", artnetnode::PAGES);
+	DEBUG_PRINTF("artnetnode::PAGES=%u, nPortIndex=%u", artnetnode::PAGES, nPortIndex);
 
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
 		uint16_t nUniverse;
@@ -159,9 +159,6 @@ void ArtNet4Node::HandleAddress(uint8_t nCommand) {
 		}
 	}
 
-	const uint8_t nPort = nCommand & 0x3;
-	DEBUG_PRINTF("nPort=%d", nPort);
-
 	switch (nCommand) {
 
 	case PortCommand::LED_NORMAL:
@@ -178,22 +175,22 @@ void ArtNet4Node::HandleAddress(uint8_t nCommand) {
 	case PortCommand::MERGE_LTP_1:
 	case PortCommand::MERGE_LTP_2:
 	case PortCommand::MERGE_LTP_3:
-		m_Bridge.SetMergeMode(nPort, lightset::MergeMode::LTP);
+		m_Bridge.SetMergeMode(nPortIndex, lightset::MergeMode::LTP);
 		break;
 
 	case PortCommand::MERGE_HTP_0:
 	case PortCommand::MERGE_HTP_1:
 	case PortCommand::MERGE_HTP_2:
 	case PortCommand::MERGE_HTP_3:
-		m_Bridge.SetMergeMode(nPort, lightset::MergeMode::HTP);
+		m_Bridge.SetMergeMode(nPortIndex, lightset::MergeMode::HTP);
 		break;
 
 	case PortCommand::CLR_0:
 	case PortCommand::CLR_1:
 	case PortCommand::CLR_2:
 	case PortCommand::CLR_3:
-		if (GetPortProtocol(nPort) == PortProtocol::SACN) {
-			m_Bridge.Clear(nPort);
+		if (GetPortProtocol(nPortIndex) == PortProtocol::SACN) {
+			m_Bridge.Clear(nPortIndex);
 		}
 		break;
 

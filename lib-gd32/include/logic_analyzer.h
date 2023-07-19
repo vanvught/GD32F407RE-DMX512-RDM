@@ -2,7 +2,7 @@
  * @file logic_analyzer.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 
+#ifndef LOGIC_ANALYZER_H_
+#define LOGIC_ANALYZER_H_
+
 #include "gd32.h"
 
 namespace logic_analyzer {
@@ -37,7 +40,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH0_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH0_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH0_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH0_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH0_GPIOx) = LOGIC_ANALYZER_CH0_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH1_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH1_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -46,7 +51,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH1_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH1_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH1_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH1_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH1_GPIOx) = LOGIC_ANALYZER_CH1_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH2_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH2_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -55,7 +62,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH2_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH2_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH2_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH2_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH2_GPIOx) = LOGIC_ANALYZER_CH2_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH3_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH3_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -64,7 +73,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH3_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH3_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH3_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH3_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH3_GPIOx) = LOGIC_ANALYZER_CH3_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH4_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH4_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -73,7 +84,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH4_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH4_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH4_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH4_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH4_GPIOx) = LOGIC_ANALYZER_CH4_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH5_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH5_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -82,7 +95,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH5_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH5_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH5_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH5_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH5_GPIOx) = LOGIC_ANALYZER_CH5_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH6_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH6_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -91,7 +106,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH6_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH6_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH6_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH6_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH6_GPIOx) = LOGIC_ANALYZER_CH6_GPIO_PINx;
 # endif
+
 # if defined (LOGIC_ANALYZER_CH7_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH7_RCU_GPIOx);
 #  if !defined (GD32F4XX)
@@ -100,7 +117,9 @@ static void init() {
 	gpio_mode_set(LOGIC_ANALYZER_CH7_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LOGIC_ANALYZER_CH7_GPIO_PINx);
 	gpio_output_options_set(LOGIC_ANALYZER_CH7_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LOGIC_ANALYZER_CH7_GPIO_PINx);
 #  endif
+	GPIO_BC(LOGIC_ANALYZER_CH7_GPIOx) = LOGIC_ANALYZER_CH7_GPIO_PINx;
 # endif
+
 #endif
 }
 
@@ -202,8 +221,5 @@ static void ch7_set() {
 }
 
 }  // namespace logic_analyzer
-
-#ifndef LOGIC_ANALYZER_H_
-#define LOGIC_ANALYZER_H_
 
 #endif /* LOGIC_ANALYZER_H_ */

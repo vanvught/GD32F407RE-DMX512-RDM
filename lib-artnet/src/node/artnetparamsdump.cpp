@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2020-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ void ArtNetParams::Dump() {
 		printf(" %s=%d [%s]\n", LightSetParamsConst::FAILSAFE, m_Params.nFailSafe, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)));
 	}
 
+#if (ARTNET_PAGE_SIZE == 4)
 	if (isMaskSet(artnetparams::Mask::SUBNET)) {
 		printf(" %s=%d\n", ArtNetParamsConst::SUBNET, m_Params.nSubnet);
 	}
@@ -55,6 +56,7 @@ void ArtNetParams::Dump() {
 	if (isMaskSet(artnetparams::Mask::NET)) {
 		printf(" %s=%d\n", ArtNetParamsConst::NET, m_Params.nNet);
 	}
+#endif
 
 	if (isMaskSet(artnetparams::Mask::SHORT_NAME)) {
 		printf(" %s=%s\n", ArtNetParamsConst::NODE_SHORT_NAME, m_Params.aShortName);
@@ -70,7 +72,11 @@ void ArtNetParams::Dump() {
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
 		if (isMaskSet(artnetparams::Mask::UNIVERSE_A << i)) {
+#if (ARTNET_PAGE_SIZE == 4)
 			printf(" %s=%d\n", LightSetParamsConst::UNIVERSE_PORT[i], m_Params.nUniversePort[i]);
+#else
+			printf(" %s=%d\n", LightSetParamsConst::UNIVERSE_PORT[i], m_Params.nUniverse[i]);
+#endif
 		}
 	}
 
@@ -92,9 +98,14 @@ void ArtNetParams::Dump() {
 	}
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
-		if (isMaskMultiPortOptionsSet(artnetparams::MaskMultiPortOptions::DESTINATION_IP_A << i)) {
+		if (isMaskMultiPortOptionsSet(1U << i)) {
 			printf(" %s=" IPSTR "\n", ArtNetParamsConst::DESTINATION_IP_PORT[i], IP2STR(m_Params.nDestinationIpPort[i]));
 		}
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		const auto nOutputStyle = static_cast<uint32_t>(isOutputStyleSet(1U << i));
+		printf(" %s=%u [%s]\n", ArtNetParamsConst::OUTPUT_STYLE[i], nOutputStyle, lightset::get_output_style(static_cast<lightset::OutputStyle>(nOutputStyle)));
 	}
 
 	if(isMaskSet(artnetparams::Mask::DISABLE_MERGE_TIMEOUT)) {

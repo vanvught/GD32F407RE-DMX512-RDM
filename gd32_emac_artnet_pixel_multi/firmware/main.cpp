@@ -78,7 +78,11 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-static constexpr uint32_t DMXPORT_OFFSET = 64U;
+#if !defined (ARTNET_PAGE_SIZE)
+# error ARTNET_PAGE_SIZE is not defined
+#endif
+
+static constexpr uint32_t DMXPORT_OFFSET = 32;
 
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
@@ -143,38 +147,38 @@ void main() {
 
 	uint32_t nPortProtocolIndex = 0;
 
-	if (artnetnode::PAGE_SIZE==4) {
-		for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
-			auto isSet = false;
-			const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
-			if (isSet) {
-				for (uint16_t u = 0; u < nUniverses; u++) {
-					node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
-					nPortProtocolIndex++;
-				}
-				nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS - nUniverses;
-			} else {
-				nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS;
-			}
-		}
-	} else {
-		assert(artnetnode::PAGE_SIZE==1);
-
-		for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
-			auto isSet = false;
-			const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
-			for (uint32_t u = 0; u < nUniverses; u++) {
-				if (isSet) {
-					node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
-				}
+#if (ARTNET_PAGE_SIZE == 4)
+	for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
+		auto isSet = false;
+		const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
+		if (isSet) {
+			for (uint16_t u = 0; u < nUniverses; u++) {
+				node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
 				nPortProtocolIndex++;
 			}
+			nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS - nUniverses;
+		} else {
+			nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS;
 		}
 	}
+#else
+	static_assert(ARTNET_PAGE_SIZE == 1, "ARTNET_PAGE_SIZE != 1");
+
+	for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
+		auto isSet = false;
+		const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
+		for (uint32_t u = 0; u < nUniverses; u++) {
+			if (isSet) {
+				node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
+			}
+			nPortProtocolIndex++;
+		}
+	}
+#endif
 
 	const auto nTestPattern = static_cast<pixelpatterns::Pattern>(pixelDmxParams.GetTestPattern());
 	PixelTestPattern pixelTestPattern(nTestPattern, nPixelActivePorts);
-	
+
 	if (PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE) {
 		node.SetOutput(nullptr);
 	} else {
@@ -196,7 +200,7 @@ void main() {
 
 	llrpOnlyDevice.SetLabel(RDM_ROOT_DEVICE, aLabel, static_cast<uint8_t>(nLength));
 	llrpOnlyDevice.SetProductCategory(E120_PRODUCT_CATEGORY_FIXTURE);
-	llrpOnlyDevice.SetProductDetail(E120_PRODUCT_DETAIL_ETHERNET_NODE);
+	llrpOnlyDevice.SetProductDetail(E120_PRODUCT_DETAIL_LED);
 
 	node.SetRdmUID(llrpOnlyDevice.GetUID(), true);
 
@@ -223,11 +227,6 @@ void main() {
 	display.Set(4, displayudf::Labels::VERSION);
 	display.Set(5, displayudf::Labels::UNIVERSE_PORT_A);
 	display.Set(6, displayudf::Labels::BOARDNAME);
-	display.Printf(7, "%s:%d G%d %s",
-		PixelType::GetType(pixelDmxConfiguration.GetType()),
-		pixelDmxConfiguration.GetCount(),
-		pixelDmxConfiguration.GetGroupingCount(),
-		PixelType::GetMap(pixelDmxConfiguration.GetMap()));
 
 	StoreDisplayUdf storeDisplayUdf;
 	DisplayUdfParams displayUdfParams(&storeDisplayUdf);
@@ -238,6 +237,11 @@ void main() {
 	}
 
 	display.Show(&node, DMXPORT_OFFSET);
+	display.Printf(7, "%s:%d G%d %s",
+		PixelType::GetType(pixelDmxConfiguration.GetType()),
+		pixelDmxConfiguration.GetCount(),
+		pixelDmxConfiguration.GetGroupingCount(),
+		PixelType::GetMap(pixelDmxConfiguration.GetMap()));
 
 	if (nTestPattern != pixelpatterns::Pattern::NONE) {
 		display.ClearLine(6);

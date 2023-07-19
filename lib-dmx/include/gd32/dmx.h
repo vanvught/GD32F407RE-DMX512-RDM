@@ -48,7 +48,7 @@ public:
 	void SetPortDirection(uint32_t nPortIndex, dmx::PortDirection portDirection, bool bEnableData = false);
 
 	dmx::PortDirection GetPortDirection(uint32_t nPortIndex = 0) const {
-		return m_tDmxPortDirection[nPortIndex];
+		return m_dmxPortDirection[nPortIndex];
 	}
 
 	void ClearData(uint32_t nPortIndex = 0);
@@ -65,8 +65,13 @@ public:
 	// DMX Send
 
 	void SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength);
-
 	void SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength);
+
+	void StartOutput(const uint32_t nPortIndex);
+	void SetOutput(const bool doForce);
+
+	void SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle);
+	dmx::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const;
 
 	void Blackout();
 	void FullOn();
@@ -107,6 +112,7 @@ public:
 private:
 	void StartData(uint32_t nUart, uint32_t nPortIndex);
 	void StopData(uint32_t nUart, uint32_t nPortIndex);
+	void StartDmxOutput(const uint32_t nPortIndex);
 
 private:
 	uint32_t m_nDmxTransmitBreakTime { dmx::transmit::BREAK_TIME_MIN };
@@ -114,7 +120,7 @@ private:
 	uint32_t m_nDmxTransmitPeriod { dmx::transmit::PERIOD_DEFAULT };
 	uint32_t m_nDmxTransmitPeriodRequested { dmx::transmit::PERIOD_DEFAULT };
 	uint16_t m_nDmxTransmitSlots { dmx::max::CHANNELS };
-	dmx::PortDirection m_tDmxPortDirection[dmx::config::max::OUT];
+	dmx::PortDirection m_dmxPortDirection[dmx::config::max::OUT];
 	uint32_t m_nDmxTransmissionLength[dmx::config::max::OUT];
 
 	static Dmx *s_pThis;

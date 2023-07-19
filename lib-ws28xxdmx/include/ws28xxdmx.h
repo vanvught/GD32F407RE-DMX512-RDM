@@ -27,6 +27,7 @@
 #define WS28XXDMX_H_
 
 #include <cstdint>
+#include <cassert>
 
 #include "lightset.h"
 
@@ -44,7 +45,19 @@ public:
 	void Start(uint32_t nPortIndex) override;
 	void Stop(uint32_t nPortIndex) override;
 
-	void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) override;
+	void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate = true) override;
+	void Sync(__attribute__((unused)) const uint32_t nPortIndex) override {}
+	void Sync(const bool doForce) override {
+		if (__builtin_expect((!doForce), 1)) {
+			assert(m_pWS28xxMulti != nullptr);
+			m_pWS28xx->Update();
+		}
+	}
+
+	void SetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const lightset::OutputStyle outputStyle) override {};
+	lightset::OutputStyle GetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex) const override {
+		return lightset::OutputStyle::DELTA;
+	}
 
 	void Blackout(bool bBlackout) override;
 	void FullOn() override;
@@ -70,7 +83,7 @@ public:
 	}
 
 	uint32_t GetCount() const {
-		return m_pixelDmxConfiguration.GetCount();;
+		return m_pixelDmxConfiguration.GetCount();
 	}
 
 	uint32_t GetGroups() const {

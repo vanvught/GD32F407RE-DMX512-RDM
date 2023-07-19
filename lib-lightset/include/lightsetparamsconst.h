@@ -29,8 +29,6 @@
 struct LightSetParamsConst {
 	static const char PARAMS_OUTPUT[];
 
-	static const char UNIVERSE[];
-
 	static const char UNIVERSE_PORT[4][16];
 	static const char MERGE_MODE_PORT[4][18];
 	static const char DIRECTION[4][18];

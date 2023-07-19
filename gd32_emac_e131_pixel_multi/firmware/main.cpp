@@ -77,7 +77,7 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-static constexpr uint32_t DMXPORT_OFFSET = 0;
+static constexpr uint32_t DMXPORT_OFFSET = 32;
 
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
@@ -128,8 +128,8 @@ void main() {
 	PixelDmxParams pixelDmxParams(&storePixelDmx);
 
 	if (pixelDmxParams.Load()) {
-		pixelDmxParams.Set(&pixelDmxConfiguration);
 		pixelDmxParams.Dump();
+		pixelDmxParams.Set(&pixelDmxConfiguration);
 	}
 
 	WS28xxDmxMulti pixelDmxMulti(pixelDmxConfiguration);
@@ -175,15 +175,15 @@ void main() {
 
 	llrpOnlyDevice.SetLabel(RDM_ROOT_DEVICE, aLabel, static_cast<uint8_t>(nLength));
 	llrpOnlyDevice.SetProductCategory(E120_PRODUCT_CATEGORY_FIXTURE);
-	llrpOnlyDevice.SetProductDetail(E120_PRODUCT_DETAIL_ETHERNET_NODE);
+	llrpOnlyDevice.SetProductDetail(E120_PRODUCT_DETAIL_LED);
 	llrpOnlyDevice.Init();
 
 	StoreRDMDevice storeRdmDevice;
 	RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
 
 	if (rdmDeviceParams.Load()) {
-		rdmDeviceParams.Set(&llrpOnlyDevice);
 		rdmDeviceParams.Dump();
+		rdmDeviceParams.Set(&llrpOnlyDevice);
 	}
 
 	llrpOnlyDevice.SetRDMDeviceStore(&storeRdmDevice);
@@ -199,21 +199,21 @@ void main() {
 	display.Set(4, displayudf::Labels::VERSION);
 	display.Set(5, displayudf::Labels::UNIVERSE_PORT_A);
 	display.Set(6, displayudf::Labels::BOARDNAME);
-	display.Printf(7, "%s:%d G%d %s",
-		PixelType::GetType(pixelDmxConfiguration.GetType()),
-		pixelDmxConfiguration.GetCount(),
-		pixelDmxConfiguration.GetGroupingCount(),
-		PixelType::GetMap(pixelDmxConfiguration.GetMap()));
 
 	StoreDisplayUdf storeDisplayUdf;
 	DisplayUdfParams displayUdfParams(&storeDisplayUdf);
 
 	if (displayUdfParams.Load()) {
-		displayUdfParams.Set(&display);
 		displayUdfParams.Dump();
+		displayUdfParams.Set(&display);
 	}
 
 	display.Show(&bridge);
+	display.Printf(7, "%s:%d G%d %s",
+		PixelType::GetType(pixelDmxConfiguration.GetType()),
+		pixelDmxConfiguration.GetCount(),
+		pixelDmxConfiguration.GetGroupingCount(),
+		PixelType::GetMap(pixelDmxConfiguration.GetMap()));
 
 	if (nTestPattern != pixelpatterns::Pattern::NONE) {
 		display.ClearLine(6);

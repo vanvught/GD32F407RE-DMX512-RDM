@@ -28,6 +28,8 @@
 
 #include "gd32.h"
 
+#include "emac/phy.h"
+
 #include "debug.h"
 
 extern enet_descriptors_struct  txdesc_tab[ENET_TXBUF_NUM];
@@ -140,41 +142,11 @@ static void enet_gpio_config(void) {
     DEBUG_EXIT
 }
 
-static ErrStatus enet_mac_config(void) {
-	DEBUG_ENTRY
-	rcu_periph_clock_enable(RCU_ENET);
-	rcu_periph_clock_enable(RCU_ENETTX);
-	rcu_periph_clock_enable(RCU_ENETRX);
-
-	enet_deinit();
-
-	if (enet_software_reset() == ERROR) {
-		DEBUG_EXIT
-		return ERROR;
-	}
-
-	ErrStatus enet_init_status = enet_init(ENET_AUTO_NEGOTIATION, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
-
-    DEBUG_PRINTF("enet_init_status=%u", (uint32_t)enet_init_status);
-
-#ifndef NDEBUG
-	uint16_t phy_value;
-	ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
-	printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR" );
-	enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-	phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-	printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR" );
-#endif
-
-	return enet_init_status;
-    DEBUG_EXIT
-}
-
 /*
  * Public function
  */
 
-int emac_start(uint8_t mac_address[]) {
+void __attribute__((cold)) emac_config() {
 	DEBUG_ENTRY
 #if(PHY_TYPE == LAN8700)
 	puts("LAN8700");
@@ -185,11 +157,88 @@ int emac_start(uint8_t mac_address[]) {
 #else
 #error PHY_TYPE is not set
 #endif
-	DEBUG_PRINTF("ENET_RXBUF_NUM=%u, ENET_TXBUF_NUM=%u", ENET_RXBUF_NUM, ENET_TXBUF_NUM);
 
 	enet_gpio_config();
 
-	const auto enet_dma_status = enet_mac_config();
+	rcu_periph_clock_enable(RCU_ENET);
+	rcu_periph_clock_enable(RCU_ENETTX);
+	rcu_periph_clock_enable(RCU_ENETRX);
+
+	enet_deinit();
+	enet_software_reset();
+
+	net::phy_config(PHY_ADDRESS);
+
+	DEBUG_EXIT
+}
+
+void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
+	DEBUG_ENTRY
+	DEBUG_PRINTF("ENET_RXBUF_NUM=%u, ENET_TXBUF_NUM=%u", ENET_RXBUF_NUM, ENET_TXBUF_NUM);
+
+	net::PhyStatus phyStatus;
+	net::phy_start(PHY_ADDRESS, phyStatus);
+
+	link = phyStatus.link;
+
+#ifndef NDEBUG
+	{
+		uint16_t phy_value;
+		ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+		printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+		enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+	}
+#endif
+
+	enet_mediamode_enum mediamode = ENET_10M_HALFDUPLEX;
+
+	if (phyStatus.speed == net::Speed::SPEED100) {
+		if (phyStatus.duplex == net::Duplex::DUPLEX_FULL) {
+			mediamode = ENET_100M_FULLDUPLEX;
+		} else {
+			mediamode = ENET_100M_HALFDUPLEX;
+		}
+	} else if (phyStatus.duplex == net::Duplex::DUPLEX_FULL) {
+		mediamode = ENET_10M_FULLDUPLEX;
+	}
+
+	DEBUG_PRINTF("%s, %d, %s",
+			phyStatus.link == net::Link::STATE_UP ? "Up" : "Down",
+			phyStatus.speed == net::Speed::SPEED10 ? 10 : 100,
+			phyStatus.duplex == net::Duplex::DUPLEX_HALF ? "HALF" : "FULL");
+
+	const auto enet_init_status = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
+	if (enet_init_status != SUCCESS) {
+
+	}
+
+    DEBUG_PRINTF("enet_init_status=%s", enet_init_status == SUCCESS ? "SUCCES" : "ERROR" );
+
+    uint16_t phy_value = 0;
+    extern volatile uint32_t s_nSysTickMillis;
+    auto nMillis = s_nSysTickMillis;
+
+    while (PHY_LINKED_STATUS != (phy_value & PHY_LINKED_STATUS)) {
+    	enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+    	if ((s_nSysTickMillis - nMillis) > 1000) {
+    		break;
+    	}
+    }
+
+    DEBUG_PRINTF("s_nSysTickMillis - nMillis=%u", s_nSysTickMillis - nMillis);
+
+#ifndef NDEBUG
+	{
+		uint16_t phy_value;
+		ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+		printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+		enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+	}
+#endif
 
 	mac_address_get(mac_address);
 
@@ -205,5 +254,4 @@ int emac_start(uint8_t mac_address[]) {
 	enet_enable();
 
 	DEBUG_EXIT
-	return (enet_dma_status == ERROR) ? - 1 : 0;
 }

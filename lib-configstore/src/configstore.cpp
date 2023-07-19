@@ -96,7 +96,7 @@ bool ConfigStore::Init() {
 
 	s_nStartAddress = StoreDevice::GetSize() - (nSectors * nEraseSize);
 
-	DEBUG_PRINTF("s_nStartAddress=%p", s_nStartAddress);
+	DEBUG_PRINTF("s_nStartAddress=%p", reinterpret_cast<void *>(s_nStartAddress));
 
 	storedevice::result result;
 	StoreDevice::Read(s_nStartAddress, FlashStore::SIZE, reinterpret_cast<uint8_t *>(&s_SpiFlashData), result);
@@ -192,20 +192,16 @@ void ConfigStore::Update(Store store, uint32_t nOffset, const void *pData, uint3
 		pSrc++;
 	}
 
-	if (bIsChanged) {
-		if ((s_State == State::IDLE) || (s_State == State::WRITING))  {
-			s_State = State::CHANGED;
-		}
-		s_nWaitMillis = Hardware::Get()->Millis();
-	}
-
 	if ((0 != nOffset) && (bIsChanged) && (nSetList != 0)) {
 		auto *pSet = reinterpret_cast<uint32_t*>((&s_SpiFlashData[GetStoreOffset(store)] + nOffsetSetList));
 
 		*pSet |= nSetList;
 	}
 
-	DEBUG_PRINTF("s_State=%u", static_cast<uint32_t>(s_State));
+	if (bIsChanged) {
+		s_State = State::CHANGED;
+	}
+
 	DEBUG_EXIT
 }
 
@@ -241,6 +237,12 @@ void ConfigStore::Copy(Store store, void *pData, uint32_t nDataLength, uint32_t 
 	DEBUG_EXIT
 }
 
+void ConfigStore::Delay() {
+	if (s_State != State::IDLE) {
+		s_State = State::CHANGED;
+	}
+}
+
 bool ConfigStore::Flash() {
 	if (__builtin_expect((s_State == State::IDLE), 1)) {
 		return false;
@@ -265,6 +267,7 @@ bool ConfigStore::Flash() {
 			s_State = State::ERASED_WAITING;
 		}
 		assert(result == storedevice::result::OK);
+		DEBUG_PRINTF("s_State=%u", static_cast<uint32_t>(s_State));
 		return true;
 	}
 		break;

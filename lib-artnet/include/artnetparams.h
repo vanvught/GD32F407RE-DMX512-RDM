@@ -41,6 +41,10 @@
 # define LIGHTSET_PORTS	0
 #endif
 
+#if !defined(ARTNET_PAGE_SIZE)
+# define ARTNET_PAGE_SIZE	4
+#endif
+
 namespace artnetparams {
 static constexpr uint16_t clear_mask(const uint32_t i) {
 	return static_cast<uint16_t>(~((1U << (i + 8)) | (1U << i)));
@@ -66,8 +70,13 @@ static constexpr uint16_t portdir_shif_right(const uint32_t nValue, const uint32
 
 struct Params {
 	uint32_t nSetList;									///< 4	  4
+#if (ARTNET_PAGE_SIZE == 4)
 	uint8_t  nNet;										///< 1	  5
 	uint8_t  nSubnet;									///< 1	  6
+#else
+	uint8_t  NotUsed2;									///< 1    5
+	uint8_t  NotUsed1;									///< 1    6
+#endif
 	uint8_t  nFailSafe;									///< 1	  7
 	uint8_t  nOutputType;								///< 1	  8
 	uint16_t nRdm;										///< 2	 10
@@ -78,14 +87,18 @@ struct Params {
 	uint16_t nMultiPortOptions;							///< 2	 96
 	uint8_t  NotUsed0[2];								///< 2	 98
 	uint8_t  NotUsed7;									///< 1	 99
+#if (ARTNET_PAGE_SIZE == 4)
 	uint8_t  NotUsed4;									///< 1	100
 	uint8_t  NotUsed3;									///< 1	101
 	uint8_t  NotUsed2;									///< 1	102
 	uint8_t  NotUsed1;									///< 1	103
 	uint8_t  nUniversePort[artnet::PORTS];				///< 4	107
+#else
+	uint16_t nUniverse[artnet::PORTS];					///< 8
+#endif
 	uint8_t  NotUsed9;									///< 1	108
 	uint8_t  nMergeModePort[artnet::PORTS];				///< 4	112
-	uint8_t  NotUsed8;									///< 1	113
+	uint8_t  nOutputStyle;								///< 1	113
 	uint8_t  nProtocolPort[artnet::PORTS];				///< 4	117
 	uint16_t nDirection;								///< 2	119
 	uint32_t nDestinationIpPort[artnet::PORTS];			///< 16	135
@@ -94,41 +107,48 @@ struct Params {
 static_assert(sizeof(struct Params) <= 144, "struct Params is too large");
 
 struct MaskMultiPortOptions {
-	static constexpr auto DESTINATION_IP_A = (1U << 0);
-	static constexpr auto DESTINATION_IP_B = (1U << 1);
-	static constexpr auto DESTINATION_IP_C = (1U << 2);
-	static constexpr auto DESTINATION_IP_D = (1U << 3);
+	static constexpr uint16_t DESTINATION_IP_A = (1U << 0);
+	static constexpr uint16_t DESTINATION_IP_B = (1U << 1);
+	static constexpr uint16_t DESTINATION_IP_C = (1U << 2);
+	static constexpr uint16_t DESTINATION_IP_D = (1U << 3);
+};
+
+struct MaskOutputStyle {
+	static constexpr uint8_t OUTPUT_STYLE_A = (1U << 0);
+	static constexpr uint8_t OUTPUT_STYLE_B = (1U << 1);
+	static constexpr uint8_t OUTPUT_STYLE_C = (1U << 2);
+	static constexpr uint8_t OUTPUT_STYLE_D = (1U << 3);
 };
 
 struct Mask {
-	static constexpr auto LONG_NAME = (1U << 0);
-	static constexpr auto SHORT_NAME = (1U << 1);
-	static constexpr auto NET = (1U << 2);
-	static constexpr auto SUBNET = (1U << 3);
-	static constexpr auto FAILSAFE = (1U << 4);
-	static constexpr auto RDM = (1U << 5);
-	//static constexpr auto  = (1U << 6);
-	//static constexpr auto  = (1U << 7);
-	static constexpr auto OUTPUT = (1U << 8);
-	//static constexpr auto  = (1U << 9);
-	//static constexpr auto  = (1U << 10);
-	//static constexpr auto  = (1U << 11);
-	static constexpr auto DISABLE_MERGE_TIMEOUT = (1U << 12);
-	static constexpr auto UNIVERSE_A = (1U << 13);
-	static constexpr auto UNIVERSE_B = (1U << 14);
-	static constexpr auto UNIVERSE_C = (1U << 15);
-	static constexpr auto UNIVERSE_D = (1U << 16);
-	static constexpr auto MERGE_MODE = (1U << 17);
-	static constexpr auto MERGE_MODE_A = (1U << 18);
-	static constexpr auto MERGE_MODE_B = (1U << 19);
-	static constexpr auto MERGE_MODE_C = (1U << 20);
-	static constexpr auto MERGE_MODE_D = (1U << 21);
-	static constexpr auto PROTOCOL = (1U << 22);
-	static constexpr auto PROTOCOL_A = (1U << 23);
-	static constexpr auto PROTOCOL_B = (1U << 24);
-	static constexpr auto PROTOCOL_C = (1U << 25);
-	static constexpr auto PROTOCOL_D = (1U << 26);
-	static constexpr auto MAP_UNIVERSE0 = (1U << 27);
+	static constexpr uint32_t LONG_NAME = (1U << 0);
+	static constexpr uint32_t SHORT_NAME = (1U << 1);
+	static constexpr uint32_t NET = (1U << 2);
+	static constexpr uint32_t SUBNET = (1U << 3);
+	static constexpr uint32_t FAILSAFE = (1U << 4);
+	static constexpr uint32_t RDM = (1U << 5);
+	//static constexpr uint32_t  = (1U << 6);
+	//static constexpr uint32_t  = (1U << 7);
+	static constexpr uint32_t OUTPUT = (1U << 8);
+	//static constexpr uint32_t  = (1U << 9);
+	//static constexpr uint32_t  = (1U << 10);
+	//static constexpr uint32_t  = (1U << 11);
+	static constexpr uint32_t DISABLE_MERGE_TIMEOUT = (1U << 12);
+	static constexpr uint32_t UNIVERSE_A = (1U << 13);
+	static constexpr uint32_t UNIVERSE_B = (1U << 14);
+	static constexpr uint32_t UNIVERSE_C = (1U << 15);
+	static constexpr uint32_t UNIVERSE_D = (1U << 16);
+	static constexpr uint32_t MERGE_MODE = (1U << 17);
+	static constexpr uint32_t MERGE_MODE_A = (1U << 18);
+	static constexpr uint32_t MERGE_MODE_B = (1U << 19);
+	static constexpr uint32_t MERGE_MODE_C = (1U << 20);
+	static constexpr uint32_t MERGE_MODE_D = (1U << 21);
+	static constexpr uint32_t PROTOCOL = (1U << 22);
+	static constexpr uint32_t PROTOCOL_A = (1U << 23);
+	static constexpr uint32_t PROTOCOL_B = (1U << 24);
+	static constexpr uint32_t PROTOCOL_C = (1U << 25);
+	static constexpr uint32_t PROTOCOL_D = (1U << 26);
+	static constexpr uint32_t MAP_UNIVERSE0 = (1U << 27);
 };
 
 }  // namespace artnetparams
@@ -157,6 +177,11 @@ public:
 
 	void Dump();
 
+	bool IsRdm() const {
+		return isMaskSet(artnetparams::Mask::RDM);
+	}
+
+#if (ARTNET_PAGE_SIZE == 4)
 	uint8_t GetNet() const {
 		return m_Params.nNet;
 	}
@@ -165,22 +190,20 @@ public:
 		return m_Params.nSubnet;
 	}
 
-	lightset::OutputType GetOutputType() const {
-		return static_cast<lightset::OutputType>(m_Params.nOutputType);
-	}
-
-	bool IsRdm() const {
-		return isMaskSet(artnetparams::Mask::RDM);
-	}
-
-	uint8_t GetUniverse(uint32_t nPortIndex, bool& IsSet) const {
+	uint8_t GetUniversePort(uint32_t nPortIndex) const {
 		if (nPortIndex < artnet::PORTS) {
-			IsSet = isMaskSet(artnetparams::Mask::UNIVERSE_A << nPortIndex);
 			return m_Params.nUniversePort[nPortIndex];
 		}
-		IsSet = false;
-		return 0;
+		return UINT8_MAX;
 	}
+#else
+	uint16_t GetUniverse(uint32_t nPortIndex) const {
+		if (nPortIndex < artnet::PORTS) {
+			return m_Params.nUniverse[nPortIndex];
+		}
+		return UINT16_MAX;
+	}
+#endif
 
 	lightset::PortDir GetDirection(uint32_t nPortIndex) const {
 		if (nPortIndex < artnet::PORTS) {
@@ -189,6 +212,12 @@ public:
 		}
 		return lightset::PortDir::DISABLE;
 	}
+
+#if defined (ESP8266)
+	lightset::OutputType GetOutputType() const {
+		return static_cast<lightset::OutputType>(m_Params.nOutputType);
+	}
+#endif
 
 	static void staticCallbackFunction(void *p, const char *s);
 
@@ -200,6 +229,9 @@ private:
 	}
 	bool isMaskMultiPortOptionsSet(uint16_t nMask) const {
 		return (m_Params.nMultiPortOptions & nMask) == nMask;
+	}
+	bool isOutputStyleSet(uint8_t nMask) const {
+		return (m_Params.nOutputStyle & nMask) == nMask;
 	}
 
 private:

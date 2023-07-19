@@ -114,7 +114,7 @@ void WS28xx::Update() {
 	const auto *pSrc = reinterpret_cast<uint16_t *>(m_pBuffer);
 	auto *pDst = reinterpret_cast<uint16_t *>(m_pBlackoutBuffer);
 
-	for (auto i = 0; i < m_nBufSize / 2; i++) {
+	for (uint32_t i = 0; i < m_nBufSize / 2; i++) {
 		pDst[i] = __builtin_bswap16(pSrc[i]);
 	}
 
@@ -138,7 +138,7 @@ void WS28xx::Blackout() {
 	if ((type == Type::APA102) || (type == Type::SK9822) || (type == Type::P9813)) {
 		memset(m_pBuffer, 0, 4);
 
-		for (auto nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
+		for (uint32_t nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
 			SetPixel(nPixelIndex, 0, 0, 0);
 		}
 
@@ -181,7 +181,7 @@ void WS28xx::FullOn() {
 	if ((type == Type::APA102) || (type == Type::SK9822) || (type == Type::P9813)) {
 		memset(m_pBuffer, 0, 4);
 
-		for (auto nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
+		for (uint32_t nPixelIndex = 0; nPixelIndex < nCount; nPixelIndex++) {
 			SetPixel(nPixelIndex, 0xFF, 0xFF, 0xFF);
 		}
 

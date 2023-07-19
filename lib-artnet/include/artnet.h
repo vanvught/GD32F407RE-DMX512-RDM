@@ -43,6 +43,10 @@ enum class PortProtocol {
 	SACN	///< Output DMX512 data from the sACN protocol and RDM data from the Art-Net protocol.
 };
 
+enum class OutputStyle {
+	DELTA, CONTINOUS
+};
+
 /**
  * Table 4 – Style Codes
  * The Style code defines the general functionality of a Controller.

@@ -165,8 +165,14 @@ struct InputPort {
 	uint8_t nSequenceNumber;
 };
 
-inline static FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
+inline static artnetnode::FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
 	const auto fs = static_cast<FailSafe>(static_cast<uint32_t>(failsafe) + static_cast<uint32_t>(FailSafe::LAST));
+	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
+	return fs;
+}
+
+inline static lightset::FailSafe convert_failsafe(const artnetnode::FailSafe failsafe) {
+	const auto fs = static_cast<lightset::FailSafe>(static_cast<uint32_t>(failsafe) - static_cast<uint32_t>(FailSafe::LAST));
 	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
 	return fs;
 }
@@ -212,6 +218,31 @@ public:
 
 		__builtin_unreachable();
 		return artnetnode::FailSafe::OFF;
+	}
+
+	void SetOutputStyle(const uint32_t nPortIndex, const artnet::OutputStyle outputStyle) {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+
+		if (outputStyle == artnet::OutputStyle::CONTINOUS) {
+			m_OutputPort[nPortIndex].GoodOutputB |= artnet::GoodOutputB::STYLE_CONSTANT;
+		} else {
+			m_OutputPort[nPortIndex].GoodOutputB &= static_cast<uint8_t>(~artnet::GoodOutputB::STYLE_CONSTANT);
+		}
+
+		if (m_State.status == artnetnode::Status::ON) {
+			if (m_pArtNetStore != nullptr) {
+				m_pArtNetStore->SaveOutputStyle(nPortIndex, outputStyle);
+			}
+
+			artnet::display_outputstyle(nPortIndex, outputStyle);
+		}
+	}
+
+	artnet::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+
+		const auto isStyleConstant = (m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::STYLE_CONSTANT) == artnet::GoodOutputB::STYLE_CONSTANT;
+		return isStyleConstant ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
 	}
 
 	void SetOutput(LightSet *pLightSet) {
