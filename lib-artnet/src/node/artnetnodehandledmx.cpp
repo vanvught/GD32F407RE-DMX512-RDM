@@ -83,7 +83,7 @@ void ArtNetNode::HandleDmx() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled && (m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (pArtDmx->PortAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
+		if (m_OutputPort[nPortIndex].genericPort.isEnabled && (m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (pArtDmx->PortAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
 
 			const auto ipA = m_OutputPort[nPortIndex].sourceA.nIp;
 			const auto ipB = m_OutputPort[nPortIndex].sourceB.nIp;

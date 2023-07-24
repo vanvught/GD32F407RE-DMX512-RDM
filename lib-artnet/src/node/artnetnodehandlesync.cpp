@@ -48,7 +48,7 @@ void ArtNetNode::HandleSync() {
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.bIsEnabled)) {
+		if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.isEnabled)) {
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 			SendDiag("Send pending data", ARTNET_DP_LOW);
 #endif
@@ -59,7 +59,7 @@ void ArtNetNode::HandleSync() {
 	m_pLightSet->Sync();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.bIsEnabled)) {
+		if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.isEnabled)) {
 			if (!m_OutputPort[nPortIndex].IsTransmitting) {
 				m_OutputPort[nPortIndex].IsTransmitting = true;
 				m_State.IsChanged = true;

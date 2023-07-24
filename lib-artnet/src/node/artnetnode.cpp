@@ -35,6 +35,10 @@
 #include "artnetconst.h"
 #include "artnet.h"
 
+#if (ARTNET_VERSION >= 4)
+# include "e131.h"
+#endif
+
 #include "lightset.h"
 #include "lightsetdata.h"
 
@@ -64,17 +68,33 @@ ArtNetNode::ArtNetNode() {
 	m_Node.IPAddressTimeCode = m_Node.IPAddressBroadcast;
 	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
 
-	m_Node.Status1 = artnet::Status1::INDICATOR_NORMAL_MODE | artnet::Status1::PAP_FRONT_PANEL;
+	/*
+	 * Status 1
+	 */
+	m_Node.Status1 = artnet::Status1::INDICATOR_NORMAL_MODE | artnet::Status1::PAP_NETWORK;
+	/*
+	 * Status 2
+	 */
 	m_Node.Status2 = artnet::Status2::PORT_ADDRESS_15BIT | (artnet::VERSION > 3 ? artnet::Status2::SACN_ABLE_TO_SWITCH : artnet::Status2::SACN_NO_SWITCH);
+#if defined (ENABLE_HTTPD) && defined (ENABLE_CONTENT)
+	m_Node.Status2 |= artnet::Status2::WEB_BROWSER_SUPPORT;
+#endif
 #if defined (ARTNET_OUTPUT_STYLE_SWITCH)
 	m_Node.Status2 |= artnet::Status2::OUTPUT_STYLE_SWITCH;
 #endif
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	m_Node.Status2 |= artnet::Status2::RDM_SWITCH;
 #endif
+	/*
+	 * Status 3
+	 */
 	m_Node.Status3 = artnet::Status3::NETWORKLOSS_LAST_STATE | artnet::Status3::FAILSAFE_CONTROL;
 #if defined (ARTNET_HAVE_DMXIN)
 	m_Node.Status3 |= artnet::Status3::OUTPUT_SWITCH;
+#endif
+
+#if (ARTNET_VERSION >= 4)
+	m_Node.AcnPriority = e131::priority::DEFAULT;
 #endif
 
 	memset(&m_State, 0, sizeof(struct State));
@@ -115,10 +135,6 @@ ArtNetNode::~ArtNetNode() {
 }
 
 void ArtNetNode::Start() {
-	if (artnet::VERSION > 3) {
-		assert(m_pArtNet4Handler != nullptr);
-	}
-
 #if (LIGHTSET_PORTS > 0)
 	assert(m_pLightSet != nullptr);
 #endif	
@@ -142,7 +158,7 @@ void ArtNetNode::Start() {
 
 #if defined (ARTNET_HAVE_DMXIN)
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		if (m_InputPort[i].genericPort.bIsEnabled) {
+		if (m_InputPort[i].genericPort.isEnabled) {
 			artnet::dmx_start(i);
 		}
 	}
@@ -150,7 +166,7 @@ void ArtNetNode::Start() {
 
 	if (m_pLightSet != nullptr) {
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+			if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 				const auto lightsetOutputStyle = GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONTINOUS  ? lightset::OutputStyle::CONTINOUS : lightset::OutputStyle::DELTA;
 				m_pLightSet->SetOutputStyle(nPortIndex, lightsetOutputStyle);
 				const auto artnetOutputStyle = m_pLightSet->GetOutputStyle(nPortIndex) == lightset::OutputStyle::CONTINOUS ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
@@ -170,7 +186,7 @@ void ArtNetNode::Start() {
 			 * - At the end of full RDM discovery.
 			 */
 			const auto isRdmDisabled = ((m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::RDM_DISABLED) == artnet::GoodOutputB::RDM_DISABLED);
-			if (!isRdmDisabled && m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+			if (!isRdmDisabled && m_OutputPort[nPortIndex].genericPort.isEnabled) {
 				SendTod(nPortIndex);
 			}
 
@@ -183,11 +199,15 @@ void ArtNetNode::Start() {
 			 *   since Output Gateways will broadcast an ArtTodData if their
 			 *   ToD changes, however it is safe programming.
 			 */
-			if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+			if (m_InputPort[nPortIndex].genericPort.isEnabled) {
 				SendTodRequest(nPortIndex);
 			}
 		}
 	}
+#endif
+
+#if (ARTNET_VERSION >= 4)
+		E131Bridge::Start();
 #endif
 
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
@@ -199,8 +219,12 @@ void ArtNetNode::Start() {
 void ArtNetNode::Stop() {
 	DEBUG_ENTRY
 
+#if (ARTNET_VERSION >= 4)
+	E131Bridge::Stop();
+#endif
+
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].protocol == artnet::PortProtocol::ARTNET) {
+		if (m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) {
 			if (m_pLightSet != nullptr) {
 				m_pLightSet->Stop(nPortIndex);
 			}
@@ -211,7 +235,7 @@ void ArtNetNode::Stop() {
 
 #if defined (ARTNET_HAVE_DMXIN)
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		if (m_InputPort[i].genericPort.bIsEnabled) {
+		if (m_InputPort[i].genericPort.isEnabled) {
 			artnet::dmx_stop(i);
 		}
 	}
@@ -370,9 +394,9 @@ void ArtNetNode::Run() {
 
 		if (m_State.SendArtPollReplyOnChange) {
 			auto doSend = m_State.IsChanged;
-			if (artnet::VERSION > 3) {
-				doSend |= m_pArtNet4Handler->IsStatusChanged();
-			}
+#if (ARTNET_VERSION >= 4)
+			doSend |= E131Bridge::IsStatusChanged();
+#endif
 			if (doSend) {
 				SendPollRelply(false);
 			}
@@ -381,7 +405,6 @@ void ArtNetNode::Run() {
 		if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= (1U * 1000U)) {
 			m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::OUTPUT)));
 		}
-
 
 #if defined (ARTNET_HAVE_DMXIN)
 		HandleDmxIn();
@@ -395,22 +418,21 @@ void ArtNetNode::Run() {
 
 #if (LIGHTSET_PORTS > 0)
 		if ((((m_Node.Status1 & artnet::Status1::INDICATOR_MASK) == artnet::Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
-			if (artnet::VERSION > 3) {
-				if (m_State.nReceivingDmx != 0) {
-					m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::DATA);
-				} else {
-					m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::NORMAL);
-				}
+#if (ARTNET_VERSION >= 4)
+			if (m_State.nReceivingDmx != 0) {
+				SetLedBlinkMode4(hardware::ledblink::Mode::DATA);
 			} else {
-				if (m_State.nReceivingDmx != 0) {
-					Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
-				} else {
-					Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
-				}
+				SetLedBlinkMode4(hardware::ledblink::Mode::NORMAL);
 			}
+#else
+			if (m_State.nReceivingDmx != 0) {
+				Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
+			} else {
+				Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
+			}
+#endif
 		}
 #endif		
-
 		return;
 	}
 
@@ -502,21 +524,25 @@ void ArtNetNode::Run() {
 
 #if (LIGHTSET_PORTS > 0)
 	if ((((m_Node.Status1 & artnet::Status1::INDICATOR_MASK) == artnet::Status1::INDICATOR_NORMAL_MODE)) && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
-		if (artnet::VERSION > 3) {
-			if (m_State.nReceivingDmx != 0) {
-				m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::DATA);
-			} else {
-				m_pArtNet4Handler->SetLedBlinkMode(hardware::ledblink::Mode::NORMAL);
-			}
+#if (ARTNET_VERSION >= 4)
+		if (m_State.nReceivingDmx != 0) {
+			SetLedBlinkMode4(hardware::ledblink::Mode::DATA);
 		} else {
-			if (m_State.nReceivingDmx != 0) {
-				Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
-			} else {
-				Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
-			}
+			SetLedBlinkMode4(hardware::ledblink::Mode::NORMAL);
 		}
+#else
+		if (m_State.nReceivingDmx != 0) {
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
+		} else {
+			Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
+		}
+#endif
 	}
 #endif	
 
 	hal::panel_led_on(hal::panelled::ARTNET);
+
+#if (ARTNET_VERSION >= 4)
+	E131Bridge::Run();
+#endif
 }

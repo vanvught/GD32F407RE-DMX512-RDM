@@ -41,7 +41,7 @@
 #include "displayhandler.h"
 #include "display_timeout.h"
 
-#include "artnet4node.h"
+#include "artnetnode.h"
 #include "artnetparams.h"
 #include "artnetmsgconst.h"
 #include "artnettriggerhandler.h"
@@ -86,7 +86,7 @@ static constexpr uint32_t DMXPORT_OFFSET = 32;
 
 void Hardware::RebootHandler() {
 	WS28xxMulti::Get()->Blackout();
-	ArtNet4Node::Get()->Stop();
+	ArtNetNode::Get()->Stop();
 }
 
 void main() {
@@ -117,7 +117,7 @@ void main() {
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
-	ArtNet4Node node;
+	ArtNetNode node;
 
 	StoreArtNet storeArtNet(DMXPORT_OFFSET);
 	node.SetArtNetStore(&storeArtNet);

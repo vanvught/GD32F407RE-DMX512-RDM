@@ -33,6 +33,12 @@ ifeq ($(findstring DMX4,$(BOARD)), DMX4)
 	DEFINES+=-DCONSOLE_I2C
 endif
 
+ifeq ($(findstring ARTNET_VERSION=4,$(DEFINES)),ARTNET_VERSION=4)
+	ifeq ($(findstring ARTNET_HAVE_DMXIN,$(DEFINES)),ARTNET_HAVE_DMXIN)
+		DEFINES+=-DE131_HAVE_DMXIN
+	endif
+endif
+
 COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
 COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES)
 COPS+=-Os -mcpu=cortex-m4 -mthumb -g -mfloat-abi=hard -fsingle-precision-constant -mfpu=fpv4-sp-d16

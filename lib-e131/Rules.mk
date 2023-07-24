@@ -3,7 +3,7 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_SRCDIR+=src/node
 	endif
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)),NODE_ARTNET)
-		ifneq ($(findstring ARTNET_VERSION=3,$(MAKE_FLAGS)),ARTNET_VERSION=3)
+		ifeq ($(findstring ARTNET_VERSION=4,$(MAKE_FLAGS)),ARTNET_VERSION=4)
 			EXTRA_SRCDIR+=src/node
 		endif
 	endif

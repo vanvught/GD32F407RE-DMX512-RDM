@@ -66,3 +66,5 @@ const char ArtNetParamsConst::PROTOCOL_PORT[artnet::PORTS][16] = {
 		"protocol_port_d" };
 
 const char ArtNetParamsConst::MAP_UNIVERSE0[] = "map_universe0";
+
+const char ArtNetParamsConst::SACN_PRIORITY[] = "sacn_priority";

@@ -170,25 +170,6 @@ void E131Params::callbackFunction(const char *pLine) {
 			return;
 		}
 
-#if __GNUC__ < 10
-/*
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-    m_Params.nDirection &= e131params::portdir_clear(i);
-                                                      ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::INPUT, i);
-                                                                                      ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::DISABLE, i);
-                                                                                        ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= e131params::portdir_shift_left(lightset::PortDir::OUTPUT, i);
- */
-
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
-#endif
-
 		nLength = 7;
 
 		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[i], value, nLength) == Sscan::OK) {
@@ -212,10 +193,6 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 
 			return;
 		}
-
-#if __GNUC__ < 10
-# pragma GCC diagnostic pop
-#endif
 
 #if defined (E131_HAVE_DMXIN)
 		if (Sscan::Uint8(pLine, E131ParamsConst::PRIORITY[i], value8) == Sscan::OK) {
@@ -319,10 +296,11 @@ void E131Params::Set(uint32_t nPortIndexOffset) {
 			p->SetMergeMode(nOffset, static_cast<lightset::MergeMode>(m_Params.nMergeModePort[nPortIndex]));
 		}
 
+#if defined (E131_HAVE_DMXIN)
 		if (isMaskSet(Mask::PRIORITY_A << nPortIndex)) {
-			p->SetPriority(m_Params.nPriority[nPortIndex], nPortIndex);
+			p->SetPriority(nPortIndex, m_Params.nPriority[nPortIndex]);
 		}
-
+#endif
 	}
 
 	p->SetFailSafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe));

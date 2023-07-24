@@ -46,6 +46,8 @@
 E131Bridge *E131Bridge::s_pThis = nullptr;
 
 E131Bridge::E131Bridge() {
+	DEBUG_ENTRY
+
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
@@ -70,6 +72,8 @@ E131Bridge::E131Bridge() {
 
 	m_nHandle = Network::Get()->Begin(e131::UDP_PORT);
 	assert(m_nHandle != -1);
+
+	DEBUG_EXIT
 }
 
 E131Bridge::~E131Bridge() {
@@ -166,11 +170,13 @@ void E131Bridge::LeaveUniverse(uint32_t nPortIndex, uint16_t nUniverse) {
 	DEBUG_PRINTF("nPortIndex=%d, nUniverse=%d", nPortIndex, nUniverse);
 
 	for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
-		DEBUG_PRINTF("\tnm_OutputPort[%d].nUniverse=%d", i, m_OutputPort[i].genericPort.nUniverse);
+		DEBUG_PRINTF("\tm_OutputPort[%d].nUniverse=%d", i, m_OutputPort[i].genericPort.nUniverse);
 
 		if (i == nPortIndex) {
+			DEBUG_PUTS("continue");
 			continue;
 		}
+
 		if (m_OutputPort[i].genericPort.nUniverse == nUniverse) {
 			DEBUG_EXIT
 			return;
@@ -183,6 +189,9 @@ void E131Bridge::LeaveUniverse(uint32_t nPortIndex, uint16_t nUniverse) {
 }
 
 void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_t nUniverse) {
+	DEBUG_ENTRY
+	DEBUG_PRINTF("nPortIndex=%u, dir=%s, nUniverse=%u", nPortIndex, lightset::get_direction(dir), nUniverse);
+
 	assert(nPortIndex < e131bridge::MAX_PORTS);
 	assert(dir <= lightset::PortDir::DISABLE);
 	assert((nUniverse >= e131::universe::DEFAULT) && (nUniverse <= e131::universe::MAX));
@@ -190,6 +199,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 	if ((dir == lightset::PortDir::INPUT) && (nPortIndex < e131bridge::MAX_PORTS)) {
 		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
 			if (m_InputPort[nPortIndex].genericPort.nUniverse == nUniverse) {
+				DEBUG_EXIT
 				return;
 			}
 		} else {
@@ -201,6 +211,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 		m_InputPort[nPortIndex].genericPort.nUniverse = nUniverse;
 		m_InputPort[nPortIndex].nMulticastIp = e131::universe_to_multicast_ip(nUniverse);
 
+		DEBUG_EXIT
 		return;
 	}
 
@@ -220,6 +231,7 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 			}
 		}
 
+		DEBUG_EXIT
 		return;
 	}
 
@@ -227,9 +239,10 @@ void E131Bridge::SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_
 
 	if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
 		if (m_OutputPort[nPortIndex].genericPort.nUniverse == nUniverse) {
+			DEBUG_EXIT
 			return;
 		} else {
-			LeaveUniverse(nPortIndex, nUniverse);
+			LeaveUniverse(nPortIndex, m_OutputPort[nPortIndex].genericPort.nUniverse);
 		}
 	} else {
 		m_State.nEnableOutputPorts = static_cast<uint8_t>(m_State.nEnableOutputPorts + 1);
@@ -559,11 +572,13 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 					memset(m_OutputPort[i].sourceA.cid, 0, e131::CID_LENGTH);
 					m_OutputPort[i].IsMerging = false;
 				}
+
 				if ((bSourceB) && (m_OutputPort[i].sourceB.nIp != 0)) {
 					m_OutputPort[i].sourceB.nIp = 0;
 					memset(m_OutputPort[i].sourceB.cid, 0, e131::CID_LENGTH);
 					m_OutputPort[i].IsMerging = false;
 				}
+
 				if (!m_State.IsMergeMode) {
 					doFailsafe = true;
 					lightset::Data::ClearLength(i);

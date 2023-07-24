@@ -45,7 +45,7 @@ static uint32_t s_ReceivingMask = 0;
 
 void ArtNetNode::HandleDmxIn() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+		if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (m_InputPort[nPortIndex].genericPort.isEnabled)) {
 
 			uint32_t nLength;
 			uint32_t nUpdatesPerSecond;

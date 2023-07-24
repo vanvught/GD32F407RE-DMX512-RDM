@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+#undef NDEBUG
+
 #include <cstdint>
 #include <cassert>
 
@@ -41,7 +43,7 @@
 #include "displayhandler.h"
 #include "display_timeout.h"
 
-#include "artnet4node.h"
+#include "artnetnode.h"
 #include "artnetparams.h"
 #include "artnetmsgconst.h"
 #include "artnetrdmcontroller.h"
@@ -69,7 +71,7 @@ static constexpr uint32_t DMXPORT_OFFSET = 0;
 
 void Hardware::RebootHandler() {
 	Dmx::Get()->Blackout();
-	ArtNet4Node::Get()->Stop();
+	ArtNetNode::Get()->Stop();
 }
 
 void main() {
@@ -100,7 +102,7 @@ void main() {
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
-	ArtNet4Node node;
+	ArtNetNode node;
 
 	StoreArtNet storeArtNet(DMXPORT_OFFSET);
 	node.SetArtNetStore(&storeArtNet);
@@ -111,6 +113,7 @@ void main() {
 		artnetParams.Dump();
 		artnetParams.Set(DMXPORT_OFFSET);
 	}
+
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		node.SetUniverseSwitch(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniversePort(nPortIndex));

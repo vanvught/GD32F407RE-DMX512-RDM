@@ -38,7 +38,7 @@ void ArtNetNode::FailSafeRecord() {
 	artnetnode::failsafe_write_start();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+		if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 			artnetnode::failsafe_write(nPortIndex, lightset::Data::Backup(nPortIndex));
 		}
 	}
@@ -54,10 +54,10 @@ void ArtNetNode::FailSafePlayback() {
 	artnetnode::failsafe_read_start();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+		if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 			artnetnode::failsafe_read(nPortIndex, const_cast<uint8_t *>(lightset::Data::Backup(nPortIndex)));
 
-			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+			if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 				lightset::Data::Output(m_pLightSet, nPortIndex);
 
 				if (!m_OutputPort[nPortIndex].IsTransmitting) {

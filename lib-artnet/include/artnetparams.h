@@ -96,7 +96,7 @@ struct Params {
 #else
 	uint16_t nUniverse[artnet::PORTS];					///< 8
 #endif
-	uint8_t  NotUsed9;									///< 1	108
+	uint8_t  nsACNPriority;								///< 1	108
 	uint8_t  nMergeModePort[artnet::PORTS];				///< 4	112
 	uint8_t  nOutputStyle;								///< 1	113
 	uint8_t  nProtocolPort[artnet::PORTS];				///< 4	117
@@ -149,6 +149,7 @@ struct Mask {
 	static constexpr uint32_t PROTOCOL_C = (1U << 25);
 	static constexpr uint32_t PROTOCOL_D = (1U << 26);
 	static constexpr uint32_t MAP_UNIVERSE0 = (1U << 27);
+	static constexpr uint32_t SACN_PRIORITY = (1U << 28);
 };
 
 }  // namespace artnetparams

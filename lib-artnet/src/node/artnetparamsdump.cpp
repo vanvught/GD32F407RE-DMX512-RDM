@@ -108,7 +108,23 @@ void ArtNetParams::Dump() {
 		printf(" %s=%u [%s]\n", ArtNetParamsConst::OUTPUT_STYLE[i], nOutputStyle, lightset::get_output_style(static_cast<lightset::OutputStyle>(nOutputStyle)));
 	}
 
-	if(isMaskSet(artnetparams::Mask::DISABLE_MERGE_TIMEOUT)) {
+	/**
+	 * Art-Net 4
+	 */
+
+	if (isMaskSet(artnetparams::Mask::MAP_UNIVERSE0)) {
+		printf(" %s=1 [Yes]\n", ArtNetParamsConst::MAP_UNIVERSE0);
+	}
+
+	if (isMaskSet(artnetparams::Mask::SACN_PRIORITY)) {
+		printf(" %s=%u\n", ArtNetParamsConst::SACN_PRIORITY, m_Params.nsACNPriority);
+	}
+
+	/**
+	 * Extra's
+	 */
+
+	if (isMaskSet(artnetparams::Mask::DISABLE_MERGE_TIMEOUT)) {
 		printf(" %s=1 [Yes]\n", LightSetParamsConst::DISABLE_MERGE_TIMEOUT);
 	}
 #endif

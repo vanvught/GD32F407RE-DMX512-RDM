@@ -1,11 +1,8 @@
 /**
- * @file artnet4handler.h
+ * @file errno.c
  *
  */
-/**
- * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
- */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,24 +23,4 @@
  * THE SOFTWARE.
  */
 
-#ifndef ARTNET4HANDLER_H_
-#define ARTNET4HANDLER_H_
-
-#include <cstdint>
-
-#include "artnet.h"
-#include "lightset.h"
-#include "hardware.h"
-
-class ArtNet4Handler {
-public:
-	virtual ~ArtNet4Handler() {}
-
-	virtual void SetPort(uint32_t nPortIndex, lightset::PortDir dir)=0;
-	virtual void HandleAddress(const uint8_t nCommand, const uint32_t nPortIndex)=0;
-	virtual uint8_t GetStatus(uint32_t nPortIndex)=0;
-	virtual bool IsStatusChanged()=0;
-	virtual void SetLedBlinkMode(hardware::ledblink::Mode mode)=0;
-};
-
-#endif /* ARTNET4HANDLER_H_ */
+int errno = 0;

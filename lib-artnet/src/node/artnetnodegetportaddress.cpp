@@ -36,12 +36,12 @@
 bool ArtNetNode::GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress) const {
 	assert(nPortIndex < artnetnode::MAX_PORTS);
 
-	if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
+	if (m_InputPort[nPortIndex].genericPort.isEnabled) {
 		nAddress = m_InputPort[nPortIndex].genericPort.nPortAddress;
 		return true;
 	}
 
-	if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+	if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 		nAddress = m_OutputPort[nPortIndex].genericPort.nPortAddress;
 		return true;
 	}
@@ -54,12 +54,12 @@ bool ArtNetNode::GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress, lightse
 
 	if (dir == lightset::PortDir::INPUT) {
 		nAddress = m_InputPort[nPortIndex].genericPort.nPortAddress;
-		return m_InputPort[nPortIndex].genericPort.bIsEnabled;
+		return m_InputPort[nPortIndex].genericPort.isEnabled;
 	}
 
 	if (dir == lightset::PortDir::OUTPUT) {
 		nAddress = m_OutputPort[nPortIndex].genericPort.nPortAddress;
-		return m_OutputPort[nPortIndex].genericPort.bIsEnabled;
+		return m_OutputPort[nPortIndex].genericPort.isEnabled;
 	}
 
 	return false;

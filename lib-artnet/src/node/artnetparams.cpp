@@ -42,6 +42,9 @@
 #include "artnetnode.h"
 #include "artnet.h"
 #include "artnetconst.h"
+#if (ARTNET_VERSION == 4)
+# include "e131.h"
+#endif
 
 #include "lightsetparamsconst.h"
 #include "lightset.h"
@@ -96,6 +99,10 @@ ArtNetParams::ArtNetParams(ArtNetParamsStore *pArtNetParamsStore): m_pArtNetPara
 	p->GetLongNameDefault(reinterpret_cast<char *>(m_Params.aLongName));
 
 	m_Params.nFailSafe = static_cast<uint8_t>(lightset::FailSafe::HOLD);
+
+#if defined (E131_HAVE_DMXIN)
+	m_Params.nsACNPriority = e131::priority::DEFAULT;
+#endif
 
 	DEBUG_PRINTF("s_nPortsMax=%u", s_nPortsMax);
 	DEBUG_EXIT
@@ -284,24 +291,6 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 			return;
 		}
 
-#if __GNUC__ < 10
-/*
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-    m_Params.nDirection &= artnetparams::portdir_clear(i);
-                                                        ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::INPUT, i);
-                                                                                        ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::DISABLE, i);
-                                                                                          ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::OUTPUT, i);
- */
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
-#endif
-
 		nLength = 7;
 
 		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[i], value, nLength) == Sscan::OK) {
@@ -326,9 +315,6 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 			return;
 		}
 
-#if __GNUC__ < 10
-# pragma GCC diagnostic pop
-#endif
 #if defined (ARTNET_HAVE_DMXIN)
 		uint32_t nValue32;
 
@@ -360,17 +346,6 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 		}
 #endif
 
-#if __GNUC__ < 10
-/*
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-    m_Params.nRdm &= artnetparams::clear_mask(i);
-                                               ^
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-     m_Params.nRdm |= artnetparams::shift_left(1, i);
- */
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
-#endif
 #if defined (RDM_CONTROLLER)
 		if (Sscan::Uint8(pLine, ArtNetParamsConst::RDM_ENABLE_PORT[i], nValue8) == Sscan::OK) {
 			m_Params.nRdm &= artnetparams::clear_mask(i);
@@ -382,9 +357,7 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 			return;
 		}
 #endif
-#if __GNUC__ < 10
-# pragma GCC diagnostic pop
-#endif
+
 	}
 
 	/**
@@ -395,6 +368,21 @@ error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change
 		SetBool(nValue8, Mask::MAP_UNIVERSE0);
 		return;
 	}
+
+#if defined (E131_HAVE_DMXIN)
+	uint8_t value8;
+
+	if (Sscan::Uint8(pLine, ArtNetParamsConst::SACN_PRIORITY, value8) == Sscan::OK) {
+		if ((value8 >= e131::priority::LOWEST) && (value8 <= e131::priority::HIGHEST) && (value8 != e131::priority::DEFAULT)) {
+			m_Params.nsACNPriority = value8;
+			m_Params.nSetList |= Mask::SACN_PRIORITY;
+		} else {
+			m_Params.nsACNPriority = e131::priority::DEFAULT;
+			m_Params.nSetList &= Mask::SACN_PRIORITY;
+		}
+		return;
+	}
+#endif
 
 	/**
 	 * Extra's
@@ -478,6 +466,9 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 		builder.Add(ArtNetParamsConst::PROTOCOL_PORT[nPortIndex], artnet::get_protocol_mode(m_Params.nProtocolPort[nPortIndex]), isMaskSet(Mask::PROTOCOL_A << nPortIndex));
 	}
 	builder.Add(ArtNetParamsConst::MAP_UNIVERSE0, isMaskSet(Mask::MAP_UNIVERSE0));
+#if defined (E131_HAVE_DMXIN)
+	builder.Add(ArtNetParamsConst::SACN_PRIORITY, m_Params.nsACNPriority, isMaskSet(Mask::SACN_PRIORITY));
+#endif
 
 	builder.AddComment("#");
 
@@ -527,9 +518,11 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 			break;
 		}
 
+#if (ARTNET_VERSION >= 4)
 		if (isMaskSet(Mask::PROTOCOL_A << nPortIndex)) {
-			p->SetPortProtocol(nOffset, static_cast<artnet::PortProtocol>(m_Params.nProtocolPort[nPortIndex]));
+			p->SetPortProtocol4(nOffset, static_cast<artnet::PortProtocol>(m_Params.nProtocolPort[nPortIndex]));
 		}
+#endif
 
 		if (isMaskSet(Mask::MERGE_MODE_A << nPortIndex)) {
 			p->SetMergeMode(nOffset, static_cast<lightset::MergeMode>(m_Params.nMergeModePort[nPortIndex]));
@@ -556,10 +549,15 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 	/**
 	 * Art-Net 4
 	 */
-
+#if (ARTNET_VERSION >= 4)
 	if (isMaskSet(Mask::MAP_UNIVERSE0)) {
 		p->SetMapUniverse0(true);
 	}
+
+	if (isMaskSet(Mask::SACN_PRIORITY)) {
+		p->SetPriority4(m_Params.nsACNPriority);
+	}
+#endif
 
 	/**
 	 * Extra's
