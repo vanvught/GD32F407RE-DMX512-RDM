@@ -1783,126 +1783,6 @@ void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 	s_TxBuffer[nPortIndex].State = TxRxState::BREAK;
 }
 
-void Dmx::StartOutput(const uint32_t nPortIndex) {
-	if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
-			&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA)
-			&& (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE)) {
-
-		StartDmxOutput(nPortIndex);
-	}
-}
-
-static bool s_doForce;
-
-void Dmx::SetOutput(const bool doForce) {
-	logic_analyzer::ch1_set();
-
-	if (doForce) {
-		s_doForce = true;
-		for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
-			if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
-					&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
-				StopData(_port_to_uart(nPortIndex), nPortIndex);
-			}
-			sv_PortState[nPortIndex] = dmx::PortState::TX;
-		}
-
-		logic_analyzer::ch1_clear();
-		return;
-	}
-
-	for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
-		if (sv_PortState[nPortIndex] == dmx::PortState::TX) {
-			const auto b = ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS) && s_doForce);
-			if (b || ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA) && (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE))) {
-				StartDmxOutput(nPortIndex);
-			}
-		}
-	}
-
-	s_doForce = false;
-	logic_analyzer::ch1_clear();
-}
-
-void Dmx::SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle) {
-	assert(nPortIndex < dmx::config::max::OUT);
-	s_TxBuffer[nPortIndex].outputStyle = outputStyle;
-}
-
-dmx::OutputStyle Dmx::GetOutputStyle(const uint32_t nPortIndex) const {
-	assert(nPortIndex < dmx::config::max::OUT);
-	return s_TxBuffer[nPortIndex].outputStyle;
-}
-
-void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
-	assert(nPortIndex < DMX_MAX_PORTS);
-	assert(sv_PortState[nPortIndex] == PortState::IDLE);
-
-	if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::OUTP) {
-		sv_PortState[nPortIndex] = PortState::TX;
-		StartDmxOutput(nPortIndex);
-	} else if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::INP) {
-		s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
-
-		while (RESET == usart_flag_get(nUart, USART_FLAG_TBE))
-			;
-
-		usart_interrupt_flag_clear(nUart, USART_INT_FLAG_RBNE);
-		usart_interrupt_enable(nUart, USART_INT_RBNE);
-
-		sv_PortState[nPortIndex] = PortState::RX;
-
-#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
-		switch (nPortIndex) {
-		case 0:
-			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH0;
-			break;
-#if DMX_MAX_PORTS >= 2
-		case 1:
-			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH1;
-			break;
-#endif
-#if DMX_MAX_PORTS >= 3
-		case 2:
-			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH2;
-			break;
-#endif
-#if DMX_MAX_PORTS >= 4
-		case 3:
-			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH3;
-			break;
-#endif
-#if DMX_MAX_PORTS >= 5
-		case 4:
-			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH0;
-			break;
-#endif
-#if DMX_MAX_PORTS >= 6
-		case 5:
-			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH1;
-			break;
-#endif
-#if DMX_MAX_PORTS >= 7
-		case 6:
-			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH2;
-			break;
-#endif
-#if DMX_MAX_PORTS == 8
-		case 7:
-			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH3;
-			break;
-#endif
-		default:
-			assert(0);
-			__builtin_unreachable();
-			break;
-		}
-#endif
-	} else {
-		assert(0);
-		__builtin_unreachable();
-	}
-}
 
 void Dmx::StopData(const uint32_t nUart, const uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
@@ -2043,6 +1923,16 @@ void Dmx::SetDmxSlots(uint16_t nSlots) {
 	}
 }
 
+void Dmx::SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle) {
+	assert(nPortIndex < dmx::config::max::OUT);
+	s_TxBuffer[nPortIndex].outputStyle = outputStyle;
+}
+
+dmx::OutputStyle Dmx::GetOutputStyle(const uint32_t nPortIndex) const {
+	assert(nPortIndex < dmx::config::max::OUT);
+	return s_TxBuffer[nPortIndex].outputStyle;
+}
+
 void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 
@@ -2064,11 +1954,6 @@ void Dmx::SetPortSendDataWithoutSC(__attribute__((unused)) uint32_t nPortIndex, 
 	logic_analyzer::ch0_set();
 
 	assert(nPortIndex < DMX_MAX_PORTS);
-
-	if ((s_TxBuffer[nPortIndex].State != dmx::TxRxState::DMXINTER) && (s_TxBuffer[nPortIndex].State != dmx::TxRxState::IDLE)) {
-		logic_analyzer::ch0_clear();
-		return;
-	}
 
 	auto *p = &s_TxBuffer[nPortIndex];
 	auto *pDst = p->data;
@@ -2127,6 +2012,118 @@ void Dmx::FullOn() {
 
 	DEBUG_EXIT
 }
+
+void Dmx::StartOutput(const uint32_t nPortIndex) {
+	if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
+			&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA)
+			&& (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE)) {
+
+		StartDmxOutput(nPortIndex);
+	}
+}
+
+static bool s_doForce;
+
+void Dmx::SetOutput(const bool doForce) {
+	logic_analyzer::ch1_set();
+
+	if (doForce) {
+		s_doForce = true;
+		for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
+			if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
+					&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
+				StopData(_port_to_uart(nPortIndex), nPortIndex);
+			}
+			sv_PortState[nPortIndex] = dmx::PortState::TX;
+		}
+
+		logic_analyzer::ch1_clear();
+		return;
+	}
+
+	for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
+		if (sv_PortState[nPortIndex] == dmx::PortState::TX) {
+			const auto b = ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS) && s_doForce);
+			if (b || ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA) && (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE))) {
+				StartDmxOutput(nPortIndex);
+			}
+		}
+	}
+
+	s_doForce = false;
+	logic_analyzer::ch1_clear();
+}
+
+void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
+	assert(nPortIndex < DMX_MAX_PORTS);
+	assert(sv_PortState[nPortIndex] == PortState::IDLE);
+
+	if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::OUTP) {
+		sv_PortState[nPortIndex] = PortState::TX;
+		StartDmxOutput(nPortIndex);
+	} else if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::INP) {
+		s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
+
+		while (RESET == usart_flag_get(nUart, USART_FLAG_TBE))
+			;
+
+		usart_interrupt_flag_clear(nUart, USART_INT_FLAG_RBNE);
+		usart_interrupt_enable(nUart, USART_INT_RBNE);
+
+		sv_PortState[nPortIndex] = PortState::RX;
+
+#if !defined(CONFIG_DMX_TRANSMIT_ONLY)
+		switch (nPortIndex) {
+		case 0:
+			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH0;
+			break;
+#if DMX_MAX_PORTS >= 2
+		case 1:
+			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH1;
+			break;
+#endif
+#if DMX_MAX_PORTS >= 3
+		case 2:
+			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH2;
+			break;
+#endif
+#if DMX_MAX_PORTS >= 4
+		case 3:
+			TIMER_DMAINTEN(TIMER2) |= (uint32_t) TIMER_INT_CH3;
+			break;
+#endif
+#if DMX_MAX_PORTS >= 5
+		case 4:
+			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH0;
+			break;
+#endif
+#if DMX_MAX_PORTS >= 6
+		case 5:
+			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH1;
+			break;
+#endif
+#if DMX_MAX_PORTS >= 7
+		case 6:
+			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH2;
+			break;
+#endif
+#if DMX_MAX_PORTS == 8
+		case 7:
+			TIMER_DMAINTEN(TIMER3) |= (uint32_t) TIMER_INT_CH3;
+			break;
+#endif
+		default:
+			assert(0);
+			__builtin_unreachable();
+			break;
+		}
+#endif
+	} else {
+		assert(0);
+		__builtin_unreachable();
+	}
+}
+
 
 // DMX Receive
 
