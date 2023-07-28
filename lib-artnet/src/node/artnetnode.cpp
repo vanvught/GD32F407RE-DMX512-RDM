@@ -67,6 +67,9 @@ ArtNetNode::ArtNetNode() {
 	m_Node.IPAddressBroadcast = Network::Get()->GetBroadcastIp();
 	m_Node.IPAddressTimeCode = m_Node.IPAddressBroadcast;
 	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
+	for (auto& port : m_Node.Port) {
+		port.direction = lightset::PortDir::DISABLE;
+	}
 
 	/*
 	 * Status 1
@@ -157,16 +160,16 @@ void ArtNetNode::Start() {
 	m_State.status = Status::ON;
 
 #if defined (ARTNET_HAVE_DMXIN)
-	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		if (m_InputPort[i].genericPort.isEnabled) {
-			artnet::dmx_start(i);
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
+			artnet::dmx_start(nPortIndex);
 		}
 	}
 #endif
 
 	if (m_pLightSet != nullptr) {
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-			if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
+			if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 				const auto lightsetOutputStyle = GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONTINOUS  ? lightset::OutputStyle::CONTINOUS : lightset::OutputStyle::DELTA;
 				m_pLightSet->SetOutputStyle(nPortIndex, lightsetOutputStyle);
 				const auto artnetOutputStyle = m_pLightSet->GetOutputStyle(nPortIndex) == lightset::OutputStyle::CONTINOUS ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
@@ -186,7 +189,7 @@ void ArtNetNode::Start() {
 			 * - At the end of full RDM discovery.
 			 */
 			const auto isRdmDisabled = ((m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::RDM_DISABLED) == artnet::GoodOutputB::RDM_DISABLED);
-			if (!isRdmDisabled && m_OutputPort[nPortIndex].genericPort.isEnabled) {
+			if (!isRdmDisabled && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
 				SendTod(nPortIndex);
 			}
 
@@ -199,7 +202,7 @@ void ArtNetNode::Start() {
 			 *   since Output Gateways will broadcast an ArtTodData if their
 			 *   ToD changes, however it is safe programming.
 			 */
-			if (m_InputPort[nPortIndex].genericPort.isEnabled) {
+			if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
 				SendTodRequest(nPortIndex);
 			}
 		}
@@ -224,7 +227,7 @@ void ArtNetNode::Stop() {
 #endif
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) {
+		if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET) {
 			if (m_pLightSet != nullptr) {
 				m_pLightSet->Stop(nPortIndex);
 			}
@@ -234,9 +237,9 @@ void ArtNetNode::Stop() {
 	}
 
 #if defined (ARTNET_HAVE_DMXIN)
-	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		if (m_InputPort[i].genericPort.isEnabled) {
-			artnet::dmx_stop(i);
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
+			artnet::dmx_stop(nPortIndex);
 		}
 	}
 #endif
@@ -432,6 +435,9 @@ void ArtNetNode::Run() {
 			}
 #endif
 		}
+#endif
+#if (ARTNET_VERSION >= 4)
+		E131Bridge::Run();
 #endif		
 		return;
 	}
@@ -452,11 +458,25 @@ void ArtNetNode::Run() {
 	case OP_DMX:
 		if (m_pLightSet != nullptr) {
 			HandleDmx();
+			m_State.IPAddressArtDmx = m_nIpAddressFrom;
 		}
 		break;
 	case OP_SYNC:
 		if (m_pLightSet != nullptr) {
-			HandleSync();
+			/*
+			 * In order to allow for multiple controllers on a network,
+			 * a node shall compare the source IP of the ArtSync to the source IP
+			 * of the most recent ArtDmx packet.
+			 * The ArtSync shall be ignored if the IP addresses do not match.
+			 */
+			/*
+			 * When a port is merging multiple streams of ArtDmx from different IP addresses,
+			 * ArtSync packets shall be ignored.
+			 */
+			if ((m_State.IPAddressArtDmx == m_nIpAddressFrom) && (!m_State.IsMergeMode)) {
+				m_State.nArtSyncMillis = Hardware::Get()->Millis();
+				HandleSync();
+			}
 		}
 		break;
 #endif		

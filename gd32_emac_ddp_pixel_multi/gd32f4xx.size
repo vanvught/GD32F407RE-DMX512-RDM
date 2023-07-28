@@ -1,8 +1,8 @@
 build_gd32/main.elf  :
 section       size         addr
 .vectors     0x188    0x8008000
-.text       0xec90    0x8008188
-.rodata     0x386c    0x8016e18
+.text       0xec68    0x8008188
+.rodata     0x3854    0x8016df0
 .stack      0x2800   0x10000000
 .tcmsram    0x4a4c   0x10002800
 .heap       0x1000   0x1000724c
@@ -12,6 +12,6 @@ section       size         addr
 .sram2         0x0   0x20020000
 .ramadd        0x0   0x20030000
 .bkpsram       0x0   0x40024000
-Total      0x3a1ec
+Total      0x3a1ac
 
 

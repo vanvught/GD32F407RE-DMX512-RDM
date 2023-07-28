@@ -76,27 +76,27 @@ void ArtNetNode::FillPollReply() {
 
 	memcpy(m_PollReply.MAC, m_Node.MACAddressLocal, sizeof(m_PollReply.MAC));
 
-	if (artnet::VERSION > 3) {
-		memcpy(m_PollReply.BindIp, ip.u8, sizeof(m_PollReply.BindIp));
-	}
+#if (ARTNET_VERSION >= 4)
+	memcpy(m_PollReply.BindIp, ip.u8, sizeof(m_PollReply.BindIp));
+#endif
 
 	memcpy(m_PollReply.DefaultUidResponder, m_Node.DefaultUidResponder, sizeof(m_PollReply.DefaultUidResponder));
 }
 
 void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
+	if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 #if (ARTNET_VERSION >= 4)
-	if (m_Node.protocol[nPortIndex] == artnet::PortProtocol::SACN) {
-		constexpr auto MASK = artnet::GoodOutput::OUTPUT_IS_MERGING | artnet::GoodOutput::DATA_IS_BEING_TRANSMITTED | artnet::GoodOutput::OUTPUT_IS_SACN;
-		auto GoodOutput = m_OutputPort[nPortIndex].GoodOutput;
-		GoodOutput &= static_cast<uint8_t>(~MASK);
-		GoodOutput = static_cast<uint8_t>(GoodOutput | (GetStatus4(nPortIndex) & MASK));
-		m_OutputPort[nPortIndex].GoodOutput = GoodOutput;
-	}
+		if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
+			constexpr auto MASK = artnet::GoodOutput::OUTPUT_IS_MERGING | artnet::GoodOutput::DATA_IS_BEING_TRANSMITTED | artnet::GoodOutput::OUTPUT_IS_SACN;
+			auto GoodOutput = m_OutputPort[nPortIndex].GoodOutput;
+			GoodOutput &= static_cast<uint8_t>(~MASK);
+			GoodOutput = static_cast<uint8_t>(GoodOutput | (GetGoodOutput4(nPortIndex) & MASK));
+			m_OutputPort[nPortIndex].GoodOutput = GoodOutput;
+		}
 #endif
-
-	if (m_OutputPort[nPortIndex].genericPort.isEnabled) {
 		const auto nIndex = m_OutputPort[nPortIndex].genericPort.nPollReplyIndex;
-		m_PollReply.PortTypes[nIndex] |= artnet::PortSettings::ENABLE_OUTPUT;
+		assert(nIndex < artnet::PORTS);
+		m_PollReply.PortTypes[nIndex] |= artnet::PortType::OUTPUT_ARTNET;
 		m_PollReply.GoodOutput[nIndex] = m_OutputPort[nPortIndex].GoodOutput;
 		m_PollReply.GoodOutputB[nIndex] = m_OutputPort[nPortIndex].GoodOutputB;
 		m_PollReply.SwOut[nIndex] = m_OutputPort[nPortIndex].genericPort.nDefaultAddress;
@@ -105,9 +105,15 @@ void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) 
 	}
 
 #if defined (ARTNET_HAVE_DMXIN)
-	if (m_InputPort[nPortIndex].genericPort.isEnabled) {
+	if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
+#if (ARTNET_VERSION >= 4)
+		if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
+
+		}
+#endif
 		const auto nIndex = m_InputPort[nPortIndex].genericPort.nPollReplyIndex;
-		m_PollReply.PortTypes[nIndex] |= artnet::PortSettings::ENABLE_INPUT;
+		assert(nIndex < artnet::PORTS);
+		m_PollReply.PortTypes[nIndex] |= artnet::PortType::INPUT_ARTNET;
 		m_PollReply.GoodInput[nIndex] = m_InputPort[nPortIndex].GoodInput;
 		m_PollReply.SwIn[nIndex] = m_InputPort[nPortIndex].genericPort.nDefaultAddress;
 		NumPortsInput++;
@@ -171,40 +177,49 @@ void ArtNetNode::SendPollRelply(bool bResponse) {
 void ArtNetNode::HandlePoll() {
 	const auto *const pArtPoll = reinterpret_cast<TArtPoll *>(m_pReceiveBuffer);
 
-	if (pArtPoll->TalkToMe & artnet::TalkToMe::SEND_ARTP_ON_CHANGE) {
+	if (pArtPoll->Flags & artnet::Flags::SEND_ARTP_ON_CHANGE) {
 		m_State.SendArtPollReplyOnChange = true;
 	} else {
 		m_State.SendArtPollReplyOnChange = false;
 	}
 
-	// If any controller requests diagnostics, the node will send diagnostics. (ArtPoll->TalkToMe->2).
-	if (pArtPoll->TalkToMe & artnet::TalkToMe::SEND_DIAG_MESSAGES) {
+	// If any controller requests diagnostics, the node will send diagnostics. (ArtPoll->Flags->2).
+	if (pArtPoll->Flags & artnet::Flags::SEND_DIAG_MESSAGES) {
 		m_State.SendArtDiagData = true;
 
 		if (m_State.IPAddressArtPoll == 0) {
 			m_State.IPAddressArtPoll = m_nIpAddressFrom;
 		} else if (!m_State.IsMultipleControllersReqDiag && (m_State.IPAddressArtPoll != m_nIpAddressFrom)) {
 			// If there are multiple controllers requesting diagnostics, diagnostics shall be broadcast.
-			m_State.IPAddressDiagSend = m_Node.IPAddressBroadcast;
+			m_State.DiagSendIPAddress = m_Node.IPAddressBroadcast;
 			m_State.IsMultipleControllersReqDiag = true;
 		}
 
 		if (m_State.IsMultipleControllersReqDiag ) {
-			// The lowest minimum value of Priority shall be used. (Ignore ArtPoll->Priority).
-			m_State.Priority = std::min(m_State.Priority , pArtPoll->Priority);
+			// The lowest minimum value of Priority shall be used. (Ignore ArtPoll->DiagPriority).
+			m_State.DiagPriority = std::min(m_State.DiagPriority , pArtPoll->DiagPriority);
 		} else {
-			m_State.Priority = pArtPoll->Priority;
+			m_State.DiagPriority = pArtPoll->DiagPriority;
 		}
 
-		// If there are multiple controllers requesting diagnostics, diagnostics shall be broadcast. (Ignore ArtPoll->TalkToMe->3).
-		if (!m_State.IsMultipleControllersReqDiag && (pArtPoll->TalkToMe & artnet::TalkToMe::SEND_DIAG_UNICAST)) {
-			m_State.IPAddressDiagSend = m_nIpAddressFrom;
+		// If there are multiple controllers requesting diagnostics, diagnostics shall be broadcast. (Ignore ArtPoll->Flags->3).
+		if (!m_State.IsMultipleControllersReqDiag && (pArtPoll->Flags & artnet::Flags::SEND_DIAG_UNICAST)) {
+			m_State.DiagSendIPAddress = m_nIpAddressFrom;
 		} else {
-			m_State.IPAddressDiagSend = m_Node.IPAddressBroadcast;
+			m_State.DiagSendIPAddress = m_Node.IPAddressBroadcast;
 		}
 	} else {
 		m_State.SendArtDiagData = false;
-		m_State.IPAddressDiagSend = 0;
+		m_State.DiagSendIPAddress = 0;
+	}
+
+	if (pArtPoll->Flags & artnet::Flags::USE_TARGET_PORT_ADDRESS) {
+		m_State.bUseTargetPortAddress = true;
+		m_State.TargetPortAddressTop = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressTopHi) >> 8) | pArtPoll->TargetPortAddressTopLo);
+		m_State.TargetPortAddressBottom = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressBottomHi) >> 8) | pArtPoll->TargetPortAddressBottomLo);
+
+	} else {
+		m_State.bUseTargetPortAddress = false;
 	}
 
 	SendPollRelply(true);

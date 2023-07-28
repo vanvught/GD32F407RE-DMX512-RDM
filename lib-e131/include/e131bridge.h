@@ -88,7 +88,6 @@ struct OutputPort {
 	Source sourceA;
 	Source sourceB;
 	lightset::MergeMode mergeMode;
-	bool IsDataPending;
 	bool IsMerging;
 	bool IsTransmitting;
 };

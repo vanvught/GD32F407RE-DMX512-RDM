@@ -176,7 +176,6 @@ static uint32_t s_nDmxTransmitInterTime { dmx::transmit::PERIOD_DEFAULT - dmx::t
 static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortIndex) {
 	uint32_t nIndex;
 	uint16_t nCounter;
-	logic_analyzer::ch0_set();
 
 	if (RESET != (USART_REG_VAL(uart, USART_FLAG_FERR) & BIT(USART_BIT_POS(USART_FLAG_FERR)))) {
 		USART_REG_VAL(uart, USART_FLAG_FERR) &= ~BIT(USART_BIT_POS(USART_FLAG_FERR));
@@ -184,7 +183,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 		if (s_RxBuffer[nPortIndex].State == TxRxState::IDLE) {
 			s_RxBuffer[nPortIndex].Dmx.nSlotsInPacket = 0;
 			s_RxBuffer[nPortIndex].State = TxRxState::BREAK;
-			logic_analyzer::ch0_clear();
 		}
 		return;
 	}
@@ -205,7 +203,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			sv_nRxDmxPackets[nPortIndex].nTimerCounterPrevious = static_cast<uint16_t>(TIMER_CNT(TIMER3));
 		}
 #endif
-		logic_analyzer::ch1_set();
 		break;
 	case TxRxState::BREAK:
 		switch (data) {
@@ -229,7 +226,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			s_RxBuffer[nPortIndex].Rdm.nChecksum = E120_SC_RDM;
 			s_RxBuffer[nPortIndex].Rdm.nIndex = 1;
 			s_RxBuffer[nPortIndex].State = TxRxState::RDMDATA;
-			logic_analyzer::ch1_set();
 			break;
 		default:
 			s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
@@ -344,7 +340,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			} else {
 				s_RxBuffer[nPortIndex].Rdm.nIndex |= 0x4000;
 				gv_RdmDataReceiveEnd = DWT->CYCCNT;
-				logic_analyzer::ch1_clear();
 			}
 
 			s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
@@ -423,8 +418,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
 			break;
 	}
-
-	logic_analyzer::ch0_clear();
 }
 
 extern "C" {
@@ -1060,7 +1053,6 @@ void TIMER1_IRQHandler() {
 }
 
 void TIMER4_IRQHandler() {
-	logic_analyzer::ch1_set();
 	/*
 	 * UART 4
 	 */
@@ -1220,11 +1212,9 @@ void TIMER2_IRQHandler() {
 		if (s_RxBuffer[0].State == TxRxState::DMXDATA) {
 			s_RxBuffer[0].State = TxRxState::IDLE;
 			s_RxBuffer[0].Dmx.nSlotsInPacket |= 0x8000;
-			logic_analyzer::ch1_clear();
 		} else if (s_RxBuffer[0].State == TxRxState::RDMDISC) {
 			s_RxBuffer[0].State = TxRxState::IDLE;
 			s_RxBuffer[0].Dmx.nSlotsInPacket |= 0x4000;
-			logic_analyzer::ch1_clear();
 		}
 	}
 #if DMX_MAX_PORTS >= 2
@@ -1387,9 +1377,10 @@ void DMA0_Channel6_IRQHandler() {
 #if defined (DMX_USE_USART2)
 # if !defined (GD32F4XX)
 void DMA0_Channel1_IRQHandler() {
-	logic_analyzer::ch1_set();
 	if (dma_interrupt_flag_get(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH1, DMA_INTERRUPT_DISABLE);
+
+		usart_flag_clear(USART2, USART_FLAG_TC);
 
 		if (s_TxBuffer[dmx::config::USART2_PORT].outputStyle == dmx::OutputStyle::DELTA) {
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::IDLE;
@@ -1400,7 +1391,6 @@ void DMA0_Channel1_IRQHandler() {
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_CLEAR);
-	logic_analyzer::ch1_clear();
 }
 # else
 void DMA0_Channel3_IRQHandler() {
@@ -1709,6 +1699,15 @@ void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 	assert(nPortIndex < dmx::config::max::OUT);
 	const auto nUart = _port_to_uart(nPortIndex);
 
+	/*
+	 * USART_FLAG_TC is set after power on.
+	 * The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
+	 */
+
+	//TODO Do we need a timeout just to be safe?
+	while (SET != usart_flag_get(nUart, USART_FLAG_TC))
+		;
+
 	switch (nUart) {
 	/* TIMER 1 */
 #if defined (DMX_USE_USART0)
@@ -1785,7 +1784,10 @@ void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 }
 
 void Dmx::StartOutput(const uint32_t nPortIndex) {
-	if ((sv_PortState[nPortIndex] == dmx::PortState::TX) && (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA)) {
+	if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
+			&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA)
+			&& (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE)) {
+
 		StartDmxOutput(nPortIndex);
 	}
 }
@@ -1793,27 +1795,33 @@ void Dmx::StartOutput(const uint32_t nPortIndex) {
 static bool s_doForce;
 
 void Dmx::SetOutput(const bool doForce) {
+	logic_analyzer::ch1_set();
+
 	if (doForce) {
 		s_doForce = true;
 		for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
-			if ((sv_PortState[nPortIndex] == dmx::PortState::TX) && (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
+			if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
+					&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
 				StopData(_port_to_uart(nPortIndex), nPortIndex);
 			}
 			sv_PortState[nPortIndex] = dmx::PortState::TX;
 		}
+
+		logic_analyzer::ch1_clear();
 		return;
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
 		if (sv_PortState[nPortIndex] == dmx::PortState::TX) {
 			const auto b = ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS) && s_doForce);
-			if (b || (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA)) {
+			if (b || ((s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::DELTA) && (s_TxBuffer[nPortIndex].State == dmx::TxRxState::IDLE))) {
 				StartDmxOutput(nPortIndex);
 			}
 		}
 	}
 
 	s_doForce = false;
+	logic_analyzer::ch1_clear();
 }
 
 void Dmx::SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle) {
@@ -2053,8 +2061,14 @@ void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 }
 
 void Dmx::SetPortSendDataWithoutSC(__attribute__((unused)) uint32_t nPortIndex, __attribute__((unused)) const uint8_t *pData, __attribute__((unused)) uint32_t nLength) {
-	logic_analyzer::ch4_set();
+	logic_analyzer::ch0_set();
+
 	assert(nPortIndex < DMX_MAX_PORTS);
+
+	if ((s_TxBuffer[nPortIndex].State != dmx::TxRxState::DMXINTER) && (s_TxBuffer[nPortIndex].State != dmx::TxRxState::IDLE)) {
+		logic_analyzer::ch0_clear();
+		return;
+	}
 
 	auto *p = &s_TxBuffer[nPortIndex];
 	auto *pDst = p->data;
@@ -2070,7 +2084,7 @@ void Dmx::SetPortSendDataWithoutSC(__attribute__((unused)) uint32_t nPortIndex, 
 		SetDmxPeriodTime(m_nDmxTransmitPeriodRequested);
 	}
 
-	logic_analyzer::ch4_clear();
+	logic_analyzer::ch0_clear();
 }
 
 void Dmx::Blackout() {

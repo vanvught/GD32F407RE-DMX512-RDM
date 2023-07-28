@@ -48,11 +48,11 @@ void ArtNetNode::SendDiag(const char *text, TPriorityCodes nPriority) {
 		return;
 	}
 
-	if (nPriority < m_State.Priority) {
+	if (nPriority < m_State.DiagPriority) {
 		return;
 	}
 
-	m_DiagData.Priority = nPriority;
+	m_DiagData.DiagPriority = nPriority;
 
 	strncpy(m_DiagData.Data, text, sizeof m_DiagData.Data - 1);
 	m_DiagData.Data[sizeof(m_DiagData.Data) - 1] = '\0';// Just be sure we have a last '\0'

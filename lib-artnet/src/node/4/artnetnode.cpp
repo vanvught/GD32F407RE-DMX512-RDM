@@ -45,7 +45,7 @@ void ArtNetNode::SetPortProtocol4(const uint32_t nPortIndex, const artnet::PortP
 		return;
 	}
 
-	m_Node.protocol[nPortIndex] = portProtocol;
+	m_Node.Port[nPortIndex].protocol = portProtocol;
 
 	if (portProtocol == artnet::PortProtocol::SACN) {
 		m_OutputPort[nPortIndex].GoodOutput |= artnet::GoodOutput::OUTPUT_IS_SACN;
@@ -69,7 +69,7 @@ void ArtNetNode::SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir
 
 	uint16_t nUniverse;
 	const bool isActive = ArtNetNode::GetPortAddress(nPortIndex, nUniverse, porDirection);
-	const auto portProtocol = m_Node.protocol[nPortIndex];
+	const auto portProtocol = m_Node.Port[nPortIndex].protocol;
 
 	DEBUG_PRINTF("Port %u, Active %c, Universe %d, Protocol %s [%s]", nPortIndex, isActive ? 'Y' : 'N', nUniverse, artnet::get_protocol_mode(portProtocol), porDirection == lightset::PortDir::OUTPUT ? "Output" : "Input");
 
@@ -119,7 +119,7 @@ void ArtNetNode::SetLedBlinkMode4(hardware::ledblink::Mode mode) {
 	Hardware::Get()->SetMode(mode);
 }
 
-uint8_t ArtNetNode::GetStatus4(const uint32_t nPortIndex) {
+uint8_t ArtNetNode::GetGoodOutput4(const uint32_t nPortIndex) {
 	assert(nPortIndex < e131bridge::MAX_PORTS);
 
 	uint16_t nUniverse;

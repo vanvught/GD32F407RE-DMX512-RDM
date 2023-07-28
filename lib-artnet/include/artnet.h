@@ -75,23 +75,15 @@ struct PriorityCodes {
 	static constexpr uint8_t DP_VOLATILE = 0xF0;///< Volatile message. Messages of this type are displayed on a single line in the DMX-Workshop diagnostics display. All other types are displayed in a list box.
 };
 
-/**
- * An enum for setting the behavior of a port.
- * Ports can either input data (DMX -> ArtNet) or
- * output (ArtNet -> DMX) data.
- */
-struct PortSettings {
-	static constexpr uint8_t ENABLE_INPUT = 0x40;
-	static constexpr uint8_t ENABLE_OUTPUT = 0x80;
-};
-
-struct PortDataCode {
-	static constexpr uint8_t PORT_DMX = 0x00;	///< Data is DMX-512
-	static constexpr uint8_t PORT_MIDI = 0x01; 	///< Data is MIDI
-	static constexpr uint8_t PORT_AVAB = 0x02;	///< Data is Avab
-	static constexpr uint8_t PORT_CMX = 0x03;	///< Data is Colortran CMX
-	static constexpr uint8_t PORT_ADB = 0x04;	///< Data is ABD 62.5
-	static constexpr uint8_t PORT_ARTNET = 0x05;///< Data is ArtNet
+struct PortType {
+	static constexpr uint8_t PROTOCOL_DMX = 0x00;	///< DMX-512
+	static constexpr uint8_t PROTOCOL_MIDI = 0x01; 	///< MIDI
+	static constexpr uint8_t PROTOCOL_AVAB = 0x02;	///< Avab
+	static constexpr uint8_t PROTOCOL_CMX = 0x03;	///< Colortran CMX
+	static constexpr uint8_t PROTOCOL_ADB = 0x04;	///< ABD 62.5
+	static constexpr uint8_t PROTOCOL_ARTNET = 0x05;///< ArtNet
+	static constexpr uint8_t INPUT_ARTNET = 0x40;	///< Set if this channel can input onto the Art-Net network
+	static constexpr uint8_t OUTPUT_ARTNET = 0x80;	///< Set if this channel can output data from the Art-Net network
 };
 
 struct PortCommand {
@@ -216,10 +208,17 @@ struct Status3 {
 	static constexpr uint8_t OUTPUT_SWITCH = (1U << 3);  		///< bit 3 = 1 Outputs can be switched to an input
 };
 
-struct TalkToMe {
-	static constexpr auto SEND_ARTP_ON_CHANGE = (1U << 1);	///< Bit 1 set : Send ArtPollReply whenever Node conditions change.
-	static constexpr auto SEND_DIAG_MESSAGES = (1U << 2);	///< Bit 2 set : Send me diagnostics messages.
-	static constexpr auto SEND_DIAG_UNICAST = (1U << 3);	///< Bit 3 : 0 = Diagnostics messages are broadcast. (if bit 2).													///< Bit 3 : 1 = Diagnostics messages are unicast. (if bit 2).
+struct Flags {
+																///< bit 1 = 0 Node only sends ArtPollReply when polled
+	static constexpr uint8_t SEND_ARTP_ON_CHANGE = (1U << 1);	///< bit 1 = 1 Node sends ArtPollReply when it needs to
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 		///< bit 2 = 0 Do not send me diagnostic messages
+	static constexpr uint8_t SEND_DIAG_MESSAGES = (1U << 2);	///< bit 2 = 1 Send me diagnostics messages.
+																///< bit 3 = 0 Diagnostics messages are broadcast. (if bit 2).
+	static constexpr uint8_t SEND_DIAG_UNICAST = (1U << 3);		///< bit 3 = 1 Diagnostics messages are unicast. (if bit 2).
+																///< bit 5 = 0 Ignore TargetPortAddress
+	static constexpr uint8_t USE_TARGET_PORT_ADDRESS = (1U < 5);///< bit 5 = 1 Only reply if device has a Port-Address that is
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	///<		   inclusively in the range TargetPortAddressBottom to
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	///<		   TargetPortAddressTop.
 };
 
 struct GoodOutput {
@@ -327,8 +326,12 @@ struct TArtPoll {
 	uint16_t OpCode;		///< The OpCode defines the class of data following ArtPoll within this UDP packet. Transmitted low byte first. See \ref TOpCodes for the OpCode listing.
 	uint8_t ProtVerHi;		///< High byte of the Art-Net protocol revision number.
 	uint8_t ProtVerLo;		///< Low byte of the Art-Net protocol revision number. Current value 14.
-	uint8_t TalkToMe;		///< Set behavior of Node
-	uint8_t Priority;		///< The lowest priority of diagnostics message that should be sent. See \ref TPriorityCodes
+	uint8_t Flags;			///< Set behavior of Node
+	uint8_t DiagPriority;	///< The lowest priority of diagnostics message that should be sent. See \ref TPriorityCodes
+	uint8_t TargetPortAddressTopHi;
+	uint8_t TargetPortAddressTopLo;
+	uint8_t TargetPortAddressBottomHi;
+	uint8_t TargetPortAddressBottomLo;
 }PACKED;
 
 /**

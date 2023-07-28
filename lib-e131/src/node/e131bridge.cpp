@@ -115,7 +115,6 @@ void E131Bridge::Stop() {
 			m_pLightSet->Stop(nPortIndex);
 		}
 		lightset::Data::ClearLength(nPortIndex);
-		m_OutputPort[nPortIndex].IsDataPending = false;
 	}
 
 #if defined (E131_HAVE_DMXIN)
@@ -559,7 +558,6 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 				m_OutputPort[i].sourceB.nIp = 0;
 				memset(m_OutputPort[i].sourceB.cid, 0, e131::CID_LENGTH);
 				lightset::Data::ClearLength(i);
-				m_OutputPort[i].IsDataPending = false;
 				m_OutputPort[i].IsTransmitting = false;
 				m_OutputPort[i].IsMerging = false;
 			}
@@ -582,7 +580,6 @@ void E131Bridge::SetNetworkDataLossCondition(bool bSourceA, bool bSourceB) {
 				if (!m_State.IsMergeMode) {
 					doFailsafe = true;
 					lightset::Data::ClearLength(i);
-					m_OutputPort[i].IsDataPending = false;
 					m_OutputPort[i].IsTransmitting = false;
 				}
 			}

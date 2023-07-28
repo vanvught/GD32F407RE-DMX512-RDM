@@ -62,7 +62,7 @@ ArtNetController::ArtNetController() {
 	memcpy(&m_ArtNetPoll, artnet::NODE_ID, 8);
 	m_ArtNetPoll.OpCode = OP_POLL;
 	m_ArtNetPoll.ProtVerLo = artnet::PROTOCOL_REVISION;
-	m_ArtNetPoll.TalkToMe = TalkToMe::SEND_ARTP_ON_CHANGE;
+	m_ArtNetPoll.Flags = Flags::SEND_ARTP_ON_CHANGE;
 
 	m_pArtDmx = new struct TArtDmx;
 	assert(m_pArtDmx != nullptr);

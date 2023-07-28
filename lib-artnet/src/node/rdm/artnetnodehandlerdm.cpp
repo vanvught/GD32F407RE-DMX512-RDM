@@ -84,8 +84,10 @@ void ArtNetNode::HandleTodControl() {
 			continue;
 		}
 
-		if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress) && m_OutputPort[nPortIndex].genericPort.isEnabled) {
-			if (m_OutputPort[nPortIndex].IsTransmitting && (!m_IsRdmResponder)) {
+		if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress)
+				&& (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
+
+			if (m_OutputPort[nPortIndex].IsTransmitting && (!m_Node.IsRdmResponder)) {
 				m_pLightSet->Stop(nPortIndex);
 			}
 
@@ -95,7 +97,7 @@ void ArtNetNode::HandleTodControl() {
 
 			SendTod(nPortIndex);
 
-			if (m_OutputPort[nPortIndex].IsTransmitting && (!m_IsRdmResponder)) {
+			if (m_OutputPort[nPortIndex].IsTransmitting && (!m_Node.IsRdmResponder)) {
 				m_pLightSet->Start(nPortIndex);
 			}
 		}
@@ -123,7 +125,8 @@ void ArtNetNode::HandleTodRequest() {
 				continue;
 			}
 
-			if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress) && m_OutputPort[nPortIndex].genericPort.isEnabled) {
+			if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress)
+					&& (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
 				SendTod(nPortIndex);
 			}
 		}
@@ -145,7 +148,7 @@ void ArtNetNode::HandleTodData() {
 	const auto portAddress = static_cast<uint16_t>((pArtTodData->Net << 8)) | static_cast<uint16_t>((pArtTodData->Address));
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (!m_InputPort[nPortIndex].genericPort.isEnabled) {
+		if (m_Node.Port[nPortIndex].direction != lightset::PortDir::INPUT) {
 			continue;
 		}
 
@@ -251,7 +254,7 @@ void ArtNetNode::SetRdmHandler(ArtNetRdm *pArtNetTRdm, bool IsResponder) {
 	m_pArtNetRdm = pArtNetTRdm;
 
 	if (m_pArtNetRdm != nullptr) {
-		m_IsRdmResponder = IsResponder;
+		m_Node.IsRdmResponder = IsResponder;
 		m_Node.Status1 |= artnet::Status1::RDM_CAPABLE;
 	} else {
 		m_Node.Status1 &= static_cast<uint8_t>(~artnet::Status1::RDM_CAPABLE);
@@ -276,12 +279,12 @@ void ArtNetNode::HandleRdm() {
 			continue;
 		}
 
-		if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress) && m_OutputPort[nPortIndex].genericPort.isEnabled) {
+		if ((portAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress) && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
 #if defined	(RDM_CONTROLLER)
 # if (ARTNET_VERSION >= 4)
-			if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::SACN)) {
+			if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN)) {
 				constexpr auto nMask = artnet::GoodOutput::OUTPUT_IS_MERGING | artnet::GoodOutput::DATA_IS_BEING_TRANSMITTED | artnet::GoodOutput::OUTPUT_IS_SACN;
-				m_OutputPort[nPortIndex].IsTransmitting = (GetStatus4(nPortIndex) & nMask) != 0;
+				m_OutputPort[nPortIndex].IsTransmitting = (GetGoodOutput4(nPortIndex) & nMask) != 0;
 			}
 # endif
 			if (m_OutputPort[nPortIndex].IsTransmitting) {
@@ -314,7 +317,7 @@ void ArtNetNode::HandleRdm() {
 #if defined	(RDM_CONTROLLER)
 	// Input ports
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if (!m_InputPort[nPortIndex].genericPort.isEnabled) {
+		if ((m_Node.Port[nPortIndex].direction != lightset::PortDir::INPUT)) {
 			continue;
 		}
 

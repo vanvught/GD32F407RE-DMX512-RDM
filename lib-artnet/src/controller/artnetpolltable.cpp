@@ -306,7 +306,7 @@ void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
 	for (uint32_t nIndex = 0; nIndex < artnet::PORTS; nIndex++) {
 		const uint8_t nPortAddress = ptArtPollReply->SwOut[nIndex];
 
-		if (ptArtPollReply->PortTypes[nIndex] == static_cast<uint8_t>(PortSettings::ENABLE_OUTPUT)) {
+		if (ptArtPollReply->PortTypes[nIndex] == static_cast<uint8_t>(artnet::PortType::OUTPUT_ARTNET)) {
 			const auto nUniverse = artnet::make_port_address(ptArtPollReply->NetSwitch, ptArtPollReply->SubSwitch, nPortAddress);
 
 			uint32_t nIndexUniverse;

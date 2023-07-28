@@ -32,14 +32,16 @@
 #include "artnet.h"
 
 #include "lightsetdata.h"
-#include "hardware.h"
 
+/**
+ * When a node receives an ArtSync packet it should transfer to synchronous operation.
+ * This means that received ArtDmx packets will be buffered
+ * and output when the next ArtSync is received.
+ */
 void ArtNetNode::HandleSync() {
-	m_State.nArtSyncMillis = Hardware::Get()->Millis();
-
 	if (!m_State.IsSynchronousMode) {
 		m_State.IsSynchronousMode = true;
-		/**
+		/*
 		 * As the ArtSync is after the ArtDmx which are already processed
 		 * we need to do a forced sync
 		 */
@@ -48,20 +50,25 @@ void ArtNetNode::HandleSync() {
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.isEnabled)) {
-#if defined ( ARTNET_ENABLE_SENDDIAG )
-			SendDiag("Send pending data", ARTNET_DP_LOW);
-#endif
+		if (m_OutputPort[nPortIndex].IsDataPending) {
 			m_pLightSet->Sync(nPortIndex);
+#if defined ( ARTNET_ENABLE_SENDDIAG )
+			SendDiag("Sync individual port", ARTNET_DP_LOW);
+#endif
 		}
 	}
 
 	m_pLightSet->Sync();
 
-	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (m_OutputPort[nPortIndex].genericPort.isEnabled)) {
-			if (!m_OutputPort[nPortIndex].IsTransmitting) {
-				m_OutputPort[nPortIndex].IsTransmitting = true;
+#if defined ( ARTNET_ENABLE_SENDDIAG )
+			SendDiag("Sync all", ARTNET_DP_LOW);
+#endif
+
+	for (auto &outputPort : m_OutputPort) {
+		if (outputPort.IsDataPending) {
+			outputPort.IsDataPending = false;
+			if (!outputPort.IsTransmitting) {
+				outputPort.IsTransmitting = true;
 				m_State.IsChanged = true;
 			}
 		}

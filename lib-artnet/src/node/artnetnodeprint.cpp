@@ -62,7 +62,7 @@ void ArtNetNode::Print() {
 				const auto mergeMode = ((m_OutputPort[nPortIndex].GoodOutput & artnet::GoodOutput::MERGE_MODE_LTP) == artnet::GoodOutput::MERGE_MODE_LTP) ? lightset::MergeMode::LTP : lightset::MergeMode::HTP;
 				printf("  Port %-2d %-4u %s %s", nPortIndex, nUniverse, lightset::get_merge_mode(mergeMode, true), GetRdm(0) ? "RDM" : "");
 #if (ARTNET_VERSION >= 4)
-				printf(" %s\n", artnet::get_protocol_mode(m_Node.protocol[nPortIndex], true));
+				printf(" %s\n", artnet::get_protocol_mode(m_Node.Port[nPortIndex].protocol, true));
 #else
 				printf("\n");
 #endif
@@ -79,12 +79,12 @@ void ArtNetNode::Print() {
 			uint16_t nUniverse;
 			if (GetPortAddress(nPortIndex, nUniverse, lightset::PortDir::INPUT)) {
 				printf("  Port %-2d %-4u", nPortIndex, nUniverse);
-				if (m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) {
+				if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET) {
 					const auto nDestinationIp = (m_InputPort[nPortIndex].nDestinationIp == 0 ? Network::Get()->GetBroadcastIp() : m_InputPort[nPortIndex].nDestinationIp);
 					printf(" -> " IPSTR, IP2STR(nDestinationIp));
 				}
 #if (ARTNET_VERSION >= 4)
-				printf(" %s\n", artnet::get_protocol_mode(m_Node.protocol[nPortIndex], true));
+				printf(" %s\n", artnet::get_protocol_mode(m_Node.Port[nPortIndex].protocol, true));
 #else
 				printf("\n");
 #endif

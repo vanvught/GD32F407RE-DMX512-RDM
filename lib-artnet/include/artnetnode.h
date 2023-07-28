@@ -114,22 +114,26 @@ enum class Status : uint8_t {
 
 struct State {
 	uint32_t ArtPollReplyCount;			///< ArtPollReply : NodeReport : decimal counter that increments every time the Node sends an ArtPollResponse.
-	uint32_t IPAddressDiagSend;			///< ArtPoll : Destination IPAddress for the ArtDiag
-	uint32_t IPAddressArtPoll;			///< ArtPoll : IPAddress for the ArtPoll package
+	uint32_t DiagSendIPAddress;			///< ArtPoll : Destination IPAddress for the ArtDiag
+	uint32_t IPAddressArtPoll;
+	uint32_t IPAddressArtDmx;
 	uint32_t nArtSyncMillis;			///< Latest ArtSync received time
 	ReportCode reportCode;
 	Status status;
-	bool SendArtPollReplyOnChange;		///< ArtPoll : TalkToMe Bit 1 : 1 = Send ArtPollReply whenever Node conditions change.
-	bool SendArtDiagData;				///< ArtPoll : TalkToMe Bit 2 : 1 = Send me diagnostics messages.
+	bool SendArtPollReplyOnChange;		///< ArtPoll : Flags Bit 1 : 1 = Send ArtPollReply whenever Node conditions change.
+	bool SendArtDiagData;				///< ArtPoll : Flags Bit 2 : 1 = Send me diagnostics messages.
 	bool IsMultipleControllersReqDiag;	///< ArtPoll : Multiple controllers requesting diagnostics
 	bool IsSynchronousMode;				///< ArtSync received
 	bool IsMergeMode;
 	bool IsChanged;
 	bool bDisableMergeTimeout;
+	bool bUseTargetPortAddress;
 	uint8_t nReceivingDmx;
 	uint8_t nEnabledOutputPorts;
 	uint8_t nEnabledInputPorts;
-	uint8_t Priority;					///< ArtPoll : Field 6 : The lowest priority of diagnostics message that should be sent.
+	uint8_t DiagPriority;				///< ArtPoll : Field 6 : The lowest priority of diagnostics message that should be sent.
+	uint16_t TargetPortAddressTop;		///< ArtPoll
+	uint16_t TargetPortAddressBottom;	///< ArtPoll
 };
 
 struct Node {
@@ -140,14 +144,17 @@ struct Node {
 	uint8_t SubSwitch[artnetnode::PAGES];		///< Bits 7-4 of the 15 bit Port-Address are encoded into the bottom 4 bits of this field.
 	char ShortName[artnet::SHORT_NAME_LENGTH];
 	char LongName[artnet::LONG_NAME_LENGTH];
-	uint8_t TalkToMe;
 	uint8_t Status1;
 	uint8_t Status2;
 	uint8_t Status3;
 	uint8_t DefaultUidResponder[6];							///< RDMnet & LLRP UID
-	artnet::PortProtocol protocol[artnetnode::MAX_PORTS];	///< Art-Net 4
+	bool IsRdmResponder;
 	bool bMapUniverse0;										///< Art-Net 4
 	uint8_t AcnPriority;									///< Art-Net 4
+	struct {
+		lightset::PortDir direction;
+		artnet::PortProtocol protocol;						///< Art-Net 4
+	} Port[artnetnode::MAX_PORTS];
 };
 
 struct Source {
@@ -159,24 +166,23 @@ struct GenericPort {
 	uint16_t nPortAddress;			///< One of the 32,768 possible addresses to which a DMX frame can be directed. The Port-Address is a 15 bit number composed of Net+Sub-Net+Universe.
 	uint8_t nDefaultAddress;		///< the address set by the hardware
 	uint8_t nPollReplyIndex;
-	bool isEnabled;
 };
 
 struct OutputPort {
 	GenericPort genericPort;
 	Source sourceA;
 	Source sourceB;
-	bool IsDataPending;				///< ArtDMX received and waiting for ArtSync
-	bool IsTransmitting;
 	uint8_t GoodOutput;
 	uint8_t GoodOutputB;
+	bool IsTransmitting;
+	bool IsDataPending;
 };
 
 struct InputPort {
 	GenericPort genericPort;
 	uint32_t nDestinationIp;
-	uint8_t GoodInput;
 	uint8_t nSequenceNumber;
+	uint8_t GoodInput;
 };
 
 inline static artnetnode::FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
@@ -320,10 +326,10 @@ public:
 
 	bool GetOutputPort(const uint16_t nUniverse, uint32_t& nPortIndex) {
 		for (nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-			if (!m_OutputPort[nPortIndex].genericPort.isEnabled) {
+			if (m_Node.Port[nPortIndex].direction != lightset::PortDir::OUTPUT) {
 				continue;
 			}
-			if ((m_Node.protocol[nPortIndex] == artnet::PortProtocol::ARTNET) && (nUniverse == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
+			if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (nUniverse == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
 				return true;
 			}
 		}
@@ -423,7 +429,7 @@ private:
 	void SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir portDir);
 	void SetLedBlinkMode4(hardware::ledblink::Mode mode);
 	void HandleAddress4(const uint8_t nCommand, const uint32_t nPortIndex);
-	uint8_t GetStatus4(const uint32_t nPortIndex);
+	uint8_t GetGoodOutput4(const uint32_t nPortIndex);
 
 public:
 	/**
@@ -447,7 +453,7 @@ public:
 	void SetPortProtocol4(const uint32_t nPortIndex, const artnet::PortProtocol portProtocol);
 	artnet::PortProtocol GetPortProtocol4(const uint32_t nPortIndex) const {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
-		return m_Node.protocol[nPortIndex];
+		return m_Node.Port[nPortIndex].protocol;
 	}
 
 	/**
@@ -518,6 +524,8 @@ private:
 
 private:
 	int32_t m_nHandle { -1 };
+	uint8_t *m_pReceiveBuffer { nullptr };
+	uint32_t m_nIpAddressFrom;
 
 	artnetnode::Node m_Node;
 	artnetnode::State m_State;
@@ -543,13 +551,9 @@ private:
 	TArtDiagData m_DiagData;
 #endif
 
-	bool m_IsRdmResponder { false };
-
 	uint32_t m_nCurrentPacketMillis { 0 };
 	uint32_t m_nPreviousPacketMillis { 0 };
 
-	uint8_t *m_pReceiveBuffer { nullptr };
-	uint32_t m_nIpAddressFrom;
 	LightSet *m_pLightSet { nullptr };
 
 	ArtNetTimeCode *m_pArtNetTimeCode { nullptr };
