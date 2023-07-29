@@ -157,8 +157,6 @@ void ArtNetNode::Start() {
 	m_nHandle = Network::Get()->Begin(artnet::UDP_PORT);
 	assert(m_nHandle != -1);
 
-	m_State.status = Status::ON;
-
 #if defined (ARTNET_HAVE_DMXIN)
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
@@ -167,13 +165,13 @@ void ArtNetNode::Start() {
 	}
 #endif
 
+	/*
+	 * Make sure that the supported LightSet OutputSyle is correctly set
+	 */
 	if (m_pLightSet != nullptr) {
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 			if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
-				const auto lightsetOutputStyle = GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONTINOUS  ? lightset::OutputStyle::CONTINOUS : lightset::OutputStyle::DELTA;
-				m_pLightSet->SetOutputStyle(nPortIndex, lightsetOutputStyle);
-				const auto artnetOutputStyle = m_pLightSet->GetOutputStyle(nPortIndex) == lightset::OutputStyle::CONTINOUS ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
-				SetOutputStyle(nPortIndex, artnetOutputStyle);
+				SetOutputStyle(nPortIndex, GetOutputStyle(nPortIndex));
 			}
 		}
 	}
@@ -182,7 +180,7 @@ void ArtNetNode::Start() {
 	if (m_pArtNetRdm != nullptr) {
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 			/* An Output Gateway will send the ArtTodData packet in the following circumstances:
-			 * - Upon power on or decice reset. 
+			 * - Upon power on or device reset.
 			 * - In response to an ArtTodRequest if the Port-Address matches.
 			 * - In response to an ArtTodControl if the Port-Address matches.
 			 * - When their ToD changes due to the addition or deletion of a UID.
@@ -213,6 +211,7 @@ void ArtNetNode::Start() {
 		E131Bridge::Start();
 #endif
 
+	m_State.status = Status::ON;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 	hal::panel_led_on(hal::panelled::ARTNET);
 

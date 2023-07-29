@@ -197,6 +197,14 @@ inline static lightset::FailSafe convert_failsafe(const artnetnode::FailSafe fai
 	return fs;
 }
 
+inline static artnet::OutputStyle convert_outputstyle(const lightset::OutputStyle outputStyle) {
+	return outputStyle == lightset::OutputStyle::CONSTANT  ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA;
+}
+
+inline static lightset::OutputStyle convert_outputstyle(const artnet::OutputStyle outputStyle) {
+	return outputStyle == artnet::OutputStyle::CONSTANT ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
+}
+
 }  // namespace artnetnode
 
 #if (ARTNET_VERSION >= 4)
@@ -244,14 +252,33 @@ public:
 		return artnetnode::FailSafe::OFF;
 	}
 
-	void SetOutputStyle(const uint32_t nPortIndex, const artnet::OutputStyle outputStyle) {
+	void SetOutputStyle(const uint32_t nPortIndex, artnet::OutputStyle outputStyle) {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
-		if (outputStyle == artnet::OutputStyle::CONTINOUS) {
+		if ((m_State.status == artnetnode::Status::ON) && (m_pLightSet != nullptr)) {
+			m_pLightSet->SetOutputStyle(nPortIndex, artnetnode::convert_outputstyle(outputStyle));
+			outputStyle = artnetnode::convert_outputstyle(m_pLightSet->GetOutputStyle(nPortIndex));
+		}
+
+		if (outputStyle == artnet::OutputStyle::CONSTANT) {
 			m_OutputPort[nPortIndex].GoodOutputB |= artnet::GoodOutputB::STYLE_CONSTANT;
 		} else {
 			m_OutputPort[nPortIndex].GoodOutputB &= static_cast<uint8_t>(~artnet::GoodOutputB::STYLE_CONSTANT);
 		}
+
+#if defined (OUTPUT_DMX_SEND) || defined (OUTPUT_DMX_SEND_MULTI)
+		/**
+		 * FIXME I do not like this hack. It should be handled in dmx.cpp
+		 */
+		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)
+				&& (outputStyle == artnet::OutputStyle::CONSTANT)
+				&& (m_pLightSet != nullptr)) {
+			if (m_OutputPort[nPortIndex].IsTransmitting) {
+				m_OutputPort[nPortIndex].IsTransmitting = false;
+				m_pLightSet->Stop(nPortIndex);
+			}
+		}
+#endif
 
 		if (m_State.status == artnetnode::Status::ON) {
 			if (m_pArtNetStore != nullptr) {
@@ -266,7 +293,7 @@ public:
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
 		const auto isStyleConstant = (m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::STYLE_CONSTANT) == artnet::GoodOutputB::STYLE_CONSTANT;
-		return isStyleConstant ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA;
+		return isStyleConstant ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA;
 	}
 
 	void SetOutput(LightSet *pLightSet) {

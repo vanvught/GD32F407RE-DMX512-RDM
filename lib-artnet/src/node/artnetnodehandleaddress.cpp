@@ -551,7 +551,6 @@ void ArtNetNode::HandleAddress() {
 	case artnet::PortCommand::STYLE_DELTA3:
 		assert(isPortIndexOutput);
 		SetOutputStyle(nPortIndex, artnet::OutputStyle::DELTA);
-		m_pLightSet->SetOutputStyle(nPortIndex, lightset::OutputStyle::DELTA);
 		break;
 
 	case artnet::PortCommand::STYLE_CONSTANT0:
@@ -559,8 +558,7 @@ void ArtNetNode::HandleAddress() {
 	case artnet::PortCommand::STYLE_CONSTANT2:
 	case artnet::PortCommand::STYLE_CONSTANT3:
 		assert(isPortIndexOutput);
-		SetOutputStyle(nPortIndex, artnet::OutputStyle::CONTINOUS);
-		m_pLightSet->SetOutputStyle(nPortIndex, lightset::OutputStyle::CONTINOUS);
+		SetOutputStyle(nPortIndex, artnet::OutputStyle::CONSTANT);
 		break;
 #endif
 

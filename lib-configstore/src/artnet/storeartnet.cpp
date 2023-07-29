@@ -209,7 +209,7 @@ void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyl
 	uint8_t nOutputStyle;
 	ConfigStore::Get()->Copy(configstore::Store::ARTNET, &nOutputStyle, sizeof(uint8_t), __builtin_offsetof(struct artnetparams::Params, nOutputStyle), false);
 
-	if (outputStyle == artnet::OutputStyle::CONTINOUS) {
+	if (outputStyle == artnet::OutputStyle::CONSTANT) {
 		nOutputStyle |= static_cast<uint8_t>(1U << nPortIndex);
 	} else {
 		nOutputStyle &= static_cast<uint8_t>(~(1U << nPortIndex));

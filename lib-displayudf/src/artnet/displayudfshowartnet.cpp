@@ -83,7 +83,7 @@ void DisplayUdf::ShowUniverse(ArtNetNode *pArtNetNode) {
 						nUniverse,
 						lightset::get_merge_mode(pArtNetNode->GetMergeMode(nPortIndex), true),
 						artnet::get_protocol_mode(pArtNetNode->GetPortProtocol4(nPortIndex), true),
-						pArtNetNode->GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONTINOUS ? 'C' : 'D',
+						pArtNetNode->GetOutputStyle(nPortIndex) == artnet::OutputStyle::CONSTANT ? 'C' : 'D',
 						pArtNetNode->GetRdm(nPortIndex) ? "RDM" : "");
 			}
 		}

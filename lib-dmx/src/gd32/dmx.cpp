@@ -89,9 +89,13 @@ enum class PortState {
 	IDLE, TX, RX
 };
 
-struct TxData {
+struct TxDmxPacket {
 	uint8_t data[dmx::buffer::SIZE];	// multiple of uint16_t
 	uint16_t nLength;
+};
+
+struct TxData {
+	struct TxDmxPacket dmx;
 	OutputStyle outputStyle;
 	volatile TxRxState State;
 };
@@ -917,8 +921,9 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART0_DMA, USART0_TX_DMA_CH) = dmaCHCTL;
 			dma_interrupt_flag_clear(USART0_DMA, USART0_TX_DMA_CH, DMA_INTF_FTFIF);
-			DMA_CHMADDR(USART0_DMA, USART0_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::USART0_PORT].data;
-			DMA_CHCNT(USART0_DMA, USART0_TX_DMA_CH) = (s_TxBuffer[dmx::config::USART0_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::USART0_PORT].dmx;
+			DMA_CHMADDR(USART0_DMA, USART0_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(USART0_DMA, USART0_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART0_DMA, USART0_TX_DMA_CH) = dmaCHCTL;
@@ -955,8 +960,9 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART1_DMA, USART1_TX_DMA_CH) = dmaCHCTL;
 			dma_interrupt_flag_clear(USART1_DMA, USART1_TX_DMA_CH, DMA_INTF_FTFIF);
-			DMA_CHMADDR(USART1_DMA, USART1_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::USART1_PORT].data;
-			DMA_CHCNT(USART1_DMA, USART1_TX_DMA_CH) = (s_TxBuffer[dmx::config::USART1_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::USART2_PORT].dmx;
+			DMA_CHMADDR(USART1_DMA, USART1_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(USART1_DMA, USART1_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART1_DMA, USART1_TX_DMA_CH) = dmaCHCTL;
@@ -992,8 +998,9 @@ void TIMER1_IRQHandler() {
 			uint32_t dmaCHCTL = DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH);
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH) = dmaCHCTL;
-			DMA_CHMADDR(USART2_DMA, USART2_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::USART2_PORT].data;
-			DMA_CHCNT(USART2_DMA, USART2_TX_DMA_CH) = (s_TxBuffer[dmx::config::USART2_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::USART2_PORT].dmx;
+			DMA_CHMADDR(USART2_DMA, USART2_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(USART2_DMA, USART2_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH) = dmaCHCTL;
@@ -1034,8 +1041,9 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(UART3_DMA, UART3_TX_DMA_CH) = dmaCHCTL;
 			dma_interrupt_flag_clear(UART3_DMA, UART3_TX_DMA_CH, DMA_INTF_FTFIF);
-			DMA_CHMADDR(UART3_DMA, UART3_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::UART3_PORT].data;
-			DMA_CHCNT(UART3_DMA, UART3_TX_DMA_CH) = (s_TxBuffer[dmx::config::UART3_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::UART3_PORT].dmx;
+			DMA_CHMADDR(UART3_DMA, UART3_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(UART3_DMA, UART3_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART3_DMA, UART3_TX_DMA_CH) = dmaCHCTL;
@@ -1074,8 +1082,9 @@ void TIMER4_IRQHandler() {
 			uint32_t dmaCHCTL = DMA_CHCTL(UART4_DMA, UART4_TX_DMA_CH);
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(UART4_DMA, UART4_TX_DMA_CH) = dmaCHCTL;
-			DMA_CHMADDR(UART4_DMA, UART4_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::UART4_PORT].data;
-			DMA_CHCNT(UART4_DMA, UART4_TX_DMA_CH) = (s_TxBuffer[dmx::config::UART4_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::UART4_PORT].dmx;
+			DMA_CHMADDR(UART4_DMA, UART4_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(UART4_DMA, UART4_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART4_DMA, UART4_TX_DMA_CH) = dmaCHCTL;
@@ -1111,8 +1120,9 @@ void TIMER4_IRQHandler() {
 			uint32_t dmaCHCTL = DMA_CHCTL(USART5_DMA, USART5_TX_DMA_CH);
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART5_DMA, USART5_TX_DMA_CH) = dmaCHCTL;
-			DMA_CHMADDR(USART5_DMA, USART5_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::USART5_PORT].data;
-			DMA_CHCNT(USART5_DMA, USART5_TX_DMA_CH) = (s_TxBuffer[dmx::config::USART5_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::USART5_PORT].dmx;
+			DMA_CHMADDR(USART5_DMA, USART5_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(USART5_DMA, USART5_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART5_DMA, USART5_TX_DMA_CH) = dmaCHCTL;
@@ -1149,8 +1159,9 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(UART6_DMA, UART6_TX_DMA_CH)= dmaCHCTL;
 			dma_interrupt_flag_clear(UART6_DMA, UART6_TX_DMA_CH, DMA_INTF_FTFIF);
-			DMA_CHMADDR(UART6_DMA, UART6_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::UART6_PORT].data;
-			DMA_CHCNT(UART6_DMA, UART6_TX_DMA_CH) = (s_TxBuffer[dmx::config::UART6_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::UART6_PORT].dmx;
+			DMA_CHMADDR(UART6_DMA, UART6_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(UART6_DMA, UART6_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART6_DMA, UART6_TX_DMA_CH)= dmaCHCTL;
@@ -1187,8 +1198,9 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(UART7_DMA, UART7_TX_DMA_CH) = dmaCHCTL;
 			dma_interrupt_flag_clear(UART7_DMA, UART7_TX_DMA_CH, DMA_INTF_FTFIF);
-			DMA_CHMADDR(UART7_DMA, UART7_TX_DMA_CH) = (uint32_t) s_TxBuffer[dmx::config::UART7_PORT].data;
-			DMA_CHCNT(UART7_DMA, UART7_TX_DMA_CH) = (s_TxBuffer[dmx::config::UART7_PORT].nLength & DMA_CHXCNT_CNT);
+			const auto *p = &s_TxBuffer[dmx::config::UART7_PORT].dmx;
+			DMA_CHMADDR(UART7_DMA, UART7_TX_DMA_CH) = (uint32_t) p->data;
+			DMA_CHCNT(UART7_DMA, UART7_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			usart_dma_transmit_config(UART7, USART_DENT_ENABLE);
@@ -1598,13 +1610,12 @@ Dmx::Dmx() {
 		gpio_output_options_set(s_DirGpio[i].nPort, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, s_DirGpio[i].nPin);
 		gpio_af_set(s_DirGpio[i].nPort, GPIO_AF_0, s_DirGpio[i].nPin);
 #endif
-		ClearData(i);
-		sv_PortState[i] = PortState::IDLE;
+		m_nDmxTransmissionLength[i] = dmx::max::CHANNELS;
 		SetPortDirection(i, PortDirection::INP, false);
 		s_RxBuffer[i].State = TxRxState::IDLE;
-		m_nDmxTransmissionLength[i] = dmx::max::CHANNELS;
 		s_TxBuffer[i].State = TxRxState::IDLE;
 		s_TxBuffer[i].outputStyle = dmx::OutputStyle::DELTA;
+		ClearData(i);
 	}
 
 	usart_dma_config();	// DMX Transmit
@@ -1685,17 +1696,20 @@ void Dmx::SetPortDirection(uint32_t nPortIndex, PortDirection portDirection, boo
 
 void Dmx::ClearData(uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
+
 	auto *p = &s_TxBuffer[nPortIndex];
-	auto *p16 = reinterpret_cast<uint16_t *>(p->data);
+	auto *p16 =	reinterpret_cast<uint16_t*>(p->dmx.data);
 
 	for (auto i = 0; i < dmx::buffer::SIZE / 2; i++) {
 		*p16++ = 0;
 	}
 
-	p->nLength = 513; // Including START Code
+	p->dmx.nLength = 513; // Including START Code
 }
 
 void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
+	logic_analyzer::ch2_set();
+
 	assert(nPortIndex < dmx::config::max::OUT);
 	const auto nUart = _port_to_uart(nPortIndex);
 
@@ -1781,6 +1795,8 @@ void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 	}
 
 	s_TxBuffer[nPortIndex].State = TxRxState::BREAK;
+
+	logic_analyzer::ch2_clear();
 }
 
 
@@ -1875,11 +1891,12 @@ void Dmx::SetDmxMabTime(uint32_t nMabTime) {
 void Dmx::SetDmxPeriodTime(uint32_t nPeriod) {
 	m_nDmxTransmitPeriodRequested = nPeriod;
 
-	auto nLengthMax = s_TxBuffer[0].nLength;
+	auto nLengthMax = s_TxBuffer[0].dmx.nLength;
 
-	for (uint32_t i = 1; i < config::max::OUT; i++) {
-		if (s_TxBuffer[i].nLength > nLengthMax) {
-			nLengthMax = s_TxBuffer[i].nLength;
+	for (uint32_t nPortIndex = 1; nPortIndex < config::max::OUT; nPortIndex++) {
+		const auto nLength = s_TxBuffer[nPortIndex].dmx.nLength;
+		if (nLength > nLengthMax) {
+			nLengthMax = nLength;
 		}
 	}
 
@@ -1925,6 +1942,7 @@ void Dmx::SetDmxSlots(uint16_t nSlots) {
 
 void Dmx::SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle) {
 	assert(nPortIndex < dmx::config::max::OUT);
+
 	s_TxBuffer[nPortIndex].outputStyle = outputStyle;
 }
 
@@ -1937,10 +1955,10 @@ void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	auto *p = &s_TxBuffer[nPortIndex];
-	auto *pDst = p->data;
+	auto *pDst = p->dmx.data;
 
 	nLength = std::min(nLength, static_cast<uint32_t>(m_nDmxTransmitSlots));
-	p->nLength = static_cast<uint16_t>(nLength + 1);
+	p->dmx.nLength = static_cast<uint16_t>(nLength + 1);
 
 	memcpy(pDst, pData,  nLength);
 
@@ -1950,16 +1968,16 @@ void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 	}
 }
 
-void Dmx::SetPortSendDataWithoutSC(__attribute__((unused)) uint32_t nPortIndex, __attribute__((unused)) const uint8_t *pData, __attribute__((unused)) uint32_t nLength) {
+void Dmx::SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
 	logic_analyzer::ch0_set();
 
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	auto *p = &s_TxBuffer[nPortIndex];
-	auto *pDst = p->data;
+	auto *pDst = p->dmx.data;
 
 	nLength = std::min(nLength, static_cast<uint32_t>(m_nDmxTransmitSlots));
-	p->nLength = static_cast<uint16_t>(nLength + 1);
+	p->dmx.nLength = static_cast<uint16_t>(nLength + 1);
 
 	pDst[0] = START_CODE;
 	memcpy(&pDst[1], pData,  nLength);
@@ -1998,13 +2016,14 @@ void Dmx::FullOn() {
 			StopData(nUart, nPortIndex);
 
 			auto *p = &s_TxBuffer[nPortIndex];
-			auto *p16 = reinterpret_cast<uint16_t*>(p->data);
+			auto *p16 = reinterpret_cast<uint16_t*>(p->dmx.data);
 
 			for (auto i = 0; i < dmx::buffer::SIZE / 2; i++) {
 				*p16++ = UINT16_MAX;
 			}
 
-			p->data[0] = dmx::START_CODE;
+			p->dmx.data[0] = dmx::START_CODE;
+			p->dmx.nLength = 513;
 
 			StartData(nUart, nPortIndex);
 		}
@@ -2060,7 +2079,9 @@ void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
 
 	if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::OUTP) {
 		sv_PortState[nPortIndex] = PortState::TX;
-		StartDmxOutput(nPortIndex);
+		if (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS) {
+			StartDmxOutput(nPortIndex);
+		}
 	} else if (m_dmxPortDirection[nPortIndex] == dmx::PortDirection::INP) {
 		s_RxBuffer[nPortIndex].State = TxRxState::IDLE;
 

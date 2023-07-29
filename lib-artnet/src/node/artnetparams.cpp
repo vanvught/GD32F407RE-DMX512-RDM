@@ -534,7 +534,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 #endif
 
 #if defined (ARTNET_OUTPUT_STYLE_SWITCH)
-		p->SetOutputStyle(nPortIndex, (isOutputStyleSet(1U << nPortIndex)) ? artnet::OutputStyle::CONTINOUS : artnet::OutputStyle::DELTA);
+		p->SetOutputStyle(nPortIndex, (isOutputStyleSet(1U << nPortIndex)) ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA);
 #endif
 
 #if defined (RDM_CONTROLLER)

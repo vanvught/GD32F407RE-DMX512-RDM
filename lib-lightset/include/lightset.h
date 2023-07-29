@@ -52,7 +52,7 @@ enum class FailSafe {
 };
 
 enum class OutputStyle {
-	DELTA, CONTINOUS
+	DELTA, CONSTANT
 };
 
 struct SlotInfo {
@@ -173,7 +173,7 @@ inline static OutputStyle get_output_style(const char *pOutputStyle) {
 		 && ((pOutputStyle[2] | 0x20) == 'n')
 		 && ((pOutputStyle[3] | 0x20) == 's')
 		 && ((pOutputStyle[4] | 0x20) == 't')) {
-			return OutputStyle::CONTINOUS;
+			return OutputStyle::CONSTANT;
 		}
 	}
 	return OutputStyle::DELTA;

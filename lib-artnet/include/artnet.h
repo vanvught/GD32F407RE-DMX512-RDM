@@ -44,7 +44,7 @@ enum class PortProtocol {
 };
 
 enum class OutputStyle {
-	DELTA, CONTINOUS
+	DELTA, CONSTANT
 };
 
 /**

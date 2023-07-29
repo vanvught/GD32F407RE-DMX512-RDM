@@ -41,11 +41,11 @@ public:
 	void Sync(const bool doForce = false) override;
 
 	void SetOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle) override {
-		Dmx::Get()->SetOutputStyle(nPortIndex, outputStyle == lightset::OutputStyle::CONTINOUS ? dmx::OutputStyle::CONTINOUS : dmx::OutputStyle::DELTA);
+		Dmx::Get()->SetOutputStyle(nPortIndex, outputStyle == lightset::OutputStyle::CONSTANT ? dmx::OutputStyle::CONTINOUS : dmx::OutputStyle::DELTA);
 	}
 
 	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const override {
-		return Dmx::Get()->GetOutputStyle(nPortIndex) == dmx::OutputStyle::CONTINOUS ? lightset::OutputStyle::CONTINOUS : lightset::OutputStyle::DELTA;
+		return Dmx::Get()->GetOutputStyle(nPortIndex) == dmx::OutputStyle::CONTINOUS ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
 	}
 
 	void Blackout(__attribute__((unused)) bool bBlackout) override {

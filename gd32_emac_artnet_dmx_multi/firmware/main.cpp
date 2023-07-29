@@ -114,7 +114,6 @@ void main() {
 		artnetParams.Set(DMXPORT_OFFSET);
 	}
 
-
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		node.SetUniverseSwitch(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniversePort(nPortIndex));
 	}
