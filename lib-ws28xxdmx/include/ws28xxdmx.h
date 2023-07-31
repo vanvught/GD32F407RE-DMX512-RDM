@@ -54,10 +54,12 @@ public:
 		}
 	}
 
-	void SetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const lightset::OutputStyle outputStyle) override {};
+#if defined (OUTPUT_HAVE_STYLESWITCH)
+	void SetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const lightset::OutputStyle outputStyle) override {}
 	lightset::OutputStyle GetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex) const override {
 		return lightset::OutputStyle::DELTA;
 	}
+#endif
 
 	void Blackout(bool bBlackout) override;
 	void FullOn() override;

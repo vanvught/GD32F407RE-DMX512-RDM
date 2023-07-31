@@ -207,8 +207,10 @@ public:
 	 * @param [IN] doForce This parameter is used with Art-Net ArtSync only.
 	 */
 	virtual void Sync(const bool doForce = false)= 0;
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	virtual void SetOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle)=0;
 	virtual lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const=0;
+#endif
 	// Optional
 	virtual void Blackout(__attribute__((unused)) bool bBlackout) {}
 	virtual void FullOn() {}

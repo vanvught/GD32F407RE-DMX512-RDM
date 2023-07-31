@@ -47,7 +47,7 @@ void ArtNetNode::SetTimeCodeIp(uint32_t nDestinationIp) {
 	if (Network::Get()->IsValidIp(nDestinationIp)) {
 		m_Node.IPAddressTimeCode = nDestinationIp;
 	} else {
-		m_Node.IPAddressTimeCode = m_Node.IPAddressBroadcast;
+		m_Node.IPAddressTimeCode = Network::Get()->GetBroadcastIp();
 	}
 
 	DEBUG_PRINTF("m_Node.IPAddressTimeCode=" IPSTR, IP2STR(m_Node.IPAddressTimeCode));

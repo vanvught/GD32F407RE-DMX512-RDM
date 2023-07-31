@@ -236,15 +236,15 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 	}
 #endif
 
-	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+	for (uint32_t nPortIndex = 0; nPortIndex < artnet::PORTS; nPortIndex++) {
 #if (ARTNET_PAGE_SIZE == 4)
-		if (Sscan::Uint8(pLine, LightSetParamsConst::UNIVERSE_PORT[i], nValue8) == Sscan::OK) {
+		if (Sscan::Uint8(pLine, LightSetParamsConst::UNIVERSE_PORT[nPortIndex], nValue8) == Sscan::OK) {
 			if (nValue8 <= 0xF) {
-				m_Params.nUniversePort[i] = nValue8;
-				if (nValue8 != static_cast<uint8_t>(i + 1)) {
-					m_Params.nSetList |= (Mask::UNIVERSE_A << i);
+				m_Params.nUniversePort[nPortIndex] = nValue8;
+				if (nValue8 != static_cast<uint8_t>(nPortIndex + 1)) {
+					m_Params.nSetList |= (Mask::UNIVERSE_A << nPortIndex);
 				} else {
-					m_Params.nSetList &= ~(Mask::UNIVERSE_A << i);
+					m_Params.nSetList &= ~(Mask::UNIVERSE_A << nPortIndex);
 				}
 			}
 			return;
@@ -252,13 +252,13 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 #else
 		uint16_t nValue16;
 
-		if (Sscan::Uint16(pLine, LightSetParamsConst::UNIVERSE_PORT[i], nValue16) == Sscan::OK) {
+		if (Sscan::Uint16(pLine, LightSetParamsConst::UNIVERSE_PORT[nPortIndex], nValue16) == Sscan::OK) {
 			if (nValue16 != 0) {
-				m_Params.nUniverse[i] = nValue16;
-				if (nValue16 != static_cast<uint16_t>(i + 1)) {
-					m_Params.nSetList |= (Mask::UNIVERSE_A << i);
+				m_Params.nUniverse[nPortIndex] = nValue16;
+				if (nValue16 != static_cast<uint16_t>(nPortIndex + 1)) {
+					m_Params.nSetList |= (Mask::UNIVERSE_A << nPortIndex);
 				} else {
-					m_Params.nSetList &= ~(Mask::UNIVERSE_A << i);
+					m_Params.nSetList &= ~(Mask::UNIVERSE_A << nPortIndex);
 				}
 			}
 			return;
@@ -267,47 +267,47 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 
 		nLength = 3;
 
-		if (Sscan::Char(pLine, LightSetParamsConst::MERGE_MODE_PORT[i], value, nLength) == Sscan::OK) {
+		if (Sscan::Char(pLine, LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], value, nLength) == Sscan::OK) {
 			if(lightset::get_merge_mode(value) == lightset::MergeMode::LTP) {
-				m_Params.nMergeModePort[i] = static_cast<uint8_t>(lightset::MergeMode::LTP);
-				m_Params.nSetList |= (Mask::MERGE_MODE_A << i);
+				m_Params.nMergeModePort[nPortIndex] = static_cast<uint8_t>(lightset::MergeMode::LTP);
+				m_Params.nSetList |= (Mask::MERGE_MODE_A << nPortIndex);
 			} else {
-				m_Params.nMergeModePort[i] = static_cast<uint8_t>(lightset::MergeMode::HTP);
-				m_Params.nSetList &= ~(Mask::MERGE_MODE_A << i);
+				m_Params.nMergeModePort[nPortIndex] = static_cast<uint8_t>(lightset::MergeMode::HTP);
+				m_Params.nSetList &= ~(Mask::MERGE_MODE_A << nPortIndex);
 			}
 			return;
 		}
 
 		nLength = 4;
 
-		if (Sscan::Char(pLine, ArtNetParamsConst::PROTOCOL_PORT[i], value, nLength) == Sscan::OK) {
+		if (Sscan::Char(pLine, ArtNetParamsConst::PROTOCOL_PORT[nPortIndex], value, nLength) == Sscan::OK) {
 			if (memcmp(value, "sacn", 4) == 0) {
-				m_Params.nProtocolPort[i] = static_cast<uint8_t>(artnet::PortProtocol::SACN);
-				m_Params.nSetList |= (Mask::PROTOCOL_A << i);
+				m_Params.nProtocolPort[nPortIndex] = static_cast<uint8_t>(artnet::PortProtocol::SACN);
+				m_Params.nSetList |= (Mask::PROTOCOL_A << nPortIndex);
 			} else {
-				m_Params.nProtocolPort[i] = static_cast<uint8_t>(artnet::PortProtocol::ARTNET);
-				m_Params.nSetList &= ~(Mask::PROTOCOL_A << i);
+				m_Params.nProtocolPort[nPortIndex] = static_cast<uint8_t>(artnet::PortProtocol::ARTNET);
+				m_Params.nSetList &= ~(Mask::PROTOCOL_A << nPortIndex);
 			}
 			return;
 		}
 
 		nLength = 7;
 
-		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[i], value, nLength) == Sscan::OK) {
+		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[nPortIndex], value, nLength) == Sscan::OK) {
 			const auto portDir = lightset::get_direction(value);
-			m_Params.nDirection &= artnetparams::portdir_clear(i);
+			m_Params.nDirection &= artnetparams::portdir_clear(nPortIndex);
 
-			DEBUG_PRINTF("%u portDir=%u, m_Params.nDirection=%x", i, static_cast<uint32_t>(portDir), m_Params.nDirection);
+			DEBUG_PRINTF("%u portDir=%u, m_Params.nDirection=%x", nPortIndex, static_cast<uint32_t>(portDir), m_Params.nDirection);
 
 #if defined (ARTNET_HAVE_DMXIN)
 			if (portDir == lightset::PortDir::INPUT) {
-				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::INPUT, i);
+				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::INPUT, nPortIndex);
 			} else 
 #endif			
 			if (portDir == lightset::PortDir::DISABLE) {
-				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::DISABLE, i);
+				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::DISABLE, nPortIndex);
 			} else {
-				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::OUTPUT, i);
+				m_Params.nDirection |= artnetparams::portdir_shift_left(lightset::PortDir::OUTPUT, nPortIndex);
 			}
 
 			DEBUG_PRINTF("m_Params.nDirection=%x", m_Params.nDirection);
@@ -318,28 +318,28 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 #if defined (ARTNET_HAVE_DMXIN)
 		uint32_t nValue32;
 
-		if (Sscan::IpAddress(pLine, ArtNetParamsConst::DESTINATION_IP_PORT[i], nValue32) == Sscan::OK) {
-			m_Params.nDestinationIpPort[i] = nValue32;
+		if (Sscan::IpAddress(pLine, ArtNetParamsConst::DESTINATION_IP_PORT[nPortIndex], nValue32) == Sscan::OK) {
+			m_Params.nDestinationIpPort[nPortIndex] = nValue32;
 
 			if (nValue32 != 0) {
-				m_Params.nMultiPortOptions |= static_cast<uint16_t>(1U << i);
+				m_Params.nMultiPortOptions |= static_cast<uint16_t>(1U << nPortIndex);
 			} else {
-				m_Params.nMultiPortOptions &= static_cast<uint16_t>(~(1U << i));
+				m_Params.nMultiPortOptions &= static_cast<uint16_t>(~(1U << nPortIndex));
 			}
 			return;
 		}
 #endif
 
-#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 		nLength = 6;
 
-		if (Sscan::Char(pLine, ArtNetParamsConst::OUTPUT_STYLE[i], value, nLength) == Sscan::OK) {
+		if (Sscan::Char(pLine, LightSetParamsConst::OUTPUT_STYLE[nPortIndex], value, nLength) == Sscan::OK) {
 			const auto nOutputStyle = static_cast<uint32_t>(lightset::get_output_style(value));
 
 			if (nOutputStyle != 0) {
-				m_Params.nOutputStyle |= static_cast<uint8_t>(1U << i);
+				m_Params.nOutputStyle |= static_cast<uint8_t>(1U << nPortIndex);
 			} else {
-				m_Params.nOutputStyle &= static_cast<uint8_t>(~(1U << i));
+				m_Params.nOutputStyle &= static_cast<uint8_t>(~(1U << nPortIndex));
 			}
 
 			return;
@@ -347,12 +347,12 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 #endif
 
 #if defined (RDM_CONTROLLER)
-		if (Sscan::Uint8(pLine, ArtNetParamsConst::RDM_ENABLE_PORT[i], nValue8) == Sscan::OK) {
-			m_Params.nRdm &= artnetparams::clear_mask(i);
+		if (Sscan::Uint8(pLine, ArtNetParamsConst::RDM_ENABLE_PORT[nPortIndex], nValue8) == Sscan::OK) {
+			m_Params.nRdm &= artnetparams::clear_mask(nPortIndex);
 
 			if (nValue8 != 0) {
-				m_Params.nRdm |= artnetparams::shift_left(1, i);
-				m_Params.nRdm |= static_cast<uint16_t>(1U << (i + 8));
+				m_Params.nRdm |= artnetparams::shift_left(1, nPortIndex);
+				m_Params.nRdm |= static_cast<uint16_t>(1U << (nPortIndex + 8));
 			}
 			return;
 		}
@@ -441,9 +441,9 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
 		builder.Add(LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], lightset::get_merge_mode(m_Params.nMergeModePort[nPortIndex]), isMaskSet(Mask::MERGE_MODE_A << nPortIndex));
 
-#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 		const auto isSet = isOutputStyleSet(1U << nPortIndex);
-		builder.Add(ArtNetParamsConst::OUTPUT_STYLE[nPortIndex], lightset::get_output_style(static_cast<lightset::OutputStyle>(isSet)), isSet);
+		builder.Add(LightSetParamsConst::OUTPUT_STYLE[nPortIndex], lightset::get_output_style(static_cast<lightset::OutputStyle>(isSet)), isSet);
 #endif
 
 #if defined (RDM_CONTROLLER)
@@ -533,7 +533,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 		}
 #endif
 
-#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 		p->SetOutputStyle(nPortIndex, (isOutputStyleSet(1U << nPortIndex)) ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA);
 #endif
 

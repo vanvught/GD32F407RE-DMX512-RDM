@@ -50,11 +50,6 @@ public:
 	void Sync(__attribute__((unused)) const uint32_t nPortIndex) override {}
 	void Sync(__attribute__((unused)) const bool doForce) override {}
 
-	void SetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex, __attribute__((unused)) const lightset::OutputStyle outputStyle) override {}
-	lightset::OutputStyle GetOutputStyle(__attribute__((unused)) const uint32_t nPortIndex) const override {
-		return lightset::OutputStyle::DELTA;
-	}
-
 	bool SetDmxStartAddress(__attribute__((unused)) uint16_t nDmxStartAddress) override {
 		return false;
 	}

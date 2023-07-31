@@ -98,6 +98,7 @@ public:
 		}
 	}
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	void SetOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle) override {
 		if (m_pA != nullptr) {
 			return m_pA->SetOutputStyle(nPortIndex, outputStyle);
@@ -117,6 +118,7 @@ public:
 
 		return lightset::OutputStyle::DELTA;
 	}
+#endif
 
 	void Blackout(bool bBlackout) override {
 		if (m_pA != nullptr) {

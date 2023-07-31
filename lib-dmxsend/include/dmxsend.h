@@ -40,6 +40,7 @@ public:
 	void Sync(const uint32_t nPortIndex) override;
 	void Sync(const bool doForce = false) override;
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	void SetOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle) override {
 		Dmx::Get()->SetOutputStyle(nPortIndex, outputStyle == lightset::OutputStyle::CONSTANT ? dmx::OutputStyle::CONTINOUS : dmx::OutputStyle::DELTA);
 	}
@@ -47,6 +48,7 @@ public:
 	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const override {
 		return Dmx::Get()->GetOutputStyle(nPortIndex) == dmx::OutputStyle::CONTINOUS ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
 	}
+#endif
 
 	void Blackout(__attribute__((unused)) bool bBlackout) override {
 		Dmx::Get()->Blackout();

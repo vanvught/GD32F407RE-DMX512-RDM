@@ -64,8 +64,7 @@ ArtNetNode::ArtNetNode() {
 	DEBUG_PRINTF("PAGE_SIZE=%u, PAGES=%u, MAX_PORTS=%u", artnetnode::PAGE_SIZE, artnetnode::PAGES, artnetnode::MAX_PORTS);
 
 	memset(&m_Node, 0, sizeof(struct Node));
-	m_Node.IPAddressBroadcast = Network::Get()->GetBroadcastIp();
-	m_Node.IPAddressTimeCode = m_Node.IPAddressBroadcast;
+	m_Node.IPAddressTimeCode = Network::Get()->GetBroadcastIp();
 	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
 	for (auto& port : m_Node.Port) {
 		port.direction = lightset::PortDir::DISABLE;
@@ -82,7 +81,7 @@ ArtNetNode::ArtNetNode() {
 #if defined (ENABLE_HTTPD) && defined (ENABLE_CONTENT)
 	m_Node.Status2 |= artnet::Status2::WEB_BROWSER_SUPPORT;
 #endif
-#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	m_Node.Status2 |= artnet::Status2::OUTPUT_STYLE_SWITCH;
 #endif
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
@@ -108,7 +107,7 @@ ArtNetNode::ArtNetNode() {
 		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
 		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
 		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
-		m_InputPort[nPortIndex].nDestinationIp = m_Node.IPAddressBroadcast;
+		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
 	}
 
 	SetShortName(nullptr);	// Default
@@ -165,6 +164,7 @@ void ArtNetNode::Start() {
 	}
 #endif
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	/*
 	 * Make sure that the supported LightSet OutputSyle is correctly set
 	 */
@@ -175,6 +175,7 @@ void ArtNetNode::Start() {
 			}
 		}
 	}
+#endif
 
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	if (m_pArtNetRdm != nullptr) {
@@ -520,6 +521,11 @@ void ArtNetNode::Run() {
 #if defined (ARTNET_HAVE_TRIGGER)		
 	case OP_TRIGGER:
 		HandleTrigger();
+		break;
+#endif
+#if defined (ARTNET_HAVE_DMXIN)
+	case OP_INPUT:
+		HandleInput();
 		break;
 #endif
 	case OP_POLL:

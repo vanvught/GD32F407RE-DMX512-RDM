@@ -45,6 +45,12 @@ const char LightSetParamsConst::DIRECTION[4][18] = {
 		"direction_port_c",
 		"direction_port_d" };
 
+const char LightSetParamsConst::OUTPUT_STYLE[4][16] = {
+		"output_style_a",
+		"output_style_b",
+		"output_style_c",
+		"output_style_d" };
+
 const char LightSetParamsConst::DMX_START_ADDRESS[] = "dmx_start_address";
 const char LightSetParamsConst::DMX_SLOT_INFO[] = "dmx_slot_info";
 

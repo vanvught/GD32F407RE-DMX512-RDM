@@ -544,7 +544,7 @@ void ArtNetNode::HandleAddress() {
 #endif
 		break;
 
-#if defined (ARTNET_OUTPUT_STYLE_SWITCH)
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	case artnet::PortCommand::STYLE_DELTA0:
 	case artnet::PortCommand::STYLE_DELTA1:
 	case artnet::PortCommand::STYLE_DELTA2:

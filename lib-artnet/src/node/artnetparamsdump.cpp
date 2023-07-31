@@ -105,7 +105,7 @@ void ArtNetParams::Dump() {
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
 		const auto nOutputStyle = static_cast<uint32_t>(isOutputStyleSet(1U << i));
-		printf(" %s=%u [%s]\n", ArtNetParamsConst::OUTPUT_STYLE[i], nOutputStyle, lightset::get_output_style(static_cast<lightset::OutputStyle>(nOutputStyle)));
+		printf(" %s=%u [%s]\n", LightSetParamsConst::OUTPUT_STYLE[i], nOutputStyle, lightset::get_output_style(static_cast<lightset::OutputStyle>(nOutputStyle)));
 	}
 
 	/**

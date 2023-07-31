@@ -137,7 +137,6 @@ struct State {
 };
 
 struct Node {
-	uint32_t IPAddressBroadcast;
 	uint32_t IPAddressTimeCode;
 	uint8_t MACAddressLocal[artnet::MAC_SIZE];
 	uint8_t NetSwitch[artnetnode::PAGES];		///< Bits 14-8 of the 15 bit Port-Address are encoded into the bottom 7 bits of this field.
@@ -252,6 +251,7 @@ public:
 		return artnetnode::FailSafe::OFF;
 	}
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
 	void SetOutputStyle(const uint32_t nPortIndex, artnet::OutputStyle outputStyle) {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
@@ -279,7 +279,6 @@ public:
 			}
 		}
 #endif
-
 		if (m_State.status == artnetnode::Status::ON) {
 			if (m_pArtNetStore != nullptr) {
 				m_pArtNetStore->SaveOutputStyle(nPortIndex, outputStyle);
@@ -295,6 +294,7 @@ public:
 		const auto isStyleConstant = (m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::STYLE_CONSTANT) == artnet::GoodOutputB::STYLE_CONSTANT;
 		return isStyleConstant ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA;
 	}
+#endif
 
 	void SetOutput(LightSet *pLightSet) {
 		m_pLightSet = pLightSet;
@@ -417,7 +417,7 @@ public:
 			if (Network::Get()->IsValidIp(nDestinationIp)) {
 				m_InputPort[nPortIndex].nDestinationIp = nDestinationIp;
 			} else {
-				m_InputPort[nPortIndex].nDestinationIp = m_Node.IPAddressBroadcast;
+				m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
 			}
 
 			DEBUG_PRINTF("m_nDestinationIp=" IPSTR, IP2STR(m_InputPort[nPortIndex].nDestinationIp));
@@ -527,6 +527,7 @@ private:
 	void HandleIpProg();
 #if defined (ARTNET_HAVE_DMXIN)
 	void HandleDmxIn();
+	void HandleInput();
 #endif
 	void HandleRdmIn();
 	void HandleTrigger();
