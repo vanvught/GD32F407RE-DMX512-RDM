@@ -104,6 +104,20 @@ void E131Bridge::Start() {
 	}
 #endif
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
+	/*
+	 * Make sure that the supported LightSet OutputSyle is correctly set
+	 */
+	if (m_pLightSet != nullptr) {
+		for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+			if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+				SetOutputStyle(nPortIndex, GetOutputStyle(nPortIndex));
+			}
+		}
+	}
+#endif
+
+	m_State.status = e131bridge::Status::ON;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 }
 
@@ -125,6 +139,7 @@ void E131Bridge::Stop() {
 	}
 #endif
 
+	m_State.status = e131bridge::Status::OFF;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::OFF_OFF);
 }
 

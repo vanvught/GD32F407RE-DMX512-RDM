@@ -246,6 +246,11 @@ public:
 		Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::IP)], "Ethernet start");
 	}
 
+	void ShowEmacStatus(const bool isLinkUp) {
+		ClearEndOfLine();
+		Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::IP)], "Ethernet Link %s", isLinkUp ? "UP" : "DOWN");
+	}
+
 	void ShowIpAddress() {
 		ClearEndOfLine();
 		Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::IP)], "" IPSTR "/%d %c", IP2STR(Network::Get()->GetIp()), Network::Get()->GetNetmaskCIDR(), Network::Get()->GetAddressingMode());

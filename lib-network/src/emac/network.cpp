@@ -120,6 +120,8 @@ Network::Network(NetworkParamsStore *pNetworkParamsStore) {
 	net::link_status_read();
 #endif
 
+	network::display_emac_status(net::Link::STATE_UP == s_lastState);
+
 	if (net::Link::STATE_UP == s_lastState) {
 		DEBUG_PUTS("net::Link::STATE_UP");
 

@@ -51,6 +51,10 @@ namespace e131bridge {
  static constexpr uint32_t MAX_PORTS = LIGHTSET_PORTS;
 #endif
 
+ enum class Status : uint8_t {
+ 	OFF, STANDBY, ON
+ };
+
 struct State {
 	bool IsNetworkDataLoss;
 	bool IsMergeMode;
@@ -69,6 +73,7 @@ struct State {
 	uint8_t nPriority;
 	uint8_t nReceivingDmx;
 	lightset::FailSafe failsafe;
+	e131bridge::Status status;
 };
 
 struct Source {
@@ -88,6 +93,7 @@ struct OutputPort {
 	Source sourceA;
 	Source sourceB;
 	lightset::MergeMode mergeMode;
+	lightset::OutputStyle outputStyle;
 	bool IsMerging;
 	bool IsTransmitting;
 };
@@ -223,6 +229,39 @@ public:
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		return m_InputPort[nPortIndex].nPriority;
 	}
+
+#if defined (OUTPUT_HAVE_STYLESWITCH)
+	void SetOutputStyle(const uint32_t nPortIndex, lightset::OutputStyle outputStyle) {
+		assert(nPortIndex < e131bridge::MAX_PORTS);
+
+		if ((m_State.status == e131bridge::Status::ON) && (m_pLightSet != nullptr)) {
+			m_pLightSet->SetOutputStyle(nPortIndex, outputStyle);
+			outputStyle = m_pLightSet->GetOutputStyle(nPortIndex);
+		}
+
+		m_OutputPort[nPortIndex].outputStyle = outputStyle;
+
+#if defined (OUTPUT_DMX_SEND) || defined (OUTPUT_DMX_SEND_MULTI)
+		/**
+		 * FIXME I do not like this hack. It should be handled in dmx.cpp
+		 */
+		if ((m_OutputPort[nPortIndex].genericPort.bIsEnabled)
+				&& (outputStyle == lightset::OutputStyle::CONSTANT)
+				&& (m_pLightSet != nullptr)) {
+			if (m_OutputPort[nPortIndex].IsTransmitting) {
+				m_OutputPort[nPortIndex].IsTransmitting = false;
+				m_pLightSet->Stop(nPortIndex);
+			}
+		}
+#endif
+
+	}
+
+	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
+		assert(nPortIndex < e131bridge::MAX_PORTS);
+		return m_OutputPort[nPortIndex].outputStyle;
+	}
+#endif
 
 	void Clear(const uint32_t nPortIndex) {
 		assert(nPortIndex < e131bridge::MAX_PORTS);

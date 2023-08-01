@@ -2,7 +2,7 @@
  * @file dmx_config.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,8 @@ namespace config {
 # include "board_gd32f207c_eval.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "board_bw_opidmx4.h"
+#elif defined (BOARD_DMX3)
+# include "board_dmx3.h"
 #elif defined (BOARD_DMX4)
 # include "board_dmx4.h"
 #else

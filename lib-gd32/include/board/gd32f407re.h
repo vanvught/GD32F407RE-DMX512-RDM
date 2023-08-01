@@ -55,22 +55,6 @@
 #define LED_BLINK_GPIO_CLK	LED1_RCU_GPIOx
 
 /**
- * LEDs 595	--> Using SPI2 pin's: MOSI, SCK and NSS
- */
-
-#define LED595_DATA_GPIO_PINx	GPIO_PIN_5
-#define LED595_DATA_RCU_GPIOx	RCU_GPIOB
-#define LED595_DATA_GPIOx		GPIOB
-
-#define LED595_CLK_GPIO_PINx	GPIO_PIN_3
-#define LED595_CLK_RCU_GPIOx	RCU_GPIOB
-#define LED595_CLK_GPIOx		GPIOB
-
-#define LED595_LOAD_GPIO_PINx	GPIO_PIN_15
-#define LED595_LOAD_RCU_GPIOx	RCU_GPIOA
-#define LED595_LOAD_GPIOx		GPIOA
-
-/**
  * KEYs
  */
 
@@ -107,7 +91,6 @@
  * SPI
  */
 
-// #define SPI2_REMAP
 #if defined (SPI2_REMAP)
 # define SPI_REMAP			SPI2_REMAP_GPIO
 #endif
@@ -130,9 +113,7 @@
  */
 
 #define USART0_REMAP
-// #define USART1_REMAP
 #define USART2_PARTIAL_REMAP
-// #define UART3_REMAP
 
 /**
  * Panel LEDs

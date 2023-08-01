@@ -19,5 +19,6 @@ ifneq ($(MAKE_FLAGS),)
 else
 EXTRA_SRCDIR+=src/node src/node/dmxin src/controller
 DEFINES+=E131_HAVE_DMXIN
+DEFINES+=OUTPUT_HAVE_STYLESWITCH
 DEFINES+=LIGHTSET_PORTS=4
 endif

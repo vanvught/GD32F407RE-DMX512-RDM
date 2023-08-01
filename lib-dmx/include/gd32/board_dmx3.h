@@ -1,8 +1,8 @@
 /**
- * @file network.cpp
+ * @file board_dmx3.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,43 +23,33 @@
  * THE SOFTWARE.
  */
 
-#include "network.h"
-#include "displayudf.h"
+#ifndef GD32_BOARD_DMX3_H_
+#define GD32_BOARD_DMX3_H_
 
-namespace network {
-void display_emac_config() {
-	DisplayUdf::Get()->ShowEmacInit();
-}
+#include "gd32_board.h"
 
-void display_emac_start() {
-	DisplayUdf::Get()->ShowEmacStart();
-}
+namespace max {
+static constexpr auto OUT = 3U;
+static constexpr auto IN = 3U;
+}  // namespace max
 
-void display_emac_status(const bool isLinkUp) {
-	DisplayUdf::Get()->ShowEmacStatus(isLinkUp);
-}
+#define DMX_MAX_PORTS  3
 
-void display_ip() {
-	DisplayUdf::Get()->ShowIpAddress();
-}
+#define DMX_USE_USART2
+#define DMX_USE_UART4
+#define DMX_USE_USART5
 
-void display_netmask() {
-	DisplayUdf::Get()->ShowNetmask();
-}
+static constexpr auto USART2_PORT = 0;
+static constexpr auto UART4_PORT  = 1;
+static constexpr auto USART5_PORT = 2;
 
-void display_gateway() {
-	DisplayUdf::Get()->ShowGatewayIp();
-}
+static constexpr auto DIR_PORT_0_GPIO_PORT = GPIOB;
+static constexpr auto DIR_PORT_0_GPIO_PIN  = GPIO_PIN_10;
 
-void display_hostname() {
-	DisplayUdf::Get()->ShowHostName();
-}
+static constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;
+static constexpr auto DIR_PORT_1_GPIO_PIN  = GPIO_PIN_5;
 
-void display_emac_shutdown() {
-	DisplayUdf::Get()->ShowShutdown();
-}
+static constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;
+static constexpr auto DIR_PORT_2_GPIO_PIN  = GPIO_PIN_14;
 
-void display_dhcp_status(network::dhcp::ClientStatus status) {
-	DisplayUdf::Get()->ShowDhcpStatus(status);
-}
-}  // namespace network
+#endif /* GD32_BOARD_DMX4_H_ */

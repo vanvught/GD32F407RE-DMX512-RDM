@@ -51,7 +51,7 @@ struct Params {
     uint8_t nOutputType;
 	uint16_t nFailSafe;
     uint16_t nUniversePort[e131params::MAX_PORTS];
-	uint8_t NotUsed1;
+	uint8_t nOutputStyle;
 	uint8_t nMergeModePort[e131params::MAX_PORTS];
 	uint32_t NotUsed2;
 	uint8_t NotUsed3;
@@ -60,6 +60,13 @@ struct Params {
 } __attribute__((packed));
 
 static_assert(sizeof(struct Params) <= 96, "struct Params is too large");
+
+struct MaskOutputStyle {
+	static constexpr uint8_t OUTPUT_STYLE_A = (1U << 0);
+	static constexpr uint8_t OUTPUT_STYLE_B = (1U << 1);
+	static constexpr uint8_t OUTPUT_STYLE_C = (1U << 2);
+	static constexpr uint8_t OUTPUT_STYLE_D = (1U << 3);
+};
 
 struct Mask {
 	static constexpr auto FAILSAFE = (1U << 0);
@@ -126,6 +133,17 @@ public:
 		return lightset::PortDir::DISABLE;
 	}
 
+#if defined (OUTPUT_HAVE_STYLESWITCH)
+	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
+		if (nPortIndex < e131params::MAX_PORTS) {
+			if (isOutputStyleSet(e131params::MaskOutputStyle::OUTPUT_STYLE_A << nPortIndex)) {
+				return lightset::OutputStyle::CONSTANT;
+			}
+		}
+		return lightset::OutputStyle::DELTA;
+	}
+#endif
+
 #if defined (ESP8266)
 	lightset::OutputType GetOutputType() const {
 		return static_cast<lightset::OutputType>(m_Params.nOutputType);
@@ -139,6 +157,9 @@ private:
     bool isMaskSet(uint32_t nMask) const {
     	return (m_Params.nSetList & nMask) == nMask;
     }
+	bool isOutputStyleSet(uint8_t nMask) const {
+		return (m_Params.nOutputStyle & nMask) == nMask;
+	}
 
 private:
     E131ParamsStore *m_pE131ParamsStore;

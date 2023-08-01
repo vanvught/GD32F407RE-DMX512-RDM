@@ -1,8 +1,8 @@
 /**
- * @file bw_opidmx4.h
+ * @file dmx3.h
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOARD_BW_OPIDMX4_H_
-#define BOARD_BW_OPIDMX4_H_
+#ifndef BOARD_DMX3_H_
+#define BOARD_DMX3_H_
 
-#if !defined(BOARD_BW_OPIDMX4)
+#if !defined(BOARD_DMX3)
 # error This file should not be included
 #endif
 
 #if defined (MCU_GD32F20X_MCU_H_) || defined (MCU_GD32F407_MCU_H_)
 # error This file should be included later
-#endif
-
-#if !defined(CONSOLE_I2C)
-# error CONSOLE_I2C is not defined
 #endif
 
 /**
@@ -182,7 +178,7 @@ static constexpr uint32_t INVERTED = 0;
 # error MCU is not supported
 #endif
 
-#define GD32_BOARD_NAME			"BW_OPIDMX4"
+#define GD32_BOARD_NAME			"DMX3"
 
 #include "gd32_gpio.h"
 
@@ -204,4 +200,4 @@ static constexpr uint32_t INVERTED = 0;
 
 #include "gpio_header.h"
 
-#endif /* BOARD_BW_OPIDMX4_H_ */
+#endif /* BOARD_DMX3_H_ */
