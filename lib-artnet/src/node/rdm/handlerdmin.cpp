@@ -59,7 +59,7 @@ void ArtNetNode::HandleRdmIn() {
 			pArtRdm->RdmVer = 0x01;
 			pArtRdm->Net = m_Node.NetSwitch[nPage];
 			pArtRdm->Command = 0;
-			pArtRdm->Address = m_InputPort[nPortIndex].genericPort.nDefaultAddress;
+			pArtRdm->Address = m_Node.Port[nPortIndex].DefaultAddress;
 
 			Network::Get()->SendTo(m_nHandle, pArtRdm, sizeof(struct TArtRdm), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
 		}

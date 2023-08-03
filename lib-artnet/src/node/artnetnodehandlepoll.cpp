@@ -94,12 +94,12 @@ void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) 
 			m_OutputPort[nPortIndex].GoodOutput = GoodOutput;
 		}
 #endif
-		const auto nIndex = m_OutputPort[nPortIndex].genericPort.nPollReplyIndex;
+		const auto nIndex = m_OutputPort[nPortIndex].nPollReplyIndex;
 		assert(nIndex < artnet::PORTS);
 		m_PollReply.PortTypes[nIndex] |= artnet::PortType::OUTPUT_ARTNET;
 		m_PollReply.GoodOutput[nIndex] = m_OutputPort[nPortIndex].GoodOutput;
 		m_PollReply.GoodOutputB[nIndex] = m_OutputPort[nPortIndex].GoodOutputB;
-		m_PollReply.SwOut[nIndex] = m_OutputPort[nPortIndex].genericPort.nDefaultAddress;
+		m_PollReply.SwOut[nIndex] = m_Node.Port[nPortIndex].DefaultAddress;
 		NumPortsOutput++;
 		return;
 	}
@@ -111,11 +111,11 @@ void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) 
 
 		}
 #endif
-		const auto nIndex = m_InputPort[nPortIndex].genericPort.nPollReplyIndex;
+		const auto nIndex = m_InputPort[nPortIndex].nPollReplyIndex;
 		assert(nIndex < artnet::PORTS);
 		m_PollReply.PortTypes[nIndex] |= artnet::PortType::INPUT_ARTNET;
 		m_PollReply.GoodInput[nIndex] = m_InputPort[nPortIndex].GoodInput;
-		m_PollReply.SwIn[nIndex] = m_InputPort[nPortIndex].genericPort.nDefaultAddress;
+		m_PollReply.SwIn[nIndex] = m_Node.Port[nPortIndex].DefaultAddress;
 		NumPortsInput++;
 	}
 #endif
@@ -144,8 +144,6 @@ void ArtNetNode::SendPollRelply(bool bResponse) {
 
 		const auto nPortIndexStart = nPage * artnetnode::PAGE_SIZE;
 
-//		DEBUG_PRINTF("nPortIndexStart=%u artnetnode::PAGE_SIZE=%u", nPortIndexStart, artnetnode::PAGE_SIZE);
-
 		uint32_t nPortsOutput = 0;
 		uint32_t nPortsInput = 0;
 
@@ -159,6 +157,7 @@ void ArtNetNode::SendPollRelply(bool bResponse) {
 				m_PollReply.GoodInput[nIndex] = 0;
 				continue;
 			}
+
 			ProcessPollRelply(nPortIndex, nPortsInput, nPortsOutput);
 		}
 

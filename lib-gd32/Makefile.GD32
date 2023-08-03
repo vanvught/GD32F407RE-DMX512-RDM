@@ -28,14 +28,29 @@ endif
 
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
-ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
+ifneq ($(MAKE_FLAGS),)
+  ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
+  else
+  	EXTRA_SRCDIR+=device/emac
+  endif
+  
+  ifeq ($(findstring DISABLE_FS,$(MAKE_FLAGS)), DISABLE_FS)
+  else
+  	EXTRA_SRCDIR+=device/sdio
+  endif
+  
+  ifeq ($(findstring CONFIG_USE_SOFTUART0,$(MAKE_FLAGS)), CONFIG_USE_SOFTUART0)
+  	EXTRA_SRCDIR+=src/softuart0
+  else
+   	ifeq ($(findstring CONSOLE_NULL,$(MAKE_FLAGS)), CONSOLE_NULL)
+   	else
+  		EXTRA_SRCDIR+=src/uart0
+  	endif
+  endif
 else
 	EXTRA_SRCDIR+=device/emac
-endif
-
-ifeq ($(findstring DISABLE_FS,$(MAKE_FLAGS)), DISABLE_FS)
-else
 	EXTRA_SRCDIR+=device/sdio
+	EXTRA_SRCDIR+=src/uart0 src/softuart0
 endif
 
 include ../firmware-template-gd32/lib/Rules.mk

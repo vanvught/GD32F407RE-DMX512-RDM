@@ -84,7 +84,7 @@ void ArtNetNode::HandleDmx() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)
 				&& (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
-				&& (pArtDmx->PortAddress == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
+				&& (pArtDmx->PortAddress == m_Node.Port[nPortIndex].PortAddress)) {
 
 			const auto ipA = m_OutputPort[nPortIndex].sourceA.nIp;
 			const auto ipB = m_OutputPort[nPortIndex].sourceB.nIp;

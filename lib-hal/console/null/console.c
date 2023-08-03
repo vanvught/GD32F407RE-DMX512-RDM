@@ -1,8 +1,8 @@
 /**
- * @file gd32_uart0.c
+ * @file console.c
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,41 +23,22 @@
  * THE SOFTWARE.
  */
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <stdint.h>
 
-extern void uart0_putc(int);
-
-static char s_buffer[128];
-
-void uart0_puts(const char *s) {
-	while (*s != '\0') {
-		if (*s == '\n') {
-			uart0_putc('\r');
-		}
-		uart0_putc(*s++);
-	}
-
-//	uart0_putc('\n'); //TODO Add '\n'
+void console_init(void) {
 }
 
-int uart0_printf(const char *fmt, ...) {
-	va_list arp;
+void console_putc(__attribute__((unused)) int i) {
+}
 
-	va_start(arp, fmt);
+void console_puts(__attribute__((unused)) const char *p) {
+}
 
-	int i = vsnprintf(s_buffer, sizeof(s_buffer) - 1, fmt, arp);
+void console_write(__attribute__((unused)) const char *p, __attribute__((unused)) unsigned int i) {
+}
 
-	va_end(arp);
+void console_status(__attribute__((unused))  uint32_t i, __attribute__((unused)) const char *p) {
+}
 
-	char *s = s_buffer;
-
-	while (*s != '\0') {
-		if (*s == '\n') {
-			uart0_putc('\r');
-		}
-		uart0_putc(*s++);
-	}
-
-	return i;
+void console_error(__attribute__((unused)) const char *p) {
 }

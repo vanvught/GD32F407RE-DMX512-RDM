@@ -64,16 +64,27 @@ void ArtNetNode::SetPortProtocol4(const uint32_t nPortIndex, const artnet::PortP
 	DEBUG_EXIT
 }
 
-void ArtNetNode::SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir porDirection) {
+void ArtNetNode::SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir portDirection) {
 	DEBUG_ENTRY
 
 	uint16_t nUniverse;
-	const bool isActive = ArtNetNode::GetPortAddress(nPortIndex, nUniverse, porDirection);
+	const bool isActive = ArtNetNode::GetPortAddress(nPortIndex, nUniverse, portDirection);
 	const auto portProtocol = m_Node.Port[nPortIndex].protocol;
 
-	DEBUG_PRINTF("Port %u, Active %c, Universe %d, Protocol %s [%s]", nPortIndex, isActive ? 'Y' : 'N', nUniverse, artnet::get_protocol_mode(portProtocol), porDirection == lightset::PortDir::OUTPUT ? "Output" : "Input");
+	DEBUG_PRINTF("Port %u, Active %c, Universe %d, Protocol %s [%s]", nPortIndex, isActive ? 'Y' : 'N', nUniverse, artnet::get_protocol_mode(portProtocol), portDirection == lightset::PortDir::OUTPUT ? "Output" : "Input");
 
 	if (portProtocol == artnet::PortProtocol::SACN) {
+		if (!isActive) {
+			if (E131Bridge::GetUniverse(nPortIndex, nUniverse, lightset::PortDir::INPUT) || E131Bridge::GetUniverse(nPortIndex, nUniverse, lightset::PortDir::OUTPUT)) {
+				E131Bridge::SetUniverse(nPortIndex, lightset::PortDir::DISABLE, nUniverse);
+
+				DEBUG_EXIT
+				return;
+			}
+
+			DEBUG_EXIT
+			return;
+		}
 
 		if (IsMapUniverse0()) {
 			nUniverse++;
@@ -84,17 +95,10 @@ void ArtNetNode::SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir
 			return;
 		}
 
-		if (!isActive) {
-			E131Bridge::SetUniverse(nPortIndex, lightset::PortDir::DISABLE, nUniverse);
-			DEBUG_EXIT
-			return;
-		}
+		E131Bridge::SetUniverse(nPortIndex, portDirection, nUniverse);
 
-		if (isActive) {
-			E131Bridge::SetUniverse(nPortIndex, porDirection, nUniverse);
-			DEBUG_EXIT
-			return;
-		}
+		DEBUG_EXIT
+		return;
 	}
 
 	DEBUG_EXIT

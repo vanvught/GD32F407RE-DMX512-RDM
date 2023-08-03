@@ -132,11 +132,11 @@ void StoreArtNet::SaveUniverse(uint32_t nPortIndex) {
 	assert(nPortIndex < artnet::PORTS);
 
 	uint16_t nUniverse;
-	ArtNetNode::Get()->GetPortAddress(nPortIndex, nUniverse);
 
-	DEBUG_PRINTF("nPortIndex=%u, nUniverse=%u", nPortIndex, nUniverse);
-
-	ConfigStore::Get()->Update(configstore::Store::ARTNET, (sizeof(uint16_t) * nPortIndex) + __builtin_offsetof(struct artnetparams::Params, nUniverse), &nUniverse, sizeof(uint16_t), artnetparams::Mask::UNIVERSE_A << nPortIndex);
+	if (ArtNetNode::Get()->GetPortAddress(nPortIndex, nUniverse)) {
+		DEBUG_PRINTF("nPortIndex=%u, nUniverse=%u", nPortIndex, nUniverse);
+		ConfigStore::Get()->Update(configstore::Store::ARTNET, (sizeof(uint16_t) * nPortIndex) + __builtin_offsetof(struct artnetparams::Params, nUniverse), &nUniverse, sizeof(uint16_t), artnetparams::Mask::UNIVERSE_A << nPortIndex);
+	}
 
 	DEBUG_EXIT
 }
@@ -241,29 +241,12 @@ void StoreArtNet::SaveRdmEnabled(uint32_t nPortIndex, const bool isEnabled) {
 	uint16_t nRdm;
 	ConfigStore::Get()->Copy(configstore::Store::ARTNET, &nRdm, sizeof(uint16_t), __builtin_offsetof(struct artnetparams::Params, nRdm), false);
 
-#if __GNUC__ < 10
-/*
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-  nRdm &= artnetparams::clear_mask(nPortIndex);
- */
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wconversion"	// FIXME ignored "-Wconversion"
-#endif
-
 	nRdm &= artnetparams::clear_mask(nPortIndex);
 
 	if (isEnabled) {
-/*
-error: conversion from 'int' to 'uint16_t' {aka 'short unsigned int'} may change value [-Werror=conversion]
-   nRdm |= artnetparams::shift_left(1, nPortIndex);
- */
 		nRdm |= artnetparams::shift_left(1, nPortIndex);
 		nRdm |= static_cast<uint16_t>(1U << (nPortIndex + 8));
 	}
-
-#if __GNUC__ < 10
-# pragma GCC diagnostic pop
-#endif
 
 	ConfigStore::Get()->Update(configstore::Store::ARTNET, __builtin_offsetof(struct artnetparams::Params, nRdm), &nRdm, sizeof(uint16_t));
 

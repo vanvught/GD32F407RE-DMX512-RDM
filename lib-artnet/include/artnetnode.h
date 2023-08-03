@@ -151,8 +151,10 @@ struct Node {
 	bool bMapUniverse0;										///< Art-Net 4
 	uint8_t AcnPriority;									///< Art-Net 4
 	struct {
+		uint16_t PortAddress;								///< The Port-Address is a 15 bit number composed of Net+Sub-Net+Universe.
 		lightset::PortDir direction;
 		artnet::PortProtocol protocol;						///< Art-Net 4
+		uint8_t DefaultAddress;
 	} Port[artnetnode::MAX_PORTS];
 };
 
@@ -161,27 +163,21 @@ struct Source {
 	uint32_t nIp;		///< The IP address for port
 };
 
-struct GenericPort {
-	uint16_t nPortAddress;			///< One of the 32,768 possible addresses to which a DMX frame can be directed. The Port-Address is a 15 bit number composed of Net+Sub-Net+Universe.
-	uint8_t nDefaultAddress;		///< the address set by the hardware
-	uint8_t nPollReplyIndex;
-};
-
 struct OutputPort {
-	GenericPort genericPort;
 	Source sourceA;
 	Source sourceB;
 	uint8_t GoodOutput;
 	uint8_t GoodOutputB;
+	uint8_t nPollReplyIndex;
 	bool IsTransmitting;
 	bool IsDataPending;
 };
 
 struct InputPort {
-	GenericPort genericPort;
 	uint32_t nDestinationIp;
 	uint8_t nSequenceNumber;
 	uint8_t GoodInput;
+	uint8_t nPollReplyIndex;
 };
 
 inline static artnetnode::FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
@@ -348,15 +344,40 @@ public:
 		return m_Node.SubSwitch[nPage];
 	}
 
-	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress) const;
-	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress, lightset::PortDir dir) const;
+	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+
+		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::DISABLE) {
+			return false;
+		}
+
+		nAddress = m_Node.Port[nPortIndex].PortAddress;
+
+		return true;
+	}
+
+	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress, lightset::PortDir dir) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+
+		if (dir == lightset::PortDir::INPUT) {
+			nAddress = m_Node.Port[nPortIndex].PortAddress;
+			return m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT;
+		}
+
+		if (dir == lightset::PortDir::OUTPUT) {
+			nAddress = m_Node.Port[nPortIndex].PortAddress;
+			return m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT;
+		}
+
+		return false;
+	}
 
 	bool GetOutputPort(const uint16_t nUniverse, uint32_t& nPortIndex) {
 		for (nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 			if (m_Node.Port[nPortIndex].direction != lightset::PortDir::OUTPUT) {
 				continue;
 			}
-			if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (nUniverse == m_OutputPort[nPortIndex].genericPort.nPortAddress)) {
+			if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET) && (nUniverse == m_Node.Port[nPortIndex].PortAddress)) {
 				return true;
 			}
 		}

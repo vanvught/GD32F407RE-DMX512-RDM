@@ -55,7 +55,7 @@ void ArtNetNode::HandleDmxIn() {
 			if (pDmxData != nullptr) {
 				m_ArtDmx.Sequence = static_cast<uint8_t>(1U + m_InputPort[nPortIndex].nSequenceNumber++);
 				m_ArtDmx.Physical = static_cast<uint8_t>(nPortIndex);
-				m_ArtDmx.PortAddress = m_InputPort[nPortIndex].genericPort.nPortAddress;
+				m_ArtDmx.PortAddress = m_Node.Port[nPortIndex].PortAddress;
 
 				memcpy(m_ArtDmx.Data, pDmxData, nLength);
 
