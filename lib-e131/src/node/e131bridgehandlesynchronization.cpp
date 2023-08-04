@@ -52,7 +52,7 @@ void E131Bridge::HandleSynchronization() {
 	m_State.SynchronizationTime = m_nCurrentPacketMillis;
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 			m_pLightSet->Sync(nPortIndex);
 		}
 	}
@@ -60,7 +60,7 @@ void E131Bridge::HandleSynchronization() {
 	m_pLightSet->Sync();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 			if (!m_OutputPort[nPortIndex].IsTransmitting) {
 				m_OutputPort[nPortIndex].IsTransmitting = true;
 				m_State.IsChanged = true;

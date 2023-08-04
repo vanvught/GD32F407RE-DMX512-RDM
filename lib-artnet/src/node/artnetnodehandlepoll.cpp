@@ -83,7 +83,7 @@ void ArtNetNode::FillPollReply() {
 	memcpy(m_PollReply.DefaultUidResponder, m_Node.DefaultUidResponder, sizeof(m_PollReply.DefaultUidResponder));
 }
 
-void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
+void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unused)) uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
 	if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 #if (ARTNET_VERSION >= 4)
 		if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
@@ -121,11 +121,7 @@ void ArtNetNode::ProcessPollRelply(uint32_t nPortIndex, __attribute__((unused)) 
 #endif
 }
 
-void ArtNetNode::SendPollRelply(bool bResponse) {
-	if (!bResponse && m_State.status == artnetnode::Status::ON) {
-		m_State.ArtPollReplyCount++;
-	}
-
+void ArtNetNode::SendPollRelply() {
 	m_PollReply.Status1 = m_Node.Status1;
 	m_PollReply.Status2 = m_Node.Status2;
 	m_PollReply.Status3 = m_Node.Status3;
@@ -163,13 +159,12 @@ void ArtNetNode::SendPollRelply(bool bResponse) {
 
 		m_PollReply.NumPortsLo = static_cast<uint8_t>(std::max(nPortsInput, nPortsOutput));
 
+		m_State.ArtPollReplyCount++;
 		uint8_t nSysNameLenght;
 		const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
 		snprintf(reinterpret_cast<char*>(m_PollReply.NodeReport), artnet::REPORT_LENGTH, "#%04x [%04d] %.*s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), nSysNameLenght, pSysName);
 
-		const auto nDestinationIp = bResponse ? m_nIpAddressFrom : Network::Get()->GetBroadcastIp();
-
-		Network::Get()->SendTo(m_nHandle, &m_PollReply, sizeof(TArtPollReply), nDestinationIp, artnet::UDP_PORT);
+		Network::Get()->SendTo(m_nHandle, &m_PollReply, sizeof(TArtPollReply), m_nIpAddressFrom, artnet::UDP_PORT);
 	}
 
 	m_State.IsChanged = false;
@@ -223,5 +218,5 @@ void ArtNetNode::HandlePoll() {
 		m_State.bUseTargetPortAddress = false;
 	}
 
-	SendPollRelply(true);
+	SendPollRelply();
 }

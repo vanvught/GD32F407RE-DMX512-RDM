@@ -60,6 +60,10 @@ public:
 		memcpy(pMacAddress, m_aNetMacaddr, network::MAC_SIZE);
 	}
 
+	uint32_t GetSecondaryIp() const {
+		return m_IpInfo.secondary_ip.addr;
+	}
+
 	void SetIp(uint32_t nIp);
 	uint32_t GetIp() const {
 		return m_IpInfo.ip.addr;

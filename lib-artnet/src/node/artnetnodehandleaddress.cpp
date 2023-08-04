@@ -75,7 +75,9 @@ int ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::Por
 			m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts - 1);
 		}
 #endif
+
 		m_Node.Port[nPortIndex].direction = lightset::PortDir::DISABLE;
+
 		DEBUG_EXIT
 		return ARTNET_EOK;
 	}
@@ -560,5 +562,5 @@ void ArtNetNode::HandleAddress() {
 		break;
 	}
 
-	SendPollRelply(true);
+	SendPollRelply();
 }

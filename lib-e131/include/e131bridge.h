@@ -76,6 +76,13 @@ struct State {
 	e131bridge::Status status;
 };
 
+struct Bridge {
+	struct {
+		uint16_t nUniverse;
+		lightset::PortDir direction;
+	} Port[e131bridge::MAX_PORTS];
+};
+
 struct Source {
 	uint32_t nMillis;
 	uint32_t nIp;
@@ -83,13 +90,7 @@ struct Source {
 	uint8_t nSequenceNumberData;
 };
 
-struct GenericPort {
-	uint16_t nUniverse;
-	bool bIsEnabled;
-};
-
 struct OutputPort {
-	GenericPort genericPort;
 	Source sourceA;
 	Source sourceB;
 	lightset::MergeMode mergeMode;
@@ -99,7 +100,6 @@ struct OutputPort {
 };
 
 struct InputPort {
-	GenericPort genericPort;
 	uint32_t nMulticastIp;
 	uint8_t nSequenceNumber;
 	uint8_t nPriority;
@@ -114,7 +114,6 @@ public:
 	void SetFailSafe(const lightset::FailSafe failsafe) {
 		m_State.failsafe = failsafe;
 	}
-
 	lightset::FailSafe GetFailSafe() const {
 		return m_State.failsafe;
 	}
@@ -122,20 +121,28 @@ public:
 	void SetOutput(LightSet *pLightSet) {
 		m_pLightSet = pLightSet;
 	}
-
 	LightSet *GetOutput() const {
 		return m_pLightSet;
 	}
 
-	void SetUniverse(uint32_t nPortIndex, lightset::PortDir dir, uint16_t nUniverse);
-	bool GetUniverse(uint32_t nPortIndex, uint16_t &nUniverse, lightset::PortDir tDir) const;
+	void SetUniverse(const uint32_t nPortIndex, const lightset::PortDir portDir, const uint16_t nUniverse);
+	bool GetUniverse(const uint32_t nPortIndex, uint16_t &nUniverse, lightset::PortDir portDir) const {
+		assert(nPortIndex < e131bridge::MAX_PORTS);
+
+		if (portDir == lightset::PortDir::DISABLE) {
+			return false;
+		}
+
+		nUniverse = m_Bridge.Port[nPortIndex].nUniverse;
+		return m_Bridge.Port[nPortIndex].direction == portDir;
+	}
 
 	bool GetOutputPort(const uint16_t nUniverse, uint32_t& nPortIndex) {
 		for (nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-			if (!m_OutputPort[nPortIndex].genericPort.bIsEnabled) {
+			if (m_Bridge.Port[nPortIndex].direction != lightset::PortDir::OUTPUT) {
 				continue;
 			}
-			if (m_OutputPort[nPortIndex].genericPort.nUniverse == nUniverse) {
+			if (m_Bridge.Port[nPortIndex].nUniverse == nUniverse) {
 				return true;
 			}
 		}
@@ -146,7 +153,6 @@ public:
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		m_OutputPort[nPortIndex].mergeMode = mergeMode;
 	}
-
 	lightset::MergeMode GetMergeMode(uint32_t nPortIndex) const {
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		return m_OutputPort[nPortIndex].mergeMode;
@@ -213,19 +219,17 @@ public:
 		strncpy(m_SourceName, pSourceName, e131::SOURCE_NAME_LENGTH - 1);
 		m_SourceName[e131::SOURCE_NAME_LENGTH - 1] = '\0';
 	}
-
 	const char *GetSourceName() const {
 		return m_SourceName;
 	}
 
-	void SetPriority(uint32_t nPortIndex, uint8_t nPriority) {
+	void SetPriority(const uint32_t nPortIndex, uint8_t nPriority) {
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		if ((nPriority >= e131::priority::LOWEST) && (nPriority <= e131::priority::HIGHEST)) {
 			m_InputPort[nPortIndex].nPriority = nPriority;
 		}
 	}
-
-	uint8_t GetPriority(uint32_t nPortIndex) const {
+	uint8_t GetPriority(const uint32_t nPortIndex) const {
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		return m_InputPort[nPortIndex].nPriority;
 	}
@@ -245,7 +249,7 @@ public:
 		/**
 		 * FIXME I do not like this hack. It should be handled in dmx.cpp
 		 */
-		if ((m_OutputPort[nPortIndex].genericPort.bIsEnabled)
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT
 				&& (outputStyle == lightset::OutputStyle::CONSTANT)
 				&& (m_pLightSet != nullptr)) {
 			if (m_OutputPort[nPortIndex].IsTransmitting) {
@@ -268,7 +272,7 @@ public:
 
 		lightset::Data::OutputClear(m_pLightSet, nPortIndex);
 
-		if (m_OutputPort[nPortIndex].genericPort.bIsEnabled && !m_OutputPort[nPortIndex].IsTransmitting) {
+		if ((m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) && !m_OutputPort[nPortIndex].IsTransmitting) {
 			m_pLightSet->Start(nPortIndex);
 			m_OutputPort[nPortIndex].IsTransmitting = true;
 		}
@@ -323,6 +327,7 @@ private:
 	char m_SourceName[e131::SOURCE_NAME_LENGTH];
 
 	e131bridge::State m_State;
+	e131bridge::Bridge m_Bridge;
 	e131bridge::OutputPort m_OutputPort[e131bridge::MAX_PORTS];
 	e131bridge::InputPort m_InputPort[e131bridge::MAX_PORTS];
 

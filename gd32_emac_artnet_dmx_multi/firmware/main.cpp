@@ -23,8 +23,6 @@
  * THE SOFTWARE.
  */
 
-#undef NDEBUG
-
 #include <cstdint>
 #include <cassert>
 
@@ -129,14 +127,9 @@ void main() {
 	}
 
 	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		uint16_t nAddress;
 		const auto nDmxPortIndex = nPortIndex - DMXPORT_OFFSET;
-
-		if (node.GetPortAddress(nPortIndex, nAddress, lightset::PortDir::OUTPUT)) {
-			dmx.SetPortDirection(nDmxPortIndex, dmx::PortDirection::OUTP, false);
-		} else {
-			dmx.SetPortDirection(nDmxPortIndex, dmx::PortDirection::INP, false);
-		}
+		const auto portDirection = (node.GetPortDirection(nPortIndex) == lightset::PortDir::OUTPUT ? dmx::PortDirection::OUTP : dmx::PortDirection::INP);
+		dmx.SetPortDirection(nDmxPortIndex, portDirection , false);
 	}
 
 	DmxSend dmxSend;

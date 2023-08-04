@@ -62,8 +62,7 @@ static uint32_t s_ReceivingMask = 0;
 
 void E131Bridge::HandleDmxIn() {
 	for (uint32_t nPortIndex = 0 ; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
-		if (m_InputPort[nPortIndex].genericPort.bIsEnabled) {
-
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
 			uint32_t nLength;
 			uint32_t nUpdatesPerSecond;
 			const auto *const pDmxData = e131::dmx_handler(nPortIndex, nLength, nUpdatesPerSecond);
@@ -75,7 +74,7 @@ void E131Bridge::HandleDmxIn() {
 				m_pE131DataPacket->FrameLayer.FLagsLength = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (DATA_FRAME_LAYER_LENGTH(nLength))));
 				m_pE131DataPacket->FrameLayer.Priority = m_InputPort[nPortIndex].nPriority;
 				m_pE131DataPacket->FrameLayer.SequenceNumber = m_InputPort[nPortIndex].nSequenceNumber++;
-				m_pE131DataPacket->FrameLayer.Universe = __builtin_bswap16(m_InputPort[nPortIndex].genericPort.nUniverse);
+				m_pE131DataPacket->FrameLayer.Universe = __builtin_bswap16(m_Bridge.Port[nPortIndex].nUniverse);
 				// Data Layer
 				m_pE131DataPacket->DMPLayer.FlagsLength = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (DATA_LAYER_LENGTH(nLength))));
 				memcpy(m_pE131DataPacket->DMPLayer.PropertyValues, pDmxData, nLength);

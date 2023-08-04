@@ -201,8 +201,6 @@ void ArtNetNode::Start() {
 	m_State.status = Status::ON;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 	hal::panel_led_on(hal::panelled::ARTNET);
-
-	SendPollRelply(false);	// send a reply on startup
 }
 
 void ArtNetNode::Stop() {
@@ -374,22 +372,14 @@ void ArtNetNode::Run() {
 	m_nCurrentPacketMillis = Hardware::Get()->Millis();
 
 	if (__builtin_expect((nBytesReceived == 0), 1)) {
-		if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= artnet::NETWORK_DATA_LOSS_TIMEOUT * 1000) {
+		const auto nDeltaMillis = m_nCurrentPacketMillis - m_nPreviousPacketMillis;
+
+		if (nDeltaMillis >= artnet::NETWORK_DATA_LOSS_TIMEOUT * 1000) {
 			SetNetworkDataLossCondition();
 			hal::panel_led_off(hal::panelled::ARTNET);
 		}
 
-		if (m_State.SendArtPollReplyOnChange) {
-			auto doSend = m_State.IsChanged;
-#if (ARTNET_VERSION >= 4)
-			doSend |= E131Bridge::IsStatusChanged();
-#endif
-			if (doSend) {
-				SendPollRelply(false);
-			}
-		}
-
-		if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= (1U * 1000U)) {
+		if (nDeltaMillis >= (1U * 1000U)) {
 			m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::OUTPUT)));
 		}
 

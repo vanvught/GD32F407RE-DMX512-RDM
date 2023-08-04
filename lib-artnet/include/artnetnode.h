@@ -347,6 +347,11 @@ public:
 		return m_Node.SubSwitch[nPage];
 	}
 
+	lightset::PortDir GetPortDirection(const uint32_t nPortIndex) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+		return m_Node.Port[nPortIndex].direction;
+	}
+
 	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress) const {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
@@ -355,24 +360,18 @@ public:
 		}
 
 		nAddress = m_Node.Port[nPortIndex].PortAddress;
-
 		return true;
 	}
 
-	bool GetPortAddress(uint32_t nPortIndex, uint16_t& nAddress, lightset::PortDir dir) const {
+	bool GetPortAddress(const uint32_t nPortIndex, uint16_t& nAddress, lightset::PortDir portDir) const {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
-		if (dir == lightset::PortDir::INPUT) {
-			nAddress = m_Node.Port[nPortIndex].PortAddress;
-			return m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT;
+		if (portDir == lightset::PortDir::DISABLE) {
+			return false;
 		}
 
-		if (dir == lightset::PortDir::OUTPUT) {
-			nAddress = m_Node.Port[nPortIndex].PortAddress;
-			return m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT;
-		}
-
-		return false;
+		nAddress = m_Node.Port[nPortIndex].PortAddress;
+		return m_Node.Port[nPortIndex].direction == portDir;
 	}
 
 	bool GetOutputPort(const uint16_t nUniverse, uint32_t& nPortIndex) {
@@ -563,8 +562,9 @@ private:
 	void UpdateMergeStatus(const uint32_t nPortIndex);
 	void CheckMergeTimeouts(const uint32_t nPortIndex);
 
-	void ProcessPollRelply(uint32_t nPortIndex, uint32_t& NumPortsInput, uint32_t& NumPortsOutput);
-	void SendPollRelply(bool);
+	void ProcessPollRelply(const uint32_t nPortIndex, uint32_t& NumPortsInput, uint32_t& NumPortsOutput);
+	void SendPollRelply();
+
 	void SendTod(uint32_t nPortIndex);
 	void SendTodRequest(uint32_t nPortIndex);
 

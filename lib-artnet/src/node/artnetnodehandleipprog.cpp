@@ -123,7 +123,7 @@ void ArtNetNode::HandleIpProg() {
 		memcpy(m_PollReply.BindIp, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
 #endif
 		if (m_State.SendArtPollReplyOnChange) {
-			SendPollRelply(true);
+			SendPollRelply();
 		}
 
 #ifndef NDEBUG
