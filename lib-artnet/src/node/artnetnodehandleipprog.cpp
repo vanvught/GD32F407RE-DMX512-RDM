@@ -37,14 +37,12 @@
 
 #include "debug.h"
 
-//static constexpr uint8_t COMMAND_NONE = 0;
 static constexpr uint8_t COMMAND_ENABLE_PROGRAMMING = (1U << 7);
 static constexpr uint8_t COMMAND_ENABLE_DHCP		= ((1U << 6) | COMMAND_ENABLE_PROGRAMMING);
-static constexpr uint8_t COMMAND_PROGRAM_GATEWAY	= ((1U << 4) | COMMAND_ENABLE_PROGRAMMING); ///< Not documented!
+static constexpr uint8_t COMMAND_PROGRAM_GATEWAY	= ((1U << 4) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_SET_TO_DEFAULT		= ((1U << 3) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_PROGRAM_IPADDRESS	= ((1U << 2) | COMMAND_ENABLE_PROGRAMMING);
 static constexpr uint8_t COMMAND_PROGRAM_SUBNETMASK	= ((1U << 1) | COMMAND_ENABLE_PROGRAMMING);
-//static constexpr uint8_t COMMAND_PROGRAM_PORT		= ((1U << 0) | COMMAND_ENABLE_PROGRAMMING);
 
 union uip {
 	uint32_t u32;
@@ -118,14 +116,12 @@ void ArtNetNode::HandleIpProg() {
 	Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, sizeof(struct TArtIpProgReply), m_nIpAddressFrom, artnet::UDP_PORT);
 
 	if (isChanged) {
-		// Update Node network details
 		m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & (~(artnet::Status2::IP_DHCP))) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
-		// Update PollReply for new IPAddress
-		memcpy(m_PollReply.IPAddress, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
-		if (artnet::VERSION > 3) {
-			memcpy(m_PollReply.BindIp, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
-		}
 
+		memcpy(m_PollReply.IPAddress, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
+#if (ARTNET_VERSION >= 4)
+		memcpy(m_PollReply.BindIp, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
+#endif
 		if (m_State.SendArtPollReplyOnChange) {
 			SendPollRelply(true);
 		}

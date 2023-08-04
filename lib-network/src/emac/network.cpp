@@ -411,11 +411,8 @@ bool Network::ApplyQueuedConfig() {
 void Network::Print() {
 	printf("Network [%c]\n", GetAddressingMode());
 	printf(" Hostname  : %s\n", m_aHostName);
-	printf(" IfName    : %d: %s\n", m_nIfIndex, m_aIfName);
-	printf(" Inet      : " IPSTR "/%d\n", IP2STR(m_IpInfo.ip.addr), GetNetmaskCIDR());
-//	printf(" Primary   : " IPSTR "/%d (Secondary " IPSTR ")\n", IP2STR(m_IpInfo.ip.addr), GetNetmaskCIDR(), IP2STR(m_IpInfo.secondary_ip.addr));
-	printf(" Netmask   : " IPSTR "\n", IP2STR(m_IpInfo.netmask.addr));
+	printf(" IfName    : %d: %s " MACSTR "\n", m_nIfIndex, m_aIfName, MAC2STR(m_aNetMacaddr));
+	printf(" Primary   : " IPSTR "/%d (HTTP only " IPSTR ")\n", IP2STR(m_IpInfo.ip.addr), GetNetmaskCIDR(), IP2STR(m_IpInfo.secondary_ip.addr));
 	printf(" Gateway   : " IPSTR "\n", IP2STR(m_IpInfo.gw.addr));
 	printf(" Broadcast : " IPSTR "\n", IP2STR(GetBroadcastIp()));
-	printf(" Mac       : " MACSTR "\n", MAC2STR(m_aNetMacaddr));
 }

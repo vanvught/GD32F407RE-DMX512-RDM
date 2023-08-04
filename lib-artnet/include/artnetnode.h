@@ -312,33 +312,36 @@ public:
 	}
 
 	void SetShortName(const char *);
-
-	void GetShortNameDefault(char *);
 	const char *GetShortName() const {
 		return m_Node.ShortName;
 	}
 
-	void SetLongName(const char *);
+	void GetShortNameDefault(char *);
 
-	void GetLongNameDefault(char *);
+	void SetLongName(const char *);
 	const char *GetLongName() const {
 		return m_Node.LongName;
 	}
 
+	void GetLongNameDefault(char *);
+
 	int SetUniverse(const uint32_t nPortIndex, const lightset::PortDir dir, const uint16_t nUniverse);
 
 	int SetUniverseSwitch(const uint32_t nPortIndex, const lightset::PortDir dir, const uint8_t nAddress);
-	bool GetUniverseSwitch(const uint32_t nPortIndex, uint8_t &nAddress,const lightset::PortDir dir) const;
+	bool GetUniverseSwitch(const uint32_t nPortIndex, uint8_t& nAddress, const lightset::PortDir portDir) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+
+		nAddress = m_Node.Port[nPortIndex].DefaultAddress;
+		return m_Node.Port[nPortIndex].direction == portDir;
+	}
 
 	void SetNetSwitch(uint8_t nAddress, uint32_t nPage);
-
 	uint8_t GetNetSwitch(const uint32_t nPage) const {
 		assert(nPage < artnetnode::PAGES);
 		return m_Node.NetSwitch[nPage];
 	}
 
 	void SetSubnetSwitch(uint8_t nAddress, uint32_t nPage);
-
 	uint8_t GetSubnetSwitch(const uint32_t nPage) const {
 		assert(nPage < artnetnode::PAGES);
 		return m_Node.SubSwitch[nPage];
@@ -385,7 +388,6 @@ public:
 	}
 
 	void SetMergeMode(const uint32_t nPortIndex, const lightset::MergeMode mergeMode);
-
 	lightset::MergeMode GetMergeMode(const uint32_t nPortIndex) const {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 		if ((m_OutputPort[nPortIndex].GoodOutput & artnet::GoodOutput::MERGE_MODE_LTP) == artnet::GoodOutput::MERGE_MODE_LTP) {
@@ -533,7 +535,7 @@ private:
 	void FillDiagData(void);
 #endif
 
-	void GetType(const uint32_t nBytesReceived, enum TOpCodes& opCode);
+	enum TOpCodes GetOpCode(const uint32_t nBytesReceived);
 
 	void HandlePoll();
 	void HandleDmx();
@@ -558,8 +560,8 @@ private:
 	bool GetPortIndexInput(const uint32_t nPage, const uint32_t nPollReplyIndex , uint32_t& nPortIndex);
 	bool GetPortIndexOutput(const uint32_t nPage, const uint32_t nPollReplyIndex, uint32_t& nPortIndex);
 
-	void UpdateMergeStatus(uint32_t nPortIndex);
-	void CheckMergeTimeouts(uint32_t nPortIndex);
+	void UpdateMergeStatus(const uint32_t nPortIndex);
+	void CheckMergeTimeouts(const uint32_t nPortIndex);
 
 	void ProcessPollRelply(uint32_t nPortIndex, uint32_t& NumPortsInput, uint32_t& NumPortsOutput);
 	void SendPollRelply(bool);

@@ -190,8 +190,7 @@ void arp_handle_request(struct t_arp *p_arp) {
 
 	DEBUG_PRINTF("Sender " IPSTR " Target " IPSTR, IP2STR(sender.u32), IP2STR(target.u32));
 
-//	if (!((target.u32 == net::globals::ipInfo.ip.addr) || (target.u32 == net::globals::ipInfo.secondary_ip.addr) || (target.u32 == net::globals::ipInfo.broadcast_ip.addr))) {
-	if (!((target.u32 == net::globals::ipInfo.ip.addr) || (target.u32 == net::globals::ipInfo.broadcast_ip.addr))) {
+	if (!((target.u32 == net::globals::ipInfo.ip.addr) || (target.u32 == net::globals::ipInfo.secondary_ip.addr) || (target.u32 == net::globals::ipInfo.broadcast_ip.addr))) {
 		DEBUG_PUTS("No for me.");
 		DEBUG_EXIT
 		return;

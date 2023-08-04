@@ -60,10 +60,7 @@ int ArtNetNode::SetUniverse(const uint32_t nPortIndex, const lightset::PortDir d
 
 int ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::PortDir dir, const uint8_t nAddress) {
 	DEBUG_PRINTF("nPortIndex=%u, dir=%s, nAddress=%u", nPortIndex, lightset::get_direction(dir), nAddress);
-
-	if (nPortIndex >= artnetnode::MAX_PORTS) {
-		return ARTNET_EACTION;
-	}
+	assert(nPortIndex < artnetnode::MAX_PORTS);
 
 	const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
 
@@ -165,26 +162,6 @@ int ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::Por
 
 	DEBUG_EXIT
 	return ARTNET_EOK;
-}
-
-bool ArtNetNode::GetUniverseSwitch(const uint32_t nPortIndex, uint8_t& nAddress, const lightset::PortDir portDir) const {
-	assert(nPortIndex < artnetnode::MAX_PORTS);
-
-	if (portDir == lightset::PortDir::DISABLE) {
-		return false;
-	}
-
-	if (portDir == lightset::PortDir::INPUT) {
-#if defined (ARTNET_HAVE_DMXIN)
-		nAddress = m_Node.Port[nPortIndex].DefaultAddress;
-		return m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT;
-#else
-		return false;
-#endif
-	}
-
-	nAddress = m_Node.Port[nPortIndex].DefaultAddress;
-	return m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT;
 }
 
 void ArtNetNode::SetSubnetSwitch(uint8_t nAddress, uint32_t nPage) {

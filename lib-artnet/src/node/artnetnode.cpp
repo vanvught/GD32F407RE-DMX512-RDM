@@ -66,6 +66,7 @@ ArtNetNode::ArtNetNode() {
 	memset(&m_Node, 0, sizeof(struct Node));
 	m_Node.IPAddressTimeCode = Network::Get()->GetBroadcastIp();
 	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
+
 	for (auto& port : m_Node.Port) {
 		port.direction = lightset::PortDir::DISABLE;
 	}
@@ -110,8 +111,8 @@ ArtNetNode::ArtNetNode() {
 		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
 	}
 
-	SetShortName(nullptr);	// Default
-	SetLongName(nullptr);	// Default
+	SetShortName(nullptr);	// Set default short name
+	SetLongName(nullptr);	// Set default long name
 
 #if defined (ARTNET_HAVE_DMXIN)
 	memcpy(m_ArtDmx.Id, artnet::NODE_ID, sizeof(m_PollReply.Id));
@@ -180,27 +181,12 @@ void ArtNetNode::Start() {
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
 	if (m_pArtNetRdm != nullptr) {
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-			/* An Output Gateway will send the ArtTodData packet in the following circumstances:
-			 * - Upon power on or device reset.
-			 * - In response to an ArtTodRequest if the Port-Address matches.
-			 * - In response to an ArtTodControl if the Port-Address matches.
-			 * - When their ToD changes due to the addition or deletion of a UID.
-			 * - At the end of full RDM discovery.
-			 */
 			const auto isRdmDisabled = ((m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::RDM_DISABLED) == artnet::GoodOutputB::RDM_DISABLED);
+
 			if (!isRdmDisabled && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
 				SendTod(nPortIndex);
 			}
 
-			/* A controller should periodically broadcast an ArtTodRequest
-			 * to the network in order to ensure its TODs are up to date. 
-			 * 
-			 * When to send:
-			 * - Upon power on or device reset.
-			 * - At regular intervals [10 minutes]. In theory not needed
-			 *   since Output Gateways will broadcast an ArtTodData if their
-			 *   ToD changes, however it is safe programming.
-			 */
 			if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
 				SendTodRequest(nPortIndex);
 			}
@@ -362,24 +348,22 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 	}
 }
 
-void ArtNetNode::GetType(const uint32_t nBytesReceived, enum TOpCodes& OpCode) {
+enum TOpCodes ArtNetNode::GetOpCode(const uint32_t nBytesReceived) {
 	const auto *const pPacket = reinterpret_cast<char *>(m_pReceiveBuffer);
 
 	if (nBytesReceived < ARTNET_MIN_HEADER_SIZE) {
-		OpCode = OP_NOT_DEFINED;
-		return;
+		return OP_NOT_DEFINED;
 	}
 
 	if ((pPacket[10] != 0) || (pPacket[11] != artnet::PROTOCOL_REVISION)) {
-		OpCode = OP_NOT_DEFINED;
-		return;
+		return OP_NOT_DEFINED;
 	}
 
 	if (memcmp(pPacket, artnet::NODE_ID, 8) == 0) {
-		OpCode = static_cast<TOpCodes>((static_cast<uint16_t>(pPacket[9] << 8)) + pPacket[8]);
-	} else {
-		OpCode = OP_NOT_DEFINED;
+		return static_cast<TOpCodes>((static_cast<uint16_t>(pPacket[9] << 8)) + pPacket[8]);
 	}
+
+	return OP_NOT_DEFINED;
 }
 
 void ArtNetNode::Run() {
@@ -450,10 +434,7 @@ void ArtNetNode::Run() {
 		}
 	}
 
-	enum TOpCodes OpCode;
-	GetType(nBytesReceived, OpCode);
-
-	switch (OpCode) {
+	switch (GetOpCode(nBytesReceived)) {
 #if (LIGHTSET_PORTS > 0)		
 	case OP_DMX:
 		if (m_pLightSet != nullptr) {

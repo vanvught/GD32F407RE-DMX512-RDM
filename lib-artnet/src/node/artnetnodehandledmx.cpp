@@ -36,7 +36,7 @@
 
 #include "lightsetdata.h"
 
-void ArtNetNode::UpdateMergeStatus(uint32_t nPortIndex) {
+void ArtNetNode::UpdateMergeStatus(const uint32_t nPortIndex) {
 	if (!m_State.IsMergeMode) {
 		m_State.IsMergeMode = true;
 		m_State.IsChanged = true;
@@ -45,7 +45,7 @@ void ArtNetNode::UpdateMergeStatus(uint32_t nPortIndex) {
 	m_OutputPort[nPortIndex].GoodOutput |= artnet::GoodOutput::OUTPUT_IS_MERGING;
 }
 
-void ArtNetNode::CheckMergeTimeouts(uint32_t nPortIndex) {
+void ArtNetNode::CheckMergeTimeouts(const uint32_t nPortIndex) {
 	const auto nTimeOutAMillis = m_nCurrentPacketMillis - m_OutputPort[nPortIndex].sourceA.nMillis;
 
 	if (nTimeOutAMillis > (artnet::MERGE_TIMEOUT_SECONDS * 1000U)) {
@@ -83,8 +83,8 @@ void ArtNetNode::HandleDmx() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)
-				&& (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
-				&& (pArtDmx->PortAddress == m_Node.Port[nPortIndex].PortAddress)) {
+		 && (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
+		 && (m_Node.Port[nPortIndex].PortAddress == pArtDmx->PortAddress)) {
 
 			const auto ipA = m_OutputPort[nPortIndex].sourceA.nIp;
 			const auto ipB = m_OutputPort[nPortIndex].sourceB.nIp;
