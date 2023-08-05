@@ -126,8 +126,6 @@ static constexpr uint32_t TCNET = 0;
 // DMX
 static constexpr uint32_t PORT_A_RX = 0;
 static constexpr uint32_t PORT_A_TX = 0;
-//
-static constexpr uint32_t INVERTED = 0;
 }  // namespace panelled
 }  // namespace hal
 #endif

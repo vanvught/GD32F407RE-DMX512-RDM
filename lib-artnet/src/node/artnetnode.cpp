@@ -71,6 +71,21 @@ ArtNetNode::ArtNetNode() {
 		port.direction = lightset::PortDir::DISABLE;
 	}
 
+#if (ARTNET_VERSION >= 4)
+	m_Node.AcnPriority = e131::priority::DEFAULT;
+#endif
+
+	memset(&m_State, 0, sizeof(struct State));
+	m_State.reportCode = ReportCode::RCPOWEROK;
+	m_State.status = Status::STANDBY;
+
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
+		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
+		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
+		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
+	}
+
 	/*
 	 * Status 1
 	 */
@@ -95,21 +110,6 @@ ArtNetNode::ArtNetNode() {
 #if defined (ARTNET_HAVE_DMXIN)
 	m_Node.Status3 |= artnet::Status3::OUTPUT_SWITCH;
 #endif
-
-#if (ARTNET_VERSION >= 4)
-	m_Node.AcnPriority = e131::priority::DEFAULT;
-#endif
-
-	memset(&m_State, 0, sizeof(struct State));
-	m_State.reportCode = ReportCode::RCPOWEROK;
-	m_State.status = Status::STANDBY;
-
-	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
-		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
-		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
-		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
-	}
 
 	SetShortName(nullptr);	// Set default short name
 	SetLongName(nullptr);	// Set default long name

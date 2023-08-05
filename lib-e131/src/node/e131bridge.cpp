@@ -51,15 +51,19 @@ E131Bridge::E131Bridge() {
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
-	for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
-		memset(&m_OutputPort[i], 0, sizeof(e131bridge::OutputPort));
-		memset(&m_InputPort[i], 0, sizeof(e131bridge::InputPort));
-		m_InputPort[i].nPriority = 100;
+	for (auto& port : m_Bridge.Port) {
+		port.direction = lightset::PortDir::DISABLE;
 	}
 
 	memset(&m_State, 0, sizeof(e131bridge::State));
 	m_State.nPriority = e131::priority::LOWEST;
 	m_State.failsafe = lightset::FailSafe::HOLD;
+
+	for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
+		memset(&m_OutputPort[i], 0, sizeof(e131bridge::OutputPort));
+		memset(&m_InputPort[i], 0, sizeof(e131bridge::InputPort));
+		m_InputPort[i].nPriority = 100;
+	}
 
 #if defined (E131_HAVE_DMXIN)
 	char aSourceName[e131::SOURCE_NAME_LENGTH];

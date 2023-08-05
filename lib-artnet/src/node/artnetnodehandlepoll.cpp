@@ -154,10 +154,21 @@ void ArtNetNode::SendPollRelply() {
 				continue;
 			}
 
+			if (artnetnode::PAGE_SIZE == 1) {
+				char label[12];
+				const auto nSize = snprintf(label, sizeof(label) - 1, "Port %u", 1 + nPortIndex);
+				memcpy(m_PollReply.ShortName, label, static_cast<size_t>(nSize));
+				m_PollReply.ShortName[nSize] = '\0';
+			}
+
 			ProcessPollRelply(nPortIndex, nPortsInput, nPortsOutput);
 		}
 
 		m_PollReply.NumPortsLo = static_cast<uint8_t>(std::max(nPortsInput, nPortsOutput));
+
+		if (m_PollReply.NumPortsLo == 0) {
+			continue;
+		}
 
 		m_State.ArtPollReplyCount++;
 		uint8_t nSysNameLenght;

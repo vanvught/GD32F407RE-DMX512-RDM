@@ -65,6 +65,10 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
+#if !defined (ARTNET_PAGE_SIZE)
+# error ARTNET_PAGE_SIZE is not defined
+#endif
+
 static constexpr uint32_t DMXPORT_OFFSET = 0;
 
 void Hardware::RebootHandler() {
@@ -113,7 +117,12 @@ void main() {
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+#if (ARTNET_PAGE_SIZE == 4)
 		node.SetUniverseSwitch(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniversePort(nPortIndex));
+#else
+		static_assert(ARTNET_PAGE_SIZE == 1, "ARTNET_PAGE_SIZE != 1");
+		node.SetUniverse(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniverse(nPortIndex));
+#endif
 	}
 
 	StoreDmxSend storeDmxSend;
