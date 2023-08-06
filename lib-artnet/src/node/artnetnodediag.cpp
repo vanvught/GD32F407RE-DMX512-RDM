@@ -35,31 +35,30 @@
 #include "network.h"
 
 void ArtNetNode::FillDiagData(void) {
-	memset(&m_DiagData, 0, sizeof (struct TArtDiagData));
+	memset(&m_DiagData, 0, sizeof(struct TArtDiagData));
 
-	memcpy(m_DiagData, NODE_ID, 8);
+	memcpy(m_DiagData.Id, artnet::NODE_ID, sizeof(m_DiagData.Id));
 	m_DiagData.OpCode = OP_DIAGDATA;
-	m_DiagData.ProtVerHi = 0;
-	m_DiagData.ProtVerLo = ARTNET_PROTOCOL_REVISION;
+	m_DiagData.ProtVerLo = artnet::PROTOCOL_REVISION;
 }
 
-void ArtNetNode::SendDiag(const char *text, TPriorityCodes nPriority) {
+void ArtNetNode::SendDiag(const char *pText, artnet::PriorityCodes priorityCode) {
 	if (!m_State.SendArtDiagData) {
 		return;
 	}
 
-	if (nPriority < m_State.DiagPriority) {
+	if (static_cast<uint8_t>(priorityCode) < m_State.DiagPriority) {
 		return;
 	}
 
-	m_DiagData.DiagPriority = nPriority;
+	m_DiagData.Priority = static_cast<uint8_t>(priorityCode);
 
-	strncpy(m_DiagData.Data, text, sizeof m_DiagData.Data - 1);
-	m_DiagData.Data[sizeof(m_DiagData.Data) - 1] = '\0';// Just be sure we have a last '\0'
-	m_DiagData.LengthLo = strlen(m_DiagData.Data) + 1;// Text length including the '\0'
+	strncpy(reinterpret_cast<char *>(m_DiagData.Data), pText, sizeof(m_DiagData.Data) - 1);
+	m_DiagData.Data[sizeof(m_DiagData.Data) - 1] = '\0';	// Just be sure we have a last '\0'
+	m_DiagData.LengthLo = static_cast<uint8_t>(strlen(reinterpret_cast<char *>(m_DiagData.Data)) + 1);	// Text length including the '\0'
 
 	const uint16_t nSize = sizeof(struct TArtDiagData) - sizeof(m_DiagData.Data) + m_DiagData.LengthLo;
 
-	Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.IPAddressDiagSend, ARTNET_UDP_PORT);
+	Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.DiagSendIPAddress, artnet::UDP_PORT);
 }
 #endif

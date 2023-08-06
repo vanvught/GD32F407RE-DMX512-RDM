@@ -53,7 +53,7 @@ void ArtNetNode::HandleSync() {
 		if (m_OutputPort[nPortIndex].IsDataPending) {
 			m_pLightSet->Sync(nPortIndex);
 #if defined ( ARTNET_ENABLE_SENDDIAG )
-			SendDiag("Sync individual port", ARTNET_DP_LOW);
+			SendDiag("Sync individual port", artnet::PriorityCodes::DP_LOW);
 #endif
 		}
 	}
@@ -61,7 +61,7 @@ void ArtNetNode::HandleSync() {
 	m_pLightSet->Sync();
 
 #if defined ( ARTNET_ENABLE_SENDDIAG )
-			SendDiag("Sync all", ARTNET_DP_LOW);
+			SendDiag("Sync all", artnet::PriorityCodes::DP_LOW);
 #endif
 
 	for (auto &outputPort : m_OutputPort) {

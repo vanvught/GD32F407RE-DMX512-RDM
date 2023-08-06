@@ -155,10 +155,7 @@ void ArtNetNode::SendPollRelply() {
 			}
 
 			if (artnetnode::PAGE_SIZE == 1) {
-				char label[12];
-				const auto nSize = snprintf(label, sizeof(label) - 1, "Port %u", 1 + nPortIndex);
-				memcpy(m_PollReply.ShortName, label, static_cast<size_t>(nSize));
-				m_PollReply.ShortName[nSize] = '\0';
+				memcpy(m_PollReply.ShortName, m_Node.Port[nPortIndex].ShortName, artnet::SHORT_NAME_LENGTH);
 			}
 
 			ProcessPollRelply(nPortIndex, nPortsInput, nPortsOutput);

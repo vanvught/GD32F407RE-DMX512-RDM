@@ -155,6 +155,7 @@ struct Node {
 		lightset::PortDir direction;
 		artnet::PortProtocol protocol;						///< Art-Net 4
 		uint8_t DefaultAddress;
+		char ShortName[artnet::SHORT_NAME_LENGTH];
 	} Port[artnetnode::MAX_PORTS];
 };
 
@@ -316,7 +317,14 @@ public:
 		return m_Node.ShortName;
 	}
 
+	void SetShortName(const uint32_t nPortIndex, const char *);
+	const char *GetShortName(const uint32_t nPortIndex) const {
+		assert(nPortIndex < artnetnode::MAX_PORTS);
+		return m_Node.Port[nPortIndex].ShortName;
+	}
+
 	void GetShortNameDefault(char *);
+	void GetShortNameDefault(const uint32_t, char *);
 
 	void SetLongName(const char *);
 	const char *GetLongName() const {
@@ -411,10 +419,6 @@ public:
 	bool GetDisableMergeTimeout() const {
 		return m_State.bDisableMergeTimeout;
 	}
-
-#if defined ( ARTNET_ENABLE_SENDDIAG )
-	void SendDiag(const char *, artnet::PriorityCodes);
-#endif
 
 	void SendTimeCode(const struct TArtNetTimeCode *);
 
@@ -532,6 +536,7 @@ private:
 	void FillPollReply();
 #if defined ( ARTNET_ENABLE_SENDDIAG )
 	void FillDiagData(void);
+	void SendDiag(const char *, artnet::PriorityCodes);
 #endif
 
 	enum TOpCodes GetOpCode(const uint32_t nBytesReceived);

@@ -45,8 +45,9 @@ static uint32_t s_ReceivingMask = 0;
 
 void ArtNetNode::HandleDmxIn() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT)
-		 && (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)) {
+		if  ((m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT)
+		 &&  (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
+		 && ((m_InputPort[nPortIndex].GoodInput & artnet::GoodInput::DISABLED) != artnet::GoodInput::DISABLED)) {
 
 			uint32_t nLength;
 			uint32_t nUpdatesPerSecond;

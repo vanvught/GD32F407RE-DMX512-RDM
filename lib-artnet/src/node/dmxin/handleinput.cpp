@@ -56,12 +56,15 @@ void ArtNetNode::HandleInput() {
 
 		const auto isPortIndexInput __attribute__((unused)) = GetPortIndexInput(nPage, NumPorts, nPortIndex);
 		DEBUG_PRINTF("isPortIndexInput=%c, nPortIndex=%u", isPortIndexInput ? 'Y' : 'N', nPortIndex);
+		assert(isPortIndexInput);
 
 		uint8_t nAddress;
 
 		if (GetUniverseSwitch(nPortIndex, nAddress, lightset::PortDir::INPUT)) {
 			if (pArtInput->Input[NumPorts] & 0x01) {
-				SetUniverseSwitch(nPortIndex, lightset::PortDir::DISABLE, nAddress);
+				m_InputPort[nPortIndex].GoodInput |= static_cast<uint8_t>(artnet::GoodInput::DISABLED);
+			} else {
+				m_InputPort[nPortIndex].GoodInput &= static_cast<uint8_t>(~static_cast<uint8_t>(artnet::GoodInput::DISABLED));
 			}
 		}
 	}

@@ -67,12 +67,12 @@ struct StyleCode {
  * Diagnostics Priority codes.
  * These are used in ArtPoll and ArtDiagData.
  */
-struct PriorityCodes {
-	static constexpr uint8_t DP_LOW = 0x10;		///< Low priority message.
-	static constexpr uint8_t DP_MED = 0x40;		///< Medium priority message.
-	static constexpr uint8_t DP_HIGH = 0x80;	///< High priority message.
-	static constexpr uint8_t DP_CRITICAL = 0xE0;///< Critical priority message.
-	static constexpr uint8_t DP_VOLATILE = 0xF0;///< Volatile message. Messages of this type are displayed on a single line in the DMX-Workshop diagnostics display. All other types are displayed in a list box.
+enum class PriorityCodes: uint8_t {
+	DP_LOW = 0x10,		///< Low priority message.
+	DP_MED = 0x40,		///< Medium priority message.
+	DP_HIGH = 0x80,		///< High priority message.
+	DP_CRITICAL = 0xE0,	///< Critical priority message.
+	DP_VOLATILE = 0xF0,	///< Volatile message. Messages of this type are displayed on a single line in the DMX-Workshop diagnostics display. All other types are displayed in a list box.
 };
 
 struct PortType {

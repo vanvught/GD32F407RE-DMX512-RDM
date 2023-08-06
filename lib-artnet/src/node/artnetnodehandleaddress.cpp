@@ -331,8 +331,17 @@ void ArtNetNode::HandleAddress() {
 	const auto *const pArtAddress = reinterpret_cast<TArtAddress *>(m_pReceiveBuffer);
 	m_State.reportCode = artnetnode::ReportCode::RCPOWEROK;
 
+	const auto nPage = static_cast<uint32_t>(pArtAddress->BindIndex > 0 ? pArtAddress->BindIndex - 1 : 0);
+
+	DEBUG_PRINTF("nPage=%u", nPage);
+
+
 	if (pArtAddress->ShortName[0] != 0)  {
-		SetShortName(reinterpret_cast<const char*>(pArtAddress->ShortName));
+		if (artnetnode::PAGE_SIZE == 4) {
+			SetShortName(reinterpret_cast<const char*>(pArtAddress->ShortName));
+		} else {
+			SetShortName(nPage, reinterpret_cast<const char*>(pArtAddress->ShortName));
+		}
 		m_State.reportCode = artnetnode::ReportCode::RCSHNAMEOK;
 	}
 
@@ -340,10 +349,6 @@ void ArtNetNode::HandleAddress() {
 		SetLongName(reinterpret_cast<const char*>(pArtAddress->LongName));
 		m_State.reportCode = artnetnode::ReportCode::RCLONAMEOK;
 	}
-
-	const auto nPage = static_cast<uint32_t>(pArtAddress->BindIndex > 0 ? pArtAddress->BindIndex - 1 : 0);
-
-	DEBUG_PRINTF("nPage=%u", nPage);
 
 	if (pArtAddress->SubSwitch == artnet::Program::DEFAULTS) {
 		SetSubnetSwitch(defaults::SUBNET_SWITCH, nPage);

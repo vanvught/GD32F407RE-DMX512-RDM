@@ -111,7 +111,14 @@ ArtNetNode::ArtNetNode() {
 	m_Node.Status3 |= artnet::Status3::OUTPUT_SWITCH;
 #endif
 
-	SetShortName(nullptr);	// Set default short name
+	if (artnetnode::PAGE_SIZE == 1) {
+		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+			SetShortName(nPortIndex, nullptr);	// Set default port label
+		}
+	} else {
+		SetShortName(nullptr);	// Set default short name
+	}
+
 	SetLongName(nullptr);	// Set default long name
 
 #if defined (ARTNET_HAVE_DMXIN)
@@ -241,6 +248,11 @@ void ArtNetNode::GetShortNameDefault(char *pShortName) {
 	snprintf(pShortName, artnet::SHORT_NAME_LENGTH - 1, IPSTR, IP2STR(Network::Get()->GetIp()));
 }
 
+void ArtNetNode::GetShortNameDefault(const uint32_t nPortIndex, char *pShortName) {
+	assert(nPortIndex < artnetnode::MAX_PORTS);
+	snprintf(pShortName, artnet::SHORT_NAME_LENGTH - 1, "Port %u", 1U + nPortIndex);
+}
+
 void ArtNetNode::SetShortName(const char *pShortName) {
 	DEBUG_ENTRY
 
@@ -263,6 +275,31 @@ void ArtNetNode::SetShortName(const char *pShortName) {
 	}
 
 	DEBUG_PUTS(m_Node.ShortName);
+	DEBUG_EXIT
+}
+
+void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName) {
+	DEBUG_ENTRY
+	DEBUG_PRINTF("nPortIndex=%u, pShortName=%s", nPortIndex, pShortName);
+	assert(nPortIndex < artnetnode::MAX_PORTS);
+
+	if (pShortName == nullptr) {
+		GetShortNameDefault(nPortIndex, m_Node.Port[nPortIndex].ShortName);
+	} else {
+		strncpy(m_Node.Port[nPortIndex].ShortName, pShortName, artnet::SHORT_NAME_LENGTH - 1);
+	}
+
+	m_Node.Port[nPortIndex].ShortName[artnet::SHORT_NAME_LENGTH - 1] = '\0';
+
+	if (m_State.status == Status::ON) {
+		if (m_pArtNetStore != nullptr) {
+//			m_pArtNetStore->SaveShortName(m_Node.ShortName);
+		}
+
+//		artnet::display_shortname(m_Node.ShortName);
+	}
+
+	DEBUG_PUTS(m_Node.Port[nPortIndex].ShortName);
 	DEBUG_EXIT
 }
 
