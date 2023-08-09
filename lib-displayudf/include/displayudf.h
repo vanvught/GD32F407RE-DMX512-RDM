@@ -108,7 +108,7 @@ enum class Labels {
 	IP,
 	NETMASK,
 	DEFAULT_GATEWAY,
-	NODE_NAME,
+	NOT_USED,
 	UNIVERSE_PORT_A,
 # if MAX_ARRAY >= 2
 	UNIVERSE_PORT_B,
@@ -181,7 +181,6 @@ public:
 
 #if defined (NODE_ARTNET)
 	void Show(ArtNetNode *pArtNetNode, uint32_t nPortIndexOffset = 0);
-	void ShowNodeName(ArtNetNode *pArtNetNode);
 	void ShowUniverse(ArtNetNode *pArtNetNode);
 	void ShowDestinationIp(ArtNetNode *pArtNetNode);
 #endif

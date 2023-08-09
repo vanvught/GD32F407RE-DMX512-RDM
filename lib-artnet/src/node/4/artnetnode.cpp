@@ -26,6 +26,10 @@
  * THE SOFTWARE.
  */
 
+#ifndef NDEBUG
+# define NDEBUG
+#endif
+
 #include <cstdint>
 
 #include "artnetnode.h"

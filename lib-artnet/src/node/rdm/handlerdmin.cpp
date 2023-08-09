@@ -49,7 +49,7 @@ void ArtNetNode::HandleRdmIn() {
 			continue;
 		}
 
-		const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
+		const auto nPage = nPortIndex;
 
 		if (m_pArtNetRdm->RdmReceive(nPortIndex, pArtRdm->RdmPacket)) {
 			memcpy(pArtRdm->Id, artnet::NODE_ID, sizeof(pArtRdm->Id));
@@ -57,7 +57,7 @@ void ArtNetNode::HandleRdmIn() {
 			pArtRdm->ProtVerHi = 0;
 			pArtRdm->ProtVerLo = artnet::PROTOCOL_REVISION;
 			pArtRdm->RdmVer = 0x01;
-			pArtRdm->Net = m_Node.NetSwitch[nPage];
+			pArtRdm->Net = m_Node.Port[nPage].NetSwitch;
 			pArtRdm->Command = 0;
 			pArtRdm->Address = m_Node.Port[nPortIndex].DefaultAddress;
 

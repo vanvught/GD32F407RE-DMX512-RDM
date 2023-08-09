@@ -29,13 +29,7 @@
 
 const char ArtNetParamsConst::FILE_NAME[] = "artnet.txt";
 
-const char ArtNetParamsConst::NET[] = "net";
-const char ArtNetParamsConst::SUBNET[] = "subnet";
-
 const char ArtNetParamsConst::ENABLE_RDM[] = "enable_rdm";
-
-const char ArtNetParamsConst::NODE_SHORT_NAME[] = "short_name";
-const char ArtNetParamsConst::NODE_LONG_NAME[] = "long_name";
 
 const char ArtNetParamsConst::DESTINATION_IP_PORT[artnet::PORTS][24] = {
 		"destination_ip_port_a",
@@ -60,5 +54,3 @@ const char ArtNetParamsConst::PROTOCOL_PORT[artnet::PORTS][16] = {
 		"protocol_port_d" };
 
 const char ArtNetParamsConst::MAP_UNIVERSE0[] = "map_universe0";
-
-const char ArtNetParamsConst::SACN_PRIORITY[] = "sacn_priority";

@@ -116,11 +116,11 @@ void ArtNetNode::HandleIpProg() {
 	Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, sizeof(struct TArtIpProgReply), m_nIpAddressFrom, artnet::UDP_PORT);
 
 	if (isChanged) {
-		m_Node.Status2 = static_cast<uint8_t>((m_Node.Status2 & (~(artnet::Status2::IP_DHCP))) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
+		m_ArtPollReply.Status2 = static_cast<uint8_t>((m_ArtPollReply.Status2 & (~(artnet::Status2::IP_DHCP))) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
 
-		memcpy(m_PollReply.IPAddress, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
+		memcpy(m_ArtPollReply.IPAddress, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
 #if (ARTNET_VERSION >= 4)
-		memcpy(m_PollReply.BindIp, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
+		memcpy(m_ArtPollReply.BindIp, &pArtIpProgReply->ProgIpHi, artnet::IP_SIZE);
 #endif
 		if (m_State.SendArtPollReplyOnChange) {
 			SendPollRelply();

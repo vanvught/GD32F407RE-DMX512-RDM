@@ -41,10 +41,6 @@
 
 #include "debug.h"
 
-#if !defined(ARTNET_PAGE_SIZE)
-# define ARTNET_PAGE_SIZE	4
-#endif
-
 namespace ws28xxdmxmulti {
 #if !defined (CONFIG_PIXELDMX_MAX_PORTS)
 # define CONFIG_PIXELDMX_MAX_PORTS	8
@@ -101,7 +97,7 @@ void WS28xxDmxMulti::SetData(uint32_t nPortIndex, const uint8_t* pData, uint32_t
 	assert(pData != nullptr);
 	assert(nLength <= lightset::dmx::UNIVERSE_SIZE);
 
-#if ((ARTNET_PAGE_SIZE==4) && defined (NODE_ARTNET_MULTI)) || defined (NODE_DDP_DISPLAY)
+#if defined (NODE_DDP_DISPLAY)
 	const auto nOutIndex = (nPortIndex / 4);
 	const auto nSwitch = nPortIndex - (nOutIndex * 4);
 #else

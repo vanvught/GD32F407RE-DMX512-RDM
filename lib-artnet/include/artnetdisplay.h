@@ -35,7 +35,6 @@
 #include "lightset.h"
 
 namespace artnet {
-void display_shortname(const char *pShortName);
 void display_longname(const char *pLongName);
 void display_universe_switch(uint32_t nPortIndex, uint8_t nAddress);
 void display_net_switch(uint8_t nAddress);

@@ -30,10 +30,6 @@
 #include "lightset.h"
 
 namespace artnet {
-void display_shortname(__attribute__((unused)) const char *pShortName) {
-	DisplayUdf::Get()->ShowNodeName(ArtNetNode::Get());
-}
-
 void display_longname(__attribute__((unused)) const char *pLongName) {
 }
 

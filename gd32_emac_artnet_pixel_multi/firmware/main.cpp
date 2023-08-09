@@ -78,10 +78,6 @@
 #include "firmwareversion.h"
 #include "software_version.h"
 
-#if !defined (ARTNET_PAGE_SIZE)
-# error ARTNET_PAGE_SIZE is not defined
-#endif
-
 static constexpr uint32_t DMXPORT_OFFSET = 32;
 
 void Hardware::RebootHandler() {
@@ -147,23 +143,6 @@ void main() {
 
 	uint32_t nPortProtocolIndex = 0;
 
-#if (ARTNET_PAGE_SIZE == 4)
-	for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
-		auto isSet = false;
-		const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
-		if (isSet) {
-			for (uint16_t u = 0; u < nUniverses; u++) {
-				node.SetUniverse(nPortProtocolIndex, lightset::PortDir::OUTPUT, static_cast<uint16_t>(nStartUniversePort + u));
-				nPortProtocolIndex++;
-			}
-			nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS - nUniverses;
-		} else {
-			nPortProtocolIndex = nPortProtocolIndex + artnet::PORTS;
-		}
-	}
-#else
-	static_assert(ARTNET_PAGE_SIZE == 1, "ARTNET_PAGE_SIZE != 1");
-
 	for (uint32_t nOutportIndex = 0; nOutportIndex < nPixelActivePorts; nOutportIndex++) {
 		auto isSet = false;
 		const auto nStartUniversePort = pixelDmxParams.GetStartUniversePort(nOutportIndex, isSet);
@@ -174,7 +153,6 @@ void main() {
 			nPortProtocolIndex++;
 		}
 	}
-#endif
 
 	const auto nTestPattern = static_cast<pixelpatterns::Pattern>(pixelDmxParams.GetTestPattern());
 	PixelTestPattern pixelTestPattern(nTestPattern, nPixelActivePorts);

@@ -45,7 +45,7 @@ const RemoteConfig::Txt RemoteConfig::s_TXT[] = {
 		{ &RemoteConfig::HandleGetDisplayTxt,    &RemoteConfig::HandleSetDisplayTxt,    "display.txt",  11, Store::DISPLAYUDF },
 #endif
 #if defined (NODE_ARTNET)
-		{ &RemoteConfig::HandleGetArtnetTxt,     &RemoteConfig::HandleSetArtnetTxt,     "artnet.txt",   10, Store::ARTNET },
+		{ &RemoteConfig::HandleGetArtnetTxt,     &RemoteConfig::HandleSetArtnetTxt,     "artnet.txt",   10, Store::NODE },
 #endif
 #if defined (NODE_E131)
 		{ &RemoteConfig::HandleGetE131Txt,       &RemoteConfig::HandleSetE131Txt,       "e131.txt",     8,  Store::E131 },

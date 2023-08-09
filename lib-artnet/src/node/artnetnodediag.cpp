@@ -59,6 +59,6 @@ void ArtNetNode::SendDiag(const char *pText, artnet::PriorityCodes priorityCode)
 
 	const uint16_t nSize = sizeof(struct TArtDiagData) - sizeof(m_DiagData.Data) + m_DiagData.LengthLo;
 
-	Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.DiagSendIPAddress, artnet::UDP_PORT);
+	Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.ArtDiagIpAddress, artnet::UDP_PORT);
 }
 #endif

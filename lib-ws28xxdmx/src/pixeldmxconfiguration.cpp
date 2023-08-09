@@ -40,10 +40,6 @@
 # define NODE_ARTNET
 #endif
 
-#if !defined(ARTNET_PAGE_SIZE)
-# define ARTNET_PAGE_SIZE	4
-#endif
-
 using namespace pixel;
 
 void PixelDmxConfiguration::Validate(uint32_t nPortsMax, uint32_t& nLedsPerPixel, pixeldmxconfiguration::PortInfo& portInfo) {
@@ -86,7 +82,7 @@ void PixelDmxConfiguration::Validate(uint32_t nPortsMax, uint32_t& nLedsPerPixel
 	if (nPortsMax == 1) {
 		portInfo.nProtocolPortIndexLast = (m_nGroups / (1U + portInfo.nBeginIndexPort[1]));
 	} else {
-#if ((ARTNET_PAGE_SIZE==4) && defined (NODE_ARTNET)) || defined (NODE_DDP_DISPLAY)
+#if defined (NODE_DDP_DISPLAY)
 		portInfo.nProtocolPortIndexLast = (((m_nOutputPorts - 1U) * 4U) + m_nUniverses - 1U);
 #else
 		portInfo.nProtocolPortIndexLast = ((m_nOutputPorts * m_nUniverses)  - 1U);

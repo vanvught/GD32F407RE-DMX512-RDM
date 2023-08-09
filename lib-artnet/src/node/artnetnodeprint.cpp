@@ -45,7 +45,7 @@
 #include "network.h"
 
 void ArtNetNode::Print() {
-	printf("Art-Net %d [%u] V%d.%d\n", artnet::VERSION, artnetnode::PAGES, ArtNetConst::VERSION[0], ArtNetConst::VERSION[1]);
+	printf("Art-Net %d V%d.%d\n", artnet::VERSION, ArtNetConst::VERSION[0], ArtNetConst::VERSION[1]);
 	printf(" Short name : %s\n", m_Node.ShortName);
 	printf(" Long name  : %s\n", m_Node.LongName);
 #if defined (ARTNET_HAVE_TIMECODE)

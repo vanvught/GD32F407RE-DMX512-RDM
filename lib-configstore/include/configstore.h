@@ -33,7 +33,6 @@
 namespace configstore {
 enum class Store {
 	NETWORK,
-	ARTNET,
 	DMXSEND,
 	WS28XXDMX,
 	E131,

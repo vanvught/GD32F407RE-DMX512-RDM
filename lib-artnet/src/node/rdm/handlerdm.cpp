@@ -174,7 +174,7 @@ void ArtNetNode::SendTod(uint32_t nPortIndex) {
 	assert(nPortIndex < artnetnode::MAX_PORTS);
 
 	auto *pTodData = &m_ArtTodPacket.ArtTodData;
-	const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
+	const auto nPage = nPortIndex;
 
 	memcpy(pTodData->Id, artnet::NODE_ID, sizeof(pTodData->Id));
 	pTodData->OpCode = OP_TODDATA;
@@ -197,7 +197,7 @@ void ArtNetNode::SendTod(uint32_t nPortIndex) {
 	pTodData->Spare5 = 0;
 	pTodData->Spare6 = 0;
 	pTodData->BindIndex = static_cast<uint8_t>(nPage + 1U); ///< ArtPollReplyData->BindIndex == ArtTodData- >BindIndex
-	pTodData->Net = m_Node.NetSwitch[nPage];
+	pTodData->Net = m_Node.Port[nPage].NetSwitch;
 	pTodData->CommandResponse = 0; 							///< The packet contains the entire TOD or is the first packet in a sequence of packets that contains the entire TOD.
 	pTodData->Address = m_Node.Port[nPortIndex].DefaultAddress;
 	pTodData->UidTotalHi = 0;
@@ -221,7 +221,7 @@ void ArtNetNode::SendTodRequest(uint32_t nPortIndex) {
 	m_pArtNetRdm->TodReset(nPortIndex);
 
 	auto *pTodRequest = &m_ArtTodPacket.ArtTodRequest;
-	const auto nPage = nPortIndex / artnetnode::PAGE_SIZE;
+	const auto nPage = nPortIndex;
 
 	memcpy(pTodRequest->Id, artnet::NODE_ID, sizeof(pTodRequest->Id));
 	pTodRequest->OpCode = OP_TODREQUEST;
@@ -234,7 +234,7 @@ void ArtNetNode::SendTodRequest(uint32_t nPortIndex) {
 	pTodRequest->Spare5 = 0;
 	pTodRequest->Spare6 = 0;
 	pTodRequest->Spare7 = 0;
-	pTodRequest->Net = m_Node.NetSwitch[nPage];
+	pTodRequest->Net = m_Node.Port[nPage].NetSwitch;
 	pTodRequest->Command = 0;
 	pTodRequest->AddCount = 1;
 	pTodRequest->Address[0] = m_Node.Port[nPortIndex].DefaultAddress;
@@ -253,9 +253,9 @@ void ArtNetNode::SetRdmHandler(ArtNetRdm *pArtNetTRdm, bool IsResponder) {
 
 	if (m_pArtNetRdm != nullptr) {
 		m_Node.IsRdmResponder = IsResponder;
-		m_Node.Status1 |= artnet::Status1::RDM_CAPABLE;
+		m_ArtPollReply.Status1 |= artnet::Status1::RDM_CAPABLE;
 	} else {
-		m_Node.Status1 &= static_cast<uint8_t>(~artnet::Status1::RDM_CAPABLE);
+		m_ArtPollReply.Status1 &= static_cast<uint8_t>(~artnet::Status1::RDM_CAPABLE);
 	}
 
 	DEBUG_EXIT

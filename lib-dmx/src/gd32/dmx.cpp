@@ -1669,6 +1669,7 @@ Dmx::Dmx() {
 }
 
 void Dmx::SetPortDirection(uint32_t nPortIndex, PortDirection portDirection, bool bEnableData) {
+//	DEBUG_PRINTF("nPortIndex=%u %s %c", nPortIndex, portDirection == PortDirection::INP ? "Input" : "Output", bEnableData ? 'Y' : 'N');
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	const auto nUart = _port_to_uart(nPortIndex);
@@ -2074,6 +2075,7 @@ void Dmx::SetOutput(const bool doForce) {
 }
 
 void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
+//	DEBUG_PRINTF("sv_PortState[%u]=%u", nPortIndex, sv_PortState[nPortIndex]);
 	assert(nPortIndex < DMX_MAX_PORTS);
 	assert(sv_PortState[nPortIndex] == PortState::IDLE);
 
