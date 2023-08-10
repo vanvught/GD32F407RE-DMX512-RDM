@@ -38,17 +38,18 @@ class ArtNetStore {
 public:
 	virtual ~ArtNetStore() {}
 
-	virtual void SaveShortName(const char *pShortName)=0;
 	virtual void SaveLongName(const char *pLongName)=0;
 
-	virtual void SaveUniverseSwitch(uint32_t nPortIndex, const uint8_t nAddress)=0;
-	virtual void SaveNetSwitch(uint32_t nPage, const uint8_t nAddress)=0;
-	virtual void SaveSubnetSwitch(uint32_t nPage, const uint8_t nAddress)=0;
+	virtual void SaveShortName(const uint32_t nPortIndex, const char *pShortName)=0;
 
-	virtual void SaveMergeMode(uint32_t nPortIndex, const lightset::MergeMode mergeMode)=0;
-	virtual void SavePortProtocol(uint32_t nPortIndex, const artnet::PortProtocol portProtocol)=0;
-	virtual void SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyle outputStyle)=0;
-	virtual void SaveRdmEnabled(uint32_t nPortIndex, const bool isEnabled)=0;
+	virtual void SaveUniverseSwitch(const uint32_t nPortIndex, const uint8_t nAddress)=0;
+	virtual void SaveNetSwitch(const uint32_t nPage, const uint8_t nAddress)=0;
+	virtual void SaveSubnetSwitch(const uint32_t nPage, const uint8_t nAddress)=0;
+
+	virtual void SaveMergeMode(const uint32_t nPortIndex, const lightset::MergeMode mergeMode)=0;
+	virtual void SavePortProtocol(const uint32_t nPortIndex, const artnet::PortProtocol portProtocol)=0;
+	virtual void SaveOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle)=0;
+	virtual void SaveRdmEnabled(const uint32_t nPortIndex, const bool isEnabled)=0;
 
 	virtual void SaveFailSafe(const uint8_t nFailsafe)=0;
 };

@@ -249,7 +249,6 @@ void ArtNetNode::HandleAddress() {
 
 	DEBUG_PRINTF("nPage=%u", nPage);
 
-
 	if (pArtAddress->ShortName[0] != 0)  {
 		SetShortName(nPage, reinterpret_cast<const char*>(pArtAddress->ShortName));
 		m_State.reportCode = artnetnode::ReportCode::RCSHNAMEOK;
@@ -421,14 +420,14 @@ void ArtNetNode::HandleAddress() {
 	case artnet::PortCommand::STYLE_DELTA1:
 	case artnet::PortCommand::STYLE_DELTA2:
 	case artnet::PortCommand::STYLE_DELTA3:
-		SetOutputStyle(nPage, artnet::OutputStyle::DELTA);
+		SetOutputStyle(nPage, lightset::OutputStyle::DELTA);
 		break;
 
 	case artnet::PortCommand::STYLE_CONSTANT0:
 	case artnet::PortCommand::STYLE_CONSTANT1:
 	case artnet::PortCommand::STYLE_CONSTANT2:
 	case artnet::PortCommand::STYLE_CONSTANT3:
-		SetOutputStyle(nPage, artnet::OutputStyle::CONSTANT);
+		SetOutputStyle(nPage, lightset::OutputStyle::CONSTANT);
 		break;
 #endif
 
@@ -452,5 +451,5 @@ void ArtNetNode::HandleAddress() {
 		break;
 	}
 
-	SendPollRelply(pArtAddress->BindIndex);
+	SendPollRelply(pArtAddress->BindIndex, m_nIpAddressFrom);
 }

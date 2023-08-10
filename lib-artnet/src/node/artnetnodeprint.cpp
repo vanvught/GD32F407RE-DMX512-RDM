@@ -61,8 +61,7 @@ void ArtNetNode::Print() {
 				const auto mergeMode = ((m_OutputPort[nPortIndex].GoodOutput & artnet::GoodOutput::MERGE_MODE_LTP) == artnet::GoodOutput::MERGE_MODE_LTP) ? lightset::MergeMode::LTP : lightset::MergeMode::HTP;
 				printf("  Port %-2d %-4u %s %s", nPortIndex, nUniverse, lightset::get_merge_mode(mergeMode, true), GetRdm(0) ? "RDM" : "");
 #if defined (OUTPUT_HAVE_STYLESWITCH)
-				const auto outputStyle = GetOutputStyle(nPortIndex) == artnet::OutputStyle::DELTA ? lightset::OutputStyle::DELTA : lightset::OutputStyle::CONSTANT;
-				printf(" %s", lightset::get_output_style(outputStyle, true));
+				printf(" %s", lightset::get_output_style(GetOutputStyle(nPortIndex), true));
 #endif
 #if (ARTNET_VERSION >= 4)
 				printf(" %s\n", artnet::get_protocol_mode(m_Node.Port[nPortIndex].protocol, true));

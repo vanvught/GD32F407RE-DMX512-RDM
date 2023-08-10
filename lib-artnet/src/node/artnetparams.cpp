@@ -367,7 +367,11 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 		const auto portDir = portdir_get(nPortIndex);
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
 		builder.Add(LightSetParamsConst::DIRECTION[nPortIndex], lightset::get_direction(portDir), !isDefault);
-		builder.Add(LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<const char*>(m_Params.aLabel[nPortIndex]), isMaskSet(Mask::LABEL_A << nPortIndex));
+		const auto isLabelSet = isMaskSet(Mask::LABEL_A << nPortIndex);
+		if (!isLabelSet) {
+			ArtNetNode::Get()->GetShortNameDefault(nPortIndex, reinterpret_cast<char *>(m_Params.aLabel[nPortIndex]));
+		}
+		builder.Add(LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<const char *>(m_Params.aLabel[nPortIndex]), isLabelSet);
 	}
 
 	builder.AddComment("DMX Output");
@@ -443,6 +447,8 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 
 		if (isMaskSet(Mask::LABEL_A << nPortIndex)) {
 			p->SetShortName(nOffset, reinterpret_cast<const char *>(m_Params.aLabel[nPortIndex]));
+		} else {
+			p->SetShortName(nOffset, nullptr);
 		}
 
 		p->SetMergeMode(nOffset, mergemode_get(nPortIndex));
@@ -458,7 +464,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 #endif
 
 #if defined (OUTPUT_HAVE_STYLESWITCH)
-		p->SetOutputStyle(nPortIndex, (isOutputStyleSet(1U << nPortIndex)) ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA);
+		p->SetOutputStyle(nPortIndex, (isOutputStyleSet(1U << nPortIndex)) ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA);
 #endif
 
 #if defined (RDM_CONTROLLER)

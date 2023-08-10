@@ -87,6 +87,8 @@ ArtNetNode::ArtNetNode() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
+		m_OutputPort[nPortIndex].sourceA.nPhysical = 0xFF;
+		m_OutputPort[nPortIndex].sourceB.nPhysical = 0xFF;
 		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
 		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
 		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
@@ -116,6 +118,13 @@ ArtNetNode::ArtNetNode() {
 	m_ArtTimeCode.ProtVerLo = artnet::PROTOCOL_REVISION;
 	m_ArtTimeCode.Filler1 = 0;
 	m_ArtTimeCode.Filler2 = 0;
+#endif
+
+#if defined (ARTNET_ENABLE_SENDDIAG)
+	memset(&m_DiagData, 0, sizeof(struct TArtDiagData));
+	memcpy(m_DiagData.Id, artnet::NODE_ID, sizeof(m_DiagData.Id));
+	m_DiagData.OpCode = OP_DIAGDATA;
+	m_DiagData.ProtVerLo = artnet::PROTOCOL_REVISION;
 #endif
 
 	DEBUG_EXIT
@@ -167,10 +176,6 @@ void ArtNetNode::Start() {
 	m_ArtPollReply.Status3 = artnet::Status3::NETWORKLOSS_LAST_STATE | artnet::Status3::FAILSAFE_CONTROL;
 #if defined (ARTNET_HAVE_DMXIN)
 	m_ArtPollReply.Status3 |= artnet::Status3::OUTPUT_SWITCH;
-#endif
-
-#if defined ( ARTNET_ENABLE_SENDDIAG )
-	FillDiagData();
 #endif
 
 	m_nHandle = Network::Get()->Begin(artnet::UDP_PORT);
@@ -277,7 +282,7 @@ void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName)
 
 	if (m_State.status == Status::ON) {
 		if (m_pArtNetStore != nullptr) {
-//			m_pArtNetStore->SaveShortName(nPortIndexm, m_Node.Port[nPortIndex].ShortName);
+			m_pArtNetStore->SaveShortName(nPortIndex, m_Node.Port[nPortIndex].ShortName);
 		}
 	}
 
@@ -433,10 +438,15 @@ void ArtNetNode::Run() {
 		E131Bridge::Run();
 #endif
 
-		if ((m_State.ArtPollMillis != 0) && (m_nCurrentPacketMillis - m_State.ArtPollMillis > m_State.ArtPollReplyDelayMillis)) {
-			m_State.ArtPollMillis = 0;
-			SendPollRelply();
+		for (auto& entry : m_State.ArtPollReplyQueue) {
+			if (entry.ArtPollMillis != 0) {
+				if ((m_nCurrentPacketMillis - entry.ArtPollMillis) > m_State.ArtPollReplyDelayMillis) {
+					entry.ArtPollMillis = 0;
+					SendPollRelply(0, entry.ArtPollReplyIpAddress);
+				}
+			}
 		}
+
 		return;
 	}
 
@@ -565,4 +575,13 @@ void ArtNetNode::Run() {
 #if (ARTNET_VERSION >= 4)
 	E131Bridge::Run();
 #endif
+
+	for (auto& entry : m_State.ArtPollReplyQueue) {
+		if (entry.ArtPollMillis != 0) {
+			if ((m_nCurrentPacketMillis - entry.ArtPollMillis) > m_State.ArtPollReplyDelayMillis) {
+				entry.ArtPollMillis = 0;
+				SendPollRelply(0, entry.ArtPollReplyIpAddress);
+			}
+		}
+	}
 }

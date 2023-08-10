@@ -43,10 +43,6 @@ enum class PortProtocol {
 	SACN	///< Output DMX512 data from the sACN protocol and RDM data from the Art-Net protocol.
 };
 
-enum class OutputStyle {
-	DELTA, CONSTANT
-};
-
 /**
  * Table 4 – Style Codes
  * The Style code defines the general functionality of a Controller.
@@ -291,7 +287,7 @@ inline static uint16_t make_port_address(const uint32_t nNetSwitch, const uint32
 static constexpr uint8_t PROTOCOL_REVISION = 14;
 static constexpr uint32_t PORTS = 4;
 static constexpr uint16_t UDP_PORT = 0x1936;
-static constexpr uint16_t DMX_LENGTH = 512;
+static constexpr uint32_t DMX_LENGTH = 512;
 static constexpr uint32_t SHORT_NAME_LENGTH = 18;
 static constexpr uint32_t LONG_NAME_LENGTH = 64;
 static constexpr uint32_t REPORT_LENGTH = 64;
@@ -399,7 +395,7 @@ struct TArtDmx {
 	uint8_t ProtVerHi;		///< High byte of the Art-Net protocol revision number.
 	uint8_t ProtVerLo;		///< Low byte of the Art-Net protocol revision number. Current value 14.
 	uint8_t Sequence;		///< The sequence number is used to ensure that ArtDmx packets are used in the correct order.
-	uint8_t Physical;		///< The physical input port from which DMX512 data was input. This field is for information only. Use Universe for data routing.
+	uint8_t Physical;		///< The physical input port from which DMX512 data was input.
 	uint16_t PortAddress;	///< The 15 bit Port-Address to which this packet is destined.
 	uint8_t LengthHi;		///< The length of the DMX512 data array. This value should be an even number in the range 2 – 512.
 	uint8_t Length;			///< Low Byte of above.

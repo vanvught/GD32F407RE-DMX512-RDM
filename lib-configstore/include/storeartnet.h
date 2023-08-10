@@ -52,14 +52,6 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveShortName(__attribute__((unused)) const char *pShortName) override {
-		DEBUG_ENTRY
-
-//		ConfigStore::Get()->Update(configstore::Store::NODE, __builtin_offsetof(struct artnetparams::Params, aShortName), pShortName, artnet::SHORT_NAME_LENGTH, artnetparams::Mask::SHORT_NAME);
-
-		DEBUG_EXIT
-	}
-
 	void SaveLongName(const char* pLongName) override {
 		DEBUG_ENTRY
 
@@ -76,7 +68,7 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveUniverseSwitch(uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
+	void SaveUniverseSwitch(const uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
 		DEBUG_ENTRY
 
 		SaveUniverse(nPortIndex);
@@ -84,7 +76,7 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveNetSwitch(uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
+	void SaveNetSwitch(const uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
 		DEBUG_ENTRY
 
 		SaveUniverse(nPortIndex);
@@ -92,7 +84,7 @@ public:
 		DEBUG_EXIT
 	}
 
-	void SaveSubnetSwitch(uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
+	void SaveSubnetSwitch(const uint32_t nPortIndex, __attribute__((unused)) const uint8_t nAddress) override {
 		DEBUG_ENTRY
 
 		SaveUniverse(nPortIndex);
@@ -100,9 +92,10 @@ public:
 		DEBUG_EXIT
 	}
 
+	void SaveShortName(uint32_t nPortIndex, const char *pShortName) override;
 	void SaveMergeMode(uint32_t nPortIndex, const lightset::MergeMode tMerge) override;
 	void SavePortProtocol(uint32_t nPortIndex, const artnet::PortProtocol tPortProtocol) override;
-	void SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyle outputStyle) override;
+	void SaveOutputStyle(uint32_t nPortIndex, const lightset::OutputStyle outputStyle) override;
 	void SaveRdmEnabled(uint32_t nPortIndex, bool isEnabled) override;
 
 	static StoreArtNet *Get() {

@@ -58,10 +58,32 @@ StoreArtNet::StoreArtNet(uint32_t nPortIndexOffset) {
 	DEBUG_EXIT
 }
 
+void StoreArtNet::SaveShortName(uint32_t nPortIndex, const char *pShortName) {
+	DEBUG_ENTRY
+	DEBUG_PRINTF("%u, %s", nPortIndex, pShortName);
+
+	if (nPortIndex >= s_nPortIndexOffset) {
+		nPortIndex -= s_nPortIndexOffset;
+	} else {
+		DEBUG_EXIT
+		return;
+	}
+
+	DEBUG_PRINTF("nPortIndex=%u", nPortIndex);
+
+	if (nPortIndex >= artnet::PORTS) {
+		DEBUG_EXIT
+		return;
+	}
+
+	ConfigStore::Get()->Update(configstore::Store::NODE, (artnet::SHORT_NAME_LENGTH * nPortIndex) + __builtin_offsetof(struct artnetparams::Params, aLabel), pShortName, artnet::SHORT_NAME_LENGTH, artnetparams::Mask::LABEL_A << nPortIndex);
+
+	DEBUG_EXIT
+}
+
 void StoreArtNet::SaveUniverse(uint32_t nPortIndex) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("s_nPortIndexOffset=%u, nPortIndex=%u", s_nPortIndexOffset, nPortIndex);
-	assert(nPortIndex < artnet::PORTS);
 
 	if (nPortIndex >= s_nPortIndexOffset) {
 		nPortIndex -= s_nPortIndexOffset;
@@ -90,7 +112,6 @@ void StoreArtNet::SaveUniverse(uint32_t nPortIndex) {
 void StoreArtNet::SaveMergeMode(uint32_t nPortIndex, const lightset::MergeMode mergeMode) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("%u, %u", nPortIndex, static_cast<uint32_t>(mergeMode));
-	assert(nPortIndex < artnet::PORTS);
 
 	if (nPortIndex >= s_nPortIndexOffset) {
 		nPortIndex -= s_nPortIndexOffset;
@@ -145,7 +166,7 @@ void StoreArtNet::SavePortProtocol(uint32_t nPortIndex, const artnet::PortProtoc
 	DEBUG_EXIT
 }
 
-void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyle outputStyle) {
+void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const lightset::OutputStyle outputStyle) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("s_nPortIndexOffset=%u, nPortIndex=%u, outputStyle=%u", s_nPortIndexOffset, nPortIndex, static_cast<uint32_t>(outputStyle));
 
@@ -166,7 +187,7 @@ void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const artnet::OutputStyl
 	uint8_t nOutputStyle;
 	ConfigStore::Get()->Copy(configstore::Store::NODE, &nOutputStyle, sizeof(uint8_t), __builtin_offsetof(struct artnetparams::Params, nOutputStyle), false);
 
-	if (outputStyle == artnet::OutputStyle::CONSTANT) {
+	if (outputStyle == lightset::OutputStyle::CONSTANT) {
 		nOutputStyle |= static_cast<uint8_t>(1U << nPortIndex);
 	} else {
 		nOutputStyle &= static_cast<uint8_t>(~(1U << nPortIndex));

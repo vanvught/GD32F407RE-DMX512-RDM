@@ -31,6 +31,8 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cstdarg>
+#include <cstdio>
 #include <cassert>
 
 #if !defined(ARTNET_VERSION)
@@ -107,7 +109,10 @@ struct State {
 	uint32_t ArtPollIpAddress;
 	uint32_t ArtPollReplyCount;
 	uint32_t ArtPollReplyDelayMillis;
-	uint32_t ArtPollMillis;
+	struct {
+		uint32_t ArtPollMillis;
+		uint32_t ArtPollReplyIpAddress;
+	} ArtPollReplyQueue[4];
 	uint32_t ArtDmxIpAddress;
 	uint32_t ArtSyncMillis;				///< Latest ArtSync received time
 	ReportCode reportCode;
@@ -150,6 +155,7 @@ struct Node {
 struct Source {
 	uint32_t nMillis;	///< The latest time of the data received from port
 	uint32_t nIp;		///< The IP address for port
+	uint8_t nPhysical;	///< The physical input port from which DMX512 data was input.
 };
 
 struct OutputPort {
@@ -180,15 +186,6 @@ inline static lightset::FailSafe convert_failsafe(const artnetnode::FailSafe fai
 	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
 	return fs;
 }
-
-inline static artnet::OutputStyle convert_outputstyle(const lightset::OutputStyle outputStyle) {
-	return outputStyle == lightset::OutputStyle::CONSTANT  ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA;
-}
-
-inline static lightset::OutputStyle convert_outputstyle(const artnet::OutputStyle outputStyle) {
-	return outputStyle == artnet::OutputStyle::CONSTANT ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
-}
-
 }  // namespace artnetnode
 
 #if (ARTNET_VERSION >= 4)
@@ -237,15 +234,15 @@ public:
 	}
 
 #if defined (OUTPUT_HAVE_STYLESWITCH)
-	void SetOutputStyle(const uint32_t nPortIndex, artnet::OutputStyle outputStyle) {
+	void SetOutputStyle(const uint32_t nPortIndex, lightset::OutputStyle outputStyle) {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
 		if ((m_State.status == artnetnode::Status::ON) && (m_pLightSet != nullptr)) {
-			m_pLightSet->SetOutputStyle(nPortIndex, artnetnode::convert_outputstyle(outputStyle));
-			outputStyle = artnetnode::convert_outputstyle(m_pLightSet->GetOutputStyle(nPortIndex));
+			m_pLightSet->SetOutputStyle(nPortIndex, outputStyle);
+			outputStyle = m_pLightSet->GetOutputStyle(nPortIndex);
 		}
 
-		if (outputStyle == artnet::OutputStyle::CONSTANT) {
+		if (outputStyle == lightset::OutputStyle::CONSTANT) {
 			m_OutputPort[nPortIndex].GoodOutputB |= artnet::GoodOutputB::STYLE_CONSTANT;
 		} else {
 			m_OutputPort[nPortIndex].GoodOutputB &= static_cast<uint8_t>(~artnet::GoodOutputB::STYLE_CONSTANT);
@@ -256,7 +253,7 @@ public:
 		 * FIXME I do not like this hack. It should be handled in dmx.cpp
 		 */
 		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)
-				&& (outputStyle == artnet::OutputStyle::CONSTANT)
+				&& (outputStyle == lightset::OutputStyle::CONSTANT)
 				&& (m_pLightSet != nullptr)) {
 			if (m_OutputPort[nPortIndex].IsTransmitting) {
 				m_OutputPort[nPortIndex].IsTransmitting = false;
@@ -273,11 +270,11 @@ public:
 		}
 	}
 
-	artnet::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
+	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
 		const auto isStyleConstant = (m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::STYLE_CONSTANT) == artnet::GoodOutputB::STYLE_CONSTANT;
-		return isStyleConstant ? artnet::OutputStyle::CONSTANT : artnet::OutputStyle::DELTA;
+		return isStyleConstant ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
 	}
 #endif
 
@@ -500,9 +497,44 @@ private:
 	void SetSubnetSwitch(const uint32_t nPortIndex, const uint8_t nSubnetSwitch);
 
 	void FillPollReply();
-#if defined ( ARTNET_ENABLE_SENDDIAG )
-	void FillDiagData(void);
-	void SendDiag(const char *, artnet::PriorityCodes);
+
+#if defined (ARTNET_ENABLE_SENDDIAG)
+# define UNUSED
+#else
+# define UNUSED	__attribute__((unused))
+#endif
+
+	void SendDiag(UNUSED const artnet::PriorityCodes priorityCode, UNUSED const char *format, ...) {
+#if defined (ARTNET_ENABLE_SENDDIAG)
+		if (!m_State.SendArtDiagData) {
+			return;
+		}
+
+		if (static_cast<uint8_t>(priorityCode) < m_State.DiagPriority) {
+			return;
+		}
+
+		m_DiagData.Priority = static_cast<uint8_t>(priorityCode);
+
+		va_list arp;
+
+		va_start(arp, format);
+
+		auto i = vsnprintf(reinterpret_cast<char *>(m_DiagData.Data), sizeof(m_DiagData.Data) - 1, format, arp);
+
+		va_end(arp);
+
+		m_DiagData.Data[sizeof(m_DiagData.Data) - 1] = '\0';	// Just be sure we have a last '\0'
+		m_DiagData.LengthLo = static_cast<uint8_t>(i + 1);		// Text length including the '\0'
+
+		const uint16_t nSize = sizeof(struct TArtDiagData) - sizeof(m_DiagData.Data) + m_DiagData.LengthLo;
+
+		Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.ArtDiagIpAddress, artnet::UDP_PORT);
+#endif
+	}
+
+#if defined (ARTNET_ENABLE_SENDDIAG)
+# undef UNUSED
 #endif
 
 	enum TOpCodes GetOpCode(const uint32_t nBytesReceived);
@@ -534,7 +566,7 @@ private:
 	void CheckMergeTimeouts(const uint32_t nPortIndex);
 
 	void ProcessPollRelply(const uint32_t nPortIndex, uint32_t& NumPortsInput, uint32_t& NumPortsOutput);
-	void SendPollRelply(const uint32_t nBindIndex = 0);
+	void SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp);
 
 	void SendTod(uint32_t nPortIndex);
 	void SendTodRequest(uint32_t nPortIndex);

@@ -40,7 +40,7 @@ void display_universe_switch(uint32_t nPortIndex, uint8_t nAddress);
 void display_net_switch(uint8_t nAddress);
 void display_subnet_switch(uint8_t nAddress);
 void display_merge_mode(uint32_t nPortIndex, lightset::MergeMode mergeMode);
-void display_outputstyle(const uint32_t nPortIndex, const artnet::OutputStyle outputStyle);
+void display_outputstyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle);
 void display_port_protocol(uint32_t nPortIndex, artnet::PortProtocol portProtocol);
 void display_rdm_enabled(uint32_t nPortIndex, bool isEnabled);
 void display_failsafe(uint8_t nFailsafe);

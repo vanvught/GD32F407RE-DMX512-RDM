@@ -112,7 +112,9 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 #endif
 }
 
-void ArtNetNode::SendPollRelply(const uint32_t nBindIndex) {
+void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp) {
+	DEBUG_PRINTF("nBindIndex=%u", nBindIndex);
+
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((nBindIndex != 0) && (nBindIndex != (nPortIndex + 1))) {
 			continue;
@@ -159,7 +161,9 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex) {
 		const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
 		snprintf(reinterpret_cast<char*>(m_ArtPollReply.NodeReport), artnet::REPORT_LENGTH, "#%04x [%04d] %.*s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), nSysNameLenght, pSysName);
 
-		Network::Get()->SendTo(m_nHandle, &m_ArtPollReply, sizeof(TArtPollReply), m_nIpAddressFrom, artnet::UDP_PORT);
+		Network::Get()->SendTo(m_nHandle, &m_ArtPollReply, sizeof(TArtPollReply), nDestinationIp, artnet::UDP_PORT);
+
+		DEBUG_PRINTF(IPSTR,  IP2STR(nDestinationIp));
 	}
 
 	m_State.IsChanged = false;
@@ -213,5 +217,12 @@ void ArtNetNode::HandlePoll() {
 		m_State.bUseTargetPortAddress = false;
 	}
 
-	m_State.ArtPollMillis = Hardware::Get()->Millis();
+	for (auto& entry : m_State.ArtPollReplyQueue) {
+		if (entry.ArtPollMillis == 0) {
+			entry.ArtPollMillis = Hardware::Get()->Millis();
+			entry.ArtPollReplyIpAddress = m_nIpAddressFrom;
+			DEBUG_PRINTF("[ArtPollReply queued for " IPSTR, IP2STR(entry.ArtPollReplyIpAddress));
+			break;
+		}
+	}
 }
