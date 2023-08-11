@@ -52,13 +52,13 @@ void ArtNetNode::HandleSync() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if (m_OutputPort[nPortIndex].IsDataPending) {
 			m_pLightSet->Sync(nPortIndex);
-			SendDiag(artnet::PriorityCodes::DP_LOW, "Sync individual %u", nPortIndex);
+			SendDiag(artnet::PriorityCodes::LOW, "Sync individual %u", nPortIndex);
 		}
 	}
 
 	m_pLightSet->Sync();
 
-	SendDiag(artnet::PriorityCodes::DP_LOW, "Sync all");
+	SendDiag(artnet::PriorityCodes::LOW, "Sync all");
 
 	for (auto &outputPort : m_OutputPort) {
 		if (outputPort.IsDataPending) {

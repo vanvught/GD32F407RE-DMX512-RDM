@@ -51,8 +51,6 @@
 
 #include "debug.h"
 
-using namespace artnetnode;
-
 static constexpr auto ARTNET_MIN_HEADER_SIZE = 12;
 
 ArtNetNode *ArtNetNode::s_pThis;
@@ -65,9 +63,25 @@ ArtNetNode::ArtNetNode() {
 
 	DEBUG_PRINTF("MAX_PORTS=%u", artnetnode::MAX_PORTS);
 
-	memset(&m_Node, 0, sizeof(struct Node));
+	memset(&m_ArtPollReply, 0, sizeof(struct artnet::ArtPollReply));
+	memcpy(m_ArtPollReply.Id, artnet::NODE_ID, sizeof(m_ArtPollReply.Id));
+	m_ArtPollReply.OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_POLLREPLY);
+	m_ArtPollReply.Port = artnet::UDP_PORT;
+	m_ArtPollReply.VersInfoH = ArtNetConst::VERSION[0];
+	m_ArtPollReply.VersInfoL = ArtNetConst::VERSION[1];
+	m_ArtPollReply.OemHi = ArtNetConst::OEM_ID[0];
+	m_ArtPollReply.Oem = ArtNetConst::OEM_ID[1];
+	m_ArtPollReply.EstaMan[0] = ArtNetConst::ESTA_ID[1];
+	m_ArtPollReply.EstaMan[1] = ArtNetConst::ESTA_ID[0];
+	Network::Get()->MacAddressCopyTo(m_ArtPollReply.MAC);
+#if (ARTNET_VERSION >= 4)
+	m_ArtPollReply.AcnPriority = e131::priority::DEFAULT;
+#endif
+
+	SetLongName(nullptr);	// Set default long name
+
+	memset(&m_Node, 0, sizeof(struct artnetnode::Node));
 	m_Node.IPAddressTimeCode = Network::Get()->GetBroadcastIp();
-	Network::Get()->MacAddressCopyTo(m_Node.MACAddressLocal);
 
 	for (auto& port : m_Node.Port) {
 		port.direction = lightset::PortDir::DISABLE;
@@ -77,43 +91,31 @@ ArtNetNode::ArtNetNode() {
 		SetShortName(nPortIndex, nullptr);	// Set default port label
 	}
 
-	SetLongName(nullptr);	// Set default long name
-
-	memset(&m_State, 0, sizeof(struct State));
-	m_State.reportCode = ReportCode::RCPOWEROK;
-	m_State.status = Status::STANDBY;
+	memset(&m_State, 0, sizeof(struct artnetnode::State));
+	m_State.reportCode = artnetnode::ReportCode::RCPOWEROK;
+	m_State.status = artnetnode::Status::STANDBY;
 	// The device should wait for a random delay of up to 1s before sending the reply.
-	m_State.ArtPollReplyDelayMillis = (m_Node.MACAddressLocal[5] | (static_cast<uint32_t>(m_Node.MACAddressLocal[4]) << 8)) % 1000;
+	m_State.ArtPollReplyDelayMillis = (m_ArtPollReply.MAC[5] | (static_cast<uint32_t>(m_ArtPollReply.MAC[4]) << 8)) % 1000;
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		memset(&m_OutputPort[nPortIndex], 0 , sizeof(struct OutputPort));
-		m_OutputPort[nPortIndex].sourceA.nPhysical = 0xFF;
-		m_OutputPort[nPortIndex].sourceB.nPhysical = 0xFF;
+		memset(&m_OutputPort[nPortIndex], 0, sizeof(struct artnetnode::OutputPort));
+		m_OutputPort[nPortIndex].SourceA.nPhysical = 0x100;
+		m_OutputPort[nPortIndex].SourceB.nPhysical = 0x100;
 		m_OutputPort[nPortIndex].GoodOutputB = artnet::GoodOutputB::RDM_DISABLED;
-		memset(&m_InputPort[nPortIndex], 0 , sizeof(struct InputPort));
+		memset(&m_InputPort[nPortIndex], 0, sizeof(struct artnetnode::InputPort));
 		m_InputPort[nPortIndex].nDestinationIp = Network::Get()->GetBroadcastIp();
 	}
 
-	memset(&m_ArtPollReply, 0, sizeof(struct TArtPollReply));
-	memcpy(m_ArtPollReply.Id, artnet::NODE_ID, sizeof(m_ArtPollReply.Id));
-	m_ArtPollReply.OpCode = OP_POLLREPLY;
-	m_ArtPollReply.Port = artnet::UDP_PORT;
-	m_ArtPollReply.VersInfoH = ArtNetConst::VERSION[0];
-	m_ArtPollReply.VersInfoL = ArtNetConst::VERSION[1];
-#if (ARTNET_VERSION >= 4)
-	m_ArtPollReply.AcnPriority = e131::priority::DEFAULT;
-#endif
-
 #if defined (ARTNET_HAVE_DMXIN)
 	memcpy(m_ArtDmx.Id, artnet::NODE_ID, sizeof(m_ArtPollReply.Id));
-	m_ArtDmx.OpCode = OP_DMX;
+	m_ArtDmx.OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_DMX);
 	m_ArtDmx.ProtVerHi = 0;
 	m_ArtDmx.ProtVerLo = artnet::PROTOCOL_REVISION;
 #endif
 
 #if defined (ARTNET_HAVE_TIMECODE)
 	memcpy(m_ArtTimeCode.Id, artnet::NODE_ID, sizeof(m_ArtPollReply.Id));
-	m_ArtTimeCode.OpCode = OP_TIMECODE;
+	m_ArtTimeCode.OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_TIMECODE);
 	m_ArtTimeCode.ProtVerHi = 0;
 	m_ArtTimeCode.ProtVerLo = artnet::PROTOCOL_REVISION;
 	m_ArtTimeCode.Filler1 = 0;
@@ -121,9 +123,9 @@ ArtNetNode::ArtNetNode() {
 #endif
 
 #if defined (ARTNET_ENABLE_SENDDIAG)
-	memset(&m_DiagData, 0, sizeof(struct TArtDiagData));
+	memset(&m_DiagData, 0, sizeof(struct artnet::ArtDiagData));
 	memcpy(m_DiagData.Id, artnet::NODE_ID, sizeof(m_DiagData.Id));
-	m_DiagData.OpCode = OP_DIAGDATA;
+	m_DiagData.OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_DIAGDATA);
 	m_DiagData.ProtVerLo = artnet::PROTOCOL_REVISION;
 #endif
 
@@ -144,8 +146,6 @@ void ArtNetNode::Start() {
 #if defined (ARTNET_HAVE_TRIGGER)
 	assert(m_pArtNetTrigger != nullptr);
 #endif	
-
-	FillPollReply();
 
 	/*
 	 * Status 1
@@ -223,7 +223,7 @@ void ArtNetNode::Start() {
 		E131Bridge::Start();
 #endif
 
-	m_State.status = Status::ON;
+	m_State.status = artnetnode::Status::ON;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
 	hal::panel_led_on(hal::panelled::ARTNET);
 }
@@ -257,7 +257,7 @@ void ArtNetNode::Stop() {
 	hal::panel_led_off(hal::panelled::ARTNET);
 
 	m_ArtPollReply.Status1 = static_cast<uint8_t>((m_ArtPollReply.Status1 & ~artnet::Status1::INDICATOR_MASK) | artnet::Status1::INDICATOR_MUTE_MODE);
-	m_State.status = Status::STANDBY;
+	m_State.status = artnetnode::Status::STANDBY;
 
 	DEBUG_EXIT
 }
@@ -280,7 +280,7 @@ void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName)
 
 	m_Node.Port[nPortIndex].ShortName[artnet::SHORT_NAME_LENGTH - 1] = '\0';
 
-	if (m_State.status == Status::ON) {
+	if (m_State.status == artnetnode::Status::ON) {
 		if (m_pArtNetStore != nullptr) {
 			m_pArtNetStore->SaveShortName(nPortIndex, m_Node.Port[nPortIndex].ShortName);
 		}
@@ -301,24 +301,22 @@ void ArtNetNode::SetLongName(const char *pLongName) {
 	DEBUG_ENTRY
 
 	if (pLongName == nullptr) {
-		GetLongNameDefault(m_Node.LongName);
+		GetLongNameDefault(reinterpret_cast<char *>(m_ArtPollReply.LongName));
 	} else {
-		strncpy(m_Node.LongName, pLongName, artnet::LONG_NAME_LENGTH - 1);
+		strncpy(reinterpret_cast<char *>(m_ArtPollReply.LongName), pLongName, artnet::LONG_NAME_LENGTH - 1);
 	}
 
-	m_Node.LongName[artnet::LONG_NAME_LENGTH - 1] = '\0';
+	m_ArtPollReply.LongName[artnet::LONG_NAME_LENGTH - 1] = '\0';
 
-	memcpy(m_ArtPollReply.LongName, m_Node.LongName, artnet::LONG_NAME_LENGTH);
-
-	if (m_State.status == Status::ON) {
+	if (m_State.status == artnetnode::Status::ON) {
 		if (m_pArtNetStore != nullptr) {
-			m_pArtNetStore->SaveLongName(m_Node.LongName);
+			m_pArtNetStore->SaveLongName(reinterpret_cast<char *>(m_ArtPollReply.LongName));
 		}
 
-		artnet::display_longname(m_Node.LongName);
+		artnet::display_longname(reinterpret_cast<char *>(m_ArtPollReply.LongName));
 	}
 
-	DEBUG_PUTS(m_Node.LongName);
+	DEBUG_PUTS(reinterpret_cast<char *>(m_ArtPollReply.LongName));
 	DEBUG_EXIT
 }
 
@@ -329,7 +327,7 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 	uint32_t nIpCount = 0;
 
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		nIpCount += (m_OutputPort[i].sourceA.nIp + m_OutputPort[i].sourceB.nIp);
+		nIpCount += (m_OutputPort[i].SourceA.nIp + m_OutputPort[i].SourceB.nIp);
 		if (nIpCount != 0) {
 			break;
 		}
@@ -364,28 +362,26 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 	}
 
 	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		m_OutputPort[i].sourceA.nIp = 0;
-		m_OutputPort[i].sourceB.nIp = 0;
+		m_OutputPort[i].SourceA.nIp = 0;
+		m_OutputPort[i].SourceB.nIp = 0;
 		lightset::Data::ClearLength(i);
 	}
 }
 
-enum TOpCodes ArtNetNode::GetOpCode(const uint32_t nBytesReceived) {
-	const auto *const pPacket = reinterpret_cast<char *>(m_pReceiveBuffer);
-
+static artnet::OpCodes get_op_code(const uint32_t nBytesReceived, const uint8_t *pBuffer) {
 	if (nBytesReceived < ARTNET_MIN_HEADER_SIZE) {
-		return OP_NOT_DEFINED;
+		return artnet::OpCodes::OP_NOT_DEFINED;
 	}
 
-	if ((pPacket[10] != 0) || (pPacket[11] != artnet::PROTOCOL_REVISION)) {
-		return OP_NOT_DEFINED;
+	if ((pBuffer[10] != 0) || (pBuffer[11] != artnet::PROTOCOL_REVISION)) {
+		return artnet::OpCodes::OP_NOT_DEFINED;
 	}
 
-	if (memcmp(pPacket, artnet::NODE_ID, 8) == 0) {
-		return static_cast<TOpCodes>((static_cast<uint16_t>(pPacket[9] << 8)) + pPacket[8]);
+	if (memcmp(pBuffer, artnet::NODE_ID, 8) == 0) {
+		return static_cast<artnet::OpCodes>((static_cast<uint16_t>(pBuffer[9] << 8)) + pBuffer[8]);
 	}
 
-	return OP_NOT_DEFINED;
+	return artnet::OpCodes::OP_NOT_DEFINED;
 }
 
 void ArtNetNode::Run() {
@@ -458,15 +454,15 @@ void ArtNetNode::Run() {
 		}
 	}
 
-	switch (GetOpCode(nBytesReceived)) {
+	switch (get_op_code(nBytesReceived, m_pReceiveBuffer)) {
 #if (LIGHTSET_PORTS > 0)		
-	case OP_DMX:
+	case artnet::OpCodes::OP_DMX:
 		if (m_pLightSet != nullptr) {
 			HandleDmx();
 			m_State.ArtDmxIpAddress = m_nIpAddressFrom;
 		}
 		break;
-	case OP_SYNC:
+	case artnet::OpCodes::OP_SYNC:
 		if (m_pLightSet != nullptr) {
 			/*
 			 * In order to allow for multiple controllers on a network,
@@ -485,55 +481,55 @@ void ArtNetNode::Run() {
 		}
 		break;
 #endif		
-	case OP_ADDRESS:
+	case artnet::OpCodes::OP_ADDRESS:
 		HandleAddress();
 		break;
 #if defined (ARTNET_HAVE_TIMECODE)		
-	case OP_TIMECODE:
+	case artnet::OpCodes::OP_TIMECODE:
 		if (m_pArtNetTimeCode != nullptr) {
 			HandleTimeCode();
 		}
 		break;
 #endif		
-	case OP_TIMESYNC:
+	case artnet::OpCodes::OP_TIMESYNC:
 		HandleTimeSync();
 		break;
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
-	case OP_TODREQUEST:
+	case artnet::OpCodes::OP_TODREQUEST:
 		if (m_pArtNetRdm != nullptr) {
 			HandleTodRequest();
 		}
 		break;
-	case OP_TODDATA:
+	case artnet::OpCodes::OP_TODDATA:
 		if (m_pArtNetRdm != nullptr) {
 			HandleTodData();
 		}
 		break;
-	case OP_TODCONTROL:
+	case artnet::OpCodes::OP_TODCONTROL:
 		if (m_pArtNetRdm != nullptr) {
 			HandleTodControl();
 		}
 		break;
-	case OP_RDM:
+	case artnet::OpCodes::OP_RDM:
 		if (m_pArtNetRdm != nullptr) {
 			HandleRdm();
 		}
 		break;
 #endif
-	case OP_IPPROG:
+	case artnet::OpCodes::OP_IPPROG:
 		HandleIpProg();
 		break;
 #if defined (ARTNET_HAVE_TRIGGER)		
-	case OP_TRIGGER:
+	case artnet::OpCodes::OP_TRIGGER:
 		HandleTrigger();
 		break;
 #endif
 #if defined (ARTNET_HAVE_DMXIN)
-	case OP_INPUT:
+	case artnet::OpCodes::OP_INPUT:
 		HandleInput();
 		break;
 #endif
-	case OP_POLL:
+	case artnet::OpCodes::OP_POLL:
 		HandlePoll();
 		break;
 	default:

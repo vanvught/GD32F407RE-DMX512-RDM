@@ -1969,7 +1969,7 @@ void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 	}
 }
 
-void Dmx::SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
+void Dmx::SetSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
 	logic_analyzer::ch0_set();
 
 	assert(nPortIndex < DMX_MAX_PORTS);
@@ -2198,7 +2198,7 @@ const uint8_t* Dmx::GetDmxCurrentData(uint32_t nPortIndex) {
 	return s_RxBuffer[nPortIndex].data;
 }
 
-uint32_t Dmx::GetUpdatesPerSecond(UNUSED uint32_t nPortIndex) {
+uint32_t Dmx::GetDmxUpdatesPerSecond(UNUSED uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	__DMB();

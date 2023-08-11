@@ -229,7 +229,7 @@ void ArtNetPollTable::ProcessUniverse(uint32_t nIpAddress, uint16_t nUniverse) {
 	DEBUG_EXIT
 }
 
-void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
+void ArtNetPollTable::Add(const struct artnet::ArtPollReply *ptArtPollReply) {
 	DEBUG_ENTRY
 
 	bool bFound = false;

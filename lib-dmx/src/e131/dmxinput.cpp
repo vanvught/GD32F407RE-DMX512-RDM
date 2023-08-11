@@ -78,7 +78,7 @@ void dmx_stop(const uint32_t nPortIndex) {
 const uint8_t *dmx_handler(const uint32_t nPortIndex, uint32_t& nLength, uint32_t &nUpdatesPerSecond) {
 	const auto *pDmx = Dmx::Get()->GetDmxAvailable(nPortIndex);
 
-	nUpdatesPerSecond = Dmx::Get()->GetUpdatesPerSecond(nPortIndex);
+	nUpdatesPerSecond = Dmx::Get()->GetDmxUpdatesPerSecond(nPortIndex);
 
 	if (pDmx != nullptr) {
 		const auto *pDmxData = reinterpret_cast<const struct Data*>(pDmx);

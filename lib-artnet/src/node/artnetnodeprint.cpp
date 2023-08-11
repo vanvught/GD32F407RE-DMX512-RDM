@@ -46,8 +46,7 @@
 
 void ArtNetNode::Print() {
 	printf("Art-Net %d V%d.%d\n", artnet::VERSION, ArtNetConst::VERSION[0], ArtNetConst::VERSION[1]);
-	printf(" Short name : %s\n", m_Node.ShortName);
-	printf(" Long name  : %s\n", m_Node.LongName);
+	printf(" Long name  : %s\n", reinterpret_cast<char *>(m_ArtPollReply.LongName));
 #if defined (ARTNET_HAVE_TIMECODE)
 	printf(" TimeCode IP: " IPSTR "\n", IP2STR(m_Node.IPAddressTimeCode));
 #endif

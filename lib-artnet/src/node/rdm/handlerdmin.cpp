@@ -53,7 +53,7 @@ void ArtNetNode::HandleRdmIn() {
 
 		if (m_pArtNetRdm->RdmReceive(nPortIndex, pArtRdm->RdmPacket)) {
 			memcpy(pArtRdm->Id, artnet::NODE_ID, sizeof(pArtRdm->Id));
-			pArtRdm->OpCode = OP_RDM;
+			pArtRdm->OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_RDM);
 			pArtRdm->ProtVerHi = 0;
 			pArtRdm->ProtVerLo = artnet::PROTOCOL_REVISION;
 			pArtRdm->RdmVer = 0x01;
@@ -61,7 +61,7 @@ void ArtNetNode::HandleRdmIn() {
 			pArtRdm->Command = 0;
 			pArtRdm->Address = m_Node.Port[nPortIndex].DefaultAddress;
 
-			Network::Get()->SendTo(m_nHandle, pArtRdm, sizeof(struct TArtRdm), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
+			Network::Get()->SendTo(m_nHandle, pArtRdm, sizeof(struct artnet::ArtRdm), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
 		}
 	}
 }

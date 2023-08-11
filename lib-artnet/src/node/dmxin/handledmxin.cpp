@@ -70,7 +70,7 @@ void ArtNetNode::HandleDmxIn() {
 
 				m_InputPort[nPortIndex].GoodInput = artnet::GoodInput::DATA_RECIEVED;
 
-				Network::Get()->SendTo(m_nHandle, &m_ArtDmx, sizeof(struct TArtDmx), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
+				Network::Get()->SendTo(m_nHandle, &m_ArtDmx, sizeof(struct artnet::ArtDmx), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
 
 				if ((s_ReceivingMask & (1U << nPortIndex)) != (1U << nPortIndex)) {
 					s_ReceivingMask |= (1U << nPortIndex);

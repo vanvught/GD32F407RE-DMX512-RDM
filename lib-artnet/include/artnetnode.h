@@ -61,6 +61,8 @@
 #include "hardware.h"
 #include "network.h"
 
+#include "debug.h"
+
 namespace artnetnode {
 #if !defined(LIGHTSET_PORTS)
 # define LIGHTSET_PORTS	0
@@ -135,10 +137,6 @@ struct State {
 
 struct Node {
 	uint32_t IPAddressTimeCode;
-	uint8_t MACAddressLocal[artnet::MAC_SIZE];
-	char ShortName[artnet::SHORT_NAME_LENGTH];
-	char LongName[artnet::LONG_NAME_LENGTH];
-	uint8_t DefaultUidResponder[6];							///< RDMnet & LLRP UID
 	bool IsRdmResponder;
 	bool bMapUniverse0;										///< Art-Net 4
 	struct {
@@ -155,12 +153,12 @@ struct Node {
 struct Source {
 	uint32_t nMillis;	///< The latest time of the data received from port
 	uint32_t nIp;		///< The IP address for port
-	uint8_t nPhysical;	///< The physical input port from which DMX512 data was input.
+	uint16_t nPhysical;	///< The physical input port from which DMX512 data was input.
 };
 
 struct OutputPort {
-	Source sourceA;
-	Source sourceB;
+	Source SourceA;
+	Source SourceB;
 	uint8_t GoodOutput;
 	uint8_t GoodOutputB;
 	uint8_t nPollReplyIndex;
@@ -307,7 +305,7 @@ public:
 
 	void SetLongName(const char *);
 	const char *GetLongName() const {
-		return m_Node.LongName;
+		return reinterpret_cast<const char * >(m_ArtPollReply.LongName);
 	}
 
 	void GetLongNameDefault(char *);
@@ -421,7 +419,7 @@ public:
 	 * LLRP
 	 */
 	void SetRdmUID(const uint8_t *pUid, bool bSupportsLLRP = false) {
-		memcpy(m_Node.DefaultUidResponder, pUid, sizeof(m_Node.DefaultUidResponder));
+		memcpy(m_ArtPollReply.DefaultUidResponder, pUid, sizeof(m_ArtPollReply.DefaultUidResponder));
 
 		if (bSupportsLLRP) {
 			m_ArtPollReply.Status3 |= artnet::Status3::SUPPORTS_LLRP;
@@ -496,8 +494,6 @@ private:
 	void SetNetSwitch(const uint32_t nPortIndex, const uint8_t nNetSwitch);
 	void SetSubnetSwitch(const uint32_t nPortIndex, const uint8_t nSubnetSwitch);
 
-	void FillPollReply();
-
 #if defined (ARTNET_ENABLE_SENDDIAG)
 # define UNUSED
 #else
@@ -527,7 +523,7 @@ private:
 		m_DiagData.Data[sizeof(m_DiagData.Data) - 1] = '\0';	// Just be sure we have a last '\0'
 		m_DiagData.LengthLo = static_cast<uint8_t>(i + 1);		// Text length including the '\0'
 
-		const uint16_t nSize = sizeof(struct TArtDiagData) - sizeof(m_DiagData.Data) + m_DiagData.LengthLo;
+		const uint16_t nSize = sizeof(struct artnet::ArtDiagData) - sizeof(m_DiagData.Data) + m_DiagData.LengthLo;
 
 		Network::Get()->SendTo(m_nHandle, &m_DiagData, nSize, m_State.ArtDiagIpAddress, artnet::UDP_PORT);
 #endif
@@ -536,8 +532,6 @@ private:
 #if defined (ARTNET_ENABLE_SENDDIAG)
 # undef UNUSED
 #endif
-
-	enum TOpCodes GetOpCode(const uint32_t nBytesReceived);
 
 	void HandlePoll();
 	void HandleDmx();
@@ -580,31 +574,6 @@ private:
 	int32_t m_nHandle { -1 };
 	uint8_t *m_pReceiveBuffer { nullptr };
 	uint32_t m_nIpAddressFrom;
-
-	artnetnode::Node m_Node;
-	artnetnode::State m_State;
-	artnetnode::OutputPort m_OutputPort[artnetnode::MAX_PORTS];
-	artnetnode::InputPort m_InputPort[artnetnode::MAX_PORTS];
-
-	TArtPollReply m_ArtPollReply;
-#if defined (ARTNET_HAVE_DMXIN)
-	TArtDmx m_ArtDmx;
-#endif
-#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
-	union UArtTodPacket {
-		struct TArtTodData ArtTodData;
-		struct TArtTodRequest ArtTodRequest;
-		struct TArtRdm ArtRdm;
-	};
-	UArtTodPacket m_ArtTodPacket;
-#endif
-#if defined (ARTNET_HAVE_TIMECODE)
-	TArtTimeCode m_ArtTimeCode;
-#endif
-#if defined (ARTNET_ENABLE_SENDDIAG)
-	TArtDiagData m_DiagData;
-#endif
-
 	uint32_t m_nCurrentPacketMillis { 0 };
 	uint32_t m_nPreviousPacketMillis { 0 };
 
@@ -614,6 +583,30 @@ private:
 	ArtNetRdm *m_pArtNetRdm { nullptr };
 	ArtNetTrigger *m_pArtNetTrigger { nullptr };
 	ArtNetStore *m_pArtNetStore { nullptr };
+
+	artnetnode::Node m_Node;
+	artnetnode::State m_State;
+	artnetnode::OutputPort m_OutputPort[artnetnode::MAX_PORTS];
+	artnetnode::InputPort m_InputPort[artnetnode::MAX_PORTS];
+
+	artnet::ArtPollReply m_ArtPollReply;
+#if defined (ARTNET_HAVE_DMXIN)
+	artnet::ArtDmx m_ArtDmx;
+#endif
+#if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
+	union UArtTodPacket {
+		artnet::ArtTodData ArtTodData;
+		artnet::ArtTodRequest ArtTodRequest;
+		artnet::ArtRdm ArtRdm;
+	};
+	UArtTodPacket m_ArtTodPacket;
+#endif
+#if defined (ARTNET_HAVE_TIMECODE)
+	artnet::ArtTimeCode m_ArtTimeCode;
+#endif
+#if defined (ARTNET_ENABLE_SENDDIAG)
+	artnet::ArtDiagData m_DiagData;
+#endif
 
 	static ArtNetNode *s_pThis;
 };

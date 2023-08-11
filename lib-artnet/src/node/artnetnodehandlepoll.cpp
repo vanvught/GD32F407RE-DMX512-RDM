@@ -48,27 +48,6 @@ union uip {
 	uint8_t u8[4];
 } static ip;
 
-void ArtNetNode::FillPollReply() {
-	ip.u32 = Network::Get()->GetIp();
-	memcpy(m_ArtPollReply.IPAddress, ip.u8, sizeof(m_ArtPollReply.IPAddress));
-
-	m_ArtPollReply.OemHi = ArtNetConst::OEM_ID[0];
-	m_ArtPollReply.Oem = ArtNetConst::OEM_ID[1];
-
-	m_ArtPollReply.EstaMan[0] = ArtNetConst::ESTA_ID[1];
-	m_ArtPollReply.EstaMan[1] = ArtNetConst::ESTA_ID[0];
-
-	memcpy(m_ArtPollReply.ShortName, m_Node.ShortName, sizeof(m_ArtPollReply.ShortName));
-	memcpy(m_ArtPollReply.LongName, m_Node.LongName, sizeof(m_ArtPollReply.LongName));
-	memcpy(m_ArtPollReply.MAC, m_Node.MACAddressLocal, sizeof(m_ArtPollReply.MAC));
-
-#if (ARTNET_VERSION >= 4)
-	memcpy(m_ArtPollReply.BindIp, ip.u8, sizeof(m_ArtPollReply.BindIp));
-#endif
-
-	memcpy(m_ArtPollReply.DefaultUidResponder, m_Node.DefaultUidResponder, sizeof(m_ArtPollReply.DefaultUidResponder));
-}
-
 void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unused)) uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
 	if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 #if (ARTNET_VERSION >= 4)
@@ -114,6 +93,12 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 
 void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp) {
 	DEBUG_PRINTF("nBindIndex=%u", nBindIndex);
+
+	ip.u32 = Network::Get()->GetIp();
+	memcpy(m_ArtPollReply.IPAddress, ip.u8, sizeof(m_ArtPollReply.IPAddress));
+#if (ARTNET_VERSION >= 4)
+	memcpy(m_ArtPollReply.BindIp, ip.u8, sizeof(m_ArtPollReply.BindIp));
+#endif
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((nBindIndex != 0) && (nBindIndex != (nPortIndex + 1))) {
@@ -161,7 +146,7 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDesti
 		const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
 		snprintf(reinterpret_cast<char*>(m_ArtPollReply.NodeReport), artnet::REPORT_LENGTH, "#%04x [%04d] %.*s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), nSysNameLenght, pSysName);
 
-		Network::Get()->SendTo(m_nHandle, &m_ArtPollReply, sizeof(TArtPollReply), nDestinationIp, artnet::UDP_PORT);
+		Network::Get()->SendTo(m_nHandle, &m_ArtPollReply, sizeof(artnet::ArtPollReply), nDestinationIp, artnet::UDP_PORT);
 
 		DEBUG_PRINTF(IPSTR,  IP2STR(nDestinationIp));
 	}
@@ -170,7 +155,7 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDesti
 }
 
 void ArtNetNode::HandlePoll() {
-	const auto *const pArtPoll = reinterpret_cast<TArtPoll *>(m_pReceiveBuffer);
+	const auto *const pArtPoll = reinterpret_cast<artnet::ArtPoll *>(m_pReceiveBuffer);
 
 	if (pArtPoll->Flags & artnet::Flags::SEND_ARTP_ON_CHANGE) {
 		m_State.SendArtPollReplyOnChange = true;

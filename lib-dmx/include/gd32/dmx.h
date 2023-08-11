@@ -2,7 +2,7 @@
  * @file dmx.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ struct Statistics {
 };
 
 struct Data {
-	uint8_t data[dmx::buffer::SIZE];
+	uint8_t Data[dmx::buffer::SIZE];
 	struct Statistics Statistics;
 };
 
@@ -46,7 +46,6 @@ public:
 	Dmx();
 
 	void SetPortDirection(uint32_t nPortIndex, dmx::PortDirection portDirection, bool bEnableData = false);
-
 	dmx::PortDirection GetPortDirection(uint32_t nPortIndex = 0) const {
 		return m_dmxPortDirection[nPortIndex];
 	}
@@ -65,7 +64,7 @@ public:
 	// DMX Send
 
 	void SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength);
-	void SetPortSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength);
+	void SetSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength);
 
 	void StartOutput(const uint32_t nPortIndex);
 	void SetOutput(const bool doForce);
@@ -86,7 +85,7 @@ public:
 		return m_nDmxTransmitMabTime;
 	}
 
-	void SetDmxPeriodTime(uint32_t nPeriod);
+	void SetDmxPeriodTime(uint32_t nPeriodTime);
 	uint32_t GetDmxPeriodTime() const {
 		return m_nDmxTransmitPeriod;
 	}
@@ -102,7 +101,7 @@ public:
 	const uint8_t* GetDmxChanged(uint32_t nPortIndex);
 	const uint8_t* GetDmxCurrentData(uint32_t nPortIndex);
 
-	uint32_t GetUpdatesPerSecond(uint32_t nPortIndex);	//TODO Refactor to GetDmxUpdatesPerSecond ?
+	uint32_t GetDmxUpdatesPerSecond(uint32_t nPortIndex);
 	uint32_t GetDmxReceivedCount(uint32_t nPortIndex);
 
 	static Dmx* Get() {
@@ -110,8 +109,8 @@ public:
 	}
 
 private:
-	void StartData(uint32_t nUart, uint32_t nPortIndex);
-	void StopData(uint32_t nUart, uint32_t nPortIndex);
+	void StartData(const uint32_t nUart, const uint32_t nPortIndex);
+	void StopData(const uint32_t nUart, const uint32_t nPortIndex);
 	void StartDmxOutput(const uint32_t nPortIndex);
 
 private:
@@ -119,9 +118,9 @@ private:
 	uint32_t m_nDmxTransmitMabTime { dmx::transmit::MAB_TIME_MIN };
 	uint32_t m_nDmxTransmitPeriod { dmx::transmit::PERIOD_DEFAULT };
 	uint32_t m_nDmxTransmitPeriodRequested { dmx::transmit::PERIOD_DEFAULT };
+	uint32_t m_nDmxTransmissionLength[dmx::config::max::OUT];
 	uint16_t m_nDmxTransmitSlots { dmx::max::CHANNELS };
 	dmx::PortDirection m_dmxPortDirection[dmx::config::max::OUT];
-	uint32_t m_nDmxTransmissionLength[dmx::config::max::OUT];
 
 	static Dmx *s_pThis;
 };

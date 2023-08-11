@@ -98,7 +98,7 @@ void DmxSend::SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 	}
 
 	if (doUpdate) {
-		Dmx::Get()->SetPortSendDataWithoutSC(nPortIndex, pData, nLength);
+		Dmx::Get()->SetSendDataWithoutSC(nPortIndex, pData, nLength);
 		Dmx::Get()->StartOutput(nPortIndex);
 	} else {
 		memcpy(s_TxData[nPortIndex].data, pData, nLength);
@@ -115,7 +115,7 @@ void DmxSend::Sync(uint32_t const nPortIndex) {
 		return;
 	}
 
-	Dmx::Get()->SetPortSendDataWithoutSC(nPortIndex, s_TxData[nPortIndex].data, s_TxData[nPortIndex].nLength);
+	Dmx::Get()->SetSendDataWithoutSC(nPortIndex, s_TxData[nPortIndex].data, s_TxData[nPortIndex].nLength);
 }
 
 /**

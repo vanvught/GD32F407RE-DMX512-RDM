@@ -242,7 +242,7 @@ void ArtNetNode::SetFailSafe(const artnetnode::FailSafe failsafe) {
 }
 
 void ArtNetNode::HandleAddress() {
-	const auto *const pArtAddress = reinterpret_cast<TArtAddress *>(m_pReceiveBuffer);
+	const auto *const pArtAddress = reinterpret_cast<artnet::ArtAddress *>(m_pReceiveBuffer);
 	m_State.reportCode = artnetnode::ReportCode::RCPOWEROK;
 
 	const auto nPage = static_cast<uint32_t>(pArtAddress->BindIndex > 0 ? pArtAddress->BindIndex - 1 : 0);
@@ -302,8 +302,8 @@ void ArtNetNode::HandleAddress() {
 	case artnet::PortCommand::CANCEL:
 		m_State.IsMergeMode = false;
 		for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-			m_OutputPort[nPortIndex].sourceA.nIp = 0;
-			m_OutputPort[nPortIndex].sourceB.nIp = 0;
+			m_OutputPort[nPortIndex].SourceA.nIp = 0;
+			m_OutputPort[nPortIndex].SourceB.nIp = 0;
 			m_OutputPort[nPortIndex].GoodOutput &= static_cast<uint8_t>(~artnet::GoodOutput::OUTPUT_IS_MERGING);
 		}
 		break;

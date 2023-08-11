@@ -45,7 +45,7 @@
 void ArtNetNode::HandleInput() {
 	DEBUG_ENTRY
 
-	const auto *const pArtInput = reinterpret_cast<TArtInput *>(m_pReceiveBuffer);
+	const auto *const pArtInput = reinterpret_cast<artnet::ArtInput *>(m_pReceiveBuffer);
 	const auto nPortIndex = static_cast<uint32_t>(pArtInput->BindIndex > 0 ? pArtInput->BindIndex - 1 : 0);
 
 	if (pArtInput->NumPortsLo == 1) {

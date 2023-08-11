@@ -28,9 +28,6 @@
 
 #include <cstring>
 #include <cassert>
-#if defined (__linux__)
-# include <unistd.h>
-#endif
 
 #include "artnetnode.h"
 #include "network.h"
@@ -51,19 +48,13 @@ union uip {
 
 void ArtNetNode::HandleIpProg() {
 	DEBUG_ENTRY
-#if defined (__linux__)
-	if (getuid() != 0) {
-		DEBUG_EXIT
-		return;
-	}
-#endif
 
-	const auto *const pArtIpProg = reinterpret_cast<TArtIpProg *>(m_pReceiveBuffer);
+	const auto *const pArtIpProg = reinterpret_cast<artnet::ArtIpProg *>(m_pReceiveBuffer);
 	const auto nCommand = pArtIpProg->Command;
-	auto *pArtIpProgReply = reinterpret_cast<TArtIpProgReply *>(m_pReceiveBuffer);
+	auto *pArtIpProgReply = reinterpret_cast<artnet::ArtIpProgReply *>(m_pReceiveBuffer);
 	const auto isDhcp = Network::Get()->IsDhcpUsed();
 
-	pArtIpProgReply->OpCode = OP_IPPROGREPLY;
+	pArtIpProgReply->OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_IPPROGREPLY);
 
 	if ((nCommand & COMMAND_ENABLE_DHCP) == COMMAND_ENABLE_DHCP) {
 		Network::Get()->EnableDhcp();
@@ -113,7 +104,7 @@ void ArtNetNode::HandleIpProg() {
 	pArtIpProgReply->Spare7 = 0;
 	pArtIpProgReply->Spare8 = 0;
 
-	Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, sizeof(struct TArtIpProgReply), m_nIpAddressFrom, artnet::UDP_PORT);
+	Network::Get()->SendTo(m_nHandle, m_pReceiveBuffer, sizeof(struct artnet::ArtIpProgReply), m_nIpAddressFrom, artnet::UDP_PORT);
 
 	if (isChanged) {
 		m_ArtPollReply.Status2 = static_cast<uint8_t>((m_ArtPollReply.Status2 & (~(artnet::Status2::IP_DHCP))) | (Network::Get()->IsDhcpUsed() ? artnet::Status2::IP_DHCP : artnet::Status2::IP_MANUALY));
