@@ -46,6 +46,7 @@ void ArtNetNode::HandleSync() {
 		 * we need to do a forced sync
 		 */
 		m_pLightSet->Sync(true);
+		SendDiag(artnet::PriorityCodes::LOW, "Sync forced");
 		return;
 	}
 

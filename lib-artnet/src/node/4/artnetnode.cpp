@@ -71,7 +71,7 @@ void ArtNetNode::SetPortProtocol4(const uint32_t nPortIndex, const artnet::PortP
 void ArtNetNode::SetUniverse4(const uint32_t nPortIndex, const lightset::PortDir portDirection) {
 	DEBUG_ENTRY
 
-	uint16_t nUniverse;
+	uint16_t nUniverse = 0;
 	const bool isActive = ArtNetNode::GetPortAddress(nPortIndex, nUniverse, portDirection);
 	const auto portProtocol = m_Node.Port[nPortIndex].protocol;
 

@@ -1668,7 +1668,7 @@ Dmx::Dmx() {
 	DEBUG_EXIT
 }
 
-void Dmx::SetPortDirection(uint32_t nPortIndex, PortDirection portDirection, bool bEnableData) {
+void Dmx::SetPortDirection(const uint32_t nPortIndex, PortDirection portDirection, bool bEnableData) {
 //	DEBUG_PRINTF("nPortIndex=%u %s %c", nPortIndex, portDirection == PortDirection::INP ? "Input" : "Output", bEnableData ? 'Y' : 'N');
 	assert(nPortIndex < DMX_MAX_PORTS);
 
@@ -1695,7 +1695,7 @@ void Dmx::SetPortDirection(uint32_t nPortIndex, PortDirection portDirection, boo
 	}
 }
 
-void Dmx::ClearData(uint32_t nPortIndex) {
+void Dmx::ClearData(const uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	auto *p = &s_TxBuffer[nPortIndex];
@@ -1810,14 +1810,12 @@ void Dmx::StopData(const uint32_t nUart, const uint32_t nPortIndex) {
 
 	if (m_dmxPortDirection[nPortIndex] == PortDirection::OUTP) {
 		do {
-			__DMB();
 			if (s_TxBuffer[nPortIndex].State == dmx::TxRxState::DMXINTER) {
 				usart_flag_clear(nUart, USART_FLAG_TC);
 				while (SET != usart_flag_get(nUart, USART_FLAG_TC))
 					;
 				s_TxBuffer[nPortIndex].State = dmx::TxRxState::IDLE;
 			}
-			__DMB();
 		} while (s_TxBuffer[nPortIndex].State != dmx::TxRxState::IDLE);
 	} else if (m_dmxPortDirection[nPortIndex] == PortDirection::INP) {
 		usart_interrupt_disable(nUart, USART_INT_RBNE);
@@ -1952,7 +1950,7 @@ dmx::OutputStyle Dmx::GetOutputStyle(const uint32_t nPortIndex) const {
 	return s_TxBuffer[nPortIndex].outputStyle;
 }
 
-void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
+void Dmx::SetSendData(const uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	auto *p = &s_TxBuffer[nPortIndex];
@@ -1969,7 +1967,7 @@ void Dmx::SetSendData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLengt
 	}
 }
 
-void Dmx::SetSendDataWithoutSC(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
+void Dmx::SetSendDataWithoutSC(const uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
 	logic_analyzer::ch0_set();
 
 	assert(nPortIndex < DMX_MAX_PORTS);
@@ -2194,14 +2192,13 @@ const uint8_t *Dmx::GetDmxAvailable(UNUSED uint32_t nPortIndex)  {
 #endif
 }
 
-const uint8_t* Dmx::GetDmxCurrentData(uint32_t nPortIndex) {
+const uint8_t* Dmx::GetDmxCurrentData(const uint32_t nPortIndex) {
 	return s_RxBuffer[nPortIndex].data;
 }
 
 uint32_t Dmx::GetDmxUpdatesPerSecond(UNUSED uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
-	__DMB();
 	return sv_nRxDmxPackets[nPortIndex].nPerSecond;
 #else
 	return 0;
@@ -2211,7 +2208,6 @@ uint32_t Dmx::GetDmxUpdatesPerSecond(UNUSED uint32_t nPortIndex) {
 uint32_t GetDmxReceivedCount(UNUSED uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
-	__DMB();
 	return sv_nRxDmxPackets[nPortIndex].nCount;
 #else
 	return 0;
@@ -2220,7 +2216,7 @@ uint32_t GetDmxReceivedCount(UNUSED uint32_t nPortIndex) {
 
 // RDM Send
 
-void Dmx::RdmSendRaw(uint32_t nPortIndex, const uint8_t* pRdmData, uint32_t nLength) {
+void Dmx::RdmSendRaw(const uint32_t nPortIndex, const uint8_t* pRdmData, uint32_t nLength) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 	assert(pRdmData != nullptr);
 	assert(nLength != 0);
@@ -2349,7 +2345,7 @@ void Dmx::RdmSendRaw(uint32_t nPortIndex, const uint8_t* pRdmData, uint32_t nLen
 
 // RDM Receive
 
-const uint8_t *Dmx::RdmReceive(uint32_t nPortIndex) {
+const uint8_t *Dmx::RdmReceive(const uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	if ((s_RxBuffer[nPortIndex].Rdm.nIndex & 0x4000) != 0x4000) {
@@ -2360,7 +2356,7 @@ const uint8_t *Dmx::RdmReceive(uint32_t nPortIndex) {
 	return s_RxBuffer[nPortIndex].data;
 }
 
-const uint8_t *Dmx::RdmReceiveTimeOut(uint32_t nPortIndex, uint16_t nTimeOut) {
+const uint8_t *Dmx::RdmReceiveTimeOut(const uint32_t nPortIndex, uint16_t nTimeOut) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	uint8_t *p = nullptr;

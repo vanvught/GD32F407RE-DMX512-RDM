@@ -271,19 +271,19 @@ void igmp_timer() {
 
 // --> Public
 
-int igmp_join(uint32_t nGroupAddress) {
+void igmp_join(uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF(IPSTR, IP2STR(nGroupAddress));
 
 	if ((nGroupAddress & 0xE0) != 0xE0) {
 		DEBUG_ENTRY
-		return -1;
+		return;
 	}
 
 	for (int i = 0; i < IGMP_MAX_JOINS_ALLOWED; i++) {
 		if (s_groups[i].nGroupAddress == nGroupAddress) {
 			DEBUG_EXIT
-			return i;
+			return;
 		}
 
 		if (s_groups[i].nGroupAddress == 0) {
@@ -294,7 +294,7 @@ int igmp_join(uint32_t nGroupAddress) {
 			_send_report(nGroupAddress);
 
 			DEBUG_EXIT
-			return i;
+			return;
 		}
 	}
 
@@ -303,10 +303,9 @@ int igmp_join(uint32_t nGroupAddress) {
 	console_error("igmp_join\n");
 #endif
 	DEBUG_ENTRY
-	return -2;
 }
 
-int igmp_leave(uint32_t nGroupAddress) {
+void igmp_leave(uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF(IPSTR, IP2STR(nGroupAddress));
 
@@ -319,7 +318,7 @@ int igmp_leave(uint32_t nGroupAddress) {
 			group.nTimer = 0;
 
 			DEBUG_EXIT
-			return 0;
+			return;
 		}
 	}
 
@@ -328,7 +327,6 @@ int igmp_leave(uint32_t nGroupAddress) {
 	printf(IPSTR "\n", IP2STR(nGroupAddress));
 #endif
 	DEBUG_EXIT
-	return -1;
 }
 
 // <---

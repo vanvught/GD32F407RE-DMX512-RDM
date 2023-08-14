@@ -379,15 +379,15 @@ Discarded input sections
  .text          0x0000000000000000        0x0 build_gd32/firmware/main.o
  .data          0x0000000000000000        0x0 build_gd32/firmware/main.o
  .bss           0x0000000000000000        0x0 build_gd32/firmware/main.o
- .debug_info    0x0000000000000000    0x10318 build_gd32/firmware/main.o
- .debug_abbrev  0x0000000000000000      0xdc2 build_gd32/firmware/main.o
+ .debug_info    0x0000000000000000    0x1030e build_gd32/firmware/main.o
+ .debug_abbrev  0x0000000000000000      0xdda build_gd32/firmware/main.o
  .debug_loclists
                 0x0000000000000000     0x1353 build_gd32/firmware/main.o
  .debug_aranges
                 0x0000000000000000      0x140 build_gd32/firmware/main.o
  .debug_rnglists
                 0x0000000000000000      0x38d build_gd32/firmware/main.o
- .debug_line    0x0000000000000000     0x2015 build_gd32/firmware/main.o
+ .debug_line    0x0000000000000000     0x2013 build_gd32/firmware/main.o
  .debug_str     0x0000000000000000     0xd9ad build_gd32/firmware/main.o
  .comment       0x0000000000000000       0x39 build_gd32/firmware/main.o
  .debug_frame   0x0000000000000000      0x3b4 build_gd32/firmware/main.o
@@ -870,7 +870,7 @@ Discarded input sections
                 0x0000000000000000       0x70 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .debug_rnglists
                 0x0000000000000000      0x292 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
- .debug_line    0x0000000000000000     0x1199 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+ .debug_line    0x0000000000000000     0x119d ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .debug_str     0x0000000000000000     0x3d4a ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .comment       0x0000000000000000       0x39 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .debug_frame   0x0000000000000000      0x18c ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
@@ -956,12 +956,12 @@ Discarded input sections
  .debug_info    0x0000000000000000     0x36de ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_abbrev  0x0000000000000000      0x660 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_loclists
-                0x0000000000000000      0x3eb ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+                0x0000000000000000      0x3fb ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_aranges
                 0x0000000000000000       0x38 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_rnglists
                 0x0000000000000000       0x40 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
- .debug_line    0x0000000000000000      0x651 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+ .debug_line    0x0000000000000000      0x653 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_str     0x0000000000000000     0x353f ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .comment       0x0000000000000000       0x39 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .debug_frame   0x0000000000000000       0x7c ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
@@ -1021,8 +1021,8 @@ Discarded input sections
                 0x0000000000000000        0x4 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
  .bss._ZZN8lightset4Data3GetEvE8instance
                 0x0000000000000000     0xc080 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
- .debug_info    0x0000000000000000     0x4621 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
- .debug_abbrev  0x0000000000000000      0xa20 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
+ .debug_info    0x0000000000000000     0x4618 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
+ .debug_abbrev  0x0000000000000000      0xa38 ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
  .debug_loclists
                 0x0000000000000000     0x127d ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
  .debug_aranges
@@ -1861,8 +1861,8 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .text._ZN4MDNSD2Ev
                 0x0000000000000000       0x54 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
- .debug_info    0x0000000000000000     0x3d09 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
- .debug_abbrev  0x0000000000000000      0x993 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+ .debug_info    0x0000000000000000     0x3d02 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+ .debug_abbrev  0x0000000000000000      0x9ab ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .debug_loclists
                 0x0000000000000000     0x1386 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .debug_aranges
@@ -1932,18 +1932,18 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .data          0x0000000000000000        0x0 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .bss           0x0000000000000000        0x0 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
- .debug_info    0x0000000000000000      0xdfd ../lib-network/lib_gd32/libnetwork.a(igmp.o)
- .debug_abbrev  0x0000000000000000      0x424 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+ .debug_info    0x0000000000000000      0xdf3 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+ .debug_abbrev  0x0000000000000000      0x407 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .debug_loclists
-                0x0000000000000000      0x37d ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000000000000      0x373 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .debug_aranges
                 0x0000000000000000       0x60 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .debug_rnglists
-                0x0000000000000000       0xcd ../lib-network/lib_gd32/libnetwork.a(igmp.o)
- .debug_line    0x0000000000000000      0x7d9 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000000000000       0xca ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+ .debug_line    0x0000000000000000      0x7ca ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .debug_str     0x0000000000000000      0x870 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .comment       0x0000000000000000       0x39 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
- .debug_frame   0x0000000000000000      0x120 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+ .debug_frame   0x0000000000000000      0x128 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .ARM.attributes
                 0x0000000000000000       0x34 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
  .text          0x0000000000000000        0x0 ../lib-network/lib_gd32/libnetwork.a(net.o)
@@ -4284,7 +4284,7 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
                 0x0000000008008188                __Vectors_End = .
                 0x0000000008008188                __Vectors_Size = (__Vectors_End - __gVectors)
 
-.text           0x0000000008008188    0x11aa8
+.text           0x0000000008008188    0x11aa0
                 0x0000000008008188                . = ALIGN (0x4)
  *(.text.unlikely*)
  .text.unlikely._Z9igmp_initv
@@ -4954,8 +4954,9 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
                 0x000000000800da8e       0x50 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
                 0x000000000800da8e                ArtNetNode::SetPortProtocol4(unsigned long, artnet::PortProtocol)
  .text._ZN10ArtNetNode12SetUniverse4EmN8lightset7PortDirE
-                0x000000000800dade       0x66 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+                0x000000000800dade       0x64 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
                 0x000000000800dade                ArtNetNode::SetUniverse4(unsigned long, lightset::PortDir)
+ *fill*         0x000000000800db42        0x2 
  .text._ZN10ArtNetNode16SetLedBlinkMode4EN8hardware8ledblink4ModeE
                 0x000000000800db44       0x38 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
                 0x000000000800db44                ArtNetNode::SetLedBlinkMode4(hardware::ledblink::Mode)
@@ -5896,1497 +5897,1497 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
                 0x0000000008014864       0x30 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
                 0x0000000008014864                igmp_timer()
  .text._Z9igmp_joinm
-                0x0000000008014894       0x4c ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x0000000008014894       0x48 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
                 0x0000000008014894                igmp_join(unsigned long)
  .text._Z10igmp_leavem
-                0x00000000080148e0       0x60 ../lib-network/lib_gd32/libnetwork.a(igmp.o)
-                0x00000000080148e0                igmp_leave(unsigned long)
+                0x00000000080148dc       0x5c ../lib-network/lib_gd32/libnetwork.a(igmp.o)
+                0x00000000080148dc                igmp_leave(unsigned long)
  .text._ZL16refresh_and_initP6IpInfob
-                0x0000000008014940       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008014938       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
  .text._Z16set_secondary_ipv
-                0x0000000008014988       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008014988                set_secondary_ip()
+                0x0000000008014980       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008014980                set_secondary_ip()
  .text._Z10net_set_ipP6IpInfo
-                0x000000000801499c       0x34 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x000000000801499c                net_set_ip(IpInfo*)
+                0x0000000008014994       0x34 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008014994                net_set_ip(IpInfo*)
  .text._Z15net_set_netmaskP6IpInfo
-                0x00000000080149d0       0x10 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x00000000080149d0                net_set_netmask(IpInfo*)
+                0x00000000080149c8       0x10 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x00000000080149c8                net_set_netmask(IpInfo*)
  .text._Z10net_set_gwP6IpInfo
-                0x00000000080149e0       0x10 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x00000000080149e0                net_set_gw(IpInfo*)
+                0x00000000080149d8       0x10 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x00000000080149d8                net_set_gw(IpInfo*)
  .text._Z12net_set_dhcpP6IpInfoPKcPb
-                0x00000000080149f0       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x00000000080149f0                net_set_dhcp(IpInfo*, char const*, bool*)
+                0x00000000080149e8       0x48 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x00000000080149e8                net_set_dhcp(IpInfo*, char const*, bool*)
  .text._Z16net_dhcp_releasev
-                0x0000000008014a38       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008014a38                net_dhcp_release()
+                0x0000000008014a30       0x14 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008014a30                net_dhcp_release()
  .text._Z16net_set_zeroconfP6IpInfo
-                0x0000000008014a4c       0x28 ../lib-network/lib_gd32/libnetwork.a(net.o)
-                0x0000000008014a4c                net_set_zeroconf(IpInfo*)
+                0x0000000008014a44       0x28 ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x0000000008014a44                net_set_zeroconf(IpInfo*)
  .text._Z14net_timers_runv
-                0x0000000008014a74       0x20 ../lib-network/lib_gd32/libnetwork.a(net_timers.o)
-                0x0000000008014a74                net_timers_run()
+                0x0000000008014a6c       0x20 ../lib-network/lib_gd32/libnetwork.a(net_timers.o)
+                0x0000000008014a6c                net_timers_run()
  .text._Z7rfc3927v
-                0x0000000008014a94       0x74 ../lib-network/lib_gd32/libnetwork.a(rfc3927.o)
-                0x0000000008014a94                rfc3927()
+                0x0000000008014a8c       0x74 ../lib-network/lib_gd32/libnetwork.a(rfc3927.o)
+                0x0000000008014a8c                rfc3927()
  .text.memcpy.isra.0
-                0x0000000008014b08       0x14 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014b00       0x14 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL12scan_optionsP5t_tcpP3tcbl
-                0x0000000008014b1c       0xb0 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014b14       0xb0 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL8_bswap32P5t_tcp
-                0x0000000008014bcc       0x4a ../lib-network/lib_gd32/libnetwork.a(tcp.o)
- *fill*         0x0000000008014c16        0x2 
+                0x0000000008014bc4       0x4a ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+ *fill*         0x0000000008014c0e        0x2 
  .text._ZL12send_packagePK3tcbRK8SendInfo
-                0x0000000008014c18      0x17c ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014c10      0x17c ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL9_init_tcbP3tcbt
-                0x0000000008014d94       0x38 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014d8c       0x38 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._ZL10send_resetP5t_tcpPK3tcb
-                0x0000000008014dcc       0x60 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014dc4       0x60 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
  .text._Z12tcp_shutdownv
-                0x0000000008014e2c        0x2 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x0000000008014e2c                tcp_shutdown()
- *fill*         0x0000000008014e2e        0x2 
+                0x0000000008014e24        0x2 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014e24                tcp_shutdown()
+ *fill*         0x0000000008014e26        0x2 
  .text._Z9tcp_begint
-                0x0000000008014e30       0x34 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x0000000008014e30                tcp_begin(unsigned short)
+                0x0000000008014e28       0x34 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014e28                tcp_begin(unsigned short)
  .text._Z8tcp_readlPPKhRm
-                0x0000000008014e64       0x68 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x0000000008014e64                tcp_read(long, unsigned char const**, unsigned long&)
+                0x0000000008014e5c       0x68 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014e5c                tcp_read(long, unsigned char const**, unsigned long&)
  .text._Z9tcp_writelPKhtm
-                0x0000000008014ecc       0x64 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
-                0x0000000008014ecc                tcp_write(long, unsigned char const*, unsigned short, unsigned long)
+                0x0000000008014ec4       0x64 ../lib-network/lib_gd32/libnetwork.a(tcp.o)
+                0x0000000008014ec4                tcp_write(long, unsigned char const*, unsigned short, unsigned long)
  .text._Z10net_memcpyPvPKvj.isra.0
-                0x0000000008014f30       0x38 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008014f28       0x38 ../lib-network/lib_gd32/libnetwork.a(udp.o)
  .text.memcpy.isra.0
-                0x0000000008014f68       0x14 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008014f60       0x14 ../lib-network/lib_gd32/libnetwork.a(udp.o)
  .text._Z10udp_set_ipv
-                0x0000000008014f7c       0x24 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008014f7c                udp_set_ip()
+                0x0000000008014f74       0x24 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008014f74                udp_set_ip()
  .text._Z9udp_begint
-                0x0000000008014fa0       0x30 ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008014fa0                udp_begin(unsigned short)
+                0x0000000008014f98       0x30 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008014f98                udp_begin(unsigned short)
  .text._Z7udp_endt
-                0x0000000008014fd0       0x4c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008014fd0                udp_end(unsigned short)
+                0x0000000008014fc8       0x4c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008014fc8                udp_end(unsigned short)
  .text._Z9udp_recv2iPPKhPmPt
-                0x000000000801501c       0x2c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x000000000801501c                udp_recv2(int, unsigned char const**, unsigned long*, unsigned short*)
+                0x0000000008015014       0x2c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008015014                udp_recv2(int, unsigned char const**, unsigned long*, unsigned short*)
  .text._Z8udp_sendiPKhtmt
-                0x0000000008015048      0x14c ../lib-network/lib_gd32/libnetwork.a(udp.o)
-                0x0000000008015048                udp_send(int, unsigned char const*, unsigned short, unsigned long, unsigned short)
+                0x0000000008015040      0x14c ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x0000000008015040                udp_send(int, unsigned char const*, unsigned short, unsigned long, unsigned short)
  .text._ZN3net18phy_customized_ledEv
-                0x0000000008015194        0x2 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x0000000008015194                net::phy_customized_led()
+                0x000000000801518c        0x2 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x000000000801518c                net::phy_customized_led()
  .text._ZN3net21phy_customized_timingEv
-                0x0000000008015196        0x2 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x0000000008015196                net::phy_customized_timing()
+                0x000000000801518e        0x2 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x000000000801518e                net::phy_customized_timing()
  .text._ZN3net8phy_readEmmRt
-                0x0000000008015198       0x16 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x0000000008015198                net::phy_read(unsigned long, unsigned long, unsigned short&)
+                0x0000000008015190       0x16 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x0000000008015190                net::phy_read(unsigned long, unsigned long, unsigned short&)
  .text._ZN3net9phy_writeEmmt
-                0x00000000080151ae       0x20 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x00000000080151ae                net::phy_write(unsigned long, unsigned long, unsigned short)
- *fill*         0x00000000080151ce        0x2 
+                0x00000000080151a6       0x20 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x00000000080151a6                net::phy_write(unsigned long, unsigned long, unsigned short)
+ *fill*         0x00000000080151c6        0x2 
  .text._ZN3net10phy_configEm
-                0x00000000080151d0       0x54 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x00000000080151d0                net::phy_config(unsigned long)
+                0x00000000080151c8       0x54 ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x00000000080151c8                net::phy_config(unsigned long)
  .text.memcpy.isra.0
-                0x0000000008015224       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x000000000801521c       0x14 ../lib-network/lib_gd32/libnetwork.a(arp.o)
  .text._Z16arp_send_requestm
-                0x0000000008015238       0x30 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008015238                arp_send_request(unsigned long)
+                0x0000000008015230       0x30 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008015230                arp_send_request(unsigned long)
  .text._Z14arp_send_probev
-                0x0000000008015268       0x40 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008015268                arp_send_probe()
+                0x0000000008015260       0x40 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008015260                arp_send_probe()
  .text._Z12arp_do_probev
-                0x00000000080152a8       0x30 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x00000000080152a8                arp_do_probe()
+                0x00000000080152a0       0x30 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x00000000080152a0                arp_do_probe()
  .text._Z21arp_send_announcementv
-                0x00000000080152d8       0x18 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x00000000080152d8                arp_send_announcement()
+                0x00000000080152d0       0x18 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x00000000080152d0                arp_send_announcement()
  .text._Z18arp_handle_requestP5t_arp
-                0x00000000080152f0       0x80 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x00000000080152f0                arp_handle_request(t_arp*)
+                0x00000000080152e8       0x80 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x00000000080152e8                arp_handle_request(t_arp*)
  .text._Z16arp_handle_replyP5t_arp
-                0x0000000008015370       0x38 ../lib-network/lib_gd32/libnetwork.a(arp.o)
-                0x0000000008015370                arp_handle_reply(t_arp*)
+                0x0000000008015368       0x38 ../lib-network/lib_gd32/libnetwork.a(arp.o)
+                0x0000000008015368                arp_handle_reply(t_arp*)
  .text._Z16arp_cache_updatePKhm
-                0x00000000080153a8       0x58 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
-                0x00000000080153a8                arp_cache_update(unsigned char const*, unsigned long)
+                0x00000000080153a0       0x58 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
+                0x00000000080153a0                arp_cache_update(unsigned char const*, unsigned long)
  .text._Z16arp_cache_lookupmPh
-                0x0000000008015400       0x98 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
-                0x0000000008015400                arp_cache_lookup(unsigned long, unsigned char*)
+                0x00000000080153f8       0x98 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
+                0x00000000080153f8                arp_cache_lookup(unsigned long, unsigned char*)
  .text._ZL14parse_responseiPKh.constprop.0
-                0x0000000008015498      0x148 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x0000000008015490      0x148 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
  .text.memcpy.isra.0
-                0x00000000080155e0       0x14 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x00000000080155d8       0x14 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
  .text._Z11dhcp_clientPKc
-                0x00000000080155f4      0x20c ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
-                0x00000000080155f4                dhcp_client(char const*)
+                0x00000000080155ec      0x20c ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x00000000080155ec                dhcp_client(char const*)
  .text._Z19dhcp_client_releasev
-                0x0000000008015800       0x70 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
-                0x0000000008015800                dhcp_client_release()
+                0x00000000080157f8       0x70 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x00000000080157f8                dhcp_client_release()
  .text._Z9ip_set_ipv
-                0x0000000008015870        0xe ../lib-network/lib_gd32/libnetwork.a(ip.o)
-                0x0000000008015870                ip_set_ip()
+                0x0000000008015868        0xe ../lib-network/lib_gd32/libnetwork.a(ip.o)
+                0x0000000008015868                ip_set_ip()
  .text._Z10net_chksumPKvm
-                0x000000000801587e       0x34 ../lib-network/lib_gd32/libnetwork.a(net_chksum.o)
-                0x000000000801587e                net_chksum(void const*, unsigned long)
+                0x0000000008015876       0x34 ../lib-network/lib_gd32/libnetwork.a(net_chksum.o)
+                0x0000000008015876                net_chksum(void const*, unsigned long)
  .text._ZN3net16link_status_readEv
-                0x00000000080158b2       0x26 ../lib-network/lib_gd32/libnetwork.a(net_link_check.o)
-                0x00000000080158b2                net::link_status_read()
+                0x00000000080158aa       0x26 ../lib-network/lib_gd32/libnetwork.a(net_link_check.o)
+                0x00000000080158aa                net::link_status_read()
  .text._ZN3net9phy_startEmRNS_9PhyStatusE
-                0x00000000080158d8      0x15c ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
-                0x00000000080158d8                net::phy_start(unsigned long, net::PhyStatus&)
+                0x00000000080158d0      0x15c ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x00000000080158d0                net::phy_start(unsigned long, net::PhyStatus&)
  .text.memcpy.isra.0
-                0x0000000008015a34       0x14 ../lib-network/lib_gd32/libnetwork.a(icmp.o)
+                0x0000000008015a2c       0x14 ../lib-network/lib_gd32/libnetwork.a(icmp.o)
  .text._ZN8LightSet11GetSlotInfoEtRN8lightset8SlotInfoE
-                0x0000000008015a48        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetgetslotinfo.o)
-                0x0000000008015a48                LightSet::GetSlotInfo(unsigned short, lightset::SlotInfo&)
+                0x0000000008015a40        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetgetslotinfo.o)
+                0x0000000008015a40                LightSet::GetSlotInfo(unsigned short, lightset::SlotInfo&)
  .text._ZN7Display14ClearEndOfLineEv.isra.0
-                0x0000000008015a52        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015a4a        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
  .text._ZN7Display5WriteEmPKc.isra.0
-                0x0000000008015a5a       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015a52       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
  .text._ZN10DisplayUdf13ShowIpAddressEv
-                0x0000000008015a7c       0x64 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008015a7c                DisplayUdf::ShowIpAddress()
+                0x0000000008015a74       0x64 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015a74                DisplayUdf::ShowIpAddress()
  .text._ZN10DisplayUdfC2Ev
-                0x0000000008015ae0       0x30 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008015ae0                DisplayUdf::DisplayUdf()
-                0x0000000008015ae0                DisplayUdf::DisplayUdf()
+                0x0000000008015ad8       0x30 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015ad8                DisplayUdf::DisplayUdf()
+                0x0000000008015ad8                DisplayUdf::DisplayUdf()
  .text._ZN10DisplayUdf8SetTitleEPKcz
-                0x0000000008015b10       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008015b10                DisplayUdf::SetTitle(char const*, ...)
+                0x0000000008015b08       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015b08                DisplayUdf::SetTitle(char const*, ...)
  .text._ZN10DisplayUdf3SetEmN10displayudf6LabelsE
-                0x0000000008015b38       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008015b38                DisplayUdf::Set(unsigned long, displayudf::Labels)
+                0x0000000008015b30       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015b30                DisplayUdf::Set(unsigned long, displayudf::Labels)
  .text._ZN10DisplayUdf4ShowEv
-                0x0000000008015b6c       0xe8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
-                0x0000000008015b6c                DisplayUdf::Show()
+                0x0000000008015b64       0xe8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x0000000008015b64                DisplayUdf::Show()
  .text._ZN17PropertiesBuilder3AddIhEEbPKcT_bm.isra.0
-                0x0000000008015c54       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015c4c       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
  .text._ZN16DisplayUdfParamsC2EP21DisplayUdfParamsStore
-                0x0000000008015ca4       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015ca4                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
-                0x0000000008015ca4                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
+                0x0000000008015c9c       0x1a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015c9c                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
+                0x0000000008015c9c                DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore*)
  .text._ZN16DisplayUdfParams4LoadEv
-                0x0000000008015cbe       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015cbe                DisplayUdfParams::Load()
- *fill*         0x0000000008015cd6        0x2 
+                0x0000000008015cb6       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015cb6                DisplayUdfParams::Load()
+ *fill*         0x0000000008015cce        0x2 
  .text._ZN16DisplayUdfParams4LoadEPKcm
-                0x0000000008015cd8       0x3c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015cd8                DisplayUdfParams::Load(char const*, unsigned long)
+                0x0000000008015cd0       0x3c ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015cd0                DisplayUdfParams::Load(char const*, unsigned long)
  .text._ZN16DisplayUdfParams16callbackFunctionEPKc
-                0x0000000008015d14       0xc8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015d14                DisplayUdfParams::callbackFunction(char const*)
+                0x0000000008015d0c       0xc8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015d0c                DisplayUdfParams::callbackFunction(char const*)
  .text._ZN16DisplayUdfParams22staticCallbackFunctionEPvPKc
-                0x0000000008015ddc        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015ddc                DisplayUdfParams::staticCallbackFunction(void*, char const*)
+                0x0000000008015dd4        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015dd4                DisplayUdfParams::staticCallbackFunction(void*, char const*)
  .text._ZN16DisplayUdfParams7BuilderEPKN16displayudfparams6ParamsEPcmRm
-                0x0000000008015de0      0x134 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015de0                DisplayUdfParams::Builder(displayudfparams::Params const*, char*, unsigned long, unsigned long&)
+                0x0000000008015dd8      0x134 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015dd8                DisplayUdfParams::Builder(displayudfparams::Params const*, char*, unsigned long, unsigned long&)
  .text._ZN16DisplayUdfParams3SetEP10DisplayUdf
-                0x0000000008015f14       0x6a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015f14                DisplayUdfParams::Set(DisplayUdf*)
+                0x0000000008015f0c       0x6a ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015f0c                DisplayUdfParams::Set(DisplayUdf*)
  .text._ZN16DisplayUdfParams4DumpEv
-                0x0000000008015f7e        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
-                0x0000000008015f7e                DisplayUdfParams::Dump()
+                0x0000000008015f76        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x0000000008015f76                DisplayUdfParams::Dump()
  .text._ZN6artnet16display_longnameEPKc
-                0x0000000008015f80        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015f80                artnet::display_longname(char const*)
- *fill*         0x0000000008015f82        0x2 
+                0x0000000008015f78        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015f78                artnet::display_longname(char const*)
+ *fill*         0x0000000008015f7a        0x2 
  .text._ZN6artnet23display_universe_switchEmh
-                0x0000000008015f84       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015f84                artnet::display_universe_switch(unsigned long, unsigned char)
+                0x0000000008015f7c       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015f7c                artnet::display_universe_switch(unsigned long, unsigned char)
  .text._ZN6artnet18display_merge_modeEmN8lightset9MergeModeE
-                0x0000000008015f98       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015f98                artnet::display_merge_mode(unsigned long, lightset::MergeMode)
+                0x0000000008015f90       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015f90                artnet::display_merge_mode(unsigned long, lightset::MergeMode)
  .text._ZN6artnet21display_port_protocolEmNS_12PortProtocolE
-                0x0000000008015fac        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015fac                artnet::display_port_protocol(unsigned long, artnet::PortProtocol)
+                0x0000000008015fa4        0x4 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015fa4                artnet::display_port_protocol(unsigned long, artnet::PortProtocol)
  .text._ZN6artnet16display_failsafeEh
-                0x0000000008015fb0        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
-                0x0000000008015fb0                artnet::display_failsafe(unsigned char)
- *fill*         0x0000000008015fb2        0x2 
+                0x0000000008015fa8        0x2 ../lib-displayudf/lib_gd32/libdisplayudf.a(artnetdisplay.o)
+                0x0000000008015fa8                artnet::display_failsafe(unsigned char)
+ *fill*         0x0000000008015faa        0x2 
  .text._ZN10DisplayUdf12ShowUniverseEP10ArtNetNode
-                0x0000000008015fb4       0xb4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
-                0x0000000008015fb4                DisplayUdf::ShowUniverse(ArtNetNode*)
+                0x0000000008015fac       0xb4 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x0000000008015fac                DisplayUdf::ShowUniverse(ArtNetNode*)
  .text._ZN10DisplayUdf4ShowEP10ArtNetNodem
-                0x0000000008016068       0x70 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
-                0x0000000008016068                DisplayUdf::Show(ArtNetNode*, unsigned long)
+                0x0000000008016060       0x70 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x0000000008016060                DisplayUdf::Show(ArtNetNode*, unsigned long)
  .text._ZN7Display14ClearEndOfLineEv.isra.0
-                0x00000000080160d8        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080160d0        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .text._ZN7Display5WriteEmPKc.isra.0
-                0x00000000080160e0       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080160d8       0x22 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .text._ZN7Display6StatusE22Display7SegmentMessage
-                0x0000000008016102       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016102                Display::Status(Display7SegmentMessage)
- *fill*         0x0000000008016136        0x2 
+                0x00000000080160fa       0x34 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080160fa                Display::Status(Display7SegmentMessage)
+ *fill*         0x000000000801612e        0x2 
  .text._ZN10DisplayUdf14ShowDhcpStatusEN7network4dhcp12ClientStatusE
-                0x0000000008016138       0x68 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016138                DisplayUdf::ShowDhcpStatus(network::dhcp::ClientStatus)
+                0x0000000008016130       0x68 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008016130                DisplayUdf::ShowDhcpStatus(network::dhcp::ClientStatus)
  .text._ZN7network19display_emac_configEv
-                0x00000000080161a0       0x24 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x00000000080161a0                network::display_emac_config()
+                0x0000000008016198       0x24 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008016198                network::display_emac_config()
  .text._ZN7network18display_emac_startEv
-                0x00000000080161c4       0x24 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x00000000080161c4                network::display_emac_start()
+                0x00000000080161bc       0x24 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080161bc                network::display_emac_start()
  .text._ZN7network19display_emac_statusEb
-                0x00000000080161e8       0x38 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x00000000080161e8                network::display_emac_status(bool)
+                0x00000000080161e0       0x38 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080161e0                network::display_emac_status(bool)
  .text._ZN7network10display_ipEv
-                0x0000000008016220       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016220                network::display_ip()
+                0x0000000008016218       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008016218                network::display_ip()
  .text._ZN7network15display_netmaskEv
-                0x0000000008016230       0x48 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016230                network::display_netmask()
+                0x0000000008016228       0x48 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008016228                network::display_netmask()
  .text._ZN7network15display_gatewayEv
-                0x0000000008016278       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016278                network::display_gateway()
+                0x0000000008016270       0x40 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x0000000008016270                network::display_gateway()
  .text._ZN7network16display_hostnameEv
-                0x00000000080162b8       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x00000000080162b8                network::display_hostname()
+                0x00000000080162b0       0x28 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080162b0                network::display_hostname()
  .text._ZN7network21display_emac_shutdownEv
-                0x00000000080162e0       0x64 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x00000000080162e0                network::display_emac_shutdown()
+                0x00000000080162d8       0x64 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x00000000080162d8                network::display_emac_shutdown()
  .text._ZN7network19display_dhcp_statusENS_4dhcp12ClientStatusE
-                0x0000000008016344       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
-                0x0000000008016344                network::display_dhcp_status(network::dhcp::ClientStatus)
+                0x000000000801633c       0x14 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801633c                network::display_dhcp_status(network::dhcp::ClientStatus)
  .text._ZL24spi_flash_cmd_wait_readym
-                0x0000000008016358       0x7c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016350       0x7c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._ZL20spi_flash_read_writePKhjS0_Phj
-                0x00000000080163d4       0x34 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080163cc       0x34 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._ZL22spi_flash_write_commonPKhjS0_jb
-                0x0000000008016408       0x60 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016400       0x60 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .text._Z18spi_flash_get_sizev
-                0x0000000008016468        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008016468                spi_flash_get_size()
+                0x0000000008016460        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016460                spi_flash_get_size()
  .text._Z25spi_flash_get_sector_sizev
-                0x0000000008016474        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008016474                spi_flash_get_sector_size()
+                0x000000000801646c        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x000000000801646c                spi_flash_get_sector_size()
  .text._Z18spi_flash_get_namev
-                0x0000000008016480        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008016480                spi_flash_get_name()
+                0x0000000008016478        0xc ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016478                spi_flash_get_name()
  .text._Z25spi_flash_cmd_write_multimjPKh
-                0x000000000801648c       0x74 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x000000000801648c                spi_flash_cmd_write_multi(unsigned long, unsigned int, unsigned char const*)
+                0x0000000008016484       0x74 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016484                spi_flash_cmd_write_multi(unsigned long, unsigned int, unsigned char const*)
  .text._Z23spi_flash_cmd_read_fastmjPh
-                0x0000000008016500       0x58 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008016500                spi_flash_cmd_read_fast(unsigned long, unsigned int, unsigned char*)
+                0x00000000080164f8       0x58 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080164f8                spi_flash_cmd_read_fast(unsigned long, unsigned int, unsigned char*)
  .text._Z19spi_flash_cmd_erasemj
-                0x0000000008016558       0x70 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x0000000008016558                spi_flash_cmd_erase(unsigned long, unsigned int)
+                0x0000000008016550       0x70 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x0000000008016550                spi_flash_cmd_erase(unsigned long, unsigned int)
  .text._Z26spi_flash_cmd_write_statush
-                0x00000000080165c8       0x28 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080165c8                spi_flash_cmd_write_status(unsigned char)
+                0x00000000080165c0       0x28 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080165c0                spi_flash_cmd_write_status(unsigned char)
  .text._Z15spi_flash_probejjj
-                0x00000000080165f0       0x68 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080165f0                spi_flash_probe(unsigned int, unsigned int, unsigned int)
+                0x00000000080165e8       0x68 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080165e8                spi_flash_probe(unsigned int, unsigned int, unsigned int)
  .text._Z23spi_flash_probe_winbondP9spi_flashPh
-                0x0000000008016658       0x54 ../lib-flash/lib_gd32/libflash.a(winbond.o)
-                0x0000000008016658                spi_flash_probe_winbond(spi_flash*, unsigned char*)
+                0x0000000008016650       0x54 ../lib-flash/lib_gd32/libflash.a(winbond.o)
+                0x0000000008016650                spi_flash_probe_winbond(spi_flash*, unsigned char*)
  .text._Z8spi_initv
-                0x00000000080166ac       0x4c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080166ac                spi_init()
+                0x00000000080166a4       0x4c ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080166a4                spi_init()
  .text._Z8spi_xfermPKhPhm
-                0x00000000080166f8       0x48 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
-                0x00000000080166f8                spi_xfer(unsigned long, unsigned char const*, unsigned char*, unsigned long)
+                0x00000000080166f0       0x48 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x00000000080166f0                spi_xfer(unsigned long, unsigned char const*, unsigned char*, unsigned long)
  .text._Z9get_timerm
-                0x0000000008016740       0x18 ../lib-flash/lib_gd32/libflash.a(get_timer.o)
-                0x0000000008016740                get_timer(unsigned long)
+                0x0000000008016738       0x18 ../lib-flash/lib_gd32/libflash.a(get_timer.o)
+                0x0000000008016738                get_timer(unsigned long)
  .text._Z26spi_flash_probe_gigadeviceP9spi_flashPh
-                0x0000000008016758       0x44 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
-                0x0000000008016758                spi_flash_probe_gigadevice(spi_flash*, unsigned char*)
+                0x0000000008016750       0x44 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
+                0x0000000008016750                spi_flash_probe_gigadevice(spi_flash*, unsigned char*)
  .text._Z24spi_flash_probe_macronixP9spi_flashPh
-                0x000000000801679c       0x4c ../lib-flash/lib_gd32/libflash.a(macronix.o)
-                0x000000000801679c                spi_flash_probe_macronix(spi_flash*, unsigned char*)
+                0x0000000008016794       0x4c ../lib-flash/lib_gd32/libflash.a(macronix.o)
+                0x0000000008016794                spi_flash_probe_macronix(spi_flash*, unsigned char*)
  .text._ZN10properties17convert_json_fileEPcmb
-                0x00000000080167e8      0x170 ../lib-properties/lib_gd32/libproperties.a(properties.o)
-                0x00000000080167e8                properties::convert_json_file(char*, unsigned long, bool)
+                0x00000000080167e0      0x170 ../lib-properties/lib_gd32/libproperties.a(properties.o)
+                0x00000000080167e0                properties::convert_json_file(char*, unsigned long, bool)
  .text._ZN17PropertiesBuilderC2EPKcPcm
-                0x0000000008016958       0x84 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x0000000008016958                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned long)
-                0x0000000008016958                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned long)
+                0x0000000008016950       0x84 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x0000000008016950                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned long)
+                0x0000000008016950                PropertiesBuilder::PropertiesBuilder(char const*, char*, unsigned long)
  .text._ZN17PropertiesBuilder12AddIpAddressEPKcmb
-                0x00000000080169dc       0x88 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x00000000080169dc                PropertiesBuilder::AddIpAddress(char const*, unsigned long, bool)
+                0x00000000080169d4       0x88 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x00000000080169d4                PropertiesBuilder::AddIpAddress(char const*, unsigned long, bool)
  .text._ZN17PropertiesBuilder10AddCommentEPKc
-                0x0000000008016a64       0x34 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
-                0x0000000008016a64                PropertiesBuilder::AddComment(char const*)
+                0x0000000008016a5c       0x34 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x0000000008016a5c                PropertiesBuilder::AddComment(char const*)
  .text._ZN14ReadConfigFileC2EPFvPvPKcES0_
-                0x0000000008016a98        0x6 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008016a98                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
-                0x0000000008016a98                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
+                0x0000000008016a90        0x6 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008016a90                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
+                0x0000000008016a90                ReadConfigFile::ReadConfigFile(void (*)(void*, char const*), void*)
  .text._ZN14ReadConfigFileD2Ev
-                0x0000000008016a9e        0x2 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008016a9e                ReadConfigFile::~ReadConfigFile()
-                0x0000000008016a9e                ReadConfigFile::~ReadConfigFile()
+                0x0000000008016a96        0x2 ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008016a96                ReadConfigFile::~ReadConfigFile()
+                0x0000000008016a96                ReadConfigFile::~ReadConfigFile()
  .text._ZN14ReadConfigFile4ReadEPKcj
-                0x0000000008016aa0       0x6e ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
-                0x0000000008016aa0                ReadConfigFile::Read(char const*, unsigned int)
+                0x0000000008016a98       0x6e ../lib-properties/lib_gd32/libproperties.a(readconfigfile.o)
+                0x0000000008016a98                ReadConfigFile::Read(char const*, unsigned int)
  .text._ZN5Sscan4CharEPKcS1_PcRm
-                0x0000000008016b0e       0x32 ../lib-properties/lib_gd32/libproperties.a(sscanchar.o)
-                0x0000000008016b0e                Sscan::Char(char const*, char const*, char*, unsigned long&)
+                0x0000000008016b06       0x32 ../lib-properties/lib_gd32/libproperties.a(sscanchar.o)
+                0x0000000008016b06                Sscan::Char(char const*, char const*, char*, unsigned long&)
  .text._ZN5Sscan5FloatEPKcS1_Rf
-                0x0000000008016b40       0xb6 ../lib-properties/lib_gd32/libproperties.a(sscanfloat.o)
-                0x0000000008016b40                Sscan::Float(char const*, char const*, float&)
+                0x0000000008016b38       0xb6 ../lib-properties/lib_gd32/libproperties.a(sscanfloat.o)
+                0x0000000008016b38                Sscan::Float(char const*, char const*, float&)
  .text._ZN5Sscan9IpAddressEPKcS1_Rm
-                0x0000000008016bf6       0x82 ../lib-properties/lib_gd32/libproperties.a(sscanipaddress.o)
-                0x0000000008016bf6                Sscan::IpAddress(char const*, char const*, unsigned long&)
+                0x0000000008016bee       0x82 ../lib-properties/lib_gd32/libproperties.a(sscanipaddress.o)
+                0x0000000008016bee                Sscan::IpAddress(char const*, char const*, unsigned long&)
  .text._ZN5Sscan6Uint16EPKcS1_Rt
-                0x0000000008016c78       0x3e ../lib-properties/lib_gd32/libproperties.a(sscanuint16.o)
-                0x0000000008016c78                Sscan::Uint16(char const*, char const*, unsigned short&)
+                0x0000000008016c70       0x3e ../lib-properties/lib_gd32/libproperties.a(sscanuint16.o)
+                0x0000000008016c70                Sscan::Uint16(char const*, char const*, unsigned short&)
  .text._ZN5Sscan6Uint32EPKcS1_Rm
-                0x0000000008016cb6       0x52 ../lib-properties/lib_gd32/libproperties.a(sscanuint32.o)
-                0x0000000008016cb6                Sscan::Uint32(char const*, char const*, unsigned long&)
+                0x0000000008016cae       0x52 ../lib-properties/lib_gd32/libproperties.a(sscanuint32.o)
+                0x0000000008016cae                Sscan::Uint32(char const*, char const*, unsigned long&)
  .text._ZN5Sscan5Uint8EPKcS1_Rh
-                0x0000000008016d08       0x3c ../lib-properties/lib_gd32/libproperties.a(sscanuint8.o)
-                0x0000000008016d08                Sscan::Uint8(char const*, char const*, unsigned char&)
+                0x0000000008016d00       0x3c ../lib-properties/lib_gd32/libproperties.a(sscanuint8.o)
+                0x0000000008016d00                Sscan::Uint8(char const*, char const*, unsigned char&)
  .text._ZN5Sscan9checkNameEPKcS1_
-                0x0000000008016d44       0x2a ../lib-properties/lib_gd32/libproperties.a(sscan.o)
-                0x0000000008016d44                Sscan::checkName(char const*, char const*)
- *fill*         0x0000000008016d6e        0x2 
+                0x0000000008016d3c       0x2a ../lib-properties/lib_gd32/libproperties.a(sscan.o)
+                0x0000000008016d3c                Sscan::checkName(char const*, char const*)
+ *fill*         0x0000000008016d66        0x2 
  .text._ZN7Display9PrintInfoEv.isra.0
-                0x0000000008016d70       0x14 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016d68       0x14 ../lib-display/lib_gd32/libdisplay.a(display.o)
  .text._ZN7HAL_I2C13WriteRegisterEht
-                0x0000000008016d84       0x2a ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016d84                HAL_I2C::WriteRegister(unsigned char, unsigned short)
+                0x0000000008016d7c       0x2a ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016d7c                HAL_I2C::WriteRegister(unsigned char, unsigned short)
  .text._ZN7HAL_I2C12IsConnected_Ehm
-                0x0000000008016dae       0x3c ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016dae                HAL_I2C::IsConnected_(unsigned char, unsigned long)
+                0x0000000008016da6       0x3c ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016da6                HAL_I2C::IsConnected_(unsigned char, unsigned long)
  .text._ZN7Display14Detect7SegmentEv
-                0x0000000008016dea       0x32 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016dea                Display::Detect7Segment()
+                0x0000000008016de2       0x32 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016de2                Display::Detect7Segment()
  .text._ZN7Display6DetectEN7display4TypeE
-                0x0000000008016e1c       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016e1c                Display::Detect(display::Type)
+                0x0000000008016e14       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016e14                Display::Detect(display::Type)
  .text._ZN7DisplayC2Ev
-                0x0000000008016e74       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
-                0x0000000008016e74                Display::Display()
-                0x0000000008016e74                Display::Display()
+                0x0000000008016e6c       0x58 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x0000000008016e6c                Display::Display()
+                0x0000000008016e6c                Display::Display()
  .text._ZN7Ssd1306D2Ev
-                0x0000000008016ecc        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016ecc                Ssd1306::~Ssd1306()
-                0x0000000008016ecc                Ssd1306::~Ssd1306()
+                0x0000000008016ec4        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016ec4                Ssd1306::~Ssd1306()
+                0x0000000008016ec4                Ssd1306::~Ssd1306()
  .text._ZN7Ssd13069SetCursorEm
-                0x0000000008016ece        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016ece                Ssd1306::SetCursor(unsigned long)
+                0x0000000008016ec6        0x2 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016ec6                Ssd1306::SetCursor(unsigned long)
  .text._ZN7Ssd13069PrintInfoEv
-                0x0000000008016ed0       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016ed0                Ssd1306::PrintInfo()
+                0x0000000008016ec8       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016ec8                Ssd1306::PrintInfo()
  .text._ZN7Ssd1306D0Ev
-                0x0000000008016ef8        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016ef8                Ssd1306::~Ssd1306()
+                0x0000000008016ef0        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016ef0                Ssd1306::~Ssd1306()
  .text._ZN7HAL_I2C5SetupEv
-                0x0000000008016f04       0x14 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016f04                HAL_I2C::Setup()
+                0x0000000008016efc       0x14 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016efc                HAL_I2C::Setup()
  .text._ZN7Ssd13067PutCharEi
-                0x0000000008016f18       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016f18                Ssd1306::PutChar(int)
+                0x0000000008016f10       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016f10                Ssd1306::PutChar(int)
  .text._ZN7Ssd13069PutStringEPKc
-                0x0000000008016f44       0x34 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016f44                Ssd1306::PutString(char const*)
+                0x0000000008016f3c       0x34 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016f3c                Ssd1306::PutString(char const*)
  .text._ZN7Ssd13064TextEPKcm
-                0x0000000008016f78       0x3e ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016f78                Ssd1306::Text(char const*, unsigned long)
+                0x0000000008016f70       0x3e ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016f70                Ssd1306::Text(char const*, unsigned long)
  .text._ZN7Ssd130611InitMembersEv
-                0x0000000008016fb6       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016fb6                Ssd1306::InitMembers()
+                0x0000000008016fae       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016fae                Ssd1306::InitMembers()
  .text._ZN7Ssd1306C2E10TOledPanel
-                0x0000000008016fd8       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008016fd8                Ssd1306::Ssd1306(TOledPanel)
-                0x0000000008016fd8                Ssd1306::Ssd1306(TOledPanel)
+                0x0000000008016fd0       0x2c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016fd0                Ssd1306::Ssd1306(TOledPanel)
+                0x0000000008016fd0                Ssd1306::Ssd1306(TOledPanel)
  .text._ZN7Ssd130611SendCommandEh
-                0x0000000008017004       0x20 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008017004                Ssd1306::SendCommand(unsigned char)
+                0x0000000008016ffc       0x20 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008016ffc                Ssd1306::SendCommand(unsigned char)
  .text._ZN7Ssd130612SetCursorPosEmm
-                0x0000000008017024       0x48 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008017024                Ssd1306::SetCursorPos(unsigned long, unsigned long)
+                0x000000000801701c       0x48 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801701c                Ssd1306::SetCursorPos(unsigned long, unsigned long)
  .text._ZN7Ssd13068TextLineEmPKcm
-                0x000000000801706c       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801706c                Ssd1306::TextLine(unsigned long, char const*, unsigned long)
+                0x0000000008017064       0x28 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008017064                Ssd1306::TextLine(unsigned long, char const*, unsigned long)
  .text._ZN7Ssd13069ClearLineEm
-                0x0000000008017094       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008017094                Ssd1306::ClearLine(unsigned long)
+                0x000000000801708c       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801708c                Ssd1306::ClearLine(unsigned long)
  .text._ZN7Ssd13068SetSleepEb
-                0x00000000080170d4        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080170d4                Ssd1306::SetSleep(bool)
+                0x00000000080170cc        0xc ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080170cc                Ssd1306::SetSleep(bool)
  .text._ZN7Ssd130611SetContrastEh
-                0x00000000080170e0       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080170e0                Ssd1306::SetContrast(unsigned char)
+                0x00000000080170d8       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080170d8                Ssd1306::SetContrast(unsigned char)
  .text._ZN7Ssd130617SetFlipVerticallyEb
-                0x00000000080170f8       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080170f8                Ssd1306::SetFlipVertically(bool)
- *fill*         0x000000000801711a        0x2 
+                0x00000000080170f0       0x22 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080170f0                Ssd1306::SetFlipVertically(bool)
+ *fill*         0x0000000008017112        0x2 
  .text._ZN7Ssd130611CheckSH1106Ev
-                0x000000000801711c       0xa8 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801711c                Ssd1306::CheckSH1106()
+                0x0000000008017114       0xa8 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008017114                Ssd1306::CheckSH1106()
  .text._ZN7Ssd13063ClsEv
-                0x00000000080171c4       0x6c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x00000000080171c4                Ssd1306::Cls()
+                0x00000000080171bc       0x6c ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x00000000080171bc                Ssd1306::Cls()
  .text._ZN7Ssd13065StartEv
-                0x0000000008017230       0xb0 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x0000000008017230                Ssd1306::Start()
+                0x0000000008017228       0xb0 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x0000000008017228                Ssd1306::Start()
  .text.console_putc
-                0x00000000080172e0        0x4 ../lib-hal/lib_gd32/libhal.a(console.o)
-                0x00000000080172e0                console_putc
+                0x00000000080172d8        0x4 ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x00000000080172d8                console_putc
  .text.console_puts
-                0x00000000080172e4        0x4 ../lib-hal/lib_gd32/libhal.a(console.o)
-                0x00000000080172e4                console_puts
+                0x00000000080172dc        0x4 ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x00000000080172dc                console_puts
  .text.console_set_fg_color
-                0x00000000080172e8       0x44 ../lib-hal/lib_gd32/libhal.a(console.o)
-                0x00000000080172e8                console_set_fg_color
+                0x00000000080172e0       0x44 ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x00000000080172e0                console_set_fg_color
  .text.console_error
-                0x000000000801732c       0x24 ../lib-hal/lib_gd32/libhal.a(console.o)
-                0x000000000801732c                console_error
+                0x0000000008017324       0x24 ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x0000000008017324                console_error
  .text.console_status
-                0x0000000008017350       0x30 ../lib-hal/lib_gd32/libhal.a(console.o)
-                0x0000000008017350                console_status
+                0x0000000008017348       0x30 ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x0000000008017348                console_status
  .text._ZN15FirmwareVersionC2EPKcS1_S1_
-                0x0000000008017380       0x70 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
-                0x0000000008017380                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
-                0x0000000008017380                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
+                0x0000000008017378       0x70 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
+                0x0000000008017378                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
+                0x0000000008017378                FirmwareVersion::FirmwareVersion(char const*, char const*, char const*)
  .text._ZN8Hardware7SetModeEN8hardware8ledblink4ModeE
-                0x00000000080173f0       0x58 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x00000000080173f0                Hardware::SetMode(hardware::ledblink::Mode)
+                0x00000000080173e8       0x58 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x00000000080173e8                Hardware::SetMode(hardware::ledblink::Mode)
  .text._ZN8Hardware15SetModeWithLockEN8hardware8ledblink4ModeEb
-                0x0000000008017448       0x12 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x0000000008017448                Hardware::SetModeWithLock(hardware::ledblink::Mode, bool)
- *fill*         0x000000000801745a        0x2 
+                0x0000000008017440       0x12 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x0000000008017440                Hardware::SetModeWithLock(hardware::ledblink::Mode, bool)
+ *fill*         0x0000000008017452        0x2 
  .text._ZN8HardwareC2Ev
-                0x000000000801745c      0x13c ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x000000000801745c                Hardware::Hardware()
-                0x000000000801745c                Hardware::Hardware()
+                0x0000000008017454      0x13c ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x0000000008017454                Hardware::Hardware()
+                0x0000000008017454                Hardware::Hardware()
  .text._ZN8Hardware7GetUuidEPh
-                0x0000000008017598       0x38 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x0000000008017598                Hardware::GetUuid(unsigned char*)
+                0x0000000008017590       0x38 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x0000000008017590                Hardware::GetUuid(unsigned char*)
  .text._ZN8Hardware7SetTimeEPK2tm
-                0x00000000080175d0        0x4 ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x00000000080175d0                Hardware::SetTime(tm const*)
+                0x00000000080175c8        0x4 ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x00000000080175c8                Hardware::SetTime(tm const*)
  .text._ZN8Hardware6RebootEv
-                0x00000000080175d4       0x7c ../lib-hal/lib_gd32/libhal.a(hardware.o)
-                0x00000000080175d4                Hardware::Reboot()
- .text._ZdlPv   0x0000000008017650        0x4 ../lib-c++/lib_gd32/libc++.a(delete.o)
-                0x0000000008017650                operator delete(void*)
- .text._ZdaPv   0x0000000008017654        0x4 ../lib-c++/lib_gd32/libc++.a(delete.o)
-                0x0000000008017654                operator delete[](void*)
- .text._Znwj    0x0000000008017658        0x4 ../lib-c++/lib_gd32/libc++.a(new.o)
-                0x0000000008017658                operator new(unsigned int)
- .text._Znaj    0x000000000801765c        0x4 ../lib-c++/lib_gd32/libc++.a(new.o)
-                0x000000000801765c                operator new[](unsigned int)
+                0x00000000080175cc       0x7c ../lib-hal/lib_gd32/libhal.a(hardware.o)
+                0x00000000080175cc                Hardware::Reboot()
+ .text._ZdlPv   0x0000000008017648        0x4 ../lib-c++/lib_gd32/libc++.a(delete.o)
+                0x0000000008017648                operator delete(void*)
+ .text._ZdaPv   0x000000000801764c        0x4 ../lib-c++/lib_gd32/libc++.a(delete.o)
+                0x000000000801764c                operator delete[](void*)
+ .text._Znwj    0x0000000008017650        0x4 ../lib-c++/lib_gd32/libc++.a(new.o)
+                0x0000000008017650                operator new(unsigned int)
+ .text._Znaj    0x0000000008017654        0x4 ../lib-c++/lib_gd32/libc++.a(new.o)
+                0x0000000008017654                operator new[](unsigned int)
  .text.__libc_init_array
-                0x0000000008017660       0x44 ../lib-c/lib_gd32/libc.a(init.o)
-                0x0000000008017660                __libc_init_array
- .text.malloc   0x00000000080176a4       0x5c ../lib-c/lib_gd32/libc.a(malloc.o)
-                0x00000000080176a4                malloc
- .text.free     0x0000000008017700       0x34 ../lib-c/lib_gd32/libc.a(malloc.o)
-                0x0000000008017700                free
- .text.memmove  0x0000000008017734       0x2e ../lib-c/lib_gd32/libc.a(memmove.o)
-                0x0000000008017734                memmove
- .text.memset   0x0000000008017762       0x42 ../lib-c/lib_gd32/libc.a(memset.o)
-                0x0000000008017762                memset
- .text.putchar  0x00000000080177a4        0xa ../lib-c/lib_gd32/libc.a(putchar.o)
-                0x00000000080177a4                putchar
- *fill*         0x00000000080177ae        0x2 
- .text.strtok   0x00000000080177b0       0x54 ../lib-c/lib_gd32/libc.a(strtok.o)
-                0x00000000080177b0                strtok
+                0x0000000008017658       0x44 ../lib-c/lib_gd32/libc.a(init.o)
+                0x0000000008017658                __libc_init_array
+ .text.malloc   0x000000000801769c       0x5c ../lib-c/lib_gd32/libc.a(malloc.o)
+                0x000000000801769c                malloc
+ .text.free     0x00000000080176f8       0x34 ../lib-c/lib_gd32/libc.a(malloc.o)
+                0x00000000080176f8                free
+ .text.memmove  0x000000000801772c       0x2e ../lib-c/lib_gd32/libc.a(memmove.o)
+                0x000000000801772c                memmove
+ .text.memset   0x000000000801775a       0x42 ../lib-c/lib_gd32/libc.a(memset.o)
+                0x000000000801775a                memset
+ .text.putchar  0x000000000801779c        0xa ../lib-c/lib_gd32/libc.a(putchar.o)
+                0x000000000801779c                putchar
+ *fill*         0x00000000080177a6        0x2 
+ .text.strtok   0x00000000080177a8       0x54 ../lib-c/lib_gd32/libc.a(strtok.o)
+                0x00000000080177a8                strtok
  .text.isleapyear
-                0x0000000008017804       0x2c ../lib-c/lib_gd32/libc.a(time.o)
+                0x00000000080177fc       0x2c ../lib-c/lib_gd32/libc.a(time.o)
  .text.getdaysofmonth
-                0x0000000008017830       0x20 ../lib-c/lib_gd32/libc.a(time.o)
- .text.mktime   0x0000000008017850       0x98 ../lib-c/lib_gd32/libc.a(time.o)
-                0x0000000008017850                mktime
+                0x0000000008017828       0x20 ../lib-c/lib_gd32/libc.a(time.o)
+ .text.mktime   0x0000000008017848       0x98 ../lib-c/lib_gd32/libc.a(time.o)
+                0x0000000008017848                mktime
  .text.gettimeofday
-                0x00000000080178e8       0x54 ../lib-c/lib_gd32/libc.a(time.o)
-                0x00000000080178e8                gettimeofday
+                0x00000000080178e0       0x54 ../lib-c/lib_gd32/libc.a(time.o)
+                0x00000000080178e0                gettimeofday
  .text.settimeofday
-                0x000000000801793c       0x30 ../lib-c/lib_gd32/libc.a(time.o)
-                0x000000000801793c                settimeofday
- .text.time     0x000000000801796c       0x16 ../lib-c/lib_gd32/libc.a(time.o)
-                0x000000000801796c                time
+                0x0000000008017934       0x30 ../lib-c/lib_gd32/libc.a(time.o)
+                0x0000000008017934                settimeofday
+ .text.time     0x0000000008017964       0x16 ../lib-c/lib_gd32/libc.a(time.o)
+                0x0000000008017964                time
  .text.uart0_puts
-                0x0000000008017982       0x1e ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
-                0x0000000008017982                uart0_puts
+                0x000000000801797a       0x1e ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
+                0x000000000801797a                uart0_puts
  .text.systick_config
-                0x00000000080179a0       0x3c ../lib-gd32/lib_gd32/libgd32.a(systick.o)
-                0x00000000080179a0                systick_config
+                0x0000000008017998       0x3c ../lib-gd32/lib_gd32/libgd32.a(systick.o)
+                0x0000000008017998                systick_config
  .text.SysTick_Handler
-                0x00000000080179dc       0x10 ../lib-gd32/lib_gd32/libgd32.a(systick.o)
-                0x00000000080179dc                SysTick_Handler
+                0x00000000080179d4       0x10 ../lib-gd32/lib_gd32/libgd32.a(systick.o)
+                0x00000000080179d4                SysTick_Handler
  .text.SystemInit
-                0x00000000080179ec      0x170 ../lib-gd32/lib_gd32/libgd32.a(system_gd32f4xx.o)
-                0x00000000080179ec                SystemInit
+                0x00000000080179e4      0x170 ../lib-gd32/lib_gd32/libgd32.a(system_gd32f4xx.o)
+                0x00000000080179e4                SystemInit
  .text.dma_deinit
-                0x0000000008017b5c       0x56 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017b5c                dma_deinit
+                0x0000000008017b54       0x56 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017b54                dma_deinit
  .text.dma_single_data_para_struct_init
-                0x0000000008017bb2       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017bb2                dma_single_data_para_struct_init
+                0x0000000008017baa       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017baa                dma_single_data_para_struct_init
  .text.dma_single_data_mode_init
-                0x0000000008017bca       0x7e ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017bca                dma_single_data_mode_init
+                0x0000000008017bc2       0x7e ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017bc2                dma_single_data_mode_init
  .text.dma_circulation_disable
-                0x0000000008017c48       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017c48                dma_circulation_disable
+                0x0000000008017c40       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017c40                dma_circulation_disable
  .text.dma_channel_subperipheral_select
-                0x0000000008017c58       0x14 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017c58                dma_channel_subperipheral_select
+                0x0000000008017c50       0x14 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017c50                dma_channel_subperipheral_select
  .text.dma_flag_clear
-                0x0000000008017c6c       0x34 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017c6c                dma_flag_clear
+                0x0000000008017c64       0x34 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017c64                dma_flag_clear
  .text.dma_interrupt_flag_clear
-                0x0000000008017ca0        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
-                0x0000000008017ca0                dma_interrupt_flag_clear
+                0x0000000008017c98        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_dma.o)
+                0x0000000008017c98                dma_interrupt_flag_clear
  .text.enet_delay
-                0x0000000008017ca4       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017c9c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
  .text.enet_software_reset
-                0x0000000008017cbc       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017cbc                enet_software_reset
+                0x0000000008017cb4       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017cb4                enet_software_reset
  .text.enet_descriptors_chain_init
-                0x0000000008017ce4       0x90 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017ce4                enet_descriptors_chain_init
+                0x0000000008017cdc       0x90 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017cdc                enet_descriptors_chain_init
  .text.enet_frame_receive
-                0x0000000008017d74       0x98 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017d74                enet_frame_receive
+                0x0000000008017d6c       0x98 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017d6c                enet_frame_receive
  .text.enet_frame_transmit
-                0x0000000008017e0c       0x84 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017e0c                enet_frame_transmit
+                0x0000000008017e04       0x84 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017e04                enet_frame_transmit
  .text.enet_transmit_checksum_config
-                0x0000000008017e90        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017e90                enet_transmit_checksum_config
+                0x0000000008017e88        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017e88                enet_transmit_checksum_config
  .text.enet_mac_address_set
-                0x0000000008017e9c       0x14 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017e9c                enet_mac_address_set
+                0x0000000008017e94       0x14 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017e94                enet_mac_address_set
  .text.enet_rx_enable
-                0x0000000008017eb0       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017eb0                enet_rx_enable
+                0x0000000008017ea8       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017ea8                enet_rx_enable
  .text.enet_phy_write_read
-                0x0000000008017ecc       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017ecc                enet_phy_write_read
+                0x0000000008017ec4       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017ec4                enet_phy_write_read
  .text.enet_phy_config
-                0x0000000008017f20       0xcc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017f20                enet_phy_config
+                0x0000000008017f18       0xcc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017f18                enet_phy_config
  .text.enet_init
-                0x0000000008017fec      0x2f8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008017fec                enet_init
+                0x0000000008017fe4      0x2f8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008017fe4                enet_init
  .text.enet_txfifo_flush
-                0x00000000080182e4       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x00000000080182e4                enet_txfifo_flush
+                0x00000000080182dc       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x00000000080182dc                enet_txfifo_flush
  .text.enet_tx_enable
-                0x0000000008018308       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008018308                enet_tx_enable
+                0x0000000008018300       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018300                enet_tx_enable
  .text.enet_enable
-                0x000000000801832c        0xe ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x000000000801832c                enet_enable
- *fill*         0x000000000801833a        0x2 
+                0x0000000008018324        0xe ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018324                enet_enable
+ *fill*         0x0000000008018332        0x2 
  .text.enet_desc_information_get
-                0x000000000801833c       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x000000000801833c                enet_desc_information_get
+                0x0000000008018334       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018334                enet_desc_information_get
  .text.enet_rxframe_drop
-                0x0000000008018390       0x64 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008018390                enet_rxframe_drop
+                0x0000000008018388       0x64 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018388                enet_rxframe_drop
  .text.enet_rxframe_size_get
-                0x00000000080183f4       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x00000000080183f4                enet_rxframe_size_get
+                0x00000000080183ec       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x00000000080183ec                enet_rxframe_size_get
  .text.enet_initpara_reset
-                0x0000000008018440       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008018440                enet_initpara_reset
+                0x0000000008018438       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018438                enet_initpara_reset
  .text.enet_deinit
-                0x0000000008018468       0x1a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
-                0x0000000008018468                enet_deinit
- *fill*         0x0000000008018482        0x2 
+                0x0000000008018460       0x1a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_enet.o)
+                0x0000000008018460                enet_deinit
+ *fill*         0x000000000801847a        0x2 
  .text.fwdgt_enable
-                0x0000000008018484       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
-                0x0000000008018484                fwdgt_enable
+                0x000000000801847c       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
+                0x000000000801847c                fwdgt_enable
  .text.fwdgt_counter_reload
-                0x0000000008018494       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
-                0x0000000008018494                fwdgt_counter_reload
+                0x000000000801848c       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
+                0x000000000801848c                fwdgt_counter_reload
  .text.fwdgt_config
-                0x00000000080184a4       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
-                0x00000000080184a4                fwdgt_config
+                0x000000000801849c       0x54 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_fwdgt.o)
+                0x000000000801849c                fwdgt_config
  .text.gpio_mode_set
-                0x00000000080184f8       0x44 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
-                0x00000000080184f8                gpio_mode_set
+                0x00000000080184f0       0x44 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
+                0x00000000080184f0                gpio_mode_set
  .text.gpio_output_options_set
-                0x000000000801853c       0x38 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
-                0x000000000801853c                gpio_output_options_set
+                0x0000000008018534       0x38 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
+                0x0000000008018534                gpio_output_options_set
  .text.gpio_bit_set
-                0x0000000008018574        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
-                0x0000000008018574                gpio_bit_set
+                0x000000000801856c        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
+                0x000000000801856c                gpio_bit_set
  .text.gpio_bit_reset
-                0x0000000008018578        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
-                0x0000000008018578                gpio_bit_reset
+                0x0000000008018570        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
+                0x0000000008018570                gpio_bit_reset
  .text.gpio_af_set
-                0x000000000801857c       0x60 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
-                0x000000000801857c                gpio_af_set
+                0x0000000008018574       0x60 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_gpio.o)
+                0x0000000008018574                gpio_af_set
  .text.pmu_backup_ldo_config
-                0x00000000080185dc       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_pmu.o)
-                0x00000000080185dc                pmu_backup_ldo_config
+                0x00000000080185d4       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_pmu.o)
+                0x00000000080185d4                pmu_backup_ldo_config
  .text.pmu_backup_write_enable
-                0x00000000080185f4       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_pmu.o)
-                0x00000000080185f4                pmu_backup_write_enable
+                0x00000000080185ec       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_pmu.o)
+                0x00000000080185ec                pmu_backup_write_enable
  .text.rcu_periph_clock_enable
-                0x0000000008018604       0x1a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x0000000008018604                rcu_periph_clock_enable
+                0x00000000080185fc       0x1a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x00000000080185fc                rcu_periph_clock_enable
  .text.rcu_periph_clock_disable
-                0x000000000801861e       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x000000000801861e                rcu_periph_clock_disable
+                0x0000000008018616       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x0000000008018616                rcu_periph_clock_disable
  .text.rcu_periph_reset_enable
-                0x000000000801863a        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x000000000801863a                rcu_periph_reset_enable
+                0x0000000008018632        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x0000000008018632                rcu_periph_reset_enable
  .text.rcu_periph_reset_disable
-                0x000000000801863e        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x000000000801863e                rcu_periph_reset_disable
- *fill*         0x0000000008018642        0x2 
+                0x0000000008018636        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x0000000008018636                rcu_periph_reset_disable
+ *fill*         0x000000000801863a        0x2 
  .text.rcu_ckout0_config
-                0x0000000008018644       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x0000000008018644                rcu_ckout0_config
+                0x000000000801863c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x000000000801863c                rcu_ckout0_config
  .text.rcu_timer_clock_prescaler_config
-                0x000000000801865c       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x000000000801865c                rcu_timer_clock_prescaler_config
+                0x0000000008018654       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x0000000008018654                rcu_timer_clock_prescaler_config
  .text.rcu_clock_freq_get
-                0x000000000801867c       0xe8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
-                0x000000000801867c                rcu_clock_freq_get
+                0x0000000008018674       0xe8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+                0x0000000008018674                rcu_clock_freq_get
  .text.syscfg_enet_phy_interface_config
-                0x0000000008018764       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_syscfg.o)
-                0x0000000008018764                syscfg_enet_phy_interface_config
+                0x000000000801875c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_syscfg.o)
+                0x000000000801875c                syscfg_enet_phy_interface_config
  .text.timer_deinit
-                0x000000000801877c      0x14c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x000000000801877c                timer_deinit
+                0x0000000008018774      0x14c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018774                timer_deinit
  .text.timer_init
-                0x00000000080188c8       0x7c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x00000000080188c8                timer_init
+                0x00000000080188c0       0x7c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x00000000080188c0                timer_init
  .text.timer_enable
-                0x0000000008018944        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018944                timer_enable
+                0x000000000801893c        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x000000000801893c                timer_enable
  .text.timer_interrupt_enable
-                0x000000000801894e        0x8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x000000000801894e                timer_interrupt_enable
+                0x0000000008018946        0x8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018946                timer_interrupt_enable
  .text.timer_dma_enable
-                0x0000000008018956        0x8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018956                timer_dma_enable
- *fill*         0x000000000801895e        0x2 
+                0x000000000801894e        0x8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x000000000801894e                timer_dma_enable
+ *fill*         0x0000000008018956        0x2 
  .text.timer_channel_output_config
-                0x0000000008018960      0x1d0 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018960                timer_channel_output_config
+                0x0000000008018958      0x1d0 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018958                timer_channel_output_config
  .text.timer_channel_output_mode_config
-                0x0000000008018b30       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018b30                timer_channel_output_mode_config
+                0x0000000008018b28       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018b28                timer_channel_output_mode_config
  .text.timer_channel_output_pulse_value_config
-                0x0000000008018b7c       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018b7c                timer_channel_output_pulse_value_config
+                0x0000000008018b74       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018b74                timer_channel_output_pulse_value_config
  .text.timer_channel_output_shadow_config
-                0x0000000008018b98       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018b98                timer_channel_output_shadow_config
+                0x0000000008018b90       0x4c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018b90                timer_channel_output_shadow_config
  .text.timer_input_trigger_source_select
-                0x0000000008018be4       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018be4                timer_input_trigger_source_select
+                0x0000000008018bdc       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018bdc                timer_input_trigger_source_select
  .text.timer_master_output_trigger_source_select
-                0x0000000008018bf4       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018bf4                timer_master_output_trigger_source_select
+                0x0000000008018bec       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018bec                timer_master_output_trigger_source_select
  .text.timer_slave_mode_select
-                0x0000000008018c04       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018c04                timer_slave_mode_select
+                0x0000000008018bfc       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018bfc                timer_slave_mode_select
  .text.timer_master_slave_mode_config
-                0x0000000008018c14       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
-                0x0000000008018c14                timer_master_slave_mode_config
+                0x0000000008018c0c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_timer.o)
+                0x0000000008018c0c                timer_master_slave_mode_config
  .text.emac_eth_recv
-                0x0000000008018c2c       0x28 ../lib-gd32/lib_gd32/libgd32.a(net.o)
-                0x0000000008018c2c                emac_eth_recv
+                0x0000000008018c24       0x28 ../lib-gd32/lib_gd32/libgd32.a(net.o)
+                0x0000000008018c24                emac_eth_recv
  .text.emac_free_pkt
-                0x0000000008018c54        0x8 ../lib-gd32/lib_gd32/libgd32.a(net.o)
-                0x0000000008018c54                emac_free_pkt
+                0x0000000008018c4c        0x8 ../lib-gd32/lib_gd32/libgd32.a(net.o)
+                0x0000000008018c4c                emac_free_pkt
  .text.emac_eth_send
-                0x0000000008018c5c        0x4 ../lib-gd32/lib_gd32/libgd32.a(net.o)
-                0x0000000008018c5c                emac_eth_send
+                0x0000000008018c54        0x4 ../lib-gd32/lib_gd32/libgd32.a(net.o)
+                0x0000000008018c54                emac_eth_send
  .text.uart0_init
-                0x0000000008018c60       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
-                0x0000000008018c60                uart0_init
+                0x0000000008018c58       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
+                0x0000000008018c58                uart0_init
  .text.uart0_putc
-                0x0000000008018c80       0x34 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
-                0x0000000008018c80                uart0_putc
+                0x0000000008018c78       0x34 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart0.o)
+                0x0000000008018c78                uart0_putc
  .text._Z14bkp_data_write22bkp_data_register_enumt
-                0x0000000008018cb4       0x10 ../lib-gd32/lib_gd32/libgd32.a(bkp.o)
-                0x0000000008018cb4                bkp_data_write(bkp_data_register_enum, unsigned short)
+                0x0000000008018cac       0x10 ../lib-gd32/lib_gd32/libgd32.a(bkp.o)
+                0x0000000008018cac                bkp_data_write(bkp_data_register_enum, unsigned short)
  .text._Z13bkp_data_read22bkp_data_register_enum
-                0x0000000008018cc4       0x14 ../lib-gd32/lib_gd32/libgd32.a(bkp.o)
-                0x0000000008018cc4                bkp_data_read(bkp_data_register_enum)
+                0x0000000008018cbc       0x14 ../lib-gd32/lib_gd32/libgd32.a(bkp.o)
+                0x0000000008018cbc                bkp_data_read(bkp_data_register_enum)
  .text._Z13gd32_adc_initv
-                0x0000000008018cd8       0x9c ../lib-gd32/lib_gd32/libgd32.a(gd32_adc.o)
-                0x0000000008018cd8                gd32_adc_init()
+                0x0000000008018cd0       0x9c ../lib-gd32/lib_gd32/libgd32.a(gd32_adc.o)
+                0x0000000008018cd0                gd32_adc_init()
  .text._ZL5_stopv.isra.0
-                0x0000000008018d74       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018d6c       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
  .text.gd32_i2c_begin
-                0x0000000008018d98       0x94 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
-                0x0000000008018d98                gd32_i2c_begin
+                0x0000000008018d90       0x94 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018d90                gd32_i2c_begin
  .text.gd32_i2c_set_baudrate
-                0x0000000008018e2c       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
-                0x0000000008018e2c                gd32_i2c_set_baudrate
+                0x0000000008018e24       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018e24                gd32_i2c_set_baudrate
  .text.gd32_i2c_set_address
-                0x0000000008018e3c        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
-                0x0000000008018e3c                gd32_i2c_set_address
+                0x0000000008018e34        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018e34                gd32_i2c_set_address
  .text.gd32_i2c_write
-                0x0000000008018e48       0xcc ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
-                0x0000000008018e48                gd32_i2c_write
+                0x0000000008018e40       0xcc ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018e40                gd32_i2c_write
  .text.gd32_i2c_read
-                0x0000000008018f14      0x148 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
-                0x0000000008018f14                gd32_i2c_read
+                0x0000000008018f0c      0x148 ../lib-gd32/lib_gd32/libgd32.a(gd32_i2c.o)
+                0x0000000008018f0c                gd32_i2c_read
  .text._ZL8_cs_highv
-                0x000000000801905c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x0000000008019054       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
  .text._ZL7_cs_lowv
-                0x0000000008019074       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x000000000801906c       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
  .text._ZL10_send_byteh
-                0x000000000801908c       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x0000000008019084       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
  .text._Z14gd32_spi_beginv
-                0x00000000080190b0       0xa4 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x00000000080190b0                gd32_spi_begin()
+                0x00000000080190a8       0xa4 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x00000000080190a8                gd32_spi_begin()
  .text._Z21gd32_spi_set_speed_hzm
-                0x0000000008019154       0x74 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x0000000008019154                gd32_spi_set_speed_hz(unsigned long)
+                0x000000000801914c       0x74 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x000000000801914c                gd32_spi_set_speed_hz(unsigned long)
  .text._Z20gd32_spi_setDataModeh
-                0x00000000080191c8       0x30 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x00000000080191c8                gd32_spi_setDataMode(unsigned char)
+                0x00000000080191c0       0x30 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x00000000080191c0                gd32_spi_setDataMode(unsigned char)
  .text._Z19gd32_spi_chipSelecth
-                0x00000000080191f8        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x00000000080191f8                gd32_spi_chipSelect(unsigned char)
+                0x00000000080191f0        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x00000000080191f0                gd32_spi_chipSelect(unsigned char)
  .text._Z19gd32_spi_transfernbPKcPcm
-                0x0000000008019204       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x0000000008019204                gd32_spi_transfernb(char const*, char*, unsigned long)
+                0x00000000080191fc       0x28 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x00000000080191fc                gd32_spi_transfernb(char const*, char*, unsigned long)
  .text._Z16gd32_spi_writenbPKcm
-                0x000000000801922c       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
-                0x000000000801922c                gd32_spi_writenb(char const*, unsigned long)
+                0x0000000008019224       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32_spi.o)
+                0x0000000008019224                gd32_spi_writenb(char const*, unsigned long)
  .text._Z10_gpio_initm
-                0x000000000801924c      0x260 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart.o)
-                0x000000000801924c                _gpio_init(unsigned long)
+                0x0000000008019244      0x260 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart.o)
+                0x0000000008019244                _gpio_init(unsigned long)
  .text.gd32_uart_begin
-                0x00000000080194ac      0x120 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart.o)
-                0x00000000080194ac                gd32_uart_begin
+                0x00000000080194a4      0x120 ../lib-gd32/lib_gd32/libgd32.a(gd32_uart.o)
+                0x00000000080194a4                gd32_uart_begin
  .text._Z15mac_address_getPh
-                0x00000000080195cc       0x24 ../lib-gd32/lib_gd32/libgd32.a(mac_address.o)
-                0x00000000080195cc                mac_address_get(unsigned char*)
+                0x00000000080195c4       0x24 ../lib-gd32/lib_gd32/libgd32.a(mac_address.o)
+                0x00000000080195c4                mac_address_get(unsigned char*)
  .text._Z11udelay_initv
-                0x00000000080195f0       0x28 ../lib-gd32/lib_gd32/libgd32.a(udelay.o)
-                0x00000000080195f0                udelay_init()
+                0x00000000080195e8       0x28 ../lib-gd32/lib_gd32/libgd32.a(udelay.o)
+                0x00000000080195e8                udelay_init()
  .text._Z6udelaymm
-                0x0000000008019618       0x30 ../lib-gd32/lib_gd32/libgd32.a(udelay.o)
-                0x0000000008019618                udelay(unsigned long, unsigned long)
+                0x0000000008019610       0x30 ../lib-gd32/lib_gd32/libgd32.a(udelay.o)
+                0x0000000008019610                udelay(unsigned long, unsigned long)
  .text.adc_clock_config
-                0x0000000008019648       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x0000000008019648                adc_clock_config
+                0x0000000008019640       0x20 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x0000000008019640                adc_clock_config
  .text.adc_special_function_config
-                0x0000000008019668       0x50 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x0000000008019668                adc_special_function_config
+                0x0000000008019660       0x50 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x0000000008019660                adc_special_function_config
  .text.adc_data_alignment_config
-                0x00000000080196b8       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x00000000080196b8                adc_data_alignment_config
+                0x00000000080196b0       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x00000000080196b0                adc_data_alignment_config
  .text.adc_enable
-                0x00000000080196ca       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x00000000080196ca                adc_enable
+                0x00000000080196c2       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x00000000080196c2                adc_enable
  .text.adc_calibration_enable
-                0x00000000080196da       0x22 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x00000000080196da                adc_calibration_enable
+                0x00000000080196d2       0x22 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x00000000080196d2                adc_calibration_enable
  .text.adc_channel_16_to_18
-                0x00000000080196fc       0x50 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x00000000080196fc                adc_channel_16_to_18
+                0x00000000080196f4       0x50 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x00000000080196f4                adc_channel_16_to_18
  .text.adc_channel_length_config
-                0x000000000801974c       0x3a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x000000000801974c                adc_channel_length_config
+                0x0000000008019744       0x3a ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x0000000008019744                adc_channel_length_config
  .text.adc_inserted_channel_config
-                0x0000000008019786       0x5e ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x0000000008019786                adc_inserted_channel_config
+                0x000000000801977e       0x5e ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x000000000801977e                adc_inserted_channel_config
  .text.adc_external_trigger_config
-                0x00000000080197e4       0x2c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x00000000080197e4                adc_external_trigger_config
+                0x00000000080197dc       0x2c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x00000000080197dc                adc_external_trigger_config
  .text.adc_software_trigger_enable
-                0x0000000008019810       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
-                0x0000000008019810                adc_software_trigger_enable
+                0x0000000008019808       0x1c ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_adc.o)
+                0x0000000008019808                adc_software_trigger_enable
  .text.i2c_clock_config
-                0x000000000801982c       0xb8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x000000000801982c                i2c_clock_config
+                0x0000000008019824       0xb8 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019824                i2c_clock_config
  .text.i2c_ack_config
-                0x00000000080198e4       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x00000000080198e4                i2c_ack_config
+                0x00000000080198dc       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x00000000080198dc                i2c_ack_config
  .text.i2c_ackpos_config
-                0x00000000080198f6       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x00000000080198f6                i2c_ackpos_config
+                0x00000000080198ee       0x12 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x00000000080198ee                i2c_ackpos_config
  .text.i2c_master_addressing
-                0x0000000008019908       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019908                i2c_master_addressing
+                0x0000000008019900       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019900                i2c_master_addressing
  .text.i2c_enable
-                0x0000000008019918        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019918                i2c_enable
+                0x0000000008019910        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019910                i2c_enable
  .text.i2c_start_on_bus
-                0x0000000008019922        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019922                i2c_start_on_bus
+                0x000000000801991a        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x000000000801991a                i2c_start_on_bus
  .text.i2c_stop_on_bus
-                0x000000000801992c        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x000000000801992c                i2c_stop_on_bus
+                0x0000000008019924        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019924                i2c_stop_on_bus
  .text.i2c_data_transmit
-                0x0000000008019936        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019936                i2c_data_transmit
+                0x000000000801992e        0x4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x000000000801992e                i2c_data_transmit
  .text.i2c_data_receive
-                0x000000000801993a        0x6 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x000000000801993a                i2c_data_receive
+                0x0000000008019932        0x6 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019932                i2c_data_receive
  .text.i2c_flag_get
-                0x0000000008019940       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019940                i2c_flag_get
+                0x0000000008019938       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019938                i2c_flag_get
  .text.i2c_flag_clear
-                0x0000000008019950       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
-                0x0000000008019950                i2c_flag_clear
+                0x0000000008019948       0x24 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_i2c.o)
+                0x0000000008019948                i2c_flag_clear
  .text.spi_i2s_deinit
-                0x0000000008019974       0x94 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
-                0x0000000008019974                spi_i2s_deinit
+                0x000000000801996c       0x94 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
+                0x000000000801996c                spi_i2s_deinit
  .text.spi_init
-                0x0000000008019a08       0x30 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
-                0x0000000008019a08                spi_init
+                0x0000000008019a00       0x30 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
+                0x0000000008019a00                spi_init
  .text.spi_enable
-                0x0000000008019a38        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
-                0x0000000008019a38                spi_enable
+                0x0000000008019a30        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
+                0x0000000008019a30                spi_enable
  .text.spi_disable
-                0x0000000008019a42        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
-                0x0000000008019a42                spi_disable
+                0x0000000008019a3a        0xa ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_spi.o)
+                0x0000000008019a3a                spi_disable
  .text.usart_deinit
-                0x0000000008019a4c       0xc4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019a4c                usart_deinit
+                0x0000000008019a44       0xc4 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019a44                usart_deinit
  .text.usart_baudrate_set
-                0x0000000008019b10       0x88 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019b10                usart_baudrate_set
+                0x0000000008019b08       0x88 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019b08                usart_baudrate_set
  .text.usart_parity_config
-                0x0000000008019b98       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019b98                usart_parity_config
+                0x0000000008019b90       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019b90                usart_parity_config
  .text.usart_word_length_set
-                0x0000000008019ba8       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019ba8                usart_word_length_set
+                0x0000000008019ba0       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019ba0                usart_word_length_set
  .text.usart_stop_bit_set
-                0x0000000008019bb8       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019bb8                usart_stop_bit_set
+                0x0000000008019bb0       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019bb0                usart_stop_bit_set
  .text.usart_transmit_config
-                0x0000000008019bc8        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019bc8                usart_transmit_config
+                0x0000000008019bc0        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019bc0                usart_transmit_config
  .text.usart_receive_config
-                0x0000000008019bd4        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019bd4                usart_receive_config
+                0x0000000008019bcc        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019bcc                usart_receive_config
  .text.usart_hardware_flow_rts_config
-                0x0000000008019be0        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019be0                usart_hardware_flow_rts_config
+                0x0000000008019bd8        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019bd8                usart_hardware_flow_rts_config
  .text.usart_hardware_flow_cts_config
-                0x0000000008019bec        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019bec                usart_hardware_flow_cts_config
+                0x0000000008019be4        0xc ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019be4                usart_hardware_flow_cts_config
  .text.usart_flag_get
-                0x0000000008019bf8       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
-                0x0000000008019bf8                usart_flag_get
+                0x0000000008019bf0       0x10 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_usart.o)
+                0x0000000008019bf0                usart_flag_get
  .text.__popcountsi2
-                0x0000000008019c08       0x28 /Users/arjanvanvught/Library/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/11.3.1-1.1.2/.content/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v7e-m+fp/hard/libgcc.a(_popcountsi2.o)
-                0x0000000008019c08                __popcountsi2
+                0x0000000008019c00       0x28 /Users/arjanvanvught/Library/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/11.3.1-1.1.2/.content/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v7e-m+fp/hard/libgcc.a(_popcountsi2.o)
+                0x0000000008019c00                __popcountsi2
  *(.glue_7)
- .glue_7        0x0000000008019c30        0x0 linker stubs
+ .glue_7        0x0000000008019c28        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x0000000008019c30        0x0 linker stubs
+ .glue_7t       0x0000000008019c28        0x0 linker stubs
  *(.eh_frame)
  *(.init)
  *(.fini)
-                0x0000000008019c30                . = ALIGN (0x4)
-                0x0000000008019c30                _etext = .
-                0x0000000008019c30                . = ALIGN (0x8)
-                0x0000000008019c30                PROVIDE (__preinit_array_start = .)
+                0x0000000008019c28                . = ALIGN (0x4)
+                0x0000000008019c28                _etext = .
+                0x0000000008019c28                . = ALIGN (0x8)
+                0x0000000008019c28                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0000000008019c30                PROVIDE (__preinit_array_end = .)
-                0x0000000008019c30                PROVIDE (__init_array_start = .)
+                0x0000000008019c28                PROVIDE (__preinit_array_end = .)
+                0x0000000008019c28                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
-                0x0000000008019c30                PROVIDE (__init_array_end = .)
+                0x0000000008019c28                PROVIDE (__init_array_end = .)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(.fini_array*)
  *(SORT_BY_NAME(.fini_array.*))
                 [!provide]                        PROVIDE (__fini_array_end = .)
 
-.vfp11_veneer   0x0000000008019c30        0x0
- .vfp11_veneer  0x0000000008019c30        0x0 linker stubs
+.vfp11_veneer   0x0000000008019c28        0x0
+ .vfp11_veneer  0x0000000008019c28        0x0 linker stubs
 
-.v4_bx          0x0000000008019c30        0x0
- .v4_bx         0x0000000008019c30        0x0 linker stubs
+.v4_bx          0x0000000008019c28        0x0
+ .v4_bx         0x0000000008019c28        0x0 linker stubs
 
-.iplt           0x0000000008019c30        0x0
- .iplt          0x0000000008019c30        0x0 build_gd32/startup_gd32f407.o
+.iplt           0x0000000008019c28        0x0
+ .iplt          0x0000000008019c28        0x0 build_gd32/startup_gd32f407.o
 
-.rodata         0x0000000008019c30     0x3a3c
-                0x0000000008019c30                . = ALIGN (0x4)
+.rodata         0x0000000008019c28     0x3a3c
+                0x0000000008019c28                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x0000000008019c30       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
+ .rodata        0x0000000008019c28       0x18 ../lib-gd32/lib_gd32/libgd32.a(gd32f4xx_rcu.o)
  *(.rodata*)
  .rodata._ZN20ArtNetTriggerHandler7HandlerEPK14TArtNetTrigger.str1.1
-                0x0000000008019c48        0x6 build_gd32/firmware/main.o
+                0x0000000008019c40        0x6 build_gd32/firmware/main.o
  .rodata.main.str1.1
-                0x0000000008019c4e       0xad build_gd32/firmware/main.o
- *fill*         0x0000000008019cfb        0x1 
+                0x0000000008019c46       0xad build_gd32/firmware/main.o
+ *fill*         0x0000000008019cf3        0x1 
  .rodata._ZTV20ArtNetTriggerHandler
-                0x0000000008019cfc       0x14 build_gd32/firmware/main.o
-                0x0000000008019cfc                vtable for ArtNetTriggerHandler
+                0x0000000008019cf4       0x14 build_gd32/firmware/main.o
+                0x0000000008019cf4                vtable for ArtNetTriggerHandler
  .rodata._ZTV17PixelDmxStartStop
-                0x0000000008019d10       0x18 build_gd32/firmware/main.o
-                0x0000000008019d10                vtable for PixelDmxStartStop
+                0x0000000008019d08       0x18 build_gd32/firmware/main.o
+                0x0000000008019d08                vtable for PixelDmxStartStop
  .rodata._ZTV10LLRPDevice
-                0x0000000008019d28       0x1c build_gd32/firmware/main.o
-                0x0000000008019d28                vtable for LLRPDevice
+                0x0000000008019d20       0x1c build_gd32/firmware/main.o
+                0x0000000008019d20                vtable for LLRPDevice
  .rodata._ZTV12RDMNetDevice
-                0x0000000008019d44       0x40 build_gd32/firmware/main.o
-                0x0000000008019d44                vtable for RDMNetDevice
+                0x0000000008019d3c       0x40 build_gd32/firmware/main.o
+                0x0000000008019d3c                vtable for RDMNetDevice
  .rodata.CSWTCH.106
-                0x0000000008019d84        0x6 build_gd32/firmware/main.o
+                0x0000000008019d7c        0x6 build_gd32/firmware/main.o
  .rodata._ZL16SOFTWARE_VERSION
-                0x0000000008019d8a        0x4 build_gd32/firmware/main.o
+                0x0000000008019d82        0x4 build_gd32/firmware/main.o
  .rodata._ZL9gamma10_0
-                0x0000000008019d8e      0x100 build_gd32/firmware/main.o
+                0x0000000008019d86      0x100 build_gd32/firmware/main.o
  .rodata._ZL16SOFTWARE_VERSION
-                0x0000000008019e8e        0x4 build_gd32/lib/rdmsoftwareversion.o
+                0x0000000008019e86        0x4 build_gd32/lib/rdmsoftwareversion.o
  .rodata._ZN12RemoteConfig16HandleDisplayGetEv.str1.1
-                0x0000000008019e92        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019e8a        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
                                          0x13 (size before relaxing)
  .rodata._ZN12RemoteConfig10HandleListEv.str1.1
-                0x0000000008019ea1       0x2f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019e99       0x2f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN12RemoteConfig13HandleTftpGetEv.str1.1
-                0x0000000008019ed0        0x9 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019ec8        0x9 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN12RemoteConfig13HandleVersionEv.str1.1
-                0x0000000008019ed9        0xb ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019ed1        0xb ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN12RemoteConfig12HandleUptimeEv.str1.1
-                0x0000000008019ee4        0xd ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019edc        0xd ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN12RemoteConfig9HandleGetEPvm.str1.1
-                0x0000000008019ef1        0xc ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019ee9        0xc ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN12RemoteConfig13HandleRequestEv.str1.1
-                0x0000000008019efd       0x21 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019ef5       0x21 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata.str1.1
-                0x0000000008019f1e       0x2f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019f16       0x2f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZL6s_Node
-                0x0000000008019f4d       0xea ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x0000000008019f45       0xea ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZL8s_Output
-                0x000000000801a037       0x90 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
- *fill*         0x000000000801a0c7        0x1 
+                0x000000000801a02f       0x90 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+ *fill*         0x000000000801a0bf        0x1 
  .rodata._ZN12RemoteConfig5s_GETE
-                0x000000000801a0c8       0x80 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
-                0x000000000801a0c8                RemoteConfig::s_GET
+                0x000000000801a0c0       0x80 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x000000000801a0c0                RemoteConfig::s_GET
  .rodata._ZN12RemoteConfig5s_SETE
-                0x000000000801a148       0x20 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
-                0x000000000801a148                RemoteConfig::s_SET
+                0x000000000801a140       0x20 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x000000000801a140                RemoteConfig::s_SET
  .rodata._ZN17PropertiesBuilder3AddEPKcb.isra.0.str1.1
-                0x000000000801a168       0x11 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigparams.o)
+                0x000000000801a160       0x11 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigparams.o)
                                          0x18 (size before relaxing)
  .rodata._ZN18RemoteConfigParams7BuilderEPK19TRemoteConfigParamsPcmRm.str1.1
-                0x000000000801a179       0x13 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigparams.o)
+                0x000000000801a171       0x13 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigparams.o)
                                          0x1a (size before relaxing)
  .rodata._ZN12RemoteConfig12HandleRebootEv.str1.1
-                0x000000000801a18c        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigreboot.o)
+                0x000000000801a184        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigreboot.o)
  .rodata.str1.1
-                0x000000000801a19a       0x3b ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigstatic.o)
- *fill*         0x000000000801a1d5        0x3 
+                0x000000000801a192       0x3b ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigstatic.o)
+ *fill*         0x000000000801a1cd        0x3 
  .rodata._ZN12RemoteConfig5s_TXTE
-                0x000000000801a1d8       0x8c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigstatic.o)
-                0x000000000801a1d8                RemoteConfig::s_TXT
+                0x000000000801a1d0       0x8c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigstatic.o)
+                0x000000000801a1d0                RemoteConfig::s_TXT
  .rodata._ZN12RemoteConfig21PlatformHandleTftpSetEv.str1.1
-                0x000000000801a264       0x12 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
+                0x000000000801a25c       0x12 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfig.o)
  .rodata._ZN10HttpDaemon11ParseMethodEPc.str1.1
-                0x000000000801a276       0x15 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a26e       0x15 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
                                          0x19 (size before relaxing)
  .rodata._ZN10HttpDaemon16ParseHeaderFieldEPc.str1.1
-                0x000000000801a28b       0x32 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a283       0x32 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
  .rodata._ZN10HttpDaemon12HandleGetTxtEv.str1.1
-                0x000000000801a2bd       0x32 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a2b5       0x32 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
                                           0x5 (size before relaxing)
  .rodata._ZN10HttpDaemon9HandleGetEv.str1.1
-                0x000000000801a2bd       0x38 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a2b5       0x38 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
  .rodata._ZN10HttpDaemon10HandlePostEb.str1.1
-                0x000000000801a2f5       0x79 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a2ed       0x79 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
                                          0x7f (size before relaxing)
  .rodata._ZN10HttpDaemon13HandleRequestEm.str1.1
-                0x000000000801a36e      0x156 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a366      0x156 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
  .rodata._ZL13s_contentType
-                0x000000000801a4c4       0x80 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
+                0x000000000801a4bc       0x80 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(httd.o)
  .rodata._ZN17RemoteConfigConst14PARAMS_DISABLEE
-                0x000000000801a544        0x8 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a544                RemoteConfigConst::PARAMS_DISABLE
+                0x000000000801a53c        0x8 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a53c                RemoteConfigConst::PARAMS_DISABLE
  .rodata._ZN17RemoteConfigConst16PARAMS_FILE_NAMEE
-                0x000000000801a54c        0xc ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a54c                RemoteConfigConst::PARAMS_FILE_NAME
+                0x000000000801a544        0xc ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a544                RemoteConfigConst::PARAMS_FILE_NAME
  .rodata._ZN17RemoteConfigConst19PARAMS_DISPLAY_NAMEE
-                0x000000000801a558        0xd ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a558                RemoteConfigConst::PARAMS_DISPLAY_NAME
+                0x000000000801a550        0xd ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a550                RemoteConfigConst::PARAMS_DISPLAY_NAME
  .rodata._ZN17RemoteConfigConst20PARAMS_DISABLE_WRITEE
-                0x000000000801a565        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a565                RemoteConfigConst::PARAMS_DISABLE_WRITE
+                0x000000000801a55d        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a55d                RemoteConfigConst::PARAMS_DISABLE_WRITE
  .rodata._ZN17RemoteConfigConst20PARAMS_ENABLE_REBOOTE
-                0x000000000801a573        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a573                RemoteConfigConst::PARAMS_ENABLE_REBOOT
+                0x000000000801a56b        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a56b                RemoteConfigConst::PARAMS_ENABLE_REBOOT
  .rodata._ZN17RemoteConfigConst20PARAMS_ENABLE_UPTIMEE
-                0x000000000801a581        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a581                RemoteConfigConst::PARAMS_ENABLE_UPTIME
+                0x000000000801a579        0xe ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a579                RemoteConfigConst::PARAMS_ENABLE_UPTIME
  .rodata._ZN17RemoteConfigConst21PARAMS_ENABLE_FACTORYE
-                0x000000000801a58f        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
-                0x000000000801a58f                RemoteConfigConst::PARAMS_ENABLE_FACTORY
+                0x000000000801a587        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigconst.o)
+                0x000000000801a587                RemoteConfigConst::PARAMS_ENABLE_FACTORY
  .rodata._ZN12remoteconfig13json_get_listEPct.str1.1
-                0x000000000801a59e       0x5f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+                0x000000000801a596       0x5f ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .rodata._ZN12remoteconfig16json_get_versionEPct.str1.1
-                0x000000000801a5fd       0x46 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+                0x000000000801a5f5       0x46 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
                                          0x51 (size before relaxing)
  .rodata._ZN12remoteconfig15json_get_uptimeEPct.str1.1
-                0x000000000801a643        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+                0x000000000801a63b        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .rodata._ZN12remoteconfig16json_get_displayEPct.str1.1
-                0x000000000801a652        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+                0x000000000801a64a        0xf ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .rodata._ZN12remoteconfig18json_get_directoryEPct.str1.1
-                0x000000000801a661       0x96 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
+                0x000000000801a659       0x96 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(remoteconfigjson.o)
  .rodata.str1.1
-                0x000000000801a6f7       0x1e ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+                0x000000000801a6ef       0x1e ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
                                          0x29 (size before relaxing)
  .rodata._ZL10index_html
-                0x000000000801a715      0x264 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+                0x000000000801a70d      0x264 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
  .rodata._ZL10styles_css
-                0x000000000801a979      0x19c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
- *fill*         0x000000000801ab15        0x3 
+                0x000000000801a971      0x19c ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+ *fill*         0x000000000801ab0d        0x3 
  .rodata._ZL11HttpContent
-                0x000000000801ab18       0x40 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+                0x000000000801ab10       0x40 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
  .rodata._ZL8index_js
-                0x000000000801ab58      0x428 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+                0x000000000801ab50      0x428 ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
  .rodata._ZL9static_js
-                0x000000000801af80      0x42a ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
+                0x000000000801af78      0x42a ../lib-remoteconfig/lib_gd32/libremoteconfig.a(get_file_content.o)
  .rodata._ZN14ArtNetMsgConst5STARTE
-                0x000000000801b3aa       0x11 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
-                0x000000000801b3aa                ArtNetMsgConst::START
+                0x000000000801b3a2       0x11 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
+                0x000000000801b3a2                ArtNetMsgConst::START
  .rodata._ZN14ArtNetMsgConst6PARAMSE
-                0x000000000801b3bb       0x14 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
-                0x000000000801b3bb                ArtNetMsgConst::PARAMS
+                0x000000000801b3b3       0x14 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
+                0x000000000801b3b3                ArtNetMsgConst::PARAMS
  .rodata._ZN14ArtNetMsgConst7STARTEDE
-                0x000000000801b3cf       0x10 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
-                0x000000000801b3cf                ArtNetMsgConst::STARTED
+                0x000000000801b3c7       0x10 ../lib-artnet/lib_gd32/libartnet.a(artnetmsgconst.o)
+                0x000000000801b3c7                ArtNetMsgConst::STARTED
  .rodata._ZN10ArtNetNode19GetShortNameDefaultEmPc.str1.1
-                0x000000000801b3df        0x8 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+                0x000000000801b3d7        0x8 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .rodata._ZN10ArtNetNode18GetLongNameDefaultEPc.str1.1
-                0x000000000801b3e7       0x21 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+                0x000000000801b3df       0x21 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
                                          0x2c (size before relaxing)
  .rodata._ZN6artnetL7NODE_IDE
-                0x000000000801b408        0x8 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
+                0x000000000801b400        0x8 ../lib-artnet/lib_gd32/libartnet.a(artnetnode.o)
  .rodata._ZN10ArtNetNode9HandleDmxEv.str1.1
-                0x000000000801b410       0x60 ../lib-artnet/lib_gd32/libartnet.a(artnetnodehandledmx.o)
+                0x000000000801b408       0x60 ../lib-artnet/lib_gd32/libartnet.a(artnetnodehandledmx.o)
  .rodata._ZN10ArtNetNode14SendPollRelplyEmm.str1.1
-                0x000000000801b470       0x1f ../lib-artnet/lib_gd32/libartnet.a(artnetnodehandlepoll.o)
+                0x000000000801b468       0x1f ../lib-artnet/lib_gd32/libartnet.a(artnetnodehandlepoll.o)
  .rodata._ZN10ArtNetNode5PrintEv.str1.1
-                0x000000000801b48f       0x7a ../lib-artnet/lib_gd32/libartnet.a(artnetnodeprint.o)
+                0x000000000801b487       0x7a ../lib-artnet/lib_gd32/libartnet.a(artnetnodeprint.o)
                                          0x80 (size before relaxing)
  .rodata._ZN17PropertiesBuilder3AddIPKcEEbS2_T_bm.isra.0.str1.1
-                0x000000000801b509       0x1a ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+                0x000000000801b501       0x1a ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .rodata._ZN17PropertiesBuilder3AddEPKcb.isra.0.str1.1
-                0x000000000801b509       0x18 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+                0x000000000801b501       0x18 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .rodata._ZN12ArtNetParams16callbackFunctionEPKc.str1.1
-                0x000000000801b509       0x12 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+                0x000000000801b501       0x12 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
                                          0x15 (size before relaxing)
  .rodata._ZN12ArtNetParams7BuilderEPKN12artnetparams6ParamsEPcmRm.str1.1
-                0x000000000801b51b       0x3e ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+                0x000000000801b513       0x3e ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
                                          0x40 (size before relaxing)
- *fill*         0x000000000801b559        0x3 
+ *fill*         0x000000000801b551        0x3 
  .rodata.CSWTCH.67
-                0x000000000801b55c       0x10 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
+                0x000000000801b554       0x10 ../lib-artnet/lib_gd32/libartnet.a(artnetparams.o)
  .rodata._ZN17ArtNetParamsConst13MAP_UNIVERSE0E
-                0x000000000801b56c        0xe ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
-                0x000000000801b56c                ArtNetParamsConst::MAP_UNIVERSE0
+                0x000000000801b564        0xe ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
+                0x000000000801b564                ArtNetParamsConst::MAP_UNIVERSE0
  .rodata._ZN17ArtNetParamsConst13PROTOCOL_PORTE
-                0x000000000801b57a       0x40 ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
-                0x000000000801b57a                ArtNetParamsConst::PROTOCOL_PORT
+                0x000000000801b572       0x40 ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
+                0x000000000801b572                ArtNetParamsConst::PROTOCOL_PORT
  .rodata._ZN17ArtNetParamsConst19DESTINATION_IP_PORTE
-                0x000000000801b5ba       0x60 ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
-                0x000000000801b5ba                ArtNetParamsConst::DESTINATION_IP_PORT
+                0x000000000801b5b2       0x60 ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
+                0x000000000801b5b2                ArtNetParamsConst::DESTINATION_IP_PORT
  .rodata._ZN17ArtNetParamsConst9FILE_NAMEE
-                0x000000000801b61a        0xb ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
-                0x000000000801b61a                ArtNetParamsConst::FILE_NAME
+                0x000000000801b612        0xb ../lib-artnet/lib_gd32/libartnet.a(artnetparamsconst.o)
+                0x000000000801b612                ArtNetParamsConst::FILE_NAME
  .rodata._ZN11ArtNetConst6OEM_IDE
-                0x000000000801b625        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
-                0x000000000801b625                ArtNetConst::OEM_ID
+                0x000000000801b61d        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
+                0x000000000801b61d                ArtNetConst::OEM_ID
  .rodata._ZN11ArtNetConst7ESTA_IDE
-                0x000000000801b627        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
-                0x000000000801b627                ArtNetConst::ESTA_ID
+                0x000000000801b61f        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
+                0x000000000801b61f                ArtNetConst::ESTA_ID
  .rodata._ZN11ArtNetConst7VERSIONE
-                0x000000000801b629        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
-                0x000000000801b629                ArtNetConst::VERSION
+                0x000000000801b621        0x2 ../lib-artnet/lib_gd32/libartnet.a(artnetconst.o)
+                0x000000000801b621                ArtNetConst::VERSION
  .rodata._ZN10E131Bridge9HandleDmxEv.str1.1
-                0x000000000801b62b       0x2d ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
+                0x000000000801b623       0x2d ../lib-e131/lib_gd32/libe131.a(e131bridge.o)
  .rodata._ZN10E131Bridge5PrintEv.str1.1
-                0x000000000801b658       0x4a ../lib-e131/lib_gd32/libe131.a(e131bridgeprint.o)
+                0x000000000801b650       0x4a ../lib-e131/lib_gd32/libe131.a(e131bridgeprint.o)
                                          0x5b (size before relaxing)
  .rodata._ZN9E117Const21ACN_PACKET_IDENTIFIERE
-                0x000000000801b6a2        0xc ../lib-e131/lib_gd32/libe131.a(e117const.o)
-                0x000000000801b6a2                E117Const::ACN_PACKET_IDENTIFIER
+                0x000000000801b69a        0xc ../lib-e131/lib_gd32/libe131.a(e117const.o)
+                0x000000000801b69a                E117Const::ACN_PACKET_IDENTIFIER
  .rodata._ZN15E131BridgeConst7VERSIONE
-                0x000000000801b6ae        0x2 ../lib-e131/lib_gd32/libe131.a(e131bridgeconst.o)
-                0x000000000801b6ae                E131BridgeConst::VERSION
+                0x000000000801b6a6        0x2 ../lib-e131/lib_gd32/libe131.a(e131bridgeconst.o)
+                0x000000000801b6a6                E131BridgeConst::VERSION
  .rodata._ZN11RDMNetConst10MSG_CONFIGE
-                0x000000000801b6b0       0x13 ../lib-rdmnet/lib_gd32/librdmnet.a(rdmnetconst.o)
-                0x000000000801b6b0                RDMNetConst::MSG_CONFIG
+                0x000000000801b6a8       0x13 ../lib-rdmnet/lib_gd32/librdmnet.a(rdmnetconst.o)
+                0x000000000801b6a8                RDMNetConst::MSG_CONFIG
  .rodata._ZN12RDMNetDevice5PrintEv.str1.1
-                0x000000000801b6c3       0x80 ../lib-rdmnet/lib_gd32/librdmnet.a(rdmnetdevice.o)
+                0x000000000801b6bb       0x80 ../lib-rdmnet/lib_gd32/librdmnet.a(rdmnetdevice.o)
  .rodata._ZN18RDMDeviceResponder5PrintEv.str1.1
-                0x000000000801b743       0xb4 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
- *fill*         0x000000000801b7f7        0x1 
+                0x000000000801b73b       0xb4 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+ *fill*         0x000000000801b7ef        0x1 
  .rodata._ZTV18RDMDeviceResponder
-                0x000000000801b7f8       0x18 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
-                0x000000000801b7f8                vtable for RDMDeviceResponder
+                0x000000000801b7f0       0x18 ../lib-rdm/lib_gd32/librdm.a(rdmdeviceresponder.o)
+                0x000000000801b7f0                vtable for RDMDeviceResponder
  .rodata._ZN10RDMHandler25GetDeviceModelDescriptionEt.str1.1
-                0x000000000801b810        0xb ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000801b808        0xb ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
  .rodata._ZL7UID_ALL
-                0x000000000801b810        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
- *fill*         0x000000000801b816        0x2 
+                0x000000000801b808        0x6 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+ *fill*         0x000000000801b80e        0x2 
  .rodata._ZN10RDMHandler15PID_DEFINITIONSE
-                0x000000000801b818      0x1e0 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
-                0x000000000801b818                RDMHandler::PID_DEFINITIONS
+                0x000000000801b810      0x1e0 ../lib-rdm/lib_gd32/librdm.a(rdmhandler.o)
+                0x000000000801b810                RDMHandler::PID_DEFINITIONS
  .rodata._ZN9RDMDeviceC2Ev.str1.1
-                0x000000000801b9f8       0x15 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
+                0x000000000801b9f0       0x15 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
  .rodata._ZN9RDMDevice5PrintEv.str1.1
-                0x000000000801b9f8       0xd4 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
+                0x000000000801b9f0       0xd4 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
  .rodata._ZL12DEVICE_LABEL
-                0x000000000801bacc       0x16 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
+                0x000000000801bac4       0x16 ../lib-rdm/lib_gd32/librdm.a(rdmdevice.o)
  .rodata._ZN8RDMConst15MANUFACTURER_IDE
-                0x000000000801bae2        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmconst.o)
-                0x000000000801bae2                RDMConst::MANUFACTURER_ID
+                0x000000000801bada        0x2 ../lib-rdm/lib_gd32/librdm.a(rdmconst.o)
+                0x000000000801bada                RDMConst::MANUFACTURER_ID
  .rodata._ZN8RDMConst17MANUFACTURER_NAMEE
-                0x000000000801bae4       0x1c ../lib-rdm/lib_gd32/librdm.a(rdmconst.o)
-                0x000000000801bae4                RDMConst::MANUFACTURER_NAME
+                0x000000000801badc       0x1c ../lib-rdm/lib_gd32/librdm.a(rdmconst.o)
+                0x000000000801badc                RDMConst::MANUFACTURER_NAME
  .rodata.uuid_unparse.str1.1
-                0x000000000801bb00       0x31 ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
+                0x000000000801baf8       0x31 ../lib-uuid/lib_gd32/libuuid.a(uuid_unparse.o)
  .rodata._ZN21PixelDmxConfiguration5PrintEv.str1.1
-                0x000000000801bb31       0x4c ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
- *fill*         0x000000000801bb7d        0x3 
+                0x000000000801bb29       0x4c ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxconfiguration.o)
+ *fill*         0x000000000801bb75        0x3 
  .rodata._ZTV14WS28xxDmxMulti
-                0x000000000801bb80       0x40 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
-                0x000000000801bb80                vtable for WS28xxDmxMulti
+                0x000000000801bb78       0x40 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(ws28xxdmxmulti.o)
+                0x000000000801bb78                vtable for WS28xxDmxMulti
  .rodata._ZN17PropertiesBuilder3AddIhEEbPKcT_bm.isra.0.str1.1
-                0x000000000801bbc0       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x000000000801bbb8       0x18 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .rodata._ZN17PropertiesBuilder3AddIPKcEEbS2_T_bm.isra.0.str1.1
-                0x000000000801bbc0       0x1a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x000000000801bbb8       0x1a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .rodata._ZN17PropertiesBuilder3AddIfEEbPKcT_bm.isra.0.str1.1
-                0x000000000801bbc0       0x15 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x000000000801bbb8       0x15 ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
                                          0x1e (size before relaxing)
  .rodata._ZN14PixelDmxParams7BuilderEPKN14pixeldmxparams6ParamsEPcmRm.str1.1
-                0x000000000801bbd5       0x6a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
+                0x000000000801bbcd       0x6a ../lib-ws28xxdmx/lib_gd32/libws28xxdmx.a(pixeldmxparams.o)
  .rodata._ZN18PixelConfiguration5PrintEv.str1.1
-                0x000000000801bc3f       0xbf ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
- *fill*         0x000000000801bcfe        0x2 
+                0x000000000801bc37       0xbf ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+ *fill*         0x000000000801bcf6        0x2 
  .rodata.CSWTCH.9
-                0x000000000801bd00       0x14 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801bcf8       0x14 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma10_0
-                0x000000000801bd14      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801bd0c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma20_0
-                0x000000000801be14      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801be0c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma21_0
-                0x000000000801bf14      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801bf0c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma22_0
-                0x000000000801c014      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801c00c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma23_0
-                0x000000000801c114      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801c10c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma24_0
-                0x000000000801c214      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801c20c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma25_0
-                0x000000000801c314      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801c30c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZL9gamma25_5
-                0x000000000801c414      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
+                0x000000000801c40c      0x100 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelconfiguration.o)
  .rodata._ZN9PixelType7GetTypeEN5pixel4TypeE.str1.1
-                0x000000000801c514        0x8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x000000000801c50c        0x8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
  .rodata._ZN9PixelType6GetMapEN5pixel3MapE.str1.1
-                0x000000000801c51c        0xa ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x000000000801c514        0xa ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
  .rodata.CSWTCH.18
-                0x000000000801c526        0xa ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x000000000801c51e        0xa ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
  .rodata._ZN9PixelType4MAPSE
-                0x000000000801c530       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x000000000801c530                PixelType::MAPS
+                0x000000000801c528       0x18 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x000000000801c528                PixelType::MAPS
  .rodata._ZN9PixelType5TYPESE
-                0x000000000801c548       0x70 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
-                0x000000000801c548                PixelType::TYPES
+                0x000000000801c540       0x70 ../lib-ws28xx/lib_gd32/libws28xx.a(pixeltype.o)
+                0x000000000801c540                PixelType::TYPES
  .rodata._ZN13PixelPatterns7GetNameEN13pixelpatterns7PatternE.str1.1
-                0x000000000801c5b8        0x8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x000000000801c5b0        0x8 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
  .rodata._ZL13s_patternName
-                0x000000000801c5b8       0x54 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
+                0x000000000801c5b0       0x54 ../lib-ws28xx/lib_gd32/libws28xx.a(pixelpatterns.o)
  .rodata._ZN5pixelL11s_GPIO_PINsE
-                0x000000000801c60c        0x2 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
- *fill*         0x000000000801c60e        0x2 
+                0x000000000801c604        0x2 ../lib-ws28xx/lib_gd32/libws28xx.a(ws28xxmulti.o)
+ *fill*         0x000000000801c606        0x2 
  .rodata._ZL11s_aStorSize
-                0x000000000801c610       0x6c ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
+                0x000000000801c608       0x6c ../lib-configstore/lib_gd32/libconfigstore.a(configstore.o)
  .rodata._ZTV15StoreDisplayUdf
-                0x000000000801c67c       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
-                0x000000000801c67c                vtable for StoreDisplayUdf
+                0x000000000801c674       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storedisplayudf.o)
+                0x000000000801c674                vtable for StoreDisplayUdf
  .rodata._ZTV12StoreNetwork
-                0x000000000801c694       0x50 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
-                0x000000000801c694                vtable for StoreNetwork
+                0x000000000801c68c       0x50 ../lib-configstore/lib_gd32/libconfigstore.a(storenetwork.o)
+                0x000000000801c68c                vtable for StoreNetwork
  .rodata._ZTV17StoreRemoteConfig
-                0x000000000801c6e4       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
-                0x000000000801c6e4                vtable for StoreRemoteConfig
+                0x000000000801c6dc       0x18 ../lib-configstore/lib_gd32/libconfigstore.a(storeremoteconfig.o)
+                0x000000000801c6dc                vtable for StoreRemoteConfig
  .rodata._ZN11StoreDeviceC2Ev.str1.1
-                0x000000000801c6fc       0x45 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
- *fill*         0x000000000801c741        0x3 
+                0x000000000801c6f4       0x45 ../lib-configstore/lib_gd32/libconfigstore.a(storedevice.o)
+ *fill*         0x000000000801c739        0x3 
  .rodata._ZTV11StoreArtNet
-                0x000000000801c744       0x78 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
-                0x000000000801c744                vtable for StoreArtNet
+                0x000000000801c73c       0x78 ../lib-configstore/lib_gd32/libconfigstore.a(storeartnet.o)
+                0x000000000801c73c                vtable for StoreArtNet
  .rodata._ZTV14StoreRDMDevice
-                0x000000000801c7bc       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
-                0x000000000801c7bc                vtable for StoreRDMDevice
+                0x000000000801c7b4       0x30 ../lib-configstore/lib_gd32/libconfigstore.a(storerdmdevice.o)
+                0x000000000801c7b4                vtable for StoreRDMDevice
  .rodata._ZTV13StorePixelDmx
-                0x000000000801c7ec       0x58 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
-                0x000000000801c7ec                vtable for StorePixelDmx
+                0x000000000801c7e4       0x58 ../lib-configstore/lib_gd32/libconfigstore.a(storepixeldmx.o)
+                0x000000000801c7e4                vtable for StorePixelDmx
  .rodata._ZN12NetworkConst15MSG_MDNS_CONFIGE
-                0x000000000801c844       0x11 ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
-                0x000000000801c844                NetworkConst::MSG_MDNS_CONFIG
+                0x000000000801c83c       0x11 ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
+                0x000000000801c83c                NetworkConst::MSG_MDNS_CONFIG
  .rodata._ZN12NetworkConst16MSG_NETWORK_INITE
-                0x000000000801c855        0xd ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
-                0x000000000801c855                NetworkConst::MSG_NETWORK_INIT
+                0x000000000801c84d        0xd ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
+                0x000000000801c84d                NetworkConst::MSG_NETWORK_INIT
  .rodata._ZN12NetworkConst19MSG_NETWORK_STARTEDE
-                0x000000000801c862       0x10 ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
-                0x000000000801c862                NetworkConst::MSG_NETWORK_STARTED
+                0x000000000801c85a       0x10 ../lib-network/lib_gd32/libnetwork.a(networkconst.o)
+                0x000000000801c85a                NetworkConst::MSG_NETWORK_STARTED
  .rodata._ZN4mdns6Domain5PrintEb.str1.1
-                0x000000000801c872        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c86a        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4MDNS5PrintEv.str1.1
-                0x000000000801c878       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c870       0x10 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
                                          0x11 (size before relaxing)
  .rodata._ZN4mdnsL10DOMAIN_DDPE
-                0x000000000801c888        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c880        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL10DOMAIN_NTPE
-                0x000000000801c88d        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c885        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL10DOMAIN_OSCE
-                0x000000000801c892        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c88a        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL10DOMAIN_TCPE
-                0x000000000801c897        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c88f        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL10DOMAIN_UDPE
-                0x000000000801c89c        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
- *fill*         0x000000000801c8a1        0x3 
+                0x000000000801c894        0x5 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+ *fill*         0x000000000801c899        0x3 
  .rodata._ZN4mdnsL10s_ServicesE
-                0x000000000801c8a4       0x90 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c89c       0x90 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL11DOMAIN_HTTPE
-                0x000000000801c934        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c92c        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL11DOMAIN_MIDIE
-                0x000000000801c93a        0xc ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c932        0xc ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL11DOMAIN_TFTPE
-                0x000000000801c946        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c93e        0x6 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL12DOMAIN_DNSSDE
-                0x000000000801c94c      0x102 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801c944      0x102 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL12DOMAIN_LOCALE
-                0x000000000801ca4e        0x7 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801ca46        0x7 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL13DOMAIN_CONFIGE
-                0x000000000801ca55        0x8 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801ca4d        0x8 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL18DOMAIN_RDMNET_LLRPE
-                0x000000000801ca5d        0xd ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801ca55        0xd ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN4mdnsL9DOMAIN_PPE
-                0x000000000801ca6a        0x4 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
+                0x000000000801ca62        0x4 ../lib-network/lib_gd32/libnetwork.a(mdns.o)
  .rodata._ZN7NetworkC2EP18NetworkParamsStore.str1.1
-                0x000000000801ca6e       0x11 ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801ca66       0x11 ../lib-network/lib_gd32/libnetwork.a(network.o)
  .rodata._ZN7Network5PrintEv.str1.1
-                0x000000000801ca7f       0xbb ../lib-network/lib_gd32/libnetwork.a(network.o)
+                0x000000000801ca77       0xbb ../lib-network/lib_gd32/libnetwork.a(network.o)
  .rodata._ZN13NetworkParams7BuilderEPKN13networkparams6ParamsEPcmRm.str1.1
-                0x000000000801cb3a       0x17 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
+                0x000000000801cb32       0x17 ../lib-network/lib_gd32/libnetwork.a(networkparams.o)
                                          0x49 (size before relaxing)
  .rodata._Z8net_initPKhP6IpInfoPKcPbS5_.str1.1
-                0x000000000801cb51        0xe ../lib-network/lib_gd32/libnetwork.a(net.o)
+                0x000000000801cb49        0xe ../lib-network/lib_gd32/libnetwork.a(net.o)
  .rodata._Z7udp_endt.str1.1
-                0x000000000801cb5f        0x8 ../lib-network/lib_gd32/libnetwork.a(udp.o)
+                0x000000000801cb57        0x8 ../lib-network/lib_gd32/libnetwork.a(udp.o)
  .rodata._ZN18NetworkParamsConst10IP_ADDRESSE
-                0x000000000801cb67        0xb ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cb67                NetworkParamsConst::IP_ADDRESS
+                0x000000000801cb5f        0xb ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb5f                NetworkParamsConst::IP_ADDRESS
  .rodata._ZN18NetworkParamsConst15DEFAULT_GATEWAYE
-                0x000000000801cb72       0x10 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cb72                NetworkParamsConst::DEFAULT_GATEWAY
+                0x000000000801cb6a       0x10 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb6a                NetworkParamsConst::DEFAULT_GATEWAY
  .rodata._ZN18NetworkParamsConst15DHCP_RETRY_TIMEE
-                0x000000000801cb82       0x10 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cb82                NetworkParamsConst::DHCP_RETRY_TIME
+                0x000000000801cb7a       0x10 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb7a                NetworkParamsConst::DHCP_RETRY_TIME
  .rodata._ZN18NetworkParamsConst8HOSTNAMEE
-                0x000000000801cb92        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cb92                NetworkParamsConst::HOSTNAME
+                0x000000000801cb8a        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb8a                NetworkParamsConst::HOSTNAME
  .rodata._ZN18NetworkParamsConst8NET_MASKE
-                0x000000000801cb9b        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cb9b                NetworkParamsConst::NET_MASK
+                0x000000000801cb93        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb93                NetworkParamsConst::NET_MASK
  .rodata._ZN18NetworkParamsConst8USE_DHCPE
-                0x000000000801cba4        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cba4                NetworkParamsConst::USE_DHCP
+                0x000000000801cb9c        0x9 ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cb9c                NetworkParamsConst::USE_DHCP
  .rodata._ZN18NetworkParamsConst9FILE_NAMEE
-                0x000000000801cbad        0xc ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
-                0x000000000801cbad                NetworkParamsConst::FILE_NAME
+                0x000000000801cba5        0xc ../lib-network/lib_gd32/libnetwork.a(networkparamsconst.o)
+                0x000000000801cba5                NetworkParamsConst::FILE_NAME
  .rodata._Z11emac_configv.str1.1
-                0x000000000801cbb9        0x8 ../lib-network/lib_gd32/libnetwork.a(emac.o)
+                0x000000000801cbb1        0x8 ../lib-network/lib_gd32/libnetwork.a(emac.o)
  .rodata._Z16arp_cache_updatePKhm.str1.1
-                0x000000000801cbc1       0x13 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
+                0x000000000801cbb9       0x13 ../lib-network/lib_gd32/libnetwork.a(arp_cache.o)
  .rodata._Z19dhcp_client_releasev.str1.1
-                0x000000000801cbd4       0x15 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
+                0x000000000801cbcc       0x15 ../lib-network/lib_gd32/libnetwork.a(dhcp.o)
  .rodata._ZN3net9phy_startEmRNS_9PhyStatusE.str1.1
-                0x000000000801cbe9       0x2d ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
+                0x000000000801cbe1       0x2d ../lib-network/lib_gd32/libnetwork.a(net_phy.o)
  .rodata._ZN19LightSetParamsConst10NODE_LABELE
-                0x000000000801cc16       0x38 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cc16                LightSetParamsConst::NODE_LABEL
+                0x000000000801cc0e       0x38 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cc0e                LightSetParamsConst::NODE_LABEL
  .rodata._ZN19LightSetParamsConst13UNIVERSE_PORTE
-                0x000000000801cc4e       0x40 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cc4e                LightSetParamsConst::UNIVERSE_PORT
+                0x000000000801cc46       0x40 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cc46                LightSetParamsConst::UNIVERSE_PORT
  .rodata._ZN19LightSetParamsConst14NODE_LONG_NAMEE
-                0x000000000801cc8e        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cc8e                LightSetParamsConst::NODE_LONG_NAME
+                0x000000000801cc86        0xa ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cc86                LightSetParamsConst::NODE_LONG_NAME
  .rodata._ZN19LightSetParamsConst14START_UNI_PORTE
-                0x000000000801cc98       0xa0 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cc98                LightSetParamsConst::START_UNI_PORT
+                0x000000000801cc90       0xa0 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cc90                LightSetParamsConst::START_UNI_PORT
  .rodata._ZN19LightSetParamsConst15MERGE_MODE_PORTE
-                0x000000000801cd38       0x48 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cd38                LightSetParamsConst::MERGE_MODE_PORT
+                0x000000000801cd30       0x48 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cd30                LightSetParamsConst::MERGE_MODE_PORT
  .rodata._ZN19LightSetParamsConst17DMX_START_ADDRESSE
-                0x000000000801cd80       0x12 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cd80                LightSetParamsConst::DMX_START_ADDRESS
+                0x000000000801cd78       0x12 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cd78                LightSetParamsConst::DMX_START_ADDRESS
  .rodata._ZN19LightSetParamsConst21DISABLE_MERGE_TIMEOUTE
-                0x000000000801cd92       0x16 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cd92                LightSetParamsConst::DISABLE_MERGE_TIMEOUT
+                0x000000000801cd8a       0x16 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cd8a                LightSetParamsConst::DISABLE_MERGE_TIMEOUT
  .rodata._ZN19LightSetParamsConst8FAILSAFEE
-                0x000000000801cda8        0x9 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cda8                LightSetParamsConst::FAILSAFE
+                0x000000000801cda0        0x9 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cda0                LightSetParamsConst::FAILSAFE
  .rodata._ZN19LightSetParamsConst9DIRECTIONE
-                0x000000000801cdb1       0x48 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
-                0x000000000801cdb1                LightSetParamsConst::DIRECTION
+                0x000000000801cda9       0x48 ../lib-lightset/lib_gd32/liblightset.a(lightsetparamsconst.o)
+                0x000000000801cda9                LightSetParamsConst::DIRECTION
  .rodata._ZN10DisplayUdf13ShowIpAddressEv.str1.1
-                0x000000000801cdf9       0x12 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x000000000801cdf1       0x12 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
  .rodata._ZN10DisplayUdf4ShowEv.str1.1
-                0x000000000801ce0b       0x2d ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
+                0x000000000801ce03       0x2d ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudf.o)
                                          0x38 (size before relaxing)
  .rodata._ZN17PropertiesBuilder3AddIhEEbPKcT_bm.isra.0.str1.1
-                0x000000000801ce38       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x000000000801ce30       0x18 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
  .rodata.str1.1
-                0x000000000801ce38        0x1 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x000000000801ce30        0x1 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
  .rodata._ZL6pArray
-                0x000000000801ce38       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
+                0x000000000801ce30       0x50 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparams.o)
  .rodata._ZN21DisplayUdfParamsConst10BOARD_NAMEE
-                0x000000000801ce88        0xb ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801ce88                DisplayUdfParamsConst::BOARD_NAME
+                0x000000000801ce80        0xb ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ce80                DisplayUdfParamsConst::BOARD_NAME
  .rodata._ZN21DisplayUdfParamsConst12ACTIVE_PORTSE
-                0x000000000801ce93        0xd ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801ce93                DisplayUdfParamsConst::ACTIVE_PORTS
+                0x000000000801ce8b        0xd ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ce8b                DisplayUdfParamsConst::ACTIVE_PORTS
  .rodata._ZN21DisplayUdfParamsConst13DMX_DIRECTIONE
-                0x000000000801cea0        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801cea0                DisplayUdfParamsConst::DMX_DIRECTION
+                0x000000000801ce98        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ce98                DisplayUdfParamsConst::DMX_DIRECTION
  .rodata._ZN21DisplayUdfParamsConst13SLEEP_TIMEOUTE
-                0x000000000801ceae        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801ceae                DisplayUdfParamsConst::SLEEP_TIMEOUT
+                0x000000000801cea6        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801cea6                DisplayUdfParamsConst::SLEEP_TIMEOUT
  .rodata._ZN21DisplayUdfParamsConst15FLIP_VERTICALLYE
-                0x000000000801cebc       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801cebc                DisplayUdfParamsConst::FLIP_VERTICALLY
+                0x000000000801ceb4       0x10 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ceb4                DisplayUdfParamsConst::FLIP_VERTICALLY
  .rodata._ZN21DisplayUdfParamsConst5TITLEE
-                0x000000000801cecc        0x6 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801cecc                DisplayUdfParamsConst::TITLE
+                0x000000000801cec4        0x6 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801cec4                DisplayUdfParamsConst::TITLE
  .rodata._ZN21DisplayUdfParamsConst7VERSIONE
-                0x000000000801ced2        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801ced2                DisplayUdfParamsConst::VERSION
+                0x000000000801ceca        0x8 ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ceca                DisplayUdfParamsConst::VERSION
  .rodata._ZN21DisplayUdfParamsConst9FILE_NAMEE
-                0x000000000801ceda        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801ceda                DisplayUdfParamsConst::FILE_NAME
+                0x000000000801ced2        0xc ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801ced2                DisplayUdfParamsConst::FILE_NAME
  .rodata._ZN21DisplayUdfParamsConst9INTENSITYE
-                0x000000000801cee6        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
-                0x000000000801cee6                DisplayUdfParamsConst::INTENSITY
+                0x000000000801cede        0xa ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfparamsconst.o)
+                0x000000000801cede                DisplayUdfParamsConst::INTENSITY
  .rodata._ZN10DisplayUdf12ShowUniverseEP10ArtNetNode.str1.1
-                0x000000000801cef0        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x000000000801cee8        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
                                          0x29 (size before relaxing)
  .rodata._ZN10DisplayUdf4ShowEP10ArtNetNodem.str1.1
-                0x000000000801ceff       0x1e ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
+                0x000000000801cef7       0x1e ../lib-displayudf/lib_gd32/libdisplayudf.a(displayudfshowartnet.o)
                                          0x25 (size before relaxing)
  .rodata._ZN10DisplayUdf14ShowDhcpStatusEN7network4dhcp12ClientStatusE.str1.1
-                0x000000000801cf1d       0x1c ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf15       0x1c ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network19display_emac_configEv.str1.1
-                0x000000000801cf39        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf31        0xe ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network18display_emac_startEv.str1.1
-                0x000000000801cf47        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf3f        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network19display_emac_statusEb.str1.1
-                0x000000000801cf56       0x19 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf4e       0x19 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network15display_netmaskEv.str1.1
-                0x000000000801cf6f        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf67        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network15display_gatewayEv.str1.1
-                0x000000000801cf6f        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf67        0xf ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata._ZN7network21display_emac_shutdownEv.str1.1
-                0x000000000801cf6f       0x11 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
+                0x000000000801cf67       0x11 ../lib-displayudf/lib_gd32/libdisplayudf.a(network.o)
  .rodata.str1.1
-                0x000000000801cf80        0x1 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x000000000801cf78        0x1 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .rodata._ZL7flashes
-                0x000000000801cf80       0x18 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
+                0x000000000801cf78       0x18 ../lib-flash/lib_gd32/libflash.a(spi_flash.o)
  .rodata.str1.1
-                0x000000000801cf98       0xf7 ../lib-flash/lib_gd32/libflash.a(winbond.o)
- *fill*         0x000000000801d08f        0x1 
+                0x000000000801cf90       0xf7 ../lib-flash/lib_gd32/libflash.a(winbond.o)
+ *fill*         0x000000000801d087        0x1 
  .rodata._ZL23winbond_spi_flash_table
-                0x000000000801d090       0x90 ../lib-flash/lib_gd32/libflash.a(winbond.o)
+                0x000000000801d088       0x90 ../lib-flash/lib_gd32/libflash.a(winbond.o)
  .rodata.str1.1
-                0x000000000801d120       0x10 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
+                0x000000000801d118       0x10 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
  .rodata._ZL26gigadevice_spi_flash_table
-                0x000000000801d130       0x10 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
+                0x000000000801d128       0x10 ../lib-flash/lib_gd32/libflash.a(gigadevice.o)
  .rodata.str1.1
-                0x000000000801d140       0x4d ../lib-flash/lib_gd32/libflash.a(macronix.o)
- *fill*         0x000000000801d18d        0x3 
+                0x000000000801d138       0x4d ../lib-flash/lib_gd32/libflash.a(macronix.o)
+ *fill*         0x000000000801d185        0x3 
  .rodata._ZL24macronix_spi_flash_table
-                0x000000000801d190       0x38 ../lib-flash/lib_gd32/libflash.a(macronix.o)
+                0x000000000801d188       0x38 ../lib-flash/lib_gd32/libflash.a(macronix.o)
  .rodata._ZN18DevicesParamsConst10ACTIVE_OUTE
-                0x000000000801d1c8        0xb ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d1c8                DevicesParamsConst::ACTIVE_OUT
+                0x000000000801d1c0        0xb ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d1c0                DevicesParamsConst::ACTIVE_OUT
  .rodata._ZN18DevicesParamsConst11GAMMA_VALUEE
-                0x000000000801d1d3        0xc ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d1d3                DevicesParamsConst::GAMMA_VALUE
+                0x000000000801d1cb        0xc ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d1cb                DevicesParamsConst::GAMMA_VALUE
  .rodata._ZN18DevicesParamsConst12SPI_SPEED_HZE
-                0x000000000801d1df        0xf ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d1df                DevicesParamsConst::SPI_SPEED_HZ
+                0x000000000801d1d7        0xf ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d1d7                DevicesParamsConst::SPI_SPEED_HZ
  .rodata._ZN18DevicesParamsConst12TEST_PATTERNE
-                0x000000000801d1ee        0xd ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d1ee                DevicesParamsConst::TEST_PATTERN
+                0x000000000801d1e6        0xd ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d1e6                DevicesParamsConst::TEST_PATTERN
  .rodata._ZN18DevicesParamsConst14GROUPING_COUNTE
-                0x000000000801d1fb       0x10 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d1fb                DevicesParamsConst::GROUPING_COUNT
+                0x000000000801d1f3       0x10 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d1f3                DevicesParamsConst::GROUPING_COUNT
  .rodata._ZN18DevicesParamsConst16GAMMA_CORRECTIONE
-                0x000000000801d20b       0x11 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d20b                DevicesParamsConst::GAMMA_CORRECTION
+                0x000000000801d203       0x11 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d203                DevicesParamsConst::GAMMA_CORRECTION
  .rodata._ZN18DevicesParamsConst17GLOBAL_BRIGHTNESSE
-                0x000000000801d21c       0x12 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d21c                DevicesParamsConst::GLOBAL_BRIGHTNESS
+                0x000000000801d214       0x12 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d214                DevicesParamsConst::GLOBAL_BRIGHTNESS
  .rodata._ZN18DevicesParamsConst3MAPE
-                0x000000000801d22e       0x10 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d22e                DevicesParamsConst::MAP
+                0x000000000801d226       0x10 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d226                DevicesParamsConst::MAP
  .rodata._ZN18DevicesParamsConst4TYPEE
-                0x000000000801d23e        0x9 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d23e                DevicesParamsConst::TYPE
+                0x000000000801d236        0x9 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d236                DevicesParamsConst::TYPE
  .rodata._ZN18DevicesParamsConst5COUNTE
-                0x000000000801d247        0xa ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d247                DevicesParamsConst::COUNT
+                0x000000000801d23f        0xa ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d23f                DevicesParamsConst::COUNT
  .rodata._ZN18DevicesParamsConst7LED_T0HE
-                0x000000000801d251        0x8 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d251                DevicesParamsConst::LED_T0H
+                0x000000000801d249        0x8 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d249                DevicesParamsConst::LED_T0H
  .rodata._ZN18DevicesParamsConst7LED_T1HE
-                0x000000000801d259        0x8 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d259                DevicesParamsConst::LED_T1H
+                0x000000000801d251        0x8 ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d251                DevicesParamsConst::LED_T1H
  .rodata._ZN18DevicesParamsConst9FILE_NAMEE
-                0x000000000801d261        0xc ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
-                0x000000000801d261                DevicesParamsConst::FILE_NAME
+                0x000000000801d259        0xc ../lib-properties/lib_gd32/libproperties.a(devicesparamsconst.o)
+                0x000000000801d259                DevicesParamsConst::FILE_NAME
  .rodata._ZN17PropertiesBuilder12AddIpAddressEPKcmb.str1.1
-                0x000000000801d26d       0x25 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x000000000801d265       0x25 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
                                          0x35 (size before relaxing)
  .rodata._ZN17PropertiesBuilder10AddCommentEPKc.str1.1
-                0x000000000801d292        0x8 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
+                0x000000000801d28a        0x8 ../lib-properties/lib_gd32/libproperties.a(propertiesbuilder.o)
  .rodata._ZN7Display9PrintInfoEv.isra.0.str1.1
-                0x000000000801d29a       0x11 ../lib-display/lib_gd32/libdisplay.a(display.o)
+                0x000000000801d292       0x11 ../lib-display/lib_gd32/libdisplay.a(display.o)
  .rodata._ZN7Ssd13069PrintInfoEv.str1.1
-                0x000000000801d2ab       0x1b ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d2a3       0x1b ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
  .rodata._ZN7Ssd130611CheckSH1106Ev.str1.1
-                0x000000000801d2c6        0x6 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d2be        0x6 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
  .rodata._ZL12_OledFont8x6
-                0x000000000801d2cc      0x2a0 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d2c4      0x2a0 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
  .rodata._ZL16oled_128x32_init
-                0x000000000801d56c       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d564       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
  .rodata._ZL16oled_128x64_init
-                0x000000000801d584       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d57c       0x18 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
  .rodata._ZTV7Ssd1306
-                0x000000000801d59c       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
-                0x000000000801d59c                vtable for Ssd1306
+                0x000000000801d594       0x40 ../lib-display/lib_gd32/libdisplay.a(ssd1306.o)
+                0x000000000801d594                vtable for Ssd1306
  .rodata.console_init.str1.1
-                0x000000000801d5dc        0xc ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x000000000801d5d4        0xc ../lib-hal/lib_gd32/libhal.a(console.o)
  .rodata.console_set_fg_color.str1.1
-                0x000000000801d5e8       0x1e ../lib-hal/lib_gd32/libhal.a(console.o)
+                0x000000000801d5e0       0x1e ../lib-hal/lib_gd32/libhal.a(console.o)
  .rodata._ZN15FirmwareVersionC2EPKcS1_S1_.str1.1
-                0x000000000801d606       0x24 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
+                0x000000000801d5fe       0x24 ../lib-hal/lib_gd32/libhal.a(firmwareversion.o)
                                          0x2f (size before relaxing)
  .rodata._ZN8Hardware6RebootEv.str1.1
-                0x000000000801d62a        0xf ../lib-hal/lib_gd32/libhal.a(hardware.o)
- *fill*         0x000000000801d639        0x3 
+                0x000000000801d622        0xf ../lib-hal/lib_gd32/libhal.a(hardware.o)
+ *fill*         0x000000000801d631        0x3 
  .rodata.days_of_month
-                0x000000000801d63c       0x30 ../lib-c/lib_gd32/libc.a(time.o)
-                0x000000000801d66c                . = ALIGN (0x4)
+                0x000000000801d634       0x30 ../lib-c/lib_gd32/libc.a(time.o)
+                0x000000000801d664                . = ALIGN (0x4)
 
-.rel.dyn        0x000000000801d66c        0x0
- .rel.iplt      0x000000000801d66c        0x0 build_gd32/startup_gd32f407.o
+.rel.dyn        0x000000000801d664        0x0
+ .rel.iplt      0x000000000801d664        0x0 build_gd32/startup_gd32f407.o
 
 .stack          0x0000000010000000     0x2800
                 0x0000000010000000                . = ALIGN (0x4)
@@ -7419,9 +7420,9 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
  *fill*         0x0000000010007264     0x1000 
                 0x0000000010008264                heap_top = .
                 0x0000000010008264                . = ALIGN (0x4)
-                0x000000000801d66c                _sidata = LOADADDR (.data)
+                0x000000000801d664                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000       0x84 load address 0x000000000801d66c
+.data           0x0000000020000000       0x84 load address 0x000000000801d664
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -7438,11 +7439,11 @@ LOAD build_gd32/lib/rdmsoftwareversion.o
                 0x0000000020000084                . = ALIGN (0x4)
                 0x0000000020000084                _edata = .
 
-.igot.plt       0x0000000020000084        0x0 load address 0x000000000801d6f0
+.igot.plt       0x0000000020000084        0x0 load address 0x000000000801d6e8
  .igot.plt      0x0000000020000084        0x0 build_gd32/startup_gd32f407.o
                 0x0000000020000084                . = ALIGN (0x4)
 
-.bss            0x0000000020000088    0x1be24 load address 0x000000000801d6f0
+.bss            0x0000000020000088    0x1be24 load address 0x000000000801d6e8
                 0x0000000020000088                _sbss = .
                 0x0000000020000088                __bss_start__ = _sbss
  *(.bss)

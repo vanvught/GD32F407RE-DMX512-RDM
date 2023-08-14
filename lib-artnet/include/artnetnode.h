@@ -235,6 +235,10 @@ public:
 	void SetOutputStyle(const uint32_t nPortIndex, lightset::OutputStyle outputStyle) {
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 
+		if (outputStyle == GetOutputStyle(nPortIndex)) {
+			return;
+		}
+
 		if ((m_State.status == artnetnode::Status::ON) && (m_pLightSet != nullptr)) {
 			m_pLightSet->SetOutputStyle(nPortIndex, outputStyle);
 			outputStyle = m_pLightSet->GetOutputStyle(nPortIndex);
@@ -259,6 +263,9 @@ public:
 			}
 		}
 #endif
+
+		m_State.IsSynchronousMode = false;
+
 		if (m_State.status == artnetnode::Status::ON) {
 			if (m_pArtNetStore != nullptr) {
 				m_pArtNetStore->SaveOutputStyle(nPortIndex, outputStyle);

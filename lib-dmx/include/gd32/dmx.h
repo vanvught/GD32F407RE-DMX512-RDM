@@ -45,8 +45,8 @@ class Dmx {
 public:
 	Dmx();
 
-	void SetPortDirection(uint32_t nPortIndex, dmx::PortDirection portDirection, bool bEnableData = false);
-	dmx::PortDirection GetPortDirection(uint32_t nPortIndex = 0) const {
+	void SetPortDirection(const uint32_t nPortIndex, const dmx::PortDirection portDirection, const bool bEnableData = false);
+	dmx::PortDirection GetPortDirection(const uint32_t nPortIndex) const {
 		return m_dmxPortDirection[nPortIndex];
 	}
 
@@ -97,12 +97,12 @@ public:
 
 	// DMX Receive
 
-	const uint8_t* GetDmxAvailable(uint32_t nPortIndex);
-	const uint8_t* GetDmxChanged(uint32_t nPortIndex);
-	const uint8_t* GetDmxCurrentData(uint32_t nPortIndex);
+	const uint8_t *GetDmxAvailable(const uint32_t nPortIndex);
+	const uint8_t *GetDmxChanged(const uint32_t nPortIndex);
+	const uint8_t *GetDmxCurrentData(const uint32_t nPortIndex);
 
-	uint32_t GetDmxUpdatesPerSecond(uint32_t nPortIndex);
-	uint32_t GetDmxReceivedCount(uint32_t nPortIndex);
+	uint32_t GetDmxUpdatesPerSecond(const uint32_t nPortIndex);
+	uint32_t GetDmxReceivedCount(const uint32_t nPortIndex);
 
 	static Dmx* Get() {
 		return s_pThis;
