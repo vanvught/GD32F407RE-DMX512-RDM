@@ -32,6 +32,9 @@
 
 #include "artnetnode.h"
 #include "artnet.h"
+#if (ARTNET_VERSION >= 4) && defined (E131_HAVE_DMXIN)
+# include "e131bridge.h"
+#endif
 
 #include "debug.h"
 
@@ -51,10 +54,13 @@ void ArtNetNode::HandleInput() {
 	if (pArtInput->NumPortsLo == 1) {
 		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
 			if (pArtInput->Input[0] & 0x01) {
-				m_InputPort[nPortIndex].GoodInput |= static_cast<uint8_t>(artnet::GoodInput::DISABLED);
+				m_InputPort[nPortIndex].GoodInput |= static_cast<uint8_t>(artnet::GoodInput::DISABLED);		
 			} else {
 				m_InputPort[nPortIndex].GoodInput &= static_cast<uint8_t>(~static_cast<uint8_t>(artnet::GoodInput::DISABLED));
 			}
+#if (ARTNET_VERSION >= 4) && defined (E131_HAVE_DMXIN)
+			E131Bridge::SetInputDisabled(nPortIndex, pArtInput->Input[0] & 0x01);
+#endif	
 		}
 	}
 

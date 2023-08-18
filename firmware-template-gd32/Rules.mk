@@ -37,10 +37,6 @@ LIBS+=c++ c gd32
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 
-ifeq ($(findstring DMX4,$(BOARD)), DMX4)
-	DEFINES+=-DCONSOLE_I2C
-endif
-
 ifeq ($(findstring ARTNET_VERSION=4,$(DEFINES)),ARTNET_VERSION=4)
 	ifeq ($(findstring ARTNET_HAVE_DMXIN,$(DEFINES)),ARTNET_HAVE_DMXIN)
 		DEFINES+=-DE131_HAVE_DMXIN

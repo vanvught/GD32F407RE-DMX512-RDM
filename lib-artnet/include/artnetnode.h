@@ -50,7 +50,6 @@
 #include "artnetrdm.h"
 #include "artnetstore.h"
 #include "artnetdisplay.h"
-#include "artnetdmx.h"
 #include "artnettrigger.h"
 
 #if (ARTNET_VERSION >= 4)
@@ -168,6 +167,7 @@ struct OutputPort {
 
 struct InputPort {
 	uint32_t nDestinationIp;
+	uint32_t nMillis;
 	uint8_t nSequenceNumber;
 	uint8_t GoodInput;
 	uint8_t nPollReplyIndex;
@@ -559,9 +559,6 @@ private:
 	void HandleTrigger();
 
 	uint16_t MakePortAddress(const uint16_t nUniverse, const uint32_t nPage);
-
-	bool GetPortIndexInput(const uint32_t nPage, const uint32_t nPollReplyIndex , uint32_t& nPortIndex);
-	bool GetPortIndexOutput(const uint32_t nPage, const uint32_t nPollReplyIndex, uint32_t& nPortIndex);
 
 	void UpdateMergeStatus(const uint32_t nPortIndex);
 	void CheckMergeTimeouts(const uint32_t nPortIndex);

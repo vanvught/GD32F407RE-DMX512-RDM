@@ -33,6 +33,10 @@
 
 #include "e117const.h"
 
+#if defined (E131_HAVE_DMXIN)
+# include "dmx.h"
+#endif
+
 #include "lightset.h"
 #include "lightsetdata.h"
 
@@ -103,7 +107,7 @@ void E131Bridge::Start() {
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
-			e131::dmx_start(nPortIndex);
+			Dmx::Get()->SetPortDirection(nPortIndex, dmx::PortDirection::INP, true);
 		}
 	}
 #endif
@@ -138,7 +142,7 @@ void E131Bridge::Stop() {
 #if defined (E131_HAVE_DMXIN)
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
-			e131::dmx_stop(nPortIndex);
+			Dmx::Get()->SetPortDirection(nPortIndex, dmx::PortDirection::INP, false);
 		}
 	}
 #endif

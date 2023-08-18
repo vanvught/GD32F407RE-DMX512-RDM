@@ -37,6 +37,7 @@ void __attribute__((weak)) link_handle_change(const net::Link state) {
 
 	if (net::Link::STATE_UP == state) {
 		if (Network::Get()->IsDhcpUsed()) {
+			DEBUG_PUTS("Enable DHCP");
 			Network::Get()->EnableDhcp();
 		}
 	}

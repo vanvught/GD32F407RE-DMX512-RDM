@@ -32,7 +32,8 @@
 
 #include "artnetnode.h"
 #include "artnet.h"
-#include "artnetdmx.h"
+
+#include "dmx.h"
 
 #include "network.h"
 #include "hardware.h"
@@ -46,19 +47,19 @@ static uint32_t s_ReceivingMask = 0;
 void ArtNetNode::HandleDmxIn() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if  ((m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT)
-		 &&  (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
-		 && ((m_InputPort[nPortIndex].GoodInput & artnet::GoodInput::DISABLED) != artnet::GoodInput::DISABLED)) {
+				&&  (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
+				&& ((m_InputPort[nPortIndex].GoodInput & artnet::GoodInput::DISABLED) != artnet::GoodInput::DISABLED)) {
 
-			uint32_t nLength;
-			uint32_t nUpdatesPerSecond;
-			const auto *const pDmxData = artnet::dmx_handler(nPortIndex, nLength, nUpdatesPerSecond);
+			const auto *const pDmxData = reinterpret_cast<const struct Data *>(Dmx::Get()->GetDmxChanged(nPortIndex));
 
 			if (pDmxData != nullptr) {
 				m_ArtDmx.Sequence = static_cast<uint8_t>(1U + m_InputPort[nPortIndex].nSequenceNumber++);
 				m_ArtDmx.Physical = static_cast<uint8_t>(nPortIndex);
 				m_ArtDmx.PortAddress = m_Node.Port[nPortIndex].PortAddress;
 
-				memcpy(m_ArtDmx.Data, pDmxData, nLength);
+				auto nLength = pDmxData->Statistics.nSlotsInPacket;
+
+				memcpy(m_ArtDmx.Data, &pDmxData->Data[1], nLength);
 
 				if ((nLength & 0x1) == 0x1) {
 					m_ArtDmx.Data[nLength] = 0x00;
@@ -77,18 +78,62 @@ void ArtNetNode::HandleDmxIn() {
 					m_State.nReceivingDmx |= (1U << static_cast<uint8_t>(lightset::PortDir::INPUT));
 					hal::panel_led_on(hal::panelled::PORT_A_RX << nPortIndex);
 				}
-			} else {
+
+				continue;
+
+			} 
+
+			if (Dmx::Get()->GetDmxUpdatesPerSecond(nPortIndex) == 0) {
+				auto sendArtDmx = false;
+
 				if ((m_InputPort[nPortIndex].GoodInput & artnet::GoodInput::DATA_RECIEVED) == artnet::GoodInput::DATA_RECIEVED) {
-					if (nUpdatesPerSecond == 0) {
-						m_InputPort[nPortIndex].GoodInput = static_cast<uint8_t>(m_InputPort[nPortIndex].GoodInput & ~artnet::GoodInput::DATA_RECIEVED);
-						s_ReceivingMask &= ~(1U << nPortIndex);
-						hal::panel_led_off(hal::panelled::PORT_A_RX << nPortIndex);
-						if (s_ReceivingMask == 0) {
-							m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::INPUT)));
-						}
+					m_InputPort[nPortIndex].GoodInput = static_cast<uint8_t>(m_InputPort[nPortIndex].GoodInput & ~artnet::GoodInput::DATA_RECIEVED);
+					m_InputPort[nPortIndex].nMillis = Hardware::Get()->Millis();
+					sendArtDmx = true;
+
+					s_ReceivingMask &= ~(1U << nPortIndex);
+					hal::panel_led_off(hal::panelled::PORT_A_RX << nPortIndex);
+
+					if (s_ReceivingMask == 0) {
+						m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::INPUT)));
+					}
+
+					SendDiag(artnet::PriorityCodes::LOW, "%u: Input DMX updates per second is 0", nPortIndex);
+				} else if (m_InputPort[nPortIndex].nMillis != 0) {
+					const auto nMillis = Hardware::Get()->Millis();
+					if ((nMillis - m_InputPort[nPortIndex].nMillis) > 1000) {
+						m_InputPort[nPortIndex].nMillis = nMillis;
+						sendArtDmx = true;
+
+						SendDiag(artnet::PriorityCodes::LOW, "%u: Input DMX timeout 1 second", nPortIndex);
 					}
 				}
+
+				if (sendArtDmx) {
+					const auto *const pDmxData = reinterpret_cast<const struct Data *>(Dmx::Get()->GetDmxCurrentData(nPortIndex));
+
+					m_ArtDmx.Sequence = static_cast<uint8_t>(1U + m_InputPort[nPortIndex].nSequenceNumber++);
+					m_ArtDmx.Physical = static_cast<uint8_t>(nPortIndex);
+					m_ArtDmx.PortAddress = m_Node.Port[nPortIndex].PortAddress;
+
+					auto nLength = pDmxData->Statistics.nSlotsInPacket;
+
+					memcpy(m_ArtDmx.Data, &pDmxData->Data[1], nLength);
+
+					if ((nLength & 0x1) == 0x1) {
+						m_ArtDmx.Data[nLength] = 0x00;
+						nLength++;
+					}
+
+					m_ArtDmx.LengthHi = static_cast<uint8_t>((nLength & 0xFF00) >> 8);
+					m_ArtDmx.Length = static_cast<uint8_t>(nLength & 0xFF);
+
+					Network::Get()->SendTo(m_nHandle, &m_ArtDmx, sizeof(struct artnet::ArtDmx), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
+
+					SendDiag(artnet::PriorityCodes::LOW, "%u: Input DMX sent (timeout)", nPortIndex);
+				}
 			}
+
 		}
 	}
 }

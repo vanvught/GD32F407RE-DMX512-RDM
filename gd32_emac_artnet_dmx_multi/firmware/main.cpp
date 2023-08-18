@@ -170,11 +170,10 @@ void main() {
 	const auto nActivePorts = static_cast<uint32_t>(node.GetActiveInputPorts() + node.GetActiveOutputPorts());
 
 	display.SetTitle("Art-Net 4 %u", nActivePorts);
-	display.Set(2, displayudf::Labels::NODE_NAME);
-	display.Set(3, displayudf::Labels::IP);
-	display.Set(4, displayudf::Labels::VERSION);
-	display.Set(5, displayudf::Labels::UNIVERSE_PORT_A);
-	display.Set(6, displayudf::Labels::UNIVERSE_PORT_B);
+	display.Set(2, displayudf::Labels::IP);
+	display.Set(3, displayudf::Labels::VERSION);
+	display.Set(4, displayudf::Labels::UNIVERSE_PORT_A);
+	display.Set(5, displayudf::Labels::UNIVERSE_PORT_B);
 
 	StoreDisplayUdf storeDisplayUdf;
 	DisplayUdfParams displayUdfParams(&storeDisplayUdf);

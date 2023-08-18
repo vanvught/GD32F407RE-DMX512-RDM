@@ -29,10 +29,6 @@ include ../firmware-template-gd32/Includes.mk
 DEFINES:=$(addprefix -D,$(DEFINES))
 DEFINES+=-D_TIME_STAMP_YEAR_=$(shell date  +"%Y") -D_TIME_STAMP_MONTH_=$(shell date  +"%-m") -D_TIME_STAMP_DAY_=$(shell date  +"%-d")
 
-ifeq ($(findstring DMX4,$(BOARD)), DMX4)
-	DEFINES+=-DCONSOLE_I2C
-endif
-
 ifeq ($(findstring ARTNET_VERSION=4,$(DEFINES)),ARTNET_VERSION=4)
 	ifeq ($(findstring ARTNET_HAVE_DMXIN,$(DEFINES)),ARTNET_HAVE_DMXIN)
 		DEFINES+=-DE131_HAVE_DMXIN

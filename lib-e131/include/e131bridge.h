@@ -32,7 +32,6 @@
 #include "e131.h"
 #include "e131packets.h"
 // Handlers
-#include "e131dmx.h"
 #include "e131sync.h"
 
 #include "lightset.h"
@@ -101,8 +100,10 @@ struct OutputPort {
 
 struct InputPort {
 	uint32_t nMulticastIp;
+	uint32_t nMillis;
 	uint8_t nSequenceNumber;
 	uint8_t nPriority;
+	bool IsDisabled;
 };
 }  // namespace e131bridge
 
@@ -232,6 +233,14 @@ public:
 	uint8_t GetPriority(const uint32_t nPortIndex) const {
 		assert(nPortIndex < e131bridge::MAX_PORTS);
 		return m_InputPort[nPortIndex].nPriority;
+	}
+
+	void SetInputDisabled(const uint32_t nPortIndex, const bool bDisable) {
+		assert(nPortIndex < e131bridge::MAX_PORTS);
+		m_InputPort[nPortIndex].IsDisabled = bDisable;
+	}
+	bool GetInputDisabled(const uint32_t nPortIndex) const {
+		return m_InputPort[nPortIndex].IsDisabled;
 	}
 
 #if defined (OUTPUT_HAVE_STYLESWITCH)

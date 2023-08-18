@@ -35,6 +35,10 @@
 #include "artnetconst.h"
 #include "artnet.h"
 
+#if defined (ARTNET_HAVE_DMXIN)
+# include "dmx.h"
+#endif
+
 #if (ARTNET_VERSION >= 4)
 # include "e131.h"
 #endif
@@ -185,7 +189,7 @@ void ArtNetNode::Start() {
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::ARTNET)
 		 && (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT)) {
-			artnet::dmx_start(nPortIndex);
+			Dmx::Get()->SetPortDirection(nPortIndex, dmx::PortDirection::INP, true);
 		}
 	}
 #endif
@@ -248,7 +252,7 @@ void ArtNetNode::Stop() {
 #if defined (ARTNET_HAVE_DMXIN)
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if (m_Node.Port[nPortIndex].direction == lightset::PortDir::INPUT) {
-			artnet::dmx_stop(nPortIndex);
+			Dmx::Get()->SetPortDirection(nPortIndex, dmx::PortDirection::INP, false);
 		}
 	}
 #endif
@@ -269,7 +273,7 @@ void ArtNetNode::GetShortNameDefault(const uint32_t nPortIndex, char *pShortName
 
 void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName) {
 	DEBUG_ENTRY
-	DEBUG_PRINTF("nPortIndex=%u, pShortName=%s", nPortIndex, pShortName);
+	DEBUG_PRINTF("nPortIndex=%u, pShortName=%s", nPortIndex, pShortName == nullptr ? "nullptr" : pShortName);
 	assert(nPortIndex < artnetnode::MAX_PORTS);
 
 	if (pShortName == nullptr) {

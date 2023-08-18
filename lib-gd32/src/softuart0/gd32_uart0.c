@@ -39,13 +39,14 @@
 # define SOFTUART_TX_RCU_GPIOx	RCU_GPIOA
 #endif
 
-/**
- * TIMER9
- * CK_TIMER = APB2 x 1
- */
+#if defined (GD32F4XX)
+# define TIMER_CLOCK		(APB2_CLOCK_FREQ * 2)
+#else
+# define TIMER_CLOCK		(APB2_CLOCK_FREQ)
+#endif
 
 #define BAUD_RATE		(115200U)
-#define TIMER_PERIOD	((APB2_CLOCK_FREQ / BAUD_RATE) - 1U)
+#define TIMER_PERIOD	((TIMER_CLOCK / BAUD_RATE) - 1U)
 #define BUFFER_SIZE		(128U)
 
 typedef enum  {
@@ -125,7 +126,7 @@ void uart0_init() {
 #else
 	gpio_mode_set(LED3_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, LED3_GPIO_PINx);
 	gpio_output_options_set(LED3_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED3_GPIO_PINx);
-	gpio_af_set(LED3_GPIOx);
+	gpio_af_set(LED3_GPIOx, GPIO_AF_0, LED3_GPIO_PINx);
 #endif
 
 	GPIO_BC(LED3_GPIOx) = LED3_GPIO_PINx;

@@ -59,14 +59,12 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 			m_OutputPort[nPortIndex].GoodOutput = GoodOutput;
 		}
 #endif
-		const auto nIndex = m_OutputPort[nPortIndex].nPollReplyIndex;
-		assert(nIndex < artnet::PORTS);
-		m_ArtPollReply.PortTypes[nIndex] |= artnet::PortType::OUTPUT_ARTNET;
-		m_ArtPollReply.GoodOutput[nIndex] = m_OutputPort[nPortIndex].GoodOutput;
-		m_ArtPollReply.GoodOutputB[nIndex] = m_OutputPort[nPortIndex].GoodOutputB;
-		m_ArtPollReply.GoodInput[nIndex] = 0;
-		m_ArtPollReply.SwOut[nIndex] = m_Node.Port[nPortIndex].DefaultAddress;
-		m_ArtPollReply.SwIn[nIndex] = 0;
+		m_ArtPollReply.PortTypes[0] |= artnet::PortType::OUTPUT_ARTNET;
+		m_ArtPollReply.GoodOutput[0] = m_OutputPort[nPortIndex].GoodOutput;
+		m_ArtPollReply.GoodOutputB[0] = m_OutputPort[nPortIndex].GoodOutputB;
+		m_ArtPollReply.GoodInput[0] = 0;
+		m_ArtPollReply.SwOut[0] = m_Node.Port[nPortIndex].DefaultAddress;
+		m_ArtPollReply.SwIn[0] = 0;
 		NumPortsOutput++;
 		return;
 	}
@@ -78,14 +76,12 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 
 		}
 #endif
-		const auto nIndex = m_InputPort[nPortIndex].nPollReplyIndex;
-		assert(nIndex < artnet::PORTS);
-		m_ArtPollReply.PortTypes[nIndex] |= artnet::PortType::INPUT_ARTNET;
-		m_ArtPollReply.GoodOutput[nIndex] = 0;
-		m_ArtPollReply.GoodOutputB[nIndex] = 0;
-		m_ArtPollReply.GoodInput[nIndex] = m_InputPort[nPortIndex].GoodInput;
-		m_ArtPollReply.SwOut[nIndex] = 0;
-		m_ArtPollReply.SwIn[nIndex] = m_Node.Port[nPortIndex].DefaultAddress;
+		m_ArtPollReply.PortTypes[0] |= artnet::PortType::INPUT_ARTNET;
+		m_ArtPollReply.GoodOutput[0] = 0;
+		m_ArtPollReply.GoodOutputB[0] = 0;
+		m_ArtPollReply.GoodInput[0] = m_InputPort[nPortIndex].GoodInput;
+		m_ArtPollReply.SwOut[0] = 0;
+		m_ArtPollReply.SwIn[0] = m_Node.Port[nPortIndex].DefaultAddress;
 		NumPortsInput++;
 	}
 #endif
@@ -135,20 +131,13 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDesti
 		ProcessPollRelply(nPortIndex, nPortsInput, nPortsOutput);
 
 		m_ArtPollReply.NumPortsLo = static_cast<uint8_t>(std::max(nPortsInput, nPortsOutput));
-
-		if (m_ArtPollReply.NumPortsLo == 0) {
-			DEBUG_PUTS("m_ArtPollReply.NumPortsLo == 0");
-			continue;
-		}
-
 		m_State.ArtPollReplyCount++;
+
 		uint8_t nSysNameLenght;
 		const auto *pSysName = Hardware::Get()->GetSysName(nSysNameLenght);
 		snprintf(reinterpret_cast<char*>(m_ArtPollReply.NodeReport), artnet::REPORT_LENGTH, "#%04x [%04d] %.*s AvV", static_cast<int>(m_State.reportCode), static_cast<int>(m_State.ArtPollReplyCount), nSysNameLenght, pSysName);
 
 		Network::Get()->SendTo(m_nHandle, &m_ArtPollReply, sizeof(artnet::ArtPollReply), nDestinationIp, artnet::UDP_PORT);
-
-		DEBUG_PRINTF(IPSTR,  IP2STR(nDestinationIp));
 	}
 
 	m_State.IsChanged = false;

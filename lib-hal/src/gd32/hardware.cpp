@@ -128,6 +128,14 @@ Hardware::Hardware() {
 	memset(&_spixel, 0, &_epixel - &_spixel);
 #  endif
 # endif
+#else
+# if defined (GD32F207RG) || defined (GD32F4XX)
+	// clear section .network
+	extern unsigned char _snetwork;
+	extern unsigned char _enetwork;
+	DEBUG_PRINTF("clearing .network at %p, size %u", &_snetwork, &_enetwork - &_snetwork);
+	memset(&_snetwork, 0, &_enetwork - &_snetwork);
+# endif
 #endif
 
 	struct tm tmbuf;
