@@ -128,11 +128,16 @@ static constexpr uint32_t OSC_IN = 0;
 static constexpr uint32_t OSC_OUT = 0;
 static constexpr uint32_t TCNET = 0;
 // DMX
-static constexpr uint32_t PORT_A_RX = 0;
-static constexpr uint32_t PORT_A_TX = 0;
+static constexpr uint32_t PORT_A_TX = (1U << 0);
+static constexpr uint32_t PORT_A_RX = (1U << 8);
 }  // namespace panelled
 }  // namespace hal
 #endif
+
+#define LEDPANEL_595_COUNT			2
+#define LEDPANEL_595_CS_GPIOx		GPIOA
+#define LEDPANEL_595_CS_RCU_GPIOx	RCU_GPIOA
+#define LEDPANEL_595_CS_GPIO_PINx	GPIO_PIN_15
 
 /**
  * SPI flash
