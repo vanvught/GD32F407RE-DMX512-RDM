@@ -222,7 +222,7 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 
     while (PHY_LINKED_STATUS != (phy_value & PHY_LINKED_STATUS)) {
     	enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-    	if ((s_nSysTickMillis - nMillis) > 1000) {
+    	if ((s_nSysTickMillis - nMillis) > 2000) {
     		break;
     	}
     }

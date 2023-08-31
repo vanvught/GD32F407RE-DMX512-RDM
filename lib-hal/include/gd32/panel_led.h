@@ -1,8 +1,8 @@
 /**
- * @file panel_led
+ * @file panel_led.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,24 +43,17 @@
 namespace hal {
 namespace panelled {
 extern uint32_t g_nData;
-extern uint32_t g_nDataPrevious;
 }  // namespace panelled
 
-inline static void panel_led_spi() {
+inline static void panel_led_spi(const UNUSED uint32_t nData) {
 #if defined(LEDPANEL_595_COUNT)
-	if (panelled::g_nData == panelled::g_nDataPrevious) {
-		return;
-	}
-
-	panelled::g_nDataPrevious = panelled::g_nData;
-
 	GPIO_BC(LEDPANEL_595_CS_GPIOx) = LEDPANEL_595_CS_GPIO_PINx;
 
 #if (LEDPANEL_595_COUNT >= 1)
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE))
 		;
 
-	SPI_DATA(SPI_PERIPH) = (panelled::g_nData & 0xFF);
+	SPI_DATA(SPI_PERIPH) = (nData & 0xFF);
 
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE))
 		;
@@ -71,7 +64,7 @@ inline static void panel_led_spi() {
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE))
 		;
 
-	SPI_DATA(SPI_PERIPH) = ((panelled::g_nData >> 8) & 0xFF);
+	SPI_DATA(SPI_PERIPH) = ((nData >> 8) & 0xFF);
 
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE))
 		;
@@ -82,7 +75,7 @@ inline static void panel_led_spi() {
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE))
 		;
 
-	SPI_DATA(SPI_PERIPH) = ((panelled::g_nData >> 16) & 0xFF);
+	SPI_DATA(SPI_PERIPH) = ((nData >> 16) & 0xFF);
 
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE))
 		;
@@ -93,7 +86,7 @@ inline static void panel_led_spi() {
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE))
 		;
 
-	SPI_DATA(SPI_PERIPH) = ((panelled::g_nData >> 24) & 0xFF);
+	SPI_DATA(SPI_PERIPH) = ((nData >> 24) & 0xFF);
 
 	while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE))
 		;
@@ -107,15 +100,25 @@ inline static void panel_led_spi() {
 
 inline static void panel_led_on(uint32_t UNUSED on) {
 #if defined(LEDPANEL_595_COUNT)
+	if (panelled::g_nData  == (panelled::g_nData | on)) {
+		return;
+	}
+
 	panelled::g_nData |= on;
-	panel_led_spi();
+
+	panel_led_spi(panelled::g_nData);
 #endif
 }
 
 inline static void panel_led_off(uint32_t UNUSED off) {
 #if defined(LEDPANEL_595_COUNT)
+	if (panelled::g_nData  == (panelled::g_nData & ~off)) {
+		return;
+	}
+
 	panelled::g_nData &= ~off;
-	panel_led_spi();
+
+	panel_led_spi(panelled::g_nData);
 #endif
 }
 }  // namespace hal

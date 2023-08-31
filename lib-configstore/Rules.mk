@@ -80,6 +80,11 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_INCLUDES+=../lib-oscclient/include
 	endif
 	
+	ifeq ($(findstring OUTPUT_DMX_SEND,$(MAKE_FLAGS)),OUTPUT_DMX_SEND)
+		EXTRA_SRCDIR+=src/dmx
+		EXTRA_INCLUDES+=../lib-dmx/include
+	endif
+	
 	ifeq ($(findstring OUTPUT_DMX_PIXEL,$(MAKE_FLAGS)), OUTPUT_DMX_PIXEL)
 		EXTRA_SRCDIR+=src/pixel
 		EXTRA_INCLUDES+=../lib-ws28xxdmx/include ../lib-ws28xx/include
