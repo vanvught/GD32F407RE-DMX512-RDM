@@ -153,7 +153,7 @@ void __attribute__((cold)) igmp_shutdown() {
 	DEBUG_EXIT
 }
 
-static void _send_report(uint32_t nGroupAddress) {
+static void _send_report(const uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	_pcast32 multicast_ip;
 
@@ -167,20 +167,15 @@ static void _send_report(uint32_t nGroupAddress) {
 
 	// Ethernet
 	memcpy(s_report.ether.dst, s_multicast_mac, ETH_ADDR_LEN);
-
 	// IPv4
 	s_report.ip4.id = s_id;
 	memcpy(s_report.ip4.dst, multicast_ip.u8, IPv4_ADDR_LEN);
 	s_report.ip4.chksum = 0;
-#if !defined (CHECKSUM_BY_HARDWARE)
 	s_report.ip4.chksum = net_chksum(reinterpret_cast<void *>(&s_report.ip4), 24); //TODO
-#endif
 	// IGMP
 	memcpy(s_report.igmp.report.igmp.group_address, multicast_ip.u8, IPv4_ADDR_LEN);
 	s_report.igmp.report.igmp.checksum = 0;
-#if !defined (CHECKSUM_BY_HARDWARE)
 	s_report.igmp.report.igmp.checksum = net_chksum(reinterpret_cast<void *>(&s_report.ip4), IPv4_IGMP_REPORT_HEADERS_SIZE);
-#endif
 
 	emac_eth_send(reinterpret_cast<void *>(&s_report), IGMP_REPORT_PACKET_SIZE);
 
@@ -189,7 +184,7 @@ static void _send_report(uint32_t nGroupAddress) {
 	DEBUG_EXIT
 }
 
-static void _send_leave(uint32_t nGroupAddress) {
+static void _send_leave(const uint32_t nGroupAddress) {
 	DEBUG_ENTRY
 	_pcast32 multicast_ip;
 

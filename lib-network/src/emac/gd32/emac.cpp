@@ -210,24 +210,10 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 			phyStatus.duplex == net::Duplex::DUPLEX_HALF ? "HALF" : "FULL");
 
 	const auto enet_init_status = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
-	if (enet_init_status != SUCCESS) {
 
-	}
+	if (enet_init_status != SUCCESS) {}
 
     DEBUG_PRINTF("enet_init_status=%s", enet_init_status == SUCCESS ? "SUCCES" : "ERROR" );
-
-    uint16_t phy_value = 0;
-    extern volatile uint32_t s_nSysTickMillis;
-    auto nMillis = s_nSysTickMillis;
-
-    while (PHY_LINKED_STATUS != (phy_value & PHY_LINKED_STATUS)) {
-    	enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-    	if ((s_nSysTickMillis - nMillis) > 2000) {
-    		break;
-    	}
-    }
-
-    DEBUG_PRINTF("s_nSysTickMillis - nMillis=%u", s_nSysTickMillis - nMillis);
 
 #ifndef NDEBUG
 	{

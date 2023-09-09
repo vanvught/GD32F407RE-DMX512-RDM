@@ -38,6 +38,10 @@
 # include "../debug/i2c/i2cdetect.h"
 #endif
 
+#if defined (ENABLE_USB_HOST)
+void usb_init();
+#endif
+
 #include "debug.h"
 
 extern "C" {
@@ -183,6 +187,10 @@ Hardware::Hardware() {
 	gpio_output_options_set(LEDPANEL_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LEDPANEL_595_CS_GPIO_PINx);
 # endif
 	GPIO_BOP(LEDPANEL_595_CS_GPIOx) = LEDPANEL_595_CS_GPIO_PINx;
+#endif
+
+#if defined ENABLE_USB_HOST
+	usb_init();
 #endif
 
 	DEBUG_EXIT

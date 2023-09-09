@@ -8,15 +8,8 @@ AS	 = $(CC)
 LD	 = $(PREFIX)ld
 AR	 = $(PREFIX)ar
 
-FAMILY?=gd32f4xx
 BOARD?=BOARD_GD32F407RE
 ENET_PHY?=DP83848
-
-FAMILY:=$(shell echo $(FAMILY) | tr A-Z a-z)
-FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
-
-$(info $$FAMILY [${FAMILY}])
-$(info $$FAMILY_UC [${FAMILY_UC}])
 
 # Output 
 TARGET=$(FAMILY).bin
@@ -28,12 +21,6 @@ BUILD=build_gd32/
 # Input
 SOURCE=./
 FIRMWARE_DIR=./../firmware-template-gd32/
-LINKER=$(FIRMWARE_DIR)gd32f407re_flash.ld
-
-include ../firmware-template-gd32/Mcu.mk
-include ../firmware-template/libs.mk
-
-LIBS+=c++ c gd32
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 
@@ -42,6 +29,13 @@ ifeq ($(findstring ARTNET_VERSION=4,$(DEFINES)),ARTNET_VERSION=4)
 		DEFINES+=-DE131_HAVE_DMXIN
 	endif
 endif
+
+MCU=GD32F407RE
+
+include ../firmware-template-gd32/Mcu.mk
+include ../firmware-template/libs.mk
+
+LIBS+=c++ c gd32
 
 include ../firmware-template-gd32/Includes.mk
 

@@ -342,12 +342,12 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
     ErrStatus phy_state= ERROR, enet_state = ERROR;
 
     /* PHY interface configuration, configure SMI clock and reset PHY chip */
-    if(ERROR == enet_phy_config()){
-        _ENET_DELAY_(PHY_RESETDELAY);
-        if(ERROR == enet_phy_config()){
-            return enet_state;
-        }
-    }
+//    if(ERROR == enet_phy_config()){
+//        _ENET_DELAY_(PHY_RESETDELAY);
+//        if(ERROR == enet_phy_config()){
+//            return enet_state;
+//        }
+//    }
     /* initialize ENET peripheral with generally concerned parameters */
     enet_default_init();
 
@@ -411,15 +411,15 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
 			media_temp |= ENET_SPEEDMODE_100M;
 		}
     }else{
-        phy_value = (uint16_t)((media_temp & ENET_MAC_CFG_DPM) >> 3);
-        phy_value |= (uint16_t)((media_temp & ENET_MAC_CFG_SPD) >> 1);
-        phy_state = enet_phy_write_read(ENET_PHY_WRITE, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
-        if(!phy_state){
-            /* return ERROR due to write timeout */
-            return enet_state;
-        }
-        /* PHY configuration need some time */
-        _ENET_DELAY_(PHY_CONFIGDELAY);      
+//        phy_value = (uint16_t)((media_temp & ENET_MAC_CFG_DPM) >> 3);
+//        phy_value |= (uint16_t)((media_temp & ENET_MAC_CFG_SPD) >> 1);
+//        phy_state = enet_phy_write_read(ENET_PHY_WRITE, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+//        if(!phy_state){
+//            /* return ERROR due to write timeout */
+//            return enet_state;
+//        }
+//        /* PHY configuration need some time */
+//        _ENET_DELAY_(PHY_CONFIGDELAY);
     }
     /* after configuring the PHY, use mediamode to configure registers */
     reg_value = ENET_MAC_CFG;

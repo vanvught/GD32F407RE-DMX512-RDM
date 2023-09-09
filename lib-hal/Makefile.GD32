@@ -1,4 +1,4 @@
-#DEFINES=NDEBUG
+DEFINES=NDEBUG
 
 ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring USE_LEDBLINK_BITBANGING595,$(MAKE_FLAGS)), USE_LEDBLINK_BITBANGING595)
@@ -9,6 +9,7 @@ ifneq ($(MAKE_FLAGS),)
 	endif
 else
 	EXTRA_SRCDIR+=debug/emac/gd32
+	EXTRA_SRCDIR+=ff12c ff12c/option
 endif
 
 include Rules.mk
