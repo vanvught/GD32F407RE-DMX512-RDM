@@ -48,7 +48,7 @@ const RemoteConfig::Txt RemoteConfig::s_TXT[] = {
 		{ &RemoteConfig::HandleGetArtnetTxt,     &RemoteConfig::HandleSetArtnetTxt,     "artnet.txt",   10, Store::NODE },
 #endif
 #if defined (NODE_E131)
-		{ &RemoteConfig::HandleGetE131Txt,       &RemoteConfig::HandleSetE131Txt,       "e131.txt",     8,  Store::E131 },
+		{ &RemoteConfig::HandleGetE131Txt,       &RemoteConfig::HandleSetE131Txt,       "e131.txt",     8,  Store::NODE },
 #endif
 #if defined (NODE_LTC_SMPTE)
 		{ &RemoteConfig::HandleGetLtcTxt,        &RemoteConfig::HandleSetLtcTxt,        "ltc.txt",      7,  Store::LTC },

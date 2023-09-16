@@ -40,9 +40,9 @@ using namespace configstore;
 
 static constexpr uint8_t s_aSignature[] = {'A', 'v', 'V', 0x01};
 static constexpr auto OFFSET_STORES	= ((((sizeof(s_aSignature) + 15) / 16) * 16) + 16); // +16 is reserved for future use
-static constexpr uint32_t s_aStorSize[static_cast<uint32_t>(Store::LAST)]  = {96,        32,    64,      96,      64,    32,     32,        480,          64,         32,        96,           48,        32,      944,          48,        64,            32,        96,         32,      1024,     32,     32,       64,            96,               32,    32,         320};
+static constexpr uint32_t s_aStorSize[static_cast<uint32_t>(Store::LAST)]  = {96,        32,    64,      64,    32,     32,        480,          64,         32,        96,           48,        32,      944,          48,        64,            32,        96,         32,      1024,     32,     32,       64,            96,               32,    32,          320};
 #ifndef NDEBUG
-static constexpr char s_aStoreName[static_cast<uint32_t>(Store::LAST)][16] = {"Network", "DMX", "Pixel", "E1.31", "LTC", "MIDI", "LTC ETC", "OSC Server", "TLC59711", "USB Pro", "RDM Device", "RConfig", "TCNet", "OSC Client", "Display", "LTC Display", "Monitor", "SparkFun", "Slush", "Motors", "Show", "Serial", "RDM Sensors", "RDM SubDevices", "GPS", "RGB Panel", "Node"};
+static constexpr char s_aStoreName[static_cast<uint32_t>(Store::LAST)][16] = {"Network", "DMX", "Pixel", "LTC", "MIDI", "LTC ETC", "OSC Server", "TLC59711", "USB Pro", "RDM Device", "RConfig", "TCNet", "OSC Client", "Display", "LTC Display", "Monitor", "SparkFun", "Slush", "Motors", "Show", "Serial", "RDM Sensors", "RDM SubDevices", "GPS", "RGB Panel", "Node"};
 #endif
 
 bool ConfigStore::s_bHaveFlashChip;
@@ -101,6 +101,8 @@ bool ConfigStore::Init() {
 	storedevice::result result;
 	StoreDevice::Read(s_nStartAddress, FlashStore::SIZE, reinterpret_cast<uint8_t *>(&s_SpiFlashData), result);
 	assert(result == storedevice::result::OK);
+
+	debug_dump(s_SpiFlashData, FlashStore::SIZE);
 
 	bool bSignatureOK = true;
 
@@ -183,6 +185,11 @@ void ConfigStore::Update(Store store, uint32_t nOffset, const void *pData, uint3
 
 	DEBUG_PRINTF("pSrc=%p [pData], pDst=%p", reinterpret_cast<const void *>(pSrc), reinterpret_cast<void *>(pDst));
 
+#if defined(__linux__) || defined (__APPLE__)
+//	debug_dump(pSrc, nDataLength);
+//	debug_dump(pDst, nDataLength);
+#endif
+
 	for (uint32_t i = 0; i < nDataLength; i++) {
 		if (*pSrc != *pDst) {
 			bIsChanged = true;
@@ -205,7 +212,7 @@ void ConfigStore::Update(Store store, uint32_t nOffset, const void *pData, uint3
 	DEBUG_EXIT
 }
 
-void ConfigStore::Copy(Store store, void *pData, uint32_t nDataLength, uint32_t nOffset, bool isSetList) {
+void ConfigStore::Copy(Store store, void *pData, uint32_t nDataLength, uint32_t nOffset) {
 	DEBUG_ENTRY
 
 	if (!s_bHaveFlashChip) {
@@ -213,23 +220,11 @@ void ConfigStore::Copy(Store store, void *pData, uint32_t nDataLength, uint32_t 
 		return;
 	}
 
-	DEBUG_PRINTF("[%s]:%u pData=%p, nDataLength=%u, nOffset=%u, isSetList=%d", s_aStoreName[static_cast<uint32_t>(store)], static_cast<uint32_t>(store), pData, nDataLength, nOffset, isSetList);
+	DEBUG_PRINTF("[%s]:%u pData=%p, nDataLength=%u, nOffset=%u", s_aStoreName[static_cast<uint32_t>(store)], static_cast<uint32_t>(store), pData, nDataLength, nOffset);
 
 	assert(store < Store::LAST);
 	assert(pData != nullptr);
 	assert((nDataLength + nOffset) <= s_aStorSize[static_cast<uint32_t>(store)]);
-
-	if (isSetList) {
-		const auto *pSet = reinterpret_cast<uint32_t *>((&s_SpiFlashData[GetStoreOffset(store)] + nOffset));
-
-		DEBUG_PRINTF("*pSet=0x%x", reinterpret_cast<uint32_t>(*pSet));
-
-		if (*pSet == 0) {
-			Update(store, nOffset, pData, nDataLength);
-			DEBUG_EXIT
-			return;
-		}
-	}
 
 	const auto *pSrc = const_cast<const uint8_t *>(&s_SpiFlashData[GetStoreOffset(store)]) + nOffset;
 	memcpy(pData, pSrc, nDataLength);

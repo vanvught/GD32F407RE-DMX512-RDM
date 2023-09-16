@@ -26,6 +26,7 @@
 #ifndef ARTNETPARAMSCONST_H_
 #define ARTNETPARAMSCONST_H_
 
+#include "artnetparams.h"
 #include "artnet.h"
 
 struct ArtNetParamsConst {

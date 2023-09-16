@@ -47,14 +47,12 @@ void E131Params::Dump() {
 
 	for (uint32_t i = 0; i < e131params::MAX_PORTS; i++) {
 		if (isMaskSet(e131params::Mask::UNIVERSE_A << i)) {
-			printf(" %s=%d\n", LightSetParamsConst::UNIVERSE_PORT[i], m_Params.nUniversePort[i]);
+			printf(" %s=%d\n", LightSetParamsConst::UNIVERSE_PORT[i], m_Params.nUniverse[i]);
 		}
 	}
 
 	for (uint32_t i = 0; i < e131params::MAX_PORTS; i++) {
-		if (isMaskSet(e131params::Mask::MERGE_MODE_A << i)) {
-			printf(" %s=%s\n", LightSetParamsConst::MERGE_MODE_PORT[i], lightset::get_merge_mode(m_Params.nMergeModePort[i]));
-		}
+		printf(" %s=%s\n", LightSetParamsConst::MERGE_MODE_PORT[i], lightset::get_merge_mode(mergemode_get(i)));
 	}
 
 	for (uint32_t i = 0; i < e131params::MAX_PORTS; i++) {

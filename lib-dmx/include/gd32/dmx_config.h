@@ -36,8 +36,10 @@ namespace config {
 # include "board_gd32f107rc.h"
 #elif defined (BOARD_GD32F207RG)
 # include "board_gd32f207rg.h"
-#elif defined (BOARD_GD32F207VC)
-# include "board_gd32f207vc.h"
+#elif defined (BOARD_GD32F207VC_2)
+# include "board_gd32f207vc_2.h"
+#elif defined (BOARD_GD32F207VC_4)
+# include "board_gd32f207vc_4.h"
 #elif defined (BOARD_GD32F303RC)
 # include "board_gd32f303rc.h"
 #elif defined (BOARD_GD32F407RE)

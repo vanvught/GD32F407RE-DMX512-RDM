@@ -28,7 +28,7 @@
 #pragma GCC optimize ("-funroll-loops")
 #pragma GCC optimize ("-fprefetch-loop-arrays")
 
-#if 1
+#if 0
 # if defined (GD32F207RG)
 #  define LOGIC_ANALYZER
 #  if defined (NDEBUG)
@@ -960,7 +960,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART1_DMA, USART1_TX_DMA_CH) = dmaCHCTL;
 			dma_interrupt_flag_clear(USART1_DMA, USART1_TX_DMA_CH, DMA_INTF_FTFIF);
-			const auto *p = &s_TxBuffer[dmx::config::USART2_PORT].dmx;
+			const auto *p = &s_TxBuffer[dmx::config::USART1_PORT].dmx;
 			DMA_CHMADDR(USART1_DMA, USART1_TX_DMA_CH) = (uint32_t) p->data;
 			DMA_CHCNT(USART1_DMA, USART1_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;

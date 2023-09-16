@@ -295,10 +295,24 @@ void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName)
 }
 
 void ArtNetNode::GetLongNameDefault(char *pLongName) {
+#if !defined (ARTNET_LONG_NAME)
 	uint8_t nBoardNameLength;
 	const auto *const pBoardName = Hardware::Get()->GetBoardName(nBoardNameLength);
 	const auto *const pWebsiteUrl = Hardware::Get()->GetWebsiteUrl();
 	snprintf(pLongName, artnet::LONG_NAME_LENGTH - 1, "%s %s %d %s", pBoardName, artnet::NODE_ID, artnet::VERSION, pWebsiteUrl);
+#else
+	uint32_t i;
+
+	for (i = 0; i < (sizeof(ARTNET_LONG_NAME) - 1) && i < (artnet::LONG_NAME_LENGTH - 1) ; i++ ) {
+		if (ARTNET_LONG_NAME[i] == '_') {
+			pLongName[i] = ' ';
+		} else {
+			pLongName[i] = ARTNET_LONG_NAME[i];
+		}
+	}
+
+	pLongName[i] = '\0';
+#endif
 }
 
 void ArtNetNode::SetLongName(const char *pLongName) {
@@ -388,13 +402,7 @@ static artnet::OpCodes get_op_code(const uint32_t nBytesReceived, const uint8_t 
 	return artnet::OpCodes::OP_NOT_DEFINED;
 }
 
-void ArtNetNode::Run() {
-	uint16_t nForeignPort;
-
-	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void**>(reinterpret_cast<void **>(&m_pReceiveBuffer)), &m_nIpAddressFrom, &nForeignPort);
-
-	m_nCurrentPacketMillis = Hardware::Get()->Millis();
-
+void ArtNetNode::Process(const uint16_t nBytesReceived) {
 	if (__builtin_expect((nBytesReceived == 0), 1)) {
 		const auto nDeltaMillis = m_nCurrentPacketMillis - m_nPreviousPacketMillis;
 
@@ -433,9 +441,6 @@ void ArtNetNode::Run() {
 			}
 #endif
 		}
-#endif
-#if (ARTNET_VERSION >= 4)
-		E131Bridge::Run();
 #endif
 
 		for (auto& entry : m_State.ArtPollReplyQueue) {
@@ -571,10 +576,6 @@ void ArtNetNode::Run() {
 #endif	
 
 	hal::panel_led_on(hal::panelled::ARTNET);
-
-#if (ARTNET_VERSION >= 4)
-	E131Bridge::Run();
-#endif
 
 	for (auto& entry : m_State.ArtPollReplyQueue) {
 		if (entry.ArtPollMillis != 0) {

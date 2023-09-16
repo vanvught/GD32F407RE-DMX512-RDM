@@ -37,6 +37,9 @@
 #include "lightset.h"
 #include "lightsetdata.h"
 
+#include "network.h"
+#include "hardware.h"
+
 #include "debug.h"
 
 namespace e131bridge {
@@ -292,7 +295,49 @@ public:
 	void Start();
 	void Stop();
 
-	void Run();
+	void Run() {
+		uint16_t nForeignPort;
+
+		const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void **>(reinterpret_cast<void **>(&m_pReceiveBuffer)), &m_nIpAddressFrom, &nForeignPort) ;
+
+		m_nCurrentPacketMillis = Hardware::Get()->Millis();
+
+		if (__builtin_expect((nBytesReceived == 0), 1)) {
+			if (m_State.nEnableOutputPorts != 0) {
+				if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= static_cast<uint32_t>(e131::NETWORK_DATA_LOSS_TIMEOUT_SECONDS * 1000)) {
+					if ((m_pLightSet != nullptr) && (!m_State.IsNetworkDataLoss)) {
+						SetNetworkDataLossCondition();
+					}
+				}
+
+				if ((m_nCurrentPacketMillis - m_nPreviousPacketMillis) >= 1000) {
+					m_State.nReceivingDmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(lightset::PortDir::OUTPUT)));
+				}
+			}
+
+#if defined (E131_HAVE_DMXIN)
+			HandleDmxIn();
+			SendDiscoveryPacket();
+#endif
+
+			// The hardware::ledblink::Mode::FAST is for RDM Identify (Art-Net 4)
+			if (m_bEnableDataIndicator && (Hardware::Get()->GetMode() != hardware::ledblink::Mode::FAST)) {
+				if (m_State.nReceivingDmx != 0) {
+					Hardware::Get()->SetMode(hardware::ledblink::Mode::DATA);
+				} else {
+					Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
+				}
+			}
+
+			return;
+		}
+
+		if (__builtin_expect((!IsValidRoot()), 0)) {
+			return;
+		}
+
+		Process();
+	}
 
 	void Print();
 
@@ -323,6 +368,7 @@ private:
 	void FillDiscoveryPacket();
 	void SendDiscoveryPacket();
 
+	void Process();
 private:
 	int32_t m_nHandle { -1 };
 

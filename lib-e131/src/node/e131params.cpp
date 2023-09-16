@@ -68,7 +68,7 @@ E131Params::E131Params(E131ParamsStore *pE131ParamsStore):m_pE131ParamsStore(pE1
 	memset(&m_Params, 0, sizeof(struct Params));
 	
 	for (uint32_t i = 0; i < e131params::MAX_PORTS; i++) {
-		m_Params.nUniversePort[i] = static_cast<uint16_t>(i + 1);
+		m_Params.nUniverse[i] = static_cast<uint16_t>(i + 1);
 		m_Params.nPriority[i] = e131::priority::DEFAULT;
 		constexpr auto n = static_cast<uint32_t>(lightset::PortDir::OUTPUT) & 0x3;
 		m_Params.nDirection |= static_cast<uint16_t>(n << (i * 2));
@@ -128,12 +128,12 @@ void E131Params::callbackFunction(const char *pLine) {
 
 	uint8_t value8;
 	uint16_t value16;
-	char value[16];
+	char aValue[16];
 
 	uint32_t nLength = 8;
 
-	if (Sscan::Char(pLine, LightSetParamsConst::FAILSAFE, value, nLength) == Sscan::OK) {
-		const auto failsafe = lightset::get_failsafe(value);
+	if (Sscan::Char(pLine, LightSetParamsConst::FAILSAFE, aValue, nLength) == Sscan::OK) {
+		const auto failsafe = lightset::get_failsafe(aValue);
 
 		if (failsafe == lightset::FailSafe::HOLD) {
 			m_Params.nSetList &= ~Mask::FAILSAFE;
@@ -148,10 +148,10 @@ void E131Params::callbackFunction(const char *pLine) {
 	for (uint32_t nPortIndex = 0; nPortIndex < e131params::MAX_PORTS; nPortIndex++) {
 		if (Sscan::Uint16(pLine, LightSetParamsConst::UNIVERSE_PORT[nPortIndex], value16) == Sscan::OK) {
 			if ((value16 == 0) || (value16 > e131::universe::MAX)) {
-				m_Params.nUniversePort[nPortIndex] = static_cast<uint16_t>(nPortIndex + 1);
+				m_Params.nUniverse[nPortIndex] = static_cast<uint16_t>(nPortIndex + 1);
 				m_Params.nSetList &= ~(Mask::UNIVERSE_A << nPortIndex);
 			} else {
-				m_Params.nUniversePort[nPortIndex] = value16;
+				m_Params.nUniverse[nPortIndex] = value16;
 				m_Params.nSetList |= (Mask::UNIVERSE_A << nPortIndex);
 			}
 			return;
@@ -159,21 +159,16 @@ void E131Params::callbackFunction(const char *pLine) {
 
 		nLength = 3;
 
-		if (Sscan::Char(pLine, LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], value, nLength) == Sscan::OK) {
-			if (lightset::get_merge_mode(value) == lightset::MergeMode::LTP) {
-				m_Params.nMergeModePort[nPortIndex] = static_cast<uint8_t>(lightset::MergeMode::LTP);
-				m_Params.nSetList |= (Mask::MERGE_MODE_A << nPortIndex);
-			} else {
-				m_Params.nMergeModePort[nPortIndex] = static_cast<uint8_t>(lightset::MergeMode::HTP);
-				m_Params.nSetList &= ~(Mask::MERGE_MODE_A << nPortIndex);
-			}
+		if (Sscan::Char(pLine, LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], aValue, nLength) == Sscan::OK) {
+			m_Params.nMergeMode &= e131params::mergemode_clear(nPortIndex);
+			m_Params.nMergeMode |= mergemode_set(nPortIndex, lightset::get_merge_mode(aValue));
 			return;
 		}
 
 		nLength = 7;
 
-		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[nPortIndex], value, nLength) == Sscan::OK) {
-			const auto portDir = lightset::get_direction(value);
+		if (Sscan::Char(pLine, LightSetParamsConst::DIRECTION[nPortIndex], aValue, nLength) == Sscan::OK) {
+			const auto portDir = lightset::get_direction(aValue);
 			m_Params.nDirection &= e131params::portdir_clear(nPortIndex);
 
 			DEBUG_PRINTF("%u portDir=%u, m_Params.nDirection=%x", nPortIndex, static_cast<uint32_t>(portDir), m_Params.nDirection);
@@ -210,8 +205,8 @@ void E131Params::callbackFunction(const char *pLine) {
 #if defined (OUTPUT_HAVE_STYLESWITCH)
 		nLength = 6;
 
-		if (Sscan::Char(pLine, LightSetParamsConst::OUTPUT_STYLE[nPortIndex], value, nLength) == Sscan::OK) {
-			const auto nOutputStyle = static_cast<uint32_t>(lightset::get_output_style(value));
+		if (Sscan::Char(pLine, LightSetParamsConst::OUTPUT_STYLE[nPortIndex], aValue, nLength) == Sscan::OK) {
+			const auto nOutputStyle = static_cast<uint32_t>(lightset::get_output_style(aValue));
 
 			if (nOutputStyle != 0) {
 				m_Params.nOutputStyle |= static_cast<uint8_t>(1U << nPortIndex);
@@ -254,7 +249,7 @@ void E131Params::Builder(const struct Params *pParams, char *pBuffer, uint32_t n
 	PropertiesBuilder builder(E131ParamsConst::FILE_NAME, pBuffer, nLength);
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
-		builder.Add(LightSetParamsConst::UNIVERSE_PORT[nPortIndex], m_Params.nUniversePort[nPortIndex], isMaskSet(Mask::UNIVERSE_A << nPortIndex));
+		builder.Add(LightSetParamsConst::UNIVERSE_PORT[nPortIndex], m_Params.nUniverse[nPortIndex], isMaskSet(Mask::UNIVERSE_A << nPortIndex));
 		const auto portDir = static_cast<lightset::PortDir>(e131params::portdir_shif_right(m_Params.nDirection, nPortIndex));
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
 		builder.Add(LightSetParamsConst::DIRECTION[nPortIndex], lightset::get_direction(portDir), !isDefault);
@@ -265,7 +260,10 @@ void E131Params::Builder(const struct Params *pParams, char *pBuffer, uint32_t n
 	builder.AddComment("DMX Output");
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
-		builder.Add(LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], lightset::get_merge_mode(m_Params.nMergeModePort[nPortIndex]), isMaskSet(Mask::MERGE_MODE_A << nPortIndex));
+		const auto mergeMode = mergemode_get(nPortIndex);
+		const auto isDefault = (mergeMode == lightset::MergeMode::HTP);
+		builder.Add(LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], lightset::get_merge_mode(mergeMode), !isDefault);
+
 #if defined (OUTPUT_HAVE_STYLESWITCH)
 		const auto isSet = isOutputStyleSet(1U << nPortIndex);
 		builder.Add(LightSetParamsConst::OUTPUT_STYLE[nPortIndex], lightset::get_output_style(static_cast<lightset::OutputStyle>(isSet)), isSet);
@@ -312,9 +310,7 @@ void E131Params::Set(uint32_t nPortIndexOffset) {
 			break;
 		}
 
-		if (isMaskSet(Mask::MERGE_MODE_A << nPortIndex)) {
-			p->SetMergeMode(nOffset, static_cast<lightset::MergeMode>(m_Params.nMergeModePort[nPortIndex]));
-		}
+		p->SetMergeMode(nOffset, mergemode_get(nPortIndex));
 
 #if defined (E131_HAVE_DMXIN)
 		if (isMaskSet(Mask::PRIORITY_A << nPortIndex)) {

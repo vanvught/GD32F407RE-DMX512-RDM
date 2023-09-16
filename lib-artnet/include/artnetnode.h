@@ -198,7 +198,17 @@ public:
 	void Start();
 	void Stop();
 
-	void Run();
+	void Run() {
+		uint16_t nForeignPort;
+		const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void**>(reinterpret_cast<void **>(&m_pReceiveBuffer)), &m_nIpAddressFrom, &nForeignPort);
+		m_nCurrentPacketMillis = Hardware::Get()->Millis();
+
+		Process(nBytesReceived);
+
+#if (ARTNET_VERSION >= 4)
+		E131Bridge::Run();
+#endif
+	}
 
 	uint8_t GetVersion() const {
 		return artnet::VERSION;
@@ -574,6 +584,7 @@ private:
 	void FailSafeRecord();
 	void FailSafePlayback();
 
+	void Process(const uint16_t);
 private:
 	int32_t m_nHandle { -1 };
 	uint8_t *m_pReceiveBuffer { nullptr };

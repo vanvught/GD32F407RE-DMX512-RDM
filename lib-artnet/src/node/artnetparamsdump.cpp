@@ -41,22 +41,24 @@
 #include "network.h"
 
 void ArtNetParams::Dump() {
-#ifdef F
+#ifndef NDEBUG
 	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, ArtNetParamsConst::FILE_NAME);
 
 	if (isMaskSet(artnetparams::Mask::FAILSAFE)) {
 		printf(" %s=%d [%s]\n", LightSetParamsConst::FAILSAFE, m_Params.nFailSafe, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)));
 	}
 
-	if (isMaskSet(artnetparams::Mask::SHORT_NAME)) {
-		printf(" %s=%s\n", ArtNetParamsConst::NODE_SHORT_NAME, m_Params.aShortName);
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		if (isMaskSet(artnetparams::Mask::LABEL_A << i)) {
+			printf(" %s=%s\n", LightSetParamsConst::NODE_LABEL[i], m_Params.aLabel[i]);
+		}
 	}
 
 	if (isMaskSet(artnetparams::Mask::LONG_NAME)) {
-		printf(" %s=%s\n", ArtNetParamsConst::NODE_LONG_NAME, m_Params.aLongName);
+		printf(" %s=%s\n", LightSetParamsConst::NODE_LONG_NAME, m_Params.aLongName);
 	}
 
-	if (isMaskSet(artnetparams::Mask::RDM)) {
+	if (isMaskSet(artnetparams::Mask::ENABLE_RDM)) {
 		printf(" %s=1 [Yes]\n", ArtNetParamsConst::ENABLE_RDM);
 	}
 
@@ -67,25 +69,28 @@ void ArtNetParams::Dump() {
 	}
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
-		if (isMaskSet(artnetparams::Mask::MERGE_MODE_A << i)) {
-			printf(" %s=%s\n", LightSetParamsConst::MERGE_MODE_PORT[i], lightset::get_merge_mode(m_Params.nMergeModePort[i]));
+		printf(" %s=%s\n", LightSetParamsConst::MERGE_MODE_PORT[i], lightset::get_merge_mode(mergemode_get(i)));
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		const auto portProtocol = protocol_get(i);
+		const auto isDefault = (portProtocol == artnet::PortProtocol::ARTNET);
+		if (!isDefault) {
+			printf(" %s=%s\n", ArtNetParamsConst::PROTOCOL_PORT[i], artnet::get_protocol_mode(i));
 		}
 	}
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
-		if (isMaskSet(artnetparams::Mask::PROTOCOL_A << i)) {
-			printf(" %s=%s\n", ArtNetParamsConst::PROTOCOL_PORT[i], artnet::get_protocol_mode(m_Params.nProtocolPort[i], true));
+		const auto portDir = portdir_get(i);
+		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
+		if (!isDefault) {
+			printf(" %s=%u [%s]\n", LightSetParamsConst::DIRECTION[i], static_cast<uint32_t>(portDir), lightset::get_direction(portDir));
 		}
 	}
 
 	for (uint32_t i = 0; i < artnet::PORTS; i++) {
-		const auto portDir = static_cast<lightset::PortDir>(artnetparams::portdir_shif_right(m_Params.nDirection, i));
-		printf(" %s=%d [%s]\n", LightSetParamsConst::DIRECTION[i], artnetparams::portdir_shif_right(m_Params.nDirection, i), lightset::get_direction(portDir));
-	}
-
-	for (uint32_t i = 0; i < artnet::PORTS; i++) {
-		if (isMaskMultiPortOptionsSet(1U << i)) {
-			printf(" %s=" IPSTR "\n", ArtNetParamsConst::DESTINATION_IP_PORT[i], IP2STR(m_Params.nDestinationIpPort[i]));
+		if (isMaskSet(artnetparams::Mask::DESTINATION_IP_A << i)) {
+			printf(" %s=" IPSTR "\n", ArtNetParamsConst::DESTINATION_IP_PORT[i], IP2STR(m_Params.nDestinationIp[i]));
 		}
 	}
 
@@ -102,8 +107,10 @@ void ArtNetParams::Dump() {
 		printf(" %s=1 [Yes]\n", ArtNetParamsConst::MAP_UNIVERSE0);
 	}
 
-	if (isMaskSet(artnetparams::Mask::SACN_PRIORITY)) {
-		printf(" %s=%u\n", ArtNetParamsConst::SACN_PRIORITY, m_Params.nsACNPriority);
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		if (isMaskSet(artnetparams::Mask::PRIORITY_A << i)) {
+			printf(" %s=%u\n", LightSetParamsConst::PRIORITY[i], m_Params.nPriority[i]);
+		}
 	}
 
 	/**

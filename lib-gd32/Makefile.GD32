@@ -19,12 +19,21 @@ ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)
 		
 		EXTRA_C_SOURCE_FILES=gd32f20x/GD32F20x_usbfs_library/driver/Source/drv_usb_core.c
 		EXTRA_C_SOURCE_FILES+=gd32f20x/GD32F20x_usbfs_library/driver/Source/drv_usb_host.c
+		EXTRA_C_SOURCE_FILES+=gd32f20x/GD32F20x_usbfs_library/driver/Source/drv_usbh_int.c
 		
 		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/driver/Include
 		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/core/Include
-		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Include
 		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/common
-		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/class/msc
+		
+		ifeq ($(findstring CONFIG_USB_HOST_MSC,$(MAKE_FLAGS)), CONFIG_USB_HOST_MSC)
+			EXTRA_SRCDIR+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Source
+		
+			EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Include
+			EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/class/msc
+		
+			EXTRA_INCLUDES+=../lib-hal/ff12c
+		endif
+		
 	endif
 endif
 
@@ -66,18 +75,7 @@ ifneq ($(MAKE_FLAGS),)
   else
   	EXTRA_SRCDIR+=device/emac
   endif
-  
-  ifeq ($(findstring DISABLE_FS,$(MAKE_FLAGS)), DISABLE_FS)
-  else
-  	EXTRA_SRCDIR+=device/sdio
-  endif
-  
-
-  ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
-  	EXTRA_SRCDIR+=device/usb
-  	EXTRA_INCLUDES+=device/usb
-  endif  
-  
+   
   ifeq ($(findstring CONFIG_USE_SOFTUART0,$(MAKE_FLAGS)), CONFIG_USE_SOFTUART0)
   	EXTRA_SRCDIR+=src/softuart0
   else
@@ -86,22 +84,16 @@ ifneq ($(MAKE_FLAGS),)
   		EXTRA_SRCDIR+=src/uart0
   	endif
   endif
+  
+  ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)		
+  	EXTRA_SRCDIR+=device/usb
+  endif	
 else
 	EXTRA_SRCDIR+=device/emac
-	EXTRA_SRCDIR+=device/sdio
 	EXTRA_SRCDIR+=device/usb
 	EXTRA_SRCDIR+=src/uart0 src/softuart0
-
-	EXTRA_C_SOURCE_FILES=gd32f20x/GD32F20x_usbfs_library/driver/Source/drv_usb_host.c
-
-	EXTRA_SRCDIR+=gd32f20x/GD32F20x_usbfs_library/host/core/Source
 	
-	EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/driver/Include
-	EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/core/Include
-	EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Include
-	EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/common
-	EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/class/msc
-	EXTRA_INCLUDES+=device/usb
+	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
 endif
 
 include ../firmware-template-gd32/lib/Rules.mk

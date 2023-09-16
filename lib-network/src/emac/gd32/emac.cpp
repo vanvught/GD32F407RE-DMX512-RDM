@@ -204,7 +204,7 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 		mediamode = ENET_10M_FULLDUPLEX;
 	}
 
-	DEBUG_PRINTF("%s, %d, %s",
+	printf("Link %s, %d, %s\n",
 			phyStatus.link == net::Link::STATE_UP ? "Up" : "Down",
 			phyStatus.speed == net::Speed::SPEED10 ? 10 : 100,
 			phyStatus.duplex == net::Duplex::DUPLEX_HALF ? "HALF" : "FULL");

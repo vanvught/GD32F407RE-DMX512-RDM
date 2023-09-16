@@ -37,10 +37,6 @@
 
 #include "lightset.h"
 
-#if !defined(LIGHTSET_PORTS)
-# define LIGHTSET_PORTS	0
-#endif
-
 namespace artnetparams {
 static constexpr uint16_t clear_mask(const uint32_t i) {
    	return static_cast<uint16_t>(~((1U << (i + 8)) | (1U << i)));
@@ -73,6 +69,7 @@ static constexpr uint16_t protocol_set(const uint32_t nPortIndex, const artnet::
 struct Params {
    uint32_t nSetList;
    // Node
+   uint8_t nPersonality;
    uint16_t nUniverse[artnet::PORTS];
    uint16_t nDirection;
    uint16_t nMergeMode;
@@ -80,7 +77,7 @@ struct Params {
    uint8_t nFailSafe;
    uint8_t aLongName[artnet::LONG_NAME_LENGTH];
    uint8_t aLabel[artnet::PORTS][artnet::SHORT_NAME_LENGTH];
-   uint8_t Filler1[2];
+   uint8_t Filler1;
    // Art-Net 4
    uint16_t nProtocol;
    uint16_t nRdm;
@@ -167,7 +164,7 @@ public:
 
 #if defined (ESP8266)
 	lightset::OutputType GetOutputType() const {
-		return static_cast<lightset::OutputType>(m_Params.Filler1[0]);
+		return static_cast<lightset::OutputType>(m_Params.Filler1);
 	}
 #endif
 

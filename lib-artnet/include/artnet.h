@@ -83,11 +83,11 @@ enum class StyleCode: uint8_t {
  * These are used in ArtPoll and ArtDiagData.
  */
 enum class PriorityCodes: uint8_t {
-	LOW = 0x10,
-	MED = 0x40,
-	HIGH = 0x80,
-	CRITICAL = 0xE0,
-	VOLATILE = 0xF0,	///< Volatile message. Messages of this type are displayed on a single line in the DMX-Workshop diagnostics display. All other types are displayed in a list box.
+	DIAG_LOW = 0x10,
+	DIAG_MED = 0x40,
+	DIAG_HIGH = 0x80,
+	DIAG_CRITICAL = 0xE0,
+	DIAG_VOLATILE = 0xF0,	///< Volatile message. Messages of this type are displayed on a single line in the DMX-Workshop diagnostics display. All other types are displayed in a list box.
 };
 
 struct PortType {

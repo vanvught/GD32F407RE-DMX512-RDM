@@ -11,8 +11,9 @@
 .word  _sbss
 .word  _ebss
 
- .weak  Reset_Handler
- .type  Reset_Handler, %function
+.section  .text.Reset_Handler
+  .weak  Reset_Handler
+  .type  Reset_Handler, %function
 
 Reset_Handler:
   movs r1, #0

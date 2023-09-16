@@ -344,6 +344,7 @@ void ArtNetParams::staticCallbackFunction(void *p, const char *s) {
 
 void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 	DEBUG_ENTRY
+	DEBUG_PRINTF("s_nPortsMax=%u", s_nPortsMax);
 
 	assert(pBuffer != nullptr);
 
@@ -356,8 +357,12 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 
 	PropertiesBuilder builder(ArtNetParamsConst::FILE_NAME, pBuffer, nLength);
 
+	if (!isMaskSet(Mask::LONG_NAME)) {
+		memcpy(m_Params.aLongName, ArtNetNode::Get()->GetLongName(), artnet::LONG_NAME_LENGTH);
+	}
 	builder.Add(LightSetParamsConst::NODE_LONG_NAME, reinterpret_cast<const char*>(m_Params.aLongName), isMaskSet(Mask::LONG_NAME));
-#if defined (RDM_CONTROLLER)
+
+	#if defined (RDM_CONTROLLER)
 	builder.Add(ArtNetParamsConst::ENABLE_RDM, isMaskSet(Mask::ENABLE_RDM));
 #endif
 	builder.Add(LightSetParamsConst::FAILSAFE, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)), isMaskSet(Mask::FAILSAFE));
@@ -367,9 +372,11 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 		const auto portDir = portdir_get(nPortIndex);
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
 		builder.Add(LightSetParamsConst::DIRECTION[nPortIndex], lightset::get_direction(portDir), !isDefault);
+
 		const auto isLabelSet = isMaskSet(Mask::LABEL_A << nPortIndex);
+
 		if (!isLabelSet) {
-			ArtNetNode::Get()->GetShortNameDefault(nPortIndex, reinterpret_cast<char *>(m_Params.aLabel[nPortIndex]));
+			memcpy(m_Params.aLabel[nPortIndex], ArtNetNode::Get()->GetShortName(nPortIndex), artnet::SHORT_NAME_LENGTH);
 		}
 		builder.Add(LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<const char *>(m_Params.aLabel[nPortIndex]), isLabelSet);
 	}

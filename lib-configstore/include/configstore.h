@@ -35,7 +35,6 @@ enum class Store {
 	NETWORK,
 	DMXSEND,
 	WS28XXDMX,
-	E131,
 	LTC,
 	MIDI,
 	LTCETC,
@@ -84,7 +83,8 @@ public:
 	void Update(configstore::Store tStore, const void *pData, uint32_t nDataLength) {
 		Update(tStore, 0, pData, nDataLength);
 	}
-	void Copy(configstore::Store tStore, void *pData, uint32_t nDataLength, uint32_t nOffset = 0, bool isSetList = true);
+
+	void Copy(configstore::Store tStore, void *pData, uint32_t nDataLength, uint32_t nOffset = 0);
 
 	void ResetSetList(configstore::Store tStore);
 
