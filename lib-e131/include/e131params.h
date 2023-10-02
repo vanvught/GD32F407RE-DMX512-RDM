@@ -48,33 +48,29 @@ static constexpr uint16_t mergemode_set(const uint32_t nPortIndex, const lightse
 	return static_cast<uint16_t>((static_cast<uint32_t>(mergeMode) & 0x3) << (nPortIndex * 2));
 }
 
-#if LIGHTSET_PORTS > 4
- static constexpr uint32_t MAX_PORTS = 4;
-#else
- static constexpr uint32_t MAX_PORTS = LIGHTSET_PORTS;
-#endif
+static constexpr uint32_t MAX_PORTS = 4;
 
- struct Params {
-    uint32_t nSetList;
-    // Node
-    uint8_t Filler0;
-    uint16_t nUniverse[e131params::MAX_PORTS];
-    uint16_t nDirection;
-    uint16_t nMergeMode;
-    uint8_t nOutputStyle;
-    uint8_t nFailSafe;
-    uint8_t aLongName[64];
-    uint8_t aLabel[e131params::MAX_PORTS][18];
-    uint8_t Filler1;
-    // Art-Net 4
-    uint16_t nProtocol;
-    uint16_t nRdm;
-    uint32_t nDestinationIp[e131params::MAX_PORTS];
-    // sACN E1.31
-    uint8_t nPriority[e131params::MAX_PORTS];
-    // Reserved
-    uint8_t Filler2[40];
- } __attribute__((packed));
+struct Params {
+	uint32_t nSetList;
+	// Node
+	uint8_t Filler0;
+	uint16_t nUniverse[e131params::MAX_PORTS];
+	uint16_t nDirection;
+	uint16_t nMergeMode;
+	uint8_t nOutputStyle;
+	uint8_t nFailSafe;
+	uint8_t aLongName[64];
+	uint8_t aLabel[e131params::MAX_PORTS][18];
+	uint8_t Filler1;
+	// Art-Net 4
+	uint16_t nProtocol;
+	uint16_t nRdm;
+	uint32_t nDestinationIp[e131params::MAX_PORTS];
+	// sACN E1.31
+	uint8_t nPriority[e131params::MAX_PORTS];
+	// Reserved
+	uint8_t Filler2[40];
+} __attribute__((packed));
 
  static_assert(sizeof(struct Params) <= 320, "struct Params is too large");
 

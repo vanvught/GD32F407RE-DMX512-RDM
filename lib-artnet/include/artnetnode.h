@@ -105,15 +105,21 @@ enum class Status : uint8_t {
 	OFF, STANDBY, ON
 };
 
+struct ArtPollQueue {
+	uint32_t ArtPollMillis;
+	uint32_t ArtPollReplyIpAddress;
+	struct {
+		uint16_t TargetPortAddressTop;
+		uint16_t TargetPortAddressBottom;
+	} ArtPollReply;
+};
+
 struct State {
 	uint32_t ArtDiagIpAddress;
 	uint32_t ArtPollIpAddress;
 	uint32_t ArtPollReplyCount;
 	uint32_t ArtPollReplyDelayMillis;
-	struct {
-		uint32_t ArtPollMillis;
-		uint32_t ArtPollReplyIpAddress;
-	} ArtPollReplyQueue[4];
+	ArtPollQueue ArtPollReplyQueue[4];
 	uint32_t ArtDmxIpAddress;
 	uint32_t ArtSyncMillis;				///< Latest ArtSync received time
 	ReportCode reportCode;
@@ -125,13 +131,10 @@ struct State {
 	bool IsMergeMode;
 	bool IsChanged;
 	bool bDisableMergeTimeout;
-	bool bUseTargetPortAddress;
 	uint8_t nReceivingDmx;
 	uint8_t nEnabledOutputPorts;
 	uint8_t nEnabledInputPorts;
 	uint8_t DiagPriority;				///< ArtPoll : Field 6 : The lowest priority of diagnostics message that should be sent.
-	uint16_t TargetPortAddressTop;		///< ArtPoll
-	uint16_t TargetPortAddressBottom;	///< ArtPoll
 };
 
 struct Node {
@@ -146,6 +149,7 @@ struct Node {
 		uint8_t SubSwitch;									///< Bits 7-4 of the 15 bit Port-Address are encoded into the bottom 4 bits of this field.
 		lightset::PortDir direction;
 		artnet::PortProtocol protocol;						///< Art-Net 4
+		bool bLocalMerge;
 	} Port[artnetnode::MAX_PORTS];
 };
 
@@ -207,6 +211,9 @@ public:
 
 #if (ARTNET_VERSION >= 4)
 		E131Bridge::Run();
+#endif
+#if defined (LIGHTSET_HAVE_RUN)
+		m_pLightSet->Run();
 #endif
 	}
 
@@ -317,8 +324,6 @@ public:
 		assert(nPortIndex < artnetnode::MAX_PORTS);
 		return m_Node.Port[nPortIndex].ShortName;
 	}
-
-	void GetShortNameDefault(const uint32_t, char *);
 
 	void SetLongName(const char *);
 	const char *GetLongName() const {
@@ -561,10 +566,9 @@ private:
 	void HandleTodRequest();
 	void HandleRdm();
 	void HandleIpProg();
-#if defined (ARTNET_HAVE_DMXIN)
 	void HandleDmxIn();
 	void HandleInput();
-#endif
+	void SetLocalMerging();
 	void HandleRdmIn();
 	void HandleTrigger();
 
@@ -574,7 +578,7 @@ private:
 	void CheckMergeTimeouts(const uint32_t nPortIndex);
 
 	void ProcessPollRelply(const uint32_t nPortIndex, uint32_t& NumPortsInput, uint32_t& NumPortsOutput);
-	void SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp);
+	void SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp, artnetnode::ArtPollQueue *pQueue = nullptr);
 
 	void SendTod(uint32_t nPortIndex);
 	void SendTodRequest(uint32_t nPortIndex);

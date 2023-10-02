@@ -43,6 +43,7 @@
 
 #include "propertiesbuilder.h"
 
+#include "lightset.h"
 #include "lightsetparamsconst.h"
 
 #include "debug.h"
@@ -69,7 +70,9 @@ E131Params::E131Params(E131ParamsStore *pE131ParamsStore):m_pE131ParamsStore(pE1
 	
 	for (uint32_t i = 0; i < e131params::MAX_PORTS; i++) {
 		m_Params.nUniverse[i] = static_cast<uint16_t>(i + 1);
+#if defined (E131_HAVE_DMXIN)
 		m_Params.nPriority[i] = e131::priority::DEFAULT;
+#endif
 		constexpr auto n = static_cast<uint32_t>(lightset::PortDir::OUTPUT) & 0x3;
 		m_Params.nDirection |= static_cast<uint16_t>(n << (i * 2));
 	}
@@ -128,7 +131,7 @@ void E131Params::callbackFunction(const char *pLine) {
 
 	uint8_t value8;
 	uint16_t value16;
-	char aValue[16];
+	char aValue[lightset::node::LABEL_NAME_LENGTH];
 
 	uint32_t nLength = 8;
 
@@ -162,6 +165,21 @@ void E131Params::callbackFunction(const char *pLine) {
 		if (Sscan::Char(pLine, LightSetParamsConst::MERGE_MODE_PORT[nPortIndex], aValue, nLength) == Sscan::OK) {
 			m_Params.nMergeMode &= e131params::mergemode_clear(nPortIndex);
 			m_Params.nMergeMode |= mergemode_set(nPortIndex, lightset::get_merge_mode(aValue));
+			return;
+		}
+
+		nLength = lightset::node::LABEL_NAME_LENGTH - 1;
+
+		if (Sscan::Char(pLine, LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<char*>(m_Params.aLabel[nPortIndex]), nLength) == Sscan::OK) {
+			m_Params.aLabel[nPortIndex][nLength] = '\0';
+			static_assert(sizeof(aValue) >= lightset::node::LABEL_NAME_LENGTH, "");
+			lightset::node::get_short_name_default(nPortIndex, aValue);
+
+			if (strcmp(reinterpret_cast<char*>(m_Params.aLabel[nPortIndex]), aValue) == 0) {
+				m_Params.nSetList &= ~(Mask::LABEL_A << nPortIndex);
+			} else {
+				m_Params.nSetList |= (Mask::LABEL_A << nPortIndex);
+			}
 			return;
 		}
 
@@ -253,6 +271,12 @@ void E131Params::Builder(const struct Params *pParams, char *pBuffer, uint32_t n
 		const auto portDir = static_cast<lightset::PortDir>(e131params::portdir_shif_right(m_Params.nDirection, nPortIndex));
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
 		builder.Add(LightSetParamsConst::DIRECTION[nPortIndex], lightset::get_direction(portDir), !isDefault);
+
+		const auto isLabelSet = isMaskSet(Mask::LABEL_A << nPortIndex);
+		if (!isLabelSet) {
+			lightset::node::get_short_name_default(nPortIndex, reinterpret_cast<char *>(m_Params.aLabel[nPortIndex]));
+		}
+		builder.Add(LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<const char *>(m_Params.aLabel[nPortIndex]), isLabelSet);
 	}
 
 	builder.Add(LightSetParamsConst::FAILSAFE, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)), isMaskSet(Mask::FAILSAFE));

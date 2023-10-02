@@ -82,6 +82,7 @@ struct Bridge {
 	struct {
 		uint16_t nUniverse;
 		lightset::PortDir direction;
+		bool bLocalMerge;
 	} Port[e131bridge::MAX_PORTS];
 };
 
@@ -337,6 +338,12 @@ public:
 		}
 
 		Process();
+
+#if defined (LIGHTSET_HAVE_RUN)
+# if (ARTNET_VERSION < 4)
+		m_pLightSet->Run();
+# endif
+#endif
 	}
 
 	void Print();
@@ -364,6 +371,7 @@ private:
 	void LeaveUniverse(uint32_t nPortIndex, uint16_t nUniverse);
 
 	void HandleDmxIn();
+	void SetLocalMerging();
 	void FillDataPacket();
 	void FillDiscoveryPacket();
 	void SendDiscoveryPacket();

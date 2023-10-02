@@ -180,7 +180,7 @@ void ArtNetNode::HandleDmx() {
 					SendDiag(artnet::PriorityCodes::DIAG_LOW, "%u:%u 8. Source matches both ip, merging Physical (SourceB)", nPortIndex, pArtDmx->Physical);
 				} else {
 					SendDiag(artnet::PriorityCodes::DIAG_LOW, "%u:%u 8. Source matches both ip, more than two sources, discarding data", nPortIndex, pArtDmx->Physical);
-					puts("WARN: 8. More than two sources, discarding data");
+					puts("WARN: 8. Source matches both ip, discarding data");
 					return;
 				}
 			}

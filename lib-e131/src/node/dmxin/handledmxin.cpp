@@ -85,6 +85,12 @@ void E131Bridge::HandleDmxIn() {
 
 				Network::Get()->SendTo(m_nHandle, m_pE131DataPacket, static_cast<uint16_t>(DATA_PACKET_SIZE(nLength)), m_InputPort[nPortIndex].nMulticastIp, e131::UDP_PORT);
 
+				if (m_Bridge.Port[nPortIndex].bLocalMerge) {
+					m_pReceiveBuffer = reinterpret_cast<uint8_t *>(m_pE131DataPacket);
+					m_nIpAddressFrom = Network::Get()->GetIp();
+					HandleDmx();
+				}
+
 				if ((s_ReceivingMask & (1U << nPortIndex)) != (1U << nPortIndex)) {
 					s_ReceivingMask |= (1U << nPortIndex);
 					m_State.nReceivingDmx |= (1U << static_cast<uint8_t>(lightset::PortDir::INPUT));
@@ -130,6 +136,12 @@ void E131Bridge::HandleDmxIn() {
 					m_pE131DataPacket->DMPLayer.PropertyValueCount = __builtin_bswap16(static_cast<uint16_t>(nLength));
 
 					Network::Get()->SendTo(m_nHandle, m_pE131DataPacket, static_cast<uint16_t>(DATA_PACKET_SIZE(nLength)), m_InputPort[nPortIndex].nMulticastIp, e131::UDP_PORT);
+
+					if (m_Bridge.Port[nPortIndex].bLocalMerge) {
+						m_pReceiveBuffer = reinterpret_cast<uint8_t *>(&m_pE131DataPacket);
+						m_nIpAddressFrom = Network::Get()->GetIp();
+						HandleDmx();
+					}
 				}
 
 			}

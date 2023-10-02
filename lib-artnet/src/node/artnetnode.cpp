@@ -143,6 +143,8 @@ ArtNetNode::~ArtNetNode() {
 }
 
 void ArtNetNode::Start() {
+	DEBUG_ENTRY
+
 #if (LIGHTSET_PORTS > 0)
 	assert(m_pLightSet != nullptr);
 #endif	
@@ -192,6 +194,8 @@ void ArtNetNode::Start() {
 			Dmx::Get()->SetPortDirection(nPortIndex, dmx::PortDirection::INP, true);
 		}
 	}
+
+	SetLocalMerging();
 #endif
 
 #if defined (OUTPUT_HAVE_STYLESWITCH)
@@ -229,7 +233,8 @@ void ArtNetNode::Start() {
 
 	m_State.status = artnetnode::Status::ON;
 	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
-	hal::panel_led_on(hal::panelled::ARTNET);
+
+	DEBUG_EXIT
 }
 
 void ArtNetNode::Stop() {
@@ -266,18 +271,13 @@ void ArtNetNode::Stop() {
 	DEBUG_EXIT
 }
 
-void ArtNetNode::GetShortNameDefault(const uint32_t nPortIndex, char *pShortName) {
-	assert(nPortIndex < artnetnode::MAX_PORTS);
-	snprintf(pShortName, artnet::SHORT_NAME_LENGTH - 1, "Port %u", 1U + nPortIndex);
-}
-
 void ArtNetNode::SetShortName(const uint32_t nPortIndex, const char *pShortName) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("nPortIndex=%u, pShortName=%s", nPortIndex, pShortName == nullptr ? "nullptr" : pShortName);
 	assert(nPortIndex < artnetnode::MAX_PORTS);
 
 	if (pShortName == nullptr) {
-		GetShortNameDefault(nPortIndex, m_Node.Port[nPortIndex].ShortName);
+		lightset::node::get_short_name_default(nPortIndex, m_Node.Port[nPortIndex].ShortName);
 	} else {
 		strncpy(m_Node.Port[nPortIndex].ShortName, pShortName, artnet::SHORT_NAME_LENGTH - 1);
 	}
@@ -344,8 +344,13 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 
 	uint32_t nIpCount = 0;
 
-	for (uint32_t i = 0; i < artnetnode::MAX_PORTS; i++) {
-		nIpCount += (m_OutputPort[i].SourceA.nIp + m_OutputPort[i].SourceB.nIp);
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+#if defined (ARTNET_HAVE_DMXIN)
+		if (m_Node.Port[nPortIndex].bLocalMerge) {
+			continue;
+		}
+#endif
+		nIpCount += (m_OutputPort[nPortIndex].SourceA.nIp + m_OutputPort[nPortIndex].SourceB.nIp);
 		if (nIpCount != 0) {
 			break;
 		}
@@ -384,6 +389,10 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 		m_OutputPort[i].SourceB.nIp = 0;
 		lightset::Data::ClearLength(i);
 	}
+
+#if defined (ARTNET_HAVE_DMXIN)
+	SetLocalMerging();
+#endif
 }
 
 static artnet::OpCodes get_op_code(const uint32_t nBytesReceived, const uint8_t *pBuffer) {
@@ -447,7 +456,7 @@ void ArtNetNode::Process(const uint16_t nBytesReceived) {
 			if (entry.ArtPollMillis != 0) {
 				if ((m_nCurrentPacketMillis - entry.ArtPollMillis) > m_State.ArtPollReplyDelayMillis) {
 					entry.ArtPollMillis = 0;
-					SendPollRelply(0, entry.ArtPollReplyIpAddress);
+					SendPollRelply(0, entry.ArtPollReplyIpAddress, &entry);
 				}
 			}
 		}
@@ -581,7 +590,7 @@ void ArtNetNode::Process(const uint16_t nBytesReceived) {
 		if (entry.ArtPollMillis != 0) {
 			if ((m_nCurrentPacketMillis - entry.ArtPollMillis) > m_State.ArtPollReplyDelayMillis) {
 				entry.ArtPollMillis = 0;
-				SendPollRelply(0, entry.ArtPollReplyIpAddress);
+				SendPollRelply(0, entry.ArtPollReplyIpAddress, &entry);
 			}
 		}
 	}

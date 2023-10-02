@@ -87,7 +87,7 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 #endif
 }
 
-void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp) {
+void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp, artnetnode::ArtPollQueue *pQueue) {
 	DEBUG_PRINTF("nBindIndex=%u", nBindIndex);
 
 	ip.u32 = Network::Get()->GetIp();
@@ -114,14 +114,14 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDesti
 		uint32_t nPortsOutput = 0;
 		uint32_t nPortsInput = 0;
 
-		if ((nBindIndex == 0) && (m_State.bUseTargetPortAddress)) {
-			if (!((m_Node.Port[nPortIndex].PortAddress >= m_State.TargetPortAddressBottom)
-					&& (m_Node.Port[nPortIndex].PortAddress <= m_State.TargetPortAddressTop))) {
+		if ((nBindIndex == 0) && (pQueue != nullptr)) {
+			if (!((m_Node.Port[nPortIndex].PortAddress >= pQueue->ArtPollReply.TargetPortAddressBottom)
+			   && (m_Node.Port[nPortIndex].PortAddress <= pQueue->ArtPollReply.TargetPortAddressTop))) {
 				DEBUG_PRINTF("NOT: 	%u >= %u && %u <= %u",
 						m_Node.Port[nPortIndex].PortAddress,
-						m_State.TargetPortAddressBottom,
+						pQueue->ArtPollReply.TargetPortAddressBottom,
 						m_Node.Port[nPortIndex].PortAddress,
-						m_State.TargetPortAddressTop);
+						pQueue->ArtPollReply.TargetPortAddressTop);
 				continue;
 			}
 		}
@@ -182,19 +182,20 @@ void ArtNetNode::HandlePoll() {
 		m_State.ArtDiagIpAddress = 0;
 	}
 
-	if (pArtPoll->Flags & artnet::Flags::USE_TARGET_PORT_ADDRESS) {
-		m_State.bUseTargetPortAddress = true;
-		m_State.TargetPortAddressTop = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressTopHi) >> 8) | pArtPoll->TargetPortAddressTopLo);
-		m_State.TargetPortAddressBottom = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressBottomHi) >> 8) | pArtPoll->TargetPortAddressBottomLo);
+	uint16_t TargetPortAddressTop = 32767; //TODO
+	uint16_t TargetPortAddressBottom = 0;
 
-	} else {
-		m_State.bUseTargetPortAddress = false;
+	if (pArtPoll->Flags & artnet::Flags::USE_TARGET_PORT_ADDRESS) {
+		TargetPortAddressTop = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressTopHi) >> 8) | pArtPoll->TargetPortAddressTopLo);
+		TargetPortAddressBottom = static_cast<uint16_t>((static_cast<uint16_t>(pArtPoll->TargetPortAddressBottomHi) >> 8) | pArtPoll->TargetPortAddressBottomLo);
 	}
 
 	for (auto& entry : m_State.ArtPollReplyQueue) {
 		if (entry.ArtPollMillis == 0) {
 			entry.ArtPollMillis = Hardware::Get()->Millis();
 			entry.ArtPollReplyIpAddress = m_nIpAddressFrom;
+			entry.ArtPollReply.TargetPortAddressTop = TargetPortAddressTop;
+			entry.ArtPollReply.TargetPortAddressBottom = TargetPortAddressBottom;
 			DEBUG_PRINTF("[ArtPollReply queued for " IPSTR, IP2STR(entry.ArtPollReplyIpAddress));
 			break;
 		}

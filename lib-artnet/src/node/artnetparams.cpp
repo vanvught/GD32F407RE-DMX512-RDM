@@ -208,7 +208,7 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 		if (Sscan::Char(pLine, LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<char*>(m_Params.aLabel[nPortIndex]), nLength) == Sscan::OK) {
 			m_Params.aLabel[nPortIndex][nLength] = '\0';
 			static_assert(sizeof(aValue) >= artnet::SHORT_NAME_LENGTH, "");
-			ArtNetNode::Get()->GetShortNameDefault(nPortIndex, aValue);
+			lightset::node::get_short_name_default(nPortIndex, aValue);
 
 			if (strcmp(reinterpret_cast<char*>(m_Params.aLabel[nPortIndex]), aValue) == 0) {
 				m_Params.nSetList &= ~(Mask::LABEL_A << nPortIndex);
@@ -362,7 +362,7 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	}
 	builder.Add(LightSetParamsConst::NODE_LONG_NAME, reinterpret_cast<const char*>(m_Params.aLongName), isMaskSet(Mask::LONG_NAME));
 
-	#if defined (RDM_CONTROLLER)
+#if defined (RDM_CONTROLLER)
 	builder.Add(ArtNetParamsConst::ENABLE_RDM, isMaskSet(Mask::ENABLE_RDM));
 #endif
 	builder.Add(LightSetParamsConst::FAILSAFE, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)), isMaskSet(Mask::FAILSAFE));

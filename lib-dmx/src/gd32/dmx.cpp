@@ -2052,7 +2052,6 @@ void Dmx::SetOutput(const bool doForce) {
 					&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
 				StopData(_port_to_uart(nPortIndex), nPortIndex);
 			}
-			sv_PortState[nPortIndex] = dmx::PortState::TX;
 		}
 
 		logic_analyzer::ch1_clear();

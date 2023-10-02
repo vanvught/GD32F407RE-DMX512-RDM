@@ -280,7 +280,7 @@ void ArtNetNode::HandleRdm() {
 		if ((portAddress == m_Node.Port[nPortIndex].PortAddress) && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
 #if defined	(RDM_CONTROLLER)
 # if (ARTNET_VERSION >= 4)
-			if ((m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN)) {
+			if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
 				constexpr auto nMask = artnet::GoodOutput::OUTPUT_IS_MERGING | artnet::GoodOutput::DATA_IS_BEING_TRANSMITTED | artnet::GoodOutput::OUTPUT_IS_SACN;
 				m_OutputPort[nPortIndex].IsTransmitting = (GetGoodOutput4(nPortIndex) & nMask) != 0;
 			}

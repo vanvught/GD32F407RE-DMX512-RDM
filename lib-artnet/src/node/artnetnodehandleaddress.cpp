@@ -39,6 +39,53 @@
 
 #include "debug.h"
 
+void ArtNetNode::SetLocalMerging() {
+	DEBUG_ENTRY
+
+	for (uint32_t nInputPortIndex = 0; nInputPortIndex < artnetnode::MAX_PORTS; nInputPortIndex++) {
+		if (m_Node.Port[nInputPortIndex].direction == lightset::PortDir::OUTPUT) {
+			continue;
+		}
+
+		m_Node.Port[nInputPortIndex].bLocalMerge = false;
+
+		for (uint32_t nOutputPortIndex = 0; nOutputPortIndex < artnetnode::MAX_PORTS; nOutputPortIndex++) {
+			if (m_Node.Port[nOutputPortIndex].direction == lightset::PortDir::INPUT) {
+				continue;
+			}
+
+			DEBUG_PRINTF("nInputPortIndex=%u %s %u, nOutputPortIndex=%u %s %u",
+					nInputPortIndex,
+					artnet::get_protocol_mode(m_Node.Port[nInputPortIndex].protocol),
+					m_Node.Port[nInputPortIndex].PortAddress,
+					nOutputPortIndex,
+					artnet::get_protocol_mode(m_Node.Port[nOutputPortIndex].protocol),
+					m_Node.Port[nOutputPortIndex].PortAddress);
+
+			if ((m_Node.Port[nInputPortIndex].protocol == m_Node.Port[nOutputPortIndex].protocol) &&
+				(m_Node.Port[nInputPortIndex].PortAddress == m_Node.Port[nOutputPortIndex].PortAddress)) {
+
+				if (!m_Node.Port[nOutputPortIndex].bLocalMerge) {
+					m_OutputPort[nOutputPortIndex].SourceA.nIp = Network::Get()->GetIp();
+					DEBUG_PUTS("Local merge Source A");
+				} else {
+					m_OutputPort[nOutputPortIndex].SourceB.nIp = Network::Get()->GetIp();
+					DEBUG_PUTS("Local merge Source B");
+				}
+
+				m_Node.Port[nInputPortIndex].bLocalMerge = true;
+				m_Node.Port[nOutputPortIndex].bLocalMerge = true;
+			}
+		}
+	}
+
+	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		DEBUG_PRINTF("nPortIndex=%u, bLocalMerge=%c", nPortIndex, m_Node.Port[nPortIndex].bLocalMerge ? 'Y' : 'N');
+	}
+
+	DEBUG_EXIT
+}
+
 uint16_t ArtNetNode::MakePortAddress(const uint16_t nUniverse, const uint32_t nPage) {
 	return artnet::make_port_address(m_Node.Port[nPage].NetSwitch, m_Node.Port[nPage].SubSwitch, nUniverse);
 }
@@ -72,15 +119,11 @@ void ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::Po
 			m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts - 1);
 		}
 #endif
-
 		m_Node.Port[nPortIndex].direction = lightset::PortDir::DISABLE;
-
-		DEBUG_EXIT
-		return;
 	}
 
-	if (dir == lightset::PortDir::INPUT) {
 #if defined (ARTNET_HAVE_DMXIN)
+	if (dir == lightset::PortDir::INPUT) {
 		if (m_Node.Port[nPortIndex].direction != lightset::PortDir::INPUT) {
 			m_State.nEnabledInputPorts = static_cast<uint8_t>(m_State.nEnabledInputPorts + 1);
 			assert(m_State.nEnabledInputPorts <= artnetnode::MAX_PORTS);
@@ -96,8 +139,8 @@ void ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::Po
 		m_Node.Port[nPortIndex].DefaultAddress = nAddress & 0x0F;
 		m_Node.Port[nPortIndex].PortAddress = MakePortAddress(nAddress, nPortIndex);
 		m_Node.Port[nPortIndex].direction = lightset::PortDir::INPUT;
-#endif
 	}
+#endif
 
 	if (dir == lightset::PortDir::OUTPUT) {
 		if (m_Node.Port[nPortIndex].direction != lightset::PortDir::OUTPUT) {
@@ -125,6 +168,10 @@ void ArtNetNode::SetUniverseSwitch(const uint32_t nPortIndex, const lightset::Po
 		}
 
 		artnet::display_universe_switch(nPortIndex, nAddress);
+
+#if defined (ARTNET_HAVE_DMXIN)
+		SetLocalMerging();
+#endif
 	}
 
 	DEBUG_EXIT

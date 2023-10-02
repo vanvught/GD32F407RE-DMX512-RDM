@@ -73,6 +73,14 @@ void ArtNetNode::HandleDmxIn() {
 
 				Network::Get()->SendTo(m_nHandle, &m_ArtDmx, sizeof(struct artnet::ArtDmx), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
 
+				if (m_Node.Port[nPortIndex].bLocalMerge) {
+					m_pReceiveBuffer = reinterpret_cast<uint8_t *>(&m_ArtDmx);
+					m_nIpAddressFrom = Network::Get()->GetIp();
+					HandleDmx();
+
+					SendDiag(artnet::PriorityCodes::DIAG_LOW, "%u: Input DMX local merge", nPortIndex);
+				}
+
 				if ((s_ReceivingMask & (1U << nPortIndex)) != (1U << nPortIndex)) {
 					s_ReceivingMask |= (1U << nPortIndex);
 					m_State.nReceivingDmx |= (1U << static_cast<uint8_t>(lightset::PortDir::INPUT));
@@ -80,7 +88,6 @@ void ArtNetNode::HandleDmxIn() {
 				}
 
 				continue;
-
 			} 
 
 			if (Dmx::Get()->GetDmxUpdatesPerSecond(nPortIndex) == 0) {
@@ -131,6 +138,14 @@ void ArtNetNode::HandleDmxIn() {
 					Network::Get()->SendTo(m_nHandle, &m_ArtDmx, sizeof(struct artnet::ArtDmx), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
 
 					SendDiag(artnet::PriorityCodes::DIAG_LOW, "%u: Input DMX sent (timeout)", nPortIndex);
+
+					if (m_Node.Port[nPortIndex].bLocalMerge) {
+						m_pReceiveBuffer = reinterpret_cast<uint8_t *>(&m_ArtDmx);
+						m_nIpAddressFrom = Network::Get()->GetIp();
+						HandleDmx();
+
+						SendDiag(artnet::PriorityCodes::DIAG_LOW, "%u: Input DMX local merge", nPortIndex);
+					}
 				}
 			}
 
