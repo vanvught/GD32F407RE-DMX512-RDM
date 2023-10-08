@@ -85,11 +85,15 @@ ifneq ($(MAKE_FLAGS),)
   	endif
   endif
   
+  ifeq ($(findstring ENABLE_PHY_SWITCH,$(MAKE_FLAGS)), ENABLE_PHY_SWITCH)	
+  	EXTRA_SRCDIR+=device/emac/dsa
+  endif
+  
   ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)		
   	EXTRA_SRCDIR+=device/usb
   endif	
 else
-	EXTRA_SRCDIR+=device/emac
+	EXTRA_SRCDIR+=device/emac device/emac/dsa
 	EXTRA_SRCDIR+=device/usb
 	EXTRA_SRCDIR+=src/uart0 src/softuart0
 	

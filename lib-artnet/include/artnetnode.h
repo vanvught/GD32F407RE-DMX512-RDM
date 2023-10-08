@@ -177,13 +177,13 @@ struct InputPort {
 	uint8_t nPollReplyIndex;
 };
 
-inline static artnetnode::FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
+inline artnetnode::FailSafe convert_failsafe(const lightset::FailSafe failsafe) {
 	const auto fs = static_cast<FailSafe>(static_cast<uint32_t>(failsafe) + static_cast<uint32_t>(FailSafe::LAST));
 	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
 	return fs;
 }
 
-inline static lightset::FailSafe convert_failsafe(const artnetnode::FailSafe failsafe) {
+inline lightset::FailSafe convert_failsafe(const artnetnode::FailSafe failsafe) {
 	const auto fs = static_cast<lightset::FailSafe>(static_cast<uint32_t>(failsafe) - static_cast<uint32_t>(FailSafe::LAST));
 	DEBUG_PRINTF("failsafe=%u, fs=%u", static_cast<uint32_t>(failsafe), static_cast<uint32_t>(fs));
 	return fs;

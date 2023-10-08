@@ -264,18 +264,18 @@ struct GoodInput {
 	static constexpr uint8_t ERRORS = (1U << 2);				///< bit 2 is receive errors
 };
 
-inline static const char *get_protocol_mode(const artnet::PortProtocol p, const bool bToUpper = false) {
+inline const char *get_protocol_mode(const artnet::PortProtocol p, const bool bToUpper = false) {
 	if (bToUpper) {
 		return (p == artnet::PortProtocol::ARTNET) ? "Art-Net" : "sACN";
 	}
 	return (p == artnet::PortProtocol::ARTNET) ? "artnet" : "sacn";
 }
 
-inline static const char *get_protocol_mode(const unsigned p, const bool bToUpper = false) {
+inline const char *get_protocol_mode(const unsigned p, const bool bToUpper = false) {
 	return get_protocol_mode(static_cast<artnet::PortProtocol>(p), bToUpper);
 }
 
-inline static artnet::PortProtocol get_protocol_mode(const char *pProtocolMode) {
+inline artnet::PortProtocol get_protocol_mode(const char *pProtocolMode) {
 	if (pProtocolMode != nullptr) {
 		if (((pProtocolMode[0] | 0x20) == 's')
 		 && ((pProtocolMode[1] | 0x20) == 'a')
@@ -287,7 +287,7 @@ inline static artnet::PortProtocol get_protocol_mode(const char *pProtocolMode) 
 	return artnet::PortProtocol::ARTNET;
 }
 
-inline static uint16_t make_port_address(const uint32_t nNetSwitch, const uint32_t nSubSwitch, const uint32_t nUniverse) {
+inline uint16_t make_port_address(const uint32_t nNetSwitch, const uint32_t nSubSwitch, const uint32_t nUniverse) {
 	// PortAddress Bit 15 = 0
 	uint16_t nPortAddress = (nNetSwitch & 0x7F) << 8;					// Net : Bits 14-8
 	nPortAddress |= static_cast<uint16_t>((nSubSwitch & 0x0F) << 4);	// Sub-Net : Bits 7-4

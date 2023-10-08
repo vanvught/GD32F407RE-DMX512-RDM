@@ -1,8 +1,8 @@
 /**
- * @file errno.c
+ * net_phy_string.cpp
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,4 +23,35 @@
  * THE SOFTWARE.
  */
 
-int errno = 0;
+#include <cstdint>
+#include <cassert>
+
+#include "emac/phy.h"
+
+#if !defined (ARRAY_SIZE)
+# define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
+
+namespace net {
+static constexpr char SPEED[3][10] = { "10baseT", "100baseT", "1000baseT" };
+
+const char *phy_string_get_link(const Link link) {
+	return link == Link::STATE_UP ? "up" : "down";
+}
+
+const char *phy_string_get_duplex(const Duplex duplex) {
+	return duplex == Duplex::DUPLEX_HALF ? "half" : "full";
+}
+
+const char *phy_string_get_speed(const Speed speed) {
+	const auto nIndex = static_cast<uint32_t>(speed);
+
+	assert(nIndex < ARRAY_SIZE(SPEED));
+	return SPEED[nIndex];
+}
+
+const char *phy_string_get_autonegotiation(const bool autonegotiation) {
+	return autonegotiation ? "on" : "off";
+}
+
+}

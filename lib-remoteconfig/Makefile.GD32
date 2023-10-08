@@ -3,9 +3,6 @@ DEFINES+=DISABLE_TFTP
 DEFINES+=NDEBUG
 
 ifneq ($(MAKE_FLAGS),)
-	ifneq (,$(findstring ENABLE_HTTPD,$(MAKE_FLAGS)))
-		EXTRA_SRCDIR+=src/httpd
-	endif
 else
 	EXTRA_SRCDIR+=src/httpd
 endif
