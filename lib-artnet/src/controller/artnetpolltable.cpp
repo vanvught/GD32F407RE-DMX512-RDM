@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2017-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -229,7 +229,7 @@ void ArtNetPollTable::ProcessUniverse(uint32_t nIpAddress, uint16_t nUniverse) {
 	DEBUG_EXIT
 }
 
-void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
+void ArtNetPollTable::Add(const struct artnet::ArtPollReply *ptArtPollReply) {
 	DEBUG_ENTRY
 
 	bool bFound = false;
@@ -254,7 +254,7 @@ void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
 		} else {
 			i = nMid;
 			bFound = true;
-			break;;
+			break;
 		}
 	}
 
@@ -306,7 +306,7 @@ void ArtNetPollTable::Add(const struct TArtPollReply *ptArtPollReply) {
 	for (uint32_t nIndex = 0; nIndex < artnet::PORTS; nIndex++) {
 		const uint8_t nPortAddress = ptArtPollReply->SwOut[nIndex];
 
-		if (ptArtPollReply->PortTypes[nIndex] == static_cast<uint8_t>(PortSettings::ENABLE_OUTPUT)) {
+		if (ptArtPollReply->PortTypes[nIndex] == static_cast<uint8_t>(artnet::PortType::OUTPUT_ARTNET)) {
 			const auto nUniverse = artnet::make_port_address(ptArtPollReply->NetSwitch, ptArtPollReply->SubSwitch, nPortAddress);
 
 			uint32_t nIndexUniverse;
@@ -402,9 +402,9 @@ void ArtNetPollTable::Dump() {
 	for (uint32_t i = 0; i < m_nPollTableEntries; i++) {
 		printf("\t" IPSTR " [" MACSTR "] |%-18s|%-64s|\n", IP2STR(m_pPollTable[i].IPAddress), MAC2STR(m_pPollTable[i].Mac), m_pPollTable[i].ShortName, m_pPollTable[i].LongName);
 
-		for (uint16_t nUniverse = 0; nUniverse < m_pPollTable[i].nUniversesCount; nUniverse++) {
+		for (uint32_t nUniverse = 0; nUniverse < m_pPollTable[i].nUniversesCount; nUniverse++) {
 			struct TArtNetNodeEntryUniverse *pArtNetNodeEntryUniverse = &m_pPollTable[i].Universe[nUniverse];
-			printf("\t %u [%u]\n", pArtNetNodeEntryUniverse->nUniverse, (Hardware::Get()->Millis() - pArtNetNodeEntryUniverse->nLastUpdateMillis) / 1000);
+			printf("\t %u [%u]\n", pArtNetNodeEntryUniverse->nUniverse, (Hardware::Get()->Millis() - pArtNetNodeEntryUniverse->nLastUpdateMillis) / 1000U);
 		}
 		puts("");
 	}

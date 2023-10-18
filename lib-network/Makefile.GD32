@@ -1,5 +1,5 @@
 DEFINES =DISABLE_FS 
-DEFINES+=NDEBUG
+#DEFINES+=NDEBUG
 
 EXTRA_INCLUDES=../lib-properties/include
 EXTRA_SRCDIR=src/emac/gd32

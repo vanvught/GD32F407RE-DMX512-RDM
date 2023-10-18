@@ -104,7 +104,7 @@ static int32_t _stop(void) {
 static int32_t _senddata(uint8_t *pData, uint32_t nCount) {
 	int32_t nTimeout;
 
-	for (auto i = 0; i < nCount; i++) {
+	for (uint32_t i = 0; i < nCount; i++) {
 		i2c_data_transmit(I2C_PERIPH, *pData);
 
 		/* point to the next byte to be written */
@@ -188,7 +188,7 @@ void gd32_i2c_set_address(uint8_t nAddress) {
 uint8_t gd32_i2c_write(const char *pBuffer, uint32_t nLength) {
 	const auto ret = _write((char *)pBuffer, (int) nLength);
 
-	return (uint8_t)-ret;;
+	return (uint8_t)-ret;
 }
 
 uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {

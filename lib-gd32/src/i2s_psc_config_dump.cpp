@@ -2,7 +2,7 @@
  * @file i2s_psc_config_dump_cpp
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@
 #define RCU_CFG1_PREDV1_OFFSET          4U                       /* PREDV1 offset in RCU_CFG1 */
 #define RCU_CFG1_PLL2MF_OFFSET          12U                      /* PLL2MF offset in RCU_CFG1 */
 
-void i2s_psc_config_dump(uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
+void i2s_psc_config_dump(__attribute__((unused)) uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
 	uint32_t i2sdiv = 2U, i2sof = 0U;
 	uint32_t clks = 0U;
 	uint32_t i2sclock = 0U;

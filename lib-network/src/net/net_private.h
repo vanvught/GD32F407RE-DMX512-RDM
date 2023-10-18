@@ -29,28 +29,23 @@
 #include <cstdint>
 
 #include "net_packets.h"
+#include "net_platform.h"
+#include "net_debug.h"
+
+#include "dhcp_internal.h"
+#include "tftp_internal.h"
+#include "ntp_internal.h"
 
 #ifndef ALIGNED
 # define ALIGNED __attribute__ ((aligned (4)))
 #endif
 
-#ifndef MIN
-# define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifdef __cplusplus
 extern "C" {
-#endif
-
-extern int console_error(const char *);
-
-extern void emac_eth_send(void *, int);
-extern int emac_eth_recv(uint8_t **);
-extern void emac_free_pkt(void);
-
-#ifdef __cplusplus
+int console_error(const char *);
+void emac_eth_send(void *, int);
+int emac_eth_recv(uint8_t **);
+void emac_free_pkt(void);
 }
-#endif
 
 void net_handle();
 
@@ -59,10 +54,13 @@ void net_timers_run();
 
 void arp_init();
 void arp_handle(struct t_arp *);
+bool arp_do_probe();
 void arp_cache_init();
 void arp_send_request(uint32_t);
+void arp_send_probe();
+void arp_send_announcement();
 void arp_cache_update(const uint8_t *, uint32_t);
-uint32_t arp_cache_lookup(uint32_t ip, uint8_t *);
+uint32_t arp_cache_lookup(uint32_t, uint8_t *);
 
 void ip_init();
 void ip_set_ip();
@@ -91,5 +89,6 @@ void icmp_shutdown();
 void tcp_init();
 void tcp_run();
 void tcp_handle(struct t_tcp *);
+void tcp_shutdown();
 
 #endif /* NET_PRIVATE_H_ */

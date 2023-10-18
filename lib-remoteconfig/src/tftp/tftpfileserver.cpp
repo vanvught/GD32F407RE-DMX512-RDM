@@ -56,19 +56,19 @@ void TFTPFileServer::Exit() {
 }
 
 
-bool TFTPFileServer::FileOpen(__attribute__((unused)) const char* pFileName, __attribute__((unused)) TFTPMode tMode) {
+bool TFTPFileServer::FileOpen(__attribute__((unused)) const char* pFileName, __attribute__((unused)) tftp::Mode tMode) {
 	DEBUG_ENTRY
 
 	DEBUG_EXIT
 	return false;
 }
 
-bool TFTPFileServer::FileCreate(const char* pFileName, TFTPMode mode) {
+bool TFTPFileServer::FileCreate(const char* pFileName, tftp::Mode mode) {
 	DEBUG_ENTRY
 
 	assert(pFileName != nullptr);
 
-	if (mode != TFTPMode::BINARY) {
+	if (mode != tftp::Mode::BINARY) {
 		DEBUG_EXIT
 		return false;
 	}

@@ -27,16 +27,13 @@
 #include <cstdio>
 #include <cassert>
 
-#if defined ENABLE_CONTENT
-extern int get_file_content(const char *fileName, char *pDst);
-#endif
-
 #include "httpd/httpd.h"
 #include "remoteconfig.h"
 #include "remoteconfigjson.h"
 #include "properties.h"
 #include "sscan.h"
 #include "propertiesconfig.h"
+#include "../http/content/json_switch.h"
 
 #include "network.h"
 #include "hardware.h"
@@ -44,19 +41,18 @@ extern int get_file_content(const char *fileName, char *pDst);
 
 #include "debug.h"
 
-char HttpDaemon::m_Content[BUFSIZE];
+#if defined ENABLE_CONTENT
+extern int get_file_content(const char *fileName, char *pDst, http::contentTypes& contentType);
+#endif
+
+char HttpDaemon::m_Content[http::BUFSIZE];
 
 using namespace http;
 
-enum class contentTypes {
-	TEXT_HTML, TEXT_CSS, TEXT_JS, APPLICATION_JSON, NOT_DEFINED
-};
-
-static constexpr char contentType[static_cast<uint32_t>(contentTypes::NOT_DEFINED)][32] =
+static constexpr char s_contentType[static_cast<uint32_t>(contentTypes::NOT_DEFINED)][32] =
 	{ "text/html", "text/css", "text/javascript", "application/json" };
 
-
-HttpDaemon::HttpDaemon() : m_pContentType(contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)]) {
+HttpDaemon::HttpDaemon() : m_pContentType(s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)]) {
 	DEBUG_ENTRY
 
 	assert(m_nHandle == -1);
@@ -66,14 +62,7 @@ HttpDaemon::HttpDaemon() : m_pContentType(contentType[static_cast<uint32_t>(cont
 	DEBUG_EXIT
 }
 
-void HttpDaemon::Run() {
-	uint32_t nConnectionHandle;
-	m_nBytesReceived = Network::Get()->TcpRead(m_nHandle, const_cast<const uint8_t **>(reinterpret_cast<uint8_t **>(&m_RequestHeaderResponse)), nConnectionHandle);
-
-	if (__builtin_expect((m_nBytesReceived <= 0), 1)) {
-		return;
-	}
-
+void HttpDaemon::HandleRequest(const uint32_t nConnectionHandle) {
 	const char *pStatusMsg = "OK";
 
 	DEBUG_PRINTF("%u: m_Status=%u, m_RequestMethod=%u", nConnectionHandle, static_cast<uint32_t>(m_Status), static_cast<uint32_t>(m_RequestMethod));
@@ -123,8 +112,8 @@ void HttpDaemon::Run() {
 			break;
 		}
 
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
-		m_nContentLength = static_cast<uint16_t>(snprintf(m_Content, BUFSIZE - 1U,
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
+		m_nContentLength = static_cast<uint32_t>(snprintf(m_Content, BUFSIZE - 1U,
 				"<!DOCTYPE html>\n"
 				"<html>\n"
 				"<head><title>%u %s</title></head>\n"
@@ -142,7 +131,7 @@ void HttpDaemon::Run() {
 			"\r\n", static_cast<uint32_t>(m_Status), pStatusMsg, Hardware::Get()->GetBoardName(nLength), m_pContentType, m_nContentLength);
 
 	Network::Get()->TcpWrite(m_nHandle, reinterpret_cast<uint8_t *>(m_RequestHeaderResponse), static_cast<uint16_t>(nHeaderLength), nConnectionHandle);
-	Network::Get()->TcpWrite(m_nHandle, reinterpret_cast<uint8_t *>(m_Content), m_nContentLength, nConnectionHandle);
+	Network::Get()->TcpWrite(m_nHandle, reinterpret_cast<uint8_t *>(m_Content), static_cast<uint16_t>(m_nContentLength), nConnectionHandle);
 	DEBUG_PRINTF("m_nContentLength=%u", m_nContentLength);
 
 	m_Status = Status::UNKNOWN_ERROR;
@@ -157,7 +146,7 @@ Status HttpDaemon::ParseRequest() {
 	m_nRequestContentLength = 0;
 	m_nFileDataLength = 0;
 
-	for (uint16_t i = 0; i < static_cast<uint16_t>(m_nBytesReceived); i++) {
+	for (uint32_t i = 0; i < m_nBytesReceived; i++) {
 		if (m_RequestHeaderResponse[i] == '\n') {
 			assert(i > 1);
 			m_RequestHeaderResponse[i - 1] = '\0';
@@ -167,7 +156,7 @@ Status HttpDaemon::ParseRequest() {
 			} else {
 				if (pLine[0] == '\0') {
 					assert((i + 1) <= m_nBytesReceived);
-					m_nFileDataLength = static_cast<uint16_t>(static_cast<uint16_t>(m_nBytesReceived) - 1U - i);
+					m_nFileDataLength = static_cast<uint16_t>(m_nBytesReceived - 1 - i);
 					if (m_nFileDataLength > 0) {
 						m_pFileData = &m_RequestHeaderResponse[i + 1];
 						m_pFileData[m_nFileDataLength] = '\0';
@@ -197,7 +186,7 @@ Status HttpDaemon::ParseMethod(char *pLine) {
 	assert(pLine != nullptr);
 	char *pToken;
 
-	if ((pToken = strtok(pLine, " ")) == 0) {
+	if ((pToken = strtok(pLine, " ")) == nullptr) {
 		return Status::METHOD_NOT_IMPLEMENTED;
 	}
 
@@ -209,17 +198,17 @@ Status HttpDaemon::ParseMethod(char *pLine) {
 		return Status::METHOD_NOT_IMPLEMENTED;
 	}
 
-	if ((pToken = strtok(0, " ")) == 0) {
+	if ((pToken = strtok(nullptr, " ")) == nullptr) {
 		return Status::BAD_REQUEST;
 	}
 
 	m_pUri = pToken;
 
-	if ((pToken = strtok(0, "/")) == nullptr || strcmp(pToken, "HTTP") != 0) {
+	if ((pToken = strtok(nullptr, "/")) == nullptr || strcmp(pToken, "HTTP") != 0) {
 		return Status::BAD_REQUEST;
 	}
 
-	if ((pToken = strtok(0, " \n")) == nullptr) {
+	if ((pToken = strtok(nullptr, " \n")) == nullptr) {
 		return Status::BAD_REQUEST;
 	}
 
@@ -245,14 +234,14 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 	}
 
 	if (strcasecmp(pToken, "Content-Type") == 0) {
-		if ((pToken = strtok(0, " ;")) == nullptr) {
+		if ((pToken = strtok(nullptr, " ;")) == nullptr) {
 			return Status::BAD_REQUEST;
 		}
 		if (strcmp(pToken, "application/json") == 0) {
 			m_bContentTypeJson = true;
 		}
 	} else if (strcasecmp(pToken, "Content-Length") == 0) {
-		if ((pToken = strtok(0, " ")) == nullptr) {
+		if ((pToken = strtok(nullptr, " ")) == nullptr) {
 			return Status::BAD_REQUEST;
 		}
 
@@ -260,7 +249,7 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 		while (*pToken != '\0') {
 			auto nDigit = static_cast<uint32_t>(*pToken++ - '0');
 			if (nDigit > 9) {
-				return Status::BAD_REQUEST;;
+				return Status::BAD_REQUEST;
 			}
 
 			nTmp *= 10;
@@ -271,7 +260,7 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 			}
 		}
 
-		m_nRequestContentLength = static_cast<uint16_t>(nTmp);
+		m_nRequestContentLength = nTmp;
 	}
 
 	DEBUG_EXIT
@@ -285,39 +274,73 @@ Status HttpDaemon::ParseHeaderField(char *pLine) {
 Status HttpDaemon::HandleGet() {
 	int nLength = 0;
 
-#if defined(ENABLE_CONTENT)
-	if ((strcmp(m_pUri, "/") == 0) || (strcmp(m_pUri, "/index.html") == 0)) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
-		nLength = get_file_content("index.html", m_Content);
-	} else if (strcmp(m_pUri, "/styles.css") == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_CSS)];
-		nLength = get_file_content("styles.css", m_Content);
-	} else if (strcmp(m_pUri, "/index.js") == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_JS)];
-		nLength = get_file_content("index.js", m_Content);
-	} else
-#endif
 	if (memcmp(m_pUri, "/json/", 6) == 0) {
-		m_pContentType = contentType[static_cast<uint32_t>(contentTypes::APPLICATION_JSON)];
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::APPLICATION_JSON)];
 		const auto *pGet = &m_pUri[6];
-		if (strcmp(pGet, "list") == 0) {
+		switch (http::get_uint(pGet)) {
+		case http::json::get::LIST:
 			nLength = remoteconfig::json_get_list(m_Content, sizeof(m_Content));
-		} else if (strcmp(pGet, "version") == 0) {
+			break;
+		case http::json::get::VERSION:
 			nLength = remoteconfig::json_get_version(m_Content, sizeof(m_Content));
-		} else if (strcmp(pGet, "uptime") == 0) {
+			break;
+		case http::json::get::UPTIME:
 			if (!RemoteConfig::Get()->IsEnableUptime()) {
 				DEBUG_PUTS("Status::BAD_REQUEST");
 				return Status::BAD_REQUEST;
 			}
 			nLength = remoteconfig::json_get_uptime(m_Content, sizeof(m_Content));
-		} else if (strcmp(pGet, "display") == 0) {
+			break;
+		case http::json::get::DISPLAY:
 			nLength = remoteconfig::json_get_display(m_Content, sizeof(m_Content));
-		} else if (strcmp(pGet, "directory") == 0) {
+			break;
+		case http::json::get::DIRECTORY:
 			nLength = remoteconfig::json_get_directory(m_Content, sizeof(m_Content));
-		} else {
-			return HandleGetTxt();
+			break;
+#if defined (ENABLE_NET_PHYSTATUS)
+		case http::json::get::PHYSTATUS:
+			nLength = remoteconfig::net::json_get_phystatus(m_Content, sizeof(m_Content));
+			break;
+#endif
+		default:
+#if defined (ENABLE_PHY_SWITCH)
+			if (memcmp(pGet, "dsa/", 4) == 0) {
+				const auto *pDsa = &pGet[4];
+				switch (http::get_uint(pDsa)) {
+				case http::json::get::PORTSTATUS:
+					nLength = remoteconfig::dsa::json_get_portstatus(m_Content, sizeof(m_Content));
+					break;
+				default:
+					break;
+				}
+			} else {
+#endif
+				return HandleGetTxt();
+#if defined (ENABLE_PHY_SWITCH)
+			}
+#endif
+			break;
 		}
 	}
+#if defined (ENABLE_CONTENT)
+	else if (strcmp(m_pUri, "/") == 0) {
+		http::contentTypes contentType;
+		nLength = get_file_content("index.html", m_Content, contentType);
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentType)];
+	}
+#if defined (ENABLE_PHY_SWITCH)
+	else if (strcmp(m_pUri, "/dsa") == 0) {
+		http::contentTypes contentType;
+		nLength = get_file_content("dsa.html", m_Content, contentType);
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentType)];
+	}
+#endif
+	else {
+		http::contentTypes contentType;
+		nLength = get_file_content(&m_pUri[1], m_Content, contentType);
+		m_pContentType = s_contentType[static_cast<uint32_t>(contentType)];
+	}
+#endif
 
 	if (nLength <= 0) {
 		DEBUG_EXIT
@@ -410,7 +433,7 @@ Status HttpDaemon::HandlePost(bool hasDataOnly) {
 					return Status::BAD_REQUEST;
 				}
 				DEBUG_PUTS("Reboot!");
-				Hardware::Get()->Reboot();
+				RemoteConfig::Get()->Reboot();
 				__builtin_unreachable();
 			}
 		} else if (Sscan::Uint8(m_pFileData, "display", value8) == Sscan::OK) {
@@ -436,7 +459,7 @@ Status HttpDaemon::HandlePost(bool hasDataOnly) {
 		PropertiesConfig::EnableJSON(bIsJSON);
 	}
 
-	m_pContentType = contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
+	m_pContentType = s_contentType[static_cast<uint32_t>(contentTypes::TEXT_HTML)];
 	m_nContentLength = static_cast<uint16_t>(snprintf(m_Content, BUFSIZE - 1U,
 			"<!DOCTYPE html>\n"
 			"<html>\n"

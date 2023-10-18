@@ -2,7 +2,7 @@
  * @file configstore.h
  *
  */
-/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,10 +33,8 @@
 namespace configstore {
 enum class Store {
 	NETWORK,
-	ARTNET,
 	DMXSEND,
 	WS28XXDMX,
-	E131,
 	LTC,
 	MIDI,
 	LTCETC,
@@ -81,25 +79,26 @@ public:
 		return s_bHaveFlashChip;
 	}
 
-	void Update(configstore::Store tStore, uint32_t nOffset, const void *pData, uint32_t nDataLength, uint32_t nSetList = 0, uint32_t nOffsetSetList = 0);
-	void Update(configstore::Store tStore, const void *pData, uint32_t nDataLength) {
-		Update(tStore, 0, pData, nDataLength);
+	void Update(configstore::Store store, uint32_t nOffset, const void *pData, uint32_t nDataLength, uint32_t nSetList = 0, uint32_t nOffsetSetList = 0);
+	void Update(configstore::Store store, const void *pData, uint32_t nDataLength) {
+		Update(store, 0, pData, nDataLength);
 	}
-	void Copy(configstore::Store tStore, void *pData, uint32_t nDataLength, uint32_t nOffset = 0, bool isSetList = true);
-	void CopyTo(configstore::Store tStore, void *pData, uint32_t& nDataLength);
 
-	void ResetSetList(configstore::Store tStore);
+	void Copy(const configstore::Store store, void *pData, uint32_t nDataLength, uint32_t nOffset = 0);
+
+	void ResetSetList(configstore::Store store);
 
 	bool Flash();
 
 	void Dump();
+
+	void Delay();
 
 	static ConfigStore *Get() {
 		return s_pThis;
 	}
 
 private:
-	bool Init();
 	uint32_t GetStoreOffset(configstore::Store tStore);
 
 private:
@@ -108,7 +107,6 @@ private:
 	};
 
 	static bool s_bHaveFlashChip;
-	static bool s_bIsNew;
 
 	static configstore::State s_State;
 	static uint32_t s_nStartAddress;

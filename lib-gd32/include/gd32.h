@@ -2,7 +2,7 @@
  * @file gd32.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,14 @@
 # endif
 #endif
 
+/*
+ * Needed for GD32 Firmware and CMSIS
+ */
+#pragma GCC diagnostic push
+
 #ifdef __cplusplus
+# pragma GCC diagnostic ignored "-Wold-style-cast"
+# pragma GCC diagnostic ignored "-Wuseless-cast"
 extern "C" {
 #endif
 

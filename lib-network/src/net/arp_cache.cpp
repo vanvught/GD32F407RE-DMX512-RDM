@@ -32,22 +32,28 @@
 #include "net_platform.h"
 #include "net_debug.h"
 
+#include "emac/net_link_check.h"
+
 #include "../../config/net_config.h"
 
-#define MAX_RECORDS	32
+#if !defined ARP_MAX_RECORDS
+static constexpr auto MAX_RECORDS = 32;
+#else
+static constexpr auto MAX_RECORDS = ARP_MAX_RECORDS;
+#endif
 
-struct t_arp_record {
-	uint32_t ip;
+struct ArpRecord {
+	uint32_t nIp;
 	uint8_t mac_address[ETH_ADDR_LEN];
-} ALIGNED;
+};
 
 typedef union pcast32 {
 	uint32_t u32;
 	uint8_t u8[4];
 } _pcast32;
 
-static struct t_arp_record s_arp_records[MAX_RECORDS] SECTION_NETWORK ALIGNED;
-static uint16_t s_entry_current SECTION_NETWORK ALIGNED;
+static ArpRecord s_ArpRecords[MAX_RECORDS] SECTION_NETWORK ALIGNED;
+static uint16_t s_Entries SECTION_NETWORK ALIGNED;
 
 #ifndef NDEBUG
 # define TICKER_COUNT 100	///< 10 seconds
@@ -55,11 +61,10 @@ static uint16_t s_entry_current SECTION_NETWORK ALIGNED;
 #endif
 
 void __attribute__((cold)) arp_cache_init() {
-	s_entry_current = 0;
+	s_Entries = 0;
 
-	for (auto i = 0; i < MAX_RECORDS; i++) {
-		s_arp_records[i].ip = 0;
-		memset(s_arp_records[i].mac_address, 0, ETH_ADDR_LEN);
+	for (auto& record : s_ArpRecords) {
+		memset(&record, 0, sizeof(struct ArpRecord));
 	}
 
 #ifndef NDEBUG
@@ -69,22 +74,24 @@ void __attribute__((cold)) arp_cache_init() {
 
 void arp_cache_update(const uint8_t *pMacAddress, uint32_t nIp) {
 	DEBUG_ENTRY
+	DEBUG_PRINTF(MACSTR " " IPSTR, MAC2STR(pMacAddress), IP2STR(nIp));
 
-	if (s_entry_current == MAX_RECORDS) {
-		console_error("arp_cache_update\n");
+	if (s_Entries == MAX_RECORDS) {
+		console_error("ARP cache is full\n");
 		return;
 	}
 
-	for (auto i = 0; i < s_entry_current; i++) {
-		if (s_arp_records[i].ip == nIp) {
+	for (auto i = 0; i < s_Entries; i++) {
+		if (s_ArpRecords[i].nIp == nIp) {
+			DEBUG_EXIT
 			return;
 		}
 	}
 
-	memcpy(s_arp_records[s_entry_current].mac_address, pMacAddress, ETH_ADDR_LEN);
-	s_arp_records[s_entry_current].ip = nIp;
+	memcpy(s_ArpRecords[s_Entries].mac_address, pMacAddress, ETH_ADDR_LEN);
+	s_ArpRecords[s_Entries].nIp = nIp;
 
-	s_entry_current++;
+	s_Entries++;
 
 	DEBUG_EXIT
 }
@@ -93,37 +100,49 @@ uint32_t arp_cache_lookup(uint32_t nIp, uint8_t *pMacAddress) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(nIp), MAC2STR(pMacAddress));
 
-	for (auto i = 0; i < MAX_RECORDS; i++) {
-		if (s_arp_records[i].ip == nIp) {
-			memcpy(pMacAddress, s_arp_records[i].mac_address, ETH_ADDR_LEN);
+	uint32_t i;
+
+	for (i = 0; i < MAX_RECORDS; i++) {
+		if (s_ArpRecords[i].nIp == nIp) {
+			memcpy(pMacAddress, s_ArpRecords[i].mac_address, ETH_ADDR_LEN);
+			DEBUG_EXIT
 			return nIp;
 		}
 
-		if (s_arp_records[i].ip == 0) {
+		if (s_ArpRecords[i].nIp == 0) {
 			break;
 		}
 	}
 
-	const auto current_entry = s_entry_current;
-	int32_t timeout;
-	auto retries = 3;
+	if (net::link_status_read() == net::Link::STATE_DOWN) {
+		DEBUG_EXIT
+		return 0;
+	}
 
-	while (retries--) {
+	const auto nEntries = s_Entries;
+	int32_t nTimeout;
+	auto nRetries = 3;
+
+	while (nRetries--) {
 		arp_send_request(nIp);
 
-		timeout = 0x1FFFF;
+		nTimeout = 0x1FFFF;
+#ifndef NDEBUG
+		nTimeout+= 0x40000;
+#endif
 
-		while ((timeout-- > 0) && (current_entry == s_entry_current)) {
+		while ((nTimeout-- > 0) && (nEntries == s_Entries)) {
 			net_handle();
 		}
 
-		if (current_entry != s_entry_current) {
-			memcpy(pMacAddress, s_arp_records[current_entry].mac_address, ETH_ADDR_LEN);
-			DEBUG_PRINTF("timeout=%x", timeout);
+		if (nEntries != s_Entries) {
+			memcpy(pMacAddress, s_ArpRecords[nEntries].mac_address, ETH_ADDR_LEN);
+			DEBUG_PRINTF("timeout=%x", nTimeout);
+			DEBUG_EXIT
 			return nIp;
 		}
 
-		DEBUG_PRINTF("i=%d, timeout=%d, current_entry=%d, s_entry_current=%d", i, timeout, current_entry, s_entry_current);
+		DEBUG_PRINTF("timeout=%d, current_entry=%d, s_entry_current=%d", nTimeout, nEntries, s_Entries);
 	}
 
 	DEBUG_EXIT
@@ -132,10 +151,10 @@ uint32_t arp_cache_lookup(uint32_t nIp, uint8_t *pMacAddress) {
 
 void arp_cache_dump() {
 #ifndef NDEBUG
-	printf("ARP Cache size=%d\n", s_entry_current);
+	printf("ARP Cache size=%d\n", s_Entries);
 
-	for (auto i = 0; i < s_entry_current; i++) {
-		printf("%02d " IPSTR " " MACSTR "\n", i, IP2STR(s_arp_records[i].ip),MAC2STR(s_arp_records[i].mac_address));
+	for (auto i = 0; i < s_Entries; i++) {
+		printf("%02d " IPSTR " " MACSTR "\n", i, IP2STR(s_ArpRecords[i].nIp),MAC2STR(s_ArpRecords[i].mac_address));
 	}
 #endif
 }
@@ -150,4 +169,3 @@ void arp_cache_timer(void) {
 	}
 }
 #endif
-

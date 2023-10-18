@@ -26,11 +26,18 @@
 #ifndef STORERDMSENSORS_H_
 #define STORERDMSENSORS_H_
 
+#include <cstdint>
+#include <cassert>
+
 #include "rdmsensorsparams.h"
+#include "rdmsensorstore.h"
+#include "rdmsensors.h"
 
 #include "configstore.h"
 
-class StoreRDMSensors final: public RDMSensorsParamsStore {
+#include "debug.h"	//FIXME Remove
+
+class StoreRDMSensors final: public RDMSensorsParamsStore, public RDMSensorStore {
 public:
 	StoreRDMSensors();
 
@@ -38,9 +45,16 @@ public:
 		ConfigStore::Get()->Update(configstore::Store::RDMSENSORS, pParams, sizeof(struct rdm::sensorsparams::Params));
 	}
 
-	void Copy(struct rdm::sensorsparams::Params *pParams) override {
+	void Copy(rdm::sensorsparams::Params *pParams) override {
 		ConfigStore::Get()->Copy(configstore::Store::RDMSENSORS, pParams, sizeof(struct rdm::sensorsparams::Params));
 	}
+
+	 void SaveCalibration(uint32_t nSensor, int32_t nCalibration) override {
+		 assert(nSensor < rdm::sensors::MAX);
+		 DEBUG_PRINTF("nSensor=%u, nCalibration=%d", nSensor, nCalibration);
+		 auto c = static_cast<int16_t>(nCalibration);
+		 ConfigStore::Get()->Update(configstore::Store::RDMSENSORS, (nSensor * sizeof(int16_t)) + __builtin_offsetof(struct rdm::sensorsparams::Params, nCalibrate), &c, sizeof(int16_t));
+	 }
 
 	static StoreRDMSensors *Get() {
 		return s_pThis;

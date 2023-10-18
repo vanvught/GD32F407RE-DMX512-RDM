@@ -26,9 +26,11 @@
 #ifndef GD32_GPIO_H_
 #define GD32_GPIO_H_
 
+#include <stdint.h>
+
 #define GD32_PORT_TO_GPIO(p,n)	((p * 16) + n)
-#define GD32_GPIO_TO_PORT(g)	(g / 16)
-#define GD32_GPIO_TO_NUMBER(g)	(g - (16 * GD32_GPIO_TO_PORT(g)))
+#define GD32_GPIO_TO_PORT(g)	(uint8_t)(g / 16)
+#define GD32_GPIO_TO_NUMBER(g)	(uint8_t)(g - (16 * GD32_GPIO_TO_PORT(g)))
 
 typedef enum T_GD32_Port {
 	GD32_GPIO_PORTA = 0,
@@ -39,8 +41,6 @@ typedef enum T_GD32_Port {
 	GD32_GPIO_PORTF,
 	GD32_GPIO_PORTG,
 } GD32_Port_TypeDef;
-
-#include <stdint.h>
 
 #include "gd32.h"
 

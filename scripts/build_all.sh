@@ -44,16 +44,25 @@ do
 					exit $retVal
 				fi
 				
-				SUFFIX=$(echo $m | cut -d '-' -f 2 | cut -d '.' -f 1)
+				SUFFIX1=$(echo $m | cut -d '-' -f 2 | cut -d '.' -f 1)
+				SUFFIX2=$(echo $m | cut -d '-' -f 3 | cut -d '.' -f 1)
 			
-				if [ $SUFFIX == 'Makefile' ]
+				if [ $SUFFIX1 == 'Makefile' ]
 				then
 					cp gd32f4xx.bin /tmp/$f/$i
 				else
-					echo $SUFFIX
-					mkdir /tmp/$f/$i/$SUFFIX/
-					cp gd32f4xx.bin /tmp/$f/$i/$SUFFIX
-				fi			
+					echo "[" $SUFFIX1 "][" $SUFFIX2 "]"
+					
+					if [ -z "$SUFFIX2" ]
+					then
+						mkdir /tmp/$f/$i/$SUFFIX1/
+						cp gd32f4xx.bin /tmp/$f/$i/$SUFFIX1
+					else
+						mkdir -p /tmp/$f/$i/$SUFFIX1/$SUFFIX2/
+						cp gd32f4xx.bin /tmp/$f/$i/$SUFFIX1/$SUFFIX2/
+					fi
+				fi
+							
 			done
 			
 		done

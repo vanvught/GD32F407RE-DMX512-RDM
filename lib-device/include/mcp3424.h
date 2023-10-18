@@ -70,8 +70,8 @@ public:
 	void SetConversion(const adc::mcp3424::Conversion conversion);
 	adc::mcp3424::Conversion GetConversion() const;
 
-	uint32_t GetRaw(const uint8_t nChannel);
-	double GetVoltage(const uint8_t nChannel);
+	uint32_t GetRaw(const uint32_t nChannel);
+	double GetVoltage(const uint32_t nChannel);
 
 private:
 	bool m_IsConnected { false };

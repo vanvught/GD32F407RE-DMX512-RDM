@@ -2,7 +2,7 @@
  * @file gd32_uart0.c
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,29 +23,12 @@
  * THE SOFTWARE.
  */
 
-#include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "gd32.h"
-#include "gd32_uart.h"
+extern void uart0_putc(int);
 
-void uart0_init(void) {
-	gd32_uart_begin(USART0, 115200U, GD32_UART_BITS_8, GD32_UART_PARITY_NONE, GD32_UART_STOP_1BIT);
-}
-
-void uart0_putc(int c) {
-	if (c == '\n') {
-		while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-			;
-		USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) '\r');
-	}
-
-	while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-		;
-
-	USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) c);
-}
+static char s_buffer[128];
 
 void uart0_puts(const char *s) {
 	while (*s != '\0') {
@@ -57,8 +40,6 @@ void uart0_puts(const char *s) {
 
 //	uart0_putc('\n'); //TODO Add '\n'
 }
-
-static char s_buffer[128];
 
 int uart0_printf(const char *fmt, ...) {
 	va_list arp;

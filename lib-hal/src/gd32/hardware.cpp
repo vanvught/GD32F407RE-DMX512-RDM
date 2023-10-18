@@ -34,28 +34,48 @@
 #include "gd32_adc.h"
 #include "gd32_board.h"
 
-#ifndef NDEBUG
-# include "../debug/i2cdetect.h"
+#if defined (DEBUG_I2C)
+# include "../debug/i2c/i2cdetect.h"
+#endif
+
+#if defined (ENABLE_USB_HOST)
+void usb_init();
 #endif
 
 #include "debug.h"
 
 extern "C" {
 void console_init(void);
+void __libc_init_array(void);
 void systick_config(void);
 }
 
-void micros_init();
 void udelay_init();
 void gd32_adc_init();
 
 Hardware *Hardware::s_pThis = nullptr;
 
 Hardware::Hardware() {
+	DEBUG_ENTRY
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
 	console_init();
+#if !defined (ENABLE_TFTP_SERVER)
+	__libc_init_array();
+#endif
+	systick_config();
+    udelay_init();
+	gd32_adc_init();
+	gd32_i2c_begin();
+
+	rcu_periph_clock_enable(RCU_TIMER5);
+	timer_deinit(TIMER5);
+	timer_parameter_struct timer_initpara;
+	timer_initpara.prescaler = TIMER_PSC_1MHZ;
+	timer_initpara.period = static_cast<uint32_t>(~0);
+	timer_init(TIMER5, &timer_initpara);
+	timer_enable(TIMER5);
 
 #if !defined (GD32F4XX)
 #else
@@ -73,10 +93,6 @@ Hardware::Hardware() {
 	assert(nAPB2 == APB2_CLOCK_FREQ);
 #endif
 
-	systick_config();
-    udelay_init();
-    micros_init();
-
 #if !defined (GD32F4XX)
 	rcu_periph_clock_enable (RCU_BKPI);
 	rcu_periph_clock_enable (RCU_PMU);
@@ -89,31 +105,42 @@ Hardware::Hardware() {
 #endif
 	bkp_data_write(BKP_DATA_1, 0x0);
 
-#if !defined (GD32F4XX)
-	// There is no tightly coupled RAM
+#if !defined (ENABLE_TFTP_SERVER)
+# if defined (GD32F207RG) || defined (GD32F4XX)
+	// clear section .dmx
+	extern unsigned char _sdmx;
+	extern unsigned char _edmx;
+	DEBUG_PRINTF("clearing .dmx at %p, size %u", &_sdmx, &_edmx - &_sdmx);
+	memset(&_sdmx, 0, &_edmx - &_sdmx);
+#  if defined (GD32F450VI)
+	// clear section .lightset
+	extern unsigned char _slightset;
+	extern unsigned char _elightset;
+	DEBUG_PRINTF("clearing .lightset at %p, size %u", &_slightset, &_elightset - &_slightset);
+	memset(&_slightset, 0, &_elightset - &_slightset);
+#  endif
+	// clear section .network
+	extern unsigned char _snetwork;
+	extern unsigned char _enetwork;
+	DEBUG_PRINTF("clearing .network at %p, size %u", &_snetwork, &_enetwork - &_snetwork);
+	memset(&_snetwork, 0, &_enetwork - &_snetwork);
+#  if !defined (GD32F450VE)
+	// clear section .pixel
+	extern unsigned char _spixel;
+	extern unsigned char _epixel;
+	DEBUG_PRINTF("clearing .pixel at %p, size %u", &_spixel, &_epixel - &_spixel);
+	memset(&_spixel, 0, &_epixel - &_spixel);
+#  endif
+# endif
 #else
-	// clear TCM SRAM
-	extern unsigned char _stcmsram;
-	extern unsigned char _etcmsram;
-	DEBUG_PRINTF("%p:%u", &_stcmsram, &_etcmsram - &_stcmsram);
-	memset(&_stcmsram, 0, &_etcmsram - &_stcmsram);
-	// clear RAMADD SRAM
-	extern unsigned char _sramadd;
-	extern unsigned char _eramadd;
-	DEBUG_PRINTF("%p:%u", &_sramadd, &_eramadd - &_sramadd);
-	memset(&_sramadd, 0, &_eramadd - &_sramadd);
+# if defined (GD32F207RG) || defined (GD32F4XX)
+	// clear section .network
+	extern unsigned char _snetwork;
+	extern unsigned char _enetwork;
+	DEBUG_PRINTF("clearing .network at %p, size %u", &_snetwork, &_enetwork - &_snetwork);
+	memset(&_snetwork, 0, &_enetwork - &_snetwork);
+# endif
 #endif
-
-	rcu_periph_clock_enable(RCU_TIMER5);
-
-	timer_deinit(TIMER5);
-	timer_parameter_struct timer_initpara;
-	timer_initpara.prescaler = TIMER_PSC_1MHZ;
-	timer_initpara.period = static_cast<uint32_t>(~0);
-	timer_init(TIMER5, &timer_initpara);
-	timer_enable(TIMER5);
-
-	gd32_adc_init();
 
 	struct tm tmbuf;
 
@@ -126,13 +153,11 @@ Hardware::Hardware() {
 	tmbuf.tm_isdst = 0; 						// 0 (DST not in effect, just take RTC time)
 
 	const auto seconds = mktime(&tmbuf);
-	const struct timeval tv = { .tv_sec = seconds, .tv_usec = 0 };
+	const struct timeval tv = { seconds, 0 };
 
 	settimeofday(&tv, nullptr);
 
-	gd32_i2c_begin();
-
-#ifndef NDEBUG
+#if defined (DEBUG_I2C)
 	I2cDetect i2cdetect;
 #endif
 
@@ -152,6 +177,23 @@ Hardware::Hardware() {
 # endif
 	GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
+
+#if defined (LEDPANEL_595_CS_GPIOx)
+	rcu_periph_clock_enable(LEDPANEL_595_CS_RCU_GPIOx);
+# if !defined (GD32F4XX)
+	gpio_init(LEDPANEL_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LEDPANEL_595_CS_GPIO_PINx);
+# else
+	gpio_mode_set(LEDPANEL_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LEDPANEL_595_CS_GPIO_PINx);
+	gpio_output_options_set(LEDPANEL_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LEDPANEL_595_CS_GPIO_PINx);
+# endif
+	GPIO_BOP(LEDPANEL_595_CS_GPIOx) = LEDPANEL_595_CS_GPIO_PINx;
+#endif
+
+#if defined ENABLE_USB_HOST
+	usb_init();
+#endif
+
+	DEBUG_EXIT
 }
 
 typedef union pcast32 {

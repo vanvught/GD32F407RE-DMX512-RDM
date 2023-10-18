@@ -34,37 +34,40 @@ struct ip_addr {
 
 typedef struct ip_addr ip_addr_t;
 
-struct ip_info {
+struct IpInfo {
     struct ip_addr ip;
     struct ip_addr netmask;
     struct ip_addr gw;
+    struct ip_addr broadcast_ip;
+    struct ip_addr secondary_ip;
 };
 
 #define IP_BROADCAST	(0xFFFFFFFF)
 #define HOST_NAME_MAX 	64	/* including a terminating null byte. */
 
-extern void net_init(const uint8_t *const, struct ip_info *, const char *, bool *, bool *);
-extern void net_shutdown();
-extern void net_handle();
+void net_init(const uint8_t *const, struct IpInfo *, const char *, bool *, bool *);
+void net_shutdown();
+void net_handle();
 
-extern void net_set_ip(uint32_t);
-extern void net_set_gw(uint32_t);
-extern bool net_set_zeroconf(struct ip_info *);
+void net_set_ip(struct IpInfo *);
+void net_set_netmask(struct IpInfo *);
+void net_set_gw(struct IpInfo *);
+bool net_set_zeroconf(struct IpInfo *);
 
-extern bool net_set_dhcp(struct ip_info *, const char *const, bool *);
-extern void net_dhcp_release();
+bool net_set_dhcp(struct IpInfo *, const char *const, bool *);
+void net_dhcp_release();
 
-extern int udp_begin(uint16_t);
-extern int udp_end(uint16_t);
-extern uint16_t udp_recv1(int, uint8_t *, uint16_t, uint32_t *, uint16_t *);
-extern uint16_t udp_recv2(int, const uint8_t **, uint32_t *, uint16_t *);
-extern int udp_send(int, const uint8_t *, uint16_t, uint32_t, uint16_t);
+int udp_begin(uint16_t);
+int udp_end(uint16_t);
+uint16_t udp_recv1(int, uint8_t *, uint16_t, uint32_t *, uint16_t *);
+uint16_t udp_recv2(int, const uint8_t **, uint32_t *, uint16_t *);
+int udp_send(int, const uint8_t *, uint16_t, uint32_t, uint16_t);
 
-extern int igmp_join(uint32_t);
-extern int igmp_leave(uint32_t);
+void igmp_join(uint32_t);
+void igmp_leave(uint32_t);
 
-extern int tcp_begin(const uint16_t);
-extern uint16_t tcp_read(const int32_t, const uint8_t **, uint32_t &);
-extern void tcp_write(const int32_t, const uint8_t *, uint16_t, const uint32_t);
+int tcp_begin(const uint16_t);
+uint16_t tcp_read(const int32_t, const uint8_t **, uint32_t &);
+void tcp_write(const int32_t, const uint8_t *, uint16_t, const uint32_t);
 
 #endif /* NET_H_ */

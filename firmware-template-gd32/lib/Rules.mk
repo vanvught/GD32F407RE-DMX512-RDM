@@ -1,3 +1,6 @@
+$(info "lib/Rules.mk")
+$(info $$MAKE_FLAGS [${MAKE_FLAGS}])
+
 PREFIX ?= arm-none-eabi-
 
 CC	= $(PREFIX)gcc
@@ -6,41 +9,45 @@ AS	= $(CC)
 LD	= $(PREFIX)ld
 AR	= $(PREFIX)ar
 
+FAMILY?=gd32f4xx
+MCU?=GD32F407RE
 BOARD?=BOARD_GD32F407RE
 ENET_PHY?=DP83848
-FAMILY?=gd32f4xx
-MCU?=gd32f407
 
-MCU_UC:=$(shell echo $(MCU_UC) | tr a-w A-W)
 FAMILY:=$(shell echo $(FAMILY) | tr A-Z a-z)
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
 
-$(info $$FAMILY_UC [${MCU_UC}])
 $(info $$FAMILY [${FAMILY}])
 $(info $$FAMILY_UC [${FAMILY_UC}])
+$(info $$BOARD [${BOARD}])
+$(info $$ENET_PHY [${ENET_PHY}])
 
-SRCDIR = src src/gd32 $(EXTRA_SRCDIR)
+SRCDIR=src src/gd32 $(EXTRA_SRCDIR)
 
 include ../firmware-template-gd32/Includes.mk
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 DEFINES+=-D_TIME_STAMP_YEAR_=$(shell date  +"%Y") -D_TIME_STAMP_MONTH_=$(shell date  +"%-m") -D_TIME_STAMP_DAY_=$(shell date  +"%-d")
 
-ifeq ($(findstring DMX4,$(BOARD)), DMX4)
-	DEFINES+=-DCONSOLE_I2C
+ifeq ($(findstring ARTNET_VERSION=4,$(DEFINES)),ARTNET_VERSION=4)
+	ifeq ($(findstring ARTNET_HAVE_DMXIN,$(DEFINES)),ARTNET_HAVE_DMXIN)
+		DEFINES+=-DE131_HAVE_DMXIN
+	endif
 endif
 
-COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
+COPS=-DBARE_METAL -DGD32 -DGD32F407 -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
 COPS+=$(DEFINES) $(MAKE_FLAGS) $(INCLUDES)
 COPS+=-Os -mcpu=cortex-m4 -mthumb -g -mfloat-abi=hard -fsingle-precision-constant -mfpu=fpv4-sp-d16
 COPS+=-DARM_MATH_CM4 -D__FPU_PRESENT=1
 COPS+=-nostartfiles -ffreestanding -nostdlib
 COPS+=-fstack-usage -Wstack-usage=10240
 COPS+=-ffunction-sections -fdata-sections
+COPS+=-Wall -Werror -Wpedantic -Wextra -Wunused -Wsign-conversion -Wconversion
+COPS+=-Wduplicated-cond -Wlogical-op
 
-CPPOPS=-std=c++11 
+CPPOPS=-std=c++11
 CPPOPS+=-Wnon-virtual-dtor -Woverloaded-virtual -Wnull-dereference -fno-rtti -fno-exceptions -fno-unwind-tables
-#CPPOPS+=-Wuseless-cast -Wold-style-cast
+CPPOPS+=-Wuseless-cast -Wold-style-cast
 CPPOPS+=-fno-threadsafe-statics
 
 CURR_DIR:=$(notdir $(patsubst %/,%,$(CURDIR)))
@@ -69,7 +76,7 @@ $(BUILD)$1/%.o: $1/%.cpp
 	$(CPP) $(COPS) $(CPPOPS)  -c $$< -o $$@
 	
 $(BUILD)$1/%.o: $1/%.S
-	$(CC) $(COPS) -D__ASSEMBLY__ -c $$< -o $$@	
+	$(CC) $(COPS) -D__ASSEMBLY__ -c $$< -o $$@
 endef
 
 all : builddirs $(TARGET)

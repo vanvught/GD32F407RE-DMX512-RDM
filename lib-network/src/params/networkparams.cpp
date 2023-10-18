@@ -2,7 +2,7 @@
  * @file networkparams.cpp
  *
  */
-/* Copyright (C) 2017-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,6 @@ bool NetworkParams::Load() {
 	ReadConfigFile configfile(NetworkParams::staticCallbackFunction, this);
 
 	if (configfile.Read(NetworkParamsConst::FILE_NAME)) {
-		// There is a configuration file
 		if (m_pNetworkParamsStore != nullptr) {
 			m_pNetworkParamsStore->Update(&m_Params);
 		}
@@ -82,14 +81,9 @@ bool NetworkParams::Load() {
 
 void NetworkParams::Load(const char *pBuffer, uint32_t nLength) {
 	DEBUG_ENTRY
+
 	assert(pBuffer != nullptr);
 	assert(nLength != 0);
-	assert(m_pNetworkParamsStore != nullptr);
-
-	if (m_pNetworkParamsStore == nullptr) {
-		DEBUG_EXIT
-		return;
-	}
 
 	m_Params.nSetList = 0;
 
@@ -97,6 +91,7 @@ void NetworkParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
+	assert(m_pNetworkParamsStore != nullptr);
 	m_pNetworkParamsStore->Update(&m_Params);
 
 	DEBUG_EXIT
@@ -179,11 +174,11 @@ void NetworkParams::callbackFunction(const char *pLine) {
 
 	if (Sscan::Float(pLine, NetworkParamsConst::NTP_UTC_OFFSET, fValue) == Sscan::OK) {
 		// https://en.wikipedia.org/wiki/List_of_UTC_time_offsets
-		if ((static_cast<int32_t>(fValue) >= -12) && (static_cast<int32_t>(fValue) <= 14) && (fValue != defaults::NTP_UTC_OFFSET)) {
+		if ((static_cast<int32_t>(fValue) >= -12) && (static_cast<int32_t>(fValue) <= 14) && (static_cast<int32_t>(fValue) != 0)) {
 			m_Params.fNtpUtcOffset = fValue;
 			m_Params.nSetList |= networkparams::Mask::NTP_UTC_OFFSET;
 		} else {
-			m_Params.fNtpUtcOffset = defaults::NTP_UTC_OFFSET;
+			m_Params.fNtpUtcOffset = 0;
 			m_Params.nSetList &= ~networkparams::Mask::NTP_UTC_OFFSET;
 		}
 		return;
@@ -228,10 +223,12 @@ void NetworkParams::Builder(const struct networkparams::Params *ptNetworkParams,
 	if (ptNetworkParams != nullptr) {
 		memcpy(&m_Params, ptNetworkParams, sizeof(struct networkparams::Params));
 	} else {
+		assert(m_pNetworkParamsStore != nullptr);
 		m_pNetworkParamsStore->Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(NetworkParamsConst::FILE_NAME, pBuffer, nLength);
+	builder.AddIpAddress("secondary_ip", Network::Get()->GetSecondaryIp(), false);
 
 	if (!isMaskSet(networkparams::Mask::IP_ADDRESS)) {
 		m_Params.nLocalIp = Network::Get()->GetIp();
@@ -272,16 +269,4 @@ void NetworkParams::Builder(const struct networkparams::Params *ptNetworkParams,
 
 	DEBUG_PRINTF("nSize=%d", nSize);
 	DEBUG_EXIT
-}
-
-void NetworkParams::Save(char *pBuffer, uint32_t nLength, uint32_t& nSize) {
-	DEBUG_ENTRY
-
-	if (m_pNetworkParamsStore == nullptr) {
-		nSize = 0;
-		DEBUG_EXIT
-		return;
-	}
-
-	Builder(nullptr, pBuffer, nLength, nSize);
 }

@@ -31,30 +31,65 @@
 #include "net_packets.h"
 #include "net_debug.h"
 
-#include "debug.h"
-
 #include "../../config/net_config.h"
 
-struct ip_info g_ip_info  __attribute__ ((aligned (4)));
-uint8_t g_mac_address[ETH_ADDR_LEN] __attribute__ ((aligned (4)));
+namespace net {
+namespace globals {
+struct IpInfo ipInfo  ALIGNED;
+uint32_t nBroadcastMask;
+uint32_t nOnNetworkMask;
+uint8_t macAddress[ETH_ADDR_LEN]  ALIGNED;
+}  // namespace globals
+}  // namespace net
 
 static uint8_t *s_p;
 static bool s_isDhcp = false;
 
-void __attribute__((cold)) net_init(const uint8_t *const pMacAddress, struct ip_info *p_ip_info, const char *pHostname, bool *bUseDhcp, bool *isZeroconfUsed) {
+static void refresh_and_init(struct IpInfo *pIpInfo, bool doInit) {
+	net::globals::ipInfo.broadcast_ip.addr = net::globals::ipInfo.ip.addr | ~net::globals::ipInfo.netmask.addr;
+
+	net::globals::nBroadcastMask = ~(net::globals::ipInfo.netmask.addr);
+	net::globals::nOnNetworkMask = net::globals::ipInfo.ip.addr & net::globals::ipInfo.netmask.addr;
+
+	if (doInit) {
+		arp_init();
+		ip_set_ip();
+	}
+
+	const auto *pSrc = reinterpret_cast<const uint8_t *>(&net::globals::ipInfo);
+	auto *pDst = reinterpret_cast<uint8_t *>(pIpInfo);
+
+	memcpy(pDst, pSrc, sizeof(struct IpInfo));
+}
+
+void set_secondary_ip() {
+	net::globals::ipInfo.ip.addr = net::globals::ipInfo.secondary_ip.addr;
+	net::globals::ipInfo.netmask.addr = 255;
+	net::globals::ipInfo.gw.addr = net::globals::ipInfo.ip.addr;
+}
+
+void __attribute__((cold)) net_init(const uint8_t *const pMacAddress, struct IpInfo *pIpInfo, const char *pHostname, bool *bUseDhcp, bool *isZeroconfUsed) {
 	DEBUG_ENTRY
 
-	for (auto i = 0; i < ETH_ADDR_LEN; i++) {
-		g_mac_address[i] = pMacAddress[i];
+	memcpy(net::globals::macAddress, pMacAddress, ETH_ADDR_LEN);
+
+	const auto *pSrc = reinterpret_cast<const uint8_t *>(pIpInfo);
+	auto *pDst = reinterpret_cast<uint8_t *>(&net::globals::ipInfo);
+
+	memcpy(pDst, pSrc, sizeof(struct IpInfo));
+
+	net::globals::ipInfo.secondary_ip.addr = 2
+			+ ((static_cast<uint32_t>(net::globals::macAddress[3])) << 8)
+			+ ((static_cast<uint32_t>(net::globals::macAddress[4])) << 16)
+			+ ((static_cast<uint32_t>(net::globals::macAddress[5])) << 24);
+
+
+	if (net::globals::ipInfo.ip.addr == 0) {
+		set_secondary_ip();
 	}
-
-	const auto *src = reinterpret_cast<const uint8_t *>(p_ip_info);
-	auto *dst = reinterpret_cast<uint8_t *>(&g_ip_info);
-
-	for (uint32_t i = 0; i < sizeof(struct ip_info); i++) {
-		*dst++ = *src++;
-	}
-
+	/*
+	 * The macAddress is set
+	 */
 	ip_init();
 
 	*isZeroconfUsed = false;
@@ -67,18 +102,16 @@ void __attribute__((cold)) net_init(const uint8_t *const pMacAddress, struct ip_
 		}
 	}
 
-	arp_init();
-	ip_set_ip();
-	tcp_init();
-
-	src = reinterpret_cast<const uint8_t *>(&g_ip_info);
-	dst = reinterpret_cast<uint8_t *>(p_ip_info);
-
-	for (uint32_t i = 0; i < sizeof(struct ip_info); i++) {
-		*dst++ = *src++;
-	}
+	refresh_and_init(pIpInfo, true);
 
 	s_isDhcp = *bUseDhcp;
+
+	if (!arp_do_probe()) {
+		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
+		arp_send_announcement();
+	} else {
+		console_error("IP Conflict!\n");
+	}
 
 	DEBUG_EXIT
 }
@@ -91,20 +124,36 @@ void __attribute__((cold)) net_shutdown() {
 	}
 }
 
-void net_set_ip(uint32_t ip) {
-	g_ip_info.ip.addr = ip;
+void net_set_ip(struct IpInfo *pIpInfo) {
+	net::globals::ipInfo.ip.addr = pIpInfo->ip.addr;
 
-	arp_init();
+	if (net::globals::ipInfo.ip.addr == 0) {
+			set_secondary_ip();
+	}
+
+	refresh_and_init(pIpInfo, true);
+
+	if (!arp_do_probe()) {
+		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
+		arp_send_announcement();
+	} else {
+		console_error("IP Conflict!\n");
+	}
+}
+
+void net_set_netmask(struct IpInfo *pIpInfo) {
+	net::globals::ipInfo.netmask.addr = pIpInfo->netmask.addr;
+
+	refresh_and_init(pIpInfo, false);
+}
+
+void net_set_gw(struct IpInfo *pIpInfo) {
+	net::globals::ipInfo.gw.addr = pIpInfo->gw.addr;
+
 	ip_set_ip();
 }
 
-void net_set_gw(uint32_t gw) {
-	g_ip_info.gw.addr = gw;
-
-	ip_set_ip();
-}
-
-bool net_set_dhcp(struct ip_info *p_ip_info, const char *const pHostname, bool *isZeroconfUsed) {
+bool net_set_dhcp(struct IpInfo *pIpInfo, const char *const pHostname, bool *isZeroconfUsed) {
 	bool isDhcp = false;
 	*isZeroconfUsed = false;
 
@@ -115,17 +164,17 @@ bool net_set_dhcp(struct ip_info *p_ip_info, const char *const pHostname, bool *
 		isDhcp = true;
 	}
 
-	arp_init();
-	ip_set_ip();
-
-	const auto *pSrc = reinterpret_cast<const uint8_t *>(&g_ip_info);
-	auto *pDst = reinterpret_cast<uint8_t *>(p_ip_info);
-
-	for (uint32_t i = 0; i < sizeof(struct ip_info); i++) {
-		*pDst++ = *pSrc++;
-	}
+	refresh_and_init(pIpInfo, true);
 
 	s_isDhcp = isDhcp;
+
+	if (!arp_do_probe()) {
+		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
+		arp_send_announcement();
+	} else {
+		console_error("IP Conflict!\n");
+	}
+
 	return isDhcp;
 }
 
@@ -134,21 +183,17 @@ void net_dhcp_release() {
 	s_isDhcp = false;
 }
 
-bool net_set_zeroconf(struct ip_info *p_ip_info) {
+bool net_set_zeroconf(struct IpInfo *pIpInfo) {
 	const auto b = rfc3927();
 
 	if (b) {
-		arp_init();
-		ip_set_ip();
-
-		const auto *pSrc = reinterpret_cast<const uint8_t *>(&g_ip_info);
-		auto *pDst = reinterpret_cast<uint8_t *>(p_ip_info);
-
-		for (uint32_t i = 0; i < sizeof(struct ip_info); i++) {
-			*pDst++ = *pSrc++;
-		}
+		refresh_and_init(pIpInfo, true);
 
 		s_isDhcp = false;
+
+		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
+		arp_send_announcement();
+
 		return true;
 	}
 
@@ -160,12 +205,12 @@ __attribute__((hot)) void net_handle() {
 	const auto nLength = emac_eth_recv(&s_p);
 
 	if (__builtin_expect((nLength > 0), 0)) {
-		const auto *const eth = reinterpret_cast<struct ether_header *>( s_p);
+		const auto *const eth = reinterpret_cast<struct ether_header *>(s_p);
 
 		if (eth->type == __builtin_bswap16(ETHER_TYPE_IPv4)) {
-			ip_handle(reinterpret_cast<struct t_ip4 *>( s_p));
+			ip_handle(reinterpret_cast<struct t_ip4 *>(s_p));
 		} else if (eth->type == __builtin_bswap16(ETHER_TYPE_ARP)) {
-			arp_handle(reinterpret_cast<struct t_arp *>( s_p));
+			arp_handle(reinterpret_cast<struct t_arp *>(s_p));
 		} else {
 			DEBUG_PRINTF("type %04x is not implemented", __builtin_bswap16(eth->type));
 		}

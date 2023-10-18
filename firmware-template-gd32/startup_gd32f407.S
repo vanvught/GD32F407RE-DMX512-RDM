@@ -11,8 +11,9 @@
 .word  _sbss
 .word  _ebss
 
- .weak  Reset_Handler
- .type  Reset_Handler, %function
+.section  .text.Reset_Handler
+  .weak  Reset_Handler
+  .type  Reset_Handler, %function
 
 Reset_Handler:
   movs r1, #0
@@ -40,6 +41,9 @@ Zerobss:
   ldr r3, = _ebss
   cmp r2, r3
   bcc FillZerobss
+#if defined (DEBUG_STACK)
+  bl stack_debug_init
+#endif
   bl  SystemInit
   bl main
   bx lr

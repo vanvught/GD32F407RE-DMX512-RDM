@@ -36,17 +36,21 @@
 #include "e131bridgeconst.h"
 #include "e131.h"
 
+#if defined (E131_HAVE_DMXIN)
 static constexpr auto  UUID_STRING_LENGTH =	36;
+#endif
 
 void E131Bridge::Print() {
+#if defined (E131_HAVE_DMXIN)
 	char uuid_str[UUID_STRING_LENGTH + 1];
 	uuid_str[UUID_STRING_LENGTH] = '\0';
 	uuid_unparse(m_Cid, uuid_str);
-
+#endif
 	printf("Bridge\n");
 	printf(" Firmware : %d.%d\n", E131BridgeConst::VERSION[0], E131BridgeConst::VERSION[1]);
+#if defined (E131_HAVE_DMXIN)
 	printf(" CID      : %s\n", uuid_str);
-
+#endif
 	if (m_State.nEnableOutputPorts != 0) {
 		printf(" Output\n");
 

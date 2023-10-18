@@ -44,7 +44,7 @@ RDMSensors::RDMSensors() {
 	s_pThis = this;
 
 #if defined (RDM_SENSORS_ENABLE) || defined (RDMSENSOR_CPU_ENABLE)
-	m_pRDMSensor = new RDMSensor*[rdm::sensors::max];
+	m_pRDMSensor = new RDMSensor*[rdm::sensors::MAX];
 	assert(m_pRDMSensor != nullptr);
 
 # if defined (RDMSENSOR_CPU_ENABLE)
@@ -113,7 +113,7 @@ bool RDMSensors::Add(RDMSensor *pRDMSensor) {
 		return false;
 	}
 
-	if (m_nCount == rdm::sensors::max) {
+	if (m_nCount == rdm::sensors::MAX) {
 		DEBUG_EXIT
 		return false;
 	}

@@ -41,8 +41,7 @@ extern void free(void *ptr);
 extern void *calloc(size_t nmemb, size_t size);
 extern void *realloc(void *ptr, size_t size);
 
-/* Return the absolute value of I.  */
-inline static int abs(int i) {
+inline int abs(int i) {
 	return i < 0 ? -i : i;
 }
 

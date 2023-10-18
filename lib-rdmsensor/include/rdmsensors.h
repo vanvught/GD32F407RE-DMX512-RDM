@@ -46,8 +46,11 @@
 
 namespace rdm {
 namespace sensors {
-static constexpr uint32_t max = 16;
-static constexpr uint32_t store = 64;	// bytes
+static constexpr auto MAX = 16;
+static constexpr auto STORE = 64;	///< Configuration store in bytes
+namespace devices {
+static constexpr auto MAX = 8;
+}  // namespace devices
 }  // namespace sensors
 }  // namespace rdm
 
@@ -66,6 +69,10 @@ public:
 	const struct rdm::sensor::Values* GetValues(uint8_t nSensor);
 	void SetValues(uint8_t nSensor);
 	void SetRecord(uint8_t nSensor);
+
+	RDMSensor *GetSensor(uint8_t nSensor) {
+		return m_pRDMSensor[nSensor];
+	}
 
 	static const char *GetTypeString(rdm::sensors::Types type);
 	static rdm::sensors::Types GetTypeString(const char *pValue);

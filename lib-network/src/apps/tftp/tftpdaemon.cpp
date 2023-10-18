@@ -56,7 +56,8 @@ enum TErrorCode {
 	ERROR_CODE_INV_USER = 7		///< No such user.
 };
 
-#define TFTP_UDP_PORT			69
+namespace tftp {
+static constexpr uint16_t UDP_PORT = 69;
 
 namespace min {
 	static constexpr auto FILENAME_MODE_LEN = (1 + 1 + 1 + 1);
@@ -71,32 +72,33 @@ namespace max {
 }
 
 #if  !defined (PACKED)
- #define PACKED __attribute__((packed))
+# define PACKED __attribute__((packed))
 #endif
 
-struct TTFTPReqPacket {
+struct ReqPacket {
 	uint16_t OpCode;
 	char FileNameMode[max::FILENAME_MODE_LEN];
 } PACKED;
 
-struct TTFTPAckPacket {
+struct AckPacket {
 	uint16_t OpCode;
 	uint16_t BlockNumber;
 } PACKED;
 
-struct TTFTPErrorPacket {
+struct ErrorPacket {
 	uint16_t OpCode;
 	uint16_t ErrorCode;
 	char ErrMsg[max::ERRMSG_LEN];
 } PACKED;
 
-struct TTFTPDataPacket {
+struct DataPacket {
 	uint16_t OpCode;
 	uint16_t BlockNumber;
 	uint8_t Data[max::DATA_LEN];
 } PACKED;
+}  // namespace tftp
 
-TFTPDaemon *TFTPDaemon::s_pThis = nullptr;
+TFTPDaemon *TFTPDaemon::s_pThis;
 
 TFTPDaemon::TFTPDaemon() {
 	DEBUG_ENTRY
@@ -109,10 +111,6 @@ TFTPDaemon::TFTPDaemon() {
 	s_pThis = this;
 
 	DEBUG_PRINTF("s_pThis=%p", reinterpret_cast<void *>(s_pThis));
-
-	assert(Network::Get() != nullptr);
-	memset(m_Buffer, 0, sizeof(m_Buffer));
-
 	DEBUG_EXIT
 }
 
@@ -127,28 +125,26 @@ TFTPDaemon::~TFTPDaemon() {
 	DEBUG_EXIT
 }
 
-bool TFTPDaemon::Run() {
-
+void TFTPDaemon::Run() {
 	if (m_nState == TFTPState::INIT) {
 		if (m_nFromPort != 0) {
 			Network::Get()->End(m_nFromPort);
 			m_nIdx = -1;
 		}
 
-		m_nIdx = Network::Get()->Begin(TFTP_UDP_PORT);
+		m_nIdx = Network::Get()->Begin(tftp::UDP_PORT);
 		DEBUG_PRINTF("m_nIdx=%d", m_nIdx);
 
-		m_nFromPort = TFTP_UDP_PORT;
+		m_nFromPort = tftp::UDP_PORT;
 		m_nBlockNumber = 0;
 		m_nState = TFTPState::WAITING_RQ;
 		m_bIsLastBlock = false;
-		memset(&m_Buffer, 0, sizeof(struct TTFTPReqPacket));
 	} else {
-		m_nLength = Network::Get()->RecvFrom(m_nIdx, &m_Buffer, sizeof(m_Buffer), &m_nFromIp, &m_nFromPort);
+		m_nLength = Network::Get()->RecvFrom(m_nIdx, const_cast<const void **>(reinterpret_cast<void **>(&m_pBuffer)), &m_nFromIp, &m_nFromPort);
 
 		switch (m_nState) {
 		case TFTPState::WAITING_RQ:
-			if (m_nLength > min::FILENAME_MODE_LEN) {
+			if (m_nLength > tftp::min::FILENAME_MODE_LEN) {
 				HandleRequest();
 			}
 			break;
@@ -156,12 +152,12 @@ bool TFTPDaemon::Run() {
 			DoRead();
 			break;
 		case TFTPState::RRQ_RECV_ACK:
-			if (m_nLength == sizeof(struct TTFTPAckPacket)) {
+			if (m_nLength == sizeof(struct tftp::AckPacket)) {
 				HandleRecvAck();
 			}
 			break;
 		case TFTPState::WRQ_RECV_PACKET:
-			if (m_nLength <= sizeof(struct TTFTPDataPacket)) {
+			if (m_nLength <= sizeof(struct tftp::DataPacket)) {
 				HandleRecvData();
 			}
 			break;
@@ -170,37 +166,35 @@ bool TFTPDaemon::Run() {
 			__builtin_unreachable();
 			break;
 		}
-
 	}
-
-	return true;
 }
 
 void TFTPDaemon::HandleRequest() {
-	auto *packet = reinterpret_cast<struct TTFTPReqPacket *>(&m_Buffer);
+	auto *const pPacket = reinterpret_cast<struct tftp::ReqPacket *>(m_pBuffer);
+	assert(pPacket != nullptr);
 
-	const uint16_t nOpCode = __builtin_bswap16(packet->OpCode);
+	const auto nOpCode = __builtin_bswap16(pPacket->OpCode);
 
 	if ((nOpCode != OP_CODE_RRQ && nOpCode != OP_CODE_WRQ)) {
 		SendError(ERROR_CODE_ILL_OPER, "Invalid operation");
 		return;
 	}
 
-	const char *pFileName = packet->FileNameMode;
-	const size_t nNameLen = strlen(pFileName);
+	const char *const pFileName = pPacket->FileNameMode;
+	const auto nFileNameLength = strlen(pFileName);
 
-	if (!(1 <= nNameLen && nNameLen <= max::FILENAME_LEN)) {
+	if (!(1 <= nFileNameLength && nFileNameLength <= tftp::max::FILENAME_LEN)) {
 		SendError(ERROR_CODE_OTHER, "Invalid file name");
 		return;
 	}
 
-	const char *pMode = &packet->FileNameMode[nNameLen + 1];
-	TFTPMode tMode;
+	const char *const pMode = &pPacket->FileNameMode[nFileNameLength + 1];
+	tftp::Mode mode;
 
 	if (strncmp(pMode, "octet", 5) == 0) {
-		tMode = TFTPMode::BINARY;
+		mode = tftp::Mode::BINARY;
 	} else if (strncmp(pMode, "netascii", 8) == 0) {
-		tMode = TFTPMode::ASCII;
+		mode = tftp::Mode::ASCII;
 	} else {
 		SendError(ERROR_CODE_ILL_OPER, "Invalid operation");
 		return;
@@ -210,22 +204,22 @@ void TFTPDaemon::HandleRequest() {
 
 	switch (nOpCode) {
 		case OP_CODE_RRQ:
-			if(!FileOpen(pFileName, tMode)) {
+			if(!FileOpen(pFileName, mode)) {
 				SendError(ERROR_CODE_NO_FILE, "File not found");
 				m_nState = TFTPState::WAITING_RQ;
 			} else {
-				Network::Get()->End(TFTP_UDP_PORT);
+				Network::Get()->End(tftp::UDP_PORT);
 				m_nIdx = Network::Get()->Begin(m_nFromPort);
 				m_nState = TFTPState::RRQ_SEND_PACKET;
 				DoRead();
 			}
 			break;
 		case OP_CODE_WRQ:
-			if(!FileCreate(pFileName, tMode)) {
+			if(!FileCreate(pFileName, mode)) {
 				SendError(ERROR_CODE_ACCESS, "Access violation");
 				m_nState = TFTPState::WAITING_RQ;
 			} else {
-				Network::Get()->End(TFTP_UDP_PORT);
+				Network::Get()->End(tftp::UDP_PORT);
 				m_nIdx = Network::Get()->Begin(m_nFromPort);
 				m_nState = TFTPState::WRQ_SEND_ACK;
 				DoWriteAck();
@@ -238,8 +232,8 @@ void TFTPDaemon::HandleRequest() {
 	}
 }
 
-void TFTPDaemon::SendError (uint16_t nErrorCode, const char *pErrorMessage) {
-	TTFTPErrorPacket ErrorPacket;
+void TFTPDaemon::SendError (const uint16_t nErrorCode, const char *pErrorMessage) {
+	tftp::ErrorPacket ErrorPacket;
 
 	ErrorPacket.OpCode = __builtin_bswap16 (OP_CODE_ERROR);
 	ErrorPacket.ErrorCode = __builtin_bswap16 (nErrorCode);
@@ -249,16 +243,17 @@ void TFTPDaemon::SendError (uint16_t nErrorCode, const char *pErrorMessage) {
 }
 
 void TFTPDaemon::DoRead() {
-	auto *const pDataPacket = reinterpret_cast<struct TTFTPDataPacket*>(&m_Buffer);
+	auto *const pDataPacket = reinterpret_cast<struct tftp::DataPacket*>(m_pBuffer);
+	assert(pDataPacket != nullptr);
 
 	if (m_nState == TFTPState::RRQ_SEND_PACKET) {
-		m_nDataLength = FileRead(pDataPacket->Data, max::DATA_LEN, ++m_nBlockNumber);
+		m_nDataLength = FileRead(pDataPacket->Data, tftp::max::DATA_LEN, ++m_nBlockNumber);
 
 		pDataPacket->OpCode = __builtin_bswap16(OP_CODE_DATA);
 		pDataPacket->BlockNumber = __builtin_bswap16(m_nBlockNumber);
 
 		m_nPacketLength = static_cast<uint16_t>(sizeof pDataPacket->OpCode + sizeof pDataPacket->BlockNumber + m_nDataLength);
-		m_bIsLastBlock = m_nDataLength < max::DATA_LEN;
+		m_bIsLastBlock = m_nDataLength < tftp::max::DATA_LEN;
 
 		if (m_bIsLastBlock) {
 			FileClose();
@@ -269,13 +264,14 @@ void TFTPDaemon::DoRead() {
 
 	DEBUG_PRINTF("Sending to " IPSTR ":%d", IP2STR(m_nFromIp), m_nFromPort);
 
-	Network::Get()->SendTo(m_nIdx, &m_Buffer, m_nPacketLength, m_nFromIp, m_nFromPort);
+	Network::Get()->SendTo(m_nIdx, m_pBuffer, m_nPacketLength, m_nFromIp, m_nFromPort);
 
 	m_nState = TFTPState::RRQ_RECV_ACK;
 }
 
 void TFTPDaemon::HandleRecvAck() {
-	const auto *const pAckPacket = reinterpret_cast<struct TTFTPAckPacket *>(&m_Buffer);
+	const auto *const pAckPacket = reinterpret_cast<struct tftp::AckPacket *>(m_pBuffer);
+	assert(pAckPacket != nullptr);
 
 	if (pAckPacket->OpCode == __builtin_bswap16(OP_CODE_ACK)) {
 
@@ -288,7 +284,8 @@ void TFTPDaemon::HandleRecvAck() {
 }
 
 void TFTPDaemon::DoWriteAck() {
-	auto *const pAckPacket = reinterpret_cast<struct TTFTPAckPacket *>(&m_Buffer);
+	auto *const pAckPacket = reinterpret_cast<struct tftp::AckPacket *>(m_pBuffer);
+	assert(pAckPacket != nullptr);
 
 	pAckPacket->OpCode = __builtin_bswap16(OP_CODE_ACK);
 	pAckPacket->BlockNumber =  __builtin_bswap16(m_nBlockNumber);
@@ -296,21 +293,22 @@ void TFTPDaemon::DoWriteAck() {
 
 	DEBUG_PRINTF("Sending to " IPSTR ":%d, m_nState=%d", IP2STR(m_nFromIp), m_nFromPort, static_cast<int>(m_nState));
 
-	Network::Get()->SendTo(m_nIdx, &m_Buffer, sizeof(struct TTFTPAckPacket), m_nFromIp, m_nFromPort);
+	Network::Get()->SendTo(m_nIdx, m_pBuffer, sizeof(struct tftp::AckPacket), m_nFromIp, m_nFromPort);
 }
 
 void TFTPDaemon::HandleRecvData() {
-	const auto *const pDataPacket = reinterpret_cast<struct TTFTPDataPacket *>(&m_Buffer);
+	const auto *const pDataPacket = reinterpret_cast<struct tftp::DataPacket *>(m_pBuffer);
+	assert(pDataPacket != nullptr);
 
 	if (pDataPacket->OpCode == __builtin_bswap16(OP_CODE_DATA)) {
 		m_nDataLength = m_nLength - 4;
 		m_nBlockNumber = __builtin_bswap16(pDataPacket->BlockNumber);
 
-		DEBUG_PRINTF("Incoming from " IPSTR ", m_nLength=%ld, m_nBlockNumber=%d, m_nDataLength=%ld", IP2STR(m_nFromIp), m_nLength, m_nBlockNumber,m_nDataLength);
+		DEBUG_PRINTF("Incoming from " IPSTR ", m_nLength=%u, m_nBlockNumber=%d, m_nDataLength=%u", IP2STR(m_nFromIp), static_cast<uint32_t>(m_nLength), m_nBlockNumber, static_cast<uint32_t>(m_nDataLength));
 
 		if (m_nDataLength == FileWrite(pDataPacket->Data, m_nDataLength, m_nBlockNumber)) {
 
-			if (m_nDataLength < max::DATA_LEN) {
+			if (m_nDataLength < tftp::max::DATA_LEN) {
 				m_bIsLastBlock = true;
 				FileClose();
 			}

@@ -2,7 +2,7 @@
  * @file gd32_adc.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,20 +88,20 @@ void gd32_adc_init(void) {
 
 float gd32_adc_gettemp(void) {
 	/* value convert  */
-	const float temperature = (1.43 - ADC_IDATA0(ADC0) * 3.3 / 4096) * 1000 / 4.3 + 25;
+	const float temperature = (1.43f - ADC_IDATA0(ADC0) * 3.3f / 4096) * 1000 / 4.3f + 25;
 	adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 	return temperature;
 }
 
 float gd32_adc_getvref(void) {
-	const float vref_value = (ADC_IDATA1(ADC0) * 3.3 / 4096);
+	const float vref_value = (ADC_IDATA1(ADC0) * 3.3f / 4096);
 	adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 	return vref_value;
 }
 
 #if defined (GD32F4XX)
 float gd32_adc_getvbat(void) {
-	const float vref_value =  (ADC_IDATA2(ADC0) * 3.3 / 4096) * 4;
+	const float vref_value =  (ADC_IDATA2(ADC0) * 3.3f / 4096) * 4;
 	adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 	return vref_value;
 }

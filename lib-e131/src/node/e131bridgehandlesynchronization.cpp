@@ -40,7 +40,8 @@ void E131Bridge::HandleSynchronization() {
 	// NOTE: There is no multicast addresses (To Ip) available
 	// We just check if SynchronizationAddress is published by a Source
 
-	const auto nSynchronizationAddress = __builtin_bswap16(m_E131.E131Packet.Synchronization.FrameLayer.UniverseNumber);
+	const auto *const pSynchronizationPacket = reinterpret_cast<TE131SynchronizationPacket *>(m_pReceiveBuffer);
+	const auto nSynchronizationAddress = __builtin_bswap16(pSynchronizationPacket->FrameLayer.UniverseNumber);
 
 	if ((nSynchronizationAddress != m_State.nSynchronizationAddressSourceA) && (nSynchronizationAddress != m_State.nSynchronizationAddressSourceB)) {
 		Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
@@ -50,16 +51,20 @@ void E131Bridge::HandleSynchronization() {
 
 	m_State.SynchronizationTime = m_nCurrentPacketMillis;
 
-	for (uint32_t i = 0; i < e131bridge::MAX_PORTS; i++) {
-		if (m_OutputPort[i].genericPort.bIsEnabled) {
-			lightset::Data::Output(m_pLightSet, i);
+	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
+			m_pLightSet->Sync(nPortIndex);
+		}
+	}
 
-			if (!m_OutputPort[i].IsTransmitting) {
-				m_pLightSet->Start(i);
-				m_OutputPort[i].IsTransmitting = true;
+	m_pLightSet->Sync();
+
+	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+		if (m_Bridge.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
+			if (!m_OutputPort[nPortIndex].IsTransmitting) {
+				m_OutputPort[nPortIndex].IsTransmitting = true;
+				m_State.IsChanged = true;
 			}
-
-			lightset::Data::ClearLength(i);
 		}
 	}
 

@@ -2,7 +2,7 @@
  * @file network.h
  *
  */
-/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ struct ip_addr {
 
 typedef struct ip_addr ip_addr_t;
 
-struct ip_info {
+struct IpInfo {
     struct ip_addr ip;
     struct ip_addr netmask;
     struct ip_addr gw;
@@ -108,6 +108,10 @@ public:
 		return m_pSSID;
 	}
 
+	uint32_t GetSecondaryIp() const {
+		return m_nLocalIp;
+	}
+
 	void SetIp(__attribute__((unused)) uint32_t nIp) {
 	}
 
@@ -172,7 +176,7 @@ private:
 	const char *GetFirmwareVersion();
 	void ApCreate(const char *pPassword);
 	void StationCreate(const char *pSsid, const char *pPassword) ;
-	void StationCreate(const char *pSsid, const char *pPassword, const struct ip_info *pInfo);
+	void StationCreate(const char *pSsid, const char *pPassword, const struct IpInfo *pInfo);
 	_wifi_station_status StationGetConnectStatus();
 	const char *StationStatus(_wifi_station_status status);
 

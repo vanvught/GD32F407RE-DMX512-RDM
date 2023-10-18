@@ -140,6 +140,10 @@ static void _gpio_mode_af(const uint32_t gpio_periph, uint32_t pin, const uint32
 # define DMA_PERIPHERAL_WIDTH_8BIT			DMA_PERIPH_WIDTH_8BIT
 # define dma_init							dma_single_data_mode_init
 # define dma_memory_to_memory_disable(x,y)
+# define DMA_INTERRUPT_ENABLE				(DMA_CHXCTL_FTFIE)
+# define DMA_INTERRUPT_DISABLE				(DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
+# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
+# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
 #else
 // GPIO
 static void _gpio_mode_output(uint32_t gpio_periph, uint32_t pin) {
@@ -150,7 +154,10 @@ static void _gpio_mode_af(uint32_t gpio_periph, uint32_t pin, __attribute__((unu
 }
 // DMA
 # define DMA_PARAMETER_STRUCT				dma_parameter_struct
-# define dma_interrupt_flag_clear(x,y,z)
+# define DMA_INTERRUPT_ENABLE				(DMA_INT_FTF)
+# define DMA_INTERRUPT_DISABLE				(DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
+# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
+# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
 #endif
 
 #endif /* GD32_DMX_INTERNAL_H_ */

@@ -49,6 +49,7 @@ static bool is_detected() {
 		}
 
 		const auto nEraseSize = FlashCode::Get()->GetSectorSize();
+		assert(nEraseSize <= failsafe::BYTES_NEEDED);
 		const auto nPages = 1 + failsafe::BYTES_NEEDED / nEraseSize;
 
 		DEBUG_PRINTF("KB_NEEDED=%u, nEraseSize=%u, nPages=%u", failsafe::BYTES_NEEDED, nEraseSize, nPages);
@@ -117,7 +118,7 @@ void failsafe_write(uint32_t nPortIndex, const uint8_t *pData) {
 void failsafe_write_end() {
 	DEBUG_ENTRY
 
-	// Nothing todo here
+	// No code needed here
 
 	DEBUG_EXIT
 }
@@ -168,7 +169,7 @@ void failsafe_read(uint32_t nPortIndex, uint8_t *pData) {
 void failsafe_read_end() {
 	DEBUG_ENTRY
 
-	// Nothing todo here
+	// No code needed here
 
 	DEBUG_EXIT
 }

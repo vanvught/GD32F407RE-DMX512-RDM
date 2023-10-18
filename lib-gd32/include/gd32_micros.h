@@ -2,7 +2,7 @@
  * @file gd32_micros.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,22 +30,25 @@
 
 #include "gd32.h"
 
-#if defined (GD32F20X_CL)
-static inline uint32_t micros() {
-	uint32_t msw, lsw;
-	do {
-		msw = TIMER_CNT(TIMER9);
-		lsw = TIMER_CNT(TIMER8);
-	} while (msw != TIMER_CNT(TIMER9));
-	return (msw << 16) | lsw;
-}
-#elif defined (GD32F4XX)
+#if defined (GD32F4XX) && !defined(MICROS_DO_NOT_USE_TIMER4)
 static inline uint32_t micros() {
 	return TIMER_CNT(TIMER4);
 }
 #else
 static inline uint32_t micros() {
-	return DWT->CYCCNT / (MCU_CLOCK_FREQ / 1000000U);
+	static uint32_t nMicrosPrevious;
+	static uint32_t nResult;
+	const auto nMicros = DWT->CYCCNT / (MCU_CLOCK_FREQ / 1000000U);
+
+	if (nMicros > nMicrosPrevious) {
+		nResult += (nMicros - nMicrosPrevious);
+	} else {
+		nResult += ((UINT32_MAX/ (MCU_CLOCK_FREQ / 1000000U)) - nMicrosPrevious + nMicros);
+	}
+
+	nMicrosPrevious = nMicros;
+
+	return nResult;
 }
 #endif
 

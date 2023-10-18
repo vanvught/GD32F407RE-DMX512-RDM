@@ -198,13 +198,33 @@ public:
 	uint32_t HandleGet(void *pBuffer, uint32_t nBufferLength);
 	void HandleSet(void *pBuffer, uint32_t nBufferLength);
 
-	void Run();
+	void Run() {
+		if (__builtin_expect((m_bDisable), 1)) {
+			return;
+		}
+
+#if defined (ENABLE_TFTP_SERVER)
+		if (__builtin_expect((m_pTFTPFileServer != nullptr), 0)) {
+			m_pTFTPFileServer->Run();
+		}
+#endif
+
+		uint16_t nForeignPort;
+		m_nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void **>(reinterpret_cast<void **>(&s_pUdpBuffer)), &m_nIPAddressFrom, &nForeignPort);
+
+		if (__builtin_expect((m_nBytesReceived < 4), 1)) {
+			return;
+		}
+
+		HandleRequest();
+	}
 
 	static RemoteConfig *Get() {
 		return s_pThis;
 	}
 
 private:
+	void HandleRequest();
 	void HandleReboot();
 	void HandleFactory();
 	void HandleList();

@@ -2,7 +2,7 @@
  * @file remoteconfig.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,12 @@ uint16_t json_get_version(char *pOutBuffer, const uint16_t nOutBufferSize);
 uint16_t json_get_uptime(char *pOutBuffer, const uint16_t nOutBufferSize);
 uint16_t json_get_display(char *pOutBuffer, const uint16_t nOutBufferSize);
 uint16_t json_get_directory(char *pOutBuffer, const uint16_t nOutBufferSize);
+namespace net {
+uint16_t json_get_phystatus(char *pOutBuffer, const uint16_t nOutBufferSize);
+}  // namespace net
+namespace dsa {
+uint16_t json_get_portstatus(char *pOutBuffer, const uint16_t nOutBufferSize);
+}  // namespace dsa
 }  // namespace remoteconfig
 
 #endif /* REMOTECONFIGJSON_H_ */

@@ -42,9 +42,6 @@
 
 #include "net.h"
 #include "net_private.h"
-#include "net_packets.h"
-#include "net_platform.h"
-#include "net_debug.h"
 
 #include "hardware.h"
 
@@ -57,19 +54,24 @@
 
 #define TCP_TX_MSS						(TCP_DATA_SIZE)
 
-#define MAX_TCBS_ALLOWED				4
+#define MAX_TCBS_ALLOWED				6
 
-extern struct ip_info g_ip_info;
-extern uint8_t g_mac_address[ETH_ADDR_LEN];
+namespace net {
+namespace globals {
+extern uint8_t macAddress[ETH_ADDR_LEN];
+}  // namespace globals
+}  // namespace net
 
 /**
  * Transmission control block (TCB)
  */
 struct tcb {
-	uint16_t nLocalPort;
+	uint8_t localIp[IPv4_ADDR_LEN];
+	uint8_t remoteIp[IPv4_ADDR_LEN];
 
+	uint16_t nLocalPort;
 	uint16_t nRemotePort;
-	uint32_t nRemoteIp;
+
 	uint8_t remoteEthAddr[ETH_ADDR_LEN];
 
 	/* Send Sequence Variables */
@@ -319,19 +321,21 @@ static void _init_tcb(struct tcb *pTcb, const uint16_t nLocalPort) {
 __attribute__((cold)) void tcp_init() {
 	DEBUG_ENTRY
 
-	_pcast32 src;
-
 	/* Ethernet */
-	memcpy(s_tcp.ether.src, g_mac_address, ETH_ADDR_LEN);
+	memcpy(s_tcp.ether.src, net::globals::macAddress, ETH_ADDR_LEN);
 	s_tcp.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
 	/* IPv4 */
-	src.u32 = g_ip_info.ip.addr;
-	memcpy(s_tcp.ip4.src, src.u8, IPv4_ADDR_LEN);
 	s_tcp.ip4.ver_ihl = 0x45;
 	s_tcp.ip4.tos = 0;
 	s_tcp.ip4.flags_froff = __builtin_bswap16(IPv4_FLAG_DF);
 	s_tcp.ip4.ttl = 64;
 	s_tcp.ip4.proto = IPv4_PROTO_TCP;
+
+	DEBUG_EXIT
+}
+
+void tcp_shutdown() {
+	DEBUG_ENTRY
 
 	DEBUG_EXIT
 }
@@ -356,8 +360,8 @@ static uint16_t _chksum(struct t_tcp *pTcp, const struct tcb *pTcb, uint16_t nLe
 	memcpy(buf, pseu, TCP_PSEUDO_LEN);
 
 	// Generate TCP psuedo header
-	memcpy(pseu->srcIp, &g_ip_info.ip.addr, IPv4_ADDR_LEN);
-	memcpy(pseu->dstIp, &pTcb->nRemoteIp, IPv4_ADDR_LEN);
+	memcpy(pseu->srcIp, pTcb->localIp, IPv4_ADDR_LEN);
+	memcpy(pseu->dstIp, pTcb->remoteIp, IPv4_ADDR_LEN);
 	pseu->zero = 0;
 	pseu->proto = IPv4_PROTO_TCP;
 	pseu->length = __builtin_bswap16(nLength);
@@ -391,7 +395,8 @@ static void send_package(const struct tcb *pTcb, const struct SendInfo &sendInfo
 	/* IPv4 */
 	s_tcp.ip4.id = s_id++;
 	s_tcp.ip4.len = __builtin_bswap16(static_cast<uint16_t>(tcplen + sizeof(struct ip4_header)));
-	memcpy(s_tcp.ip4.dst, &pTcb->nRemoteIp, IPv4_ADDR_LEN);
+	memcpy(s_tcp.ip4.src, pTcb->localIp, IPv4_ADDR_LEN);
+	memcpy(s_tcp.ip4.dst, pTcb->remoteIp, IPv4_ADDR_LEN);
 	s_tcp.ip4.chksum = 0;
 #if !defined (CHECKSUM_BY_HARDWARE)
 	s_tcp.ip4.chksum = net_chksum(reinterpret_cast<void *>(&s_tcp.ip4), 20);
@@ -504,7 +509,7 @@ static void scan_options(struct t_tcp *pTcp, struct tcb *pTcb, const int32_t nDa
 				const auto *p = &pOptions->Data;
 				auto nMSS = (p[0] << 8) + p[1];
 				// RFC 1122 section 4.2.2.6
-				nMSS = std::min((nMSS + 20), static_cast<int32_t>(TCP_TX_MSS)) - TCP_HEADER_SIZE; // - IP_OPTION_SIZE;
+				nMSS = std::min(static_cast<int32_t>(nMSS + 20), static_cast<int32_t>(TCP_TX_MSS)) - TCP_HEADER_SIZE; // - IP_OPTION_SIZE;
 				pTcb->SendMSS = static_cast<uint16_t>(nMSS);
 			}
 			pOptions = reinterpret_cast<struct Options *>(reinterpret_cast<uint8_t *>(pOptions) + pOptions->nLength);
@@ -572,7 +577,12 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 	DEBUG_PRINTF(IPSTR ":%d[%d] -> %d", pTcp->ip4.src[0], pTcp->ip4.src[1], pTcp->ip4.src[2], pTcp->ip4.src[3], pTcp->tcp.dstpt, pTcp->tcp.srcpt, tcplen);
 
 	uint32_t nIndexPort;
-	uint32_t nIndexTCB;
+	/*
+	  src/net/tcp.cpp: In function 'void tcp_handle(t_tcp*)':
+src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+  871 |                 switch (pTCB->state) {
+	 */
+	uint32_t nIndexTCB = 0;
 
 	// Find a TCB
 	for (nIndexPort = 0; nIndexPort < TCP_MAX_PORTS_ALLOWED; nIndexPort++) {
@@ -581,9 +591,7 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			for (nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
 				auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
 				if (pTCB->state != STATE_LISTEN) {
-					_pcast32 src;
-					memcpy(src.u8, pTcp->ip4.src, IPv4_ADDR_LEN);
-					if ((pTCB->nRemotePort == pTcp->tcp.srcpt) && (pTCB->nRemoteIp == src.u32)) {
+					if ((pTCB->nRemotePort == pTcp->tcp.srcpt) && (memcmp(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN) == 0)) {
 						break;
 					}
 				}
@@ -616,15 +624,16 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 	if (nIndexPort == TCP_MAX_PORTS_ALLOWED) {
 		DEBUG_PUTS("TCP_MAX_PORTS_ALLOWED");
 		struct tcb TCB;
-		_pcast32 src;
 
 		memset(&TCB, 0, sizeof(struct tcb));
 
 		TCB.nLocalPort = pTcp->tcp.dstpt;
+		memcpy(TCB.localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
+
 		TCB.nRemotePort = pTcp->tcp.srcpt;
-		memcpy(src.u8, pTcp->ip4.src, IPv4_ADDR_LEN);
-		TCB.nRemoteIp = src.u32;
+		memcpy(TCB.remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
 		memcpy(TCB.remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
+
 		_bswap32(pTcp);
 
 		scan_options(pTcp, &TCB, nDataOffset);
@@ -654,7 +663,6 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			nDataLength);
 
 	SendInfo sendInfo;
-	_pcast32 src;
 
 	const auto SEG_LEN = nDataLength;
 	const auto SEG_ACK = _get_acknum(pTcp);
@@ -683,9 +691,10 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 
 	// https://www.rfc-editor.org/rfc/rfc9293.html#name-listen-state
 	if (pTCB->state == STATE_LISTEN) {
+		memcpy(pTCB->localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
+
 		pTCB->nRemotePort = pTcp->tcp.srcpt;
-		memcpy(src.u8, pTcp->ip4.src, IPv4_ADDR_LEN);
-		pTCB->nRemoteIp = src.u32;
+		memcpy(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
 		memcpy(pTCB->remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
 
 		// First, check for a RST
@@ -829,7 +838,7 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			return;
 		}
 
-		// third check security and precedence. Nothing todo here
+		// third check security and precedence. No code needed here
 
 		/* fourth, check the SYN bit, *//* Page 71 */
 		if (pTcp->tcp.control & Control::SYN) {
@@ -941,7 +950,7 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 			break;
 		}
 
-		// sixth, check the URG bit. Nothing todo here
+		// sixth, check the URG bit. No code needed here
 
 		// seventh, process the segment text
 		switch (pTCB->state) {
@@ -1066,32 +1075,29 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 int tcp_begin(const uint16_t nLocalPort) {
 	DEBUG_PRINTF("nLocalPort=%u", nLocalPort);
 
-	int i;
-
-	for (i = 0; i < TCP_MAX_PORTS_ALLOWED; i++) {
+	for (int i = 0; i < TCP_MAX_PORTS_ALLOWED; i++) {
 		if (s_Port[i].nLocalPort == nLocalPort) {
 			return i;
 		}
 
 		if (s_Port[i].nLocalPort == 0) {
-			break;
+			s_Port[i].nLocalPort = nLocalPort;
+
+			for (uint32_t nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
+				// create transmission control block's (TCB)
+				_init_tcb(&s_Port[i].TCB[nIndexTCB], nLocalPort);
+			}
+
+			DEBUG_PRINTF("i=%d, nLocalPort=%d[%x]", i, nLocalPort, nLocalPort);
+			return i;
 		}
 	}
 
-	if (i == TCP_MAX_PORTS_ALLOWED) {
-		console_error("tcp_begin");
-		return -1;
-	}
+#ifndef NDEBUG
+	console_error("tcp_begin\n");
+#endif
+	return -1;
 
-	s_Port[i].nLocalPort = nLocalPort;
-
-	for (uint32_t nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
-		// create transmission control block's (TCB)
-		_init_tcb(&s_Port[i].TCB[nIndexTCB], nLocalPort);
-	}
-
-	DEBUG_PRINTF("i=%d, nLocalPort=%d[%x]", i, nLocalPort, nLocalPort);
-	return i;
 }
 
 uint16_t tcp_read(const int32_t nHandleListen, const uint8_t **pData, uint32_t &nHandleConnection) {
@@ -1125,7 +1131,7 @@ void tcp_write(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLe
 	assert(pBuffer != nullptr);
 	assert(nHandleConnection < MAX_TCBS_ALLOWED);
 
-	nLength = MIN(nLength, TCP_DATA_SIZE);
+	nLength = std::min(nLength, static_cast<uint16_t>(TCP_DATA_SIZE));
 
 	auto *pTCB = &s_Port[nHandleListen].TCB[nHandleConnection];
 

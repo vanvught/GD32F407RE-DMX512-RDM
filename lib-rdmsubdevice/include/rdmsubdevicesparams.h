@@ -2,7 +2,7 @@
  * @file rdmsubdevicesparams.h
  *
  */
-/* Copyright (C) 2020-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,12 +40,13 @@ struct Params {
 		uint8_t nAddress;
 		uint16_t nDmxStartAddress;
 		uint32_t nSpeedHz;
-	} __attribute__((packed)) Entry[rdm::subdevices::max];
+	} __attribute__((packed)) Entry[rdm::subdevices::MAX];
 } __attribute__((packed));
+
+static_assert(sizeof(struct Params) <= rdm::subdevices::STORE, "struct Params is too large");
+
 }  // namespace subdevicesparams
 }  // namespace rdm
-
-static_assert(sizeof(struct rdm::subdevicesparams::Params) <= rdm::subdevices::store, "struct rdm::subdevicesparams::Params is too large");
 
 class RDMSubDevicesParamsStore {
 public:
@@ -57,13 +58,20 @@ public:
 
 class RDMSubDevicesParams {
 public:
-	RDMSubDevicesParams(RDMSubDevicesParamsStore *pRDMSubDevicesParamsStore = nullptr);
+	RDMSubDevicesParams(RDMSubDevicesParamsStore *pRDMSubDevicesParamsStore);
 
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
 	void Builder(const rdm::subdevicesparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
-	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize) {
+		if (m_pRDMSubDevicesParamsStore == nullptr) {
+			nSize = 0;
+			return;
+		}
+
+		Builder(nullptr, pBuffer, nLength, nSize);
+	}
 
 	void Dump();
 
