@@ -31,7 +31,7 @@ struct FilesContent {
 };
 
 static constexpr struct FilesContent HttpContent[] = {
-	{ "static.js", static_js, 1065, static_cast<http::contentTypes>(2) },
+	{ "static.js", static_js, 1072, static_cast<http::contentTypes>(2) },
 	{ "styles.css", styles_css, 409, static_cast<http::contentTypes>(1) },
 	{ "index.js", index_js, 1140, static_cast<http::contentTypes>(2) },
 #if defined (ENABLE_PHY_SWITCH)
@@ -42,7 +42,7 @@ static constexpr struct FilesContent HttpContent[] = {
 	{ "rdm.js", rdm_js, 1025, static_cast<http::contentTypes>(2) },
 #endif /* RDM_CONTROLLER || RDM_RESPONDER */
 #if defined (RDM_CONTROLLER) || defined (RDM_RESPONDER)
-	{ "rdm.html", rdm_html, 1059, static_cast<http::contentTypes>(0) },
+	{ "rdm.html", rdm_html, 1142, static_cast<http::contentTypes>(0) },
 #endif /* RDM_CONTROLLER || RDM_RESPONDER */
 	{ "index.html", index_html, 669, static_cast<http::contentTypes>(0) },
 #if defined (ENABLE_PHY_SWITCH)
