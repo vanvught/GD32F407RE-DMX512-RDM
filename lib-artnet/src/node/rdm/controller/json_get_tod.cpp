@@ -1,8 +1,8 @@
 /**
- * @file delete.cpp
+ * @file json_get_tod.cpp
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,24 @@
  * THE SOFTWARE.
  */
 
-#include <cstdlib>
-#include <cstddef>
+#include <cstdint>
+#include <cstdio>
 
-void operator delete(void *p) {
-	free(p);
-}
+#include "artnetnode.h"
 
-void operator delete[](void *p) {
-	free(p);
-}
+namespace remoteconfig {
+namespace rdm {
+uint32_t json_get_tod(const char cPort, char *pOutBuffer, const uint32_t nOutBufferSize) {
+	const uint32_t nPortIndex = (cPort | 0x20) - 'a';
 
-void operator delete(void* p, __attribute__((unused)) std::size_t size) noexcept {
-	free(p);
-}
+	if (nPortIndex < artnetnode::MAX_PORTS) {
+		auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nOutBufferSize, "{\"port\":\"%c\",\"tod\":[" , (nPortIndex + 'A')));
+		nLength += ArtNetNode::Get()->RdmCopyTod(nPortIndex, &pOutBuffer[nLength], nOutBufferSize - nLength);
+		nLength += static_cast<uint32_t>(snprintf(&pOutBuffer[nLength], nOutBufferSize - nLength, "]}" ));
+		return nLength;
+	}
 
-void operator delete[](void* p, __attribute__((unused))std::size_t size) noexcept {
-	free(p);
+	return 0;
 }
+}  // namespace rdm
+}  // namespace remoteconfig

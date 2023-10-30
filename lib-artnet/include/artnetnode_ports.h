@@ -1,8 +1,8 @@
 /**
- * @file delete.cpp
+ * @file artnetnode_ports.h
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,19 @@
  * THE SOFTWARE.
  */
 
-#include <cstdlib>
-#include <cstddef>
+#ifndef ARTNETNODE_PORTS_H_
+#define ARTNETNODE_PORTS_H_
 
-void operator delete(void *p) {
-	free(p);
-}
+namespace artnetnode {
+#if !defined(LIGHTSET_PORTS)
+# define LIGHTSET_PORTS	0
+#endif
 
-void operator delete[](void *p) {
-	free(p);
-}
+#if (LIGHTSET_PORTS == 0)
+ static constexpr uint32_t MAX_PORTS = 1;	// ISO C++ forbids zero-size array
+#else
+ static constexpr uint32_t MAX_PORTS = LIGHTSET_PORTS;
+#endif
+}  // namespace artnetnode
 
-void operator delete(void* p, __attribute__((unused)) std::size_t size) noexcept {
-	free(p);
-}
-
-void operator delete[](void* p, __attribute__((unused))std::size_t size) noexcept {
-	free(p);
-}
+#endif /* IARTNETNODE_PORTS_H_ */

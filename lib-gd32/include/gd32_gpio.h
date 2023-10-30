@@ -112,7 +112,7 @@ inline static void gd32_gpio_fsel(const uint32_t gpio, const uint32_t fsel) {
 	gpio_fsel(gpio_periph, pin, fsel);
 }
 
-inline static void gd32_gpio_pud(const uint32_t gpio, const uint32_t pud) {
+inline static void gd32_gpio_set_pud(const uint32_t gpio, const uint32_t pud) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 

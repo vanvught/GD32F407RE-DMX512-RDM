@@ -1,8 +1,8 @@
 /**
- * @file delete.cpp
+ * @file setrdm.cpp
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,33 @@
  * THE SOFTWARE.
  */
 
-#include <cstdlib>
-#include <cstddef>
+#include <cstdint>
 
-void operator delete(void *p) {
-	free(p);
+#include "artnetnode.h"
+#include "artnetrdmresponder.h"
+
+#include "debug.h"
+
+void ArtNetNode::SetRdm(const bool doEnable) {
+	DEBUG_ENTRY
+
+	SetRdmResponder(m_pArtNetRdmResponder, doEnable);
+
+	DEBUG_EXIT
 }
 
-void operator delete[](void *p) {
-	free(p);
-}
+void ArtNetNode::SetRdmResponder(ArtNetRdmResponder *pArtNetRdmResponder, const bool doEnable) {
+	DEBUG_ENTRY
 
-void operator delete(void* p, __attribute__((unused)) std::size_t size) noexcept {
-	free(p);
-}
+	m_pArtNetRdmResponder = pArtNetRdmResponder;
+	m_State.rdm.IsEnabled = ((pArtNetRdmResponder != nullptr) & doEnable);
 
-void operator delete[](void* p, __attribute__((unused))std::size_t size) noexcept {
-	free(p);
+	if (m_State.rdm.IsEnabled) {
+		m_ArtPollReply.Status1 |= artnet::Status1::RDM_CAPABLE;
+	} else {
+		m_ArtPollReply.Status1 &= static_cast<uint8_t>(~artnet::Status1::RDM_CAPABLE);
+	}
+
+	DEBUG_PRINTF("m_State.rdm.IsEnabled=%c", m_State.rdm.IsEnabled ? 'Y' : 'N');
+	DEBUG_EXIT
 }

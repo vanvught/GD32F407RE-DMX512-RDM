@@ -90,6 +90,7 @@ enum class Output {
 	ARTNET,
 	SERIAL,
 	RGBPANEL,
+	PWM,
 	LAST
 };
 
@@ -449,6 +450,8 @@ private:
 	void HandleDisplayGet();
 	void HandleTftpSet();
 	void HandleTftpGet();
+	void HandleRdmSet();
+	void HandleRdmGet();
 
 	void PlatformHandleTftpSet();
 	void PlatformHandleTftpGet();

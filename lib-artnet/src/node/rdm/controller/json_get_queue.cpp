@@ -1,8 +1,8 @@
 /**
- * @file delete.cpp
+ * @file json_get_queue.cpp
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,20 @@
  * THE SOFTWARE.
  */
 
-#include <cstdlib>
-#include <cstddef>
+#include <cstdint>
+#include <cstdio>
 
-void operator delete(void *p) {
-	free(p);
-}
+#include "artnetnode.h"
 
-void operator delete[](void *p) {
-	free(p);
+namespace remoteconfig {
+namespace rdm {
+uint32_t json_get_queue(char *pOutBuffer, const uint32_t nOutBufferSize) {
+	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nOutBufferSize, "{\"uid\":[" ));
+	nLength += ArtNetNode::Get()->RdmCopyWorkingQueue(&pOutBuffer[nLength], nOutBufferSize - nLength - 2);
+	nLength += static_cast<uint32_t>(snprintf(&pOutBuffer[nLength], nOutBufferSize - nLength, "]}" ));
+	return nLength;
 }
+}  // namespace rdm
+}  // namespace remoteconfig
 
-void operator delete(void* p, __attribute__((unused)) std::size_t size) noexcept {
-	free(p);
-}
 
-void operator delete[](void* p, __attribute__((unused))std::size_t size) noexcept {
-	free(p);
-}
