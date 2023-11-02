@@ -502,7 +502,7 @@ static void timer1_config() {
 #endif
 
 #if defined (DMX_USE_UART3)
-	timer_channel_output_mode_config(TIMER1, TIMER_CH_2, TIMER_OC_MODE_ACTIVE);
+	timer_channel_output_mode_config(TIMER1, TIMER_CH_3, TIMER_OC_MODE_ACTIVE);
 	timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3, ~0);
 #endif
 
@@ -728,14 +728,19 @@ static void usart_dma_config(void) {
 	dma_channel_subperipheral_select(USART2_DMA, USART2_TX_DMA_CH, USART2_TX_DMA_SUBPERIx);
 # endif
 	dma_interrupt_disable(USART2_DMA, USART2_TX_DMA_CH, DMA_INTERRUPT_DISABLE);
+# if !defined (GD32F4XX)
 	NVIC_SetPriority(DMA0_Channel1_IRQn, 1);
 	NVIC_EnableIRQ(DMA0_Channel1_IRQn);
+# else
+	NVIC_SetPriority(DMA0_Channel3_IRQn, 1);
+	NVIC_EnableIRQ(DMA0_Channel3_IRQn);
+# endif
 #endif
 	/*
 	 * UART 3
 	 */
 #if defined (DMX_USE_UART3)
-	dma_deinit(DMA1, DMA_CH4);
+	dma_deinit(UART3_DMA, UART3_TX_DMA_CH);
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
 #if !defined (GD32F4XX)
@@ -749,14 +754,14 @@ static void usart_dma_config(void) {
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
-	dma_init(DMA1, DMA_CH4, &dma_init_struct);
+	dma_init(UART3_DMA, UART3_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
-	dma_circulation_disable(DMA1, DMA_CH4);
-	dma_memory_to_memory_disable(DMA1, DMA_CH4);
+	dma_circulation_disable(UART3_DMA, UART3_TX_DMA_CH);
+	dma_memory_to_memory_disable(UART3_DMA, UART3_TX_DMA_CH);
 # if defined (GD32F4XX)
 	dma_channel_subperipheral_select(UART3_DMA, UART3_TX_DMA_CH, UART3_TX_DMA_SUBPERIx);
 # endif
-	dma_interrupt_disable(USART0_DMA, USART0_TX_DMA_CH, DMA_INTERRUPT_DISABLE);
+	dma_interrupt_disable(UART3_DMA, UART3_TX_DMA_CH, DMA_INTERRUPT_DISABLE);
 # if !defined (GD32F4XX)
 	NVIC_SetPriority(DMA1_Channel4_IRQn, 1);
 	NVIC_EnableIRQ(DMA1_Channel4_IRQn);
@@ -791,7 +796,7 @@ static void usart_dma_config(void) {
 	dma_channel_subperipheral_select(UART4_DMA, UART4_TX_DMA_CH, UART4_TX_DMA_SUBPERIx);
 # endif
 	dma_interrupt_disable(UART4_DMA, UART4_TX_DMA_CH, DMA_INTERRUPT_DISABLE);
-# if defined (GD32F20X)
+# if !defined (GD32F4XX)
 	NVIC_SetPriority(DMA1_Channel3_IRQn, 1);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 # else
@@ -887,7 +892,7 @@ static void usart_dma_config(void) {
 # if defined (GD32F4XX)
 	dma_channel_subperipheral_select(UART7_DMA, UART7_TX_DMA_CH, UART7_TX_DMA_SUBPERIx);
 # endif
-# if defined (GD32F20X)
+# if !defined (GD32F4XX)
 	NVIC_SetPriority(DMA1_Channel3_IRQn, 1);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 # else
@@ -986,18 +991,19 @@ void TIMER1_IRQHandler() {
 		case TxRxState::DMXINTER:
 			_gpio_mode_output(USART2_GPIO_PORT, USART2_TX_PIN);
 			GPIO_BC(USART2_GPIO_PORT) = USART2_TX_PIN;
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitBreakTime);
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::BREAK;
+			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitBreakTime);
 			break;
 		case TxRxState::BREAK:
 			_gpio_mode_af(USART2_GPIO_PORT, USART2_TX_PIN, USART2);
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitMabTime);
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::MAB;
+			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitMabTime);
 			break;
 		case TxRxState::MAB: {
 			uint32_t dmaCHCTL = DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH);
 			dmaCHCTL &= ~DMA_CHXCTL_CHEN;
 			DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH) = dmaCHCTL;
+			dma_interrupt_flag_clear(USART2_DMA, USART2_TX_DMA_CH, DMA_INTF_FTFIF);
 			const auto *p = &s_TxBuffer[dmx::config::USART2_PORT].dmx;
 			DMA_CHMADDR(USART2_DMA, USART2_TX_DMA_CH) = (uint32_t) p->data;
 			DMA_CHCNT(USART2_DMA, USART2_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
@@ -1005,11 +1011,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH) = dmaCHCTL;
 			usart_dma_transmit_config(USART2, USART_DENT_ENABLE);
-			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::DMXDATA;
 		}
-			break;
-		case TxRxState::DMXDATA:
-			console_error("DMXDATA:USART2");
 			break;
 		default:
 			break;
@@ -1186,12 +1188,12 @@ void TIMER4_IRQHandler() {
 			_gpio_mode_output(UART7_GPIO_PORT, UART7_TX_PIN);
 			GPIO_BC(UART7_GPIO_PORT) = UART7_TX_PIN;
 			s_TxBuffer[dmx::config::UART7_PORT].State = TxRxState::BREAK;
-			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_2, TIMER_CNT(TIMER4) + s_nDmxTransmitBreakTime);
+			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3, TIMER_CNT(TIMER4) + s_nDmxTransmitBreakTime);
 			break;
 		case TxRxState::BREAK:
 			_gpio_mode_af(UART7_GPIO_PORT, UART7_TX_PIN, UART7);
 			s_TxBuffer[dmx::config::UART7_PORT].State = TxRxState::MAB;
-			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_2, TIMER_CNT(TIMER4) + s_nDmxTransmitMabTime);
+			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3, TIMER_CNT(TIMER4) + s_nDmxTransmitMabTime);
 			break;
 		case TxRxState::MAB: {
 			uint32_t dmaCHCTL = DMA_CHCTL(UART7_DMA, UART7_TX_DMA_CH);
@@ -1203,6 +1205,7 @@ void TIMER4_IRQHandler() {
 			DMA_CHCNT(UART7_DMA, UART7_TX_DMA_CH) = (p->nLength & DMA_CHXCNT_CNT);
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
+			DMA_CHCTL(UART7_DMA, UART7_TX_DMA_CH)= dmaCHCTL;
 			usart_dma_transmit_config(UART7, USART_DENT_ENABLE);
 		}
 			break;
@@ -1449,7 +1452,7 @@ void DMA0_Channel4_IRQHandler() {
 		if (s_TxBuffer[dmx::config::UART3_PORT].outputStyle == dmx::OutputStyle::DELTA) {
 			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::IDLE;
 		} else {
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
+			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::DMXINTER;
 		}
 	}

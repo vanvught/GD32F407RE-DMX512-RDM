@@ -341,6 +341,10 @@ private:
 	void HandleGetRgbPanelTxt(uint32_t& nSize);
 #endif
 
+#if defined (OUTPUT_DMX_PCA9685)
+	void HandleGetPca9685Txt(uint32_t& nSize);
+#endif
+
 	void HandleSetRconfig();
 	void HandleSetNetworkTxt();
 
@@ -415,6 +419,10 @@ private:
 
 #if defined (OUTPUT_RGB_PANEL)
 	void HandleSetRgbPanelTxt();
+#endif
+
+#if defined (OUTPUT_DMX_PCA9685)
+	void HandleSetPca9685Txt();
 #endif
 
 #if defined (OUTPUT_DMX_STEPPER)

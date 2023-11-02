@@ -216,22 +216,36 @@ public:
 		m_pLightSet->Run();
 #endif
 #if defined (RDM_CONTROLLER)
-		if (m_State.rdm.IsEnabled) {
+		if (__builtin_expect((m_State.rdm.IsEnabled), 0)) {
 			assert(m_pArtNetRdmController != nullptr);
 			m_pArtNetRdmController->Run();
 
-			if (!m_State.rdm.IsDiscoveryRunning && ((m_nCurrentPacketMillis - m_State.rdm.nDiscoveryMillis) > (1000 * 60 * 15))) {
+			if (__builtin_expect((!m_State.rdm.IsDiscoveryRunning && ((m_nCurrentPacketMillis - m_State.rdm.nDiscoveryMillis) > (1000 * 60 * 15))), 0)) {
 				DEBUG_PUTS("RDM Discovery -> START");
 				m_State.rdm.IsDiscoveryRunning = true;
 			}
 
-			if (m_State.rdm.IsDiscoveryRunning) {
+			if (__builtin_expect((m_State.rdm.IsDiscoveryRunning), 0)) {
 				m_State.rdm.IsDiscoveryRunning = RdmDiscoveryRun();
 
 				if (!m_State.rdm.IsDiscoveryRunning) {
 					DEBUG_PUTS("RDM Discovery -> DONE");
 					m_State.rdm.nDiscoveryPortIndex = 0;
 					m_State.rdm.nDiscoveryMillis = m_nCurrentPacketMillis;
+				}
+			} else {
+				uint32_t nPortIndex;
+				bool bIsIncremental;
+				if (m_pArtNetRdmController->IsFinished(nPortIndex, bIsIncremental)) {
+					SendTod(nPortIndex);
+
+					DEBUG_PRINTF("TOD sent -> %u", nPortIndex);
+
+					if (m_OutputPort[nPortIndex].IsTransmitting) {
+						DEBUG_PUTS("m_pLightSet->Stop/Start");
+						m_pLightSet->Stop(nPortIndex);
+						m_pLightSet->Start(nPortIndex);
+					}
 				}
 			}
 		}
@@ -659,7 +673,11 @@ private:
 
 				SendTod(nPortIndex);
 
+				DEBUG_PUTS("TOD sent");
+
 				if (m_OutputPort[nPortIndex].IsTransmitting) {
+					DEBUG_PUTS("m_pLightSet->Stop/Start");
+					m_pLightSet->Stop(nPortIndex);
 					m_pLightSet->Start(nPortIndex);
 				}
 

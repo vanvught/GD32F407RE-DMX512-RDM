@@ -47,6 +47,8 @@
 									<listOptionValue builtIn="false" value="__GNUC__"/>
 									<listOptionValue builtIn="false" value="DMX_USE_USART0"/>
 									<listOptionValue builtIn="false" value="DMX_USE_UART4"/>
+									<listOptionValue builtIn="false" value="DMX_USE_UART3"/>
+									<listOptionValue builtIn="false" value="DMX_USE_USART5"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.326631215" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -79,6 +81,8 @@
 									<listOptionValue builtIn="false" value="__GNUC__"/>
 									<listOptionValue builtIn="false" value="DMX_USE_USART0"/>
 									<listOptionValue builtIn="false" value="DMX_USE_UART4"/>
+									<listOptionValue builtIn="false" value="DMX_USE_UART3"/>
+									<listOptionValue builtIn="false" value="DMX_USE_USART5"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.315032740" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

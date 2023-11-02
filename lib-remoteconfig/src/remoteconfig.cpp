@@ -172,6 +172,12 @@
 # include "storergbpanel.h"
 #endif
 
+#if defined (OUTPUT_DMX_PCA9685)
+/* pca9685.txt */
+# include "pca9685dmxparams.h"
+# include "storepca9685.h"
+#endif
+
 /**
  * RDM_
  */
@@ -253,7 +259,7 @@ const struct RemoteConfig::Commands RemoteConfig::s_SET[] = {
 };
 
 static constexpr char s_Node[static_cast<uint32_t>(remoteconfig::Node::LAST)][18] = { "Art-Net", "sACN E1.31", "OSC Server", "LTC", "OSC Client", "RDMNet LLRP Only", "Showfile", "MIDI", "DDP", "PixelPusher", "Node", "Bootloader TFTP", "RDM Responder" };
-static constexpr char s_Output[static_cast<uint32_t>(remoteconfig::Output::LAST)][12] = { "DMX", "RDM", "Monitor", "Pixel", "TimeCode", "OSC", "Config", "Stepper", "Player", "Art-Net", "Serial", "RGB Panel" };
+static constexpr char s_Output[static_cast<uint32_t>(remoteconfig::Output::LAST)][12] = { "DMX", "RDM", "Monitor", "Pixel", "TimeCode", "OSC", "Config", "Stepper", "Player", "Art-Net", "Serial", "RGB Panel", "PWM" };
 
 RemoteConfig *RemoteConfig::s_pThis;
 RemoteConfig::ListBin RemoteConfig::s_RemoteConfigListBin;
@@ -876,6 +882,17 @@ void RemoteConfig::HandleGetRgbPanelTxt(uint32_t& nSize) {
 }
 #endif
 
+#if defined (OUTPUT_DMX_PCA9685)
+void RemoteConfig::HandleGetPca9685Txt(uint32_t& nSize) {
+	DEBUG_ENTRY
+
+	PCA9685DmxParams pca9685DmxParams(StorePCA9685::Get());
+	pca9685DmxParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
+
+	DEBUG_EXIT
+}
+#endif
+
 #endif
 
 /**
@@ -1323,6 +1340,22 @@ void RemoteConfig::HandleSetRgbPanelTxt() {
 	rgbPanelParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	rgbPanelParams.Dump();
+#endif
+
+	DEBUG_EXIT
+}
+#endif
+
+#if defined (OUTPUT_DMX_PCA9685)
+void RemoteConfig::HandleSetPca9685Txt() {
+	DEBUG_ENTRY
+
+	assert(StorePCA9685::Get() != nullptr);
+	PCA9685DmxParams pca9685DmxParams(StorePCA9685::Get());
+
+	pca9685DmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
+#ifndef NDEBUG
+	pca9685DmxParams.Dump();
 #endif
 
 	DEBUG_EXIT

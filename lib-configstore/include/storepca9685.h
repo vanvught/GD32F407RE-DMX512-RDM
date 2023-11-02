@@ -38,15 +38,15 @@ public:
 	StorePCA9685();
 
 	void Update(const struct pca9685dmxparams::Params *pParams) override {
-		ConfigStore::Get()->Update(configstore::Store::TLC5711DMX, pParams, sizeof(struct pca9685dmxparams::Params));
+		ConfigStore::Get()->Update(configstore::Store::PCA9685, pParams, sizeof(struct pca9685dmxparams::Params));
 	}
 
 	void Copy(struct pca9685dmxparams::Params *pParams) override {
-		ConfigStore::Get()->Copy(configstore::Store::TLC5711DMX, pParams, sizeof(struct pca9685dmxparams::Params));
+		ConfigStore::Get()->Copy(configstore::Store::PCA9685, pParams, sizeof(struct pca9685dmxparams::Params));
 	}
 
 	void SaveDmxStartAddress(uint16_t nDmxStartAddress) override {
-		ConfigStore::Get()->Update(configstore::Store::TLC5711DMX, __builtin_offsetof(struct pca9685dmxparams::Params, nDmxStartAddress), &nDmxStartAddress, sizeof(uint32_t), pca9685dmxparams::Mask::DMX_START_ADDRESS);
+		ConfigStore::Get()->Update(configstore::Store::PCA9685, __builtin_offsetof(struct pca9685dmxparams::Params, nDmxStartAddress), &nDmxStartAddress, sizeof(uint32_t), pca9685dmxparams::Mask::DMX_START_ADDRESS);
 	}
 
 	static StorePCA9685 *Get() {

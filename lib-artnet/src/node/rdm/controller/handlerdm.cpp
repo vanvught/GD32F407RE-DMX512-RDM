@@ -55,11 +55,6 @@ void ArtNetNode::HandleTodControl() {
 		}
 
 		if ((portAddress == m_Node.Port[nPortIndex].PortAddress) && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
-
-			if (m_OutputPort[nPortIndex].IsTransmitting) {
-				m_pLightSet->Stop(nPortIndex);
-			}
-
 			if (pArtTodControl->Command == 0x01) {	// AtcFlush
 				m_pArtNetRdmController->Full(nPortIndex);
 			}
