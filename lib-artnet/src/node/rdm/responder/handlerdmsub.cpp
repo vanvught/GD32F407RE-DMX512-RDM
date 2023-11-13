@@ -1,8 +1,11 @@
 /**
- * @file json_get_tod.cpp
+ * @file handlerdmsub.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/**
+ * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
+ */
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,31 +26,31 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
+#ifdef NDEBUG
+# undef NDEBUG	//TODO Remove # undef NDEBUG
+#endif
+
+#include <cstring>
 #include <cstdio>
 #include <cassert>
 
 #include "artnetnode.h"
 
-namespace remoteconfig {
-namespace rdm {
-uint32_t json_get_tod(const char cPort, char *pOutBuffer, const uint32_t nOutBufferSize) {
-	const uint32_t nPortIndex = (cPort | 0x20) - 'a';
+#include "network.h"
 
-	if (nPortIndex < artnetnode::MAX_PORTS) {
-		const auto nBufferSize = nOutBufferSize - 2U;
-		auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nBufferSize, "{\"port\":\"%c\",\"tod\":[" , (nPortIndex + 'A')));
+#include "panel_led.h"
 
-		nLength += ArtNetNode::Get()->RdmCopyTod(nPortIndex, &pOutBuffer[nLength], nBufferSize - nLength);
+#include "debug.h"
 
-		pOutBuffer[nLength++] = ']';
-		pOutBuffer[nLength++] = '}';
+void ArtNetNode::HandleRdmSub() {
+	DEBUG_ENTRY
 
-		assert(nLength <= nOutBufferSize);
-		return nLength;
+	auto *const pArtRdmSub = reinterpret_cast<artnet::ArtRdmSub *>(m_pReceiveBuffer);
+
+	if (pArtRdmSub->RdmVer != 0x01) {
+		DEBUG_EXIT
+		return;
 	}
 
-	return 0;
+	DEBUG_EXIT
 }
-}  // namespace rdm
-}  // namespace remoteconfig

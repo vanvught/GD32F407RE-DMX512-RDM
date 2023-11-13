@@ -42,16 +42,28 @@
 #include "propertiesbuilder.h"
 
 #if defined (RDM_SENSORS_ENABLE)
-# include "rdmsensorbh1750.h"
-# include "rdmsensormcp9808.h"
-# include "rdmsensorhtu21dhumidity.h"
-# include "rdmsensorhtu21dtemperature.h"
-# include "rdmsensorina219current.h"
-# include "rdmsensorina219power.h"
-# include "rdmsensorina219voltage.h"
-# include "rdmsensorsi7021humidity.h"
-# include "rdmsensorsi7021temperature.h"
-# include "rdmsensorthermistor.h"
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_BH170)
+#  include "rdmsensorbh1750.h"
+# endif
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_MCP9808)
+#  include "rdmsensormcp9808.h"
+# endif
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_HTU21D)
+#  include "rdmsensorhtu21dhumidity.h"
+#  include "rdmsensorhtu21dtemperature.h"
+# endif
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_INA219)
+#  include "rdmsensorina219current.h"
+#  include "rdmsensorina219power.h"
+#  include "rdmsensorina219voltage.h"
+# endif
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_SI7021)
+#  include "rdmsensorsi7021humidity.h"
+#  include "rdmsensorsi7021temperature.h"
+# endif
+# if !defined (CONFIG_RDM_SENSORS_DISABLE_THERMISTOR)
+#  include "rdmsensorthermistor.h"
+# endif
 #endif
 
 #include "debug.h"
@@ -185,15 +197,20 @@ void RDMSensorsParams::Set(__attribute__((unused)) RDMSensorStore *pRDMSensorSto
 		const auto nAddress = m_Params.Entry[i].nAddress;
 
 		switch (static_cast<rdm::sensors::Types>(m_Params.Entry[i].nType)) {
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_BH170)
 		case rdm::sensors::Types::BH170:
 			Add(new RDMSensorBH170(nSensorNumber, nAddress));
 			break;
+#endif
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_HTU21D)
 		case rdm::sensors::Types::HTU21D:
 			if (!Add(new RDMSensorHTU21DHumidity(nSensorNumber++, nAddress))) {
 				continue;
 			}
 			Add(new RDMSensorHTU21DTemperature(nSensorNumber, nAddress));
 			break;
+#endif
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_INA219)
 		case rdm::sensors::Types::INA219:
 			if (!Add(new RDMSensorINA219Current(nSensorNumber++, nAddress))) {
 				continue;
@@ -203,15 +220,21 @@ void RDMSensorsParams::Set(__attribute__((unused)) RDMSensorStore *pRDMSensorSto
 			}
 			Add(new RDMSensorINA219Voltage(nSensorNumber, nAddress));
 			break;
+#endif
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_MCP9808)
 		case rdm::sensors::Types::MCP9808:
 			Add(new RDMSensorMCP9808(nSensorNumber, nAddress));
 			break;
+#endif
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_SI7021)
 		case rdm::sensors::Types::SI7021:
 			if (!Add(new RDMSensorSI7021Humidity(nSensorNumber++, nAddress))) {
 				continue;
 			}
 			Add(new RDMSensorSI7021Temperature(nSensorNumber, nAddress));
 			break;
+#endif
+#if !defined (CONFIG_RDM_SENSORS_DISABLE_THERMISTOR)
 		case rdm::sensors::Types::MCP3424:
 			if (!Add(new RDMSensorThermistor(nSensorNumber, nAddress, 0, m_Params.nCalibrate[nSensorNumber], pRDMSensorStore))) {
 				continue;
@@ -227,6 +250,7 @@ void RDMSensorsParams::Set(__attribute__((unused)) RDMSensorStore *pRDMSensorSto
 			nSensorNumber++;
 			Add(new RDMSensorThermistor(nSensorNumber, nAddress, 3, m_Params.nCalibrate[nSensorNumber], pRDMSensorStore));
 			break;
+#endif
 		default:
 			break;
 		}

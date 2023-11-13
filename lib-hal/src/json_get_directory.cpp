@@ -1,8 +1,8 @@
 /**
- * @file json_get_queue.cpp
+ * @file json_get_directory.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,49 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
 #include <cstdio>
+#include <cstdint>
 #include <cassert>
-
-#include "artnetnode.h"
+#include <dirent.h>
 
 namespace remoteconfig {
-namespace rdm {
-uint32_t json_get_queue(char *pOutBuffer, const uint32_t nOutBufferSize) {
+namespace storage {
+uint32_t json_get_directory(char *pOutBuffer, const uint32_t nOutBufferSize) {
 	const auto nBufferSize = nOutBufferSize - 2U;
-	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nBufferSize, "{\"uid\":[" ));
+#if defined (__linux__) || defined (__APPLE__)
+	auto *dirp = opendir("storage");
+#else
+	auto *dirp = opendir(".");
+#endif
+	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nBufferSize, "{\"label\":\"%s\",\"files\":[", (dirp != nullptr) ? "storage" : "No storage"));
 
-	nLength += ArtNetNode::Get()->RdmCopyWorkingQueue(&pOutBuffer[nLength], nBufferSize - nLength);
+	if (dirp != nullptr) {
+		struct dirent *dp;
+		do {
+			if ((dp = readdir(dirp)) != nullptr) {
+				if (dp->d_type == DT_DIR) {
+					continue;
+				}
+
+				const auto nSize = nBufferSize - nLength;
+				const auto nCharacters = static_cast<uint32_t>(snprintf(&pOutBuffer[nLength], nSize, "\"%s\",", dp->d_name));
+
+				if (nCharacters > nSize) {
+					break;
+				}
+
+				nLength+=nCharacters;
+
+				if (nLength >= nBufferSize) {
+					break;
+				}
+			}
+		} while (dp != nullptr);
+
+		if (pOutBuffer[nLength - 1] == ',') {
+			nLength--;
+		}
+	}
 
 	pOutBuffer[nLength++] = ']';
 	pOutBuffer[nLength++] = '}';
@@ -43,7 +73,5 @@ uint32_t json_get_queue(char *pOutBuffer, const uint32_t nOutBufferSize) {
 	assert(nLength <= nOutBufferSize);
 	return nLength;
 }
-}  // namespace rdm
+}  // namespace storage
 }  // namespace remoteconfig
-
-

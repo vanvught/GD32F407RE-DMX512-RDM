@@ -68,7 +68,6 @@ public:
 	void Print() override;
 
 private:
-	uint32_t m_nMillis { 0 };
 	uint8_t m_nStarted { 0 };
 };
 
