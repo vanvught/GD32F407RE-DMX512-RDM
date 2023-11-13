@@ -529,6 +529,11 @@ void ArtNetNode::Process(const uint16_t nBytesReceived) {
 			HandleRdm();
 		}
 		break;
+	case artnet::OpCodes::OP_RDMSUB:
+		if (m_State.rdm.IsEnabled) {
+			HandleRdmSub();
+		}
+		break;
 #endif
 	case artnet::OpCodes::OP_IPPROG:
 		HandleIpProg();

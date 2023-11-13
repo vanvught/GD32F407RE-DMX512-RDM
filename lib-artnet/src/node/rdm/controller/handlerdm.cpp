@@ -34,9 +34,9 @@
 
 #include "network.h"
 
-#include "debug.h"
+#include "panel_led.h"
 
-//TODO Make RDM discovery a state-machine.
+#include "debug.h"
 
 /**
  * ArtTodControl is used to for an Output Gateway to flush its ToD and commence full discovery.
@@ -224,7 +224,6 @@ void ArtNetNode::HandleRdm() {
 		}
 
 		if ((portAddress == m_Node.Port[nPortIndex].PortAddress) && (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)) {
-#if defined	(RDM_CONTROLLER)
 # if (ARTNET_VERSION >= 4)
 			if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
 				constexpr auto nMask = artnet::GoodOutput::OUTPUT_IS_MERGING | artnet::GoodOutput::DATA_IS_BEING_TRANSMITTED | artnet::GoodOutput::OUTPUT_IS_SACN;
@@ -234,7 +233,7 @@ void ArtNetNode::HandleRdm() {
 			if (m_OutputPort[nPortIndex].IsTransmitting) {
 				m_pLightSet->Stop(nPortIndex); // Stop DMX if was running
 			}
-#endif
+
 			const auto *pRdmResponse = const_cast<uint8_t*>(m_pArtNetRdmController->Handler(nPortIndex, pArtRdm->RdmPacket));
 
 			if (pRdmResponse != nullptr) {
@@ -250,15 +249,18 @@ void ArtNetNode::HandleRdm() {
 				DEBUG_PUTS("No RDM response");
 			}
 
-#if defined	(RDM_CONTROLLER)
 			if (m_OutputPort[nPortIndex].IsTransmitting) {
 				m_pLightSet->Start(nPortIndex); // Start DMX if was running
 			}
+
+#if defined(CONFIG_PANELLED_RDM_PORT)
+			hal::panel_led_on(hal::panelled::PORT_A_RDM << nPortIndex);
+#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+			hal::panel_led_on(hal::panelled::RDM << nPortIndex);
 #endif
 		}
 	}
 
-#if defined	(RDM_CONTROLLER)
 	// Input ports
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		if ((m_Node.Port[nPortIndex].direction != lightset::PortDir::INPUT)) {
@@ -266,9 +268,13 @@ void ArtNetNode::HandleRdm() {
 		}
 
 		if (m_Node.Port[nPortIndex].PortAddress == portAddress) {
-			DEBUG_PRINTF("nPortIndex=%u, portAddress=%u", nPortIndex, portAddress);
 			rdm_send(nPortIndex, pArtRdm->RdmPacket);
+
+#if defined(CONFIG_PANELLED_RDM_PORT)
+			hal::panel_led_on(hal::panelled::PORT_A_RDM << nPortIndex);
+#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+			hal::panel_led_on(hal::panelled::RDM << nPortIndex);
+#endif
 		}
 	}
-#endif
 }

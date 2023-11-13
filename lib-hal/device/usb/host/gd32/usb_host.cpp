@@ -94,11 +94,12 @@ static void usb_intr_config() {
 #endif
 }
 
-usbh_host usb_host_msc;
 #if !defined (GD32F4XX)
 extern usb_core_driver usbh_core;
+usbh_host usb_host;
 #else
 usb_core_driver usbh_core;
+usbh_host usb_host_msc;
 #endif
 extern usbh_user_cb usr_cb;
 
@@ -106,11 +107,11 @@ void usb_init() {
     usb_gpio_config();
     usb_rcu_config();
 
-    usbh_class_register(&usb_host_msc, &usbh_msc);
-
 #if !defined (GD32F4XX)
-    usbh_init (&usb_host_msc, &usr_cb);
+    usbh_class_register(&usb_host, &usbh_msc);
+    usbh_init (&usb_host, &usr_cb);
 #else
+    usbh_class_register(&usb_host_msc, &usbh_msc);
     usbh_init(&usb_host_msc,
               &usbh_core,
               USB_CORE_ENUM_FS,

@@ -1,5 +1,5 @@
 /**
- * @file handlerdmin.cpp
+ * @file handlerdmsub.cpp
  *
  */
 /**
@@ -26,48 +26,31 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
+#ifdef NDEBUG
+# undef NDEBUG	//TODO Remove # undef NDEBUG
+#endif
+
 #include <cstring>
+#include <cstdio>
 #include <cassert>
 
 #include "artnetnode.h"
-#include "artnet.h"
-#include "artnetrdmcontroller.h"
 
 #include "network.h"
-#include "hardware.h"
 
 #include "panel_led.h"
 
 #include "debug.h"
 
-void ArtNetNode::HandleRdmIn() {
-	auto *const pArtRdm = &m_ArtTodPacket.ArtRdm;
+void ArtNetNode::HandleRdmSub() {
+	DEBUG_ENTRY
 
-	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		if ((m_Node.Port[nPortIndex].direction != lightset::PortDir::INPUT)) {
-			continue;
-		}
+	auto *const pArtRdmSub = reinterpret_cast<artnet::ArtRdmSub *>(m_pReceiveBuffer);
 
-		const auto nPage = nPortIndex;
-
-		if (m_pArtNetRdmController->RdmReceive(nPortIndex, pArtRdm->RdmPacket)) {
-			memcpy(pArtRdm->Id, artnet::NODE_ID, sizeof(pArtRdm->Id));
-			pArtRdm->OpCode = static_cast<uint16_t>(artnet::OpCodes::OP_RDM);
-			pArtRdm->ProtVerHi = 0;
-			pArtRdm->ProtVerLo = artnet::PROTOCOL_REVISION;
-			pArtRdm->RdmVer = 0x01;
-			pArtRdm->Net = m_Node.Port[nPage].NetSwitch;
-			pArtRdm->Command = 0;
-			pArtRdm->Address = m_Node.Port[nPortIndex].DefaultAddress;
-
-			Network::Get()->SendTo(m_nHandle, pArtRdm, sizeof(struct artnet::ArtRdm), m_InputPort[nPortIndex].nDestinationIp, artnet::UDP_PORT);
-
-#if defined(CONFIG_PANELLED_RDM_PORT)
-			hal::panel_led_on(hal::panelled::PORT_A_RDM << nPortIndex);
-#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
-			hal::panel_led_on(hal::panelled::RDM << nPortIndex);
-#endif
-		}
+	if (pArtRdmSub->RdmVer != 0x01) {
+		DEBUG_EXIT
+		return;
 	}
+
+	DEBUG_EXIT
 }

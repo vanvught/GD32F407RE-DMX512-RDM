@@ -1,8 +1,8 @@
 /**
- * @file setrdm.cpp
+ * @file json_get_directory.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,37 +23,18 @@
  * THE SOFTWARE.
  */
 
+#include <cstdio>
 #include <cstdint>
 
-#include "artnetnode.h"
+#include "device/usb/host.h"
 
-#include "debug.h"
-
-void ArtNetNode::SetRdm(const uint32_t nPortIndex, const bool bEnable) {
-	DEBUG_ENTRY
-	assert(nPortIndex < artnetnode::MAX_PORTS);
-
-	const auto isEnabled = !((m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::RDM_DISABLED) == artnet::GoodOutputB::RDM_DISABLED);
-
-	if (isEnabled == bEnable) {
-		DEBUG_EXIT
-		return;
-	}
-
-	if (!bEnable) {
-		m_OutputPort[nPortIndex].GoodOutputB |= artnet::GoodOutputB::RDM_DISABLED;
-	} else {
-		m_OutputPort[nPortIndex].GoodOutputB &= static_cast<uint8_t>(~artnet::GoodOutputB::RDM_DISABLED);
-	}
-
-	if (m_State.status == artnetnode::Status::ON) {
-		if (m_pArtNetStore != nullptr) {
-			m_pArtNetStore->SaveRdmEnabled(nPortIndex, bEnable);
-		}
-
-		artnet::display_rdm_enabled(nPortIndex, bEnable);
-	}
-
-
-	DEBUG_EXIT
+namespace remoteconfig {
+namespace storage {
+uint32_t json_get_directory(char *pOutBuffer, const uint32_t nOutBufferSize) {
+	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nOutBufferSize, "{\"label\":\"%s\",\"files\":[", usb::host::get_status() == usb::host::Status::READY ? "storage" : "No USB device"));
+	//TODO
+	nLength += static_cast<uint32_t>(snprintf(&pOutBuffer[nLength], nOutBufferSize - nLength, "]}" ));
+	return nLength;
 }
+}  // namespace storage
+}  // namespace remoteconfig

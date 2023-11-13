@@ -28,6 +28,7 @@
 #include <cassert>
 
 #include "hardware.h"
+#include "panel_led.h"
 
 #include "gd32.h"
 #include "gd32_i2c.h"
@@ -167,7 +168,7 @@ Hardware::Hardware() {
 	m_HwClock.HcToSys();
 #endif
 
-#if !defined(USE_LEDBLINK_BITBANGING595)
+#if !defined(CONFIG_LEDBLINK_USE_PANELLED)
 	rcu_periph_clock_enable(LED_BLINK_GPIO_CLK);
 # if !defined (GD32F4XX)
 	gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
@@ -178,16 +179,18 @@ Hardware::Hardware() {
 	GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
 
-#if defined (LEDPANEL_595_CS_GPIOx)
-	rcu_periph_clock_enable(LEDPANEL_595_CS_RCU_GPIOx);
+#if defined (PANELLED_595_CS_GPIOx)
+	rcu_periph_clock_enable(PANELLED_595_CS_RCU_GPIOx);
 # if !defined (GD32F4XX)
-	gpio_init(LEDPANEL_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LEDPANEL_595_CS_GPIO_PINx);
+	gpio_init(PANELLED_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
 # else
-	gpio_mode_set(LEDPANEL_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LEDPANEL_595_CS_GPIO_PINx);
-	gpio_output_options_set(LEDPANEL_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LEDPANEL_595_CS_GPIO_PINx);
+	gpio_mode_set(PANELLED_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, PANELLED_595_CS_GPIO_PINx);
+	gpio_output_options_set(PANELLED_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
 # endif
-	GPIO_BOP(LEDPANEL_595_CS_GPIOx) = LEDPANEL_595_CS_GPIO_PINx;
+	GPIO_BOP(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
 #endif
+
+	hal::panel_led_init();
 
 #if defined ENABLE_USB_HOST
 	usb_init();

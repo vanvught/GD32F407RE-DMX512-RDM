@@ -1,22 +1,25 @@
 DEFINES=NDEBUG
 
-ifneq ($(MAKE_FLAGS),)
-	ifeq ($(findstring USE_LEDBLINK_BITBANGING595,$(MAKE_FLAGS)), USE_LEDBLINK_BITBANGING595)
-		EXTRA_SRCDIR=src/gd32/bitbanging
-	endif
-	
-	ifneq (,$(findstring DEBUG_EMAC,$(MAKE_FLAGS)))
-		EXTRA_SRCDIR+=debug/emac/gd32
-	endif
-	
-	ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
+EXTRA_SRCDIR=
+
+ifneq ($(MAKE_FLAGS),)	
+	ifeq (,$(findstring DISABLE_RTC,$(MAKE_FLAGS)))	  
+		ifeq (,$(findstring DISABLE_INTERNAL_RTC,$(MAKE_FLAGS)))
+			EXTRA_SRCDIR+=rtc/gd32
+  	endif
+  endif
+  
+  ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
   	EXTRA_SRCDIR+=device/usb/host/gd32
   	EXTRA_INCLUDES+=device/usb/host/gd32
-  endif  
+  endif
+  
+  ifneq (,$(findstring DEBUG_EMAC,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=debug/emac/gd32
+	endif
 else
-	EXTRA_SRCDIR+=debug/emac/gd32
-	EXTRA_SRCDIR+=ff12c ff12c/option
-	
+	EXTRA_SRCDIR+=debug/emac/gd32	
+	EXTRA_SRCDIR+=rtc/gd32
 	EXTRA_SRCDIR+=device/usb/host/gd32
   EXTRA_INCLUDES+=device/usb/host/gd32
 	

@@ -89,6 +89,10 @@ public:
 		Get().IClearLength(nPortIndex);
 	}
 
+	static uint32_t GetLength(const uint32_t nPortIndex) {
+		return Get().IGetLength(nPortIndex);
+	}
+
 	static const uint8_t *Backup(const uint32_t nPortIndex) {
 		return Get().IBackup(nPortIndex);
 	}
@@ -167,6 +171,10 @@ private:
 		assert(nPortIndex < PORTS);
 
 		m_OutputPort[nPortIndex].nLength = 0;
+	}
+
+	uint32_t IGetLength(const uint32_t nPortIndex) const {
+		return m_OutputPort[nPortIndex].nLength;
 	}
 
 	const uint8_t *IBackup(const uint32_t nPortIndex) {
