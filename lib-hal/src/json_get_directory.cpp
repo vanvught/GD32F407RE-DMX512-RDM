@@ -27,6 +27,9 @@
 #include <cstdint>
 #include <cassert>
 #include <dirent.h>
+#ifndef NDEBUG
+# include <errno.h>
+#endif
 
 namespace remoteconfig {
 namespace storage {
@@ -34,9 +37,15 @@ uint32_t json_get_directory(char *pOutBuffer, const uint32_t nOutBufferSize) {
 	const auto nBufferSize = nOutBufferSize - 2U;
 #if defined (__linux__) || defined (__APPLE__)
 	auto *dirp = opendir("storage");
+#elif defined (CONFIG_USB_HOST_MSC)
+	auto *dirp = opendir("0:/");
 #else
 	auto *dirp = opendir(".");
 #endif
+#ifndef NDEBUG
+	perror("opendir");
+#endif
+
 	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nBufferSize, "{\"label\":\"%s\",\"files\":[", (dirp != nullptr) ? "storage" : "No storage"));
 
 	if (dirp != nullptr) {
