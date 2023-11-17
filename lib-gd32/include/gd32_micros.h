@@ -31,11 +31,11 @@
 #include "gd32.h"
 
 #if defined (GD32F4XX) && !defined(MICROS_DO_NOT_USE_TIMER4)
-static inline uint32_t micros() {
+inline uint32_t micros() {
 	return TIMER_CNT(TIMER4);
 }
 #else
-static inline uint32_t micros() {
+inline uint32_t micros() {
 	static uint32_t nMicrosPrevious;
 	static uint32_t nResult;
 	const auto nMicros = DWT->CYCCNT / (MCU_CLOCK_FREQ / 1000000U);
@@ -43,7 +43,7 @@ static inline uint32_t micros() {
 	if (nMicros > nMicrosPrevious) {
 		nResult += (nMicros - nMicrosPrevious);
 	} else {
-		nResult += ((UINT32_MAX/ (MCU_CLOCK_FREQ / 1000000U)) - nMicrosPrevious + nMicros);
+		nResult += ((UINT32_MAX / (MCU_CLOCK_FREQ / 1000000U)) - nMicrosPrevious + nMicros);
 	}
 
 	nMicrosPrevious = nMicros;

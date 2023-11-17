@@ -28,15 +28,6 @@
 #pragma GCC optimize ("-funroll-loops")
 #pragma GCC optimize ("-fprefetch-loop-arrays")
 
-#if 0
-# if defined (GD32F207RG)
-#  define LOGIC_ANALYZER
-#  if defined (NDEBUG)
-#   undef NDEBUG
-#  endif
-# endif
-#endif
-
 extern "C" {
 void console_error(const char *);
 }
@@ -1667,7 +1658,6 @@ Dmx::Dmx() {
 	NVIC_EnableIRQ(UART7_IRQn);
 #endif
 
-	logic_analyzer::init();
 	DEBUG_EXIT
 }
 

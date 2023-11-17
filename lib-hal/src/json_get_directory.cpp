@@ -2,7 +2,7 @@
  * @file json_get_directory.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,10 @@
 
 namespace remoteconfig {
 namespace storage {
+static bool filter(const char *pName) {
+	return *pName == '.';
+}
+
 uint32_t json_get_directory(char *pOutBuffer, const uint32_t nOutBufferSize) {
 	const auto nBufferSize = nOutBufferSize - 2U;
 #if defined (__linux__) || defined (__APPLE__)
@@ -53,6 +57,10 @@ uint32_t json_get_directory(char *pOutBuffer, const uint32_t nOutBufferSize) {
 		do {
 			if ((dp = readdir(dirp)) != nullptr) {
 				if (dp->d_type == DT_DIR) {
+					continue;
+				}
+
+				if (filter(dp->d_name)) {
 					continue;
 				}
 

@@ -26,11 +26,11 @@
 #ifndef LOGIC_ANALYZER_H_
 #define LOGIC_ANALYZER_H_
 
+#include "board/logic_analyzer.h"
 #include "gd32.h"
 
 namespace logic_analyzer {
-
-static void init() {
+inline void init() {
 #if defined (LOGIC_ANALYZER)
 # if defined (LOGIC_ANALYZER_CH0_GPIO_PINx)
 	rcu_periph_clock_enable(LOGIC_ANALYZER_CH0_RCU_GPIOx);
@@ -123,103 +123,102 @@ static void init() {
 #endif
 }
 
-static void ch0_clear() {
+inline void ch0_clear() {
 #if defined (LOGIC_ANALYZER_CH0_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH0_GPIOx) = LOGIC_ANALYZER_CH0_GPIO_PINx;
 #endif
 }
 
-static void ch0_set() {
+inline void ch0_set() {
 #if defined (LOGIC_ANALYZER_CH0_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH0_GPIOx) = LOGIC_ANALYZER_CH0_GPIO_PINx;
 #endif
 }
 
-static void ch1_clear() {
+inline void ch1_clear() {
 #if defined (LOGIC_ANALYZER_CH1_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH1_GPIOx) = LOGIC_ANALYZER_CH1_GPIO_PINx;
 #endif
 }
 
-static void ch1_set() {
+inline void ch1_set() {
 #if defined (LOGIC_ANALYZER_CH1_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH1_GPIOx) = LOGIC_ANALYZER_CH1_GPIO_PINx;
 #endif
 }
 
-static void ch2_clear() {
+inline void ch2_clear() {
 #if defined (LOGIC_ANALYZER_CH2_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH2_GPIOx) = LOGIC_ANALYZER_CH2_GPIO_PINx;
 #endif
 }
 
-static void ch2_set() {
+inline void ch2_set() {
 #if defined (LOGIC_ANALYZER_CH2_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH2_GPIOx) = LOGIC_ANALYZER_CH2_GPIO_PINx;
 #endif
 }
 
-static void ch3_clear() {
+inline void ch3_clear() {
 #if defined (LOGIC_ANALYZER_CH3_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH3_GPIOx) = LOGIC_ANALYZER_CH3_GPIO_PINx;
 #endif
 }
 
-static void ch3_set() {
+inline void ch3_set() {
 #if defined (LOGIC_ANALYZER_CH3_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH3_GPIOx) = LOGIC_ANALYZER_CH3_GPIO_PINx;
 #endif
 }
 
 //
-static void ch4_clear() {
+inline void ch4_clear() {
 #if defined (LOGIC_ANALYZER_CH4_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH4_GPIOx) = LOGIC_ANALYZER_CH4_GPIO_PINx;
 #endif
 }
 
-static void ch4_set() {
+inline void ch4_set() {
 #if defined (LOGIC_ANALYZER_CH4_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH4_GPIOx) = LOGIC_ANALYZER_CH4_GPIO_PINx;
 #endif
 }
 
-static void ch5_clear() {
+inline void ch5_clear() {
 #if defined (LOGIC_ANALYZER_CH5_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH5_GPIOx) = LOGIC_ANALYZER_CH5_GPIO_PINx;
 #endif
 }
 
-static void ch5_set() {
+inline void ch5_set() {
 #if defined (LOGIC_ANALYZER_CH5_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH5_GPIOx) = LOGIC_ANALYZER_CH5_GPIO_PINx;
 #endif
 }
 
-static void ch6_clear() {
+inline void ch6_clear() {
 #if defined (LOGIC_ANALYZER_CH6_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH6_GPIOx) = LOGIC_ANALYZER_CH6_GPIO_PINx;
 #endif
 }
 
-static void ch6_set() {
+inline void ch6_set() {
 #if defined (LOGIC_ANALYZER_CH6_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH6_GPIOx) = LOGIC_ANALYZER_CH6_GPIO_PINx;
 #endif
 }
 
-static void ch7_clear() {
+inline void ch7_clear() {
 #if defined (LOGIC_ANALYZER_CH7_GPIO_PINx)
 	GPIO_BC(LOGIC_ANALYZER_CH7_GPIOx) = LOGIC_ANALYZER_CH7_GPIO_PINx;
 #endif
 }
 
-static void ch7_set() {
+inline void ch7_set() {
 #if defined (LOGIC_ANALYZER_CH7_GPIO_PINx)
 	GPIO_BOP(LOGIC_ANALYZER_CH7_GPIOx) = LOGIC_ANALYZER_CH7_GPIO_PINx;
 #endif
 }
-
 }  // namespace logic_analyzer
 
 #endif /* LOGIC_ANALYZER_H_ */

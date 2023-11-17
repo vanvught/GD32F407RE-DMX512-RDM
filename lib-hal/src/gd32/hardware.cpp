@@ -43,6 +43,8 @@
 void usb_init();
 #endif
 
+#include "logic_analyzer.h"
+
 #include "debug.h"
 
 extern "C" {
@@ -195,6 +197,8 @@ Hardware::Hardware() {
 #if defined ENABLE_USB_HOST
 	usb_init();
 #endif
+
+	logic_analyzer::init();
 
 	DEBUG_EXIT
 }
