@@ -358,7 +358,7 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	PropertiesBuilder builder(ArtNetParamsConst::FILE_NAME, pBuffer, nLength);
 
 	if (!isMaskSet(Mask::LONG_NAME)) {
-		memcpy(m_Params.aLongName, ArtNetNode::Get()->GetLongName(), artnet::LONG_NAME_LENGTH);
+		ArtNetNode::Get()->GetLongNameDefault(reinterpret_cast<char *>(m_Params.aLongName));
 	}
 	builder.Add(LightSetParamsConst::NODE_LONG_NAME, reinterpret_cast<const char*>(m_Params.aLongName), isMaskSet(Mask::LONG_NAME));
 

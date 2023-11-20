@@ -18,12 +18,15 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_SRCDIR+=debug/emac/gd32
 	endif
 else
-	EXTRA_SRCDIR+=debug/emac/gd32	
+	ifneq (, $(shell test -d '../lib-network/src/noemac' && echo -n yes))
+	else
+		EXTRA_SRCDIR+=debug/emac/gd32	
+	endif	
 	EXTRA_SRCDIR+=rtc/gd32
-	EXTRA_SRCDIR+=device/usb/host/gd32
-  EXTRA_INCLUDES+=device/usb/host/gd32
+#	EXTRA_SRCDIR+=device/usb/host/gd32
+#	EXTRA_INCLUDES+=device/usb/host/gd32
 	
-	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
+#	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
 endif
 
 include Rules.mk

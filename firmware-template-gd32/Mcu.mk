@@ -1,3 +1,5 @@
+$(info "Mcu.mk")
+
 ifndef MCU
 	$(error MCU is not set)
 endif
