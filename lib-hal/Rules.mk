@@ -48,6 +48,7 @@ else
 	DEFINES+=DEBUG_I2C DEBUG_STACK
 	DEFINES+=LOGIC_ANALYZER
 	EXTRA_INCLUDES+=debug/i2c debug/stack
-	EXTRA_SRCDIR+=console/i2c console/null console/uart0 rtc 
+	EXTRA_SRCDIR+=console/i2c console/null console/uart0 
 	EXTRA_SRCDIR+=posix
+	EXTRA_SRCDIR+=rtc rtc/i2c
 endif

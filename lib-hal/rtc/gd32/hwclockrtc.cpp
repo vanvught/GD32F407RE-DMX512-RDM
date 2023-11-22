@@ -2,7 +2,7 @@
  * @file  hwclockrtc.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,24 +81,23 @@ void HwClock::RtcProbe() {
 	DEBUG_EXIT
 }
 
-bool HwClock::RtcSet(const struct rtc_time *pRtcTime) {
+bool HwClock::RtcSet(const struct tm *pTime) {
 	DEBUG_ENTRY
-	assert(pRtcTime != nullptr);
+	assert(pTime != nullptr);
 
-	rtc_counter_set(mktime(const_cast<struct tm *>(reinterpret_cast<const struct tm *>(pRtcTime))));
-//	rtc_lwoff_wait();
+	rtc_counter_set(mktime(const_cast<struct tm *>(pTime)));
 
 	DEBUG_EXIT
 	return true;
 }
 
-bool HwClock::RtcGet(struct rtc_time *pRtcTime) {
+bool HwClock::RtcGet(struct tm *pTime) {
 	DEBUG_ENTRY
-	assert(pRtcTime != nullptr);
+	assert(pTime != nullptr);
 
 	const auto nSeconds = static_cast<time_t>(rtc_counter_get());
 	const auto *pTm = localtime(&nSeconds);
-	memcpy(pRtcTime, pTm, sizeof(struct rtc_time));
+	memcpy(pTime, pTm, sizeof(struct tm));
 
 	DEBUG_EXIT
 	return true;

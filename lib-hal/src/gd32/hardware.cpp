@@ -225,40 +225,6 @@ void Hardware::GetUuid(uuid_t out) {
 	memcpy(out, cast.uuid, sizeof(uuid_t));
 }
 
-bool Hardware::SetTime(__attribute__((unused)) const struct tm *pTime) {
-	DEBUG_ENTRY
-#if !defined(DISABLE_RTC)
-	rtc_time rtc_time;
-
-	rtc_time.tm_sec = pTime->tm_sec;
-	rtc_time.tm_min = pTime->tm_min;
-	rtc_time.tm_hour = pTime->tm_hour;
-	rtc_time.tm_mday = pTime->tm_mday;
-	rtc_time.tm_mon = pTime->tm_mon;
-	rtc_time.tm_year = pTime->tm_year;
-
-	m_HwClock.Set(&rtc_time);
-
-	DEBUG_EXIT
-	return true;
-#else
-	DEBUG_EXIT
-	return false;
-#endif
-}
-
-void Hardware::GetTime(struct tm *pTime) {
-	auto ltime = time(nullptr);
-	const auto *local_time = localtime(&ltime);
-
-	pTime->tm_year = local_time->tm_year;
-	pTime->tm_mon = local_time->tm_mon;
-	pTime->tm_mday = local_time->tm_mday;
-	pTime->tm_hour = local_time->tm_hour;
-	pTime->tm_min = local_time->tm_min;
-	pTime->tm_sec = local_time->tm_sec;
-}
-
 #include <cstdio>
 
 bool Hardware::Reboot() {
