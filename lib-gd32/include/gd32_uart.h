@@ -2,7 +2,7 @@
  * @file gd32_uart.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,11 +54,11 @@ extern void gd32_uart_set_baudrate(const uint32_t usart_periph, uint32_t baudrat
 extern void gd32_uart_transmit(const uint32_t usart_periph, const uint8_t *data, uint32_t length);
 extern void gd32_uart_transmit_string(const uint32_t uart_base, const char *data);
 
-static inline uint32_t gd32_uart_get_rx_fifo_level(__attribute__((unused)) const uint32_t usart_periph) {
+inline uint32_t gd32_uart_get_rx_fifo_level(__attribute__((unused)) const uint32_t usart_periph) {
 	return 1;
 }
 
-static inline uint8_t gd32_uart_get_rx_data(const uint32_t uart_base) {
+inline uint8_t gd32_uart_get_rx_data(const uint32_t uart_base) {
 	return (uint8_t)(GET_BITS(USART_DATA(uart_base), 0U, 8U));
 }
 

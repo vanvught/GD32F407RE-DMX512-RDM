@@ -1,4 +1,0 @@
-DEFINES=NDEBUG
-EXTRA_INCLUDES=../lib-rdm/include ../lib-properties/include ../lib-hal/include ../lib-device/include
-
-include ../firmware-template-gd32/lib/Rules.mk

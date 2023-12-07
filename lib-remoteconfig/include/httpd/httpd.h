@@ -86,7 +86,6 @@ private:
 	uint32_t m_nFileDataLength { 0 };
 	uint32_t m_nRequestContentLength { 0 };
 	int32_t m_nHandle { -1 };
-
 	uint32_t m_nBytesReceived { 0 };
 
 	http::Status m_Status { http::Status::UNKNOWN_ERROR };

@@ -90,6 +90,8 @@ public:
 
 	bool AddComment(const char *pComment);
 
+	bool AddRaw(const char *pRaw);
+
 	uint16_t GetSize() {
 		if (m_bJson) {
 			m_pBuffer[m_nSize - 1] = '}';

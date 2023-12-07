@@ -1309,17 +1309,20 @@ void TIMER3_IRQHandler() {
 }
 
 void TIMER6_IRQHandler() {
-	for (auto i = 0; i < DMX_MAX_PORTS; i++) {
-		sv_nRxDmxPackets[i].nPerSecond = sv_nRxDmxPackets[i].nCount - sv_nRxDmxPackets[i].nCountPrevious;
-		sv_nRxDmxPackets[i].nCountPrevious = sv_nRxDmxPackets[i].nCount;
+	const auto nIntFlag = TIMER_INTF(TIMER6);
+
+	if ((nIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) {
+		for (auto i = 0; i < DMX_MAX_PORTS; i++) {
+			sv_nRxDmxPackets[i].nPerSecond = sv_nRxDmxPackets[i].nCount - sv_nRxDmxPackets[i].nCountPrevious;
+			sv_nRxDmxPackets[i].nCountPrevious = sv_nRxDmxPackets[i].nCount;
+		}
+
 	}
 
-	timer_interrupt_flag_clear(TIMER6, TIMER_INT_FLAG_UP);
+	timer_interrupt_flag_clear(TIMER6, nIntFlag);
 }
 #endif
 }
-
-#include <stdio.h>
 
 extern "C" {
 /*
@@ -2197,7 +2200,7 @@ uint32_t Dmx::GetDmxUpdatesPerSecond(UNUSED uint32_t nPortIndex) {
 #endif
 }
 
-uint32_t GetDmxReceivedCount(UNUSED uint32_t nPortIndex) {
+uint32_t Dmx::GetDmxReceivedCount(UNUSED uint32_t nPortIndex) {
 	assert(nPortIndex < DMX_MAX_PORTS);
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	return sv_nRxDmxPackets[nPortIndex].nCount;

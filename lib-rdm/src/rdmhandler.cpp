@@ -31,21 +31,17 @@
 #include <cassert>
 
 #include "rdmhandler.h"
-
 #include "rdmdeviceresponder.h"
 #include "rdmsensors.h"
 #include "rdmsubdevices.h"
-
 #include "rdmidentify.h"
 #include "rdmslotinfo.h"
-#include "rdmmessage.h"
-
+#include "rdmconst.h"
+#include "rdm_e120.h"
+#include "rdm_message_print.h"
 #if defined (ENABLE_RDM_MANUFACTURER_PIDS)
 # include "rdm_manufacturer_pid.h"
 #endif
-
-#include "rdm.h"
-#include "rdm_e120.h"
 
 #include "hardware.h"
 #include "display.h"
@@ -253,7 +249,7 @@ void RDMHandler::HandleData(const uint8_t *pRdmDataIn, uint8_t *pRdmDataOut) {
 	}
 
 #ifndef NDEBUG
-	RDMMessage::PrintNoSc(pRdmDataIn);
+	rdm::message_print_no_sc(pRdmDataIn);
 #endif
 
 	const auto *pUID = RDMDeviceResponder::Get()->GetUID();
@@ -308,6 +304,7 @@ void RDMHandler::HandleData(const uint8_t *pRdmDataIn, uint8_t *pRdmDataOut) {
 					p->checksum[2] = static_cast<uint8_t>((rdm_checksum & 0xFF) | 0xAA);
 					p->checksum[3] = static_cast<uint8_t>((rdm_checksum & 0xFF) | 0x55);
 
+					DEBUG_EXIT
 					return;
 				}
 			}

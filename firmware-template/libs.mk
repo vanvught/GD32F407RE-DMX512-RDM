@@ -33,21 +33,6 @@ ifeq ($(findstring RDM_CONTROLLER,$(DEFINES)),RDM_CONTROLLER)
 	LIBS+=rdm
 	DMX=1
 endif
-ifeq ($(findstring RDM_RESPONDER,$(DEFINES)),RDM_RESPONDER)
-	ifneq ($(findstring NODE_ARTNET,$(DEFINES)),NODE_ARTNET)
-		ifneq ($(findstring dmxreceiver,$(LIBS)),dmxreceiver)
-			LIBS+=dmxreceiver
-		endif
-	endif
-	ifneq ($(findstring rdmsensor,$(LIBS)),rdmsensor)
-		LIBS+=rdmsensor
-	endif
-	ifneq ($(findstring rdmsubdevice,$(LIBS)),rdmsubdevice)
-		LIBS+=rdmsubdevice
-	endif
-	LIBS+=rdm
-	DMX=1
-endif
 
 ifeq ($(findstring NODE_RDMNET_LLRP_ONLY,$(DEFINES)),NODE_RDMNET_LLRP_ONLY)
 	ifneq ($(findstring rdmnet,$(LIBS)),rdmnet)
@@ -55,12 +40,6 @@ ifeq ($(findstring NODE_RDMNET_LLRP_ONLY,$(DEFINES)),NODE_RDMNET_LLRP_ONLY)
 	endif
 	ifneq ($(findstring e131,$(LIBS)),e131)
 		LIBS+=e131
-	endif
-	ifneq ($(findstring rdmsensor,$(LIBS)),rdmsensor)
-		LIBS+=rdmsensor
-	endif
-	ifneq ($(findstring rdmsubdevice,$(LIBS)),rdmsubdevice)
-		LIBS+=rdmsubdevice
 	endif
 	ifneq ($(findstring RDM_CONTROLLER,$(DEFINES)),RDM_CONTROLLER)
 		LIBS+=rdm

@@ -39,24 +39,13 @@
 #include "debug.h"
 
 static uint8_t s_TransactionNumber[dmx::config::max::OUT];
-static uint32_t s_nLastSendMicros[dmx::config::max::OUT];
 
 extern volatile uint32_t gv_RdmDataReceiveEnd;
 
-void Rdm::Send(uint32_t nPort, struct TRdmMessage *pRdmMessage, uint32_t nSpacingMicros) {
+void Rdm::Send(uint32_t nPort, struct TRdmMessage *pRdmMessage) {
 	DEBUG_PRINTF("nPort=%u, pRdmData=%p, nSpacingMicros=%u", nPort, pRdmMessage, nSpacingMicros);
 	assert(nPort < DMX_MAX_PORTS);
 	assert(pRdmMessage != nullptr);
-
-	if (nSpacingMicros != 0) {
-		const auto nMicros = micros();
-		const auto nDeltaMicros = nMicros - s_nLastSendMicros[nPort];
-		if (nDeltaMicros < nSpacingMicros) {
-			const auto nWait = nSpacingMicros - nDeltaMicros;
-			do {
-			} while ((micros() - nMicros) < nWait);
-		}
-	}
 
 	auto *pData = reinterpret_cast<uint8_t*>(pRdmMessage);
 	uint32_t i;
@@ -73,7 +62,6 @@ void Rdm::Send(uint32_t nPort, struct TRdmMessage *pRdmMessage, uint32_t nSpacin
 
 	SendRaw(nPort, reinterpret_cast<const uint8_t*>(pRdmMessage), pRdmMessage->message_length + RDM_MESSAGE_CHECKSUM_SIZE);
 
-	s_nLastSendMicros[nPort] = micros();
 	s_TransactionNumber[nPort]++;
 
 	DEBUG_EXIT

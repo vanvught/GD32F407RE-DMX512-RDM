@@ -13,6 +13,7 @@ ifneq ($(MAKE_FLAGS),)
 		ifeq ($(findstring ARTNET_VERSION=4,$(MAKE_FLAGS)), ARTNET_VERSION=4)
 			EXTRA_INCLUDES+=../lib-e131/include
 		endif	
+		EXTRA_INCLUDES+=../lib-dmx/include
 	endif
 	
 	ifneq (,$(findstring NODE_E131,$(MAKE_FLAGS)))

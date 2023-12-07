@@ -47,7 +47,6 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)), NODE_ARTNET)
 		EXTRA_SRCDIR+=src/artnet
 		EXTRA_INCLUDES+=../lib-artnet/include
-		EXTRA_SRCDIR+=src/rdm
 		RDM=1
 		ifeq ($(findstring ARTNET_VERSION=4,$(MAKE_FLAGS)), ARTNET_VERSION=4)
 			EXTRA_INCLUDES+=../lib-e131/include
@@ -69,9 +68,7 @@ ifneq ($(MAKE_FLAGS),)
 	
 	ifeq ($(findstring NODE_NODE,$(MAKE_FLAGS)), NODE_NODE)
 		EXTRA_SRCDIR+=src/node
-		EXTRA_INCLUDES+=../lib-node/include
-		EXTRA_INCLUDES+=../lib-artnet/include ../lib-rdmdiscovery/include
-		EXTRA_INCLUDES+=../lib-e131/include
+		EXTRA_INCLUDES+=../lib-node/include ../lib-artnet/include ../lib-e131/include
 		RDM=1
 	endif
 	
@@ -128,7 +125,6 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring RDM_CONTROLLER,$(MAKE_FLAGS)), RDM_CONTROLLER)
 		ifdef RDM
 		else
-			EXTRA_SRCDIR+=src/rdm
 			RDM=1
 		endif
 	endif
@@ -136,16 +132,20 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring RDM_RESPONDER,$(MAKE_FLAGS)), RDM_RESPONDER)
 		ifdef RDM
 		else
-			EXTRA_SRCDIR+=src/rdm
 			RDM=1
 		endif
 		EXTRA_INCLUDES+=../lib-rdmresponder/include
+		EXTRA_INCLUDES+=../lib-rdmsensor/include
+		EXTRA_SRCDIR+=src/rdm/sensors
+		ifeq ($(findstring ENABLE_RDM_SUBDEVICES,$(MAKE_FLAGS)), ENABLE_RDM_SUBDEVICES)
+			EXTRA_SRCDIR+=src/rdm/subdevices
+			EXTRA_INCLUDES+=../lib-rdmsubdevice/include
+		endif
 	endif
 	
 	ifeq ($(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)), NODE_RDMNET_LLRP_ONLY)
 		ifdef RDM
 		else
-			EXTRA_SRCDIR+=src/rdm
 			RDM=1
 		endif
 	endif
@@ -156,7 +156,8 @@ ifneq ($(MAKE_FLAGS),)
 	endif
 	
 	ifdef RDM
-		EXTRA_INCLUDES+=../lib-rdm/include ../lib-rdmsensor/include ../lib-rdmsubdevice/include
+		EXTRA_SRCDIR+=src/rdm
+		EXTRA_INCLUDES+=../lib-rdm/include
 	endif
 else
 	ifneq (, $(shell test -d '../lib-network/src/noemac' && echo -n yes))

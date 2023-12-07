@@ -40,7 +40,8 @@
 # include "rpi/hal_spi.h"
 #endif
 
-#include <cstdint>
+#ifdef __cplusplus
+# include <cstdint>
 
 class HAL_SPI {
 	void Setup() {
@@ -80,5 +81,6 @@ private:
 	uint8_t m_nChipSelect;
 	uint8_t m_nMode;
 };
+#endif
 
 #endif /* HAL_SPI_H_ */

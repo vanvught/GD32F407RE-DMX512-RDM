@@ -2,7 +2,7 @@
  * @file rdmhandler.h
  *
  */
-/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,9 @@
 # endif
 #endif
 
-#include "rdmmessage.h"
-#include "rdmqueuedmessage.h"
+#if defined (ENABLE_RDM_QUEUED_MSG)
+# include "rdmqueuedmessage.h"
+#endif
 
 #if defined (ENABLE_RDM_MANUFACTURER_PIDS)
 # include "rdm_manufacturer_pid.h"

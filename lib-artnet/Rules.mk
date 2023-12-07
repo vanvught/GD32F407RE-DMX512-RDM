@@ -1,3 +1,5 @@
+EXTRA_INCLUDES+=../lib-lightset/include ../lib-properties/include ../lib-hal/include ../lib-network/include
+
 ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)), NODE_ARTNET)
 		EXTRA_SRCDIR+=src/node
@@ -11,7 +13,7 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring RDM_CONTROLLER,$(MAKE_FLAGS)), RDM_CONTROLLER)
 		EXTRA_SRCDIR+=src/node/rdm
 		EXTRA_SRCDIR+=src/node/rdm/controller
-		EXTRA_INCLUDES+=../lib-rdm/include
+		EXTRA_INCLUDES+=../lib-rdm/include ../lib-dmx/include
 	endif
 	
 	ifeq ($(findstring RDM_RESPONDER,$(MAKE_FLAGS)), RDM_RESPONDER)

@@ -202,7 +202,7 @@ static void rdm_send(const uint32_t nPortIndex, const uint8_t *pRdmData) {
 		Rdm::SendRaw(nPortIndex, reinterpret_cast<const uint8_t*>(&rdmMessage), rdmMessage.message_length + RDM_MESSAGE_CHECKSUM_SIZE);
 
 #ifndef NDEBUG
-		RDMMessage::Print(reinterpret_cast<const uint8_t *>(&rdmMessage));
+		rdm::message_print(reinterpret_cast<const uint8_t *>(&rdmMessage));
 #endif
 	}
 }

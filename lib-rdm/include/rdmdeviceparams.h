@@ -29,7 +29,7 @@
 #include <cstdint>
 
 #include "rdmdevice.h"
-#include "rdm.h"
+#include "rdmconst.h"
 
 namespace rdm {
 namespace deviceparams {

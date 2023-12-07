@@ -33,7 +33,7 @@
 # include <cstdio>
 #endif
 
-#include "rdm.h"
+#include "rdmconst.h"
 
 #include "debug.h"
 

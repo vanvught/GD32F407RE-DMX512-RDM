@@ -29,7 +29,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "rdm.h"
+#include "rdmconst.h"
 #include "rdmdevice.h"
 #include "rdmidentify.h"
 #include "rdmpersonality.h"

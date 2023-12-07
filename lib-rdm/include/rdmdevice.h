@@ -57,8 +57,6 @@ struct TRDMDeviceInfo {
 	uint8_t sensor_count;			///< This field indicates the number of available sensors in a Root Device or Sub-Device. When this parameter is directed to a Sub-Device, the reply shall be identical for any Sub-Device owned by a specific Root Device.
 };
 
-#include "rdm.h"
-
 class RDMDevice {
 public:
 	RDMDevice();

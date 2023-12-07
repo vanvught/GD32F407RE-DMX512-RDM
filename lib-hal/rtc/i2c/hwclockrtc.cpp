@@ -23,10 +23,6 @@
  * THE SOFTWARE.
  */
 
-#ifdef NDEBUG
-# undef NDEBUG	//TODO # undef NDEBUG
-#endif
-
 #include <cassert>
 #include <time.h>
 
