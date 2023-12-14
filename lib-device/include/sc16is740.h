@@ -49,7 +49,7 @@ public:
 	};
 
 	SC16IS740(uint8_t nAddress = sc16is740::I2C_ADDRESS, uint32_t nOnBoardCrystal = sc16is740::CRISTAL_HZ);
-	~SC16IS740() {}
+	~SC16IS740() = default;
 
 	void SetOnBoardCrystal(uint32_t nOnBoardCrystalHz) {
 		m_nOnBoardCrystal = nOnBoardCrystalHz;

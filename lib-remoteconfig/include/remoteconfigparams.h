@@ -52,8 +52,7 @@ struct RemoteConfigParamsMask {
 
 class RemoteConfigParamsStore {
 public:
-	virtual ~RemoteConfigParamsStore() {
-	}
+	virtual ~RemoteConfigParamsStore() = default;
 
 	virtual void Update(const struct TRemoteConfigParams *pRemoteConfigParams)=0;
 	virtual void Copy(struct TRemoteConfigParams *pRemoteConfigParams)=0;

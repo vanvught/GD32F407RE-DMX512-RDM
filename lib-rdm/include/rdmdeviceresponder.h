@@ -50,7 +50,7 @@ void factorydefaults();
 class RDMDeviceResponder: public RDMDevice {
 public:
 	RDMDeviceResponder(RDMPersonality **pRDMPersonalities, uint32_t nPersonalityCount);
-	virtual ~RDMDeviceResponder() {}
+	virtual ~RDMDeviceResponder() = default;
 
 	void Init();
 	void Print();

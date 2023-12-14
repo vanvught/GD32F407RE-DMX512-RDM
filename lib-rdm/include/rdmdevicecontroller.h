@@ -37,10 +37,7 @@ public:
 		DEBUG_EXIT
 	}
 
-	~RDMDeviceController() {
-		DEBUG_ENTRY
-		DEBUG_EXIT
-	}
+	~RDMDeviceController() = default;
 };
 
 #endif /* RDMDEVICECONTROLLER_H_ */

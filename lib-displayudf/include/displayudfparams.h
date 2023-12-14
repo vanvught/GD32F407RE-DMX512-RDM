@@ -50,7 +50,7 @@ struct Mask {
 
 class DisplayUdfParamsStore {
 public:
-	virtual ~DisplayUdfParamsStore() {}
+	virtual ~DisplayUdfParamsStore() = default;
 
 	virtual void Update(const struct displayudfparams::Params *ptDisplayUdfParams)=0;
 	virtual void Copy(struct displayudfparams::Params *ptDisplayUdfParams)=0;

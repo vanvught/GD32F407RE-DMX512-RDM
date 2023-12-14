@@ -26,13 +26,10 @@
 #ifndef GD32_H_
 #define GD32_H_
 
-#include <stdint.h>
-
-#if !defined  __cplusplus
- void udelay(uint32_t us);
-#else
-# if !defined(GD32_UDELAY)
-#  define GD32_UDELAY
+#ifdef __cplusplus
+# include <cstdint>
+# if !defined(UDELAY)
+#  define UDELAY
  void udelay(uint32_t us, uint32_t offset = 0);
 # endif
 #endif

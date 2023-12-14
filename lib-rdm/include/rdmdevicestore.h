@@ -2,7 +2,7 @@
  * @file rdmdevicestore.h
  *
  */
-/* Copyright (C) 2019-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 
 class RDMDeviceStore {
 public:
-	virtual ~RDMDeviceStore() {}
+	virtual ~RDMDeviceStore() = default;
 
 	virtual void SaveLabel(const char *pLabel, uint8_t nLength)=0;
 };

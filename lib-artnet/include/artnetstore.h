@@ -36,7 +36,7 @@
 
 class ArtNetStore {
 public:
-	virtual ~ArtNetStore() {}
+	virtual ~ArtNetStore() = default;
 
 	virtual void SaveLongName(const char *pLongName)=0;
 

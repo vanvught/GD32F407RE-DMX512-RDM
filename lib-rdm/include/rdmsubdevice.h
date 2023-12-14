@@ -65,7 +65,7 @@ public:
 		m_nCheckSum = CalculateChecksum();
 	}
 
-	virtual ~RDMSubDevice() {}
+	virtual ~RDMSubDevice() = default;
 
 	void SetDmxStartAddress(uint16_t nDmxStartAddress) {
 		m_tSubDevicesInfo.dmx_start_address = nDmxStartAddress;

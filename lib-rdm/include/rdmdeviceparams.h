@@ -51,7 +51,7 @@ struct Mask {
 
 class RDMDeviceParamsStore {
 public:
-	virtual ~RDMDeviceParamsStore() {}
+	virtual ~RDMDeviceParamsStore() = default;
 
 	virtual void Update(const struct rdm::deviceparams::Params *pParams)=0;
 	virtual void Copy(struct rdm::deviceparams::Params *pParams)=0;

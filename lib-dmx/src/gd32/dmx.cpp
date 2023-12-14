@@ -2338,6 +2338,34 @@ void Dmx::RdmSendRaw(const uint32_t nPortIndex, const uint8_t* pRdmData, uint32_
 	}
 }
 
+void Dmx::RdmSendDiscoveryRespondMessage(uint32_t nPortIndex, const uint8_t *pRdmData, uint32_t nLength) {
+	DEBUG_PRINTF("nPort=%u, pRdmData=%p, nLength=%u", nPortIndex, pRdmData, nLength);
+	assert(nPortIndex < DMX_MAX_PORTS);
+	assert(pRdmData != nullptr);
+	assert(nLength != 0);
+
+	// 3.2.2 Responder Packet spacing
+	udelay(RDM_RESPONDER_PACKET_SPACING, gv_RdmDataReceiveEnd);
+
+	SetPortDirection(nPortIndex, dmx::PortDirection::OUTP, false);
+
+	const auto nUart = _port_to_uart(nPortIndex);
+
+	for (uint32_t i = 0; i < nLength; i++) {
+		while (RESET == usart_flag_get(nUart, USART_FLAG_TBE))
+			;
+		USART_DATA(nUart) = static_cast<uint16_t>(USART_DATA_DATA & pRdmData[i]);
+	}
+
+	while (SET != usart_flag_get(nUart, USART_FLAG_TC)) {
+		static_cast<void>(GET_BITS(USART_DATA(nUart), 0U, 8U));
+	}
+
+	udelay(RDM_RESPONDER_DATA_DIRECTION_DELAY);
+
+	SetPortDirection(nPortIndex, dmx::PortDirection::INP, true);
+}
+
 // RDM Receive
 
 const uint8_t *Dmx::RdmReceive(const uint32_t nPortIndex) {

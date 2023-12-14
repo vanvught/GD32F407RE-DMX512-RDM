@@ -96,7 +96,7 @@ public:
 		DEBUG_EXIT
 	}
 
-	virtual ~RDMSensor() {}
+	virtual ~RDMSensor() = default;
 
 public:
 	void SetType(const uint8_t nType) {

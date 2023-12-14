@@ -79,7 +79,7 @@ struct Mask {
 
 class NetworkParamsStore {
 public:
-	virtual ~NetworkParamsStore() {}
+	virtual ~NetworkParamsStore() = default;
 
 	virtual void Update(const networkparams::Params *pNetworkParams)=0;
 	virtual void Copy(networkparams::Params *pNetworkParams)=0;

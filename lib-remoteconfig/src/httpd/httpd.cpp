@@ -29,15 +29,17 @@
 #include <cassert>
 
 #include "httpd/httpd.h"
+#include "../http/content/json_switch.h"
+
 #include "remoteconfig.h"
 #include "remoteconfigjson.h"
 #include "properties.h"
 #include "sscan.h"
 #include "propertiesconfig.h"
-#include "../http/content/json_switch.h"
 
-#include "network.h"
 #include "hardware.h"
+#include "network.h"
+#include "mdns.h"
 #include "display.h"
 
 #if defined(RDM_CONTROLLER)
@@ -63,6 +65,9 @@ HttpDaemon::HttpDaemon() : m_pContentType(s_contentType[static_cast<uint32_t>(co
 	assert(m_nHandle == -1);
 	m_nHandle = Network::Get()->TcpBegin(80);
 	assert(m_nHandle != -1);
+
+	assert(MDNS::Get() != nullptr);
+	MDNS::Get()->ServiceRecordAdd(nullptr, mdns::Services::HTTP);
 
 	DEBUG_EXIT
 }

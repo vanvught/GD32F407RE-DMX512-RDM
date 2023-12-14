@@ -112,7 +112,7 @@ struct Mask {
 
 class E131ParamsStore {
 public:
-	virtual ~E131ParamsStore() {}
+	virtual ~E131ParamsStore() = default;
 
 	virtual void Update(const e131params::Params *pParams)=0;
 	virtual void Copy(e131params::Params *pParams)=0;

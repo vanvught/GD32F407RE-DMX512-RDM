@@ -60,7 +60,7 @@ public:
 		s_pThis = this;
 	}
 
-	~RDMResponder() override {}
+	~RDMResponder() override = default;
 
 	void Init() {
 		RDMDeviceResponder::Init();

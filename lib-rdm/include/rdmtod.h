@@ -61,7 +61,7 @@ public:
 		}
 	}
 
-	~RDMTod() {}
+	~RDMTod() = default;
 
 	void Reset() {
 		for (uint32_t i = 0; i < m_nEntries; i++) {

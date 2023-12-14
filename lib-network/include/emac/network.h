@@ -46,7 +46,7 @@
 class Network {
 public:
 	Network(NetworkParamsStore *pNetworkParamsStore);
-	~Network() {}
+	~Network() = default;
 
 	void Print();
 

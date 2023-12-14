@@ -36,4 +36,11 @@
 # include "rpi/hal_api.h"
 #endif
 
+#include <cstdint>
+
+#if !defined(UDELAY)
+# define UDELAY
+ void udelay(uint32_t us, uint32_t offset = 0);
+#endif
+
 #endif /* HAL_API_H_ */

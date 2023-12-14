@@ -79,20 +79,12 @@ void main() {
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
 	StoreNetwork storeNetwork;
 	Network nw(&storeNetwork);
+	MDNS mDns;
 	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, Display7SegmentMessage::INFO_NONE, CONSOLE_GREEN);
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
 	fw.Print("Art-Net 4 DMX/RDM controller {" STR(LIGHTSET_PORTS) " Universes}");
 	nw.Print();
-
-	display.TextStatus(NetworkConst::MSG_MDNS_CONFIG, Display7SegmentMessage::INFO_MDNS_CONFIG, CONSOLE_YELLOW);
-
-	MDNS mDns;
-	mDns.ServiceRecordAdd(nullptr, mdns::Services::CONFIG, "node=Art-Net 4 DMX/RDM");
-#if defined (ENABLE_HTTPD)
-	mDns.ServiceRecordAdd(nullptr, mdns::Services::HTTP);
-#endif
-	mDns.Print();
 
 #if defined (ENABLE_HTTPD)
 	HttpDaemon httpDaemon;
@@ -186,6 +178,8 @@ void main() {
 
 	while (configStore.Flash())
 		;
+
+	mDns.Print();
 
 	display.TextStatus(ArtNetMsgConst::START, Display7SegmentMessage::INFO_NODE_START, CONSOLE_YELLOW);
 

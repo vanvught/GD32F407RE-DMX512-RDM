@@ -58,7 +58,7 @@ static constexpr uint16_t roundup_slots(uint8_t n) {
 
 class DmxParamsStore {
 public:
-	virtual ~DmxParamsStore() {}
+	virtual ~DmxParamsStore() = default;
 
 	virtual void Update(const struct TDmxParams *pDmxParams)=0;
 	virtual void Copy(struct TDmxParams *pDmxParams)=0;
