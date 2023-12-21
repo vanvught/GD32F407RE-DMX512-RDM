@@ -28,7 +28,6 @@
 
 #include <cstdint>
 
-#include "rdmdevice.h"
 #include "rdmconst.h"
 
 namespace rdm {
@@ -49,17 +48,11 @@ struct Mask {
 }  // namespace rdmdevice
 }  // namespace rdm
 
-class RDMDeviceParamsStore {
-public:
-	virtual ~RDMDeviceParamsStore() = default;
-
-	virtual void Update(const struct rdm::deviceparams::Params *pParams)=0;
-	virtual void Copy(struct rdm::deviceparams::Params *pParams)=0;
-};
+class RDMDevice;
 
 class RDMDeviceParams {
 public:
-	RDMDeviceParams(RDMDeviceParamsStore *pRDMDeviceParamsStore);
+	RDMDeviceParams();
 
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
@@ -83,7 +76,6 @@ private:
     }
 
 private:
-    RDMDeviceParamsStore *m_pRDMDeviceParamsStore;
     rdm::deviceparams::Params m_Params;
 };
 

@@ -184,10 +184,10 @@ static constexpr uint32_t PORT_A_TX = 0;
  */
 
 #define SPI_LCD_RST_PIN		GPIO_EXT_7
-#define SPI_LCD_DC_PIN 		GPIO_EXT_26
-#define SPI_LCD_BL_PIN		GPIO_EXT_22
-#if defined(SPI_LCD_HAVE_CS_PIN)
-# define SPI_LCD_CS_PIN		GPIO_EXT_24
+#define SPI_LCD_DC_GPIO 		GPIO_EXT_26
+#define SPI_LCD_BL_GPIO		GPIO_EXT_22
+#if defined(SPI_LCD_HAVE_CS_GPIO)
+# define SPI_LCD_CS_GPIO		GPIO_EXT_24
 #endif
 
 #include "gpio_header.h"

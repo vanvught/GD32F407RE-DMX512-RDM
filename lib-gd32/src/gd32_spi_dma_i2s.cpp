@@ -177,15 +177,18 @@ void gd32_spi_dma_tx_start(const uint8_t *pTxBuffer, uint32_t nLength) {
 	auto nDmaChCTL = DMA_CHCTL(SPI_DMAx, SPI_DMA_CHx);
 	nDmaChCTL &= ~DMA_CHXCTL_CHEN;
 	DMA_CHCTL(SPI_DMAx, SPI_DMA_CHx) = nDmaChCTL;
+
 	DMA_CHMADDR(SPI_DMAx, SPI_DMA_CHx) = (uint32_t)pTxBuffer;
 	DMA_CHCNT(SPI_DMAx, SPI_DMA_CHx) = dma_chcnt;
+
 	nDmaChCTL |= DMA_CHXCTL_CHEN;
 	DMA_CHCTL(SPI_DMAx, SPI_DMA_CHx) = nDmaChCTL;
+
 	spi_dma_enable(SPI_PERIPH, SPI_DMA_TRANSMIT);
 }
 
-bool gd32_spi_dma_tx_is_active(void) {
-	return (uint32_t) DMA_CHCNT(SPI_DMAx, SPI_DMA_CHx) != 0;
+bool gd32_spi_dma_tx_is_active() {
+	return DMA_CHCNT(SPI_DMAx, SPI_DMA_CHx) != 0;
 }
 
 /**

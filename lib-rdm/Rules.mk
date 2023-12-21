@@ -1,5 +1,5 @@
 EXTRA_INCLUDES=../lib-rdmsensor/include ../lib-rdmsubdevice/include ../lib-dmx/include ../lib-properties/include ../lib-lightset/include
-EXTRA_INCLUDES+=../lib-hal/include ../lib-network/include ../lib-display/include 
+EXTRA_INCLUDES+=../lib-hal/include ../lib-network/include ../lib-display/include ../lib-configstore/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifeq (,$(findstring NODE_ARTNET,$(MAKE_FLAGS)))
@@ -15,6 +15,9 @@ ifneq ($(MAKE_FLAGS),)
 	
 	ifneq (,$(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)))
  		EXTRA_SRCDIR+=src/llrp
+	endif
+	ifneq (,$(findstring CONFIG_STORE_USE_ROM,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-flashcode/include
 	endif
 else
 	ifneq (, $(shell test -d '../lib-network/src/noemac' && echo -n yes))

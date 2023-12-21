@@ -2,7 +2,7 @@
  * @file storenetwork.h
  *
  */
-/* Copyright (C) 2018-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
 #ifndef STORENETWORK_H_
 #define STORENETWORK_H_
 
+#include <cstdint>
+#include <cstddef>
 #include <algorithm>
 
 #include "network.h"
@@ -45,24 +47,24 @@ public:
 	}
 
 	void SaveIp(uint32_t nIp) override {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, __builtin_offsetof(struct networkparams::Params, nLocalIp), &nIp, sizeof(uint32_t), networkparams::Mask::IP_ADDRESS);
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nLocalIp), &nIp, sizeof(uint32_t), networkparams::Mask::IP_ADDRESS);
 	}
 
 	void SaveNetMask(uint32_t nNetMask) override {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, __builtin_offsetof(struct networkparams::Params, nNetmask), &nNetMask, sizeof(uint32_t), networkparams::Mask::NET_MASK);
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nNetmask), &nNetMask, sizeof(uint32_t), networkparams::Mask::NET_MASK);
 	}
 
 	void SaveGatewayIp(uint32_t nGatewayIp) override {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, __builtin_offsetof(struct networkparams::Params, nGatewayIp), &nGatewayIp, sizeof(uint32_t), networkparams::Mask::DEFAULT_GATEWAY);
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nGatewayIp), &nGatewayIp, sizeof(uint32_t), networkparams::Mask::DEFAULT_GATEWAY);
 	}
 
 	void SaveHostName(const char *pHostName, uint32_t nLength) override {
 		nLength = std::min(nLength,static_cast<uint32_t>(network::HOSTNAME_SIZE));
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, __builtin_offsetof(struct networkparams::Params, aHostName), pHostName, nLength, networkparams::Mask::HOSTNAME);
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, aHostName), pHostName, nLength, networkparams::Mask::HOSTNAME);
 	}
 
 	void SaveDhcp(bool bIsDhcpUsed) override {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, __builtin_offsetof(struct networkparams::Params, bIsDhcpUsed), &bIsDhcpUsed, sizeof(bool), networkparams::Mask::DHCP);
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, bIsDhcpUsed), &bIsDhcpUsed, sizeof(bool), networkparams::Mask::DHCP);
 	}
 
 	static StoreNetwork *Get() {

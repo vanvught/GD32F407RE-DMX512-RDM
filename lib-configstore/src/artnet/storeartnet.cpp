@@ -27,6 +27,7 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 #include <cassert>
 
 #include "storeartnet.h"
@@ -76,7 +77,7 @@ void StoreArtNet::SaveShortName(uint32_t nPortIndex, const char *pShortName) {
 		return;
 	}
 
-	ConfigStore::Get()->Update(configstore::Store::NODE, (artnet::SHORT_NAME_LENGTH * nPortIndex) + __builtin_offsetof(struct artnetparams::Params, aLabel), pShortName, artnet::SHORT_NAME_LENGTH, artnetparams::Mask::LABEL_A << nPortIndex);
+	ConfigStore::Get()->Update(configstore::Store::NODE, (artnet::SHORT_NAME_LENGTH * nPortIndex) + offsetof(struct artnetparams::Params, aLabel), pShortName, artnet::SHORT_NAME_LENGTH, artnetparams::Mask::LABEL_A << nPortIndex);
 
 	DEBUG_EXIT
 }
@@ -103,7 +104,7 @@ void StoreArtNet::SaveUniverse(uint32_t nPortIndex) {
 
 	if (ArtNetNode::Get()->GetPortAddress(nPortIndex, nUniverse)) {
 		DEBUG_PRINTF("nPortIndex=%u, nUniverse=%u", nPortIndex, nUniverse);
-		ConfigStore::Get()->Update(configstore::Store::NODE, (sizeof(uint16_t) * nPortIndex) + __builtin_offsetof(struct artnetparams::Params, nUniverse), &nUniverse, sizeof(uint16_t), artnetparams::Mask::UNIVERSE_A << nPortIndex);
+		ConfigStore::Get()->Update(configstore::Store::NODE, (sizeof(uint16_t) * nPortIndex) + offsetof(struct artnetparams::Params, nUniverse), &nUniverse, sizeof(uint16_t), artnetparams::Mask::UNIVERSE_A << nPortIndex);
 	}
 
 	DEBUG_EXIT
@@ -128,12 +129,12 @@ void StoreArtNet::SaveMergeMode(uint32_t nPortIndex, const lightset::MergeMode m
 	}
 
 	uint16_t nMergeMode;
-	ConfigStore::Get()->Copy(configstore::Store::NODE, &nMergeMode, sizeof(uint16_t), __builtin_offsetof(struct artnetparams::Params, nMergeMode));
+	ConfigStore::Get()->Copy(configstore::Store::NODE, &nMergeMode, sizeof(uint16_t), offsetof(struct artnetparams::Params, nMergeMode));
 
 	nMergeMode &= artnetparams::mergemode_clear(nPortIndex);
 	nMergeMode |= artnetparams::mergemode_set(nPortIndex, mergeMode);
 
-	ConfigStore::Get()->Update(configstore::Store::NODE, __builtin_offsetof(struct artnetparams::Params, nMergeMode), &nMergeMode, sizeof(uint16_t));
+	ConfigStore::Get()->Update(configstore::Store::NODE, offsetof(struct artnetparams::Params, nMergeMode), &nMergeMode, sizeof(uint16_t));
 
 	DEBUG_EXIT
 }
@@ -157,12 +158,12 @@ void StoreArtNet::SavePortProtocol(uint32_t nPortIndex, const artnet::PortProtoc
 	}
 
 	uint16_t nPortProtocol;
-	ConfigStore::Get()->Copy(configstore::Store::NODE, &nPortProtocol, sizeof(uint16_t), __builtin_offsetof(struct artnetparams::Params, nProtocol));
+	ConfigStore::Get()->Copy(configstore::Store::NODE, &nPortProtocol, sizeof(uint16_t), offsetof(struct artnetparams::Params, nProtocol));
 
 	nPortProtocol &= artnetparams::protocol_clear(nPortIndex);
 	nPortProtocol |= artnetparams::protocol_set(nPortIndex, portProtocol);
 
-	ConfigStore::Get()->Update(configstore::Store::NODE, __builtin_offsetof(struct artnetparams::Params, nProtocol), &nPortProtocol, sizeof(uint16_t));
+	ConfigStore::Get()->Update(configstore::Store::NODE, offsetof(struct artnetparams::Params, nProtocol), &nPortProtocol, sizeof(uint16_t));
 	DEBUG_EXIT
 }
 
@@ -185,7 +186,7 @@ void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const lightset::OutputSt
 	}
 
 	uint8_t nOutputStyle;
-	ConfigStore::Get()->Copy(configstore::Store::NODE, &nOutputStyle, sizeof(uint8_t), __builtin_offsetof(struct artnetparams::Params, nOutputStyle));
+	ConfigStore::Get()->Copy(configstore::Store::NODE, &nOutputStyle, sizeof(uint8_t), offsetof(struct artnetparams::Params, nOutputStyle));
 
 	if (outputStyle == lightset::OutputStyle::CONSTANT) {
 		nOutputStyle |= static_cast<uint8_t>(1U << nPortIndex);
@@ -193,7 +194,7 @@ void  StoreArtNet::SaveOutputStyle(uint32_t nPortIndex, const lightset::OutputSt
 		nOutputStyle &= static_cast<uint8_t>(~(1U << nPortIndex));
 	}
 
-	ConfigStore::Get()->Update(configstore::Store::NODE, __builtin_offsetof(struct artnetparams::Params, nOutputStyle), &nOutputStyle, sizeof(uint8_t));
+	ConfigStore::Get()->Update(configstore::Store::NODE, offsetof(struct artnetparams::Params, nOutputStyle), &nOutputStyle, sizeof(uint8_t));
 
 	DEBUG_EXIT
 }
@@ -217,7 +218,7 @@ void StoreArtNet::SaveRdmEnabled(uint32_t nPortIndex, const bool isEnabled) {
 	}
 
 	uint16_t nRdm;
-	ConfigStore::Get()->Copy(configstore::Store::NODE, &nRdm, sizeof(uint16_t), __builtin_offsetof(struct artnetparams::Params, nRdm));
+	ConfigStore::Get()->Copy(configstore::Store::NODE, &nRdm, sizeof(uint16_t), offsetof(struct artnetparams::Params, nRdm));
 
 	nRdm &= artnetparams::clear_mask(nPortIndex);
 
@@ -226,7 +227,7 @@ void StoreArtNet::SaveRdmEnabled(uint32_t nPortIndex, const bool isEnabled) {
 		nRdm |= static_cast<uint16_t>(1U << (nPortIndex + 8));
 	}
 
-	ConfigStore::Get()->Update(configstore::Store::NODE, __builtin_offsetof(struct artnetparams::Params, nRdm), &nRdm, sizeof(uint16_t));
+	ConfigStore::Get()->Update(configstore::Store::NODE, offsetof(struct artnetparams::Params, nRdm), &nRdm, sizeof(uint16_t));
 
 	DEBUG_EXIT
 }

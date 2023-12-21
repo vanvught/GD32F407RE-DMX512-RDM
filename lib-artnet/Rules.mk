@@ -1,4 +1,4 @@
-EXTRA_INCLUDES+=../lib-lightset/include ../lib-properties/include ../lib-hal/include ../lib-network/include
+EXTRA_INCLUDES+=../lib-lightset/include ../lib-properties/include ../lib-hal/include ../lib-network/include ../lib-configstore/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)), NODE_ARTNET)
@@ -42,6 +42,10 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring ARTNET_VERSION=4,$(MAKE_FLAGS)), ARTNET_VERSION=4)
 		EXTRA_SRCDIR+=src/node/4
 		EXTRA_INCLUDES+=../lib-e131/include
+	endif
+	
+	ifneq (,$(findstring CONFIG_STORE_USE_ROM,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-flashcode/include
 	endif
 else
 	EXTRA_SRCDIR+=src/node src/node/failsafe src/node/dmxin src/node/rdm src/node/rdm/controller src/node/timecode

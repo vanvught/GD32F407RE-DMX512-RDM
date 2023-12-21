@@ -131,8 +131,8 @@ void main() {
 
 	DmxConfigUdp dmxConfigUdp;
 
-	StoreRDMDevice storeRdmDevice;
-	RDMDeviceParams rdmDeviceParams(&storeRdmDevice);
+
+	RDMDeviceParams rdmDeviceParams;
 
 	ArtNetRdmController artNetRdmController;
 

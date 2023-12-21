@@ -1,7 +1,7 @@
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
-EXTRA_INCLUDES=../lib-hal/include ../lib-network/include ../lib-properties/include ../lib-display/include ../lib-lightset/include ../lib-configstore/include
-EXTRA_INCLUDES+=../lib-flash/include ../lib-flashcode/include ../lib-flashcodeinstall/include
+EXTRA_INCLUDES=../lib-network/include ../lib-properties/include ../lib-display/include ../lib-lightset/include ../lib-configstore/include
+EXTRA_INCLUDES+=../lib-flashcode/include ../lib-flashcodeinstall/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring ENABLE_HTTPD,$(MAKE_FLAGS)))

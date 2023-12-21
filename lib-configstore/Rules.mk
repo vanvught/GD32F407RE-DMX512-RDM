@@ -1,6 +1,6 @@
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
-EXTRA_INCLUDES =../lib-flashcode/include ../lib-flash/include
+EXTRA_INCLUDES =../lib-flashcode/include
 EXTRA_INCLUDES+=../lib-hal/include ../lib-properties/include ../lib-lightset/include ../lib-network/include
 
 ifneq ($(MAKE_FLAGS),)
@@ -136,9 +136,7 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 		EXTRA_INCLUDES+=../lib-rdmresponder/include
 		EXTRA_INCLUDES+=../lib-rdmsensor/include
-		EXTRA_SRCDIR+=src/rdm/sensors
 		ifeq ($(findstring ENABLE_RDM_SUBDEVICES,$(MAKE_FLAGS)), ENABLE_RDM_SUBDEVICES)
-			EXTRA_SRCDIR+=src/rdm/subdevices
 			EXTRA_INCLUDES+=../lib-rdmsubdevice/include
 		endif
 	endif

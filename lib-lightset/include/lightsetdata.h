@@ -50,7 +50,7 @@ namespace lightset {
 
 class Data {
 public:
-	Data(const Data&) = delete;
+//	Data(const Data&) = delete;
 
 	static Data& Get() {
 		static Data instance SECTION_LIGHTSET;
@@ -102,7 +102,7 @@ public:
 	}
 
 private:
-	Data() {}
+//	Data() {}
 
 	void IMergeSourceA(const uint32_t nPortIndex, const uint8_t *pData, const uint32_t nLength, const MergeMode mergeMode) {
 		assert(nPortIndex < PORTS);

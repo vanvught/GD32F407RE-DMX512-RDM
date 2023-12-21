@@ -60,7 +60,7 @@ typedef enum T_GD32_Port {
 # define GPIO_PULL_DISABLE		GPIO_PUPD_NONE
 #endif
 
-inline static void gpio_fsel(const uint32_t gpio_periph, const uint32_t pin, const uint32_t fsel) {
+inline void gpio_fsel(const uint32_t gpio_periph, const uint32_t pin, const uint32_t fsel) {
 	switch (gpio_periph) {
 		case GPIOA:
 			rcu_periph_clock_enable(RCU_GPIOA);
@@ -105,14 +105,14 @@ inline static void gpio_fsel(const uint32_t gpio_periph, const uint32_t pin, con
 #endif
 }
 
-inline static void gd32_gpio_fsel(const uint32_t gpio, const uint32_t fsel) {
+inline void gd32_gpio_fsel(const uint32_t gpio, const uint32_t fsel) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
 	gpio_fsel(gpio_periph, pin, fsel);
 }
 
-inline static void gd32_gpio_set_pud(const uint32_t gpio, const uint32_t pud) {
+inline void gd32_gpio_set_pud(const uint32_t gpio, const uint32_t pud) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
@@ -129,7 +129,7 @@ inline static void gd32_gpio_set_pud(const uint32_t gpio, const uint32_t pud) {
 #endif
 }
 
-inline static void gd32_gpio_int_cfg(const uint32_t gpio, const uint32_t trig_type) {
+inline void gd32_gpio_int_cfg(const uint32_t gpio, const uint32_t trig_type) {
 	const uint32_t linex = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
     switch(trig_type){
@@ -159,21 +159,21 @@ inline static void gd32_gpio_int_cfg(const uint32_t gpio, const uint32_t trig_ty
 #endif
 }
 
-inline static void gd32_gpio_clr(const uint32_t gpio) {
+inline void gd32_gpio_clr(const uint32_t gpio) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
 	GPIO_BC(gpio_periph) = (uint32_t) pin;
 }
 
-inline static void gd32_gpio_set(const uint32_t gpio) {
+inline void gd32_gpio_set(const uint32_t gpio) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
 	GPIO_BOP(gpio_periph) = (uint32_t) pin;
 }
 
-inline static void gd32_gpio_write(const uint32_t gpio, const uint32_t level) {
+inline void gd32_gpio_write(const uint32_t gpio, const uint32_t level) {
 	if (level == 0) {
 		gd32_gpio_clr(gpio);
 	} else {
@@ -181,7 +181,7 @@ inline static void gd32_gpio_write(const uint32_t gpio, const uint32_t level) {
 	}
 }
 
-inline static uint32_t gd32_gpio_lev(const uint32_t gpio) {
+inline uint32_t gd32_gpio_lev(const uint32_t gpio) {
 	const uint32_t gpio_periph = GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
 	const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 	return (uint32_t) ((uint32_t) 0 != (GPIO_ISTAT(gpio_periph) & pin));

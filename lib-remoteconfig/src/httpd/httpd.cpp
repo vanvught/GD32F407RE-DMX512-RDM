@@ -366,6 +366,9 @@ Status HttpDaemon::HandleGet() {
 				case http::json::get::PORTSTATUS:
 					nLength = remoteconfig::dsa::json_get_portstatus(m_Content, sizeof(m_Content));
 					break;
+				case http::json::get::VLANTABLE:
+					nLength = remoteconfig::dsa::json_get_vlantable(m_Content, sizeof(m_Content));
+					break;
 				default:
 					break;
 				}

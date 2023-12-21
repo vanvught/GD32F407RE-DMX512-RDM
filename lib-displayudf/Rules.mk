@@ -1,3 +1,5 @@
+EXTRA_INCLUDES+=../lib-configstore/include
+
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring NODE_NODE,$(MAKE_FLAGS)))
 		EXTRA_INCLUDES+=../lib-node/include
@@ -36,6 +38,10 @@ ifneq ($(MAKE_FLAGS),)
 		else
 			EXTRA_INCLUDES+=../lib-dmxreceiver/include ../lib-dmx/include
 		endif
+	endif
+	
+	ifneq (,$(findstring CONFIG_STORE_USE_ROM,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-flashcode/include
 	endif
 else
 	ifneq (, $(shell test -d '../lib-network/src/noemac' && echo -n yes))

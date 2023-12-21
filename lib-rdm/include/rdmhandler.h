@@ -129,6 +129,9 @@ private:
 #if defined (ENABLE_RDM_PRESET_PLAYBACK)
 	void SetPresetPlayback(bool IsBroadcast, uint16_t nSubDevice);
 #endif
+#if defined (ENABLE_RDM_MANUFACTURER_PIDS)
+	void SetManufacturerPid(bool IsBroadcast, uint16_t nSubDevice);
+#endif
 	// ANSI E1.37-1
 	void SetIdentifyMode(bool IsBroadcast, uint16_t nSubDevice);
 	// ANSI E1.37-2 – 2015

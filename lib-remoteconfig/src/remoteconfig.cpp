@@ -672,7 +672,7 @@ void RemoteConfig::HandleGetOscClntTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetRdmDeviceTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	RDMDeviceParams rdmDeviceParams(StoreRDMDevice::Get());
+	RDMDeviceParams rdmDeviceParams;
 	rdmDeviceParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -681,7 +681,7 @@ void RemoteConfig::HandleGetRdmDeviceTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetRdmSensorsTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	RDMSensorsParams rdmSensorsParams(StoreRDMSensors::Get());
+	RDMSensorsParams rdmSensorsParams;
 	rdmSensorsParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -691,7 +691,7 @@ void RemoteConfig::HandleGetRdmSensorsTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetRdmSubdevTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	RDMSubDevicesParams rdmSubDevicesParams(StoreRDMSubDevices::Get());
+	RDMSubDevicesParams rdmSubDevicesParams;
 	rdmSubDevicesParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -1294,9 +1294,7 @@ void RemoteConfig::HandleSetNodeTxt(const node::Personality personality) {
 void RemoteConfig::HandleSetRdmDeviceTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreRDMDevice::Get() != nullptr);
-	RDMDeviceParams rdmDeviceParams(StoreRDMDevice::Get());
-
+	RDMDeviceParams rdmDeviceParams;
 	rdmDeviceParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	rdmDeviceParams.Dump();
@@ -1308,9 +1306,7 @@ void RemoteConfig::HandleSetRdmDeviceTxt() {
 void RemoteConfig::HandleSetRdmSensorsTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreRDMSensors::Get() != nullptr);
-	RDMSensorsParams rdmSensorsParams(StoreRDMSensors::Get());
-
+	RDMSensorsParams rdmSensorsParams;
 	rdmSensorsParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	rdmSensorsParams.Dump();
@@ -1323,8 +1319,7 @@ void RemoteConfig::HandleSetRdmSensorsTxt() {
 void RemoteConfig::HandleSetRdmSubdevTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreRDMSubDevices::Get() != nullptr);
-	RDMSubDevicesParams rdmSubDevicesParams(StoreRDMSubDevices::Get());
+	RDMSubDevicesParams rdmSubDevicesParams;
 
 	rdmSubDevicesParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG

@@ -40,15 +40,15 @@ public:
 		return instance;
 	}
 
-	void Update(const struct rdm::deviceparams::Params *pParams) {
+	static void Update(const struct rdm::deviceparams::Params *pParams) {
 		Get().IUpdate(pParams);
 	}
 
-	void Copy(struct rdm::deviceparams::Params *pRDMDeviceParams) {
+	static void Copy(struct rdm::deviceparams::Params *pRDMDeviceParams) {
 		Get().ICopy(pRDMDeviceParams);
 	}
 
-	void SaveLabel(const char *pLabel, uint8_t nLength) {
+	static void SaveLabel(const char *pLabel, uint8_t nLength) {
 		Get().ISaveLabel(pLabel, nLength);
 	}
 
