@@ -650,7 +650,7 @@ void RemoteConfig::HandleGetE131Txt(uint32_t& nSize) {
 void RemoteConfig::HandleGetOscTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	OSCServerParams oscServerParams(StoreOscServer::Get());
+	OSCServerParams oscServerParams;
 	oscServerParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -661,7 +661,7 @@ void RemoteConfig::HandleGetOscTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetOscClntTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	OscClientParams oscClientParams(StoreOscClient::Get());
+	OscClientParams oscClientParams;
 	oscClientParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -886,7 +886,7 @@ void RemoteConfig::HandleGetNodeTxt(const node::Personality personality, uint32_
 void RemoteConfig::HandleGetSerialTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	DmxSerialParams dmxSerialParams(StoreDmxSerial::Get());
+	DmxSerialParams dmxSerialParams;
 	dmxSerialParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -1024,9 +1024,7 @@ void RemoteConfig::HandleSetE131Txt() {
 void RemoteConfig::HandleSetOscTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreOscServer::Get() != nullptr);
-	OSCServerParams oscServerParams(StoreOscServer::Get());
-
+	OSCServerParams oscServerParams;
 	oscServerParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	oscServerParams.Dump();
@@ -1040,9 +1038,7 @@ void RemoteConfig::HandleSetOscTxt() {
 void RemoteConfig::HandleSetOscClientTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreOscClient::Get() != nullptr);
-	OscClientParams oscClientParams(StoreOscClient::Get());
-
+	OscClientParams oscClientParams;
 	oscClientParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	oscClientParams.Dump();
@@ -1335,9 +1331,7 @@ void RemoteConfig::HandleSetRdmSubdevTxt() {
 void RemoteConfig::HandleSetSerialTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreDmxSerial::Get() != nullptr);
-	DmxSerialParams dmxSerialParams(StoreDmxSerial::Get());
-
+	DmxSerialParams dmxSerialParams;
 	dmxSerialParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	dmxSerialParams.Dump();

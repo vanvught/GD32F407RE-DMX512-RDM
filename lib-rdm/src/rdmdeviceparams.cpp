@@ -63,7 +63,7 @@ RDMDeviceParams::RDMDeviceParams() {
 	DEBUG_EXIT
 }
 
-bool RDMDeviceParams::Load() {
+void RDMDeviceParams::Load() {
 	DEBUG_ENTRY
 
 #if !defined(DISABLE_FS)
@@ -78,7 +78,6 @@ bool RDMDeviceParams::Load() {
 	StoreRDMDevice::Copy(&m_Params);
 
 	DEBUG_EXIT
-	return true;
 }
 
 void RDMDeviceParams::Load(const char *pBuffer, uint32_t nLength) {
@@ -157,31 +156,6 @@ void RDMDeviceParams::Set(RDMDevice *pRDMDevice) {
 	}
 }
 
-void RDMDeviceParams::Dump() {
-#ifndef NDEBUG
-	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, RDMDeviceParamsConst::FILE_NAME);
-
-	if (isMaskSet(rdm::deviceparams::Mask::LABEL)) {
-		printf(" %s=%.*s\n", RDMDeviceParamsConst::LABEL, m_Params.nDeviceRootLabelLength, m_Params.aDeviceRootLabel);
-	}
-
-	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_CATEGORY)) {
-		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory);
-	}
-
-	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL)) {
-		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail);
-	}
-#endif
-}
-
-void RDMDeviceParams::staticCallbackFunction(void *p, const char *s) {
-	assert(p != nullptr);
-	assert(s != nullptr);
-
-	(static_cast<RDMDeviceParams *>(p))->callbackFunction(s);
-}
-
 void RDMDeviceParams::Builder(const struct rdm::deviceparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 	DEBUG_ENTRY
 
@@ -202,4 +176,29 @@ void RDMDeviceParams::Builder(const struct rdm::deviceparams::Params *pParams, c
 
 	DEBUG_PRINTF("nSize=%d", nSize);
 	DEBUG_EXIT
+}
+
+void RDMDeviceParams::staticCallbackFunction(void *p, const char *s) {
+	assert(p != nullptr);
+	assert(s != nullptr);
+
+	(static_cast<RDMDeviceParams *>(p))->callbackFunction(s);
+}
+
+void RDMDeviceParams::Dump() {
+#ifndef NDEBUG
+	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, RDMDeviceParamsConst::FILE_NAME);
+
+	if (isMaskSet(rdm::deviceparams::Mask::LABEL)) {
+		printf(" %s=%.*s\n", RDMDeviceParamsConst::LABEL, m_Params.nDeviceRootLabelLength, m_Params.aDeviceRootLabel);
+	}
+
+	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_CATEGORY)) {
+		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory);
+	}
+
+	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL)) {
+		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail);
+	}
+#endif
 }

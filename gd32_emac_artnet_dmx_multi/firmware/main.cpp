@@ -131,15 +131,12 @@ void main() {
 
 	DmxConfigUdp dmxConfigUdp;
 
-
 	RDMDeviceParams rdmDeviceParams;
-
 	ArtNetRdmController artNetRdmController;
 
-	if (rdmDeviceParams.Load()) {
-		rdmDeviceParams.Dump();
-		rdmDeviceParams.Set(&artNetRdmController);
-	}
+	rdmDeviceParams.Load();
+	rdmDeviceParams.Dump();
+	rdmDeviceParams.Set(&artNetRdmController);
 
 	artNetRdmController.Init();
 	artNetRdmController.Print();

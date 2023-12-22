@@ -54,7 +54,7 @@ class RDMDeviceParams {
 public:
 	RDMDeviceParams();
 
-	bool Load();
+	void Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
 	void Builder(const struct rdm::deviceparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);

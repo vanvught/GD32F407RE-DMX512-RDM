@@ -1,7 +1,6 @@
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
-EXTRA_INCLUDES =../lib-flashcode/include
-EXTRA_INCLUDES+=../lib-hal/include ../lib-properties/include ../lib-lightset/include ../lib-network/include
+EXTRA_INCLUDES=../lib-flashcode/include ../lib-hal/include ../lib-properties/include ../lib-lightset/include ../lib-network/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring CONFIG_STORE_USE_FILE,$(MAKE_FLAGS)))
@@ -72,16 +71,6 @@ ifneq ($(MAKE_FLAGS),)
 		RDM=1
 	endif
 	
-	ifeq ($(findstring NODE_OSC_CLIENT,$(MAKE_FLAGS)), NODE_OSC_CLIENT)
-		EXTRA_SRCDIR+=src/oscclient
-		EXTRA_INCLUDES+=../lib-oscclient/include
-	endif
-	
-	ifeq ($(findstring NODE_OSC_SERVER,$(MAKE_FLAGS)), NODE_OSC_SERVER)
-		EXTRA_SRCDIR+=src/oscserver
-		EXTRA_INCLUDES+=../lib-oscserver/include
-	endif
-	
 	ifeq ($(findstring OUTPUT_DMX_SEND,$(MAKE_FLAGS)),OUTPUT_DMX_SEND)
 		EXTRA_SRCDIR+=src/dmx
 		EXTRA_INCLUDES+=../lib-dmx/include
@@ -95,11 +84,6 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring OUTPUT_DMX_SHOWFILE,$(MAKE_FLAGS)), OUTPUT_DMX_SHOWFILE)
 		EXTRA_SRCDIR+=src/showfile
 		EXTRA_INCLUDES+=../lib-showfile/include
-	endif
-	
-	ifeq ($(findstring OUTPUT_DMX_SERIAL,$(MAKE_FLAGS)), OUTPUT_DMX_SERIAL)
-		EXTRA_SRCDIR+=src/dmxserial
-		EXTRA_INCLUDES+=../lib-dmxserial/include
 	endif
 	
 	ifeq ($(findstring OUTPUT_DMX_STEPPER,$(MAKE_FLAGS)), OUTPUT_DMX_STEPPER)
@@ -148,13 +132,7 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 	endif
 	
-	ifeq ($(findstring WIDGET_HAVE_FLASHROM,$(MAKE_FLAGS)), WIDGET_HAVE_FLASHROM)
-		EXTRA_SRCDIR+=src/widget
-		EXTRA_INCLUDES+=../lib-widget/include
-	endif
-	
 	ifdef RDM
-		EXTRA_SRCDIR+=src/rdm
 		EXTRA_INCLUDES+=../lib-rdm/include
 	endif
 else
@@ -176,7 +154,6 @@ else
 	endif
 	
 	EXTRA_INCLUDES+=../lib-ws28xx/include
-	EXTRA_SRCDIR+=src/rdm
 	EXTRA_INCLUDES+=../lib-rdm/include ../lib-rdmsensor/include ../lib-rdmsubdevice/include		
 	EXTRA_SRCDIR+=src/stepper
 	EXTRA_INCLUDES+=../lib-l6470dmx/include ../lib-l6470/include
@@ -193,6 +170,4 @@ EXTRA_INCLUDES+=../lib-displayudf/include ../lib-display/include
 EXTRA_INCLUDES+=../lib-dmxsend/include
 EXTRA_INCLUDES+=../lib-dmxmonitor/include
 EXTRA_INCLUDES+=../lib-dmxreceiver/include ../lib-dmx/include
-EXTRA_INCLUDES+=../lib-oscserver/include 
 EXTRA_INCLUDES+=../lib-device/include
-EXTRA_INCLUDES+=../lib-midi/include
