@@ -116,15 +116,12 @@ void main() {
 		bridge.SetUniverse(nPortIndex, e131params.GetDirection(nPortIndex), nUniverse);
 	}
 
-	StoreDmxSend storeDmxSend;
-	DmxParams dmxparams(&storeDmxSend);
-
+	DmxParams dmxparams;
 	Dmx dmx;
 
-	if (dmxparams.Load()) {
-		dmxparams.Dump();
-		dmxparams.Set(&dmx);
-	}
+	dmxparams.Load();
+	dmxparams.Dump();
+	dmxparams.Set(&dmx);
 
 	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		uint16_t nUniverse;

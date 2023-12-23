@@ -108,15 +108,12 @@ void main() {
 		node.SetUniverse(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniverse(nPortIndex));
 	}
 
-	StoreDmxSend storeDmxSend;
-	DmxParams dmxparams(&storeDmxSend);
-
+	DmxParams dmxparams;
 	Dmx dmx;
 
-	if (dmxparams.Load()) {
-		dmxparams.Dump();
-		dmxparams.Set(&dmx);
-	}
+	dmxparams.Load();
+	dmxparams.Dump();
+	dmxparams.Set(&dmx);
 
 	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		const auto nDmxPortIndex = nPortIndex - DMXPORT_OFFSET;
