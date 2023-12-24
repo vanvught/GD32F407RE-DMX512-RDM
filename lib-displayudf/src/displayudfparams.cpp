@@ -46,12 +46,13 @@
 #include "displayudfparams.h"
 #include "displayudfparamsconst.h"
 
+#include "storedisplayudf.h"
+
 #include "networkparamsconst.h"
 #include "lightsetparamsconst.h"
 
 #include "readconfigfile.h"
 #include "sscan.h"
-
 #include "propertiesbuilder.h"
 
 #include "display.h"
@@ -140,31 +141,31 @@ static constexpr const char *pArray[static_cast<uint32_t>(Labels::UNKNOWN)] = {
 # undef MAX_ARRAY
 #endif
 
-DisplayUdfParams::DisplayUdfParams(DisplayUdfParamsStore *pDisplayUdfParamsStore): m_pDisplayUdfParamsStore(pDisplayUdfParamsStore) {
+DisplayUdfParams::DisplayUdfParams() {
+	DEBUG_ENTRY
+
 	memset(&m_tDisplayUdfParams, 0, sizeof(struct displayudfparams::Params));
 	m_tDisplayUdfParams.nSleepTimeout = display::Defaults::SEEP_TIMEOUT;
 	m_tDisplayUdfParams.nIntensity = defaults::INTENSITY;
+
+	DEBUG_EXIT
 }
 
-bool DisplayUdfParams::Load() {
+void DisplayUdfParams::Load() {
+	DEBUG_ENTRY
+
 	m_tDisplayUdfParams.nSetList = 0;
 
 #if !defined(DISABLE_FS)
 	ReadConfigFile configfile(DisplayUdfParams::staticCallbackFunction, this);
 
 	if (configfile.Read(DisplayUdfParamsConst::FILE_NAME)) {
-		if (m_pDisplayUdfParamsStore != nullptr) {
-			m_pDisplayUdfParamsStore->Update(&m_tDisplayUdfParams);
-		}
+		StoreDisplayUdf::Update(&m_tDisplayUdfParams);
 	} else
 #endif
-	if (m_pDisplayUdfParamsStore != nullptr) {
-		m_pDisplayUdfParamsStore->Copy(&m_tDisplayUdfParams);
-	} else {
-		return false;
-	}
+		StoreDisplayUdf::Copy(&m_tDisplayUdfParams);
 
-	return true;
+	DEBUG_EXIT
 }
 
 void DisplayUdfParams::Load(const char *pBuffer, uint32_t nLength) {
@@ -179,8 +180,7 @@ void DisplayUdfParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	assert(m_pDisplayUdfParamsStore != nullptr);
-	m_pDisplayUdfParamsStore->Update(&m_tDisplayUdfParams);
+	StoreDisplayUdf::Update(&m_tDisplayUdfParams);
 
 	DEBUG_EXIT
 }
@@ -241,7 +241,7 @@ void DisplayUdfParams::Builder(const struct displayudfparams::Params *ptDisplayU
 		memcpy(&m_tDisplayUdfParams, ptDisplayUdfParams, sizeof(struct displayudfparams::Params));
 	} else {
 		assert(m_pDisplayUdfParamsStore != nullptr);
-		m_pDisplayUdfParamsStore->Copy(&m_tDisplayUdfParams);
+		StoreDisplayUdf::Copy(&m_tDisplayUdfParams);
 	}
 
 	PropertiesBuilder builder(DisplayUdfParamsConst::FILE_NAME, pBuffer, nLength);

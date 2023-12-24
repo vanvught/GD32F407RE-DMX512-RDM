@@ -62,7 +62,7 @@ class RemoteConfigParams {
 public:
 	RemoteConfigParams(RemoteConfigParamsStore *pRemoteConfigParamsStore);
 
-	bool Load();
+	void Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
 	void Builder(const struct TRemoteConfigParams *pRemoteConfigParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);

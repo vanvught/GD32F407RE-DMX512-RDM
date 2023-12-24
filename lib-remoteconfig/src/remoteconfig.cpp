@@ -746,7 +746,7 @@ void RemoteConfig::HandleGetDevicesTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetLtcTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	LtcParams ltcParams(StoreLtc::Get());
+	LtcParams ltcParams;
 	ltcParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -755,7 +755,7 @@ void RemoteConfig::HandleGetLtcTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetLdisplayTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	LtcDisplayParams ltcDisplayParams(StoreLtcDisplay::Get());
+	LtcDisplayParams ltcDisplayParams;
 	ltcDisplayParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -782,7 +782,7 @@ void RemoteConfig::HandleGetGpsTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetLtcEtcTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	LtcEtcParams ltcEtcParams(StoreLtcEtc::Get());
+	LtcEtcParams ltcEtcParams;
 	ltcEtcParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -804,7 +804,7 @@ void RemoteConfig::HandleGetMonTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetDisplayTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	DisplayUdfParams displayParams(StoreDisplayUdf::Get());
+	DisplayUdfParams displayParams;
 	displayParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -1092,9 +1092,7 @@ void RemoteConfig::HandleSetDevicesTxt() {
 void RemoteConfig::HandleSetLtcTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreLtc::Get() != nullptr);
-	LtcParams ltcParams(StoreLtc::Get());
-
+	LtcParams ltcParams;
 	ltcParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	ltcParams.Dump();
@@ -1106,9 +1104,7 @@ void RemoteConfig::HandleSetLtcTxt() {
 void RemoteConfig::HandleSetLdisplayTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreLtcDisplay::Get() != nullptr);
-	LtcDisplayParams ltcDisplayParams(StoreLtcDisplay::Get());
-
+	LtcDisplayParams ltcDisplayParams;
 	ltcDisplayParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	ltcDisplayParams.Dump();
@@ -1144,9 +1140,7 @@ void RemoteConfig::HandleSetGpsTxt() {
 void RemoteConfig::HandleSetLtcEtcTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreLtcEtc::Get() != nullptr);
-	LtcEtcParams ltcEtcParams(StoreLtcEtc::Get());
-
+	LtcEtcParams ltcEtcParams;
 	ltcEtcParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	ltcEtcParams.Dump();
@@ -1174,9 +1168,7 @@ void RemoteConfig::HandleSetMonTxt() {
 void RemoteConfig::HandleSetDisplayTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreDisplayUdf::Get() != nullptr);
-	DisplayUdfParams displayParams(StoreDisplayUdf::Get());
-
+	DisplayUdfParams displayParams;
 	displayParams.Load(s_pUdpBuffer, m_nBytesReceived);
 #ifndef NDEBUG
 	displayParams.Dump();

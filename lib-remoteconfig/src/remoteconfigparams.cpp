@@ -2,7 +2,7 @@
  * @file remoteconfigparams.cpp
  *
  */
-/* Copyright (C) 2019-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ RemoteConfigParams::RemoteConfigParams(RemoteConfigParamsStore* pTRemoteConfigPa
 	memset(&m_tRemoteConfigParams, 0, sizeof(struct TRemoteConfigParams));
 }
 
-bool RemoteConfigParams::Load() {
+void RemoteConfigParams::Load() {
 	m_tRemoteConfigParams.nSetList = 0;
 
 #if !defined(DISABLE_FS)
@@ -61,11 +61,7 @@ bool RemoteConfigParams::Load() {
 #endif
 	if (m_pRemoteConfigParamsStore != nullptr) {
 		m_pRemoteConfigParamsStore->Copy(&m_tRemoteConfigParams);
-	} else {
-		return false;
 	}
-
-	return true;
 }
 
 void RemoteConfigParams::Load(const char* pBuffer, uint32_t nLength) {

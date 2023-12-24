@@ -2,7 +2,7 @@
  * @file storedisplayudf.h
  *
  */
-/* Copyright (C) 2019-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,27 +27,31 @@
 #define STOREDISPLAYUDF_H_
 
 #include "displayudfparams.h"
-
 #include "configstore.h"
 
-class StoreDisplayUdf final: public DisplayUdfParamsStore {
+class StoreDisplayUdf {
 public:
-	StoreDisplayUdf();
-
-	void Update(const struct displayudfparams::Params *pDisplayUdfParams) override {
-		ConfigStore::Get()->Update(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	static StoreDisplayUdf& Get() {
+		static StoreDisplayUdf instance;
+		return instance;
 	}
 
-	void Copy(struct displayudfparams::Params *pDisplayUdfParams) override {
-		ConfigStore::Get()->Copy(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	static void Update(const struct displayudfparams::Params *pDisplayUdfParams) {
+		Get().IUpdate(pDisplayUdfParams);
 	}
 
-	static StoreDisplayUdf *Get() {
-		return s_pThis;
+	static void Copy(struct displayudfparams::Params *pDisplayUdfParams) {
+		Get().ICopy(pDisplayUdfParams);
 	}
 
 private:
-	static StoreDisplayUdf *s_pThis;
+	void IUpdate(const struct displayudfparams::Params *pDisplayUdfParams) {
+		ConfigStore::Get()->Update(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	}
+
+	void ICopy(struct displayudfparams::Params *pDisplayUdfParams) {
+		ConfigStore::Get()->Copy(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	}
 };
 
 #endif /* STOREDISPLAYUDF_H_ */

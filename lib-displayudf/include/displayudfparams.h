@@ -48,19 +48,11 @@ struct Mask {
 };
 }  // namespace displayudfparams
 
-class DisplayUdfParamsStore {
-public:
-	virtual ~DisplayUdfParamsStore() = default;
-
-	virtual void Update(const struct displayudfparams::Params *ptDisplayUdfParams)=0;
-	virtual void Copy(struct displayudfparams::Params *ptDisplayUdfParams)=0;
-};
-
 class DisplayUdfParams {
 public:
-	DisplayUdfParams(DisplayUdfParamsStore *pDisplayUdfParamsStore);
+	DisplayUdfParams();
 
-	bool Load();
+	void Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
 	void Builder(const struct displayudfparams::Params *ptDisplayUdfParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
@@ -81,7 +73,6 @@ private:
     }
 
 private:
-    DisplayUdfParamsStore *m_pDisplayUdfParamsStore;
     displayudfparams::Params m_tDisplayUdfParams;
 };
 
