@@ -77,27 +77,17 @@ struct Mask {
 
 }  // namespace networkparams
 
-class NetworkParamsStore {
-public:
-	virtual ~NetworkParamsStore() = default;
-
-	virtual void Update(const networkparams::Params *pNetworkParams)=0;
-	virtual void Copy(networkparams::Params *pNetworkParams)=0;
-};
-
 class NetworkParams {
 public:
-	NetworkParams(NetworkParamsStore *pNetworkParamsStore);
+	NetworkParams();
 
-	bool Load();
+	void Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
-	void Builder(const networkparams::Params *ptNetworkParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Builder(const networkparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
 	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}
-
-	void Dump();
 
 	bool isDhcpUsed() const {
 		return m_Params.bIsDhcpUsed;
@@ -155,13 +145,13 @@ public:
     static void staticCallbackFunction(void *p, const char *s);
 
 private:
+	void Dump();
     void callbackFunction(const char *s);
     bool isMaskSet(uint32_t nMask) const {
     	return (m_Params.nSetList & nMask) == nMask;
     }
 
 private:
-	NetworkParamsStore *m_pNetworkParamsStore;
 	networkparams::Params m_Params;
 };
 

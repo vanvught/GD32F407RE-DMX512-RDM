@@ -33,6 +33,7 @@
 
 #include <cstring>
 #include <cstdint>
+#include <cstdio>
 #include <climits>
 #include <cassert>
 #include <algorithm>
@@ -101,18 +102,14 @@ bool ArtNetParams::Load() {
 	ReadConfigFile configfile(ArtNetParams::staticCallbackFunction, this);
 
 	if (configfile.Read(ArtNetParamsConst::FILE_NAME)) {
-		// There is a configuration file
-		if (m_pArtNetParamsStore != nullptr) {
-			m_pArtNetParamsStore->Update(&m_Params);
-		}
+		m_pArtNetParamsStore->Update(&m_Params);
 	} else
 #endif
-	if (m_pArtNetParamsStore != nullptr) {
 		m_pArtNetParamsStore->Copy(&m_Params);
-	} else {
-		return false;
-	}
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	return true;
 }
 
@@ -130,6 +127,10 @@ void ArtNetParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	assert(m_pArtNetParamsStore != nullptr);
 	m_pArtNetParamsStore->Update(&m_Params);
+
+#ifndef NDEBUG
+	Dump();
+#endif
 
 	DEBUG_EXIT
 }
@@ -335,13 +336,6 @@ void ArtNetParams::callbackFunction(const char *pLine) {
 	}
 }
 
-void ArtNetParams::staticCallbackFunction(void *p, const char *s) {
-	assert(p != nullptr);
-	assert(s != nullptr);
-
-	(static_cast<ArtNetParams*>(p))->callbackFunction(s);
-}
-
 void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("s_nPortsMax=%u", s_nPortsMax);
@@ -504,4 +498,68 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 	}
 
 	DEBUG_EXIT
+}
+
+void ArtNetParams::staticCallbackFunction(void *p, const char *s) {
+	assert(p != nullptr);
+	assert(s != nullptr);
+
+	(static_cast<ArtNetParams*>(p))->callbackFunction(s);
+}
+
+void ArtNetParams::Dump() {
+	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, ArtNetParamsConst::FILE_NAME);
+
+	printf(" %s=%d [%s]\n", LightSetParamsConst::FAILSAFE, m_Params.nFailSafe, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)));
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=%s\n", LightSetParamsConst::NODE_LABEL[i], m_Params.aLabel[i]);
+	}
+
+	printf(" %s=%s\n", LightSetParamsConst::NODE_LONG_NAME, m_Params.aLongName);
+	printf(" %s=1 [Yes]\n", ArtNetParamsConst::ENABLE_RDM);
+
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=%d\n", LightSetParamsConst::UNIVERSE_PORT[i], m_Params.nUniverse[i]);
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=%s\n", LightSetParamsConst::MERGE_MODE_PORT[i], lightset::get_merge_mode(mergemode_get(i)));
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=%s\n", ArtNetParamsConst::PROTOCOL_PORT[i], artnet::get_protocol_mode(i));
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		const auto portDir = portdir_get(i);
+		printf(" %s=%u [%s]\n", LightSetParamsConst::DIRECTION[i], static_cast<uint32_t>(portDir), lightset::get_direction(portDir));
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=" IPSTR "\n", ArtNetParamsConst::DESTINATION_IP_PORT[i], IP2STR(m_Params.nDestinationIp[i]));
+
+	}
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		const auto nOutputStyle = static_cast<uint32_t>(isOutputStyleSet(1U << i));
+		printf(" %s=%u [%s]\n", LightSetParamsConst::OUTPUT_STYLE[i], nOutputStyle, lightset::get_output_style(static_cast<lightset::OutputStyle>(nOutputStyle)));
+	}
+
+	/**
+	 * Art-Net 4
+	 */
+
+	printf(" %s=1 [Yes]\n", ArtNetParamsConst::MAP_UNIVERSE0);
+
+	for (uint32_t i = 0; i < artnet::PORTS; i++) {
+		printf(" %s=%u\n", LightSetParamsConst::PRIORITY[i], m_Params.nPriority[i]);
+	}
+
+	/**
+	 * Extra's
+	 */
+
+	printf(" %s=1 [Yes]\n", LightSetParamsConst::DISABLE_MERGE_TIMEOUT);
 }

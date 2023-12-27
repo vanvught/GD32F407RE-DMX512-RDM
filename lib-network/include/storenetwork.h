@@ -34,45 +34,70 @@
 #include "networkparams.h"
 #include "configstore.h"
 
-class StoreNetwork final: public NetworkParamsStore, public NetworkStore {
+class StoreNetwork {
 public:
-	StoreNetwork();
-
-	void Update(const struct networkparams::Params *pNetworkParams) override {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, pNetworkParams, sizeof(struct networkparams::Params));
+	static StoreNetwork& Get() {
+		static StoreNetwork instance;
+		return instance;
 	}
 
-	void Copy(struct networkparams::Params *pNetworkParams) override {
-		ConfigStore::Get()->Copy(configstore::Store::NETWORK, pNetworkParams, sizeof(struct networkparams::Params));
+	static void Update(const struct networkparams::Params *pParams) {
+		Get().IUpdate(pParams);
 	}
 
-	void SaveIp(uint32_t nIp) override {
+	static void Copy(struct networkparams::Params *pParams) {
+		Get().ICopy(pParams);
+	}
+
+	static void SaveIp(uint32_t nIp) {
+		Get().ISaveIp(nIp);
+	}
+
+	static void SaveNetMask(uint32_t nNetMask) {
+		Get().ISaveNetMask(nNetMask);
+	}
+
+	static void SaveGatewayIp(uint32_t nGatewayIp) {
+		Get().ISaveGatewayIp(nGatewayIp);
+	}
+
+	static void SaveHostName(const char *pHostName, uint32_t nLength) {
+		Get().ISaveHostName(pHostName, nLength);
+	}
+
+	static void SaveDhcp(bool bIsDhcpUsed) {
+		Get().ISaveDhcp(bIsDhcpUsed);
+	}
+
+private:
+	void IUpdate(const struct networkparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
+	}
+
+	void ICopy(struct networkparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
+	}
+
+	void ISaveIp(uint32_t nIp) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nLocalIp), &nIp, sizeof(uint32_t), networkparams::Mask::IP_ADDRESS);
 	}
 
-	void SaveNetMask(uint32_t nNetMask) override {
+	void ISaveNetMask(uint32_t nNetMask) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nNetmask), &nNetMask, sizeof(uint32_t), networkparams::Mask::NET_MASK);
 	}
 
-	void SaveGatewayIp(uint32_t nGatewayIp) override {
+	void ISaveGatewayIp(uint32_t nGatewayIp) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nGatewayIp), &nGatewayIp, sizeof(uint32_t), networkparams::Mask::DEFAULT_GATEWAY);
 	}
 
-	void SaveHostName(const char *pHostName, uint32_t nLength) override {
+	void ISaveHostName(const char *pHostName, uint32_t nLength) {
 		nLength = std::min(nLength,static_cast<uint32_t>(network::HOSTNAME_SIZE));
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, aHostName), pHostName, nLength, networkparams::Mask::HOSTNAME);
 	}
 
-	void SaveDhcp(bool bIsDhcpUsed) override {
+	void ISaveDhcp(bool bIsDhcpUsed) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, bIsDhcpUsed), &bIsDhcpUsed, sizeof(bool), networkparams::Mask::DHCP);
 	}
-
-	static StoreNetwork *Get() {
-		return s_pThis;
-	}
-
-private:
-	static StoreNetwork *s_pThis;
 };
 
 #endif /* STORENETWORK_H_ */

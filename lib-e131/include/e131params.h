@@ -110,17 +110,9 @@ struct Mask {
 };
 }
 
-class E131ParamsStore {
-public:
-	virtual ~E131ParamsStore() = default;
-
-	virtual void Update(const e131params::Params *pParams)=0;
-	virtual void Copy(e131params::Params *pParams)=0;
-};
-
 class E131Params {
 public:
-	E131Params(E131ParamsStore *pE131ParamsStore);
+	E131Params();
 
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
@@ -131,8 +123,6 @@ public:
 	}
 
 	void Set(uint32_t nPortIndexOffset);
-
-	void Dump();
 
 	uint16_t GetUniverse(uint32_t nPortIndex, bool &IsSet) const {
 		if (nPortIndex < e131params::MAX_PORTS) {
@@ -171,6 +161,7 @@ public:
     static void staticCallbackFunction(void *p, const char *s);
 
 private:
+	void Dump();
     void callbackFunction(const char *s);
     bool isMaskSet(uint32_t nMask) const {
     	return (m_Params.nSetList & nMask) == nMask;
@@ -184,7 +175,6 @@ private:
 	}
 
 private:
-    E131ParamsStore *m_pE131ParamsStore;
     e131params::Params m_Params;
 };
 

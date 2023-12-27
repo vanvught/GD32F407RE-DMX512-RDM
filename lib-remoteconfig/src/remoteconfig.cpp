@@ -607,7 +607,7 @@ uint32_t RemoteConfig::HandleGet(void *pBuffer, uint32_t nBufferLength) {
 void RemoteConfig::HandleGetRconfigTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	RemoteConfigParams remoteConfigParams(StoreRemoteConfig::Get());
+	RemoteConfigParams remoteConfigParams;
 	remoteConfigParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -616,7 +616,7 @@ void RemoteConfig::HandleGetRconfigTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetNetworkTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	NetworkParams networkParams(StoreNetwork::Get());
+	NetworkParams networkParams;
 	networkParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -638,8 +638,7 @@ void RemoteConfig::HandleGetArtnetTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetE131Txt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	assert(StoreE131::Get() != nullptr);
-	E131Params e131params(StoreE131::Get());
+	E131Params e131params;
 	e131params.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -719,7 +718,6 @@ void RemoteConfig::HandleGetDevicesTxt(uint32_t& nSize) {
 
 	TLC59711DmxParams tlc5911params;
 	tlc5911params.Load();
-	tlc5911params.Dump();
 #  if defined (OUTPUT_DMX_PIXEL)
 	if ((bIsSetLedType = tlc5911params.IsSetLedType()) == true) {
 #  endif
@@ -962,14 +960,9 @@ void RemoteConfig::HandleSet(void *pBuffer, uint32_t nBufferLength) {
 void RemoteConfig::HandleSetRconfig() {
 	DEBUG_ENTRY
 
-	assert(StoreRemoteConfig::Get() != nullptr);
-	RemoteConfigParams remoteConfigParams(StoreRemoteConfig::Get());
-
+	RemoteConfigParams remoteConfigParams;
 	remoteConfigParams.Load(s_pUdpBuffer, m_nBytesReceived);
 	remoteConfigParams.Set(this);
-#ifndef NDEBUG
-	remoteConfigParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -977,13 +970,8 @@ void RemoteConfig::HandleSetRconfig() {
 void RemoteConfig::HandleSetNetworkTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreNetwork::Get() != nullptr);
-	NetworkParams params(StoreNetwork::Get());
-
+	NetworkParams params;
 	params.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	params.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -994,11 +982,7 @@ void RemoteConfig::HandleSetArtnetTxt() {
 
 	assert(StoreArtNet::Get() != nullptr);
 	ArtNetParams artnetParams(StoreArtNet::Get());
-
 	artnetParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	artnetParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1008,13 +992,9 @@ void RemoteConfig::HandleSetArtnetTxt() {
 void RemoteConfig::HandleSetE131Txt() {
 	DEBUG_ENTRY
 
-	assert(StoreE131::Get() != nullptr);
-	E131Params e131params(StoreE131::Get());
-
+	E131Params e131params;
 	e131params.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	e131params.Dump();
-#endif
+
 	DEBUG_EXIT
 }
 #endif
@@ -1025,9 +1005,6 @@ void RemoteConfig::HandleSetOscTxt() {
 
 	OSCServerParams oscServerParams;
 	oscServerParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	oscServerParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1039,9 +1016,6 @@ void RemoteConfig::HandleSetOscClientTxt() {
 
 	OscClientParams oscClientParams;
 	oscClientParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	oscClientParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1053,9 +1027,6 @@ void RemoteConfig::HandleSetParamsTxt() {
 
 	DmxParams dmxparams;
 	dmxparams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	dmxparams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1068,7 +1039,6 @@ void RemoteConfig::HandleSetDevicesTxt() {
 # if defined (OUTPUT_DMX_TLC59711)
 	TLC59711DmxParams tlc59711params;
 	tlc59711params.Load(s_pUdpBuffer, m_nBytesReceived);
-	tlc59711params.Dump();
 
 	DEBUG_PRINTF("tlc5911params.IsSetLedType()=%d", tlc59711params.IsSetLedType());
 
@@ -1078,7 +1048,6 @@ void RemoteConfig::HandleSetDevicesTxt() {
 		assert(StorePixelDmx::Get() != nullptr);
 		PixelDmxParams pixelDmxParams(StorePixelDmx::Get());
 		pixelDmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
-		pixelDmxParams.Dump();
 # endif
 # if defined (OUTPUT_DMX_TLC59711)
 	}
@@ -1094,9 +1063,6 @@ void RemoteConfig::HandleSetLtcTxt() {
 
 	LtcParams ltcParams;
 	ltcParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	ltcParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1106,9 +1072,6 @@ void RemoteConfig::HandleSetLdisplayTxt() {
 
 	LtcDisplayParams ltcDisplayParams;
 	ltcDisplayParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	ltcDisplayParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1118,9 +1081,6 @@ void RemoteConfig::HandleSetTCNetTxt() {
 
 	TCNetParams tcnetParams;
 	tcnetParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	tcnetParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1130,9 +1090,6 @@ void RemoteConfig::HandleSetGpsTxt() {
 
 	GPSParams gpsParams;
 	gpsParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	gpsParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1142,9 +1099,6 @@ void RemoteConfig::HandleSetLtcEtcTxt() {
 
 	LtcEtcParams ltcEtcParams;
 	ltcEtcParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	ltcEtcParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1156,9 +1110,6 @@ void RemoteConfig::HandleSetMonTxt() {
 
 	DMXMonitorParams monitorParams;
 	monitorParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	monitorParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1170,9 +1121,6 @@ void RemoteConfig::HandleSetDisplayTxt() {
 
 	DisplayUdfParams displayParams;
 	displayParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	displayParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1184,11 +1132,7 @@ void RemoteConfig::HandleSetSparkFunTxt() {
 
 	assert(StoreSparkFunDmx::Get() != nullptr);
 	SparkFunDmxParams sparkFunDmxParams(StoreSparkFunDmx::Get());
-
 	sparkFunDmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	sparkFunDmxParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1199,33 +1143,17 @@ void RemoteConfig::HandleSetMotorTxt(uint32_t nMotorIndex) {
 
 	assert(StoreSparkFunDmx::Get() != nullptr);
 	SparkFunDmxParams sparkFunDmxParams(StoreSparkFunDmx::Get());
-
 	sparkFunDmxParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	sparkFunDmxParams.Dump();
-#endif
 
 	assert(StoreMotors::Get() != nullptr);
 	ModeParams modeParams(StoreMotors::Get());
-
 	modeParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	modeParams.Dump();
-#endif
 
 	MotorParams motorParams(StoreMotors::Get());
-
 	motorParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	motorParams.Dump();
-#endif
 
 	L6470Params l6470Params(StoreMotors::Get());
-
 	l6470Params.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	l6470Params.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1237,9 +1165,6 @@ void RemoteConfig::HandleSetShowTxt() {
 
 	ShowFileParams showFileParams;
 	showFileParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	showFileParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1251,11 +1176,7 @@ void RemoteConfig::HandleSetNodeTxt(const node::Personality personality) {
 
 	assert(StoreNode::Get() != nullptr);
 	NodeParams nodeParams(StoreNode::Get(), personality);
-
 	nodeParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	nodeParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1267,9 +1188,6 @@ void RemoteConfig::HandleSetRdmDeviceTxt() {
 
 	RDMDeviceParams rdmDeviceParams;
 	rdmDeviceParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	rdmDeviceParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1279,9 +1197,6 @@ void RemoteConfig::HandleSetRdmSensorsTxt() {
 
 	RDMSensorsParams rdmSensorsParams;
 	rdmSensorsParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	rdmSensorsParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1291,11 +1206,7 @@ void RemoteConfig::HandleSetRdmSubdevTxt() {
 	DEBUG_ENTRY
 
 	RDMSubDevicesParams rdmSubDevicesParams;
-
 	rdmSubDevicesParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	rdmSubDevicesParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1308,9 +1219,6 @@ void RemoteConfig::HandleSetSerialTxt() {
 
 	DmxSerialParams dmxSerialParams;
 	dmxSerialParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	dmxSerialParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1322,9 +1230,6 @@ void RemoteConfig::HandleSetRgbPanelTxt() {
 
 	RgbPanelParams rgbPanelParams;
 	rgbPanelParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	rgbPanelParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }
@@ -1336,9 +1241,6 @@ void RemoteConfig::HandleSetPca9685Txt() {
 
 	PCA9685DmxParams pca9685DmxParams;
 	pca9685DmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
-#ifndef NDEBUG
-	pca9685DmxParams.Dump();
-#endif
 
 	DEBUG_EXIT
 }

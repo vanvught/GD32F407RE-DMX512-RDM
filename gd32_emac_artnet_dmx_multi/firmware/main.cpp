@@ -77,8 +77,7 @@ void main() {
 	DisplayUdf display;
 	ConfigStore configStore;
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
-	StoreNetwork storeNetwork;
-	Network nw(&storeNetwork);
+	Network nw;
 	MDNS mDns;
 	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, Display7SegmentMessage::INFO_NONE, CONSOLE_GREEN);
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
@@ -100,7 +99,6 @@ void main() {
 	ArtNetParams artnetParams(&storeArtNet);
 
 	if (artnetParams.Load()) {
-		artnetParams.Dump();
 		artnetParams.Set(DMXPORT_OFFSET);
 	}
 
@@ -112,7 +110,6 @@ void main() {
 	Dmx dmx;
 
 	dmxparams.Load();
-	dmxparams.Dump();
 	dmxparams.Set(&dmx);
 
 	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
@@ -132,7 +129,6 @@ void main() {
 	ArtNetRdmController artNetRdmController;
 
 	rdmDeviceParams.Load();
-	rdmDeviceParams.Dump();
 	rdmDeviceParams.Set(&artNetRdmController);
 
 	artNetRdmController.Init();
@@ -153,18 +149,14 @@ void main() {
 	DisplayUdfParams displayUdfParams;
 
 	displayUdfParams.Load();
-	displayUdfParams.Dump();
 	displayUdfParams.Set(&display);
 
 	display.Show(&node);
 
 	RemoteConfig remoteConfig(remoteconfig::Node::ARTNET, artnetParams.IsRdm() ? remoteconfig::Output::RDM : remoteconfig::Output::DMX, nActivePorts);
 
-	StoreRemoteConfig storeRemoteConfig;
-	RemoteConfigParams remoteConfigParams(&storeRemoteConfig);
-
+	RemoteConfigParams remoteConfigParams;
 	remoteConfigParams.Load();
-	remoteConfigParams.Dump();
 	remoteConfigParams.Set(&remoteConfig);
 
 	while (configStore.Flash())

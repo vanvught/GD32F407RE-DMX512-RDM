@@ -1,8 +1,8 @@
 /**
- * @file storenetwork.cpp
+ * @file storee131.h
  *
  */
-/* Copyright (C) 2018-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,35 @@
  * THE SOFTWARE.
  */
 
-#include <cassert>
+#ifndef STOREE131_H_
+#define STOREE131_H_
 
-#include "storenetwork.h"
-#include "debug.h"
+#include "e131params.h"
+#include "configstore.h"
 
-StoreNetwork *StoreNetwork::s_pThis = nullptr;
+class StoreE131 {
+public:
+	static StoreE131& Get() {
+		static StoreE131 instance;
+		return instance;
+	}
 
-StoreNetwork::StoreNetwork() {
-	DEBUG_ENTRY
+	static void Update(const struct e131params::Params *pParams) {
+		Get().IUpdate(pParams);
+	}
 
-	assert(s_pThis == nullptr);
-	s_pThis = this;
+	static void Copy(struct e131params::Params *pParams) {
+		Get().ICopy(pParams);
+	}
 
-	DEBUG_PRINTF("%p", reinterpret_cast<void *>(s_pThis));
-	DEBUG_EXIT
-}
+private:
+	void IUpdate(const struct e131params::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
+	}
+
+	void ICopy(struct e131params::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
+	}
+};
+
+#endif /* STOREE131_H_ */

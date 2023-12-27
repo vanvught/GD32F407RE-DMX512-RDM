@@ -144,9 +144,9 @@ static constexpr const char *pArray[static_cast<uint32_t>(Labels::UNKNOWN)] = {
 DisplayUdfParams::DisplayUdfParams() {
 	DEBUG_ENTRY
 
-	memset(&m_tDisplayUdfParams, 0, sizeof(struct displayudfparams::Params));
-	m_tDisplayUdfParams.nSleepTimeout = display::Defaults::SEEP_TIMEOUT;
-	m_tDisplayUdfParams.nIntensity = defaults::INTENSITY;
+	memset(&m_Params, 0, sizeof(struct displayudfparams::Params));
+	m_Params.nSleepTimeout = display::Defaults::SEEP_TIMEOUT;
+	m_Params.nIntensity = defaults::INTENSITY;
 
 	DEBUG_EXIT
 }
@@ -154,17 +154,20 @@ DisplayUdfParams::DisplayUdfParams() {
 void DisplayUdfParams::Load() {
 	DEBUG_ENTRY
 
-	m_tDisplayUdfParams.nSetList = 0;
+	m_Params.nSetList = 0;
 
 #if !defined(DISABLE_FS)
 	ReadConfigFile configfile(DisplayUdfParams::staticCallbackFunction, this);
 
 	if (configfile.Read(DisplayUdfParamsConst::FILE_NAME)) {
-		StoreDisplayUdf::Update(&m_tDisplayUdfParams);
+		StoreDisplayUdf::Update(&m_Params);
 	} else
 #endif
-		StoreDisplayUdf::Copy(&m_tDisplayUdfParams);
+		StoreDisplayUdf::Copy(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
 }
 
@@ -174,14 +177,17 @@ void DisplayUdfParams::Load(const char *pBuffer, uint32_t nLength) {
 	assert(pBuffer != nullptr);
 	assert(nLength != 0);
 
-	m_tDisplayUdfParams.nSetList = 0;
+	m_Params.nSetList = 0;
 
 	ReadConfigFile config(DisplayUdfParams::staticCallbackFunction, this);
 
 	config.Read(pBuffer, nLength);
 
-	StoreDisplayUdf::Update(&m_tDisplayUdfParams);
+	StoreDisplayUdf::Update(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
 }
 
@@ -190,32 +196,32 @@ void DisplayUdfParams::callbackFunction(const char *pLine) {
 	uint8_t value8;
 
 	if (Sscan::Uint8(pLine, DisplayUdfParamsConst::INTENSITY, value8) == Sscan::OK) {
-		m_tDisplayUdfParams.nIntensity = value8;
+		m_Params.nIntensity = value8;
 
 		if (value8 != defaults::INTENSITY) {
-			m_tDisplayUdfParams.nSetList |= displayudfparams::Mask::INTENSITY;
+			m_Params.nSetList |= displayudfparams::Mask::INTENSITY;
 		} else {
-			m_tDisplayUdfParams.nSetList &= ~displayudfparams::Mask::INTENSITY;
+			m_Params.nSetList &= ~displayudfparams::Mask::INTENSITY;
 		}
 		return;
 	}
 
 	if (Sscan::Uint8(pLine, DisplayUdfParamsConst::SLEEP_TIMEOUT, value8) == Sscan::OK) {
-		m_tDisplayUdfParams.nSleepTimeout = value8;
+		m_Params.nSleepTimeout = value8;
 
 		if (value8 != display::Defaults::SEEP_TIMEOUT) {
-			m_tDisplayUdfParams.nSetList |= displayudfparams::Mask::SLEEP_TIMEOUT;
+			m_Params.nSetList |= displayudfparams::Mask::SLEEP_TIMEOUT;
 		} else {
-			m_tDisplayUdfParams.nSetList &= ~displayudfparams::Mask::SLEEP_TIMEOUT;
+			m_Params.nSetList &= ~displayudfparams::Mask::SLEEP_TIMEOUT;
 		}
 		return;
 	}
 
 	if (Sscan::Uint8(pLine, DisplayUdfParamsConst::FLIP_VERTICALLY, value8) == Sscan::OK) {
 		if (value8 != 0) {
-			m_tDisplayUdfParams.nSetList |= displayudfparams::Mask::FLIP_VERTICALLY;
+			m_Params.nSetList |= displayudfparams::Mask::FLIP_VERTICALLY;
 		} else {
-			m_tDisplayUdfParams.nSetList &= ~displayudfparams::Mask::FLIP_VERTICALLY;
+			m_Params.nSetList &= ~displayudfparams::Mask::FLIP_VERTICALLY;
 		}
 		return;
 	}
@@ -223,11 +229,11 @@ void DisplayUdfParams::callbackFunction(const char *pLine) {
 	for (uint32_t i = 0; i < static_cast<uint32_t>(Labels::UNKNOWN); i++) {
 		if (Sscan::Uint8(pLine, pArray[i], value8) == Sscan::OK) {
 			if ((value8 > 0) && (value8 <= LABEL_MAX_ROWS)) {
-				m_tDisplayUdfParams.nLabelIndex[i] = value8;
-				m_tDisplayUdfParams.nSetList |= (1U << i);
+				m_Params.nLabelIndex[i] = value8;
+				m_Params.nSetList |= (1U << i);
 			} else {
-				m_tDisplayUdfParams.nLabelIndex[i] = 0;
-				m_tDisplayUdfParams.nSetList &= ~(1U << i);
+				m_Params.nLabelIndex[i] = 0;
+				m_Params.nSetList &= ~(1U << i);
 			}
 			return;
 		}
@@ -238,21 +244,21 @@ void DisplayUdfParams::Builder(const struct displayudfparams::Params *ptDisplayU
 	assert(pBuffer != nullptr);
 
 	if (ptDisplayUdfParams != nullptr) {
-		memcpy(&m_tDisplayUdfParams, ptDisplayUdfParams, sizeof(struct displayudfparams::Params));
+		memcpy(&m_Params, ptDisplayUdfParams, sizeof(struct displayudfparams::Params));
 	} else {
 		assert(m_pDisplayUdfParamsStore != nullptr);
-		StoreDisplayUdf::Copy(&m_tDisplayUdfParams);
+		StoreDisplayUdf::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(DisplayUdfParamsConst::FILE_NAME, pBuffer, nLength);
 
-	builder.Add(DisplayUdfParamsConst::INTENSITY, m_tDisplayUdfParams.nIntensity , isMaskSet(displayudfparams::Mask::INTENSITY));
-	builder.Add(DisplayUdfParamsConst::SLEEP_TIMEOUT, m_tDisplayUdfParams.nSleepTimeout , isMaskSet(displayudfparams::Mask::SLEEP_TIMEOUT));
+	builder.Add(DisplayUdfParamsConst::INTENSITY, m_Params.nIntensity , isMaskSet(displayudfparams::Mask::INTENSITY));
+	builder.Add(DisplayUdfParamsConst::SLEEP_TIMEOUT, m_Params.nSleepTimeout , isMaskSet(displayudfparams::Mask::SLEEP_TIMEOUT));
 	builder.Add(DisplayUdfParamsConst::FLIP_VERTICALLY, isMaskSet(displayudfparams::Mask::FLIP_VERTICALLY) , isMaskSet(displayudfparams::Mask::FLIP_VERTICALLY));
 
 	for (uint32_t i = 0; i < static_cast<uint32_t>(Labels::UNKNOWN); i++) {
 		if (pArray[i][0] != '\0') {
-			builder.Add(pArray[i], m_tDisplayUdfParams.nLabelIndex[i] , isMaskSet(1U << i));
+			builder.Add(pArray[i], m_Params.nLabelIndex[i] , isMaskSet(1U << i));
 		}
 	}
 
@@ -263,18 +269,18 @@ void DisplayUdfParams::Set(DisplayUdf *pDisplayUdf) {
 	assert(pDisplayUdf != nullptr);
 
 	if (isMaskSet(displayudfparams::Mask::INTENSITY)) {
-		pDisplayUdf->SetContrast(m_tDisplayUdfParams.nIntensity);
+		pDisplayUdf->SetContrast(m_Params.nIntensity);
 	}
 
 	if (isMaskSet(displayudfparams::Mask::SLEEP_TIMEOUT)) {
-		pDisplayUdf->SetSleepTimeout(m_tDisplayUdfParams.nSleepTimeout);
+		pDisplayUdf->SetSleepTimeout(m_Params.nSleepTimeout);
 	}
 
 	pDisplayUdf->SetFlipVertically(isMaskSet(displayudfparams::Mask::FLIP_VERTICALLY));
 
 	for (uint32_t i = 0; i < static_cast<uint32_t>(Labels::UNKNOWN); i++) {
 		if (isMaskSet(1U << i)) {
-			pDisplayUdf->Set(m_tDisplayUdfParams.nLabelIndex[i], static_cast<Labels>(i));
+			pDisplayUdf->Set(m_Params.nLabelIndex[i], static_cast<Labels>(i));
 		}
 	}
 }
@@ -287,15 +293,14 @@ void DisplayUdfParams::staticCallbackFunction(void *p, const char *s) {
 }
 
 void DisplayUdfParams::Dump() {
-#ifndef NDEBUG
 	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, DisplayUdfParamsConst::FILE_NAME);
 
 	if (isMaskSet(displayudfparams::Mask::INTENSITY)) {
-		printf(" %s=%d\n", DisplayUdfParamsConst::INTENSITY, m_tDisplayUdfParams.nIntensity);
+		printf(" %s=%d\n", DisplayUdfParamsConst::INTENSITY, m_Params.nIntensity);
 	}
 
 	if (isMaskSet(displayudfparams::Mask::SLEEP_TIMEOUT)) {
-		printf(" %s=%d\n", DisplayUdfParamsConst::SLEEP_TIMEOUT, m_tDisplayUdfParams.nSleepTimeout);
+		printf(" %s=%d\n", DisplayUdfParamsConst::SLEEP_TIMEOUT, m_Params.nSleepTimeout);
 	}
 
 	if (isMaskSet(displayudfparams::Mask::FLIP_VERTICALLY)) {
@@ -304,8 +309,7 @@ void DisplayUdfParams::Dump() {
 
 	for (uint32_t i = 0; i < static_cast<uint32_t>(Labels::UNKNOWN); i++) {
 		if (isMaskSet(1U << i)) {
-			printf(" %s=%d\n", pArray[i], m_tDisplayUdfParams.nLabelIndex[i]);
+			printf(" %s=%d\n", pArray[i], m_Params.nLabelIndex[i]);
 		}
 	}
-#endif
 }

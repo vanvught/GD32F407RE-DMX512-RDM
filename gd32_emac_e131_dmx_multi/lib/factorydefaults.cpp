@@ -37,7 +37,7 @@ namespace responder {
 void factorydefaults() {
 	RemoteConfig::Get()->SetDisable(false);
 	ConfigStore::Get()->ResetSetList(configstore::Store::RDMDEVICE);
-	StoreNetwork::Get()->SaveDhcp(true);
+	StoreNetwork::SaveDhcp(true);
 }
 
 }  // namespace responder

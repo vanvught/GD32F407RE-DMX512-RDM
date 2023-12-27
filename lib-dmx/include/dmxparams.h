@@ -70,18 +70,17 @@ public:
 
 	void Set(Dmx *);
 
-	void Dump();
-
     static void staticCallbackFunction(void *p, const char *s);
 
 private:
+	void Dump();
     void callbackFunction(const char *s);
     bool isMaskSet(uint32_t nMask) const  {
-    	return (m_tDmxParams.nSetList & nMask) == nMask;
+    	return (m_Params.nSetList & nMask) == nMask;
     }
 
 private:
-    dmxsendparams::Params m_tDmxParams;
+    dmxsendparams::Params m_Params;
 };
 
 #endif /* DMXPARAMS_H_ */

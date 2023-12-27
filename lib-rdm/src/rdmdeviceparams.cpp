@@ -30,9 +30,7 @@
 
 #include <cstdint>
 #include <cstring>
-#ifndef NDEBUG
-# include <cstdio>
-#endif
+#include <cstdio>
 #include <cassert>
 
 #include "rdmdeviceparams.h"
@@ -77,6 +75,9 @@ void RDMDeviceParams::Load() {
 #endif
 	StoreRDMDevice::Copy(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
 }
 
@@ -94,6 +95,9 @@ void RDMDeviceParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	StoreRDMDevice::Update(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
 }
 
@@ -186,7 +190,6 @@ void RDMDeviceParams::staticCallbackFunction(void *p, const char *s) {
 }
 
 void RDMDeviceParams::Dump() {
-#ifndef NDEBUG
 	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, RDMDeviceParamsConst::FILE_NAME);
 
 	if (isMaskSet(rdm::deviceparams::Mask::LABEL)) {
@@ -200,5 +203,4 @@ void RDMDeviceParams::Dump() {
 	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL)) {
 		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail);
 	}
-#endif
 }

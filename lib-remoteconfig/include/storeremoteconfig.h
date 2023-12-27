@@ -2,7 +2,7 @@
  * @file storeremoteconfig.h
  *
  */
-/* Copyright (C) 2019-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,27 +27,31 @@
 #define STOREREMOTECONFIG_H_
 
 #include "remoteconfigparams.h"
-
 #include "configstore.h"
 
-class StoreRemoteConfig final: public RemoteConfigParamsStore {
+class StoreRemoteConfig {
 public:
-	StoreRemoteConfig();
-
-	void Update(const struct TRemoteConfigParams *pRemoteConfigParams) override {
-		ConfigStore::Get()->Update(configstore::Store::RCONFIG, pRemoteConfigParams, sizeof(struct TRemoteConfigParams));
+	static StoreRemoteConfig& Get() {
+		static StoreRemoteConfig instance;
+		return instance;
 	}
 
-	void Copy(struct TRemoteConfigParams *pRemoteConfigParams) override {
-		ConfigStore::Get()->Copy(configstore::Store::RCONFIG, pRemoteConfigParams, sizeof(struct TRemoteConfigParams));
+	static void Update(const struct remoteconfigparams::Params *pParams) {
+		Get().IUpdate(pParams);
 	}
 
-	static StoreRemoteConfig *Get() {
-		return s_pThis;
+	static void Copy(struct remoteconfigparams::Params *pParams) {
+		Get().ICopy(pParams);
 	}
 
 private:
-	static StoreRemoteConfig *s_pThis;
+	void IUpdate(const struct remoteconfigparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::RCONFIG, pParams, sizeof(struct remoteconfigparams::Params));
+	}
+
+	void ICopy(struct remoteconfigparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::RCONFIG, pParams, sizeof(struct remoteconfigparams::Params));
+	}
 };
 
 #endif /* STOREREMOTECONFIG_H_ */

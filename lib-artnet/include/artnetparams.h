@@ -142,8 +142,6 @@ public:
 
 	void Set(uint32_t nPortIndexOffset);
 
-	void Dump();
-
 	bool IsRdm() const {
 		return isMaskSet(artnetparams::Mask::ENABLE_RDM);
 	}
@@ -187,6 +185,7 @@ private:
 		return static_cast<artnet::PortProtocol>((m_Params.nProtocol >> (nPortIndex * 2)) & 0x3);
 	}
 
+	void Dump();
 	void callbackFunction(const char *pLine);
 	void SetBool(const uint8_t nValue, const uint32_t nMask);
 	bool isMaskSet(uint32_t nMask) const {

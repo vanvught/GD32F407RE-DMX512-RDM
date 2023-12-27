@@ -85,8 +85,7 @@ void main() {
 	DisplayUdf display;
 	ConfigStore configStore;
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);
-	StoreNetwork storeNetwork;
-	Network nw(&storeNetwork);
+	Network nw;
 	MDNS mDns;
 	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, Display7SegmentMessage::INFO_NONE, CONSOLE_GREEN);
 	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
@@ -100,15 +99,11 @@ void main() {
 
 	display.TextStatus(E131MsgConst::PARAMS, Display7SegmentMessage::INFO_BRIDGE_PARMAMS, CONSOLE_YELLOW);
 
-	StoreE131 storeE131;
-	E131Params e131params(&storeE131);
-
 	E131Bridge bridge;
 
-	if (e131params.Load()) {
-		e131params.Dump();
-		e131params.Set(DMXPORT_OFFSET);
-	}
+	E131Params e131params;
+	e131params.Load();
+	e131params.Set(DMXPORT_OFFSET);
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		bool bIsSet;
@@ -120,7 +115,6 @@ void main() {
 	Dmx dmx;
 
 	dmxparams.Load();
-	dmxparams.Dump();
 	dmxparams.Set(&dmx);
 
 	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
@@ -162,7 +156,6 @@ void main() {
 	RDMDeviceParams rdmDeviceParams;
 
 	rdmDeviceParams.Load();
-	rdmDeviceParams.Dump();
 	rdmDeviceParams.Set(&llrpOnlyDevice);
 	
 	llrpOnlyDevice.Print();
@@ -180,18 +173,14 @@ void main() {
 	DisplayUdfParams displayUdfParams;
 
 	displayUdfParams.Load();
-	displayUdfParams.Dump();
 	displayUdfParams.Set(&display);
 
 	display.Show(&bridge);
 
 	RemoteConfig remoteConfig(remoteconfig::Node::E131, remoteconfig::Output::DMX, nActivePorts);
 
-	StoreRemoteConfig storeRemoteConfig;
-	RemoteConfigParams remoteConfigParams(&storeRemoteConfig);
-
+	RemoteConfigParams remoteConfigParams;
 	remoteConfigParams.Load();
-	remoteConfigParams.Dump();
 	remoteConfigParams.Set(&remoteConfig);
 
 	while (configStore.Flash())

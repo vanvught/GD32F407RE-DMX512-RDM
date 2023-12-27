@@ -62,18 +62,17 @@ public:
 
 	void Set(DisplayUdf *pDisplayUdf);
 
-	void Dump();
-
     static void staticCallbackFunction(void *p, const char *s);
 
 private:
+	void Dump();
     void callbackFunction(const char *s);
     bool isMaskSet(uint32_t nMask) const {
-    	return (m_tDisplayUdfParams.nSetList & nMask) == nMask;
+    	return (m_Params.nSetList & nMask) == nMask;
     }
 
 private:
-    displayudfparams::Params m_tDisplayUdfParams;
+    displayudfparams::Params m_Params;
 };
 
 #endif /* DISPLAYUDFPARAMS_H_ */

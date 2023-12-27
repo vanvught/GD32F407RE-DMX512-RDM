@@ -830,7 +830,7 @@ bool MDNS::ServiceRecordAdd(const char *pName, const mdns::Services services, co
 
 bool MDNS::ServiceRecordDelete(const mdns::Services service) {
 	DEBUG_ENTRY
-	assert(services < mdns::Services::LAST_NOT_USED);
+	assert(service < mdns::Services::LAST_NOT_USED);
 
 	for (auto &record : s_ServiceRecords) {
 		if (record.services == service) {
