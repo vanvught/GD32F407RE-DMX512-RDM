@@ -56,10 +56,7 @@
 
 #include "configstore.h"
 #include "storeartnet.h"
-#include "storedisplayudf.h"
-#include "storedmxsend.h"
 #include "storenetwork.h"
-#include "storerdmdevice.h"
 #include "storeremoteconfig.h"
 
 #include "firmwareversion.h"
@@ -96,7 +93,7 @@ void main() {
 	StoreArtNet storeArtNet(DMXPORT_OFFSET);
 	node.SetArtNetStore(&storeArtNet);
 
-	ArtNetParams artnetParams(&storeArtNet);
+	ArtNetParams artnetParams;
 
 	if (artnetParams.Load()) {
 		artnetParams.Set(DMXPORT_OFFSET);

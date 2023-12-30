@@ -1,8 +1,8 @@
 /**
- * @file rdmdevicestore.h
+ * @file l6470.cpp
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,23 @@
  * THE SOFTWARE.
  */
 
-#ifndef RDMDEVICESTORE_H_
-#define RDMDEVICESTORE_H_
+#include "l6470.h"
+#include "l6470constants.h"
 
-#include <cstdint>
-#include <cstddef>
+L6470::~L6470() {
+}
 
-#include "rdmdeviceparams.h"
-#include "configstore.h"
+void L6470::setMicroSteps(unsigned int nMicroSteps) {
+	hardHiZ();
 
-class RDMDeviceStore {
-public:
-	static void SaveLabel(const char *pLabel, uint8_t nLength) {
-		ConfigStore::Get()->Update(configstore::Store::RDMDEVICE, offsetof(struct rdm::deviceparams::Params, aDeviceRootLabel), pLabel, nLength, rdm::deviceparams::Mask::LABEL);
-		ConfigStore::Get()->Update(configstore::Store::RDMDEVICE, offsetof(struct rdm::deviceparams::Params, nDeviceRootLabelLength), &nLength, sizeof(uint8_t), rdm::deviceparams::Mask::LABEL);
+	unsigned int stepVal = 0;
+
+	for (stepVal = 0; stepVal < 8; stepVal++) {
+		if (nMicroSteps == 1) {
+			break;
+		}
+		nMicroSteps = nMicroSteps >> 1;
 	}
-};
 
-#endif /* RDMDEVICESTORE_H_ */
+	setParam(L6470_PARAM_STEP_MODE, stepVal | L6470_SYNC_SEL_1);
+}

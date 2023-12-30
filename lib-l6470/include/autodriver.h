@@ -1,8 +1,11 @@
 /**
- * @file storedisplayudf.h
+ * @file autodriver.h
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/*
+ * Based on https://github.com/sparkfun/L6470-AutoDriver/tree/master/Libraries/Arduino
+ */
+/* Copyright (C) 2017-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +26,52 @@
  * THE SOFTWARE.
  */
 
-#ifndef STOREDISPLAYUDF_H_
-#define STOREDISPLAYUDF_H_
+#ifndef AUTODRIVER_H_
+#define AUTODRIVER_H_
 
-#include "displayudfparams.h"
-#include "configstore.h"
+#include <cstdint>
 
-class StoreDisplayUdf {
+#include "l6470.h"
+
+class AutoDriver final: public L6470 {
 public:
-	static StoreDisplayUdf& Get() {
-		static StoreDisplayUdf instance;
-		return instance;
-	}
+	AutoDriver(uint8_t, uint8_t, uint8_t, uint8_t);
+	AutoDriver(uint8_t, uint8_t, uint8_t);
 
-	static void Update(const struct displayudfparams::Params *pDisplayUdfParams) {
-		Get().IUpdate(pDisplayUdfParams);
-	}
+	~AutoDriver() override;
 
-	static void Copy(struct displayudfparams::Params *pDisplayUdfParams) {
-		Get().ICopy(pDisplayUdfParams);
-	}
+	int busyCheck() override;
+
+	void Print();
 
 private:
-	void IUpdate(const struct displayudfparams::Params *pDisplayUdfParams) {
-		ConfigStore::Get()->Update(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	uint8_t SPIXfer(uint8_t) override;
+
+	/*
+	 * Additional methods
+	 */
+public:
+	bool IsConnected();
+
+	unsigned getMotorNumber() {
+		return m_nMotorNumber;
 	}
 
-	void ICopy(struct displayudfparams::Params *pDisplayUdfParams) {
-		ConfigStore::Get()->Copy(configstore::Store::DISPLAYUDF, pDisplayUdfParams, sizeof(struct displayudfparams::Params));
+	void setMotorNumber(unsigned nMotorNumber) {
+		m_nMotorNumber = nMotorNumber;
 	}
+
+	static uint16_t getNumBoards();
+	static uint8_t getNumBoards(uint8_t cs);
+
+private:
+	uint8_t m_nSpiChipSelect;
+	uint8_t m_nResetPin;
+	uint8_t m_nBusyPin;
+	uint8_t m_nPosition;
+	bool m_bIsBusy;
+
+	static uint8_t m_nNumBoards[2];
 };
 
-#endif /* STOREDISPLAYUDF_H_ */
+#endif /* AUTODRIVER_H_ */

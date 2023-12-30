@@ -38,7 +38,6 @@
 #include "dmxparams.h"
 #include "dmxparamsconst.h"
 #include "dmxconst.h"
-#include "storedmxsend.h"
 
 #include "readconfigfile.h"
 #include "sscan.h"

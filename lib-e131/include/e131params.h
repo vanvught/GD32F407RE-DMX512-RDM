@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "e131bridge.h"
+#include "configstore.h"
 #include "lightset.h"
 
 #if !defined(LIGHTSET_PORTS)
@@ -109,6 +110,17 @@ struct Mask {
 	static constexpr uint32_t PRIORITY_D    		= (1U << 24);
 };
 }
+
+class E131ParamsStore {
+public:
+	static void Update(const struct e131params::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
+	}
+
+	static void Copy(struct e131params::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
+	}
+};
 
 class E131Params {
 public:

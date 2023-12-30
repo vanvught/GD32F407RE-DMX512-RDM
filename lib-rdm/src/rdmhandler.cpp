@@ -135,7 +135,11 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS_SUB_DEVICES[] {
 };
 
 #if defined (ENABLE_RDM_MANUFACTURER_PIDS)
+# if defined (CONFIG_RDM_MANUFACTURER_PIDS_SET)
 const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, nullptr, 0, false, true, false };
+# else
+const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, nullptr, 0, false, true, false };
+# endif
 #endif
 
 RDMHandler::RDMHandler(bool bIsRdm): m_bIsRDM(bIsRdm) {
@@ -523,7 +527,7 @@ void RDMHandler::GetSupportedParameters(uint16_t nSubDevice) {
 	RespondMessageAck();
 }
 
-#if defined (ENABLE_RDM_MANUFACTURER_PIDS)
+# if defined (ENABLE_RDM_MANUFACTURER_PIDS)
 void RDMHandler::GetParameterDescription(__attribute__((unused)) uint16_t nSubDevice) {
 	const auto *pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc *>(m_pRdmDataIn);
 	const auto nPid = static_cast<uint16_t>((pRdmDataIn->param_data[0] << 8) + pRdmDataIn->param_data[1]);
@@ -568,7 +572,9 @@ void RDMHandler::GetManufacturerPid(__attribute__((unused))  uint16_t nSubDevice
 
 	RespondMessageNack(nReason);
 }
-#endif
+#  if defined (CONFIG_RDM_MANUFACTURER_PIDS_SET)
+#  endif // CONFIG_RDM_MANUFACTURER_PIDS_SET
+# endif	// ENABLE_RDM_MANUFACTURER_PIDS
 #endif
 
 void RDMHandler::GetDeviceInfo(uint16_t nSubDevice) {
@@ -1330,7 +1336,7 @@ void RDMHandler::GetSelfTestDescription(__attribute__((unused)) uint16_t nSubDev
 
 	RespondMessageAck();
 }
-#endif
+#endif // ENABLE_RDM_SELF_TEST
 
 #if defined (ENABLE_RDM_PRESET_PLAYBACK)
 #include "rdm_preset_playback.h"
@@ -1372,7 +1378,7 @@ void RDMHandler::SetPresetPlayback(__attribute__((unused)) bool IsBroadcast, __a
 
 	RespondMessageAck();
 }
-#endif
+#endif // ENABLE_RDM_PRESET_PLAYBACK
 
 void RDMHandler::GetSlotInfo(uint16_t nSubDevice) {
     auto *pRdmDataOut = reinterpret_cast<struct TRdmMessage *>(m_pRdmDataOut);

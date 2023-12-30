@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "dmx.h"
+#include "configstore.h"
 
 namespace dmxsendparams {
 struct Params {
@@ -42,10 +43,10 @@ struct Params {
 static_assert(sizeof(struct Params) <= 32, "struct Params is too large");
 
 struct Mask {
-	static constexpr auto BREAK_TIME = (1U << 0);
-	static constexpr auto MAB_TIME = (1U << 1);
-	static constexpr auto REFRESH_RATE = (1U << 2);
-	static constexpr auto SLOTS_COUNT = (1U << 3);
+	static constexpr uint32_t BREAK_TIME = (1U << 0);
+	static constexpr uint32_t MAB_TIME = (1U << 1);
+	static constexpr uint32_t REFRESH_RATE = (1U << 2);
+	static constexpr uint32_t SLOTS_COUNT = (1U << 3);
 };
 
 static constexpr uint8_t rounddown_slots(uint16_t n) {
@@ -55,6 +56,17 @@ static constexpr uint16_t roundup_slots(uint8_t n) {
 	return static_cast<uint16_t>((n + 1U) * 2U);
 }
 }  // namespace dmxsendparams]
+
+class StoreDmxSend {
+public:
+	static void Update(const struct dmxsendparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::DMXSEND, pParams, sizeof(struct dmxsendparams::Params));
+	}
+
+	static void Copy(struct dmxsendparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::DMXSEND, pParams, sizeof(struct dmxsendparams::Params));
+	}
+};
 
 class DmxParams {
 public:

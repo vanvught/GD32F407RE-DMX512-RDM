@@ -46,8 +46,6 @@
 #include "displayudfparams.h"
 #include "displayudfparamsconst.h"
 
-#include "storedisplayudf.h"
-
 #include "networkparamsconst.h"
 #include "lightsetparamsconst.h"
 
@@ -160,10 +158,10 @@ void DisplayUdfParams::Load() {
 	ReadConfigFile configfile(DisplayUdfParams::staticCallbackFunction, this);
 
 	if (configfile.Read(DisplayUdfParamsConst::FILE_NAME)) {
-		StoreDisplayUdf::Update(&m_Params);
+		DisplayUdfParamsStore::Update(&m_Params);
 	} else
 #endif
-		StoreDisplayUdf::Copy(&m_Params);
+		DisplayUdfParamsStore::Copy(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -183,7 +181,7 @@ void DisplayUdfParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	StoreDisplayUdf::Update(&m_Params);
+	DisplayUdfParamsStore::Update(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -247,7 +245,7 @@ void DisplayUdfParams::Builder(const struct displayudfparams::Params *ptDisplayU
 		memcpy(&m_Params, ptDisplayUdfParams, sizeof(struct displayudfparams::Params));
 	} else {
 		assert(m_pDisplayUdfParamsStore != nullptr);
-		StoreDisplayUdf::Copy(&m_Params);
+		DisplayUdfParamsStore::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(DisplayUdfParamsConst::FILE_NAME, pBuffer, nLength);

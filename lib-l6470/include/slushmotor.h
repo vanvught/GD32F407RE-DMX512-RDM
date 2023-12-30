@@ -1,8 +1,11 @@
 /**
- * @file rdmdevicestore.h
+ * @file slushmotor.h
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/*
+ * Based on https://github.com/Roboteurs/slushengine/tree/master/Slush
+ */
+/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +26,47 @@
  * THE SOFTWARE.
  */
 
-#ifndef RDMDEVICESTORE_H_
-#define RDMDEVICESTORE_H_
+#ifndef SLUSHMOTOR_H_
+#define SLUSHMOTOR_H_
 
 #include <cstdint>
-#include <cstddef>
 
-#include "rdmdeviceparams.h"
-#include "configstore.h"
+#include "l6470.h"
 
-class RDMDeviceStore {
+class SlushMotor: public L6470 {
 public:
-	static void SaveLabel(const char *pLabel, uint8_t nLength) {
-		ConfigStore::Get()->Update(configstore::Store::RDMDEVICE, offsetof(struct rdm::deviceparams::Params, aDeviceRootLabel), pLabel, nLength, rdm::deviceparams::Mask::LABEL);
-		ConfigStore::Get()->Update(configstore::Store::RDMDEVICE, offsetof(struct rdm::deviceparams::Params, nDeviceRootLabelLength), &nLength, sizeof(uint8_t), rdm::deviceparams::Mask::LABEL);
-	}
+	SlushMotor(unsigned, bool bUseSPI = true);
+	~SlushMotor() override;
+
+	int busyCheck() override;
+
+	/*
+	 * Roboteurs Slushengine Phyton compatible methods
+	 */
+	int isBusy();
+
+	void setOverCurrent(unsigned int);
+	void setAsHome();
+
+	void softFree();
+	void free();
+
+	/*
+	 * Additional methods
+	 */
+	bool GetUseSpiBusy() const;
+	void SetUseSpiBusy(bool);
+	bool IsConnected() const;
+
+private:
+	uint8_t SPIXfer(uint8_t) override;
+
+private:
+	unsigned m_nSpiChipSelect;
+	unsigned m_nBusyPin;
+	bool m_bUseSpiBusy;
+	bool m_bIsBusy;
+	bool m_bIsConnected;
 };
 
-#endif /* RDMDEVICESTORE_H_ */
+#endif /* SLUSHMOTOR_H_ */

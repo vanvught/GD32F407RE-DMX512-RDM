@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "rdmconst.h"
+#include "configstore.h"
 
 namespace rdm {
 namespace deviceparams {
@@ -49,6 +50,17 @@ struct Mask {
 }  // namespace rdm
 
 class RDMDevice;
+
+class RDMDeviceParamsStore {
+public:
+	static void Update(const struct rdm::deviceparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::RDMDEVICE, pParams, sizeof(struct rdm::deviceparams::Params));
+	}
+
+	static void Copy(struct rdm::deviceparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::RDMDEVICE, pParams, sizeof(struct rdm::deviceparams::Params));
+	}
+};
 
 class RDMDeviceParams {
 public:

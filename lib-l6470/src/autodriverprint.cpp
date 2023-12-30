@@ -1,8 +1,8 @@
 /**
- * @file storee131.h
+ * @file autodriverprint.cpp
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +23,18 @@
  * THE SOFTWARE.
  */
 
-#ifndef STOREE131_H_
-#define STOREE131_H_
+#include <cstdint>
+#include <cstdio>
 
-#include "e131params.h"
-#include "configstore.h"
+#include "autodriver.h"
 
-class StoreE131 {
-public:
-	static StoreE131& Get() {
-		static StoreE131 instance;
-		return instance;
-	}
-
-	static void Update(const struct e131params::Params *pParams) {
-		Get().IUpdate(pParams);
-	}
-
-	static void Copy(struct e131params::Params *pParams) {
-		Get().ICopy(pParams);
-	}
-
-private:
-	void IUpdate(const struct e131params::Params *pParams) {
-		ConfigStore::Get()->Update(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
-	}
-
-	void ICopy(struct e131params::Params *pParams) {
-		ConfigStore::Get()->Copy(configstore::Store::NODE, pParams, sizeof(struct e131params::Params));
-	}
-};
-
-#endif /* STOREE131_H_ */
+void AutoDriver::Print() {
+	printf("SparkFun AutoDriver [%d]\n", m_nMotorNumber);
+	printf(" Position=%d, ChipSelect=%d, ResetPin=%d, BusyPin=%d [%s]\n", m_nPosition, m_nSpiChipSelect, m_nResetPin, m_nBusyPin, m_nBusyPin == 0xFF ? "SPI" : "GPIO");
+	printf(" MinSpeed=%3.0f, MaxSpeed=%3.0f, Acc=%4.0f, Dec=%4.0f\n", getMinSpeed(), getMaxSpeed(), getAcc(), getDec());
+	printf(" AccKVAL=%d, DecKVAL=%d, RunKVAL=%d, HoldKVAL=%d\n",
+			static_cast<int>(getAccKVAL()), static_cast<int>(getDecKVAL()),
+			static_cast<int>(getRunKVAL()), static_cast<int>(getHoldKVAL()));
+	printf(" MicroSteps=%u, SwitchMode=%d\n",
+			static_cast<unsigned>(1) << getStepMode(), getSwitchMode());
+}

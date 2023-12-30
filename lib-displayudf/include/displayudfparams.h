@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "displayudf.h"
+#include "configstore.h"
 
 namespace displayudfparams {
 struct Params {
@@ -48,6 +49,17 @@ struct Mask {
 };
 }  // namespace displayudfparams
 
+class DisplayUdfParamsStore {
+public:
+	static void Update(const struct displayudfparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::DISPLAYUDF, pParams, sizeof(struct displayudfparams::Params));
+	}
+
+	static void Copy(struct displayudfparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::DISPLAYUDF, pParams, sizeof(struct displayudfparams::Params));
+	}
+};
+
 class DisplayUdfParams {
 public:
 	DisplayUdfParams();
@@ -55,7 +67,7 @@ public:
 	void Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
-	void Builder(const struct displayudfparams::Params *ptDisplayUdfParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Builder(const struct displayudfparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
 	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}

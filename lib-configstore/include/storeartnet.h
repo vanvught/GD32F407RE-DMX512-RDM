@@ -35,25 +35,9 @@
 
 #include "debug.h"
 
-class StoreArtNet final: public ArtNetParamsStore, public ArtNetStore {
+class StoreArtNet final: public ArtNetStore {
 public:
 	StoreArtNet(uint32_t nPortIndexOffset);
-
-	void Update(const struct artnetparams::Params* pArtNetParams) override {
-		DEBUG_ENTRY
-
-		ConfigStore::Get()->Update(configstore::Store::NODE, pArtNetParams, sizeof(struct artnetparams::Params));
-
-		DEBUG_EXIT
-	}
-
-	void Copy(struct artnetparams::Params* pArtNetParams) override {
-		DEBUG_ENTRY
-
-		ConfigStore::Get()->Copy(configstore::Store::NODE, pArtNetParams, sizeof(struct artnetparams::Params));
-
-		DEBUG_EXIT
-	}
 
 	void SaveLongName(const char* pLongName) override {
 		DEBUG_ENTRY

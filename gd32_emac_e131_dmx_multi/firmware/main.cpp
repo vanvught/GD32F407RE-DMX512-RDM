@@ -61,13 +61,7 @@
 #include "remoteconfigparams.h"
 
 #include "configstore.h"
-#include "storedisplayudf.h"
-#include "storedmxsend.h"
-#include "storee131.h"
 #include "storenetwork.h"
-#if defined (NODE_RDMNET_LLRP_ONLY)
-# include "storerdmdevice.h"
-#endif
 #include "storeremoteconfig.h"
 
 #include "firmwareversion.h"

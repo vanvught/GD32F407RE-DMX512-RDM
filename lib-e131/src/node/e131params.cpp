@@ -37,7 +37,6 @@
 #include "e131params.h"
 #include "e131paramsconst.h"
 #include "e131.h"
-#include "storee131.h"
 
 #include "readconfigfile.h"
 #include "sscan.h"
@@ -93,10 +92,10 @@ bool E131Params::Load() {
 	ReadConfigFile configfile(E131Params::staticCallbackFunction, this);
 
 	if (configfile.Read(E131ParamsConst::FILE_NAME)) {
-		StoreE131::Update(&m_Params);
+		E131ParamsStore::Update(&m_Params);
 	} else
 #endif
-		StoreE131::Copy(&m_Params);
+		E131ParamsStore::Copy(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -117,7 +116,7 @@ void E131Params::Load(const char* pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	StoreE131::Update(&m_Params);
+	E131ParamsStore::Update(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -252,7 +251,7 @@ void E131Params::Builder(const struct Params *pParams, char *pBuffer, uint32_t n
 	if (pParams != nullptr) {
 		memcpy(&m_Params, pParams, sizeof(struct Params));
 	} else {
-		StoreE131::Copy(&m_Params);
+		E131ParamsStore::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(E131ParamsConst::FILE_NAME, pBuffer, nLength);

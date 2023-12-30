@@ -71,7 +71,7 @@ static constexpr bool is_set(const uint16_t nValue, const uint32_t i) {
 
 using namespace artnetparams;
 
-ArtNetParams::ArtNetParams(ArtNetParamsStore *pArtNetParamsStore): m_pArtNetParamsStore(pArtNetParamsStore) {
+ArtNetParams::ArtNetParams() {
 	DEBUG_ENTRY
 
 	auto *const pArtnetNode = ArtNetNode::Get();
@@ -102,10 +102,10 @@ bool ArtNetParams::Load() {
 	ReadConfigFile configfile(ArtNetParams::staticCallbackFunction, this);
 
 	if (configfile.Read(ArtNetParamsConst::FILE_NAME)) {
-		m_pArtNetParamsStore->Update(&m_Params);
+		ArtNetParamsStore::Update(&m_Params);
 	} else
 #endif
-		m_pArtNetParamsStore->Copy(&m_Params);
+		ArtNetParamsStore::Copy(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -125,8 +125,7 @@ void ArtNetParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	assert(m_pArtNetParamsStore != nullptr);
-	m_pArtNetParamsStore->Update(&m_Params);
+	ArtNetParamsStore::Update(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -345,8 +344,7 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	if (pParams != nullptr) {
 		memcpy(&m_Params, pParams, sizeof(struct Params));
 	} else {
-		assert(m_pArtNetParamsStore != nullptr);
-		m_pArtNetParamsStore->Copy(&m_Params);
+		ArtNetParamsStore::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(ArtNetParamsConst::FILE_NAME, pBuffer, nLength);

@@ -62,7 +62,6 @@
 #if defined(DISPLAY_UDF)
 /* display.txt */
 # include "displayudfparams.h"
-# include "storedisplayudf.h"
 #endif
 
 /**
@@ -79,19 +78,16 @@
 #if defined (NODE_E131)
 /* e131.txt */
 # include "e131params.h"
-# include "storee131.h"
 #endif
 
 #if defined (NODE_OSC_CLIENT)
 /* oscclnt.txt */
 # include "oscclientparams.h"
-# include "storeoscclient.h"
 #endif
 
 #if defined (NODE_OSC_SERVER)
 /* osc.txt */
 # include "oscserverparams.h"
-# include "storeoscserver.h"
 #endif
 
 #if defined (NODE_LTC_SMPTE)
@@ -103,10 +99,8 @@
 # include "storeltcdisplay.h"
 /* tcnet.txt */
 # include "tcnetparams.h"
-# include "storetcnet.h"
 /* gps.txt */
 # include "gpsparams.h"
-# include "storegps.h"
 /* etc.txt */
 # include "ltcetcparams.h"
 # include "storeltcetc.h"
@@ -132,24 +126,20 @@
 #if defined (OUTPUT_DMX_SEND)
 /* params.txt */
 # include "dmxparams.h"
-# include "storedmxsend.h"
 #endif
 
 #if defined (OUTPUT_DMX_PIXEL)
 /* devices.txt */
 # include "pixeldmxparams.h"
-# include "storepixeldmx.h"
 #endif
 #if defined (OUTPUT_DMX_TLC59711)
 /* devices.txt */
 # include "tlc59711dmxparams.h"
-# include "storetlc59711.h"
 #endif
 
 #if defined (OUTPUT_DMX_MONITOR)
 /* mon.txt */
 # include "dmxmonitorparams.h"
-# include "storemonitor.h"
 #endif
 
 #if defined(OUTPUT_DMX_STEPPER)
@@ -166,19 +156,16 @@
 #if defined (OUTPUT_DMX_SERIAL)
 /* serial.txt */
 # include "dmxserialparams.h"
-# include "storedmxserial.h"
 #endif
 
 #if defined (OUTPUT_RGB_PANEL)
 /* rgbpanel.txt */
 # include "rgbpanelparams.h"
-# include "storergbpanel.h"
 #endif
 
 #if defined (OUTPUT_DMX_PCA9685)
 /* pca9685.txt */
 # include "pca9685dmxparams.h"
-# include "storepca9685.h"
 #endif
 
 /**
@@ -188,14 +175,12 @@
 #if defined (RDM_RESPONDER)
 /* rdm_device.txt */
 # include "rdmdeviceparams.h"
-# include "storerdmdevice.h"
 /* sensors.txt */
 # include "rdmsensorsparams.h"
 # include "storerdmsensors.h"
 /* "subdev.txt" */
 # if defined (ENABLE_RDM_SUBDEVICES)
 #  include "rdmsubdevicesparams.h"
-#  include "storerdmsubdevices.h"
 # endif
 #endif
 
@@ -626,8 +611,7 @@ void RemoteConfig::HandleGetNetworkTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetArtnetTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	assert(StoreArtNet::Get() != nullptr);
-	ArtNetParams artnetParams(StoreArtNet::Get());
+	ArtNetParams artnetParams;
 	artnetParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -729,7 +713,7 @@ void RemoteConfig::HandleGetDevicesTxt(uint32_t& nSize) {
 	if (!bIsSetLedType) {
 # endif
 #if defined (OUTPUT_DMX_PIXEL)
-		PixelDmxParams pixelDmxParams(StorePixelDmx::Get());
+		PixelDmxParams pixelDmxParams;
 		pixelDmxParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 #endif
 # if defined (OUTPUT_DMX_TLC59711)
@@ -980,8 +964,7 @@ void RemoteConfig::HandleSetNetworkTxt() {
 void RemoteConfig::HandleSetArtnetTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreArtNet::Get() != nullptr);
-	ArtNetParams artnetParams(StoreArtNet::Get());
+	ArtNetParams artnetParams;
 	artnetParams.Load(s_pUdpBuffer, m_nBytesReceived);
 
 	DEBUG_EXIT
@@ -1045,8 +1028,7 @@ void RemoteConfig::HandleSetDevicesTxt() {
 	if (!tlc59711params.IsSetLedType()) {
 # endif
 #if defined (OUTPUT_DMX_PIXEL)
-		assert(StorePixelDmx::Get() != nullptr);
-		PixelDmxParams pixelDmxParams(StorePixelDmx::Get());
+		PixelDmxParams pixelDmxParams;
 		pixelDmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
 # endif
 # if defined (OUTPUT_DMX_TLC59711)

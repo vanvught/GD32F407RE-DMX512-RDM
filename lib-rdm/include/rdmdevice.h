@@ -35,8 +35,6 @@
 #include "rdmconst.h"
 #include "rdm_e120.h"
 
-#include "storerdmdevice.h"
-
 #include "debug.h"
 
 struct TRDMDeviceInfoData {
@@ -111,7 +109,7 @@ public:
 			memcpy(m_aRootLabel, pInfo->data, nLength);
 			m_nRootLabelLength = nLength;
 
-			StoreRDMDevice::SaveLabel(m_aRootLabel, m_nRootLabelLength);
+			RDMDeviceStore::SaveLabel(m_aRootLabel, m_nRootLabelLength);
 		} else {
 			memcpy(m_aFactoryRootLabel, pInfo->data, nLength);
 			m_nFactoryRootLabelLength = nLength;
