@@ -30,7 +30,7 @@
 
 #include "network.h"
 #include "networkparams.h"
-#include "storenetwork.h"
+#include "networkstore.h"
 
 #include "hardware.h"
 
@@ -212,9 +212,9 @@ void Network::SetIp(uint32_t nIp) {
 	net_set_ip(&m_IpInfo);
 	net_set_gw(&m_IpInfo);
 
-	StoreNetwork::SaveIp(m_IpInfo.ip.addr);
-	StoreNetwork::SaveGatewayIp(m_IpInfo.gw.addr);
-	StoreNetwork::SaveDhcp(false);
+	NetworkStore::SaveIp(m_IpInfo.ip.addr);
+	NetworkStore::SaveGatewayIp(m_IpInfo.gw.addr);
+	NetworkStore::SaveDhcp(false);
 
 	network::mdns_announcement();
 	network::display_ip();
@@ -234,7 +234,7 @@ void Network::SetNetmask(uint32_t nNetmask) {
 	m_IpInfo.netmask.addr = nNetmask;
 	net_set_netmask(&m_IpInfo);
 
-	StoreNetwork::SaveNetMask(m_IpInfo.netmask.addr);
+	NetworkStore::SaveNetMask(m_IpInfo.netmask.addr);
 
 	network::display_ip();
 	network::display_netmask();
@@ -253,7 +253,7 @@ void Network::SetGatewayIp(uint32_t nGatewayIp) {
 	m_IpInfo.gw.addr = nGatewayIp;
 	net_set_gw(&m_IpInfo);
 
-	StoreNetwork::SaveGatewayIp(m_IpInfo.gw.addr);
+	NetworkStore::SaveGatewayIp(m_IpInfo.gw.addr);
 
 	network::display_gateway();
 
@@ -266,7 +266,7 @@ void Network::SetHostName(const char *pHostName) {
 	strncpy(m_aHostName, pHostName, network::HOSTNAME_SIZE - 1);
 	m_aHostName[network::HOSTNAME_SIZE - 1] = '\0';
 
-	StoreNetwork::SaveHostName(m_aHostName, static_cast<uint16_t>(strlen(m_aHostName)));
+	NetworkStore::SaveHostName(m_aHostName, static_cast<uint16_t>(strlen(m_aHostName)));
 
 	network::mdns_announcement();
 	network::display_hostname();
@@ -288,7 +288,7 @@ bool Network::SetZeroconf() {
 	if (m_IsZeroconfUsed) {
 		m_IsDhcpUsed = false;
 
-		StoreNetwork::SaveDhcp(true);// Zeroconf is enabled only when use_dhcp=1
+		NetworkStore::SaveDhcp(true);// Zeroconf is enabled only when use_dhcp=1
 	}
 
 	network::mdns_announcement();
@@ -324,7 +324,7 @@ bool Network::EnableDhcp() {
 
 	DEBUG_PRINTF("m_IsDhcpUsed=%d, m_IsZeroconfUsed=%d", m_IsDhcpUsed, m_IsZeroconfUsed);
 
-	StoreNetwork::SaveDhcp(m_IsDhcpUsed);
+	NetworkStore::SaveDhcp(m_IsDhcpUsed);
 
 	network::mdns_announcement();
 	network::display_ip();

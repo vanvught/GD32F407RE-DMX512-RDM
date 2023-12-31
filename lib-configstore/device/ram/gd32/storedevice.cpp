@@ -27,8 +27,7 @@
 #include <cstdio>
 #include <cassert>
 
-#include "storedevice.h"
-
+#include "configstoredevice.h"
 #include "gd32.h"
 
 #include "debug.h"

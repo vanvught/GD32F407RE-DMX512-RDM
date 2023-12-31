@@ -1,8 +1,8 @@
 /**
- * @file storenetwork.h
+ * @file networkstore.h
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,81 +23,38 @@
  * THE SOFTWARE.
  */
 
-#ifndef STORENETWORK_H_
-#define STORENETWORK_H_
+#ifndef NETWORKSTORE_H_
+#define NETWORKSTORE_H_
 
 #include <cstdint>
 #include <cstddef>
 #include <algorithm>
 
-#include "network.h"
 #include "networkparams.h"
 #include "configstore.h"
 
-class StoreNetwork {
+class NetworkStore {
 public:
-	static StoreNetwork& Get() {
-		static StoreNetwork instance;
-		return instance;
-	}
-
-	static void Update(const struct networkparams::Params *pParams) {
-		Get().IUpdate(pParams);
-	}
-
-	static void Copy(struct networkparams::Params *pParams) {
-		Get().ICopy(pParams);
-	}
-
 	static void SaveIp(uint32_t nIp) {
-		Get().ISaveIp(nIp);
-	}
-
-	static void SaveNetMask(uint32_t nNetMask) {
-		Get().ISaveNetMask(nNetMask);
-	}
-
-	static void SaveGatewayIp(uint32_t nGatewayIp) {
-		Get().ISaveGatewayIp(nGatewayIp);
-	}
-
-	static void SaveHostName(const char *pHostName, uint32_t nLength) {
-		Get().ISaveHostName(pHostName, nLength);
-	}
-
-	static void SaveDhcp(bool bIsDhcpUsed) {
-		Get().ISaveDhcp(bIsDhcpUsed);
-	}
-
-private:
-	void IUpdate(const struct networkparams::Params *pParams) {
-		ConfigStore::Get()->Update(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
-	}
-
-	void ICopy(struct networkparams::Params *pParams) {
-		ConfigStore::Get()->Copy(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
-	}
-
-	void ISaveIp(uint32_t nIp) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nLocalIp), &nIp, sizeof(uint32_t), networkparams::Mask::IP_ADDRESS);
 	}
 
-	void ISaveNetMask(uint32_t nNetMask) {
+	static void SaveNetMask(uint32_t nNetMask) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nNetmask), &nNetMask, sizeof(uint32_t), networkparams::Mask::NET_MASK);
 	}
 
-	void ISaveGatewayIp(uint32_t nGatewayIp) {
+	static void SaveGatewayIp(uint32_t nGatewayIp) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, nGatewayIp), &nGatewayIp, sizeof(uint32_t), networkparams::Mask::DEFAULT_GATEWAY);
 	}
 
-	void ISaveHostName(const char *pHostName, uint32_t nLength) {
+	static void SaveHostName(const char *pHostName, uint32_t nLength) {
 		nLength = std::min(nLength,static_cast<uint32_t>(network::HOSTNAME_SIZE));
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, aHostName), pHostName, nLength, networkparams::Mask::HOSTNAME);
 	}
 
-	void ISaveDhcp(bool bIsDhcpUsed) {
+	static void SaveDhcp(bool bIsDhcpUsed) {
 		ConfigStore::Get()->Update(configstore::Store::NETWORK, offsetof(struct networkparams::Params, bIsDhcpUsed), &bIsDhcpUsed, sizeof(bool), networkparams::Mask::DHCP);
 	}
 };
 
-#endif /* STORENETWORK_H_ */
+#endif /* NETWORKSTORE_H_ */

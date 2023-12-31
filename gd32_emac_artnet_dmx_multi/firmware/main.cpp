@@ -56,8 +56,6 @@
 
 #include "configstore.h"
 #include "storeartnet.h"
-#include "storenetwork.h"
-#include "storeremoteconfig.h"
 
 #include "firmwareversion.h"
 #include "software_version.h"

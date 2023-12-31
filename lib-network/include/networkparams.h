@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "network.h"
+#include "configstore.h"
 
 namespace networkparams {
 namespace defaults {
@@ -76,6 +77,17 @@ struct Mask {
 };
 
 }  // namespace networkparams
+
+class NetworkParamsStore {
+public:
+	static void Update(const struct networkparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
+	}
+
+	static void Copy(struct networkparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::NETWORK, pParams, sizeof(struct networkparams::Params));
+	}
+};
 
 class NetworkParams {
 public:

@@ -36,7 +36,7 @@
 #include "remoteconfigparams.h"
 #include "remoteconfig.h"
 #include "remoteconfigconst.h"
-#include "storeremoteconfig.h"
+
 
 #include "readconfigfile.h"
 #include "sscan.h"
@@ -61,10 +61,10 @@ void RemoteConfigParams::Load() {
 	ReadConfigFile configfile(RemoteConfigParams::staticCallbackFunction, this);
 
 	if (configfile.Read(RemoteConfigConst::PARAMS_FILE_NAME)) {
-		StoreRemoteConfig::Update(&m_Params);
+		RemoteConfigParamsStore::Update(&m_Params);
 	} else
 #endif
-		StoreRemoteConfig::Copy(&m_Params);
+		RemoteConfigParamsStore::Copy(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -84,7 +84,7 @@ void RemoteConfigParams::Load(const char* pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	StoreRemoteConfig::Update(&m_Params);
+	RemoteConfigParamsStore::Update(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -146,7 +146,7 @@ void RemoteConfigParams::Builder(const struct remoteconfigparams::Params *pRemot
 	if (pRemoteConfigParams != nullptr) {
 		memcpy(&m_Params, pRemoteConfigParams, sizeof(struct remoteconfigparams::Params));
 	} else {
-		StoreRemoteConfig::Copy(&m_Params);
+		RemoteConfigParamsStore::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(RemoteConfigConst::PARAMS_FILE_NAME, pBuffer, nLength);

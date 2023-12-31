@@ -54,10 +54,8 @@
 
 /* rconfig.txt */
 #include "remoteconfigparams.h"
-#include "storeremoteconfig.h"
 /* network.txt */
 #include "networkparams.h"
-#include "storenetwork.h"
 
 #if defined(DISPLAY_UDF)
 /* display.txt */
@@ -93,23 +91,19 @@
 #if defined (NODE_LTC_SMPTE)
 /* ltc.txt */
 # include "ltcparams.h"
-# include "storeltc.h"
 /* ldisplay.txt */
 # include "ltcdisplayparams.h"
-# include "storeltcdisplay.h"
 /* tcnet.txt */
 # include "tcnetparams.h"
 /* gps.txt */
 # include "gpsparams.h"
 /* etc.txt */
 # include "ltcetcparams.h"
-# include "storeltcetc.h"
 #endif
 
 #if defined(NODE_SHOWFILE)
 /* show.txt */
 # include "showfileparams.h"
-# include "storeshowfile.h"
 #endif
 
 #if defined(NODE_NODE)
@@ -177,7 +171,6 @@
 # include "rdmdeviceparams.h"
 /* sensors.txt */
 # include "rdmsensorsparams.h"
-# include "storerdmsensors.h"
 /* "subdev.txt" */
 # if defined (ENABLE_RDM_SUBDEVICES)
 #  include "rdmsubdevicesparams.h"
@@ -856,7 +849,7 @@ void RemoteConfig::HandleGetShowTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetNodeTxt(const node::Personality personality, uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	NodeParams nodeParams(StoreNode::Get(), personality);
+	NodeParams nodeParams(personality);
 	nodeParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -1156,8 +1149,7 @@ void RemoteConfig::HandleSetShowTxt() {
 void RemoteConfig::HandleSetNodeTxt(const node::Personality personality) {
 	DEBUG_ENTRY
 
-	assert(StoreNode::Get() != nullptr);
-	NodeParams nodeParams(StoreNode::Get(), personality);
+	NodeParams nodeParams(personality);
 	nodeParams.Load(s_pUdpBuffer, m_nBytesReceived);
 
 	DEBUG_EXIT

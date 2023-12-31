@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-#include "storedevice.h"
+#include "configstoredevice.h"
 
 namespace configstore {
 enum class Store {

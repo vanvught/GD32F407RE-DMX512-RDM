@@ -35,7 +35,7 @@
 #include "network.h"
 #include "networkparams.h"
 #include "networkparamsconst.h"
-#include "storenetwork.h"
+
 
 #include "readconfigfile.h"
 #include "sscan.h"
@@ -64,10 +64,10 @@ void NetworkParams::Load() {
 	ReadConfigFile configfile(NetworkParams::staticCallbackFunction, this);
 
 	if (configfile.Read(NetworkParamsConst::FILE_NAME)) {
-		StoreNetwork::Update(&m_Params);
+		NetworkParamsStore::Update(&m_Params);
 	} else
 #endif
-		StoreNetwork::Copy(&m_Params);
+		NetworkParamsStore::Copy(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -87,7 +87,7 @@ void NetworkParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	StoreNetwork::Update(&m_Params);
+	NetworkParamsStore::Update(&m_Params);
 
 #ifndef NDEBUG
 	Dump();
@@ -221,7 +221,7 @@ void NetworkParams::Builder(const struct networkparams::Params *ptNetworkParams,
 	if (ptNetworkParams != nullptr) {
 		memcpy(&m_Params, ptNetworkParams, sizeof(struct networkparams::Params));
 	} else {
-		StoreNetwork::Copy(&m_Params);
+		NetworkParamsStore::Copy(&m_Params);
 	}
 
 	PropertiesBuilder builder(NetworkParamsConst::FILE_NAME, pBuffer, nLength);

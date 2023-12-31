@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "remoteconfig.h"
+#include "configstore.h"
 
 namespace remoteconfigparams {
 struct Params {
@@ -43,14 +44,25 @@ struct Params {
 static_assert(sizeof(struct Params) <= 48, "struct Params is too large");
 
 struct Mask {
-	static constexpr auto DISABLE = (1U << 0);
-	static constexpr auto DISABLE_WRITE = (1U << 1);
-	static constexpr auto ENABLE_REBOOT = (1U << 2);
-	static constexpr auto ENABLE_UPTIME = (1U << 3);
-	static constexpr auto DISPLAY_NAME = (1U << 4);
-	static constexpr auto ENABLE_FACTORY = (1U << 5);
+	static constexpr uint32_t DISABLE = (1U << 0);
+	static constexpr uint32_t DISABLE_WRITE = (1U << 1);
+	static constexpr uint32_t ENABLE_REBOOT = (1U << 2);
+	static constexpr uint32_t ENABLE_UPTIME = (1U << 3);
+	static constexpr uint32_t DISPLAY_NAME = (1U << 4);
+	static constexpr uint32_t ENABLE_FACTORY = (1U << 5);
 };
 }  // namespace remoteconfigparams
+
+class RemoteConfigParamsStore {
+public:
+	static void Update(const struct remoteconfigparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::RCONFIG, pParams, sizeof(struct remoteconfigparams::Params));
+	}
+
+	static void Copy(struct remoteconfigparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::RCONFIG, pParams, sizeof(struct remoteconfigparams::Params));
+	}
+};
 
 class RemoteConfigParams {
 public:
