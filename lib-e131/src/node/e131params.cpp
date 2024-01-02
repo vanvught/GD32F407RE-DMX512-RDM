@@ -48,6 +48,12 @@
 
 #include "debug.h"
 
+namespace e131bridge {
+namespace configstore {
+extern uint32_t DMXPORT_OFFSET;
+}  // namespace configstore
+}  // namespace e131bridge
+
 static uint32_t s_nPortsMax;
 
 namespace e131params {
@@ -300,14 +306,14 @@ void E131Params::Builder(const struct Params *pParams, char *pBuffer, uint32_t n
 	DEBUG_EXIT
 }
 
-void E131Params::Set(uint32_t nPortIndexOffset) {
+void E131Params::Set() {
 	DEBUG_ENTRY
 
-	if (nPortIndexOffset <= e131bridge::MAX_PORTS) {
-		s_nPortsMax = std::min(e131params::MAX_PORTS, e131bridge::MAX_PORTS - nPortIndexOffset);
+	if (e131bridge::configstore::DMXPORT_OFFSET <= e131bridge::MAX_PORTS) {
+		s_nPortsMax = std::min(e131params::MAX_PORTS, e131bridge::MAX_PORTS - e131bridge::configstore::DMXPORT_OFFSET);
 	}
 
-	DEBUG_PRINTF("e131bridge::MAX_PORTS=%u, nPortIndexOffset=%u, s_nPortsMax=%u", e131bridge::MAX_PORTS, nPortIndexOffset, s_nPortsMax);
+	DEBUG_PRINTF("e131bridge::MAX_PORTS=%u, e131bridge::configstore::DMXPORT_OFFSET=%u, s_nPortsMax=%u", e131bridge::MAX_PORTS, e131bridge::configstore::DMXPORT_OFFSET, s_nPortsMax);
 
 	if (m_Params.nSetList == 0) {
 		return;
@@ -317,7 +323,7 @@ void E131Params::Set(uint32_t nPortIndexOffset) {
 	assert(p != nullptr);
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
-		const auto nOffset = nPortIndex + nPortIndexOffset;
+		const auto nOffset = nPortIndex + e131bridge::configstore::DMXPORT_OFFSET;
 
 		if (nOffset >= e131bridge::MAX_PORTS) {
 			DEBUG_EXIT

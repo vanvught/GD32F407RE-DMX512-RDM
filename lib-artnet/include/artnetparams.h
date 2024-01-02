@@ -143,7 +143,7 @@ public:
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}
 
-	void Set(uint32_t nPortIndexOffset);
+	void Set();
 
 	bool IsRdm() const {
 		return isMaskSet(artnetparams::Mask::ENABLE_RDM);

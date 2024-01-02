@@ -2,7 +2,7 @@
  * @file rdm_manufacturer_pid.h
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,7 @@ struct ManufacturerParamData {
 };
 
 bool handle_manufactureer_pid_get(const uint16_t nPid, const ManufacturerParamData *pIn, ManufacturerParamData *pOut, uint16_t& nReason);
-bool handle_manufactureer_pid_set(bool isBroadcast, const uint16_t nPid, const rdm::ParameterDescription &parameterDescription, const ManufacturerParamData *pIn, ManufacturerParamData *pOut, uint16_t& nReason);
+bool handle_manufactureer_pid_set(const bool isBroadcast, const uint16_t nPid, const rdm::ParameterDescription &parameterDescription, const ManufacturerParamData *pIn, ManufacturerParamData *pOut, uint16_t& nReason);
 }  // namespace rdm
 
 #endif /* RDM_MANUFACTURER_PID_H_ */

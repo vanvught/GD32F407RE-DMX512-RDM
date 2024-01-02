@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,6 @@
 #include "artnet.h"
 #include "artnetnode_ports.h"
 #include "artnettimecode.h"
-#include "artnetstore.h"
 #include "artnetdisplay.h"
 #include "artnettrigger.h"
 #if defined (RDM_CONTROLLER)
@@ -273,6 +272,9 @@ public:
 		return artnet::VERSION;
 	}
 
+	void SetOutputStyle(const uint32_t nPortIndex, lightset::OutputStyle outputStyle);
+	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const;
+
 	void SetFailSafe(const artnetnode::FailSafe failsafe);
 
 	artnetnode::FailSafe GetFailSafe() {
@@ -299,58 +301,6 @@ public:
 		__builtin_unreachable();
 		return artnetnode::FailSafe::OFF;
 	}
-
-#if defined (OUTPUT_HAVE_STYLESWITCH)
-	void SetOutputStyle(const uint32_t nPortIndex, lightset::OutputStyle outputStyle) {
-		assert(nPortIndex < artnetnode::MAX_PORTS);
-
-		if (outputStyle == GetOutputStyle(nPortIndex)) {
-			return;
-		}
-
-		if ((m_State.status == artnetnode::Status::ON) && (m_pLightSet != nullptr)) {
-			m_pLightSet->SetOutputStyle(nPortIndex, outputStyle);
-			outputStyle = m_pLightSet->GetOutputStyle(nPortIndex);
-		}
-
-		if (outputStyle == lightset::OutputStyle::CONSTANT) {
-			m_OutputPort[nPortIndex].GoodOutputB |= artnet::GoodOutputB::STYLE_CONSTANT;
-		} else {
-			m_OutputPort[nPortIndex].GoodOutputB &= static_cast<uint8_t>(~artnet::GoodOutputB::STYLE_CONSTANT);
-		}
-
-#if defined (OUTPUT_DMX_SEND) || defined (OUTPUT_DMX_SEND_MULTI)
-		/**
-		 * FIXME I do not like this hack. It should be handled in dmx.cpp
-		 */
-		if ((m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT)
-				&& (outputStyle == lightset::OutputStyle::CONSTANT)
-				&& (m_pLightSet != nullptr)) {
-			if (m_OutputPort[nPortIndex].IsTransmitting) {
-				m_OutputPort[nPortIndex].IsTransmitting = false;
-				m_pLightSet->Stop(nPortIndex);
-			}
-		}
-#endif
-
-		m_State.IsSynchronousMode = false;
-
-		if (m_State.status == artnetnode::Status::ON) {
-			if (m_pArtNetStore != nullptr) {
-				m_pArtNetStore->SaveOutputStyle(nPortIndex, outputStyle);
-			}
-
-			artnet::display_outputstyle(nPortIndex, outputStyle);
-		}
-	}
-
-	lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const {
-		assert(nPortIndex < artnetnode::MAX_PORTS);
-
-		const auto isStyleConstant = (m_OutputPort[nPortIndex].GoodOutputB & artnet::GoodOutputB::STYLE_CONSTANT) == artnet::GoodOutputB::STYLE_CONSTANT;
-		return isStyleConstant ? lightset::OutputStyle::CONSTANT : lightset::OutputStyle::DELTA;
-	}
-#endif
 
 	void SetOutput(LightSet *pLightSet) {
 		m_pLightSet = pLightSet;
@@ -497,10 +447,6 @@ public:
 	}
 
 	void SetTimeCodeIp(uint32_t nDestinationIp);
-
-	void SetArtNetStore(ArtNetStore *pArtNetStore) {
-		m_pArtNetStore = pArtNetStore;
-	}
 
 	void SetArtNetTrigger(ArtNetTrigger *pArtNetTrigger) {
 		m_pArtNetTrigger = pArtNetTrigger;
@@ -725,7 +671,6 @@ private:
 
 	ArtNetTimeCode *m_pArtNetTimeCode { nullptr };
 	ArtNetTrigger *m_pArtNetTrigger { nullptr };
-	ArtNetStore *m_pArtNetStore { nullptr };
 
 	artnetnode::Node m_Node;
 	artnetnode::State m_State;

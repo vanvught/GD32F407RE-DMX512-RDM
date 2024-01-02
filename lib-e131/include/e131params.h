@@ -134,7 +134,7 @@ public:
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}
 
-	void Set(uint32_t nPortIndexOffset);
+	void Set();
 
 	uint16_t GetUniverse(uint32_t nPortIndex, bool &IsSet) const {
 		if (nPortIndex < e131params::MAX_PORTS) {

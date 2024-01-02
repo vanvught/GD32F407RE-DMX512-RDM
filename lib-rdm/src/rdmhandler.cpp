@@ -2,7 +2,7 @@
  * @file rdmhandler.cpp
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -136,9 +136,9 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS_SUB_DEVICES[] {
 
 #if defined (ENABLE_RDM_MANUFACTURER_PIDS)
 # if defined (CONFIG_RDM_MANUFACTURER_PIDS_SET)
-const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, nullptr, 0, false, true, false };
+const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, &RDMHandler::SetManufacturerPid, 0, false, true, false };
 # else
-const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, nullptr, 0, false, true, false };
+const RDMHandler::PidDefinition RDMHandler::PID_DEFINITION_MANUFACTURER_GENERAL { 0, &RDMHandler::GetManufacturerPid, nullptr,                         0, false, true, false };
 # endif
 #endif
 
@@ -573,6 +573,27 @@ void RDMHandler::GetManufacturerPid(__attribute__((unused))  uint16_t nSubDevice
 	RespondMessageNack(nReason);
 }
 #  if defined (CONFIG_RDM_MANUFACTURER_PIDS_SET)
+void RDMHandler::SetManufacturerPid(bool IsBroadcast, __attribute__((unused)) uint16_t nSubDevice) {
+	const auto *pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc *>(m_pRdmDataIn);
+	auto *pRdmDataOut = reinterpret_cast<struct TRdmMessage *>(m_pRdmDataOut);
+
+	const auto nPid = static_cast<uint16_t>(pRdmDataIn->param_id[0] + (pRdmDataIn->param_id[1] << 8));
+	const rdm::ManufacturerParamData pIn = { pRdmDataIn->param_data_length, const_cast<uint8_t *>(pRdmDataIn->param_data) };
+	rdm::ManufacturerParamData pOut = { 0, pRdmDataOut->param_data };
+	uint16_t nReason = E120_NR_UNKNOWN_PID;
+
+	for (uint32_t nIndex = 0; nIndex < GetParameterDescriptionCount(); nIndex++) {
+		if (PARAMETER_DESCRIPTIONS[nIndex].pid == nPid) {
+			if (rdm::handle_manufactureer_pid_set(IsBroadcast, nPid, PARAMETER_DESCRIPTIONS[nIndex], &pIn, &pOut, nReason)) {
+				pRdmDataOut->param_data_length = pOut.nPdl;
+				RespondMessageAck();
+				return;
+			}
+		}
+	}
+
+	RespondMessageNack(nReason);
+}
 #  endif // CONFIG_RDM_MANUFACTURER_PIDS_SET
 # endif	// ENABLE_RDM_MANUFACTURER_PIDS
 #endif

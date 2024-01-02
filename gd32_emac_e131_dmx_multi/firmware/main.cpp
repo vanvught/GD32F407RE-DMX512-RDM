@@ -62,11 +62,14 @@
 
 #include "configstore.h"
 
-
 #include "firmwareversion.h"
 #include "software_version.h"
 
-static constexpr uint32_t DMXPORT_OFFSET = 0;
+namespace e131bridge {
+namespace configstore {
+uint32_t DMXPORT_OFFSET = 0;
+}  // namespace configstore
+}  // namespace e131bridge
 
 void Hardware::RebootHandler() {
 	Dmx::Get()->Blackout();
@@ -96,7 +99,7 @@ void main() {
 
 	E131Params e131params;
 	e131params.Load();
-	e131params.Set(DMXPORT_OFFSET);
+	e131params.Set();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		bool bIsSet;
@@ -104,15 +107,15 @@ void main() {
 		bridge.SetUniverse(nPortIndex, e131params.GetDirection(nPortIndex), nUniverse);
 	}
 
-	DmxParams dmxparams;
 	Dmx dmx;
 
+	DmxParams dmxparams;
 	dmxparams.Load();
 	dmxparams.Set(&dmx);
 
-	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
+	for (uint32_t nPortIndex = e131bridge::configstore::DMXPORT_OFFSET; nPortIndex < e131bridge::MAX_PORTS; nPortIndex++) {
 		uint16_t nUniverse;
-		const auto nDmxPortIndex = nPortIndex - DMXPORT_OFFSET;
+		const auto nDmxPortIndex = nPortIndex - e131bridge::configstore::DMXPORT_OFFSET;
 
 		if (bridge.GetUniverse(nPortIndex, nUniverse, lightset::PortDir::OUTPUT)) {
 			dmx.SetPortDirection(nDmxPortIndex, dmx::PortDirection::OUTP, false);

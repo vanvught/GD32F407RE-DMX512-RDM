@@ -70,7 +70,6 @@
 /* artnet.txt */
 # include "artnetnode.h"
 # include "artnetparams.h"
-# include "storeartnet.h"
 #endif
 
 #if defined (NODE_E131)
@@ -110,7 +109,6 @@
 /* node.txt */
 # include "node.h"
 # include "nodeparams.h"
-# include "storenode.h"
 #endif
 
 /**

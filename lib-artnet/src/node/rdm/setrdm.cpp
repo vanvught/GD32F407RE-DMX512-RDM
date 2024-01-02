@@ -2,7 +2,7 @@
  * @file setrdm.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 #include <cstdint>
 
 #include "artnetnode.h"
+#include "artnetstore.h"
 
 #include "debug.h"
 
@@ -47,13 +48,9 @@ void ArtNetNode::SetRdm(const uint32_t nPortIndex, const bool bEnable) {
 	}
 
 	if (m_State.status == artnetnode::Status::ON) {
-		if (m_pArtNetStore != nullptr) {
-			m_pArtNetStore->SaveRdmEnabled(nPortIndex, bEnable);
-		}
-
+		ArtNetStore::SaveRdmEnabled(nPortIndex, bEnable);
 		artnet::display_rdm_enabled(nPortIndex, bEnable);
 	}
-
 
 	DEBUG_EXIT
 }

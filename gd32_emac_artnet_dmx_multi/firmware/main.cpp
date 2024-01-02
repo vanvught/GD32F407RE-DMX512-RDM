@@ -55,12 +55,15 @@
 #include "remoteconfigparams.h"
 
 #include "configstore.h"
-#include "storeartnet.h"
 
 #include "firmwareversion.h"
 #include "software_version.h"
 
-static constexpr uint32_t DMXPORT_OFFSET = 0;
+namespace artnetnode {
+namespace configstore {
+uint32_t DMXPORT_OFFSET = 0;
+}  // namespace configstore
+}  // namespace artnetnode
 
 void Hardware::RebootHandler() {
 	Dmx::Get()->Blackout();
@@ -88,27 +91,22 @@ void main() {
 
 	ArtNetNode node;
 
-	StoreArtNet storeArtNet(DMXPORT_OFFSET);
-	node.SetArtNetStore(&storeArtNet);
-
 	ArtNetParams artnetParams;
-
-	if (artnetParams.Load()) {
-		artnetParams.Set(DMXPORT_OFFSET);
-	}
+	artnetParams.Load();
+	artnetParams.Set();
 
 	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
 		node.SetUniverse(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniverse(nPortIndex));
 	}
 
-	DmxParams dmxparams;
 	Dmx dmx;
 
+	DmxParams dmxparams;
 	dmxparams.Load();
 	dmxparams.Set(&dmx);
 
-	for (uint32_t nPortIndex = DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		const auto nDmxPortIndex = nPortIndex - DMXPORT_OFFSET;
+	for (uint32_t nPortIndex = artnetnode::configstore::DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
+		const auto nDmxPortIndex = nPortIndex - artnetnode::configstore::DMXPORT_OFFSET;
 		const auto portDirection = (node.GetPortDirection(nPortIndex) == lightset::PortDir::OUTPUT ? dmx::PortDirection::OUTP : dmx::PortDirection::INP);
 		dmx.SetPortDirection(nDmxPortIndex, portDirection , false);
 	}

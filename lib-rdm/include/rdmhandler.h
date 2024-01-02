@@ -2,7 +2,7 @@
  * @file rdmhandler.h
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -129,7 +129,7 @@ private:
 #if defined (ENABLE_RDM_PRESET_PLAYBACK)
 	void SetPresetPlayback(bool IsBroadcast, uint16_t nSubDevice);
 #endif
-#if defined (ENABLE_RDM_MANUFACTURER_PIDS)
+#if defined (ENABLE_RDM_MANUFACTURER_PIDS) && defined (CONFIG_RDM_MANUFACTURER_PIDS_SET)
 	void SetManufacturerPid(bool IsBroadcast, uint16_t nSubDevice);
 #endif
 	// ANSI E1.37-1

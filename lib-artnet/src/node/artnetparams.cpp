@@ -59,6 +59,12 @@
 
 #include "debug.h"
 
+namespace artnetnode {
+namespace configstore {
+extern uint32_t DMXPORT_OFFSET;
+}  // namespace configstore
+}  // namespace artnetnode
+
 static uint32_t s_nPortsMax;
 
 namespace artnetparams {
@@ -360,6 +366,13 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	builder.Add(LightSetParamsConst::FAILSAFE, lightset::get_failsafe(static_cast<lightset::FailSafe>(m_Params.nFailSafe)), isMaskSet(Mask::FAILSAFE));
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
+		const auto nOffset = nPortIndex + artnetnode::configstore::DMXPORT_OFFSET;
+
+		if (nOffset >= artnetnode::MAX_PORTS) {
+			DEBUG_PUTS("break");
+			break;
+		}
+
 		builder.Add(LightSetParamsConst::UNIVERSE_PORT[nPortIndex], m_Params.nUniverse[nPortIndex], isMaskSet(Mask::UNIVERSE_A << nPortIndex));
 		const auto portDir = portdir_get(nPortIndex);
 		const auto isDefault = (portDir == lightset::PortDir::OUTPUT);
@@ -368,8 +381,9 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 		const auto isLabelSet = isMaskSet(Mask::LABEL_A << nPortIndex);
 
 		if (!isLabelSet) {
-			memcpy(m_Params.aLabel[nPortIndex], ArtNetNode::Get()->GetShortName(nPortIndex), artnet::SHORT_NAME_LENGTH);
+			memcpy(m_Params.aLabel[nPortIndex], ArtNetNode::Get()->GetShortName(nOffset), artnet::SHORT_NAME_LENGTH);
 		}
+
 		builder.Add(LightSetParamsConst::NODE_LABEL[nPortIndex], reinterpret_cast<const char *>(m_Params.aLabel[nPortIndex]), isLabelSet);
 	}
 
@@ -420,14 +434,14 @@ void ArtNetParams::Builder(const struct Params *pParams, char *pBuffer, uint32_t
 	DEBUG_EXIT
 }
 
-void ArtNetParams::Set(uint32_t nPortIndexOffset) {
+void ArtNetParams::Set() {
 	DEBUG_ENTRY
 
-	if (nPortIndexOffset <= artnetnode::MAX_PORTS) {
-		s_nPortsMax = std::min(artnet::PORTS, artnetnode::MAX_PORTS - nPortIndexOffset);
+	if (artnetnode::configstore::DMXPORT_OFFSET <= artnetnode::MAX_PORTS) {
+		s_nPortsMax = std::min(artnet::PORTS, artnetnode::MAX_PORTS - artnetnode::configstore::DMXPORT_OFFSET);
 	}
 
-	DEBUG_PRINTF("artnetnode::MAX_PORTS=%u, nPortIndexOffset=%u, s_nPortsMax=%u", artnetnode::MAX_PORTS, nPortIndexOffset, s_nPortsMax);
+	DEBUG_PRINTF("artnetnode::MAX_PORTS=%u, artnetnode::configstore::DMXPORT_OFFSET=%u, s_nPortsMax=%u", artnetnode::MAX_PORTS, artnetnode::configstore::DMXPORT_OFFSET, s_nPortsMax);
 
 	auto *const p = ArtNetNode::Get();
 	assert(p != nullptr);
@@ -437,7 +451,7 @@ void ArtNetParams::Set(uint32_t nPortIndexOffset) {
 	}
 
 	for (uint32_t nPortIndex = 0; nPortIndex < s_nPortsMax; nPortIndex++) {
-		const auto nOffset = nPortIndex + nPortIndexOffset;
+		const auto nOffset = nPortIndex + artnetnode::configstore::DMXPORT_OFFSET;
 
 		if (nOffset >= artnetnode::MAX_PORTS) {
 			DEBUG_PUTS("break");
