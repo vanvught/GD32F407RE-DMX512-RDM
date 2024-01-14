@@ -2,12 +2,11 @@
     \file    dfu_mem.h
     \brief   USB DFU device media access layer header file
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -36,7 +35,7 @@ OF SUCH DAMAGE.
 #ifndef __DFU_MEM_H
 #define __DFU_MEM_H
 
-#include "usbd_conf.h"
+#include "usb_conf.h"
 
 typedef struct _dfu_mem_prop
 {
@@ -82,4 +81,3 @@ uint8_t* dfu_mem_read(uint8_t *buf, uint32_t addr, uint32_t len);
 uint8_t dfu_mem_getstatus(uint32_t addr, uint8_t cmd, uint8_t *buffer);
 
 #endif /* __DFU_MEM_H */
-

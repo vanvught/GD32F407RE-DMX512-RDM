@@ -2,7 +2,7 @@
  * usb_host.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,13 @@
 
 #include "gd32.h"
 
+/**
+ * Needed for older GD32F firmware
+ */
+#if !defined(GPIO_OSPEED_MAX)
+# define GPIO_OSPEED_MAX	GPIO_OSPEED_200MHZ
+#endif
+
 extern "C" {
 #include "usbh_core.h"
 #include "usbh_msc_core.h"
@@ -43,7 +50,7 @@ static void usb_gpio_config() {
 
     /* USBFS_DM(PA11) and USBFS_DP(PA12) GPIO pin configuration */
     gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_11 | GPIO_PIN_12);
-    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_200MHZ, GPIO_PIN_11 | GPIO_PIN_12);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_MAX, GPIO_PIN_11 | GPIO_PIN_12);
 
     gpio_af_set(GPIOA, GPIO_AF_10, GPIO_PIN_11 | GPIO_PIN_12);
 #endif

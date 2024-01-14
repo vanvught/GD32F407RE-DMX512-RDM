@@ -32,10 +32,6 @@
 
 #include "mdns.h"
 
-#if defined (ENABLE_HTTPD)
-# include "httpd/httpd.h"
-#endif
-
 #include "displayudf.h"
 #include "displayudfparams.h"
 #include "displayhandler.h"
@@ -82,10 +78,6 @@ void main() {
 
 	fw.Print("Art-Net 4 DMX/RDM controller {" STR(LIGHTSET_PORTS) " Universes}");
 	nw.Print();
-
-#if defined (ENABLE_HTTPD)
-	HttpDaemon httpDaemon;
-#endif
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
@@ -175,9 +167,6 @@ void main() {
 			dmxConfigUdp.Run();
 		}
 		mDns.Run();
-#if defined (ENABLE_HTTPD)
-		httpDaemon.Run();
-#endif
 		display.Run();
 		hw.Run();
 	}

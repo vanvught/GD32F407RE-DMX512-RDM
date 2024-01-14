@@ -2,12 +2,11 @@
     \file    usbh_hid_core.h
     \brief   header file for the usbh_hid_core.c
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -100,7 +99,7 @@ typedef struct _hid_process
     __IO uint32_t        timer;
     usb_desc_hid         hid_desc;
 
-    hid_state            state; 
+    hid_state            state;
     hid_ctlstate         ctl_state;
 
     usbh_status          (*init)(usb_core_driver *udev, usbh_host *uhost);

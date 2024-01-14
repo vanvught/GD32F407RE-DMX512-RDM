@@ -2,7 +2,7 @@
  * @file dmx.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,13 @@ void console_error(const char *);
 # define UNUSED
 # else
 # define UNUSED __attribute__((unused))
+#endif
+
+/**
+ * Needed for older GD32F firmware
+ */
+#if !defined(USART_TRANSMIT_DMA_ENABLE)
+# define USART_TRANSMIT_DMA_ENABLE	USART_DENT_ENABLE
 #endif
 
 /**
@@ -923,7 +930,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART0_DMA, USART0_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(USART0, USART_DENT_ENABLE);
+			usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -962,7 +969,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART1_DMA, USART1_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(USART1, USART_DENT_ENABLE);
+			usart_dma_transmit_config(USART1, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1001,7 +1008,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(USART2, USART_DENT_ENABLE);
+			usart_dma_transmit_config(USART2, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1040,7 +1047,7 @@ void TIMER1_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART3_DMA, UART3_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(UART3, USART_DENT_ENABLE);
+			usart_dma_transmit_config(UART3, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1081,7 +1088,7 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART4_DMA, UART4_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(UART4, USART_DENT_ENABLE);
+			usart_dma_transmit_config(UART4, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1119,7 +1126,7 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(USART5_DMA, USART5_TX_DMA_CH) = dmaCHCTL;
-			usart_dma_transmit_config(USART5, USART_DENT_ENABLE);
+			usart_dma_transmit_config(USART5, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1158,7 +1165,7 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART6_DMA, UART6_TX_DMA_CH)= dmaCHCTL;
-			usart_dma_transmit_config(UART6, USART_DENT_ENABLE);
+			usart_dma_transmit_config(UART6, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:
@@ -1197,7 +1204,7 @@ void TIMER4_IRQHandler() {
 			dmaCHCTL |= DMA_CHXCTL_CHEN;
 			dmaCHCTL |= DMA_INTERRUPT_ENABLE;
 			DMA_CHCTL(UART7_DMA, UART7_TX_DMA_CH)= dmaCHCTL;
-			usart_dma_transmit_config(UART7, USART_DENT_ENABLE);
+			usart_dma_transmit_config(UART7, USART_TRANSMIT_DMA_ENABLE);
 		}
 			break;
 		default:

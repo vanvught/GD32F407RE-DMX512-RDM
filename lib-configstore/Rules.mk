@@ -1,7 +1,5 @@
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
-EXTRA_INCLUDES=../lib-flashcode/include ../lib-hal/include
-
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring CONFIG_STORE_USE_FILE,$(MAKE_FLAGS)))
 		EXTRA_SRCDIR+=device/file

@@ -1,14 +1,12 @@
 /*!
     \file    gd32f4xx_wwdgt.h
     \brief   definitions for the WWDGT 
-    
-    \version 2016-08-15, V1.0.0, firmware for GD32F4xx
-    \version 2018-12-12, V2.0.0, firmware for GD32F4xx
-    \version 2020-09-30, V2.1.0, firmware for GD32F4xx
+
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2020, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -40,7 +38,7 @@ OF SUCH DAMAGE.
 #include "gd32f4xx.h"
 
 /* WWDGT definitions */
-#define WWDGT                       WWDGT_BASE
+#define WWDGT                       WWDGT_BASE                      /*!< WWDGT base address */
 
 /* registers definitions */
 #define WWDGT_CTL                   REG32((WWDGT) + 0x00U)          /*!< WWDGT control register */
@@ -66,6 +64,11 @@ OF SUCH DAMAGE.
 #define WWDGT_CFG_PSC_DIV2          CFG_PSC(1)                      /*!< the time base of WWDGT = (PCLK1/4096)/2 */
 #define WWDGT_CFG_PSC_DIV4          CFG_PSC(2)                      /*!< the time base of WWDGT = (PCLK1/4096)/4 */
 #define WWDGT_CFG_PSC_DIV8          CFG_PSC(3)                      /*!< the time base of WWDGT = (PCLK1/4096)/8 */
+
+/* write value to WWDGT_CTL_CNT bit field */
+#define CTL_CNT(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0))
+/* write value to WWDGT_CFG_WIN bit field */
+#define CFG_WIN(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0))
 
 /* function declarations */
 /* reset the window watchdog timer configuration */

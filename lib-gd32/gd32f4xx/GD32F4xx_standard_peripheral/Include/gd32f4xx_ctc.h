@@ -2,13 +2,11 @@
     \file    gd32f4xx_ctc.h
     \brief   definitions for the CTC
 
-    \version 2016-08-15, V1.0.0, firmware for GD32F4xx
-    \version 2018-12-12, V2.0.0, firmware for GD32F4xx
-    \version 2020-09-30, V2.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2020, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -64,7 +62,6 @@ OF SUCH DAMAGE.
 #define CTC_CTL1_CKLIM               BITS(16,23)               /*!< clock trim base limit value */
 #define CTC_CTL1_REFPSC              BITS(24,26)               /*!< reference signal source prescaler */
 #define CTC_CTL1_REFSEL              BITS(28,29)               /*!< reference signal source selection */
-#define CTC_CTL1_USBSOFSEL           BIT(30)                   /*!< USBFS or USBHS SOF signal selection */
 #define CTC_CTL1_REFPOL              BIT(31)                   /*!< reference signal source polarity */
 
 /* CTC_STAT */
@@ -93,15 +90,10 @@ OF SUCH DAMAGE.
 #define CTC_REFSOURCE_POLARITY_FALLING                   CTC_CTL1_REFPOL              /*!< reference signal source polarity is falling edge*/
 #define CTC_REFSOURCE_POLARITY_RISING                    ((uint32_t)0x00000000U)      /*!< reference signal source polarity is rising edge*/
 
-/* USBFS or USBHS SOF signal selection definitions */
-#define CTC_USBSOFSEL_USBHS                              CTC_CTL1_USBSOFSEL           /*!< USBHS SOF signal is selected*/
-#define CTC_USBSOFSEL_USBFS                              ((uint32_t)0x00000000U)      /*!< USBFS SOF signal is selected*/
-
 /* reference signal source selection definitions */
 #define CTL1_REFSEL(regval)                              (BITS(28,29) & ((uint32_t)(regval) << 28))
 #define CTC_REFSOURCE_GPIO                               CTL1_REFSEL(0)               /*!< GPIO is selected */
 #define CTC_REFSOURCE_LXTAL                              CTL1_REFSEL(1)               /*!< LXTAL is clock selected */
-#define CTC_REFSOURCE_USBSOF                             CTL1_REFSEL(2)               /*!< USBSOF is selected */
 
 /* reference signal source prescaler definitions */
 #define CTL1_REFPSC(regval)                              (BITS(24,26) & ((uint32_t)(regval) << 24))
@@ -155,8 +147,6 @@ void ctc_hardware_trim_mode_config(uint32_t hardmode);
 
 /* configure reference signal source polarity */
 void ctc_refsource_polarity_config(uint32_t polarity);
-/* select USBFS or USBHS SOF signal */
-void ctc_usbsof_signal_select(uint32_t usbsof);
 /* select reference signal source */
 void ctc_refsource_signal_select(uint32_t refs);
 /* configure reference signal source prescaler */

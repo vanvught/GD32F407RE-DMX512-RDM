@@ -1,14 +1,12 @@
 /*!
     \file    gd32f4xx_fwdgt.h
     \brief   definitions for the FWDGT
-    
-    \version 2016-08-15, V1.0.0, firmware for GD32F4xx
-    \version 2018-12-12, V2.0.0, firmware for GD32F4xx
-    \version 2020-09-30, V2.1.0, firmware for GD32F4xx
+
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2020, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -40,7 +38,7 @@ OF SUCH DAMAGE.
 #include "gd32f4xx.h"
 
 /* FWDGT definitions */
-#define FWDGT                       FWDGT_BASE
+#define FWDGT                       FWDGT_BASE                      /*!< FWDGT base address */
 
 /* registers definitions */
 #define FWDGT_CTL                   REG32((FWDGT) + 0x00U)          /*!< FWDGT control register */
@@ -87,6 +85,9 @@ OF SUCH DAMAGE.
 #define FWDGT_FLAG_PUD              FWDGT_STAT_PUD                  /*!< FWDGT prescaler divider value update flag */
 #define FWDGT_FLAG_RUD              FWDGT_STAT_RUD                  /*!< FWDGT counter reload value update flag */
 
+/* write value to FWDGT_RLD_RLD bit field */
+#define RLD_RLD(regval)             (BITS(0,11) & ((uint32_t)(regval) << 0))
+
 /* function declarations */
 /* enable write access to FWDGT_PSC and FWDGT_RLD */
 void fwdgt_write_enable(void);
@@ -95,6 +96,10 @@ void fwdgt_write_disable(void);
 /* start the free watchdog timer counter */
 void fwdgt_enable(void);
 
+/* configure the free watchdog timer counter prescaler value */
+ErrStatus fwdgt_prescaler_value_config(uint16_t prescaler_value);
+/* configure the free watchdog timer counter reload value */
+ErrStatus fwdgt_reload_value_config(uint16_t reload_value);
 /* reload the counter of FWDGT */
 void fwdgt_counter_reload(void);
 /* configure counter reload value, and prescaler divider value */

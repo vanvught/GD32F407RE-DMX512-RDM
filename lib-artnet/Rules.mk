@@ -1,4 +1,4 @@
-EXTRA_INCLUDES+=../lib-lightset/include ../lib-properties/include ../lib-hal/include ../lib-network/include ../lib-configstore/include
+EXTRA_INCLUDES+=../lib-lightset/include ../lib-properties/include ../lib-network/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring NODE_ARTNET,$(MAKE_FLAGS)), NODE_ARTNET)

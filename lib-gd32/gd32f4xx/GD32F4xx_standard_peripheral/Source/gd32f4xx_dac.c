@@ -1,36 +1,34 @@
 /*!
     \file    gd32f4xx_dac.c
     \brief   DAC driver
-    
-    \version 2016-08-15, V1.0.0, firmware for GD32F4xx
-    \version 2018-12-12, V2.0.0, firmware for GD32F4xx
-    \version 2020-09-30, V2.1.0, firmware for GD32F4xx
+
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2020, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
@@ -42,7 +40,7 @@ OF SUCH DAMAGE.
 #define DH_8BIT_OFFSET            ((uint32_t)8U)
 
 /*!
-    \brief    deinitialize DAC
+    \brief      deinitialize DAC
     \param[in]  none
     \param[out] none
     \retval     none
@@ -54,97 +52,97 @@ void dac_deinit(void)
 }
 
 /*!
-    \brief    enable DAC
+    \brief      enable DAC
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_enable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL |= DAC_CTL_DEN0;
-    }else{
+    } else {
         DAC_CTL |= DAC_CTL_DEN1;
     }
-} 
+}
 
 /*!
-    \brief    disable DAC
+    \brief      disable DAC
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_disable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL &= ~DAC_CTL_DEN0;
-    }else{
+    } else {
         DAC_CTL &= ~DAC_CTL_DEN1;
     }
 }
 
 /*!
-    \brief    enable DAC DMA function
+    \brief      enable DAC DMA function
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_dma_enable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL |= DAC_CTL_DDMAEN0;
-    }else{
+    } else {
         DAC_CTL |= DAC_CTL_DDMAEN1;
     }
 }
 
 /*!
-    \brief    disable DAC DMA function
+    \brief      disable DAC DMA function
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_dma_disable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL &= ~DAC_CTL_DDMAEN0;
-    }else{
+    } else {
         DAC_CTL &= ~DAC_CTL_DDMAEN1;
     }
 }
 
 /*!
-    \brief    enable DAC output buffer
+    \brief      enable DAC output buffer
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_output_buffer_enable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL &= ~DAC_CTL_DBOFF0;
-    }else{
+    } else {
         DAC_CTL &= ~DAC_CTL_DBOFF1;
     }
 }
 
 /*!
-    \brief    disable DAC output buffer
+    \brief      disable DAC output buffer
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_output_buffer_disable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL |= DAC_CTL_DBOFF0;
-    }else{
+    } else {
         DAC_CTL |= DAC_CTL_DBOFF1;
     }
 }
 
 /*!
-    \brief    get DAC output value
+    \brief      get DAC output value
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     DAC output data
@@ -152,10 +150,10 @@ void dac_output_buffer_disable(uint32_t dac_periph)
 uint16_t dac_output_value_get(uint32_t dac_periph)
 {
     uint16_t data = 0U;
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* store the DAC0 output value */
         data = (uint16_t)DAC0_DO;
-    }else{
+    } else {
         /* store the DAC1 output value */
         data = (uint16_t)DAC1_DO;
     }
@@ -163,7 +161,7 @@ uint16_t dac_output_value_get(uint32_t dac_periph)
 }
 
 /*!
-    \brief    set the DAC specified data holding register value
+    \brief      set the DAC specified data holding register value
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  dac_align: data alignment
                 only one parameter can be selected which is shown as below:
@@ -176,8 +174,8 @@ uint16_t dac_output_value_get(uint32_t dac_periph)
 */
 void dac_data_set(uint32_t dac_periph, uint32_t dac_align, uint16_t data)
 {
-    if(DAC0 == dac_periph){
-        switch(dac_align){
+    if(DAC0 == dac_periph) {
+        switch(dac_align) {
         /* data right 12 bit alignment */
         case DAC_ALIGN_12B_R:
             DAC0_R12DH = data;
@@ -193,8 +191,8 @@ void dac_data_set(uint32_t dac_periph, uint32_t dac_align, uint16_t data)
         default:
             break;
         }
-    }else{
-        switch(dac_align){
+    } else {
+        switch(dac_align) {
         /* data right 12 bit alignment */
         case DAC_ALIGN_12B_R:
             DAC1_R12DH = data;
@@ -214,37 +212,37 @@ void dac_data_set(uint32_t dac_periph, uint32_t dac_align, uint16_t data)
 }
 
 /*!
-    \brief    enable DAC trigger
+    \brief      enable DAC trigger
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_trigger_enable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL |= DAC_CTL_DTEN0;
-    }else{
+    } else {
         DAC_CTL |= DAC_CTL_DTEN1;
     }
 }
 
 /*!
-    \brief    disable DAC trigger
+    \brief      disable DAC trigger
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_trigger_disable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_CTL &= ~DAC_CTL_DTEN0;
-    }else{
+    } else {
         DAC_CTL &= ~DAC_CTL_DTEN1;
     }
 }
 
 /*!
-    \brief    set DAC trigger source
+    \brief      set DAC trigger source
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  triggersource: external triggers of DAC
                 only one parameter can be selected which is shown as below:
@@ -259,13 +257,13 @@ void dac_trigger_disable(uint32_t dac_periph)
     \param[out] none
     \retval     none
 */
-void dac_trigger_source_config(uint32_t dac_periph,uint32_t triggersource)
+void dac_trigger_source_config(uint32_t dac_periph, uint32_t triggersource)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* configure DAC0 trigger source */
         DAC_CTL &= ~DAC_CTL_DTSEL0;
         DAC_CTL |= triggersource;
-    }else{
+    } else {
         /* configure DAC1 trigger source */
         DAC_CTL &= ~DAC_CTL_DTSEL1;
         DAC_CTL |= (triggersource << DAC1_REG_OFFSET);
@@ -273,36 +271,36 @@ void dac_trigger_source_config(uint32_t dac_periph,uint32_t triggersource)
 }
 
 /*!
-    \brief    enable DAC software trigger
+    \brief      enable DAC software trigger
     \param[in]  dac_periph: DACx(x = 0,1)
     \retval     none
 */
 void dac_software_trigger_enable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_SWT |= DAC_SWT_SWTR0;
-    }else{
+    } else {
         DAC_SWT |= DAC_SWT_SWTR1;
     }
 }
 
 /*!
-    \brief    disable DAC software trigger
+    \brief      disable DAC software trigger
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_software_trigger_disable(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_SWT &= ~DAC_SWT_SWTR0;
-    }else{
+    } else {
         DAC_SWT &= ~DAC_SWT_SWTR1;
     }
 }
 
 /*!
-    \brief    configure DAC wave mode
+    \brief      configure DAC wave mode
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  wave_mode: noise wave mode
                 only one parameter can be selected which is shown as below:
@@ -314,11 +312,11 @@ void dac_software_trigger_disable(uint32_t dac_periph)
 */
 void dac_wave_mode_config(uint32_t dac_periph, uint32_t wave_mode)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* configure DAC0 wave mode */
         DAC_CTL &= ~DAC_CTL_DWM0;
         DAC_CTL |= wave_mode;
-    }else{
+    } else {
         /* configure DAC1 wave mode */
         DAC_CTL &= ~DAC_CTL_DWM1;
         DAC_CTL |= (wave_mode << DAC1_REG_OFFSET);
@@ -326,7 +324,7 @@ void dac_wave_mode_config(uint32_t dac_periph, uint32_t wave_mode)
 }
 
 /*!
-    \brief    configure DAC wave bit width
+    \brief      configure DAC wave bit width
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  bit_width: noise wave bit width
                 only one parameter can be selected which is shown as below:
@@ -347,11 +345,11 @@ void dac_wave_mode_config(uint32_t dac_periph, uint32_t wave_mode)
 */
 void dac_wave_bit_width_config(uint32_t dac_periph, uint32_t bit_width)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* configure DAC0 wave bit width */
         DAC_CTL &= ~DAC_CTL_DWBW0;
         DAC_CTL |= bit_width;
-    }else{
+    } else {
         /* configure DAC1 wave bit width */
         DAC_CTL &= ~DAC_CTL_DWBW1;
         DAC_CTL |= (bit_width << DAC1_REG_OFFSET);
@@ -359,7 +357,7 @@ void dac_wave_bit_width_config(uint32_t dac_periph, uint32_t bit_width)
 }
 
 /*!
-    \brief    configure DAC LFSR noise mode
+    \brief      configure DAC LFSR noise mode
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  unmask_bits: unmask LFSR bits in DAC LFSR noise mode
                 only one parameter can be selected which is shown as below:
@@ -380,11 +378,11 @@ void dac_wave_bit_width_config(uint32_t dac_periph, uint32_t bit_width)
 */
 void dac_lfsr_noise_config(uint32_t dac_periph, uint32_t unmask_bits)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* configure DAC0 LFSR noise mode */
         DAC_CTL &= ~DAC_CTL_DWBW0;
         DAC_CTL |= unmask_bits;
-    }else{
+    } else {
         /* configure DAC1 LFSR noise mode */
         DAC_CTL &= ~DAC_CTL_DWBW1;
         DAC_CTL |= (unmask_bits << DAC1_REG_OFFSET);
@@ -392,7 +390,7 @@ void dac_lfsr_noise_config(uint32_t dac_periph, uint32_t unmask_bits)
 }
 
 /*!
-    \brief    configure DAC triangle noise mode
+    \brief      configure DAC triangle noise mode
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[in]  amplitude: triangle amplitude in DAC triangle noise mode
                 only one parameter can be selected which is shown as below:
@@ -413,11 +411,11 @@ void dac_lfsr_noise_config(uint32_t dac_periph, uint32_t unmask_bits)
 */
 void dac_triangle_noise_config(uint32_t dac_periph, uint32_t amplitude)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* configure DAC0 triangle noise mode */
         DAC_CTL &= ~DAC_CTL_DWBW0;
         DAC_CTL |= amplitude;
-    }else{
+    } else {
         /* configure DAC1 triangle noise mode */
         DAC_CTL &= ~DAC_CTL_DWBW1;
         DAC_CTL |= (amplitude << DAC1_REG_OFFSET);
@@ -425,7 +423,7 @@ void dac_triangle_noise_config(uint32_t dac_periph, uint32_t amplitude)
 }
 
 /*!
-    \brief    enable DAC concurrent mode
+    \brief      enable DAC concurrent mode
     \param[in]  none
     \param[out] none
     \retval     none
@@ -438,7 +436,7 @@ void dac_concurrent_enable(void)
 }
 
 /*!
-    \brief    disable DAC concurrent mode
+    \brief      disable DAC concurrent mode
     \param[in]  none
     \param[out] none
     \retval     none
@@ -451,7 +449,7 @@ void dac_concurrent_disable(void)
 }
 
 /*!
-    \brief    enable DAC concurrent software trigger function
+    \brief      enable DAC concurrent software trigger function
     \param[in]  none
     \param[out] none
     \retval     none
@@ -460,11 +458,11 @@ void dac_concurrent_software_trigger_enable(void)
 {
     uint32_t swt = 0U;
     swt = DAC_SWT_SWTR0 | DAC_SWT_SWTR1;
-    DAC_SWT |= (swt); 
+    DAC_SWT |= (swt);
 }
 
 /*!
-    \brief    disable DAC concurrent software trigger function
+    \brief      disable DAC concurrent software trigger function
     \param[in]  none
     \param[out] none
     \retval     none
@@ -477,7 +475,7 @@ void dac_concurrent_software_trigger_disable(void)
 }
 
 /*!
-    \brief    enable DAC concurrent buffer function
+    \brief      enable DAC concurrent buffer function
     \param[in]  none
     \param[out] none
     \retval     none
@@ -490,7 +488,7 @@ void dac_concurrent_output_buffer_enable(void)
 }
 
 /*!
-    \brief    disable DAC concurrent buffer function
+    \brief      disable DAC concurrent buffer function
     \param[in]  none
     \param[out] none
     \retval     none
@@ -503,7 +501,7 @@ void dac_concurrent_output_buffer_disable(void)
 }
 
 /*!
-    \brief    set DAC concurrent mode data holding register value
+    \brief      set DAC concurrent mode data holding register value
     \param[in]  dac_align: data alignment
                 only one parameter can be selected which is shown as below:
       \arg        DAC_ALIGN_8B_R: data right 8b alignment
@@ -517,7 +515,7 @@ void dac_concurrent_output_buffer_disable(void)
 void dac_concurrent_data_set(uint32_t dac_align, uint16_t data0, uint16_t data1)
 {
     uint32_t data = 0U;
-    switch(dac_align){
+    switch(dac_align) {
     /* data right 12b alignment */
     case DAC_ALIGN_12B_R:
         data = ((uint32_t)data1 << DH_12BIT_OFFSET) | data0;
@@ -539,7 +537,7 @@ void dac_concurrent_data_set(uint32_t dac_align, uint16_t data0, uint16_t data1)
 }
 
 /*!
-    \brief    enable DAC concurrent interrupt funcution
+    \brief      enable DAC concurrent interrupt funcution
     \param[in]  none
     \param[out] none
     \retval     none
@@ -552,7 +550,7 @@ void dac_concurrent_interrupt_enable(void)
 }
 
 /*!
-    \brief    disable DAC concurrent interrupt funcution
+    \brief      disable DAC concurrent interrupt funcution
     \param[in]  none
     \param[out] none
     \retval     none
@@ -565,37 +563,7 @@ void dac_concurrent_interrupt_disable(void)
 }
 
 /*!
-    \brief    enable DAC interrupt(DAC DMA underrun interrupt)
-    \param[in]  dac_periph: DACx(x = 0,1)
-    \param[out] none
-    \retval     none
-*/
-void dac_interrupt_enable(uint32_t dac_periph)
-{
-    if(DAC0 == dac_periph){
-        DAC_CTL |= DAC_CTL_DDUDRIE0;
-    }else{
-        DAC_CTL |= DAC_CTL_DDUDRIE1;
-    }
-}
-
-/*!
-    \brief    disable DAC interrupt(DAC DMA underrun interrupt)
-    \param[in]  dac_periph: DACx(x = 0,1)
-    \param[out] none
-    \retval     none
-*/
-void dac_interrupt_disable(uint32_t dac_periph)
-{
-    if(DAC0 == dac_periph){
-        DAC_CTL &= ~DAC_CTL_DDUDRIE0;
-    }else{
-        DAC_CTL &= ~DAC_CTL_DDUDRIE1;
-    }
-}
-
-/*!
-    \brief    get the specified DAC flag (DAC DMA underrun flag)
+    \brief      get the specified DAC flag (DAC DMA underrun flag)
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     FlagStatus: SET or RESET
@@ -603,14 +571,14 @@ void dac_interrupt_disable(uint32_t dac_periph)
 FlagStatus dac_flag_get(uint32_t dac_periph)
 {
     FlagStatus temp_flag = RESET;
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* check the DMA underrun flag */
-        if(RESET != (DAC_STAT & DAC_STAT_DDUDR0)){
+        if(RESET != (DAC_STAT & DAC_STAT_DDUDR0)) {
             temp_flag = SET;
         }
-    }else{
+    } else {
         /* check the DMA underrun flag */
-        if(RESET != (DAC_STAT & DAC_STAT_DDUDR1)){
+        if(RESET != (DAC_STAT & DAC_STAT_DDUDR1)) {
             temp_flag = SET;
         }
     }
@@ -618,22 +586,52 @@ FlagStatus dac_flag_get(uint32_t dac_periph)
 }
 
 /*!
-    \brief    clear the specified DAC flag (DAC DMA underrun flag)
+    \brief      clear the specified DAC flag (DAC DMA underrun flag)
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_flag_clear(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_STAT |= DAC_STAT_DDUDR0;
-    }else{
+    } else {
         DAC_STAT |= DAC_STAT_DDUDR1;
     }
 }
 
 /*!
-    \brief    get the specified DAC interrupt flag (DAC DMA underrun interrupt flag)
+    \brief      enable DAC interrupt(DAC DMA underrun interrupt)
+    \param[in]  dac_periph: DACx(x = 0,1)
+    \param[out] none
+    \retval     none
+*/
+void dac_interrupt_enable(uint32_t dac_periph)
+{
+    if(DAC0 == dac_periph) {
+        DAC_CTL |= DAC_CTL_DDUDRIE0;
+    } else {
+        DAC_CTL |= DAC_CTL_DDUDRIE1;
+    }
+}
+
+/*!
+    \brief      disable DAC interrupt(DAC DMA underrun interrupt)
+    \param[in]  dac_periph: DACx(x = 0,1)
+    \param[out] none
+    \retval     none
+*/
+void dac_interrupt_disable(uint32_t dac_periph)
+{
+    if(DAC0 == dac_periph) {
+        DAC_CTL &= ~DAC_CTL_DDUDRIE0;
+    } else {
+        DAC_CTL &= ~DAC_CTL_DDUDRIE1;
+    }
+}
+
+/*!
+    \brief      get the specified DAC interrupt flag (DAC DMA underrun interrupt flag)
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     FlagStatus: SET or RESET
@@ -643,18 +641,18 @@ FlagStatus dac_interrupt_flag_get(uint32_t dac_periph)
     FlagStatus temp_flag = RESET;
     uint32_t ddudr_flag = 0U, ddudrie_flag = 0U;
 
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         /* check the DMA underrun flag and DAC DMA underrun interrupt enable flag */
         ddudr_flag = DAC_STAT & DAC_STAT_DDUDR0;
         ddudrie_flag = DAC_CTL & DAC_CTL_DDUDRIE0;
-        if((RESET != ddudr_flag) && (RESET != ddudrie_flag)){
+        if((RESET != ddudr_flag) && (RESET != ddudrie_flag)) {
             temp_flag = SET;
         }
-    }else{
+    } else {
         /* check the DMA underrun flag and DAC DMA underrun interrupt enable flag */
         ddudr_flag = DAC_STAT & DAC_STAT_DDUDR1;
         ddudrie_flag = DAC_CTL & DAC_CTL_DDUDRIE1;
-        if((RESET != ddudr_flag) && (RESET != ddudrie_flag)){
+        if((RESET != ddudr_flag) && (RESET != ddudrie_flag)) {
             temp_flag = SET;
         }
     }
@@ -662,16 +660,16 @@ FlagStatus dac_interrupt_flag_get(uint32_t dac_periph)
 }
 
 /*!
-    \brief    clear the specified DAC interrupt flag (DAC DMA underrun interrupt flag)
+    \brief      clear the specified DAC interrupt flag (DAC DMA underrun interrupt flag)
     \param[in]  dac_periph: DACx(x = 0,1)
     \param[out] none
     \retval     none
 */
 void dac_interrupt_flag_clear(uint32_t dac_periph)
 {
-    if(DAC0 == dac_periph){
+    if(DAC0 == dac_periph) {
         DAC_STAT |= DAC_STAT_DDUDR0;
-    }else{
+    } else {
         DAC_STAT |= DAC_STAT_DDUDR1;
     }
 }

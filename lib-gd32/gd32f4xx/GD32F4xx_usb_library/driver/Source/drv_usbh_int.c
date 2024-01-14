@@ -2,12 +2,11 @@
     \file    drv_usbh_int.c
     \brief   USB host mode interrupt handler file
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -98,11 +97,6 @@ uint32_t usbh_isr (usb_core_driver *udev)
             retval |= usbh_int_port (udev);
         }
 
-        if (intr & GINTF_WKUPIF) {
-            /* clear interrupt */
-            udev->regs.gr->GINTF = GINTF_WKUPIF;
-        }
-
         if (intr & GINTF_DISCIF) {
             usbh_int_fop->disconnect(udev->host.data);
 
@@ -173,7 +167,7 @@ static uint32_t usbh_int_port (usb_core_driver *udev)
 
     __IO uint32_t port_state = *udev->regs.HPCS;
 
-    /* clear the interrupt bits in GINTSTS */
+    /* clear the interrupt bit in GINTF */
     port_state &= ~(HPCS_PE | HPCS_PCD | HPCS_PEDC);
 
     /* port connect detected */
@@ -278,7 +272,8 @@ static uint32_t usbh_int_pipe_in (usb_core_driver *udev, uint32_t pp_num)
 
     usb_pipe *pp = &udev->host.pipe[pp_num];
 
-    __IO uint32_t intr_pp = pp_reg->HCHINTF & pp_reg->HCHINTEN;
+    uint32_t intr_pp = pp_reg->HCHINTF;
+    intr_pp &= pp_reg->HCHINTEN;
 
     uint8_t ep_type = (uint8_t)((pp_reg->HCHCTL & HCHCTL_EPTYPE) >> 18U);
 
@@ -405,17 +400,17 @@ static uint32_t usbh_int_pipe_in (usb_core_driver *udev, uint32_t pp_num)
 #endif /* __ICCARM */
 static uint32_t usbh_int_pipe_out (usb_core_driver *udev, uint32_t pp_num)
 {
+    usbh_host *uhost = udev->host.data;
     usb_pr *pp_reg = udev->regs.pr[pp_num];
-
     usb_pipe *pp = &udev->host.pipe[pp_num];
-
-    uint32_t intr_pp = pp_reg->HCHINTF & pp_reg->HCHINTEN;
+    uint32_t intr_pp = pp_reg->HCHINTF;
+    intr_pp &= pp_reg->HCHINTEN;
 
     if (intr_pp & HCHINTF_ACK) {
         if (1U == udev->host.pipe[pp_num].do_ping) {
             udev->host.pipe[pp_num].do_ping = 0;
             pp->err_count = 0U;
-            usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_ACK, pp->pp_status);
+            usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_ACK, PIPE_NAK);
         }
 
         pp_reg->HCHINTF = HCHINTF_ACK;
@@ -437,19 +432,29 @@ static uint32_t usbh_int_pipe_out (usb_core_driver *udev, uint32_t pp_num)
         }
 
         pp->err_count = 0U;
+        if(USB_USE_FIFO == udev->bp.transfer_mode) {
+            usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_NAK, PIPE_NAK);
+        } else {
+            pp_reg->HCHINTF = HCHINTF_NAK;
+        }
         usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_NAK, PIPE_NAK);
     } else if (intr_pp & HCHINTF_USBER) {
         pp->err_count++;
         usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_USBER, PIPE_TRACERR);
     } else if (intr_pp & HCHINTF_NYET) {
-        if (0U == udev->host.pipe[pp_num].do_ping) {
-            if (1U == udev->host.pipe[pp_num].supp_ping) {
-                udev->host.pipe[pp_num].do_ping = 1;
+        if (CTL_STATUS_OUT != uhost->control.ctl_state) {
+            if (0U == udev->host.pipe[pp_num].do_ping) {
+                if (1U == udev->host.pipe[pp_num].supp_ping) {
+                    udev->host.pipe[pp_num].do_ping = 1;
+                }
             }
+
+            usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_NYET, PIPE_NYET);
+        } else {
+            usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_NYET, PIPE_XF);
         }
 
         pp->err_count = 0U;
-        usb_pp_halt (udev, (uint8_t)pp_num, HCHINTF_NYET, PIPE_NYET);
     } else if (intr_pp & HCHINTF_CH) {
         udev->regs.pr[pp_num]->HCHINTEN &= ~HCHINTEN_CHIE;
 
@@ -463,8 +468,14 @@ static uint32_t usbh_int_pipe_out (usb_core_driver *udev, uint32_t pp_num)
             break;
 
         case PIPE_NAK:
+            pp->urb_state = URB_NOTREADY;    
+            break;
         case PIPE_NYET:
-            pp->urb_state = URB_NOTREADY;
+            pp->urb_state = URB_DONE;
+
+            if ((uint8_t)USB_EPTYPE_BULK == ((pp_reg->HCHCTL & HCHCTL_EPTYPE) >> 18U)) {
+                pp->data_toggle_out ^= 1U; 
+            }
             break;
 
         case PIPE_STALL:
@@ -506,7 +517,7 @@ static uint32_t usbh_int_pipe_out (usb_core_driver *udev, uint32_t pp_num)
 #endif /* __ICCARM */
 static uint32_t usbh_int_rxfifonoempty (usb_core_driver *udev)
 {
-    uint32_t count = 0U;
+    uint32_t count = 0U, xfer_count = 0U;
 
     __IO uint8_t pp_num = 0U;
     __IO uint32_t rx_stat = 0U;
@@ -528,12 +539,14 @@ static uint32_t usbh_int_rxfifonoempty (usb_core_driver *udev)
             /* manage multiple transfer packet */
             udev->host.pipe[pp_num].xfer_buf += count;
             udev->host.pipe[pp_num].xfer_count += count;
+            
+            xfer_count = udev->host.pipe[pp_num].xfer_count;
 
-            udev->host.backup_xfercount[pp_num] = udev->host.pipe[pp_num].xfer_count;
+            udev->host.backup_xfercount[pp_num] = xfer_count;
 
             if (udev->regs.pr[pp_num]->HCHLEN & HCHLEN_PCNT) {
                 /* re-activate the channel when more packets are expected */
-                __IO uint32_t pp_ctl = udev->regs.pr[pp_num]->HCHCTL;
+                uint32_t pp_ctl = udev->regs.pr[pp_num]->HCHCTL;
 
                 pp_ctl |= HCHCTL_CEN;
                 pp_ctl &= ~HCHCTL_CDIS;

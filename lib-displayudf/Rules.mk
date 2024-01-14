@@ -1,5 +1,3 @@
-EXTRA_INCLUDES+=../lib-configstore/include
-
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring NODE_NODE,$(MAKE_FLAGS)))
 		EXTRA_INCLUDES+=../lib-node/include

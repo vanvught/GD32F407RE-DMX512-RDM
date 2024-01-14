@@ -1,8 +1,8 @@
 /**
- * @file devicesparamsconst.cpp
+ * @file e131const.h
  *
  */
-/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,13 @@
  * THE SOFTWARE.
  */
 
-#include "devicesparamsconst.h"
+#ifndef E131CONST_H_
+#define E131CONST_H_
 
-const char DevicesParamsConst::FILE_NAME[] = "devices.txt";
+#include <cstdint>
 
-const char DevicesParamsConst::TYPE[] = "led_type";
+struct E131Const {
+	static const uint8_t VERSION[];
+};
 
-const char DevicesParamsConst::MAP[] = "led_rgb_mapping";
-
-const char DevicesParamsConst::LED_T0H[] = "led_t0h";
-const char DevicesParamsConst::LED_T1H[] = "led_t1h";
-
-const char DevicesParamsConst::COUNT[] = "led_count";
-const char DevicesParamsConst::GROUPING_COUNT[] = "led_group_count";
-
-const char DevicesParamsConst::SPI_SPEED_HZ[] = "clock_speed_hz";
-
-const char DevicesParamsConst::GLOBAL_BRIGHTNESS[] = "global_brightness";
-
-const char DevicesParamsConst::ACTIVE_OUT[] = "active_out";
-
-const char DevicesParamsConst::TEST_PATTERN[] = "test_pattern";
-
-const char DevicesParamsConst::GAMMA_CORRECTION[] = "gamma_correction";
-const char DevicesParamsConst::GAMMA_VALUE[] = "gamma_value";
-
+#endif /* E131CONST_H_ */

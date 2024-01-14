@@ -2,7 +2,7 @@
  * @file gd32.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,25 +42,25 @@
 #ifdef __cplusplus
 # pragma GCC diagnostic ignored "-Wold-style-cast"
 # pragma GCC diagnostic ignored "-Wuseless-cast"
+# if __cplusplus > 201402
+// error: compound assignment with 'volatile'-qualified left operand is deprecated
+#  pragma GCC diagnostic ignored "-Wvolatile"
+# endif
 extern "C" {
 #endif
 
 #if defined  (GD32F10X_HD) || defined (GD32F10X_CL)
 # define GD32F10X
 # include "gd32f10x.h"
-# include "gd32f10x_libopt.h"
 #elif defined (GD32F20X_CL)
 # define GD32F20X
 # include "gd32f20x.h"
-# include "gd32f20x_libopt.h"
 #elif defined (GD32F30X_HD)
 # define GD32F30X
 # include "gd32f30x.h"
-# include "gd32f30x_libopt.h"
-#elif defined (GD32F407) || defined (GD32F450)
+#elif defined (GD32F407) || defined (GD32F450) || defined (GD32F470)
 # define GD32F4XX
 # include "gd32f4xx.h"
-# include "gd32f4xx_libopt.h"
 #else
 # error MCU is not supported
 #endif

@@ -2,7 +2,7 @@
  * @file remoteconfig.cpp
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -137,12 +137,10 @@
 #if defined(OUTPUT_DMX_STEPPER)
 /* sparkfun.txt */
 # include "sparkfundmxparams.h"
-# include "storesparkfundmx.h"
 /* motor%.txt */
 # include "modeparams.h"
 # include "motorparams.h"
 # include "l6470params.h"
-# include "storemotors.h"
 #endif
 
 #if defined (OUTPUT_DMX_SERIAL)
@@ -244,7 +242,7 @@ RemoteConfig *RemoteConfig::s_pThis;
 RemoteConfig::ListBin RemoteConfig::s_RemoteConfigListBin;
 char *RemoteConfig::s_pUdpBuffer;
 
-RemoteConfig::RemoteConfig(remoteconfig::Node node, remoteconfig::Output output, uint32_t nActiveOutputs):
+RemoteConfig::RemoteConfig(const remoteconfig::Node node, const remoteconfig::Output output, const uint32_t nActiveOutputs):
 	m_tNode(node),
 	m_tOutput(output),
 	m_nActiveOutputs(nActiveOutputs)
@@ -273,6 +271,11 @@ RemoteConfig::RemoteConfig(remoteconfig::Node node, remoteconfig::Output output,
 # if defined(ENABLE_TFTP_SERVER)
 	MDNS::Get()->ServiceRecordAdd(nullptr, mdns::Services::TFTP);
 # endif
+
+# if defined (ENABLE_HTTPD)
+	m_pHttpDaemon = new HttpDaemon;
+	assert(m_pHttpDaemon != nullptr);
+# endif
 #endif
 
 	DEBUG_EXIT
@@ -282,6 +285,12 @@ RemoteConfig::~RemoteConfig() {
 	DEBUG_ENTRY
 
 #if !defined (CONFIG_REMOTECONFIG_MINIMUM)
+# if defined (ENABLE_HTTPD)
+	if (m_pHttpDaemon != nullptr) {
+		delete m_pHttpDaemon;
+	}
+# endif
+
 	MDNS::Get()->ServiceRecordDelete(mdns::Services::CONFIG);
 #endif
 
@@ -477,12 +486,12 @@ void RemoteConfig::HandleDisplaySet() {
 
 	const auto nCmdLength = s_SET[static_cast<uint32_t>(remoteconfig::udp::set::Command::DISPLAY)].nLength;
 
-	if (m_nBytesReceived != (nCmdLength + 1)) {
+	if (m_nBytesReceived != (nCmdLength + 1U)) {
 		DEBUG_EXIT
 		return;
 	}
 
-	Display::Get()->SetSleep(s_pUdpBuffer[nCmdLength + 1] == '0');
+	Display::Get()->SetSleep(s_pUdpBuffer[nCmdLength + 1U] == '0');
 
 	DEBUG_PRINTF("%c", s_pUdpBuffer[nCmdLength + 1]);
 	DEBUG_EXIT
@@ -509,14 +518,14 @@ void RemoteConfig::HandleRdmSet() {
 
 	const auto nCmdLength = s_SET[static_cast<uint32_t>(remoteconfig::udp::set::Command::RDM)].nLength;
 
-	if (m_nBytesReceived != (nCmdLength + 1)) {
+	if (m_nBytesReceived != (nCmdLength + 1U)) {
 		DEBUG_EXIT
 		return;
 	}
 
-	ArtNetNode::Get()->SetRdm(s_pUdpBuffer[nCmdLength + 1] != '0');
+	ArtNetNode::Get()->SetRdm(s_pUdpBuffer[nCmdLength + 1U] != '0');
 
-	DEBUG_PRINTF("%c", s_pUdpBuffer[nCmdLength + 1]);
+	DEBUG_PRINTF("%c", s_pUdpBuffer[nCmdLength + 1U]);
 	DEBUG_EXIT
 }
 
@@ -788,7 +797,7 @@ void RemoteConfig::HandleGetDisplayTxt(uint32_t& nSize) {
 void RemoteConfig::HandleGetSparkFunTxt(uint32_t& nSize) {
 	DEBUG_ENTRY
 
-	SparkFunDmxParams sparkFunParams(StoreSparkFunDmx::Get());
+	SparkFunDmxParams sparkFunParams;
 	sparkFunParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSize);
 
 	DEBUG_EXIT
@@ -800,28 +809,28 @@ void RemoteConfig::HandleGetMotorTxt(uint32_t nMotorIndex, uint32_t& nSize) {
 
 	uint32_t nSizeSparkFun = 0;
 
-	SparkFunDmxParams sparkFunParams(StoreSparkFunDmx::Get());
+	SparkFunDmxParams sparkFunParams;
 	sparkFunParams.Save(s_pUdpBuffer, remoteconfig::udp::BUFFER_SIZE, nSizeSparkFun, nMotorIndex);
 
 	DEBUG_PRINTF("nSizeSparkFun=%d", nSizeSparkFun);
 
 	uint32_t nSizeMode = 0;
 
-	ModeParams modeParams(StoreMotors::Get());
+	ModeParams modeParams;
 	modeParams.Save(nMotorIndex, s_pUdpBuffer + nSizeSparkFun, remoteconfig::udp::BUFFER_SIZE - nSizeSparkFun, nSizeMode);
 
 	DEBUG_PRINTF("nSizeMode=%d", nSizeMode);
 
 	uint32_t nSizeMotor = 0;
 
-	MotorParams motorParams(StoreMotors::Get());
+	MotorParams motorParams;
 	motorParams.Save(nMotorIndex, s_pUdpBuffer + nSizeSparkFun + nSizeMode, remoteconfig::udp::BUFFER_SIZE - nSizeSparkFun - nSizeMode, nSizeMotor);
 
 	DEBUG_PRINTF("nSizeMotor=%d", nSizeMotor);
 
 	uint32_t nSizeL6470 = 0;
 
-	L6470Params l6470Params(StoreMotors::Get());
+	L6470Params l6470Params;
 	l6470Params.Save(nMotorIndex, s_pUdpBuffer + nSizeSparkFun + nSizeMode + nSizeMotor, remoteconfig::udp::BUFFER_SIZE - nSizeSparkFun - nSizeMode - nSizeMotor, nSizeL6470);
 
 	DEBUG_PRINTF("nSizeL6470=%d", nSizeL6470);
@@ -1103,8 +1112,7 @@ void RemoteConfig::HandleSetDisplayTxt() {
 void RemoteConfig::HandleSetSparkFunTxt() {
 	DEBUG_ENTRY
 
-	assert(StoreSparkFunDmx::Get() != nullptr);
-	SparkFunDmxParams sparkFunDmxParams(StoreSparkFunDmx::Get());
+	SparkFunDmxParams sparkFunDmxParams;
 	sparkFunDmxParams.Load(s_pUdpBuffer, m_nBytesReceived);
 
 	DEBUG_EXIT
@@ -1114,18 +1122,16 @@ void RemoteConfig::HandleSetMotorTxt(uint32_t nMotorIndex) {
 	DEBUG_ENTRY
 	DEBUG_PRINTF("nMotorIndex=%d", nMotorIndex);
 
-	assert(StoreSparkFunDmx::Get() != nullptr);
-	SparkFunDmxParams sparkFunDmxParams(StoreSparkFunDmx::Get());
+	SparkFunDmxParams sparkFunDmxParams;
 	sparkFunDmxParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
 
-	assert(StoreMotors::Get() != nullptr);
-	ModeParams modeParams(StoreMotors::Get());
+	ModeParams modeParams;
 	modeParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
 
-	MotorParams motorParams(StoreMotors::Get());
+	MotorParams motorParams;
 	motorParams.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
 
-	L6470Params l6470Params(StoreMotors::Get());
+	L6470Params l6470Params;
 	l6470Params.Load(nMotorIndex, s_pUdpBuffer, m_nBytesReceived);
 
 	DEBUG_EXIT
@@ -1236,12 +1242,12 @@ void RemoteConfig::HandleTftpSet() {
 
 	const auto nCmdLength = s_SET[static_cast<uint32_t>(remoteconfig::udp::set::Command::TFTP)].nLength;
 
-	if (m_nBytesReceived != (nCmdLength + 1)) {
+	if (m_nBytesReceived != (nCmdLength + 1U)) {
 		DEBUG_EXIT
 		return;
 	}
 
-	m_bEnableTFTP = (s_pUdpBuffer[nCmdLength + 1] != '0');
+	m_bEnableTFTP = (s_pUdpBuffer[nCmdLength + 1U] != '0');
 
 	if (m_bEnableTFTP) {
 		Display::Get()->SetSleep(false);

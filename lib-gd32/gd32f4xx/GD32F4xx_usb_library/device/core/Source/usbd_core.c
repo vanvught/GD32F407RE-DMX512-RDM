@@ -2,12 +2,11 @@
     \file    usbd_core.c
     \brief   USB device mode core functions
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -77,7 +76,7 @@ void usbd_init (usb_core_driver *udev, usb_core_enum core, usb_desc *desc, usb_c
 
 #ifndef USE_OTG_MODE
     usb_curmode_set(&udev->regs, DEVICE_MODE);
-#endif
+#endif /* USE_OTG_MODE */
 
     /* initializes device mode */
     (void)usb_devcore_init (udev);

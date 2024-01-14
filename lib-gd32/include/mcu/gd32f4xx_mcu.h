@@ -2,7 +2,7 @@
  * @file gd32f4xx_mcu.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 #ifndef MCU_GD32F4XX_MCU_H_
 #define MCU_GD32F4XX_MCU_H_
 
-#if !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_))
+#if !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
 # error This file should not be included
 #endif
 
@@ -247,6 +247,19 @@
 # define SPI2_MOSI_GPIO_PINx	GPIO_PIN_5
 #endif
 
+#define SPI5_PERIPH				SPI5
+#define SPI5_RCU_CLK			RCU_SPI5
+#define SPI5_NSS_GPIOx			GPIOG
+#define SPI5_NSS_RCU_GPIOx		RCU_GPIOG
+#define SPI5_NSS_GPIO_PINx		GPIO_PIN_9
+#define SPI5_GPIOx				GPIOG
+#define SPI5_RCU_GPIOx			RCU_GPIOG
+#define SPI5_SCK_GPIO_PINx		GPIO_PIN_13
+#define SPI5_MISO_GPIO_PINx		GPIO_PIN_15
+#define SPI5_MOSI_GPIO_PINx		GPIO_PIN_14
+#define SPI5_IO2_GPIO_PINx		GPIO_PIN_10
+#define SPI5_IO3_GPIO_PINx		GPIO_PIN_11
+
 /**
  * TIMER GPIO
  */
@@ -271,6 +284,10 @@
 #define SPI2_DMAx               DMA0
 #define SPI2_TX_DMA_CHx         DMA_CH5
 #define SPI2_TX_DMA_SUBPERIx    DMA_SUBPERI0
+
+#define SPI5_DMAx               DMA1
+#define SPI5_TX_DMA_CHx         DMA_CH5
+#define SPI5_TX_DMA_SUBPERIx    DMA_SUBPERI1
 
 #define TIMER2_RCU_DMAx         RCU_DMA0
 #define TIMER2_DMAx             DMA0

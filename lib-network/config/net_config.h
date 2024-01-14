@@ -56,7 +56,10 @@
 #  error
 # endif
 #else
-# error
+#  define UDP_MAX_PORTS_ALLOWED			16
+#  define IGMP_MAX_JOINS_ALLOWED		(4 + (8 * 4)) /* 8 outputs x 4 Universes */
+#  define TCP_MAX_TCBS_ALLOWED			16
+# define TCP_MAX_PORTS_ALLOWED			2
 #endif
 
 #if !defined (UDP_MAX_PORTS_ALLOWED)

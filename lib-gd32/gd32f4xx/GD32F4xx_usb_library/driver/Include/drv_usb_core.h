@@ -2,12 +2,11 @@
     \file    drv_usb_core.h
     \brief   USB core low level driver header file
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -261,7 +260,7 @@ typedef struct _usb_host_drv
 {
     __IO uint32_t            connect_status;
     __IO uint32_t            port_enabled;
-    __IO uint32_t            backup_xfercount[USBFS_MAX_TX_FIFOS];
+    uint32_t                 backup_xfercount[USBFS_MAX_TX_FIFOS];
 
     usb_pipe                 pipe[USBFS_MAX_TX_FIFOS];
     void                    *data;
@@ -293,7 +292,11 @@ typedef struct _usb_core_driver
 */
 __STATIC_INLINE uint32_t usb_coreintr_get(usb_core_regs *usb_regs)
 {
-    return usb_regs->gr->GINTEN & usb_regs->gr->GINTF;
+    uint32_t reg_data = usb_regs->gr->GINTEN;
+    
+    reg_data &= usb_regs->gr->GINTF;
+    
+    return reg_data;
 }
 
 /*!
@@ -337,13 +340,13 @@ __STATIC_INLINE void usb_globalint_disable(usb_core_regs *usb_regs)
 usb_status usb_basic_init (usb_core_basic *usb_basic, usb_core_regs *usb_regs, usb_core_enum usb_core);
 /* initializes the USB controller registers and prepares the core device mode or host mode operation */
 usb_status usb_core_init (usb_core_basic usb_basic, usb_core_regs *usb_regs);
-/* write a packet into the TX FIFO associated with the endpoint */
+/* write a packet into the Tx FIFO associated with the endpoint */
 usb_status usb_txfifo_write (usb_core_regs *usb_regs, uint8_t *src_buf, uint8_t  fifo_num, uint16_t byte_count);
-/* read a packet from the RX FIFO associated with the endpoint */
+/* read a packet from the Rx FIFO associated with the endpoint */
 void *usb_rxfifo_read (usb_core_regs *usb_regs, uint8_t *dest_buf, uint16_t byte_count);
-/* flush a TX FIFO or all TX FIFOs */
+/* flush a Tx FIFO or all Tx FIFOs */
 usb_status usb_txfifo_flush (usb_core_regs *usb_regs, uint8_t fifo_num);
-/* flush the entire RX FIFO */
+/* flush the entire Rx FIFO */
 usb_status usb_rxfifo_flush (usb_core_regs *usb_regs);
 /* set endpoint or channel TX FIFO size */
 void usb_set_txfifo(usb_core_regs *usb_regs, uint8_t fifo, uint16_t size);

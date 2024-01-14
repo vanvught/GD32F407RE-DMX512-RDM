@@ -2,7 +2,7 @@
  * @file gd32_gpio.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ typedef enum T_GD32_Port {
 # define GPIO_PULL_DISABLE		GPIO_MODE_IN_FLOATING
 # define GPIO_INT_CFG_NEG_EDGE	EXTI_TRIG_FALLING
 # define GPIO_INT_CFG_BOTH		EXTI_TRIG_BOTH
-#elif defined (GD32F407) || defined (GD32F450)
+#elif defined (GD32F407) || defined (GD32F450) || defined (GD32F470)
 # define GPIO_FSEL_OUTPUT		GPIO_MODE_OUTPUT
 # define GPIO_FSEL_INPUT		GPIO_MODE_INPUT
 # define GPIO_PULL_UP			GPIO_PUPD_PULLUP

@@ -1,6 +1,7 @@
 $(info "Includes.mk")
 
-INCLUDES:=-I./include -I../include -I../lib-configstore/include -I../lib-flash/include -I../lib-flashcode/include -I../lib-hal/include -I../lib-debug/include 
+INCLUDES:=-I./include -I../include 
+INCLUDES+=-I../lib-debug/include
 INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 INCLUDES+=-I../firmware-template-gd32/include
 INCLUDES+=-I../firmware-template-gd32/template

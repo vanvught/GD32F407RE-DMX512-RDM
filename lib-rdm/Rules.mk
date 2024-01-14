@@ -1,5 +1,5 @@
 EXTRA_INCLUDES=../lib-rdmsensor/include ../lib-rdmsubdevice/include ../lib-dmx/include ../lib-properties/include ../lib-lightset/include
-EXTRA_INCLUDES+=../lib-hal/include ../lib-network/include ../lib-display/include ../lib-configstore/include
+EXTRA_INCLUDES+=../lib-network/include ../lib-display/include
 
 ifneq ($(MAKE_FLAGS),)
 	ifeq (,$(findstring NODE_ARTNET,$(MAKE_FLAGS)))

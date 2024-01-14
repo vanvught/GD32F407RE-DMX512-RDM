@@ -2,7 +2,7 @@
  * @file delete.cpp
  *
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2017-2024 by Arjan van Vught mailto:info@info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,10 +34,14 @@ void operator delete[](void *p) {
 	free(p);
 }
 
-void operator delete(void* p, __attribute__((unused)) std::size_t size) noexcept {
+/*
+ * C++14 and above
+ */
+
+void operator delete(void *p, __attribute__((unused)) std::size_t size) noexcept {
 	free(p);
 }
 
-void operator delete[](void* p, __attribute__((unused))std::size_t size) noexcept {
+void operator delete[](void *p, __attribute__((unused))std::size_t size) noexcept {
 	free(p);
 }

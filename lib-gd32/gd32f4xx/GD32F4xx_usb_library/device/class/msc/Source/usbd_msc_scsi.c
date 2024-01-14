@@ -2,12 +2,11 @@
     \file    usbd_msc_scsi.c
     \brief   USB SCSI layer functions
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -177,7 +176,7 @@ void scsi_sense_code (usb_core_driver *udev, uint8_t lun, uint8_t skey, uint8_t 
     usbd_msc_handler *msc = (usbd_msc_handler *)udev->dev.class_data[USBD_MSC_INTERFACE];
 
     msc->scsi_sense[msc->scsi_sense_tail].SenseKey = skey;
-    msc->scsi_sense[msc->scsi_sense_tail].ASC = asc << 8U;
+    msc->scsi_sense[msc->scsi_sense_tail].ASC = asc;
     msc->scsi_sense_tail++;
 
     if (SENSE_LIST_DEEPTH == msc->scsi_sense_tail) {
@@ -209,7 +208,7 @@ static int8_t scsi_test_unit_ready (usb_core_driver *udev, uint8_t lun, uint8_t 
 
         return -1;
     }
-    
+
     msc->bbb_datalen = 0U;
 
     return 0;
@@ -424,8 +423,8 @@ static int8_t scsi_request_sense (usb_core_driver *udev, uint8_t lun, uint8_t *p
 
     if ((msc->scsi_sense_head != msc->scsi_sense_tail)) {
         msc->bbb_data[2] = msc->scsi_sense[msc->scsi_sense_head].SenseKey;
-        msc->bbb_data[12] = msc->scsi_sense[msc->scsi_sense_head].ASCQ;
-        msc->bbb_data[13] = msc->scsi_sense[msc->scsi_sense_head].ASC;
+        msc->bbb_data[12] = msc->scsi_sense[msc->scsi_sense_head].ASC;
+        msc->bbb_data[13] = msc->scsi_sense[msc->scsi_sense_head].ASCQ;
         msc->scsi_sense_head++;
 
         if (msc->scsi_sense_head == SENSE_LIST_DEEPTH) {

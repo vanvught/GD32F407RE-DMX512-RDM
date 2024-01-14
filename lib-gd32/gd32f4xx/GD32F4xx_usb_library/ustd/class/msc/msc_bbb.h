@@ -2,12 +2,11 @@
     \file    msc_bbb.h
     \brief   definitions for the USB MSC BBB(bulk/bulk/bulk) protocol
 
-    \version 2020-08-01, V3.0.0, firmware for GD32F4xx
-    \version 2022-03-09, V3.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2022, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -51,14 +50,14 @@ typedef struct {
     uint8_t  bCBWLUN;
     uint8_t  bCBWCBLength;
     uint8_t  CBWCB[16];
-}msc_bbb_cbw;
+} msc_bbb_cbw;
 
 typedef struct {
     uint32_t dCSWSignature;
     uint32_t dCSWTag;
     uint32_t dCSWDataResidue;
     uint8_t  bCSWStatus;
-}msc_bbb_csw;
+} msc_bbb_csw;
 
 /* CSW command status */
 enum msc_csw_status {

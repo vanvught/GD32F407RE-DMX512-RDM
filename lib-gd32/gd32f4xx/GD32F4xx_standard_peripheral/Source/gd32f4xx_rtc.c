@@ -2,35 +2,33 @@
     \file    gd32f4xx_rtc.c
     \brief   RTC driver
 
-    \version 2016-08-15, V1.0.0, firmware for GD32F4xx
-    \version 2018-12-12, V2.0.0, firmware for GD32F4xx
-    \version 2020-09-30, V2.1.0, firmware for GD32F4xx
+    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2020, GigaDevice Semiconductor Inc.
+    Copyright (c) 2023, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
@@ -44,7 +42,6 @@ OF SUCH DAMAGE.
 #define RTC_HRFC_TIMEOUT                   ((uint32_t)0x20000000U)                    /*!< recalibration pending flag timeout */
 #define RTC_SHIFTCTL_TIMEOUT               ((uint32_t)0x00001000U)                    /*!< shift function operation pending flag timeout */
 #define RTC_ALRMXWF_TIMEOUT                ((uint32_t)0x00008000U)                    /*!< alarm configuration can be write flag timeout */
-
 
 /*!
     \brief    reset most of the RTC registers
@@ -67,7 +64,7 @@ ErrStatus rtc_deinit(void)
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){
+    if(ERROR != error_status) {
         /* reset RTC_CTL register, but RTC_CTL[2��0] */
         RTC_CTL &= (RTC_REGISTER_RESET | RTC_CTL_WTCS);
         /* before reset RTC_TIME and RTC_DATE, BPSHAD bit in RTC_CTL should be reset as the condition.
@@ -78,18 +75,18 @@ ErrStatus rtc_deinit(void)
         RTC_PSC = RTC_PSC_RESET;
         /* only when RTC_CTL_WTEN=0 and RTC_STAT_WTWF=1 can write RTC_CTL[2��0] */
         /* wait until the WTWF flag to be set */
-        do{
-           flag_status = RTC_STAT & RTC_STAT_WTWF;
-        }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+        do {
+            flag_status = RTC_STAT & RTC_STAT_WTWF;
+        } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-        if ((uint32_t)RESET == flag_status){
+        if((uint32_t)RESET == flag_status) {
             error_status = ERROR;
-        }else{
+        } else {
             RTC_CTL &= RTC_REGISTER_RESET;
             RTC_WUT = RTC_WUT_RESET;
             RTC_COSC = RTC_REGISTER_RESET;
             /* to write RTC_ALRMxSS register, ALRMxEN bit in RTC_CTL register should be reset as the condition */
-            RTC_ALRM0TD = RTC_REGISTER_RESET;        
+            RTC_ALRM0TD = RTC_REGISTER_RESET;
             RTC_ALRM1TD = RTC_REGISTER_RESET;
             RTC_ALRM0SS = RTC_REGISTER_RESET;
             RTC_ALRM1SS = RTC_REGISTER_RESET;
@@ -97,9 +94,9 @@ ErrStatus rtc_deinit(void)
                at the same time, RTC_STAT_SOPF bit is reset, as the condition to reset RTC_SHIFTCTL register later */
             RTC_STAT = RTC_STAT_RESET;
             /* reset RTC_SHIFTCTL and RTC_HRFC register, this can be done without the init mode */
-            RTC_SHIFTCTL   = RTC_REGISTER_RESET;       
+            RTC_SHIFTCTL   = RTC_REGISTER_RESET;
             RTC_HRFC       = RTC_REGISTER_RESET;
-            error_status = rtc_register_sync_wait(); 
+            error_status = rtc_register_sync_wait();
         }
     }
 
@@ -111,7 +108,7 @@ ErrStatus rtc_deinit(void)
 
 /*!
     \brief    initialize RTC registers
-    \param[in]  rtc_initpara_struct: pointer to a rtc_parameter_struct structure which contains 
+    \param[in]  rtc_initpara_struct: pointer to a rtc_parameter_struct structure which contains
                 parameters for initialization of the rtc peripheral
                 members of the structure and the member values are shown as below:
                   year: 0x0 - 0x99(BCD format)
@@ -130,7 +127,7 @@ ErrStatus rtc_deinit(void)
     \param[out] none
     \retval     ErrStatus: ERROR or SUCCESS
 */
-ErrStatus rtc_init(rtc_parameter_struct* rtc_initpara_struct)
+ErrStatus rtc_init(rtc_parameter_struct *rtc_initpara_struct)
 {
     ErrStatus error_status = ERROR;
     uint32_t reg_time = 0U, reg_date = 0U;
@@ -138,13 +135,13 @@ ErrStatus rtc_init(rtc_parameter_struct* rtc_initpara_struct)
     reg_date = (DATE_YR(rtc_initpara_struct->year) | \
                 DATE_DOW(rtc_initpara_struct->day_of_week) | \
                 DATE_MON(rtc_initpara_struct->month) | \
-                DATE_DAY(rtc_initpara_struct->date)); 
-    
-    reg_time = (rtc_initpara_struct->am_pm| \
+                DATE_DAY(rtc_initpara_struct->date));
+
+    reg_time = (rtc_initpara_struct->am_pm | \
                 TIME_HR(rtc_initpara_struct->hour)  | \
                 TIME_MN(rtc_initpara_struct->minute) | \
-                TIME_SC(rtc_initpara_struct->second)); 
-              
+                TIME_SC(rtc_initpara_struct->second));
+
     /* 1st: disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -152,8 +149,8 @@ ErrStatus rtc_init(rtc_parameter_struct* rtc_initpara_struct)
     /* 2nd: enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){    
-        RTC_PSC = (uint32_t)(PSC_FACTOR_A(rtc_initpara_struct->factor_asyn)| \
+    if(ERROR != error_status) {
+        RTC_PSC = (uint32_t)(PSC_FACTOR_A(rtc_initpara_struct->factor_asyn) | \
                              PSC_FACTOR_S(rtc_initpara_struct->factor_syn));
 
         RTC_TIME = (uint32_t)reg_time;
@@ -161,10 +158,10 @@ ErrStatus rtc_init(rtc_parameter_struct* rtc_initpara_struct)
 
         RTC_CTL &= (uint32_t)(~RTC_CTL_CS);
         RTC_CTL |=  rtc_initpara_struct->display_format;
-        
-        /* 3rd: exit init mode */  
+
+        /* 3rd: exit init mode */
         rtc_init_mode_exit();
-        
+
         /* 4th: wait the RSYNF flag to set */
         error_status = rtc_register_sync_wait();
     }
@@ -188,18 +185,18 @@ ErrStatus rtc_init_mode_enter(void)
     ErrStatus error_status = ERROR;
 
     /* check whether it has been in init mode */
-    if ((uint32_t)RESET == (RTC_STAT & RTC_STAT_INITF)){   
+    if((uint32_t)RESET == (RTC_STAT & RTC_STAT_INITF)) {
         RTC_STAT |= RTC_STAT_INITM;
-        
-        /* wait until the INITF flag to be set */
-        do{
-           flag_status = RTC_STAT & RTC_STAT_INITF;
-        }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-        if ((uint32_t)RESET != flag_status){        
+        /* wait until the INITF flag to be set */
+        do {
+            flag_status = RTC_STAT & RTC_STAT_INITF;
+        } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+
+        if((uint32_t)RESET != flag_status) {
             error_status = SUCCESS;
         }
-    }else{
+    } else {
         error_status = SUCCESS;
     }
     return error_status;
@@ -217,7 +214,7 @@ void rtc_init_mode_exit(void)
 }
 
 /*!
-    \brief    wait until RTC_TIME and RTC_DATE registers are synchronized with APB clock, and the shadow 
+    \brief    wait until RTC_TIME and RTC_DATE registers are synchronized with APB clock, and the shadow
                 registers are updated
     \param[in]  none
     \param[out] none
@@ -229,7 +226,7 @@ ErrStatus rtc_register_sync_wait(void)
     uint32_t flag_status = RESET;
     ErrStatus error_status = ERROR;
 
-    if ((uint32_t)RESET == (RTC_CTL & RTC_CTL_BPSHAD)){
+    if((uint32_t)RESET == (RTC_CTL & RTC_CTL_BPSHAD)) {
         /* disable the write protection */
         RTC_WPK = RTC_UNLOCK_KEY1;
         RTC_WPK = RTC_UNLOCK_KEY2;
@@ -238,17 +235,17 @@ ErrStatus rtc_register_sync_wait(void)
         RTC_STAT &= (uint32_t)(~RTC_STAT_RSYNF);
 
         /* wait until RSYNF flag to be set */
-        do{
+        do {
             flag_status = RTC_STAT & RTC_STAT_RSYNF;
-        }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+        } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-        if ((uint32_t)RESET != flag_status){  
+        if((uint32_t)RESET != flag_status) {
             error_status = SUCCESS;
         }
-        
+
         /* enable the write protection */
         RTC_WPK = RTC_LOCK_KEY;
-    }else{ 
+    } else {
         error_status = SUCCESS;
     }
 
@@ -258,7 +255,7 @@ ErrStatus rtc_register_sync_wait(void)
 /*!
     \brief    get current time and date
     \param[in]  none
-    \param[out] rtc_initpara_struct: pointer to a rtc_parameter_struct structure which contains 
+    \param[out] rtc_initpara_struct: pointer to a rtc_parameter_struct structure which contains
                 parameters for initialization of the rtc peripheral
                 members of the structure and the member values are shown as below:
                   year: 0x0 - 0x99(BCD format)
@@ -276,26 +273,26 @@ ErrStatus rtc_register_sync_wait(void)
                   display_format: RTC_24HOUR, RTC_12HOUR
     \retval     none
 */
-void rtc_current_time_get(rtc_parameter_struct* rtc_initpara_struct)
+void rtc_current_time_get(rtc_parameter_struct *rtc_initpara_struct)
 {
     uint32_t temp_tr = 0U, temp_dr = 0U, temp_pscr = 0U, temp_ctlr = 0U;
 
-    temp_tr = (uint32_t)RTC_TIME;   
+    temp_tr = (uint32_t)RTC_TIME;
     temp_dr = (uint32_t)RTC_DATE;
     temp_pscr = (uint32_t)RTC_PSC;
     temp_ctlr = (uint32_t)RTC_CTL;
-  
+
     /* get current time and construct rtc_parameter_struct structure */
     rtc_initpara_struct->year = (uint8_t)GET_DATE_YR(temp_dr);
     rtc_initpara_struct->month = (uint8_t)GET_DATE_MON(temp_dr);
     rtc_initpara_struct->date = (uint8_t)GET_DATE_DAY(temp_dr);
-    rtc_initpara_struct->day_of_week = (uint8_t)GET_DATE_DOW(temp_dr);  
+    rtc_initpara_struct->day_of_week = (uint8_t)GET_DATE_DOW(temp_dr);
     rtc_initpara_struct->hour = (uint8_t)GET_TIME_HR(temp_tr);
     rtc_initpara_struct->minute = (uint8_t)GET_TIME_MN(temp_tr);
     rtc_initpara_struct->second = (uint8_t)GET_TIME_SC(temp_tr);
     rtc_initpara_struct->factor_asyn = (uint16_t)GET_PSC_FACTOR_A(temp_pscr);
     rtc_initpara_struct->factor_syn = (uint16_t)GET_PSC_FACTOR_S(temp_pscr);
-    rtc_initpara_struct->am_pm = (uint32_t)(temp_pscr & RTC_TIME_PM); 
+    rtc_initpara_struct->am_pm = (uint32_t)(temp_tr & RTC_TIME_PM);
     rtc_initpara_struct->display_format = (uint32_t)(temp_ctlr & RTC_CTL_CS);
 }
 
@@ -311,7 +308,7 @@ uint32_t rtc_subsecond_get(void)
     /* if BPSHAD bit is reset, reading RTC_SS will lock RTC_TIME and RTC_DATE automatically */
     reg = (uint32_t)RTC_SS;
     /* read RTC_DATE to unlock the 3 shadow registers */
-    (void) (RTC_DATE);
+    (void)(RTC_DATE);
 
     return reg;
 }
@@ -319,7 +316,7 @@ uint32_t rtc_subsecond_get(void)
 /*!
     \brief    configure RTC alarm
     \param[in]  rtc_alarm: RTC_ALARM0 or RTC_ALARM1
-    \param[in]  rtc_alarm_time: pointer to a rtc_alarm_struct structure which contains 
+    \param[in]  rtc_alarm_time: pointer to a rtc_alarm_struct structure which contains
                 parameters for RTC alarm configuration
                 members of the structure and the member values are shown as below:
                   alarm_mask: RTC_ALARM_NONE_MASK, RTC_ALARM_DATE_MASK, RTC_ALARM_HOUR_MASK
@@ -335,26 +332,26 @@ uint32_t rtc_subsecond_get(void)
     \param[out] none
     \retval     none
 */
-void rtc_alarm_config(uint8_t rtc_alarm, rtc_alarm_struct* rtc_alarm_time)
+void rtc_alarm_config(uint8_t rtc_alarm, rtc_alarm_struct *rtc_alarm_time)
 {
     uint32_t reg_alrmtd = 0U;
 
-    reg_alrmtd =(rtc_alarm_time->alarm_mask | \
-                 rtc_alarm_time->weekday_or_date | \
-                 rtc_alarm_time->am_pm | \
-                 ALRMTD_DAY(rtc_alarm_time->alarm_day) | \
-                 ALRMTD_HR(rtc_alarm_time->alarm_hour) | \
-                 ALRMTD_MN(rtc_alarm_time->alarm_minute) | \
-                 ALRMTD_SC(rtc_alarm_time->alarm_second));
+    reg_alrmtd = (rtc_alarm_time->alarm_mask | \
+                  rtc_alarm_time->weekday_or_date | \
+                  rtc_alarm_time->am_pm | \
+                  ALRMTD_DAY(rtc_alarm_time->alarm_day) | \
+                  ALRMTD_HR(rtc_alarm_time->alarm_hour) | \
+                  ALRMTD_MN(rtc_alarm_time->alarm_minute) | \
+                  ALRMTD_SC(rtc_alarm_time->alarm_second));
 
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
 
-    if(RTC_ALARM0 == rtc_alarm){
+    if(RTC_ALARM0 == rtc_alarm) {
         RTC_ALRM0TD = (uint32_t)reg_alrmtd;
-    
-    }else{
+
+    } else {
         RTC_ALRM1TD = (uint32_t)reg_alrmtd;
     }
     /* enable the write protection */
@@ -389,12 +386,12 @@ void rtc_alarm_subsecond_config(uint8_t rtc_alarm, uint32_t mask_subsecond, uint
 {
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
-    RTC_WPK = RTC_UNLOCK_KEY2;  
+    RTC_WPK = RTC_UNLOCK_KEY2;
 
-    if(RTC_ALARM0 == rtc_alarm){
-        RTC_ALRM0SS = mask_subsecond | subsecond;  
-    }else{
-        RTC_ALRM1SS = mask_subsecond | subsecond; 
+    if(RTC_ALARM0 == rtc_alarm) {
+        RTC_ALRM0SS = mask_subsecond | subsecond;
+    } else {
+        RTC_ALRM1SS = mask_subsecond | subsecond;
     }
     /* enable the write protection */
     RTC_WPK = RTC_LOCK_KEY;
@@ -403,7 +400,7 @@ void rtc_alarm_subsecond_config(uint8_t rtc_alarm, uint32_t mask_subsecond, uint
 /*!
     \brief    get RTC alarm
     \param[in]  rtc_alarm: RTC_ALARM0 or RTC_ALARM1
-    \param[out] rtc_alarm_time: pointer to a rtc_alarm_struct structure which contains 
+    \param[out] rtc_alarm_time: pointer to a rtc_alarm_struct structure which contains
                 parameters for RTC alarm configuration
                 members of the structure and the member values are shown as below:
                   alarm_mask: RTC_ALARM_NONE_MASK, RTC_ALARM_DATE_MASK, RTC_ALARM_HOUR_MASK
@@ -418,24 +415,24 @@ void rtc_alarm_subsecond_config(uint8_t rtc_alarm, uint32_t mask_subsecond, uint
                   am_pm: RTC_AM, RTC_PM
     \retval     none
 */
-void rtc_alarm_get(uint8_t rtc_alarm, rtc_alarm_struct* rtc_alarm_time)
+void rtc_alarm_get(uint8_t rtc_alarm, rtc_alarm_struct *rtc_alarm_time)
 {
     uint32_t reg_alrmtd = 0U;
 
     /* get the value of RTC_ALRM0TD register */
-    if(RTC_ALARM0 == rtc_alarm){
+    if(RTC_ALARM0 == rtc_alarm) {
         reg_alrmtd = RTC_ALRM0TD;
-    }else{
+    } else {
         reg_alrmtd = RTC_ALRM1TD;
     }
     /* get alarm parameters and construct the rtc_alarm_struct structure */
-    rtc_alarm_time->alarm_mask = reg_alrmtd & RTC_ALARM_ALL_MASK; 
+    rtc_alarm_time->alarm_mask = reg_alrmtd & RTC_ALARM_ALL_MASK;
     rtc_alarm_time->am_pm = (uint32_t)(reg_alrmtd & RTC_ALRMXTD_PM);
     rtc_alarm_time->weekday_or_date = (uint32_t)(reg_alrmtd & RTC_ALRMXTD_DOWS);
     rtc_alarm_time->alarm_day = (uint8_t)GET_ALRMTD_DAY(reg_alrmtd);
     rtc_alarm_time->alarm_hour = (uint8_t)GET_ALRMTD_HR(reg_alrmtd);
     rtc_alarm_time->alarm_minute = (uint8_t)GET_ALRMTD_MN(reg_alrmtd);
-    rtc_alarm_time->alarm_second = (uint8_t)GET_ALRMTD_SC(reg_alrmtd);  
+    rtc_alarm_time->alarm_second = (uint8_t)GET_ALRMTD_SC(reg_alrmtd);
 }
 
 /*!
@@ -446,9 +443,9 @@ void rtc_alarm_get(uint8_t rtc_alarm, rtc_alarm_struct* rtc_alarm_time)
 */
 uint32_t rtc_alarm_subsecond_get(uint8_t rtc_alarm)
 {
-    if(RTC_ALARM0 == rtc_alarm){
+    if(RTC_ALARM0 == rtc_alarm) {
         return ((uint32_t)(RTC_ALRM0SS & RTC_ALRM0SS_SSC));
-    }else{
+    } else {
         return ((uint32_t)(RTC_ALRM1SS & RTC_ALRM1SS_SSC));
     }
 }
@@ -465,9 +462,9 @@ void rtc_alarm_enable(uint8_t rtc_alarm)
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
 
-    if(RTC_ALARM0 == rtc_alarm){
+    if(RTC_ALARM0 == rtc_alarm) {
         RTC_CTL |= RTC_CTL_ALRM0EN;
-    }else{
+    } else {
         RTC_CTL |= RTC_CTL_ALRM1EN;
     }
     /* enable the write protection */
@@ -489,23 +486,23 @@ ErrStatus rtc_alarm_disable(uint8_t rtc_alarm)
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
-    
+
     /* clear the state of alarm */
-    if(RTC_ALARM0 == rtc_alarm){
-        RTC_CTL &= (uint32_t)(~RTC_CTL_ALRM0EN); 
+    if(RTC_ALARM0 == rtc_alarm) {
+        RTC_CTL &= (uint32_t)(~RTC_CTL_ALRM0EN);
         /* wait until ALRM0WF flag to be set after the alarm is disabled */
-        do{
+        do {
             flag_status = RTC_STAT & RTC_STAT_ALRM0WF;
-        }while((--time_index > 0U) && ((uint32_t)RESET == flag_status)); 
-    }else{
-        RTC_CTL &= (uint32_t)(~RTC_CTL_ALRM1EN);  
+        } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+    } else {
+        RTC_CTL &= (uint32_t)(~RTC_CTL_ALRM1EN);
         /* wait until ALRM1WF flag to be set after the alarm is disabled */
-        do{
+        do {
             flag_status = RTC_STAT & RTC_STAT_ALRM1WF;
-        }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+        } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
     }
-  
-    if ((uint32_t)RESET != flag_status){     
+
+    if((uint32_t)RESET != flag_status) {
         error_status = SUCCESS;
     }
 
@@ -532,7 +529,7 @@ void rtc_timestamp_enable(uint32_t edge)
 
     /* new configuration */
     reg_ctl |= (uint32_t)(edge | RTC_CTL_TSEN);
-   
+
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -554,7 +551,7 @@ void rtc_timestamp_disable(void)
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
-    
+
     /* clear the TSEN bit */
     RTC_CTL &= (uint32_t)(~ RTC_CTL_TSEN);
 
@@ -565,7 +562,7 @@ void rtc_timestamp_disable(void)
 /*!
     \brief    get RTC timestamp time and date
     \param[in]  none
-    \param[out] rtc_timestamp: pointer to a rtc_timestamp_struct structure which contains 
+    \param[out] rtc_timestamp: pointer to a rtc_timestamp_struct structure which contains
                 parameters for RTC time-stamp configuration
                 members of the structure and the member values are shown as below:
                   timestamp_month: RTC_JAN, RTC_FEB, RTC_MAR, RTC_APR, RTC_MAY, RTC_JUN,
@@ -579,14 +576,14 @@ void rtc_timestamp_disable(void)
                   am_pm: RTC_AM, RTC_PM
     \retval     none
 */
-void rtc_timestamp_get(rtc_timestamp_struct* rtc_timestamp)
+void rtc_timestamp_get(rtc_timestamp_struct *rtc_timestamp)
 {
     uint32_t temp_tts = 0U, temp_dts = 0U;
 
     /* get the value of time_stamp registers */
     temp_tts = (uint32_t)RTC_TTS;
     temp_dts = (uint32_t)RTC_DTS;
-  
+
     /* get timestamp time and construct the rtc_timestamp_struct structure */
     rtc_timestamp->am_pm = (uint32_t)(temp_tts & RTC_TTS_PM);
     rtc_timestamp->timestamp_month = (uint8_t)GET_DTS_MON(temp_dts);
@@ -609,7 +606,7 @@ uint32_t rtc_timestamp_subsecond_get(void)
 }
 
 /*!
-    \brief    RTC time-stamp mapping 
+    \brief    RTC time-stamp mapping
     \param[in]  rtc_af:
       \arg        RTC_AF0_TIMESTAMP: RTC_AF0 use for timestamp
       \arg        RTC_AF1_TIMESTAMP: RTC_AF1 use for timestamp
@@ -624,7 +621,7 @@ void rtc_timestamp_pin_map(uint32_t rtc_af)
 
 /*!
     \brief    enable RTC tamper
-    \param[in]  rtc_tamper: pointer to a rtc_tamper_struct structure which contains 
+    \param[in]  rtc_tamper: pointer to a rtc_tamper_struct structure which contains
                 parameters for RTC tamper configuration
                 members of the structure and the member values are shown as below:
                   detecting tamper event can using edge mode or level mode
@@ -646,49 +643,49 @@ void rtc_timestamp_pin_map(uint32_t rtc_af)
     \param[out] none
     \retval     none
 */
-void rtc_tamper_enable(rtc_tamper_struct* rtc_tamper)
+void rtc_tamper_enable(rtc_tamper_struct *rtc_tamper)
 {
     /* disable tamper */
-    RTC_TAMP &= (uint32_t)~(rtc_tamper->tamper_source); 
+    RTC_TAMP &= (uint32_t)~(rtc_tamper->tamper_source);
 
     /* tamper filter must be used when the tamper source is voltage level detection */
     RTC_TAMP &= (uint32_t)~RTC_TAMP_FLT;
-    
+
     /* the tamper source is voltage level detection */
-    if((uint32_t)(rtc_tamper->tamper_filter) != RTC_FLT_EDGE ){ 
+    if((uint32_t)(rtc_tamper->tamper_filter) != RTC_FLT_EDGE) {
         RTC_TAMP &= (uint32_t)~(RTC_TAMP_DISPU | RTC_TAMP_PRCH | RTC_TAMP_FREQ | RTC_TAMP_FLT);
 
         /* check if the tamper pin need precharge, if need, then configure the precharge time */
-        if(DISABLE == rtc_tamper->tamper_precharge_enable){
-            RTC_TAMP |=  (uint32_t)RTC_TAMP_DISPU;    
-        }else{
+        if(DISABLE == rtc_tamper->tamper_precharge_enable) {
+            RTC_TAMP |= (uint32_t)RTC_TAMP_DISPU;
+        } else {
             RTC_TAMP |= (uint32_t)(rtc_tamper->tamper_precharge_time);
         }
 
         RTC_TAMP |= (uint32_t)(rtc_tamper->tamper_sample_frequency);
         RTC_TAMP |= (uint32_t)(rtc_tamper->tamper_filter);
-        
+
         /* configure the tamper trigger */
-        RTC_TAMP &= ((uint32_t)~((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS));    
-        if(RTC_TAMPER_TRIGGER_LEVEL_LOW != rtc_tamper->tamper_trigger){
-            RTC_TAMP |= (uint32_t)((rtc_tamper->tamper_source)<< RTC_TAMPER_TRIGGER_POS);
+        RTC_TAMP &= ((uint32_t)~((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS));
+        if(RTC_TAMPER_TRIGGER_LEVEL_LOW != rtc_tamper->tamper_trigger) {
+            RTC_TAMP |= (uint32_t)((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS);
         }
-    }else{
- 
+    } else {
+
         /* configure the tamper trigger */
-        RTC_TAMP &= ((uint32_t)~((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS));    
-        if(RTC_TAMPER_TRIGGER_EDGE_RISING != rtc_tamper->tamper_trigger){
-            RTC_TAMP |= (uint32_t)((rtc_tamper->tamper_source)<< RTC_TAMPER_TRIGGER_POS);  
+        RTC_TAMP &= ((uint32_t)~((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS));
+        if(RTC_TAMPER_TRIGGER_EDGE_RISING != rtc_tamper->tamper_trigger) {
+            RTC_TAMP |= (uint32_t)((rtc_tamper->tamper_source) << RTC_TAMPER_TRIGGER_POS);
         }
     }
-    
-    RTC_TAMP &= (uint32_t)~RTC_TAMP_TPTS;      
-    if(DISABLE != rtc_tamper->tamper_with_timestamp){           
+
+    RTC_TAMP &= (uint32_t)~RTC_TAMP_TPTS;
+    if(DISABLE != rtc_tamper->tamper_with_timestamp) {
         /* the tamper event also cause a time-stamp event */
         RTC_TAMP |= (uint32_t)RTC_TAMP_TPTS;
-    }    
+    }
     /* enable tamper */
-    RTC_TAMP |=  (uint32_t)(rtc_tamper->tamper_source); 
+    RTC_TAMP |= (uint32_t)(rtc_tamper->tamper_source);
 }
 
 /*!
@@ -702,12 +699,12 @@ void rtc_tamper_enable(rtc_tamper_struct* rtc_tamper)
 void rtc_tamper_disable(uint32_t source)
 {
     /* disable tamper */
-    RTC_TAMP &= (uint32_t)~source; 
+    RTC_TAMP &= (uint32_t)~source;
 
 }
 
 /*!
-    \brief    RTC tamper0 mapping 
+    \brief    RTC tamper0 mapping
     \param[in]  rtc_af:
       \arg        RTC_AF0_TAMPER0: RTC_AF0 use for tamper0
       \arg        RTC_AF1_TAMPER0: RTC_AF1 use for tamper0
@@ -732,18 +729,18 @@ void rtc_tamper0_pin_map(uint32_t rtc_af)
     \retval     none
 */
 void rtc_interrupt_enable(uint32_t interrupt)
-{  
+{
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
- 
+
     /* enable the interrupts in RTC_CTL register */
     RTC_CTL |= (uint32_t)(interrupt & (uint32_t)~RTC_TAMP_TPIE);
     /* enable the interrupts in RTC_TAMP register */
     RTC_TAMP |= (uint32_t)(interrupt & RTC_TAMP_TPIE);
-    
+
     /* enable the write protection */
-    RTC_WPK = RTC_LOCK_KEY; 
+    RTC_WPK = RTC_LOCK_KEY;
 }
 
 /*!
@@ -758,11 +755,11 @@ void rtc_interrupt_enable(uint32_t interrupt)
     \retval     none
 */
 void rtc_interrupt_disable(uint32_t interrupt)
-{  
+{
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
- 
+
     /* disable the interrupts in RTC_CTL register */
     RTC_CTL &= (uint32_t)~(interrupt & (uint32_t)~RTC_TAMP_TPIE);
     /* disable the interrupts in RTC_TAMP register */
@@ -779,7 +776,7 @@ void rtc_interrupt_disable(uint32_t interrupt)
       \arg        RTC_FLAG_TP1: RTC tamper 1 detected flag
       \arg        RTC_FLAG_TP0: RTC tamper 0 detected flag
       \arg        RTC_FLAG_TSOVR: time-stamp overflow flag
-      \arg        RTC_FLAG_TS: time-stamp flag 
+      \arg        RTC_FLAG_TS: time-stamp flag
       \arg        RTC_FLAG_ALRM0: alarm0 occurs flag
       \arg        RTC_FLAG_ALRM1: alarm1 occurs flag
       \arg        RTC_FLAG_WT: wakeup timer occurs flag
@@ -796,8 +793,8 @@ void rtc_interrupt_disable(uint32_t interrupt)
 FlagStatus rtc_flag_get(uint32_t flag)
 {
     FlagStatus flag_state = RESET;
-    
-    if ((uint32_t)RESET != (RTC_STAT & flag)){
+
+    if((uint32_t)RESET != (RTC_STAT & flag)) {
         flag_state = SET;
     }
     return flag_state;
@@ -818,7 +815,7 @@ FlagStatus rtc_flag_get(uint32_t flag)
 */
 void rtc_flag_clear(uint32_t flag)
 {
-    RTC_STAT &= (uint32_t)(~flag);  
+    RTC_STAT &= (uint32_t)(~flag);
 }
 
 /*!
@@ -856,9 +853,9 @@ void rtc_alarm_output_config(uint32_t source, uint32_t mode)
 /*!
     \brief    configure rtc calibration output source
     \param[in]  source: specify signal to output
-      \arg        RTC_CALIBRATION_512HZ: when the LSE freqency is 32768Hz and the RTC_PSC 
+      \arg        RTC_CALIBRATION_512HZ: when the LSE freqency is 32768Hz and the RTC_PSC
                                          is the default value, output 512Hz signal
-      \arg        RTC_CALIBRATION_1HZ: when the LSE freqency is 32768Hz and the RTC_PSC 
+      \arg        RTC_CALIBRATION_1HZ: when the LSE freqency is 32768Hz and the RTC_PSC
                                        is the default value, output 1Hz signal
     \param[out] none
     \retval     none
@@ -876,7 +873,6 @@ void rtc_calibration_output_config(uint32_t source)
     RTC_WPK = RTC_LOCK_KEY;
 }
 
-
 /*!
     \brief    adjust the daylight saving time by adding or substracting one hour from the current time
     \param[in]  operation: hour adjustment operation
@@ -890,7 +886,7 @@ void rtc_hour_adjust(uint32_t operation)
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
-    
+
     RTC_CTL |= (uint32_t)(operation);
 
     /* enable the write protection */
@@ -911,21 +907,21 @@ ErrStatus rtc_second_adjust(uint32_t add, uint32_t minus)
     volatile uint32_t time_index = RTC_SHIFTCTL_TIMEOUT;
     ErrStatus error_status = ERROR;
     uint32_t flag_status = RESET;
-    uint32_t temp=0U;
+    uint32_t temp = 0U;
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
-    
-    /* check if a shift operation is ongoing */    
-    do{
+
+    /* check if a shift operation is ongoing */
+    do {
         flag_status = RTC_STAT & RTC_STAT_SOPF;
-    }while((--time_index > 0U) && ((uint32_t)RESET != flag_status));
-    
+    } while((--time_index > 0U) && ((uint32_t)RESET != flag_status));
+
     /* check if the function of reference clock detection is disabled */
     temp = RTC_CTL & RTC_CTL_REFEN;
-    if((RESET == flag_status) && (RESET == temp)){  
+    if((RESET == flag_status) && (RESET == temp)) {
         RTC_SHIFTCTL = (uint32_t)(add | SHIFTCTL_SFS(minus));
-        error_status = rtc_register_sync_wait();        
+        error_status = rtc_register_sync_wait();
     }
 
     /* enable the write protection */
@@ -941,7 +937,7 @@ ErrStatus rtc_second_adjust(uint32_t add, uint32_t minus)
     \retval     none
 */
 void rtc_bypass_shadow_enable(void)
-{ 
+{
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -959,7 +955,7 @@ void rtc_bypass_shadow_enable(void)
     \retval     none
 */
 void rtc_bypass_shadow_disable(void)
-{ 
+{
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -979,7 +975,7 @@ void rtc_bypass_shadow_disable(void)
 ErrStatus rtc_refclock_detection_enable(void)
 {
     ErrStatus error_status = ERROR;
-    
+
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -987,7 +983,7 @@ ErrStatus rtc_refclock_detection_enable(void)
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){
+    if(ERROR != error_status) {
         RTC_CTL |= (uint32_t)RTC_CTL_REFEN;
         /* exit init mode */
         rtc_init_mode_exit();
@@ -1008,7 +1004,7 @@ ErrStatus rtc_refclock_detection_enable(void)
 ErrStatus rtc_refclock_detection_disable(void)
 {
     ErrStatus error_status = ERROR;
-    
+
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
@@ -1016,7 +1012,7 @@ ErrStatus rtc_refclock_detection_disable(void)
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){ 
+    if(ERROR != error_status) {
         RTC_CTL &= (uint32_t)~RTC_CTL_REFEN;
         /* exit init mode */
         rtc_init_mode_exit();
@@ -1038,7 +1034,7 @@ void rtc_wakeup_enable(void)
 {
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
-    RTC_WPK = RTC_UNLOCK_KEY2; 
+    RTC_WPK = RTC_UNLOCK_KEY2;
 
     RTC_CTL |= RTC_CTL_WTEN;
 
@@ -1062,13 +1058,13 @@ ErrStatus rtc_wakeup_disable(void)
     RTC_WPK = RTC_UNLOCK_KEY2;
     RTC_CTL &= ~RTC_CTL_WTEN;
     /* wait until the WTWF flag to be set */
-    do{
+    do {
         flag_status = RTC_STAT & RTC_STAT_WTWF;
-    }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+    } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-    if ((uint32_t)RESET == flag_status){
+    if((uint32_t)RESET == flag_status) {
         error_status = ERROR;
-    }else{
+    } else {
         error_status = SUCCESS;
     }
     /* enable the write protection */
@@ -1079,12 +1075,12 @@ ErrStatus rtc_wakeup_disable(void)
 /*!
     \brief    set RTC auto wakeup timer clock
     \param[in]  wakeup_clock:
-      \arg        WAKEUP_RTCCK_DIV16: RTC auto wakeup timer clock is RTC clock divided by 16 
-      \arg        WAKEUP_RTCCK_DIV8: RTC auto wakeup timer clock is RTC clock divided by 8 
-      \arg        WAKEUP_RTCCK_DIV4: RTC auto wakeup timer clock is RTC clock divided by 4 
-      \arg        WAKEUP_RTCCK_DIV2: RTC auto wakeup timer clock is RTC clock divided by 2 
+      \arg        WAKEUP_RTCCK_DIV16: RTC auto wakeup timer clock is RTC clock divided by 16
+      \arg        WAKEUP_RTCCK_DIV8: RTC auto wakeup timer clock is RTC clock divided by 8
+      \arg        WAKEUP_RTCCK_DIV4: RTC auto wakeup timer clock is RTC clock divided by 4
+      \arg        WAKEUP_RTCCK_DIV2: RTC auto wakeup timer clock is RTC clock divided by 2
       \arg        WAKEUP_CKSPRE: RTC auto wakeup timer clock is ckspre
-      \arg        WAKEUP_CKSPRE_2EXP16: RTC auto wakeup timer clock is ckspre and wakeup timer add 2exp16 
+      \arg        WAKEUP_CKSPRE_2EXP16: RTC auto wakeup timer clock is ckspre and wakeup timer add 2exp16
     \param[out] none
     \retval     ErrStatus: ERROR or SUCCESS
 */
@@ -1095,23 +1091,23 @@ ErrStatus rtc_wakeup_clock_set(uint8_t wakeup_clock)
     uint32_t flag_status = RESET;
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
-    RTC_WPK = RTC_UNLOCK_KEY2; 
+    RTC_WPK = RTC_UNLOCK_KEY2;
     /* only when RTC_CTL_WTEN=0 and RTC_STAT_WTWF=1 can write RTC_CTL[2��0] */
     /* wait until the WTWF flag to be set */
-    do{
+    do {
         flag_status = RTC_STAT & RTC_STAT_WTWF;
-    }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+    } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-    if ((uint32_t)RESET == flag_status){
+    if((uint32_t)RESET == flag_status) {
         error_status = ERROR;
-    }else{
+    } else {
         RTC_CTL &= (uint32_t)~ RTC_CTL_WTCS;
         RTC_CTL |= (uint32_t)wakeup_clock;
         error_status = SUCCESS;
     }
     /* enable the write protection */
     RTC_WPK = RTC_LOCK_KEY;
-    
+
     return error_status;
 }
 
@@ -1130,13 +1126,13 @@ ErrStatus rtc_wakeup_timer_set(uint16_t wakeup_timer)
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
     /* wait until the WTWF flag to be set */
-    do{
+    do {
         flag_status = RTC_STAT & RTC_STAT_WTWF;
-    }while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
+    } while((--time_index > 0U) && ((uint32_t)RESET == flag_status));
 
-    if ((uint32_t)RESET == flag_status){
+    if((uint32_t)RESET == flag_status) {
         error_status = ERROR;
-    }else{
+    } else {
         RTC_WUT = (uint32_t)wakeup_timer;
         error_status = SUCCESS;
     }
@@ -1151,7 +1147,7 @@ ErrStatus rtc_wakeup_timer_set(uint16_t wakeup_timer)
     \param[out] none
     \retval     wakeup timer value
 */
- uint16_t rtc_wakeup_timer_get(void)
+uint16_t rtc_wakeup_timer_get(void)
 {
     return (uint16_t)RTC_WUT;
 }
@@ -1174,17 +1170,17 @@ ErrStatus rtc_smooth_calibration_config(uint32_t window, uint32_t plus, uint32_t
     volatile uint32_t time_index = RTC_HRFC_TIMEOUT;
     ErrStatus error_status = ERROR;
     uint32_t flag_status = RESET;
-    
+
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
-    RTC_WPK = RTC_UNLOCK_KEY2;    
-    
-    /* check if a smooth calibration operation is ongoing */        
-    do{
+    RTC_WPK = RTC_UNLOCK_KEY2;
+
+    /* check if a smooth calibration operation is ongoing */
+    do {
         flag_status = RTC_STAT & RTC_STAT_SCPF;
-    }while((--time_index > 0U) && ((uint32_t)RESET != flag_status));
-    
-    if((uint32_t)RESET == flag_status){
+    } while((--time_index > 0U) && ((uint32_t)RESET != flag_status));
+
+    if((uint32_t)RESET == flag_status) {
         RTC_HRFC = (uint32_t)(window | plus | HRFC_CMSK(minus));
         error_status = SUCCESS;
     }
@@ -1210,12 +1206,12 @@ ErrStatus rtc_coarse_calibration_enable(void)
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){ 
+    if(ERROR != error_status) {
         RTC_CTL |= (uint32_t)RTC_CTL_CCEN;
         /* exit init mode */
         rtc_init_mode_exit();
     }
-    
+
     /* enable the write protection */
     RTC_WPK = RTC_LOCK_KEY;
     return error_status;
@@ -1232,24 +1228,24 @@ ErrStatus rtc_coarse_calibration_disable(void)
     ErrStatus error_status = ERROR;
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
-    RTC_WPK = RTC_UNLOCK_KEY2;    
+    RTC_WPK = RTC_UNLOCK_KEY2;
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){ 
+    if(ERROR != error_status) {
         RTC_CTL &= (uint32_t)~RTC_CTL_CCEN;
         /* exit init mode */
         rtc_init_mode_exit();
     }
-    
+
     /* enable the write protection */
-    RTC_WPK = RTC_LOCK_KEY;	
+    RTC_WPK = RTC_LOCK_KEY;
     return error_status;
 }
 
 /*!
     \brief    config coarse calibration direction and step
-    \param[in]  direction: CALIB_INCREASE or CALIB_DECREASE      
+    \param[in]  direction: CALIB_INCREASE or CALIB_DECREASE
     \param[in]  step: 0x00-0x1F
                 COSD=0:
                   0x00:+0 PPM
@@ -1272,14 +1268,14 @@ ErrStatus rtc_coarse_calibration_config(uint8_t direction, uint8_t step)
     /* disable the write protection */
     RTC_WPK = RTC_UNLOCK_KEY1;
     RTC_WPK = RTC_UNLOCK_KEY2;
-    
+
     /* enter init mode */
     error_status = rtc_init_mode_enter();
 
-    if(ERROR != error_status){ 
-        if(CALIB_DECREASE == direction){
+    if(ERROR != error_status) {
+        if(CALIB_DECREASE == direction) {
             RTC_COSC |= (uint32_t)RTC_COSC_COSD;
-        }else{
+        } else {
             RTC_COSC &= (uint32_t)~RTC_COSC_COSD;
         }
         RTC_COSC &= ~RTC_COSC_COSS;
@@ -1287,9 +1283,9 @@ ErrStatus rtc_coarse_calibration_config(uint8_t direction, uint8_t step)
         /* exit init mode */
         rtc_init_mode_exit();
     }
-    
+
     /* enable the write protection */
     RTC_WPK = RTC_LOCK_KEY;
-    
+
     return error_status;
 }
