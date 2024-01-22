@@ -30,10 +30,9 @@
 #include <cstring>
 
 #include "rdmdeviceresponder.h"
-#include "llrpdevice.h"
+#include "llrp/llrpdevice.h"
 
 #include "rdmhandler.h"
-
 #include "e131.h"
 
 #include "hardware.h"

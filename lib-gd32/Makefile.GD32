@@ -27,7 +27,7 @@ ifneq ($(MAKE_FLAGS),)
   			EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Include
   			EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/class/msc
   		
-  			EXTRA_INCLUDES+=../lib-hal/ff12c
+  			EXTRA_INCLUDES+=../lib-hal/ff14b/source
   		endif
   	endif
   endif
@@ -57,7 +57,7 @@ ifneq ($(MAKE_FLAGS),)
   			EXTRA_INCLUDES+=gd32f4xx/GD32F4xx_usb_library/host/class/msc/Include
   			EXTRA_INCLUDES+=gd32f4xx/GD32F4xx_usb_library/ustd/class/msc
   			
-  			EXTRA_INCLUDES+=../lib-hal/ff12c
+  			EXTRA_INCLUDES+=../lib-hal/ff14b/source
   		endif
   		
   	endif

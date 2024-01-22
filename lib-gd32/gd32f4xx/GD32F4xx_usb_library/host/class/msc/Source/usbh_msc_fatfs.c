@@ -33,8 +33,10 @@ OF SUCH DAMAGE.
 */
 
 #include "usb_conf.h"
-#include "diskio.h"
 #include "usbh_msc_core.h"
+
+#include "ff.h"
+#include "diskio.h"
 
 static volatile DSTATUS state = STA_NOINIT; /* disk status */
 

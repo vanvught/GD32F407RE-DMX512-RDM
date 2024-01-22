@@ -28,8 +28,8 @@
 #include <uuid/uuid.h>
 
 #include "rdmnetdevice.h"
+#include "llrp/llrpdevice.h"
 
-#include "llrpdevice.h"
 #include "rdmpersonality.h"
 #include "lightset.h"
 #include "rdmdeviceresponder.h"

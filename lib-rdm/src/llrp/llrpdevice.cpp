@@ -28,9 +28,8 @@
 #include <cstdio>
 #include <cassert>
 
-#include "llrpdevice.h"
-
-#include "llrppacket.h"
+#include "llrp/llrpdevice.h"
+#include "llrp/llrppacket.h"
 
 #include "e133.h"
 #include "rdmconst.h"

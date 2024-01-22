@@ -30,7 +30,7 @@
 #include <cstdio>
 #include <cassert>
 
-#include "llrppacket.h"
+#include "llrp/llrppacket.h"
 #include "e133.h"
 
 #include "network.h"

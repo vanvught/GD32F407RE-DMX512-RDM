@@ -2,7 +2,7 @@
  * usb_host_msc.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,10 +38,12 @@ extern "C" {
 void console_error(const char *);
 }
 
-#include "../lib-hal/ff12c/ff.h"
+// #include "../lib-hal/ff12c/ff.h"
+#include "../lib-hal/ff14b/source/ff.h"
 #include "device/usb/host.h"
 
-#if (_FFCONF == 68300)		// R0.12c
+//#if (_FFCONF == 68300)		// R0.12c
+#if (FF_DEFINED	== 86631)		// R0.14b
  static FATFS fat_fs;
 #else
 # error Not a recognized/tested FatFs version

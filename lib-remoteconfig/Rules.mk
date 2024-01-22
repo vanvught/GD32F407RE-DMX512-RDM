@@ -32,6 +32,9 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring NODE_OSC_SERVER,$(MAKE_FLAGS)), NODE_OSC_SERVER)
 		EXTRA_INCLUDES+=../lib-oscserver/include
 	endif
+	ifeq ($(findstring NODE_SHOWFILE,$(MAKE_FLAGS)), NODE_SHOWFILE)
+		EXTRA_INCLUDES+=../lib-osc/include
+	endif
 	
 	ifeq ($(findstring RDM_CONTROLLER,$(MAKE_FLAGS)), RDM_CONTROLLER)
 		EXTRA_INCLUDES+=../lib-rdm/include ../lib-dmx/include

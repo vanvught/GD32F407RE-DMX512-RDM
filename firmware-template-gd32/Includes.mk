@@ -56,5 +56,5 @@ ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
 endif
 
 ifdef USB_HOST_MSC
-		EXTRA_INCLUDES+=../lib-hal/ff12c
+		EXTRA_INCLUDES+=../lib-hal/ff14b/source
 endif

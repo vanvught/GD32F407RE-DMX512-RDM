@@ -376,11 +376,11 @@ void RDMHandler::HandleData(const uint8_t *pRdmDataIn, uint8_t *pRdmDataOut) {
 }
 
 void RDMHandler::Handlers(bool bIsBroadcast, uint8_t nCommandClass, uint16_t nParamId, uint8_t nParamDataLength, uint16_t nSubDevice) {
-	DEBUG1_ENTRY
+	DEBUG_ENTRY
 
 	if (nCommandClass != E120_GET_COMMAND && nCommandClass != E120_SET_COMMAND) {
 		RespondMessageNack(E120_NR_UNSUPPORTED_COMMAND_CLASS);
-		DEBUG1_EXIT
+		DEBUG_EXIT
 		return;
 	}
 
@@ -388,7 +388,7 @@ void RDMHandler::Handlers(bool bIsBroadcast, uint8_t nCommandClass, uint16_t nPa
 
 	if ((nSubDevice > sub_device_count) && (nSubDevice != E120_SUB_DEVICE_ALL_CALL)) {
 		RespondMessageNack(E120_NR_SUB_DEVICE_OUT_OF_RANGE);
-		DEBUG1_EXIT
+		DEBUG_EXIT
 		return;
 	}
 
@@ -420,45 +420,45 @@ void RDMHandler::Handlers(bool bIsBroadcast, uint8_t nCommandClass, uint16_t nPa
 
 	if (!pid_handler) {
 		RespondMessageNack(E120_NR_UNKNOWN_PID);
-		DEBUG1_EXIT
+		DEBUG_EXIT
 		return;
 	}
 
 	if (m_bIsRDM) {
 		if (!bRDM) {
 			RespondMessageNack(E120_NR_UNKNOWN_PID);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 	} else {
 		if (!bRDMNet) {
 			RespondMessageNack(E120_NR_UNKNOWN_PID);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 	}
 
 	if (nCommandClass == E120_GET_COMMAND) {
 		if (bIsBroadcast) {
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 
 		if (nSubDevice == E120_SUB_DEVICE_ALL_CALL) {
 			RespondMessageNack(E120_NR_SUB_DEVICE_OUT_OF_RANGE);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 
 		if (!pid_handler->pGetHandler) {
 			RespondMessageNack(E120_NR_UNSUPPORTED_COMMAND_CLASS);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 
 		if (nParamDataLength != pid_handler->nGetArgumentSize) {
 			RespondMessageNack(E120_NR_FORMAT_ERROR);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 
@@ -467,14 +467,14 @@ void RDMHandler::Handlers(bool bIsBroadcast, uint8_t nCommandClass, uint16_t nPa
 
 		if (!pid_handler->pSetHandler) {
 			RespondMessageNack(E120_NR_UNSUPPORTED_COMMAND_CLASS);
-			DEBUG1_EXIT
+			DEBUG_EXIT
 			return;
 		}
 
 		(this->*(pid_handler->pSetHandler))(bIsBroadcast, nSubDevice);
 	}
 
-	DEBUG1_EXIT
+	DEBUG_EXIT
 }
 
 #if defined (ENABLE_RDM_QUEUED_MSG)
