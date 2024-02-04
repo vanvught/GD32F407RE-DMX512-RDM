@@ -2,7 +2,7 @@
  * @file hardware.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,14 @@ void usb_init();
 
 #include "debug.h"
 
+#if defined (GD32F4XX) && defined(GPIO_INIT)
+# error
+#endif
+
+#if !defined (GD32F4XX) && !defined(GPIO_INIT)
+# error
+#endif
+
 extern "C" {
 void console_init(void);
 void __libc_init_array(void);
@@ -56,7 +64,7 @@ void systick_config(void);
 void udelay_init();
 void gd32_adc_init();
 
-Hardware *Hardware::s_pThis = nullptr;
+Hardware *Hardware::s_pThis;
 
 Hardware::Hardware() {
 	DEBUG_ENTRY
@@ -80,9 +88,9 @@ Hardware::Hardware() {
 	timer_init(TIMER5, &timer_initpara);
 	timer_enable(TIMER5);
 
-#if !defined (GD32F4XX)
-#else
+#if defined (GD32F4XX)
 	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
+#else
 #endif
 
 #ifndef NDEBUG
@@ -96,14 +104,15 @@ Hardware::Hardware() {
 	assert(nAPB2 == APB2_CLOCK_FREQ);
 #endif
 
-#if !defined (GD32F4XX)
-	rcu_periph_clock_enable (RCU_BKPI);
-	rcu_periph_clock_enable (RCU_PMU);
-	pmu_backup_write_enable();
-#else
+#if defined (GD32F4XX)
+	rcu_periph_clock_enable(RCU_RTC);
 	rcu_periph_clock_enable(RCU_PMU);
 	pmu_backup_ldo_config(PMU_BLDOON_ON);
 	rcu_periph_clock_enable(RCU_BKPSRAM);
+	pmu_backup_write_enable();
+#else
+	rcu_periph_clock_enable (RCU_BKPI);
+	rcu_periph_clock_enable (RCU_PMU);
 	pmu_backup_write_enable();
 #endif
 	bkp_data_write(BKP_DATA_1, 0x0);
@@ -172,7 +181,7 @@ Hardware::Hardware() {
 
 #if !defined(CONFIG_LEDBLINK_USE_PANELLED)
 	rcu_periph_clock_enable(LED_BLINK_GPIO_CLK);
-# if !defined (GD32F4XX)
+# if defined (GPIO_INIT)
 	gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
 # else
 	gpio_mode_set(LED_BLINK_GPIO_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_BLINK_PIN);
@@ -183,7 +192,7 @@ Hardware::Hardware() {
 
 #if defined (PANELLED_595_CS_GPIOx)
 	rcu_periph_clock_enable(PANELLED_595_CS_RCU_GPIOx);
-# if !defined (GD32F4XX)
+# if defined (GPIO_INIT)
 	gpio_init(PANELLED_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
 # else
 	gpio_mode_set(PANELLED_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, PANELLED_595_CS_GPIO_PINx);
@@ -211,14 +220,18 @@ typedef union pcast32 {
 void Hardware::GetUuid(uuid_t out) {
 	_pcast32 cast;
 
-#if !defined (GD32F4XX)
-	cast.u32[0] = *(volatile uint32_t*) (0x1FFFF7E8);
-	cast.u32[1] = *(volatile uint32_t*) (0x1FFFF7EC);
-	cast.u32[2] = *(volatile uint32_t*) (0x1FFFF7F0);
-#else
+#if defined (GD32H7XX)
+	cast.u32[0] = *(volatile uint32_t*) (0x1FF0F7E8);
+	cast.u32[1] = *(volatile uint32_t*) (0x1FF0F7EC);
+	cast.u32[2] = *(volatile uint32_t*) (0x1FF0F7F0);
+#elif defined (GD32F4XX)
 	cast.u32[0] = *(volatile uint32_t*) (0x1FFF7A10);
 	cast.u32[1] = *(volatile uint32_t*) (0x1FFF7A14);
 	cast.u32[2] = *(volatile uint32_t*) (0x1FFF7A18);
+#else
+	cast.u32[0] = *(volatile uint32_t*) (0x1FFFF7E8);
+	cast.u32[1] = *(volatile uint32_t*) (0x1FFFF7EC);
+	cast.u32[2] = *(volatile uint32_t*) (0x1FFFF7F0);
 #endif
 	cast.u32[3] = cast.u32[0] + cast.u32[1] + cast.u32[2];
 

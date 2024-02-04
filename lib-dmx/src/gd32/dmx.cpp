@@ -171,9 +171,9 @@ static RxData s_RxBuffer[config::max::IN] ALIGNED;
 
 static TxData s_TxBuffer[config::max::OUT] ALIGNED SECTION_DMA_BUFFER;
 
-static uint32_t s_nDmxTransmitBreakTime { dmx::transmit::BREAK_TIME_TYPICAL };
-static uint32_t s_nDmxTransmitMabTime { dmx::transmit::MAB_TIME_MIN };		///< MAB_TIME_MAX = 1000000U;
-static uint32_t s_nDmxTransmitInterTime { dmx::transmit::PERIOD_DEFAULT - dmx::transmit::MAB_TIME_MIN - dmx::transmit::BREAK_TIME_TYPICAL - (dmx::max::CHANNELS * 44) - 44 };
+static uint32_t s_nDmxTransmitBreakTime;
+static uint32_t s_nDmxTransmitMabTime;
+static uint32_t s_nDmxTransmitInterTime;
 
 static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortIndex) {
 	uint32_t nIndex;
@@ -1606,6 +1606,10 @@ Dmx::Dmx() {
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
+	s_nDmxTransmitBreakTime = m_nDmxTransmitBreakTime;
+	s_nDmxTransmitMabTime = m_nDmxTransmitMabTime;
+	s_nDmxTransmitInterTime = dmx::transmit::PERIOD_DEFAULT - s_nDmxTransmitBreakTime - s_nDmxTransmitMabTime - (dmx::max::CHANNELS * 44) - 44;
+
 	for (auto i = 0; i < DMX_MAX_PORTS; i++) {
 #if !defined (GD32F4XX)
 		gpio_init(s_DirGpio[i].nPort, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, s_DirGpio[i].nPin);
@@ -1913,21 +1917,22 @@ void Dmx::SetDmxPeriodTime(uint32_t nPeriod) {
 	}
 #endif
 
-	uint32_t nDmxTransmitPeriod;
-
 	if (nPeriod != 0) {
 		if (nPeriod < nPackageLengthMicroSeconds) {
-			nDmxTransmitPeriod = std::max(transmit::BREAK_TO_BREAK_TIME_MIN, nPackageLengthMicroSeconds + 44U);
+			m_nDmxTransmitPeriod = std::max(transmit::BREAK_TO_BREAK_TIME_MIN, nPackageLengthMicroSeconds + 44U);
 		} else {
-			nDmxTransmitPeriod = nPeriod;
+			m_nDmxTransmitPeriod = nPeriod;
 		}
 	} else {
-		nDmxTransmitPeriod = std::max(transmit::BREAK_TO_BREAK_TIME_MIN, nPackageLengthMicroSeconds + 44U);
+		m_nDmxTransmitPeriod = std::max(transmit::BREAK_TO_BREAK_TIME_MIN, nPackageLengthMicroSeconds + 44U);
 	}
 
-	s_nDmxTransmitInterTime = nDmxTransmitPeriod - nPackageLengthMicroSeconds;
+	s_nDmxTransmitInterTime = m_nDmxTransmitPeriod - nPackageLengthMicroSeconds;
 
-	DEBUG_PRINTF("nPeriod=%u, nLengthMax=%u, s_nDmxTransmitPeriod=%u, nPackageLengthMicroSeconds=%u -> s_nDmxTransmitInterTime=%u", nPeriod, nLengthMax, nDmxTransmitPeriod, nPackageLengthMicroSeconds, s_nDmxTransmitInterTime);
+	m_nDmxTransmitBreakTime = s_nDmxTransmitBreakTime;
+	m_nDmxTransmitMabTime = s_nDmxTransmitMabTime;
+
+	DEBUG_PRINTF("nPeriod=%u, nLengthMax=%u, m_nDmxTransmitPeriod=%u, nPackageLengthMicroSeconds=%u -> s_nDmxTransmitInterTime=%u", nPeriod, nLengthMax, m_nDmxTransmitPeriod, nPackageLengthMicroSeconds, s_nDmxTransmitInterTime);
 }
 
 void Dmx::SetDmxSlots(uint16_t nSlots) {

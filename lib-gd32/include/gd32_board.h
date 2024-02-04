@@ -50,6 +50,8 @@
 # include "board/gd32f207c_eval.h"
 #elif defined (BOARD_GD32F470Z_EVAL)
 # include "board/gd32f470z_eval.h"
+#elif defined (BOARD_GD32H759I_EVAL)
+# include "board/gd32h759i_eval.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "board/bw_opidmx4.h"
 #elif defined (BOARD_DMX3)
@@ -64,6 +66,24 @@
 
 #if defined(USART0_REMAP) && !defined (I2C0_REMAP)
 # error Configuration error
+#endif
+
+#if defined (GD32H7XX)
+# ifdef USE_ENET0
+#  define ENETx			ENET0
+#  define RCU_ENET		RCU_ENET0
+#  define RCU_ENETTX	RCU_ENET0TX
+#  define RCU_ENETRX	RCU_ENET0RX
+# elif USE_ENET1
+#  define ENETx			ENET1
+#  define RCU_ENET		RCU_ENET1
+#  define RCU_ENETTX	RCU_ENET1TX
+#  define RCU_ENETRX	RCU_ENET1RX
+# else
+#  error
+# endif
+#else
+# define ENETx
 #endif
 
 #endif /* GD32_BOARD_H_ */

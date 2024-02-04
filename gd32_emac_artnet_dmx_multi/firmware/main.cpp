@@ -2,7 +2,7 @@
  * @file main.cpp
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,11 @@
 #include "dmxsend.h"
 #include "rdmdeviceparams.h"
 #include "dmxconfigudp.h"
+
+#if defined (NODE_SHOWFILE)
+# include "showfile.h"
+# include "showfileparams.h"
+#endif
 
 #include "remoteconfig.h"
 #include "remoteconfigparams.h"
@@ -108,8 +113,6 @@ void main() {
 
 	node.SetOutput(&dmxSend);
 
-	DmxConfigUdp dmxConfigUdp;
-
 	RDMDeviceParams rdmDeviceParams;
 	ArtNetRdmController artNetRdmController;
 
@@ -120,6 +123,16 @@ void main() {
 	artNetRdmController.Print();
 
 	node.SetRdmController(&artNetRdmController, artnetParams.IsRdm());
+
+#if defined (NODE_SHOWFILE)
+	ShowFile showFile;
+
+	ShowFileParams showFileParams;
+	showFileParams.Load();
+	showFileParams.Set();
+
+	showile.Print();
+#endif
 
 	node.Print();
 
@@ -161,11 +174,11 @@ void main() {
 		hw.WatchdogFeed();
 		nw.Run();
 		node.Run();
+#if defined (NODE_SHOWFILE)
+		showFile.Run();
+#endif
 		remoteConfig.Run();
 		configStore.Flash();
-		if (node.GetActiveOutputPorts() != 0) {
-			dmxConfigUdp.Run();
-		}
 		mDns.Run();
 		display.Run();
 		hw.Run();

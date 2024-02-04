@@ -1,3 +1,4 @@
+$(info "lib-gd32/Makefile.GD32")
 $(info $$FAMILY [${FAMILY}])
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
@@ -5,6 +6,7 @@ ifneq ($(MAKE_FLAGS),)
   ifeq ($(findstring gd32f10x,$(FAMILY)), gd32f10x)
   	EXTRA_SRCDIR=gd32f10x/CMSIS/GD/GD32F10x/Source
   	EXTRA_SRCDIR+=gd32f10x/GD32F10x_standard_peripheral/Source
+  	EXTRA_SRCDIR+=src/f
   endif
 
   ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)
@@ -30,11 +32,13 @@ ifneq ($(MAKE_FLAGS),)
   			EXTRA_INCLUDES+=../lib-hal/ff14b/source
   		endif
   	endif
+  	EXTRA_SRCDIR+=src/f
   endif
 
   ifeq ($(findstring gd32f30x,$(FAMILY)), gd32f30x)
   	EXTRA_SRCDIR=gd32f30x/CMSIS/GD/GD32F30x/Source
   	EXTRA_SRCDIR+=gd32f30x/GD32F30x_standard_peripheral/Source
+  	EXTRA_SRCDIR+=src/f
   endif
   
   ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
@@ -61,6 +65,7 @@ ifneq ($(MAKE_FLAGS),)
   		endif
   		
   	endif
+  	EXTRA_SRCDIR+=src/f
   endif
 
   ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
@@ -85,22 +90,29 @@ ifneq ($(MAKE_FLAGS),)
   	EXTRA_SRCDIR+=device/usb
   endif	
 else
-	FAMILY=
 	ifeq ($(FAMILY),)
+		ifneq (, $(shell test -d '../lib-gd32/gd32f10x' && echo -n yes))
+			FAMILY=gd32f10x
+			EXTRA_SRCDIR+=src/f
+		endif
+		ifneq (, $(shell test -d '../lib-gd32/gd32f30x' && echo -n yes))
+			FAMILY=gd32f30x
+			EXTRA_SRCDIR+=src/f
+		endif
+		ifneq (, $(shell test -d '../lib-gd32/gd32f4xx' && echo -n yes))
+			FAMILY=gd32f4xx
+			HAVE_SOFTUART=1
+			EXTRA_SRCDIR+=src/f
+		endif
+		ifneq (, $(shell test -d '../lib-gd32/gd32h7xx' && echo -n yes))
+			FAMILY=gd32h7xx
+			HAVE_SOFTUART=1
+			EXTRA_SRCDIR+=src/h
+		endif
 		ifneq (, $(shell test -d '../lib-gd32/gd32f20x' && echo -n yes))
 			FAMILY=gd32f20x
 			HAVE_SOFTUART=1
-		else
-			ifneq (, $(shell test -d '../lib-gd32/gd32f10x' && echo -n yes))
-				FAMILY=gd32f10x
-			endif
-			ifneq (, $(shell test -d '../lib-gd32/gd32f30x' && echo -n yes))
-				FAMILY=gd32f30x
-			endif
-			ifneq (, $(shell test -d '../lib-gd32/gd32f4xx' && echo -n yes))
-				FAMILY=gd32f4xx
-				HAVE_SOFTUART=1
-			endif
+			EXTRA_SRCDIR+=src/f
 		endif
 	endif
 	

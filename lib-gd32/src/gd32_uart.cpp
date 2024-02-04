@@ -2,7 +2,7 @@
  * @file gd32_uart.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -106,7 +106,7 @@ static void _rcu_periph_clock_enable(const uint32_t usart_periph) {
 	assert(isSet);
 }
 
-#if !defined (GD32F4XX)
+#if !(defined (GD32F4XX) || defined (GD32H7XX))
 static void _gpio_init(const uint32_t usart_periph) {
 	rcu_periph_clock_enable(RCU_AF);
 
@@ -307,7 +307,11 @@ void gd32_uart_transmit(const uint32_t usart_periph, const uint8_t *data, uint32
 	while (length-- != 0) {
 		while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE))
 			;
+#if defined (GD32H7XX)
+		USART_TDATA(usart_periph) = USART_TDATA_TDATA & (uint32_t)*data++;
+#else
 		USART_DATA(usart_periph) = ((uint16_t) USART_DATA_DATA & *data++);
+#endif
 	}
 
 }
@@ -318,6 +322,10 @@ void gd32_uart_transmit_string(const uint32_t usart_periph, const char *data) {
 	while (*data != '\0') {
 		while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
 			;
+#if defined (GD32H7XX)
+		USART_TDATA(usart_periph) = USART_TDATA_TDATA & (uint32_t)*data++;
+#else
 		USART_DATA(usart_periph) = ((uint16_t) USART_DATA_DATA & *data++);
+#endif
 	}
 }

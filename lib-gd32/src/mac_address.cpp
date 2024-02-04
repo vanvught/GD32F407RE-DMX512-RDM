@@ -2,7 +2,7 @@
  * @file mac_address.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,15 @@
 #include "debug.h"
 
 void mac_address_get(uint8_t paddr[]) {
-#if !defined (GD32F4XX)
-	const auto mac_hi = *(volatile uint32_t *) (0x1FFFF7E8);
-	const auto mac_lo = *(volatile uint32_t *) (0x1FFFF7EC);
-#else
+#if defined (GD32H7XX)
+	const auto mac_hi = *(volatile uint32_t *) (0x1FF0F7E8);
+	const auto mac_lo = *(volatile uint32_t *) (0x1FF0F7EC);
+#elif defined (GD32F4XX)
 	const auto mac_hi = *(volatile uint32_t *) (0x1FFF7A10);
 	const auto mac_lo = *(volatile uint32_t *) (0x1FFF7A14);
+#else
+	const auto mac_hi = *(volatile uint32_t *) (0x1FFFF7E8);
+	const auto mac_lo = *(volatile uint32_t *) (0x1FFFF7EC);
 #endif
 
 	paddr[0] = 2;

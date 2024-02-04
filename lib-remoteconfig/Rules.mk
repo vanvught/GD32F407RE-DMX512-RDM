@@ -33,7 +33,16 @@ ifneq ($(MAKE_FLAGS),)
 		EXTRA_INCLUDES+=../lib-oscserver/include
 	endif
 	ifeq ($(findstring NODE_SHOWFILE,$(MAKE_FLAGS)), NODE_SHOWFILE)
-		EXTRA_INCLUDES+=../lib-osc/include
+		EXTRA_INCLUDES+=../lib-showfile/include
+		ifeq ($(findstring CONFIG_SHOWFILE_ENABLE_OSC,$(MAKE_FLAGS)), CONFIG_SHOWFILE_ENABLE_OSC)
+			EXTRA_INCLUDES+=../lib-osc/include
+		endif
+		ifeq ($(findstring CONFIG_SHOWFILE_PROTOCOL_E131,$(MAKE_FLAGS)), CONFIG_SHOWFILE_PROTOCOL_E131)
+			EXTRA_INCLUDES+=../lib-e131/include
+		endif
+		ifeq ($(findstring CONFIG_SHOWFILE_PROTOCOL_ARTNET,$(MAKE_FLAGS)), CONFIG_SHOWFILE_PROTOCOL_ARTNET)
+			EXTRA_INCLUDES+=../lib-artnet/include
+		endif
 	endif
 	
 	ifeq ($(findstring RDM_CONTROLLER,$(MAKE_FLAGS)), RDM_CONTROLLER)

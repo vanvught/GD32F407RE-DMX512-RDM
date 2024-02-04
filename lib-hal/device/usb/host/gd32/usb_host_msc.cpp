@@ -38,11 +38,9 @@ extern "C" {
 void console_error(const char *);
 }
 
-// #include "../lib-hal/ff12c/ff.h"
 #include "../lib-hal/ff14b/source/ff.h"
 #include "device/usb/host.h"
 
-//#if (_FFCONF == 68300)		// R0.12c
 #if (FF_DEFINED	== 86631)		// R0.14b
  static FATFS fat_fs;
 #else
@@ -71,6 +69,19 @@ usbh_user_cb usr_cb = {
     usbh_user_device_not_supported,
     usbh_user_unrecovered_error
 };
+
+#if defined NODE_SHOWFILE
+namespace showfile {
+	void usb_ready();
+	void usb_disconnected();
+}  // namespace showfile
+#endif
+
+/* state machine for the USBH_USR_ApplicationState */
+#define USBH_USR_FS_MOUNT            0
+#define USBH_USR_FS_READY	         1
+
+static uint8_t usbh_usr_application_state = USBH_USR_FS_MOUNT;
 
 static usb::host::Status s_status;
 static usb::host::Speed s_speed;
@@ -116,6 +127,10 @@ void usbh_user_unrecovered_error() {
 void usbh_user_device_disconnected() {
 	s_status = usb::host::Status::DISCONNECTED;
 	puts("> Device Disconnected.");
+	usbh_usr_application_state = USBH_USR_FS_MOUNT;
+#if defined NODE_SHOWFILE
+	showfile::usb_disconnected();
+#endif
 }
 
 void usbh_user_device_reset() {
@@ -188,17 +203,6 @@ void usbh_user_device_not_supported() {
 
 usbh_user_status usbh_user_userinput() {
 	puts("usbh_user_userinput");
-
-	const FRESULT result = f_mount(&fat_fs, (const TCHAR *) "0:/", (BYTE) 0);
-
-	if (result == FR_OK) {
-		s_status = usb::host::Status::READY;
-	} else {
-		char buffer[32];
-		snprintf(buffer, sizeof(buffer) - 1, "f_mount failed! %d\n", (int) result);
-		console_error(buffer);
-	}
-
     return static_cast<usbh_user_status>(1);
 }
 
@@ -207,5 +211,22 @@ void usbh_user_over_current_detected() {
 }
 
 int usbh_usr_msc_application() {
+	if  (usbh_usr_application_state == USBH_USR_FS_MOUNT) {
+		const auto result = f_mount(&fat_fs, (const TCHAR *) "0:/", (BYTE) 0);
+
+		if (result == FR_OK) {
+			s_status = usb::host::Status::READY;
+			usbh_usr_application_state = USBH_USR_FS_READY;
+#if defined NODE_SHOWFILE
+			showfile::usb_ready();
+#endif
+		} else {
+			char buffer[32];
+			snprintf(buffer, sizeof(buffer) - 1, "f_mount failed! %d\n", (int) result);
+			console_error(buffer);
+			return -1;
+		}
+	}
+
 	return 0;
 }

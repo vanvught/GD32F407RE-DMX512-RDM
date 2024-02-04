@@ -2,7 +2,7 @@
  * @file gd32f407re.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -180,14 +180,20 @@ static constexpr uint32_t PORT_A_TX = 0;
 #define GD32_BOARD_STATUS_LED	GD32_BOARD_LED1
 
 /**
+ * Pixel DMX
+ */
+
+#define PIXELDMXSTARTSTOP_GPIO	GD32_BOARD_LED2
+
+/**
  * SPI LCD
  */
 
 #define SPI_LCD_RST_PIN		GPIO_EXT_7
-#define SPI_LCD_DC_GPIO 		GPIO_EXT_26
+#define SPI_LCD_DC_GPIO 	GPIO_EXT_26
 #define SPI_LCD_BL_GPIO		GPIO_EXT_22
 #if defined(SPI_LCD_HAVE_CS_GPIO)
-# define SPI_LCD_CS_GPIO		GPIO_EXT_24
+# define SPI_LCD_CS_GPIO	GPIO_EXT_24
 #endif
 
 #include "gpio_header.h"

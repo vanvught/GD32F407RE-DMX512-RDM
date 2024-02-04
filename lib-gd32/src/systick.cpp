@@ -2,7 +2,7 @@
  * @file  systick.c
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 volatile uint32_t s_nSysTickMillis;
 
 extern "C" {
-void systick_config(void) {
+void systick_config() {
 	/* setup systick timer for 1000Hz interrupts */
 	if (SysTick_Config(SystemCoreClock / 1000U)) {
 		/* capture error */
@@ -41,7 +41,7 @@ void systick_config(void) {
 	NVIC_SetPriority(SysTick_IRQn, 0x00U);
 }
 
-void SysTick_Handler(void) {
+void SysTick_Handler() {
 	s_nSysTickMillis++;
 }
 }

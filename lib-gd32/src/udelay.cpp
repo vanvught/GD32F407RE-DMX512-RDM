@@ -2,7 +2,7 @@
  * @file udelay.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 
 static constexpr uint32_t TICKS_PER_US = (MCU_CLOCK_FREQ / 1000000U);
 
-void udelay_init(void) {
+void udelay_init() {
 	assert(MCU_CLOCK_FREQ == SystemCoreClock);
 
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
