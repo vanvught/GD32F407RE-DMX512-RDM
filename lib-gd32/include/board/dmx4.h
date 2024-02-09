@@ -200,12 +200,18 @@ static constexpr uint32_t PORT_A_RDM = (1U << 16);
  * SPI LCD
  */
 
-#define SPI_LCD_RST_PIN		GPIO_EXT_7
+#define SPI_LCD_RST_PIN			GPIO_EXT_7
 #define SPI_LCD_DC_GPIO 		GPIO_EXT_26
-#define SPI_LCD_BL_GPIO		GPIO_EXT_22
+#define SPI_LCD_BL_GPIO			GPIO_EXT_22
 #if defined(SPI_LCD_HAVE_CS_GPIO)
 # define SPI_LCD_CS_GPIO		GPIO_EXT_24
 #endif
+
+/**
+ * LCD
+ */
+
+#define DISPLAYTIMEOUT_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTC, 13)	// KEY2
 
 #include "gpio_header.h"
 

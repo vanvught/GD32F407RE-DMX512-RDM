@@ -15,7 +15,7 @@ LIBS=
 
 SRCDIR=firmware lib
 
-include Rules.mk
+include Common.mk
 include ../firmware-template-gd32/Rules.mk
 
 prerequisites:

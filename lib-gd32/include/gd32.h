@@ -49,20 +49,15 @@
 extern "C" {
 #endif
 
-#if defined  (GD32F10X_HD) || defined (GD32F10X_CL)
-# define GD32F10X
+#if defined (GD32F10X_HD) || defined (GD32F10X_CL)
 # include "gd32f10x.h"
 #elif defined (GD32F20X_CL)
-# define GD32F20X
 # include "gd32f20x.h"
 #elif defined (GD32F30X_HD)
-# define GD32F30X
 # include "gd32f30x.h"
 #elif defined (GD32F407) || defined (GD32F450) || defined (GD32F470)
-# define GD32F4XX
 # include "gd32f4xx.h"
 #elif defined (GD32H759)
-# define GD32H7XX
 # include "gd32h7xx.h"
 #else
 # error MCU is not supported

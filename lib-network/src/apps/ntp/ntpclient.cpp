@@ -283,7 +283,7 @@ void NtpClient::Stop() {
 	DEBUG_EXIT
 }
 
-void NtpClient::PrintNtpTime(__attribute__((unused)) const char *pText, __attribute__((unused)) const struct TimeStamp *pNtpTime) {
+void NtpClient::PrintNtpTime([[maybe_unused]] const char *pText, [[maybe_unused]] const struct TimeStamp *pNtpTime) {
 #ifndef NDEBUG
 	const auto nSeconds = static_cast<time_t>(pNtpTime->nSeconds - JAN_1970);
 	const auto *pTm = localtime(&nSeconds);

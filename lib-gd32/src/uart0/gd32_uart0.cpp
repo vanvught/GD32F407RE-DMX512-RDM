@@ -2,7 +2,7 @@
  * @file gd32_uart0.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,12 +38,19 @@ void uart0_putc(int c) {
 	if (c == '\n') {
 		while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
 			;
+#if defined (GD32H7XX)
+		USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t)'\r';
+#else
 		USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) '\r');
+#endif
 	}
 
 	while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
 		;
-
+#if defined (GD32H7XX)
+	USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t) c;
+#else
 	USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) c);
+#endif
 }
 }

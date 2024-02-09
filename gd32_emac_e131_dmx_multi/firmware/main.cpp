@@ -34,7 +34,6 @@
 #include "displayudf.h"
 #include "displayudfparams.h"
 #include "displayhandler.h"
-#include "display_timeout.h"
 
 #include "e131.h"
 #include "e131bridge.h"

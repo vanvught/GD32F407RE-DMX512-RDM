@@ -38,10 +38,10 @@ void operator delete[](void *p) {
  * C++14 and above
  */
 
-void operator delete(void *p, __attribute__((unused)) std::size_t size) noexcept {
+void operator delete(void *p, [[maybe_unused]] std::size_t size) noexcept {
 	free(p);
 }
 
-void operator delete[](void *p, __attribute__((unused))std::size_t size) noexcept {
+void operator delete[](void *p, [[maybe_unused]]std::size_t size) noexcept {
 	free(p);
 }

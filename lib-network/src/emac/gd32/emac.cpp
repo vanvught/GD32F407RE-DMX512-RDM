@@ -78,10 +78,19 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 #ifndef NDEBUG
 	{
 		uint16_t phy_value;
+#if defined (GD32H7XX)
+		ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+#else
 		ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+#endif
 		printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+#if defined (GD32H7XX)
+		enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+#else
 		enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 		phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+#endif
 		printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR" );
 	}
 #endif
@@ -103,7 +112,11 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 			phyStatus.speed == net::Speed::SPEED10 ? 10 : 100,
 			phyStatus.duplex == net::Duplex::DUPLEX_HALF ? "HALF" : "FULL");
 
+#if defined (GD32H7XX)
+	const auto enet_init_status = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
+#else
 	const auto enet_init_status = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
+#endif
 
 	if (enet_init_status != SUCCESS) {}
 
@@ -112,22 +125,36 @@ void __attribute__((cold)) emac_start(uint8_t mac_address[], net::Link& link) {
 #ifndef NDEBUG
 	{
 		uint16_t phy_value;
+#if defined (GD32H7XX)
+		ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+#else
 		ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+#endif
 		printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR" );
+#if defined (GD32H7XX)
+		enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+		phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+#else
 		enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 		phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
+#endif
 		printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR" );
 	}
 #endif
 
 	mac_address_get(mac_address);
 
+#if defined (GD32H7XX)
+	enet_mac_address_set(ENETx, ENET_MAC_ADDRESS0, mac_address);
+	enet_descriptors_chain_init(ENETx, ENET_DMA_TX);
+	enet_descriptors_chain_init(ENETx, ENET_DMA_RX);
+#else
 	enet_mac_address_set(ENET_MAC_ADDRESS0, mac_address);
-
 	enet_descriptors_chain_init(ENET_DMA_TX);
 	enet_descriptors_chain_init(ENET_DMA_RX);
+#endif
 
-	for (unsigned i = 0; i < ENET_TXBUF_NUM; i++) {
+	for (uint32_t i = 0; i < ENET_TXBUF_NUM; i++) {
 		enet_transmit_checksum_config(&txdesc_tab[i], ENET_CHECKSUM_TCPUDPICMP_FULL);
 	}
 

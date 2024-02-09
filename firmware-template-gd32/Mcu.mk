@@ -59,16 +59,24 @@ ifeq ($(strip $(MCU)),GD32F450VI)
   LINE=gd32f450
 endif
 
+ifeq ($(strip $(MCU)),GD32F470ZK) 
+  LINKER=$(FIRMWARE_DIR)gd32f470zk_flash.ld
+  FAMILY=gd32f4xx
+  LINE=gd32f470
+endif
+
 ifndef LINKER
 	$(error MCU is not configured)
 endif
 
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
+FAMILY_UCA=$(shell echo $(FAMILY) | tr a-z A-Z)
+LINE_UC=$(shell echo $(LINE) | tr a-z A-Z)
+
 
 $(info $$FAMILY [${FAMILY}])
 $(info $$FAMILY_UC [${FAMILY_UC}])
-
-LINE_UC=$(shell echo $(LINE) | tr a-z A-Z)
+$(info $$FAMILY_UCA [${FAMILY_UCA}])
 
 $(info $$LINE [${LINE}])
 $(info $$LINE_UC [${LINE_UC}])

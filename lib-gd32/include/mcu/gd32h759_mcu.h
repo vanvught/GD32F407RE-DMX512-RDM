@@ -1,8 +1,8 @@
 /**
- * @file display_timeout.h
+ * @file gd32h759_mcu.h
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +23,31 @@
  * THE SOFTWARE.
  */
 
-#ifndef DISPLAY_TIMEOUT_H_
-#define DISPLAY_TIMEOUT_H_
+#ifndef MCU_GD32H759_MCU_H_
+#define MCU_GD32H759_MCU_H_
 
-#include "gd32.h"
+#if !defined(GD32H759)
+# error This file should not be included
+#endif
 
-namespace display {
-namespace timeout {
+#include <stdint.h>
 
-void gpio_init() {
-	gpio_fsel(KEY2_GPIOx, KEY2_PINx, GPIO_FSEL_INPUT);
-}
+/**
+ * 	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
+ *
+ * CK_APB1 x 4 = 240000000
+ * TIMER1,2,3,4,5,6,11,12,13
+ *
+ * CK_APB2 x 2 = 240000000
+ * TIMER0,7,8,9,10
+ */
 
-bool gpio_renew() {
-	return (GPIO_ISTAT(KEY2_GPIOx) & KEY2_PINx) == 0;
-}
+#define MCU_CLOCK_FREQ      (uint32_t)(600000000)
+#define APB1_CLOCK_FREQ     (uint32_t)(150000000)
+#define APB2_CLOCK_FREQ     (uint32_t)(300000000)
+#define TIMER_PSC_1MHZ      (uint16_t)(239)
+#define TIMER_PSC_10KHZ     (uint16_t)(23999)
 
-}  // namespace timeout
-}  // namespace display
+#include "gd32h7xx_mcu.h"
 
-#endif /* DISPLAY_TIMEOUT_H_ */
+#endif /* MCU_GD32H759_MCU_H_ */

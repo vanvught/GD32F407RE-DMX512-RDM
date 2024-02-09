@@ -141,7 +141,7 @@ void RDMDeviceResponder::Print() {
 	printf(" Sensors          : %d\n", pDeviceInfo->sensor_count);
 }
 
-void RDMDeviceResponder::PersonalityUpdate(__attribute__((unused))  LightSet *pLightSet) {
+void RDMDeviceResponder::PersonalityUpdate([[maybe_unused]]  LightSet *pLightSet) {
 }
 
 void RDMDeviceResponder::DmxStartAddressUpdate() {

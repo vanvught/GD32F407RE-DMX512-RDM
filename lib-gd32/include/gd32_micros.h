@@ -30,7 +30,7 @@
 
 #include "gd32.h"
 
-#if defined (GD32F4XX) && !defined(MICROS_DO_NOT_USE_TIMER4)
+#if (defined (GD32F4XX) || defined (GD32H7XX)) && !defined(MICROS_DO_NOT_USE_TIMER4)
 inline uint32_t micros() {
 	return TIMER_CNT(TIMER4);
 }

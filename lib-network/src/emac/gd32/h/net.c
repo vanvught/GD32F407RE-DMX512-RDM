@@ -1,8 +1,8 @@
 /**
- * @file display_timeout.cpp
+ * net.c
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,32 @@
  * THE SOFTWARE.
  */
 
-namespace display {
-namespace timeout {
-void __attribute__((weak)) gpio_init() {}
-bool __attribute__((weak)) gpio_renew() { return false;}
-}  // namespace timeout
-}  // namespace display
+#include <stdint.h>
+#include <stddef.h>
+
+#include "gd32.h"
+
+extern enet_descriptors_struct  *dma_current_rxdesc;
+
+int emac_eth_recv(uint8_t **packet) {
+	const uint32_t size = enet_rxframe_size_get(ENETx);
+
+	if (size > 0) {
+		*packet = (uint8_t *) (enet_desc_information_get(ENETx, dma_current_rxdesc, RXDESC_BUFFER_1_ADDR));
+		return size;
+	}
+
+	return -1;
+}
+
+void emac_free_pkt(void) {
+#ifdef SELECT_DESCRIPTORS_ENHANCED_MODE
+    ENET_NOCOPY_PTPFRAME_RECEIVE_ENHANCED_MODE(ENETx, NULL);
+#else
+    ENET_NOCOPY_FRAME_RECEIVE(ENETx);
+#endif /* SELECT_DESCRIPTORS_ENHANCED_MODE */
+}
+
+void emac_eth_send(void *packet, int len) {
+	enet_frame_transmit(ENETx, (uint8_t *) packet, len);
+}

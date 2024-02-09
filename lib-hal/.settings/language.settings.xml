@@ -2,7 +2,7 @@
 <project>
 	<configuration id="cdt.managedbuild.toolchain.gnu.cross.base.999241968" name="GD32">
 		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider class="org.eclipse.cdt.internal.build.crossgcc.CrossGCCBuiltinSpecsDetector" console="true" env-hash="-1035064771983189378" id="org.eclipse.cdt.build.crossgcc.CrossGCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT Cross GCC Built-in Compiler Settings" parameter="arm-none-eabi-gcc -nostartfiles -ffreestanding -nostdlib -mcpu=cortex-m3 -mthumb -DBARE_METAL -DGD32 -DGD32F20X_CL ${FLAGS} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+			<provider class="org.eclipse.cdt.internal.build.crossgcc.CrossGCCBuiltinSpecsDetector" console="true" env-hash="-959651673242759874" id="org.eclipse.cdt.build.crossgcc.CrossGCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT Cross GCC Built-in Compiler Settings" parameter="arm-none-eabi-gcc -nostartfiles -ffreestanding -nostdlib -mcpu=cortex-m3 -mthumb -DBARE_METAL -DGD32 -DGD32F20X_CL ${FLAGS} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
 				<language-scope id="org.eclipse.cdt.core.gcc"/>
 				<language-scope id="org.eclipse.cdt.core.g++"/>
 			</provider>

@@ -30,7 +30,7 @@
 
 namespace hardware {
 namespace ledblink {
-void __attribute__((weak)) display(__attribute__((unused)) const uint32_t nState) {}
+void __attribute__((weak)) display([[maybe_unused]] const uint32_t nState) {}
 }  // namespace ledblink
 }  // namespace hardware
 

@@ -26,10 +26,10 @@
 #ifndef GD32_ADC_H_
 #define GD32_ADC_H_
 
-float gd32_adc_gettemp(void);
-float gd32_adc_getvref(void);
+float gd32_adc_gettemp();
+float gd32_adc_getvref();
 #if defined (GD32F4XX)
-float gd32_adc_getvbat(void);
+float gd32_adc_getvbat();
 #endif
 
 #ifdef __cplusplus
