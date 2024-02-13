@@ -37,8 +37,6 @@
 
 #include "network.h"
 
-#include "showfile.h"
-
 #include "debug.h"
 
 namespace cmd {
@@ -48,7 +46,9 @@ namespace cmd {
 	static constexpr char SHOW[] = "show";
 	static constexpr char LOOP[] = "loop";
 	static constexpr char BO[] = "blackout";
+#if defined (SHOWFILE_ENABLE_DMX_MASTER)
 	static constexpr char MASTER[] = "master";
+#endif
 	static constexpr char TFTP[] = "tftp";
 	static constexpr char DELETE[] = "delete";
 	// TouchOSC specific
@@ -63,7 +63,9 @@ namespace length {
 	static constexpr uint32_t SHOW = sizeof(cmd::SHOW) - 1;
 	static constexpr uint32_t LOOP = sizeof(cmd::LOOP) - 1;
 	static constexpr uint32_t BO = sizeof(cmd::BO) - 1;
+#if defined (SHOWFILE_ENABLE_DMX_MASTER)
 	static constexpr uint32_t MASTER = sizeof(cmd::MASTER) - 1;
+#endif
 	static constexpr uint32_t TFTP = sizeof(cmd::TFTP) - 1;
 	static constexpr uint32_t DELETE = sizeof(cmd::DELETE) - 1;
 	// TouchOSC specific
@@ -160,6 +162,7 @@ void ShowFileOSC::Process() {
 		return;
 	}
 
+#if defined (SHOWFILE_ENABLE_DMX_MASTER)
 	if (memcmp(&m_pBuffer[length::PATH], cmd::MASTER, length::MASTER) == 0) {
 		OscSimpleMessage Msg(m_pBuffer, m_nBytesReceived);
 
@@ -180,6 +183,7 @@ void ShowFileOSC::Process() {
 		DEBUG_PRINTF("Master %d", nValue);
 		return;
 	}
+#endif
 
 	if (memcmp(&m_pBuffer[length::PATH], cmd::TFTP, length::TFTP) == 0) {
 		OscSimpleMessage Msg(m_pBuffer, m_nBytesReceived);

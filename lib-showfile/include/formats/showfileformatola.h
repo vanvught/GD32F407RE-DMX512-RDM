@@ -33,6 +33,14 @@
 
 #include "debug.h"
 
+#define SHOWFILE_PREFIX	"show"
+#define SHOWFILE_SUFFIX	".txt"
+
+namespace showfile {
+static constexpr uint32_t FILE_NAME_LENGTH = sizeof(SHOWFILE_PREFIX "NN" SHOWFILE_SUFFIX) - 1U;
+static constexpr uint32_t FILE_MAX_NUMBER = 99;
+}  // namespace showfile
+
 class ShowFileFormat: public ShowFileProtocol {
 public:
 	ShowFileFormat() {

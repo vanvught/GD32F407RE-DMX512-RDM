@@ -45,6 +45,9 @@ Zerobss:
   bl stack_debug_init
 #endif
   bl  SystemInit
+#if !defined (ENABLE_TFTP_SERVER)
+  bl __libc_init_array
+#endif
   bl main
   bx lr
 .size Reset_Handler, .-Reset_Handler

@@ -37,11 +37,13 @@
 # include "showfileosc.h"
 #endif
 
+#if defined (OUTPUT_DMX_PIXEL) || defined (OUTPUT_DMX_PIXEL_MULTI)
+# define SHOWFILE_ENABLE_DMX_MASTER
+#endif
+
 #include "debug.h"
 
 namespace showfile {
-Formats format_get(const char *pFormat);
-const char *format_get(const Formats format);
 bool filename_copyto(char *pShowFileName, const uint32_t nLength, const uint32_t nShowFileNumber);
 bool filename_check(const char *pShowFileName, uint32_t &nShowFileNumber);
 }  // namespace showfile
@@ -110,9 +112,6 @@ public:
 	}
 
 	void Print() {
-#if defined (CONFIG_SHOWFILE_ENABLE_OSC)
-		m_showFileOSC.Print();
-#endif
 		puts("Showfile");
 		if (m_aShowFileName[0] != '\0') {
 			printf(" %s\n", m_aShowFileName);
@@ -123,6 +122,9 @@ public:
 		printf(" %s\n", m_bDoLoop ? "Looping" : "Not looping");
 		ShowFileFormat::ShowFilePrint();
 		ShowFileProtocol::Print();
+#if defined (CONFIG_SHOWFILE_ENABLE_OSC)
+		m_showFileOSC.Print();
+#endif
 	}
 
 	void SetStatus(showfile::Status Status);
@@ -164,8 +166,10 @@ public:
 		ShowFileProtocol::DmxBlackout();
 	}
 
-	void SetMaster(uint32_t nMaster) {
+	void SetMaster([[maybe_unused]] const uint32_t nMaster) {
+#if defined (SHOWFILE_ENABLE_DMX_MASTER)
 		ShowFileProtocol::DmxMaster(nMaster);
+#endif
 	}
 
 	/*

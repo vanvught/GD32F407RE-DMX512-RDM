@@ -57,12 +57,14 @@ void usb_init();
 
 extern "C" {
 void console_init(void);
-void __libc_init_array(void);
 void systick_config(void);
 }
 
 void udelay_init();
 void gd32_adc_init();
+namespace hal {
+void uuid_init(uuid_t out);
+}  // namespace hardware
 
 Hardware *Hardware::s_pThis;
 
@@ -72,11 +74,9 @@ Hardware::Hardware() {
 	s_pThis = this;
 
 	console_init();
-#if !defined (ENABLE_TFTP_SERVER)
-	__libc_init_array();
-#endif
 	systick_config();
     udelay_init();
+    hal::uuid_init(m_uuid);
 	gd32_adc_init();
 	gd32_i2c_begin();
 
@@ -88,7 +88,8 @@ Hardware::Hardware() {
 	timer_init(TIMER5, &timer_initpara);
 	timer_enable(TIMER5);
 
-#if defined (GD32F4XX)
+#if defined (GD32H7XX)
+#elif defined (GD32F4XX)
 	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
 #else
 #endif
@@ -210,32 +211,6 @@ Hardware::Hardware() {
 	logic_analyzer::init();
 
 	DEBUG_EXIT
-}
-
-typedef union pcast32 {
-	uuid_t uuid;
-	uint32_t u32[4];
-} _pcast32;
-
-void Hardware::GetUuid(uuid_t out) {
-	_pcast32 cast;
-
-#if defined (GD32H7XX)
-	cast.u32[0] = *(volatile uint32_t*) (0x1FF0F7E8);
-	cast.u32[1] = *(volatile uint32_t*) (0x1FF0F7EC);
-	cast.u32[2] = *(volatile uint32_t*) (0x1FF0F7F0);
-#elif defined (GD32F4XX)
-	cast.u32[0] = *(volatile uint32_t*) (0x1FFF7A10);
-	cast.u32[1] = *(volatile uint32_t*) (0x1FFF7A14);
-	cast.u32[2] = *(volatile uint32_t*) (0x1FFF7A18);
-#else
-	cast.u32[0] = *(volatile uint32_t*) (0x1FFFF7E8);
-	cast.u32[1] = *(volatile uint32_t*) (0x1FFFF7EC);
-	cast.u32[2] = *(volatile uint32_t*) (0x1FFFF7F0);
-#endif
-	cast.u32[3] = cast.u32[0] + cast.u32[1] + cast.u32[2];
-
-	memcpy(out, cast.uuid, sizeof(uuid_t));
 }
 
 #include <cstdio>

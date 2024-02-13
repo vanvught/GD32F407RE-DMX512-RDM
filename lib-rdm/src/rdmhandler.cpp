@@ -1204,20 +1204,19 @@ void RDMHandler::SetDisplayLevel([[maybe_unused]] bool IsBroadcast, [[maybe_unus
 }
 
 void RDMHandler::GetRealTimeClock([[maybe_unused]] uint16_t nSubDevice) {
-	struct tm local_time;
-	Hardware::Get()->GetTime(&local_time);
-
-	const auto year = static_cast<uint16_t>(local_time.tm_year + 1900);
+	const auto ltime = time(nullptr);
+	const auto *tm = localtime(&ltime);
+	const auto year = static_cast<uint16_t>(tm->tm_year + 1900);
 
 	auto *pRdmDataOut = reinterpret_cast<struct TRdmMessage *>(m_pRdmDataOut);
 
 	pRdmDataOut->param_data[0] = static_cast<uint8_t>(year >> 8);
 	pRdmDataOut->param_data[1] = static_cast<uint8_t>(year);
-	pRdmDataOut->param_data[2] = static_cast<uint8_t>(local_time.tm_mon + 1);	// 0..11
-	pRdmDataOut->param_data[3] = static_cast<uint8_t>(local_time.tm_mday);
-	pRdmDataOut->param_data[4] = static_cast<uint8_t>(local_time.tm_hour);
-	pRdmDataOut->param_data[5] = static_cast<uint8_t>(local_time.tm_min);
-	pRdmDataOut->param_data[6] = static_cast<uint8_t>(local_time.tm_sec);
+	pRdmDataOut->param_data[2] = static_cast<uint8_t>(tm->tm_mon + 1);	// 0..11
+	pRdmDataOut->param_data[3] = static_cast<uint8_t>(tm->tm_mday);
+	pRdmDataOut->param_data[4] = static_cast<uint8_t>(tm->tm_hour);
+	pRdmDataOut->param_data[5] = static_cast<uint8_t>(tm->tm_min);
+	pRdmDataOut->param_data[6] = static_cast<uint8_t>(tm->tm_sec);
 
 	pRdmDataOut->param_data_length = 7;
 

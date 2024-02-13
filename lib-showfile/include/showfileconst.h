@@ -34,26 +34,6 @@ enum class Status {
 };
 
 static constexpr char STATUS[static_cast<int>(showfile::Status::UNDEFINED)][12] = { "Idle", "Playing", "Stopped", "Ended" };
-
-enum class Formats {
-	OLA, UNDEFINED
-};
-
-static constexpr uint32_t FORMAT_NAME_LENGTH = 6;	///< Includes '\0'
-static constexpr char FORMAT[static_cast<uint32_t>(Formats::UNDEFINED)][FORMAT_NAME_LENGTH] = { "OLA" };
-
-//enum class Protocols {
-//	SACN, ARTNET, NODE_SACN, NODE_ARTNET, UNDEFINED
-//};
-//
-//static constexpr uint32_t PROTOCOL_NAME_LENGTH = 14;	///< Includes '\0'
-//static constexpr char PROTOCOL[static_cast<uint32_t>(Protocols::UNDEFINED)][PROTOCOL_NAME_LENGTH] = { "sACN", "Art-Net", "Node sACN", "Node Art-Net" };
-
-#define SHOWFILE_PREFIX	"show"
-#define SHOWFILE_SUFFIX	".txt"
-
-static constexpr uint32_t FILE_NAME_LENGTH = sizeof(SHOWFILE_PREFIX "NN" SHOWFILE_SUFFIX) - 1U;
-static constexpr uint32_t FILE_MAX_NUMBER = 99;
 }  // namespace showfile
 
 #endif /* SHOWFILECONST_H_ */
