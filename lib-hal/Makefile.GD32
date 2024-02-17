@@ -9,10 +9,17 @@ ifneq ($(MAKE_FLAGS),)
   	endif
   endif
   
-  ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
-  	EXTRA_SRCDIR+=device/usb/host/gd32
-  	EXTRA_INCLUDES+=device/usb/host/gd32
-  endif
+	ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
+		ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
+			EXTRA_SRCDIR+=device/usb/host/gd32/h
+			EXTRA_INCLUDES+=device/usb/host/gd32/h
+		else
+			EXTRA_SRCDIR+=device/usb/host/gd32/f
+			EXTRA_INCLUDES+=device/usb/host/gd32/f
+		endif
+		EXTRA_SRCDIR+=device/usb/host/gd32
+		EXTRA_INCLUDES+=device/usb/host/gd32
+	endif
   
   ifneq (,$(findstring DEBUG_EMAC,$(MAKE_FLAGS)))
 		EXTRA_SRCDIR+=debug/emac/gd32

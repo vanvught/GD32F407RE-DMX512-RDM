@@ -2,7 +2,7 @@
  * @file dmx4.h
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -178,7 +178,7 @@ static constexpr uint32_t PORT_A_RDM = (1U << 16);
  */
 
 #if defined (GD32F20X_CL)
-# include "mcu/gd32f20x_mcu.h"
+# include "mcu/gd32f207_mcu.h"
 # define GD32_MCU_NAME	"GD32F207RG"
 #elif defined (GD32F407)
 # include "mcu/gd32f407_mcu.h"

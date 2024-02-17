@@ -2,7 +2,7 @@
  * @file  hwclockrtc.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,15 +32,61 @@
 
 #include "debug.h"
 
-bool rtc_configuration(void) {
-	rcu_osci_on (RCU_LXTAL);
+#define BCD2DEC(val)	( ((val) & 0x0f) + ((val) >> 4) * 10 )
+#define DEC2BCD(val)	static_cast<char>( (((val) / 10) << 4) + (val) % 10 )
+
+#if defined (GD32F4XX) || defined (GD32H7XX)
+# define RTC_CLOCK_SOURCE_LXTAL
+static rtc_parameter_struct rtc_initpara;
+#endif
+
+#if defined (GD32F4XX) || defined (GD32H7XX)
+bool rtc_configuration() {
+# if defined (RTC_CLOCK_SOURCE_IRC32K)
+	rcu_osci_on (RCU_IRC32K);
+	if (SUCCESS != rcu_osci_stab_wait(RCU_IRC32K)) {
+		return false;
+	}
+	rcu_rtc_clock_config (RCU_RTCSRC_IRC32K);
+# elif defined (RTC_CLOCK_SOURCE_LXTAL)
+	rcu_osci_on(RCU_LXTAL);
 
 	if (SUCCESS != rcu_osci_stab_wait(RCU_LXTAL)) {
 		return false;
 	}
 
-	rcu_rtc_clock_config (RCU_RTCSRC_LXTAL);
-	rcu_periph_clock_enable (RCU_RTC);
+	rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
+# else
+#  error RTC clock source should be defined.
+# endif
+	rcu_periph_clock_enable(RCU_RTC);
+
+	if (SUCCESS != rtc_register_sync_wait()) {
+		return false;
+	}
+
+	rtc_initpara.date = DEC2BCD(_TIME_STAMP_DAY_);
+	rtc_initpara.month = DEC2BCD(_TIME_STAMP_MONTH_ - 1);
+	rtc_initpara.year = DEC2BCD(_TIME_STAMP_YEAR_ - 1900);
+
+	if (SUCCESS != rtc_init(&rtc_initpara)) {
+		DEBUG_PUTS("RTC time configuration failed!");
+		return false;
+	}
+
+	DEBUG_PUTS("RTC time configuration success!");
+	return true;
+}
+#else
+bool rtc_configuration() {
+	rcu_osci_on(RCU_LXTAL);
+
+	if (SUCCESS != rcu_osci_stab_wait(RCU_LXTAL)) {
+		return false;
+	}
+
+	rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
+	rcu_periph_clock_enable(RCU_RTC);
 	rtc_register_sync_wait();
 	rtc_lwoff_wait();
 	rtc_prescaler_set(32767);
@@ -48,11 +94,25 @@ bool rtc_configuration(void) {
 
 	return true;
 }
+#endif
 
 using namespace rtc;
 
 void HwClock::RtcProbe() {
 	DEBUG_ENTRY
+
+#if defined (GD32F4XX) || defined (GD32H7XX)
+# if defined (RTC_CLOCK_SOURCE_IRC32K)
+	rtc_initpara.factor_syn = 0x13F;
+	rtc_initpara.factor_asyn = = 0x63;
+# elif defined (RTC_CLOCK_SOURCE_LXTAL)
+	rtc_initpara.factor_syn = 0xFF;
+	rtc_initpara.factor_asyn = 0x7F;
+# else
+#  error RTC clock source should be defined.
+# endif
+	rtc_initpara.display_format = RTC_24HOUR;
+#endif
 
 	if (bkp_data_read(BKP_DATA_0) != 0xA5A5) {
 		DEBUG_PUTS("RTC not yet configured");
@@ -64,14 +124,23 @@ void HwClock::RtcProbe() {
 			return;
 		}
 
+#if defined (GD32F4XX) || defined (GD32H7XX)
+		const auto ltime = time(nullptr);
+		const auto *tm = localtime(&ltime);
+		RtcSet(tm);
+#else
 		rtc_lwoff_wait();
 		rtc_counter_set(time(nullptr));
 		rtc_lwoff_wait();
+#endif
 		bkp_data_write(BKP_DATA_0, 0xA5A5);
 	} else {
 		DEBUG_PUTS("No need to configure RTC");
 		rtc_register_sync_wait();
-        rtc_lwoff_wait();
+#if defined (GD32F4XX) || defined (GD32H7XX)
+#else
+		rtc_lwoff_wait();
+#endif
 	}
 
 	m_Type = rtc::Type::SOC_INTERNAL;
@@ -82,23 +151,61 @@ void HwClock::RtcProbe() {
 }
 
 bool HwClock::RtcSet(const struct tm *pTime) {
-	DEBUG_ENTRY
 	assert(pTime != nullptr);
 
-	rtc_counter_set(mktime(const_cast<struct tm *>(pTime)));
+	DEBUG_PRINTF("sec=%d, min=%d, hour=%d, mday=%d, mon=%d, year=%d, wday=%d",
+		pTime->tm_sec,
+		pTime->tm_min,
+		pTime->tm_hour,
+		pTime->tm_mday,
+		pTime->tm_mon,
+		pTime->tm_year,
+		pTime->tm_wday);
 
-	DEBUG_EXIT
+#if defined (GD32F4XX) || defined (GD32H7XX)
+	rtc_initpara.year = DEC2BCD(pTime->tm_year);
+	rtc_initpara.month = DEC2BCD(pTime->tm_mon);
+	rtc_initpara.date = DEC2BCD(pTime->tm_mday);
+	rtc_initpara.day_of_week = DEC2BCD(pTime->tm_wday);
+	rtc_initpara.hour = DEC2BCD(pTime->tm_hour);
+	rtc_initpara.minute = DEC2BCD(pTime->tm_min);
+	rtc_initpara.second = DEC2BCD(pTime->tm_sec);
+
+	return (SUCCESS == rtc_init(&rtc_initpara));
+#else
+	rtc_counter_set(mktime(const_cast<struct tm *>(pTime)));
+#endif
 	return true;
 }
 
 bool HwClock::RtcGet(struct tm *pTime) {
-	DEBUG_ENTRY
 	assert(pTime != nullptr);
 
-	const auto nSeconds = static_cast<time_t>(rtc_counter_get());
-	const auto *pTm = localtime(&nSeconds);
-	memcpy(pTime, pTm, sizeof(struct tm));
+#if defined (GD32F4XX) || defined (GD32H7XX)
+   const auto tr = reinterpret_cast<uint32_t>(RTC_TIME);
+   const auto dr = reinterpret_cast<uint32_t>(RTC_DATE);
 
-	DEBUG_EXIT
+   pTime->tm_year = BCD2DEC(GET_DATE_YR(dr));
+   pTime->tm_mon = BCD2DEC(GET_DATE_MON(dr));
+   pTime->tm_mday = BCD2DEC(GET_DATE_DAY(dr));
+   pTime->tm_wday = BCD2DEC(GET_DATE_DOW(dr));
+   pTime->tm_hour = BCD2DEC(GET_TIME_HR(tr));
+   pTime->tm_min = BCD2DEC(GET_TIME_MN(tr));
+   pTime->tm_sec = BCD2DEC(GET_TIME_SC(tr));
+#else
+   const auto nSeconds = static_cast<time_t>(rtc_counter_get());
+   const auto *pTm = localtime(&nSeconds);
+   memcpy(pTime, pTm, sizeof(struct tm));
+#endif
+
+	DEBUG_PRINTF("sec=%d, min=%d, hour=%d, mday=%d, mon=%d, year=%d, wday=%d",
+		pTime->tm_sec,
+		pTime->tm_min,
+		pTime->tm_hour,
+		pTime->tm_mday,
+		pTime->tm_mon,
+		pTime->tm_year,
+		pTime->tm_wday);
+
 	return true;
 }

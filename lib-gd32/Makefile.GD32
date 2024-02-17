@@ -24,6 +24,7 @@ ifneq ($(MAKE_FLAGS),)
   		EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/ustd/common
   		
   		ifeq ($(findstring CONFIG_USB_HOST_MSC,$(MAKE_FLAGS)), CONFIG_USB_HOST_MSC)
+  		EXTRA_SRCDIR+=device/usb/f
   			EXTRA_SRCDIR+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Source
   		
   			EXTRA_INCLUDES+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Include
@@ -45,6 +46,7 @@ ifneq ($(MAKE_FLAGS),)
   	EXTRA_SRCDIR=gd32f4xx/CMSIS/GD/GD32F4xx/Source
   	EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_standard_peripheral/Source
     ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
+    	 		EXTRA_SRCDIR+=device/usb/f
     	EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_usb_library/host/core/Source
     	
     	EXTRA_C_SOURCE_FILES=gd32f4xx/GD32F4xx_usb_library/driver/Source/drv_usb_core.c
@@ -67,6 +69,23 @@ ifneq ($(MAKE_FLAGS),)
   	endif
   	EXTRA_SRCDIR+=src/f
   endif
+  
+ 	ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
+  		EXTRA_SRCDIR=gd32h7xx/CMSIS/GD/GD32H7xx/Source
+  		EXTRA_SRCDIR+=gd32h7xx/GD32H7xx_standard_peripheral/Source
+  	 	ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
+  	 		EXTRA_SRCDIR+=device/usb/h
+  			EXTRA_SRCDIR+=gd32h7xx/GD32H7xx_usbhs_library/host/core/Source
+  		 	EXTRA_C_SOURCE_FILES=gd32h7xx/GD32H7xx_usbhs_library/driver/Source/drv_usb_core.c
+    		EXTRA_C_SOURCE_FILES+=gd32h7xx/GD32H7xx_usbhs_library/driver/Source/drv_usb_host.c
+    		EXTRA_C_SOURCE_FILES+=gd32h7xx/GD32H7xx_usbhs_library/driver/Source/drv_usbh_int.c 
+	  	 	ifeq ($(findstring CONFIG_USB_HOST_MSC,$(MAKE_FLAGS)), CONFIG_USB_HOST_MSC)
+	  	 		EXTRA_SRCDIR+=gd32h7xx/GD32H7xx_usbhs_library/host/class/msc/Source
+					EXTRA_INCLUDES+=../lib-hal/ff14b/source
+	  	 	endif
+  		endif
+		EXTRA_SRCDIR+=src/h
+  	endif
 
   ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
   else

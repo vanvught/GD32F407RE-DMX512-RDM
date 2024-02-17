@@ -47,11 +47,7 @@ void usb_init();
 
 #include "debug.h"
 
-#if defined (GD32F4XX) && defined(GPIO_INIT)
-# error
-#endif
-
-#if !defined (GD32F4XX) && !defined(GPIO_INIT)
+#if (defined (GD32F4XX) || defined (GD32H7XX)) && defined(GPIO_INIT)
 # error
 #endif
 
@@ -105,7 +101,11 @@ Hardware::Hardware() {
 	assert(nAPB2 == APB2_CLOCK_FREQ);
 #endif
 
-#if defined (GD32F4XX)
+#if defined (GD32H7XX)
+    rcu_periph_clock_enable(RCU_PMU);
+    rcu_periph_clock_enable(RCU_BKPSRAM);
+    pmu_backup_write_enable();
+#elif defined (GD32F4XX)
 	rcu_periph_clock_enable(RCU_RTC);
 	rcu_periph_clock_enable(RCU_PMU);
 	pmu_backup_ldo_config(PMU_BLDOON_ON);
@@ -186,7 +186,7 @@ Hardware::Hardware() {
 	gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
 # else
 	gpio_mode_set(LED_BLINK_GPIO_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_BLINK_PIN);
-	gpio_output_options_set(LED_BLINK_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
+	gpio_output_options_set(LED_BLINK_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED, LED_BLINK_PIN);
 # endif
 	GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
@@ -197,7 +197,7 @@ Hardware::Hardware() {
 	gpio_init(PANELLED_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
 # else
 	gpio_mode_set(PANELLED_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, PANELLED_595_CS_GPIO_PINx);
-	gpio_output_options_set(PANELLED_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
+	gpio_output_options_set(PANELLED_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, PANELLED_595_CS_GPIO_PINx);
 # endif
 	GPIO_BOP(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
 #endif
@@ -216,7 +216,7 @@ Hardware::Hardware() {
 #include <cstdio>
 
 bool Hardware::Reboot() {
-	printf("Rebooting ...\n");
+	puts("Rebooting ...");
 	WatchdogStop();
 	
 	RebootHandler();

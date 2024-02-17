@@ -189,7 +189,7 @@
  * SPI
  */
 
-#define SPI0_PERiPH				SPI0
+#define SPI0_PERIPH				SPI0
 #define SPI0_RCU_CLK			RCU_SPI0
 #if defined (SPI0_REMAP)
 # define SPI0_REMAP_GPIO		GPIO_SPI0_REMAP

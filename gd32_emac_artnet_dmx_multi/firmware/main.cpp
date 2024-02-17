@@ -130,7 +130,7 @@ void main() {
 	showFileParams.Load();
 	showFileParams.Set();
 
-	showile.Print();
+	showFile.Print();
 #endif
 
 	node.Print();

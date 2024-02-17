@@ -113,6 +113,14 @@
  * U(S)ART
  */
 
+// #define USART0_REMAP
+// #define USART1_REMAP
+// #define USART2_FULL_REMAP
+// #define USART2_PARTIAL_REMAP
+// #define UART3_REMAP
+// #define USART5_REMAP
+// #define UART6_REMAP
+
 /**
  * Panel LEDs
  */
@@ -196,10 +204,12 @@ static constexpr uint32_t PORT_A_TX = 0;
  * SPI LCD
  */
 
+#define SPI_LCD_RST_PIN		GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 14)
 #define SPI_LCD_DC_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 11)
 #define SPI_LCD_BL_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 12)
-#define SPI_LCD_CS_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 13)
-#define SPI_LCD_RST_PIN		GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 14)
+#if defined(SPI_LCD_HAVE_CS_GPIO)
+# define SPI_LCD_CS_GPIO	GD32_PORT_TO_GPIO(GD32_GPIO_PORTA, 13)
+#endif
 
 #include "gpio_header.h"
 
