@@ -72,7 +72,7 @@ void console_error(const char *);
 /**
  * https://www.gd32-dmx.org/memory.html
  */
-#if defined (GD32F20X) ||defined (GD32F4XX)
+#if defined (GD32F20X) || defined (GD32F4XX)
 # define SECTION_DMA_BUFFER					__attribute__ ((section (".dmx")))
 #else
 # define SECTION_DMA_BUFFER
@@ -181,7 +181,11 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 
 	if (RESET != (USART_REG_VAL(uart, USART_FLAG_FERR) & BIT(USART_BIT_POS(USART_FLAG_FERR)))) {
 		USART_REG_VAL(uart, USART_FLAG_FERR) &= ~BIT(USART_BIT_POS(USART_FLAG_FERR));
+#if defined (GD32H7XX)
+		static_cast<void>(GET_BITS(USART_RDATA(uart), 0U, 8U));
+#else
 		static_cast<void>(GET_BITS(USART_DATA(uart), 0U, 8U));
+#endif
 		if (s_RxBuffer[nPortIndex].State == TxRxState::IDLE) {
 			s_RxBuffer[nPortIndex].Dmx.nSlotsInPacket = 0;
 			s_RxBuffer[nPortIndex].State = TxRxState::BREAK;
@@ -189,7 +193,11 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 		return;
 	}
 
+#if defined (GD32H7XX)
+	const auto data = static_cast<uint8_t>(GET_BITS(USART_RDATA(uart), 0U, 8U));
+#else
 	const auto data = static_cast<uint8_t>(GET_BITS(USART_DATA(uart), 0U, 8U));
+#endif
 
 	switch (s_RxBuffer[nPortIndex].State) {
 	case TxRxState::IDLE:
@@ -637,23 +645,34 @@ static void usart_dma_config(void) {
 	DMA_PARAMETER_STRUCT dma_init_struct;
 	rcu_periph_clock_enable(RCU_DMA0);
 	rcu_periph_clock_enable(RCU_DMA1);
+#if defined (GD32H7XX)
+	rcu_periph_clock_enable(RCU_DMAMUX);
+#endif
 	/*
 	 * USART 0
 	 */
 #if defined (DMX_USE_USART0)
 	dma_deinit(USART0_DMA, USART0_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_USART0_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+# else
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(USART0);
+# else
 	dma_init_struct.periph_addr = USART0 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
-	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# if defined (GD32F4XX) || defined (GD32H7XX)
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+# else
+	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
+# endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(USART0_DMA, USART0_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
@@ -676,18 +695,26 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_USART1)
 	dma_deinit(USART1_DMA, USART1_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_USART1_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+# else
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(USART1);
+# else
 	dma_init_struct.periph_addr = USART1 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
-	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# if defined (GD32F4XX) || defined (GD32H7XX)
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+# else
+	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
+# endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(USART1_DMA, USART1_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
@@ -705,17 +732,25 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_USART2)
 	dma_deinit(USART2_DMA, USART2_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_USART2_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-# if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+# else
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
 # endif
-	dma_init_struct.periph_addr = USART2 + 0x04U;
-	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-# if !defined (GD32F4XX)
-	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(USART2);
 # else
+	dma_init_struct.periph_addr = USART2 + 0x04U;
+# endif
+	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
+# if defined (GD32F4XX) || defined (GD32H7XX)
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
+# else
+	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
 # endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(USART2_DMA, USART2_TX_DMA_CH, &dma_init_struct);
@@ -726,12 +761,12 @@ static void usart_dma_config(void) {
 	dma_channel_subperipheral_select(USART2_DMA, USART2_TX_DMA_CH, USART2_TX_DMA_SUBPERIx);
 # endif
 	dma_interrupt_disable(USART2_DMA, USART2_TX_DMA_CH, DMA_INTERRUPT_DISABLE);
-# if !defined (GD32F4XX)
-	NVIC_SetPriority(DMA0_Channel1_IRQn, 1);
-	NVIC_EnableIRQ(DMA0_Channel1_IRQn);
-# else
+#if defined (GD32F4XX) || defined (GD32H7XX)
 	NVIC_SetPriority(DMA0_Channel3_IRQn, 1);
 	NVIC_EnableIRQ(DMA0_Channel3_IRQn);
+# else
+	NVIC_SetPriority(DMA0_Channel1_IRQn, 1);
+	NVIC_EnableIRQ(DMA0_Channel1_IRQn);
 # endif
 #endif
 	/*
@@ -739,18 +774,26 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_UART3)
 	dma_deinit(UART3_DMA, UART3_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_UART3_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+# else
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(UART3);
+# else
 	dma_init_struct.periph_addr = UART3 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
-	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# if defined (GD32F4XX) || defined (GD32H7XX)
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+# else
+	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
+# endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(UART3_DMA, UART3_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
@@ -773,17 +816,25 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_UART4)
 	dma_deinit(UART4_DMA, UART4_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_UART4_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+# else
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(UART4);
+# else
 	dma_init_struct.periph_addr = UART4 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
-	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+#if defined (GD32F4XX) || defined (GD32H7XX)
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
+#else
+	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(UART4_DMA, UART4_TX_DMA_CH, &dma_init_struct);
@@ -807,16 +858,23 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_USART5)
 	dma_deinit(USART5_DMA, USART5_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_USART5_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F20X)
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(USART5);
+# else
 	dma_init_struct.periph_addr = USART5 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
+#if defined (GD32F20X)
 	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# else
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
@@ -836,18 +894,25 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_UART6)
 	dma_deinit(UART6_DMA, UART6_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_UART6_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F20X)
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(UART6);
+# else
 	dma_init_struct.periph_addr = UART6 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F20X)
 	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# else
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+# endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(UART6_DMA, UART6_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
@@ -870,18 +935,25 @@ static void usart_dma_config(void) {
 	 */
 #if defined (DMX_USE_UART7)
 	dma_deinit(UART7_DMA, UART7_TX_DMA_CH);
+# if defined (GD32H7XX)
+	dma_init_struct.request = DMA_REQUEST_UART7_TX;
+# endif
 	dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F20X)
 	dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+# endif
+# if defined (GD32H7XX)
+	dma_init_struct.periph_addr = (uint32_t) &USART_TDATA(UART7);
+# else
 	dma_init_struct.periph_addr = UART7 + 0x04U;
+# endif
 	dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-#if !defined (GD32F4XX)
+# if defined (GD32F20X)
 	dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#else
+# else
 	dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+# endif
 	dma_init_struct.priority = DMA_PRIORITY_HIGH;
 	dma_init(UART7_DMA, UART7_TX_DMA_CH, &dma_init_struct);
 	/* configure DMA mode */
@@ -890,7 +962,7 @@ static void usart_dma_config(void) {
 # if defined (GD32F4XX)
 	dma_channel_subperipheral_select(UART7_DMA, UART7_TX_DMA_CH, UART7_TX_DMA_SUBPERIx);
 # endif
-# if !defined (GD32F4XX)
+#if defined (GD32F20X)
 	NVIC_SetPriority(DMA1_Channel3_IRQn, 1);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 # else
@@ -990,12 +1062,12 @@ void TIMER1_IRQHandler() {
 			_gpio_mode_output(USART2_GPIO_PORT, USART2_TX_PIN);
 			GPIO_BC(USART2_GPIO_PORT) = USART2_TX_PIN;
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::BREAK;
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitBreakTime);
+			TIMER_CH2CV(TIMER1) =  TIMER_CNT(TIMER1) + s_nDmxTransmitBreakTime;
 			break;
 		case TxRxState::BREAK:
 			_gpio_mode_af(USART2_GPIO_PORT, USART2_TX_PIN, USART2);
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::MAB;
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2, TIMER_CNT(TIMER1) + s_nDmxTransmitMabTime);
+			TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_nDmxTransmitMabTime;
 			break;
 		case TxRxState::MAB: {
 			uint32_t dmaCHCTL = DMA_CHCTL(USART2_DMA, USART2_TX_DMA_CH);
@@ -1109,12 +1181,12 @@ void TIMER4_IRQHandler() {
 			_gpio_mode_output(USART5_GPIO_PORT, USART5_TX_PIN);
 			GPIO_BC(USART5_GPIO_PORT) = USART5_TX_PIN;
 			s_TxBuffer[dmx::config::USART5_PORT].State = TxRxState::BREAK;
-			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_1, TIMER_CNT(TIMER4) + s_nDmxTransmitBreakTime);
+			TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_nDmxTransmitBreakTime;
 			break;
 		case TxRxState::BREAK:
 			_gpio_mode_af(USART5_GPIO_PORT, USART5_TX_PIN, USART5);
 			s_TxBuffer[dmx::config::USART5_PORT].State = TxRxState::MAB;
-			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_1, TIMER_CNT(TIMER4) + s_nDmxTransmitMabTime);
+			TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_nDmxTransmitMabTime;
 			break;
 		case TxRxState::MAB: {
 			uint32_t dmaCHCTL = DMA_CHCTL(USART5_DMA, USART5_TX_DMA_CH);
@@ -1215,6 +1287,7 @@ void TIMER4_IRQHandler() {
 		return;
 	}
 #endif
+	timer_interrupt_flag_clear(TIMER4, ~0);
 }
 
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
@@ -1336,22 +1409,7 @@ extern "C" {
  * USART 0
  */
 #if defined (DMX_USE_USART0)
-# if !defined (GD32F4XX)
-void DMA0_Channel3_IRQHandler() {
-	if (dma_interrupt_flag_get(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET) == SET) {
-		dma_interrupt_disable(DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE);
-
-		if (s_TxBuffer[dmx::config::USART0_PORT].outputStyle == dmx::OutputStyle::DELTA) {
-			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::IDLE;
-		} else {
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_0 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
-			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::DMXINTER;
-		}
-	}
-
-	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
-}
-# else
+# if defined (GD32F4XX) || defined (GD32H7XX)
 void DMA1_Channel7_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA1, DMA_CH7, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA1, DMA_CH7, DMA_INTERRUPT_DISABLE);
@@ -1365,6 +1423,21 @@ void DMA1_Channel7_IRQHandler() {
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH7, DMA_INTERRUPT_FLAG_CLEAR);
+}
+# else
+void DMA0_Channel3_IRQHandler() {
+	if (dma_interrupt_flag_get(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET) == SET) {
+		dma_interrupt_disable(DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE);
+
+		if (s_TxBuffer[dmx::config::USART0_PORT].outputStyle == dmx::OutputStyle::DELTA) {
+			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::IDLE;
+		} else {
+			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_0 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
+			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::DMXINTER;
+		}
+	}
+
+	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
 }
 # endif
 #endif
@@ -1391,7 +1464,22 @@ void DMA0_Channel6_IRQHandler() {
  * USART 2
  */
 #if defined (DMX_USE_USART2)
-# if !defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
+void DMA0_Channel3_IRQHandler() {
+	if (dma_interrupt_flag_get(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET) == SET) {
+		dma_interrupt_disable(DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE);
+
+		if (s_TxBuffer[dmx::config::USART2_PORT].outputStyle == dmx::OutputStyle::DELTA) {
+			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::IDLE;
+		} else {
+			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
+			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::DMXINTER;
+		}
+	}
+
+	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
+}
+# else
 void DMA0_Channel1_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH1, DMA_INTERRUPT_DISABLE);
@@ -1408,44 +1496,13 @@ void DMA0_Channel1_IRQHandler() {
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_CLEAR);
 }
-# else
-void DMA0_Channel3_IRQHandler() {
-	if (dma_interrupt_flag_get(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET) == SET) {
-		dma_interrupt_disable(DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE);
-
-		if (s_TxBuffer[dmx::config::USART2_PORT].outputStyle == dmx::OutputStyle::DELTA) {
-			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::IDLE;
-		} else {
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
-			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::DMXINTER;
-		}
-	}
-
-	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
-}
 # endif
 #endif
 /*
  * UART 3
  */
 #if defined (DMX_USE_UART3)
-# if !defined (GD32F4XX)
-void DMA1_Channel4_IRQHandler() {
-	if (dma_interrupt_flag_get(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET) == SET) {
-		dma_interrupt_disable(DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE);
-
-		if (s_TxBuffer[dmx::config::UART3_PORT].outputStyle == dmx::OutputStyle::DELTA) {
-			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::IDLE;
-		} else {
-			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
-			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::DMXINTER;
-		}
-	}
-
-	dma_interrupt_flag_clear(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
-}
-# endif
-# if defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
 void DMA0_Channel4_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH4, DMA_INTERRUPT_DISABLE);
@@ -1459,6 +1516,21 @@ void DMA0_Channel4_IRQHandler() {
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
+}
+# else
+void DMA1_Channel4_IRQHandler() {
+	if (dma_interrupt_flag_get(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET) == SET) {
+		dma_interrupt_disable(DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE);
+
+		if (s_TxBuffer[dmx::config::UART3_PORT].outputStyle == dmx::OutputStyle::DELTA) {
+			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::IDLE;
+		} else {
+			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
+			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::DMXINTER;
+		}
+	}
+
+	dma_interrupt_flag_clear(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
 }
 # endif
 #endif
@@ -1482,7 +1554,7 @@ void DMA1_Channel3_IRQHandler() {
 	dma_interrupt_flag_clear(DMA1, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
 }
 # endif
-# if defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
 void DMA0_Channel7_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA0, DMA_CH7, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH7, DMA_INTERRUPT_DISABLE);
@@ -1538,7 +1610,7 @@ void DMA1_Channel4_IRQHandler() {
 	dma_interrupt_flag_clear(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
 }
 # endif
-# if defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
 void DMA0_Channel1_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH1, DMA_INTERRUPT_DISABLE);
@@ -1575,7 +1647,7 @@ void DMA1_Channel3_IRQHandler() {
 	dma_interrupt_flag_clear(DMA1, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
 }
 # endif
-# if defined (GD32F4XX)
+# if defined (GD32F4XX) || defined (GD32H7XX)
 void DMA0_Channel0_IRQHandler() {
 	if (dma_interrupt_flag_get(DMA0, DMA_CH0, DMA_INTERRUPT_FLAG_GET) == SET) {
 		dma_interrupt_disable(DMA0, DMA_CH0, DMA_INTERRUPT_DISABLE);
@@ -1598,7 +1670,7 @@ static void uart_dmx_config(uint32_t usart_periph) {
 	gd32_uart_begin(usart_periph, 250000U, GD32_UART_BITS_8, GD32_UART_PARITY_NONE, GD32_UART_STOP_2BITS);
 }
 
-Dmx *Dmx::s_pThis = nullptr;
+Dmx *Dmx::s_pThis;
 
 Dmx::Dmx() {
 	DEBUG_ENTRY
@@ -1611,11 +1683,11 @@ Dmx::Dmx() {
 	s_nDmxTransmitInterTime = dmx::transmit::PERIOD_DEFAULT - s_nDmxTransmitBreakTime - s_nDmxTransmitMabTime - (dmx::max::CHANNELS * 44) - 44;
 
 	for (auto i = 0; i < DMX_MAX_PORTS; i++) {
-#if !defined (GD32F4XX)
+#if defined (GPIO_INIT)
 		gpio_init(s_DirGpio[i].nPort, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, s_DirGpio[i].nPin);
 #else
 		gpio_mode_set(s_DirGpio[i].nPort, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, s_DirGpio[i].nPin);
-		gpio_output_options_set(s_DirGpio[i].nPort, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, s_DirGpio[i].nPin);
+		gpio_output_options_set(s_DirGpio[i].nPort, GPIO_OTYPE_PP, GPIO_OSPEED, s_DirGpio[i].nPin);
 		gpio_af_set(s_DirGpio[i].nPort, GPIO_AF_0, s_DirGpio[i].nPin);
 #endif
 		m_nDmxTransmissionLength[i] = dmx::max::CHANNELS;
@@ -1676,7 +1748,6 @@ Dmx::Dmx() {
 }
 
 void Dmx::SetPortDirection(const uint32_t nPortIndex, PortDirection portDirection, bool bEnableData) {
-//	DEBUG_PRINTF("nPortIndex=%u %s %c", nPortIndex, portDirection == PortDirection::INP ? "Input" : "Output", bEnableData ? 'Y' : 'N');
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	const auto nUart = _port_to_uart(nPortIndex);
@@ -1716,8 +1787,6 @@ void Dmx::ClearData(const uint32_t nPortIndex) {
 }
 
 void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
-	logic_analyzer::ch2_set();
-
 	assert(nPortIndex < dmx::config::max::OUT);
 	const auto nUart = _port_to_uart(nPortIndex);
 
@@ -1803,8 +1872,6 @@ void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 	}
 
 	s_TxBuffer[nPortIndex].State = TxRxState::BREAK;
-
-	logic_analyzer::ch2_clear();
 }
 
 
@@ -1908,8 +1975,9 @@ void Dmx::SetDmxPeriodTime(uint32_t nPeriod) {
 
 	auto nPackageLengthMicroSeconds = s_nDmxTransmitBreakTime + s_nDmxTransmitMabTime + (nLengthMax * 44U);
 
-	// The GD32F4xx Timer 1 has a 32-bit counter
-#if ! defined(GD32F4XX)
+	// The GD32F4xx/GD32H7XX Timer 1 has a 32-bit counter
+#if  defined(GD32F4XX) || defined (GD32H7XX)
+#else
 	if (nPackageLengthMicroSeconds > (static_cast<uint16_t>(~0) - 44U)) {
 		s_nDmxTransmitBreakTime = std::min(transmit::BREAK_TIME_TYPICAL, s_nDmxTransmitBreakTime);
 		s_nDmxTransmitMabTime = transmit::MAB_TIME_MIN;
@@ -1949,7 +2017,6 @@ void Dmx::SetDmxSlots(uint16_t nSlots) {
 
 void Dmx::SetOutputStyle(const uint32_t nPortIndex, const dmx::OutputStyle outputStyle) {
 	assert(nPortIndex < dmx::config::max::OUT);
-
 	s_TxBuffer[nPortIndex].outputStyle = outputStyle;
 }
 
@@ -1976,8 +2043,6 @@ void Dmx::SetSendData(const uint32_t nPortIndex, const uint8_t *pData, uint32_t 
 }
 
 void Dmx::SetSendDataWithoutSC(const uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength) {
-	logic_analyzer::ch0_set();
-
 	assert(nPortIndex < DMX_MAX_PORTS);
 
 	auto *p = &s_TxBuffer[nPortIndex];
@@ -1993,8 +2058,6 @@ void Dmx::SetSendDataWithoutSC(const uint32_t nPortIndex, const uint8_t *pData, 
 		m_nDmxTransmissionLength[nPortIndex] = nLength;
 		SetDmxPeriodTime(m_nDmxTransmitPeriodRequested);
 	}
-
-	logic_analyzer::ch0_clear();
 }
 
 void Dmx::Blackout() {
@@ -2051,8 +2114,6 @@ void Dmx::StartOutput(const uint32_t nPortIndex) {
 static bool s_doForce;
 
 void Dmx::SetOutput(const bool doForce) {
-	logic_analyzer::ch1_set();
-
 	if (doForce) {
 		s_doForce = true;
 		for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
@@ -2061,8 +2122,6 @@ void Dmx::SetOutput(const bool doForce) {
 				StopData(_port_to_uart(nPortIndex), nPortIndex);
 			}
 		}
-
-		logic_analyzer::ch1_clear();
 		return;
 	}
 
@@ -2076,11 +2135,9 @@ void Dmx::SetOutput(const bool doForce) {
 	}
 
 	s_doForce = false;
-	logic_analyzer::ch1_clear();
 }
 
 void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
-//	DEBUG_PRINTF("sv_PortState[%u]=%u", nPortIndex, sv_PortState[nPortIndex]);
 	assert(nPortIndex < DMX_MAX_PORTS);
 	assert(sv_PortState[nPortIndex] == PortState::IDLE);
 
@@ -2155,7 +2212,7 @@ void Dmx::StartData(const uint32_t nUart, const uint32_t nPortIndex) {
 
 // DMX Receive
 
-const uint8_t* Dmx::GetDmxChanged(UNUSED uint32_t nPortIndex) {
+const uint8_t *Dmx::GetDmxChanged(UNUSED uint32_t nPortIndex) {
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 	const auto *p = GetDmxAvailable(nPortIndex);
 
@@ -2342,11 +2399,19 @@ void Dmx::RdmSendRaw(const uint32_t nPortIndex, const uint8_t* pRdmData, uint32_
 	for (uint32_t i = 0; i < nLength; i++) {
 		while (RESET == usart_flag_get(nUart, USART_FLAG_TBE))
 			;
+#if defined (GD32H7XX)
+		USART_TDATA(nUart) = USART_TDATA_TDATA & pRdmData[i];
+#else
 		USART_DATA(nUart) = static_cast<uint16_t>(USART_DATA_DATA & pRdmData[i]);
+#endif
 	}
 
 	while (SET != usart_flag_get(nUart, USART_FLAG_TC)) {
+#if defined (GD32H7XX)
+		static_cast<void>(GET_BITS(USART_RDATA(nUart), 0U, 8U));
+#else
 		static_cast<void>(GET_BITS(USART_DATA(nUart), 0U, 8U));
+#endif
 	}
 }
 
@@ -2366,11 +2431,19 @@ void Dmx::RdmSendDiscoveryRespondMessage(uint32_t nPortIndex, const uint8_t *pRd
 	for (uint32_t i = 0; i < nLength; i++) {
 		while (RESET == usart_flag_get(nUart, USART_FLAG_TBE))
 			;
+#if defined (GD32H7XX)
+		USART_TDATA(nUart) = USART_TDATA_TDATA & pRdmData[i];
+#else
 		USART_DATA(nUart) = static_cast<uint16_t>(USART_DATA_DATA & pRdmData[i]);
+#endif
 	}
 
 	while (SET != usart_flag_get(nUart, USART_FLAG_TC)) {
+#if defined (GD32H7XX)
+		static_cast<void>(GET_BITS(USART_RDATA(nUart), 0U, 8U));
+#else
 		static_cast<void>(GET_BITS(USART_DATA(nUart), 0U, 8U));
+#endif
 	}
 
 	udelay(RDM_RESPONDER_DATA_DIRECTION_DELAY);

@@ -127,25 +127,51 @@ public:
 #endif
 	}
 
-	void SetStatus(showfile::Status Status);
+	void SetStatus(const showfile::Status Status);
 
 	showfile::Status GetStatus() const {
 		return m_Status;
 	}
 
-	void SetShowFile(uint32_t nShowFileNumber);
+	void LoadShows();
+	void UnloadShows() {
+		m_nShows = 0;
+
+		for (auto &FileIndex : m_nShowFileNumber) {
+			FileIndex = -1;
+		}
+
+		m_nShowFileCurrent = showfile::FILE_MAX_NUMBER + 1U;
+	}
+
+	void SetShowFile(const uint32_t nShowFileNumber);
 
 	const char *GetShowFileName() const {
 		return static_cast<const char *>(m_aShowFileName);
 	}
 
 	uint32_t GetShowFile() const {
-		return m_nShowFileNumber;
+		return m_nShowFileCurrent;
 	}
 
-	bool DeleteShowFile(uint32_t nShowFileNumber);
+	int8_t GetShowFile(const uint32_t nIndex) {
+		if (nIndex < sizeof(m_nShowFileNumber) / sizeof(m_nShowFileNumber[0]) ) {
+			return m_nShowFileNumber[nIndex];
+		}
 
-	void DoLoop(bool bDoLoop) {
+		return -1;
+	}
+
+	uint8_t GetShows() {
+		if (m_nShows == 0) {
+			LoadShows();
+		}
+		return m_nShows;
+	}
+
+	bool DeleteShowFile(const uint32_t nShowFileNumber);
+
+	void DoLoop(const bool bDoLoop) {
 		m_bDoLoop = bDoLoop;
 	}
 
@@ -162,8 +188,10 @@ public:
 	}
 
 	void BlackOut() {
+#if defined (SHOWFILE_ENABLE_DMX_MASTER)
 		Stop();
 		ShowFileProtocol::DmxBlackout();
+#endif
 	}
 
 	void SetMaster([[maybe_unused]] const uint32_t nMaster) {
@@ -217,6 +245,8 @@ private:
 #endif
 	showfile::Status m_Status { showfile::Status::IDLE };
 	char m_aShowFileName[showfile::FILE_NAME_LENGTH + 1]; // Including '\0'
+	uint8_t m_nShows { 0 };
+	int8_t m_nShowFileNumber[showfile::FILE_MAX_NUMBER + 1];
 	bool m_bAutoStart { false };
 #if !defined(CONFIG_SHOWFILE_DISABLE_TFTP)
 	bool m_bEnableTFTP { false };

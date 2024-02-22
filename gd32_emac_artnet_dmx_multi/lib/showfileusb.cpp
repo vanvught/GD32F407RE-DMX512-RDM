@@ -36,6 +36,8 @@ void usb_ready() {
 
 	if (ShowFile::Get()->IsAutoStart()) {
 		ShowFile::Get()->Start();
+	} else {
+		ShowFile::Get()->LoadShows();
 	}
 
 	DEBUG_EXIT
@@ -45,6 +47,7 @@ void usb_disconnected() {
 	DEBUG_ENTRY
 
 	ShowFile::Get()->Stop();
+	ShowFile::Get()->UnloadShows();
 
 	DEBUG_EXIT
 }

@@ -32,6 +32,10 @@
 
 #include "mdns.h"
 
+#if defined (ENABLE_NTP_CLIENT)
+# include "ntpclient.h"
+#endif
+
 #include "displayudf.h"
 #include "displayudfparams.h"
 #include "displayhandler.h"
@@ -82,6 +86,12 @@ void main() {
 
 	fw.Print("Art-Net 4 DMX/RDM controller {" STR(LIGHTSET_PORTS) " Universes}");
 	nw.Print();
+
+#if defined (ENABLE_NTP_CLIENT)
+	NtpClient ntpClient;
+	ntpClient.Start();
+	ntpClient.Print();
+#endif
 
 	display.TextStatus(ArtNetMsgConst::PARAMS, Display7SegmentMessage::INFO_NODE_PARMAMS, CONSOLE_YELLOW);
 
@@ -179,6 +189,9 @@ void main() {
 		remoteConfig.Run();
 		configStore.Flash();
 		mDns.Run();
+#if defined (ENABLE_NTP_CLIENT)
+		ntpClient.Run();
+#endif
 		display.Run();
 		hw.Run();
 	}

@@ -157,6 +157,14 @@ static constexpr uint32_t PORT_A_TX = 0;
 #define SPI_FLASH_HOLD_GPIO_PINx	SPI_IO3_PIN
 
 /**
+ * USB
+ */
+
+#define USB_HOST_VBUS_GPIOx			GPIOD
+#define USB_HOST_VBUS_RCU_GPIOx		RCU_GPIOD
+#define USB_HOST_VBUS_GPIO_PINx		GPIO_PIN_13
+
+/**
  * EXT PHY
  */
 

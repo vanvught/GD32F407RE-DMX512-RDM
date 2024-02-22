@@ -31,6 +31,10 @@
 
 #include "mdns.h"
 
+#if defined (ENABLE_NTP_CLIENT)
+# include "ntpclient.h"
+#endif
+
 #include "displayudf.h"
 #include "displayudfparams.h"
 #include "displayhandler.h"
@@ -88,6 +92,12 @@ void main() {
 
 	fw.Print("sACN E1.31 DMX  {" STR(LIGHTSET_PORTS) " Universes}");
 	nw.Print();
+
+#if defined (ENABLE_NTP_CLIENT)
+	NtpClient ntpClient;
+	ntpClient.Start();
+	ntpClient.Print();
+#endif
 
 	display.TextStatus(E131MsgConst::PARAMS, Display7SegmentMessage::INFO_BRIDGE_PARMAMS, CONSOLE_YELLOW);
 
@@ -206,6 +216,9 @@ void main() {
 		remoteConfig.Run();
 		configStore.Flash();
 		mDns.Run();
+#if defined (ENABLE_NTP_CLIENT)
+		ntpClient.Run();
+#endif
 #if defined (NODE_RDMNET_LLRP_ONLY)
 		llrpOnlyDevice.Run();
 #endif
