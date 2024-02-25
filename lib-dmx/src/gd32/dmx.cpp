@@ -28,10 +28,6 @@
 #pragma GCC optimize ("-funroll-loops")
 #pragma GCC optimize ("-fprefetch-loop-arrays")
 
-extern "C" {
-void console_error(const char *);
-}
-
 #include <cstdint>
 #include <cstring>
 #include <algorithm>

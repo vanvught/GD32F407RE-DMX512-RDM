@@ -2,13 +2,13 @@ $(info "Includes.mk")
 
 INCLUDES:=-I./include -I../include 
 INCLUDES+=-I../lib-debug/include
-INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 INCLUDES+=-I../firmware-template-gd32/include
 INCLUDES+=-I../firmware-template-gd32/template
 INCLUDES+=-I../CMSIS/Core/Include
 INCLUDES+=-I../lib-gd32/${FAMILY}/${FAMILY_UC}_standard_peripheral/Include
 INCLUDES+=-I../lib-gd32/${FAMILY}/CMSIS/GD/${FAMILY_UC}/Include
 INCLUDES+=-I../lib-gd32/include
+INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 
 ifeq ($(findstring ENABLE_USB_HOST,$(DEFINES)), ENABLE_USB_HOST)
 	USB_HOST=1
@@ -66,5 +66,5 @@ ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
 endif
 
 ifdef USB_HOST_MSC
-		EXTRA_INCLUDES+=../lib-hal/ff14b/source
+		INCLUDES+=-I../lib-hal/ff14b/source
 endif

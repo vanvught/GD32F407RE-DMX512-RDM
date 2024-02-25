@@ -65,8 +65,39 @@ ifeq ($(strip $(MCU)),GD32F470ZK)
   LINE=gd32f470
 endif
 
+ifeq ($(strip $(MCU)),GD32H759IM) 
+  LINKER=$(FIRMWARE_DIR)gd32h7xx_M_flash.ld
+  FAMILY=gd32h7xx
+  LINE=gd32h759
+endif
+
 ifndef LINKER
 	$(error MCU is not configured)
+endif
+
+CMSISOPS=-D__Vendor_SysTickConfig=0
+
+ifeq ($(FAMILY),gd32f10x)
+	ARMOPS=-mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+
+ifeq ($(FAMILY),gd32f20x)
+	ARMOPS=-mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+
+ifeq ($(FAMILY),gd32f30x)
+	ARMOPS=-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant
+	CMSISOPS+=-D__FPU_PRESENT=1 -DARM_MATH_CM4
+endif
+
+ifeq ($(FAMILY),gd32f4xx)
+	ARMOPS=-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant
+	CMSISOPS+=-D__FPU_PRESENT=1 -DARM_MATH_CM4
+endif
+
+ifeq ($(FAMILY),gd32h7xx)
+	ARMOPS=-mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -fsingle-precision-constant
+	CMSISOPS+=-D__FPU_PRESENT=1 -DARM_MATH_CM7
 endif
 
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)

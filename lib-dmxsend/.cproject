@@ -24,7 +24,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.931495703" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.c.compiler.option.include.paths.843610614" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.2031662653" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="BARE_METAL"/>
 									<listOptionValue builtIn="false" value="GD32"/>
 									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="GD32F407"/>
@@ -45,7 +44,6 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1050129494" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="GD32F407"/>
-									<listOptionValue builtIn="false" value="BARE_METAL"/>
 									<listOptionValue builtIn="false" value="GD32"/>
 									<listOptionValue builtIn="false" value="BOARD_GD32F407RE"/>
 									<listOptionValue builtIn="false" value="DISABLE_FS"/>
