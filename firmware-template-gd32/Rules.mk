@@ -11,21 +11,19 @@ AR	 = $(PREFIX)ar
 BOARD?=BOARD_GD32F407RE
 ENET_PHY?=DP83848
 
-# Output
 TARGET=$(FAMILY).bin
 LIST=$(FAMILY).list
 MAP=$(FAMILY).map
 SIZE=$(FAMILY).size
 BUILD=build_gd32/
 
-# Input
-SOURCE=./
 FIRMWARE_DIR=./../firmware-template-gd32/
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 
 MCU=GD32F407RE
 
+include ../firmware-template-gd32/Board.mk
 include ../firmware-template-gd32/Mcu.mk
 include ../firmware-template/libs.mk
 include ../firmware-template-gd32/Includes.mk
@@ -47,13 +45,7 @@ LDLIBS:=$(addprefix -l,$(LIBS))
 # The variables for the dependency check
 LIBDEP=$(addprefix ../lib-,$(LIBS))
 
-$(info $$BOARD [${BOARD}])
-$(info $$ENET_PHY [${ENET_PHY}])
-$(info $$DEFINES [${DEFINES}])
-$(info $$LIBS [${LIBS}])
-$(info $$LIBDEP [${LIBDEP}])
-
-COPS=-DBARE_METAL -DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
+COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
 COPS+=$(strip $(DEFINES) $(MAKE_FLAGS) $(INCLUDES) $(LIBINCDIRS))
 COPS+=$(strip $(ARMOPS) $(CMSISOPS))
 COPS+=-Os -nostartfiles -ffreestanding -nostdlib
@@ -83,13 +75,13 @@ BUILD_DIRS:=$(addprefix $(BUILD),$(SRCDIR))
 OBJECTS:=$(ASM_OBJECTS) $(C_OBJECTS)
 
 define compile-objects
-$(BUILD)$1/%.o: $(SOURCE)$1/%.cpp
+$(BUILD)$1/%.o: $1/%.cpp
 	$(CPP) $(COPS) $(CPPOPS) -c $$< -o $$@
 
-$(BUILD)$1/%.o: $(SOURCE)$1/%.c
+$(BUILD)$1/%.o: $1/%.c
 	$(CC) $(COPS) -c $$< -o $$@
 
-$(BUILD)$1/%.o: $(SOURCE)$1/%.S
+$(BUILD)$1/%.o: $1/%.S
 	$(CC) $(COPS) -D__ASSEMBLY__ -c $$< -o $$@
 endef
 
