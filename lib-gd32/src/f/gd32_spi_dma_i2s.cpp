@@ -2,7 +2,7 @@
  * @file gd32_spi_dma_i2s.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ void i2s_psc_config_dump(uint32_t spi_periph, uint32_t audiosample, uint32_t fra
 
 static uint16_t s_TxBuffer[SPI_BUFFER_SIZE] __attribute__ ((aligned (4)));
 
-static void _spi_i2s_dma_config() {
+static void spi_i2s_dma_config() {
 	rcu_periph_clock_enable(RCU_DMA1);
 
 	dma_deinit(SPI_DMAx, SPI_DMA_CHx);
@@ -114,36 +114,12 @@ void gd32_spi_dma_begin() {
     gpio_output_options_set(SPI_NSS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #endif
 
-#if defined (GD32F10X_CL) || defined (GD32F20X_CL)
-	/**
-	 * Setup PLL2
-	 *
-	 * i2sclock=160000000
-	 * i2sdiv=12, i2sof=256
-	 */
-
-    RCU_CTL &= ~RCU_CTL_PLL2EN;
-
-    rcu_pll2_config(RCU_PLL2_MUL16);
-
-	RCU_CTL |= RCU_CTL_PLL2EN;
-
-	while ((RCU_CTL & RCU_CTL_PLL2STB) == 0U) {
-	}
-
-	if (SPI_PERIPH == SPI2) {
-		rcu_i2s2_clock_config(RCU_I2S2SRC_CKPLL2_MUL2);
-	} else {
-		rcu_i2s1_clock_config(RCU_I2S1SRC_CKPLL2_MUL2);
-	}
-#endif
-
 	i2s_disable(SPI_PERIPH);
 	i2s_psc_config(SPI_PERIPH, 200000, I2S_FRAMEFORMAT_DT16B_CH16B,  I2S_MCKOUT_DISABLE);
 	i2s_init(SPI_PERIPH, I2S_MODE_MASTERTX, I2S_STD_MSB, I2S_CKPL_LOW);
 	i2s_enable(SPI_PERIPH);
 
-	_spi_i2s_dma_config();
+	spi_i2s_dma_config();
 
 #ifndef NDEBUG
 	i2s_psc_config_dump(SPI_PERIPH, 200000, I2S_FRAMEFORMAT_DT16B_CH16B,  I2S_MCKOUT_DISABLE);

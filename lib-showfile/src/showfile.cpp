@@ -172,10 +172,6 @@ void ShowFile::LoadShows() {
             }
         }
     } while (dp != nullptr);
-
-	for (auto &FileIndex : m_nShowFileNumber) {
-		printf("%d ", FileIndex);
-	}
 }
 
 void ShowFile::EnableTFTP([[maybe_unused]] bool bEnableTFTP) {

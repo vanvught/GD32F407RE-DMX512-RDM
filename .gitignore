@@ -53,3 +53,15 @@
 
 *.bin
 udp_send
+
+gd32f1*.*
+lib-gd32/gd32f10x/*
+gd32f2*.*
+lib-gd32/gd32f20x/*
+gd32f3*.*
+lib-gd32/gd32f30x/*
+gd32fh*.*
+lib-gd32/gd32h7xx/*
+
+
+software_version_id.h
