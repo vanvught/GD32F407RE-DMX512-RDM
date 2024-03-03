@@ -97,8 +97,16 @@ Hardware::Hardware() {
 	const auto nAPB2 = rcu_clock_freq_get(CK_APB2);
 	printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", nSYS, nAHB, nAPB1, nAPB2);
 	assert(nSYS == MCU_CLOCK_FREQ);
+	assert(nAHB == AHB_CLOCK_FREQ);
 	assert(nAPB1 == APB1_CLOCK_FREQ);
 	assert(nAPB2 == APB2_CLOCK_FREQ);
+# if defined (CK_APB4)
+	const auto nAPB3 = rcu_clock_freq_get(CK_APB3);
+	const auto nAPB4 = rcu_clock_freq_get(CK_APB4);
+	printf("nCK_APB3=%u\nCK_APB4=%u\n", nAPB3, nAPB4);
+	assert(nAPB3 == APB3_CLOCK_FREQ);
+	assert(nAPB4 == APB4_CLOCK_FREQ);
+# endif
 #endif
 
 #if defined (GD32H7XX)
@@ -217,6 +225,7 @@ Hardware::Hardware() {
 
 bool Hardware::Reboot() {
 	puts("Rebooting ...");
+
 	WatchdogStop();
 	
 	RebootHandler();

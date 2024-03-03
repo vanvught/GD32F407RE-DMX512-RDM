@@ -43,6 +43,7 @@
  */
 
 #define MCU_CLOCK_FREQ      (uint32_t)(240000000)
+#define AHB_CLOCK_FREQ     	(uint32_t)(240000000)
 #define APB1_CLOCK_FREQ     (uint32_t)(60000000)
 #define APB2_CLOCK_FREQ     (uint32_t)(120000000)
 #define TIMER_PSC_1MHZ      (uint16_t)(239)

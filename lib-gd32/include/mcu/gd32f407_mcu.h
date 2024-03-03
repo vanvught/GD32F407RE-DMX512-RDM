@@ -2,7 +2,7 @@
  * @file gd32f407_mcu.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@
  */
 
 #define MCU_CLOCK_FREQ      (uint32_t)(168000000)
+#define AHB_CLOCK_FREQ     	(uint32_t)(168000000)
 #define APB1_CLOCK_FREQ     (uint32_t)(42000000)
 #define APB2_CLOCK_FREQ     (uint32_t)(84000000)
 #define TIMER_PSC_1MHZ      (uint16_t)(167)

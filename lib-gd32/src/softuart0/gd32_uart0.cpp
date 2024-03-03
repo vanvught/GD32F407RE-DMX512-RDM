@@ -2,7 +2,7 @@
  * @file gd32_uart0.c
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,6 @@
  * THE SOFTWARE.
  */
 
-#if defined (NDEBUG)
-# undef NDEBUG
-#endif
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -34,20 +30,22 @@
 #include "gd32.h"
 
 #if !defined (SOFTUART_TX_PINx)
-# define SOFTUART_TX_PINx		GPIO_PIN_9
-# define SOFTUART_TX_GPIOx		GPIOA
-# define SOFTUART_TX_RCU_GPIOx	RCU_GPIOA
+# define SOFTUART_TX_PINx			GPIO_PIN_9
+# define SOFTUART_TX_GPIOx			GPIOA
+# define SOFTUART_TX_RCU_GPIOx		RCU_GPIOA
 #endif
 
-#if defined (GD32F4XX)
-# define TIMER_CLOCK		(APB2_CLOCK_FREQ * 2)
+#if defined (GD32H7XX)
+# define TIMER_CLOCK				(AHB_CLOCK_FREQ)
+#elif defined (GD32F4XX)
+# define TIMER_CLOCK				(APB2_CLOCK_FREQ * 2)
 #else
-# define TIMER_CLOCK		(APB2_CLOCK_FREQ)
+# define TIMER_CLOCK				(APB2_CLOCK_FREQ)
 #endif
 
-#define BAUD_RATE		(115200U)
-#define TIMER_PERIOD	((TIMER_CLOCK / BAUD_RATE) - 1U)
-#define BUFFER_SIZE		(128U)
+#define BAUD_RATE					(115200U)
+#define TIMER_PERIOD				((TIMER_CLOCK / BAUD_RATE) - 1U)
+#define BUFFER_SIZE					(128U)
 
 typedef enum  {
 	SOFTUART_IDLE,
@@ -129,7 +127,7 @@ void TIMER0_UP_TIMER9_IRQHandler() {
 void uart0_init() {
 #if defined (LED3_GPIO_PINx)
 	rcu_periph_clock_enable (LED3_RCU_GPIOx);
-# if !defined (GD32F4XX)
+# if defined (GPIO_INIT)
 	gpio_init(LED3_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED3_GPIO_PINx);
 # else
 	gpio_mode_set(LED3_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, LED3_GPIO_PINx);
@@ -142,7 +140,7 @@ void uart0_init() {
 
 	rcu_periph_clock_enable (SOFTUART_TX_RCU_GPIOx);
 
-#if !defined (GD32F4XX)
+#if defined (GPIO_INIT)
 	gpio_init(SOFTUART_TX_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, SOFTUART_TX_PINx);
 #else
 	gpio_mode_set(SOFTUART_TX_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, SOFTUART_TX_PINx);
