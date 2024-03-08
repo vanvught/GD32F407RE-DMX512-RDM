@@ -1,8 +1,8 @@
 /**
- * @file gd32_uart0.cpp
+ * @file rdmsensorina219power.h
  *
  */
-/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,36 @@
  * THE SOFTWARE.
  */
 
+#ifndef RDMSENSORINA219POWER_H_
+#define RDMSENSORINA219POWER_H_
+
 #include <cstdint>
-#include <cstdio>
 
-#include "gd32.h"
-#include "gd32_uart.h"
+#include "rdmsensor.h"
+#include "ina219.h"
 
-extern "C" {
-void uart0_init(void) {
-	gd32_uart_begin(USART0, 115200U, GD32_UART_BITS_8, GD32_UART_PARITY_NONE, GD32_UART_STOP_1BIT);
-}
+#include "rdm_e120.h"
 
-void uart0_putc(int c) {
-	if (c == '\n') {
-		while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-			;
-#if defined (GD32H7XX)
-		USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t)'\r';
-#else
-		USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) '\r');
-#endif
+class RDMSensorINA219Power: public RDMSensor, sensor::INA219 {
+public:
+	RDMSensorINA219Power(uint8_t nSensor, uint8_t nAddress = 0) : RDMSensor(nSensor), sensor::INA219(nAddress) {
+		SetType(E120_SENS_CURRENT);
+		SetUnit(E120_UNITS_AMPERE_DC);
+		SetPrefix(E120_PREFIX_MILLI);
+		SetRangeMin(rdm::sensor::safe_range_min(sensor::ina219::power::RANGE_MIN));
+		SetRangeMax(rdm::sensor::safe_range_max(sensor::ina219::power::RANGE_MAX));
+		SetNormalMin(rdm::sensor::safe_range_min(sensor::ina219::power::RANGE_MIN));
+		SetNormalMax(rdm::sensor::safe_range_max(sensor::ina219::power::RANGE_MAX));
+		SetDescription(sensor::ina219::power::DESCRIPTION);
 	}
 
-	while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-		;
-#if defined (GD32H7XX)
-	USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t) c;
-#else
-	USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) c);
-#endif
-}
-}
+	bool Initialize() override {
+		return sensor::INA219::Initialize();
+	}
+
+	int16_t GetValue() override {
+		return static_cast<int16_t>(sensor::INA219::GetBusPower());
+	}
+};
+
+#endif /* RDMSENSORINA219POWER_H_ */

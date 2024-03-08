@@ -1,0 +1,17 @@
+#DEFINES=NDEBUG
+
+EXTRA_INCLUDES=
+
+EXTRA_SRCDIR=src/patterns src/pixel
+
+ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring OUTPUT_DMX_PIXEL_MULTI,$(MAKE_FLAGS)), OUTPUT_DMX_PIXEL_MULTI)
+		EXTRA_SRCDIR+=src/gd32/gpio
+	else
+		EXTRA_SRCDIR+=src/gd32/i2s
+	endif
+else
+	EXTRA_SRCDIR+=src/gd32/gpio src/gd32/i2s
+endif
+
+include ../firmware-template-gd32/lib/Rules.mk

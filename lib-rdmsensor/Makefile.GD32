@@ -1,0 +1,6 @@
+DEFINES=NDEBUG
+
+EXTRA_INCLUDES=
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

@@ -476,6 +476,7 @@ static void timer1_config() {
 	timer_deinit(TIMER1);
 
 	timer_parameter_struct timer_initpara;
+	timer_struct_para_init(&timer_initpara);
 
 	timer_initpara.prescaler = TIMER_PSC_1MHZ;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
@@ -519,6 +520,7 @@ static void timer4_config() {
 	timer_deinit(TIMER4);
 
 	timer_parameter_struct timer_initpara;
+	timer_struct_para_init(&timer_initpara);
 
 	timer_initpara.prescaler = TIMER_PSC_1MHZ;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
@@ -563,6 +565,7 @@ static void timer2_config() {
 	timer_deinit(TIMER2);
 
 	timer_parameter_struct timer_initpara;
+	timer_struct_para_init(&timer_initpara);
 
 	timer_initpara.prescaler = TIMER_PSC_1MHZ;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
@@ -592,6 +595,7 @@ static void timer3_config() {
 	timer_deinit(TIMER3);
 
 	timer_parameter_struct timer_initpara;
+	timer_struct_para_init(&timer_initpara);
 
 	timer_initpara.prescaler = TIMER_PSC_1MHZ;
 	timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
@@ -621,6 +625,8 @@ static void timer6_config() {
 	timer_deinit(TIMER6);
 
 	timer_parameter_struct timer_initpara;
+	timer_struct_para_init(&timer_initpara);
+
 	timer_initpara.prescaler = TIMER_PSC_10KHZ;
 	timer_initpara.period = 10000;		// 1 second
 	timer_init(TIMER6, &timer_initpara);

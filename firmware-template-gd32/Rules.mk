@@ -32,8 +32,7 @@ include ../firmware-template-gd32/Artnet.mk
 LIBS+=c++ c gd32
 
 # The variable for the libraries include directory
-LIBINCDIRS:=$(addprefix -I../lib-,$(LIBS))
-LIBINCDIRS+=$(addsuffix /include, $(LIBINCDIRS))
+LIBINCDIRS:=$(addsuffix /include, $(addprefix -I../lib-,$(LIBS)))
 
 # The variables for the ld -L flag
 LIBGD32=$(addprefix -L../lib-,$(LIBS))

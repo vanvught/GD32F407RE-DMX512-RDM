@@ -205,9 +205,9 @@
  */
 
 #define SPI0_PERIPH				SPI0
+#define SPI0_GPIO_AF			GPIO_AF_5
 #define SPI0_RCU_CLK			RCU_SPI0
 #if defined (SPI0_REMAP)
-# define SPI0_REMAP_GPIO		GPIO_SPI0_REMAP
 # define SPI0_NSS_GPIOx			GPIOA
 # define SPI0_NSS_RCU_GPIOx		RCU_GPIOA
 # define SPI0_NSS_GPIO_PINx		GPIO_PIN_15
@@ -228,6 +228,7 @@
 #endif
 
 #define SPI1_PERIPH				SPI1
+#define SPI1_GPIO_AF			GPIO_AF_5
 #define SPI1_RCU_CLK			RCU_SPI1
 #define SPI1_NSS_GPIOx			GPIOB
 #define SPI1_NSS_RCU_GPIOx		RCU_GPIOB
@@ -240,40 +241,41 @@
 //TODO SPI1 REMAP
 
 #define SPI2_PERIPH				SPI2
+#define SPI2_GPIO_AF			GPIO_AF_6
 #define SPI2_RCU_CLK			RCU_SPI2
 #if defined (SPI2_REMAP)
-# define SPI2_REMAP_GPIO		GPIO_SPI2_REMAP
-# define SPI2_NSS_GPIOx			GPIOA
-# define SPI2_NSS_RCU_GPIOx		RCU_GPIOA
-# define SPI2_NSS_GPIO_PINx		GPIO_PIN_4
 # define SPI2_GPIOx				GPIOC
 # define SPI2_RCU_GPIOx			RCU_GPIOC
 # define SPI2_SCK_GPIO_PINx		GPIO_PIN_10
 # define SPI2_MISO_GPIO_PINx	GPIO_PIN_11
 # define SPI2_MOSI_GPIO_PINx	GPIO_PIN_12
-#else
 # define SPI2_NSS_GPIOx			GPIOA
 # define SPI2_NSS_RCU_GPIOx		RCU_GPIOA
-# define SPI2_NSS_GPIO_PINx		GPIO_PIN_15
-# define SPI2_GPIOx				GPIOB
+# define SPI2_NSS_GPIO_PINx		GPIO_PIN_4
+#else
 # define SPI2_RCU_GPIOx			RCU_GPIOB
+# define SPI2_GPIOx				GPIOB
 # define SPI2_SCK_GPIO_PINx		GPIO_PIN_3
 # define SPI2_MISO_GPIO_PINx	GPIO_PIN_4
 # define SPI2_MOSI_GPIO_PINx	GPIO_PIN_5
+# define SPI2_NSS_GPIOx			GPIOA
+# define SPI2_NSS_RCU_GPIOx		RCU_GPIOA
+# define SPI2_NSS_GPIO_PINx		GPIO_PIN_15
 #endif
 
 #define SPI5_PERIPH				SPI5
+#define SPI5_GPIO_AF			GPIO_AF_5
 #define SPI5_RCU_CLK			RCU_SPI5
-#define SPI5_NSS_GPIOx			GPIOG
-#define SPI5_NSS_RCU_GPIOx		RCU_GPIOG
-#define SPI5_NSS_GPIO_PINx		GPIO_PIN_9
 #define SPI5_GPIOx				GPIOG
 #define SPI5_RCU_GPIOx			RCU_GPIOG
 #define SPI5_SCK_GPIO_PINx		GPIO_PIN_13
-#define SPI5_MISO_GPIO_PINx		GPIO_PIN_15
+#define SPI5_MISO_GPIO_PINx		GPIO_PIN_12
 #define SPI5_MOSI_GPIO_PINx		GPIO_PIN_14
 #define SPI5_IO2_GPIO_PINx		GPIO_PIN_10
 #define SPI5_IO3_GPIO_PINx		GPIO_PIN_11
+#define SPI5_NSS_GPIOx			GPIOG
+#define SPI5_NSS_RCU_GPIOx		RCU_GPIOG
+#define SPI5_NSS_GPIO_PINx		GPIO_PIN_9
 
 /**
  * TIMER GPIO
@@ -299,6 +301,14 @@
 #define SPI2_DMAx               DMA0
 #define SPI2_TX_DMA_CHx         DMA_CH5
 #define SPI2_TX_DMA_SUBPERIx    DMA_SUBPERI0
+
+#define SPI3_DMAx               DMA1
+#define SPI3_TX_DMA_CHx         DMA_CH1
+#define SPI3_TX_DMA_SUBPERIx    DMA_SUBPER4
+
+#define SPI4_DMAx               DMA1
+#define SPI4_TX_DMA_CHx         DMA_CH4
+#define SPI4_TX_DMA_SUBPERIx    DMA_SUBPERI2
 
 #define SPI5_DMAx               DMA1
 #define SPI5_TX_DMA_CHx         DMA_CH5
