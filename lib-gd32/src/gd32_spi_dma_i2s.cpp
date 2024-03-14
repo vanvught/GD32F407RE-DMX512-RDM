@@ -30,36 +30,43 @@
 
 #if defined (I2S_PERIPH)
 
-#if defined (GD32F4XX) || defined (GD32H7XX)
-# define DMA_PARAMETER_STRUCT				dma_single_data_parameter_struct
-# define DMA_CHMADDR						DMA_CHM0ADDR
-# define DMA_MEMORY_TO_PERIPHERAL			DMA_MEMORY_TO_PERIPH
-# define DMA_PERIPHERAL_WIDTH_16BIT			DMA_PERIPH_WIDTH_16BIT
-# define dma_init							dma_single_data_mode_init
-# define dma_struct_para_init				dma_single_data_para_struct_init
-# define dma_memory_to_memory_disable(x,y)
-#else
-# define DMA_PARAMETER_STRUCT				dma_parameter_struct
-#endif
-
-#ifndef NDEBUG
-# if !defined (GD32H7XX)
-  void i2s_psc_config_dump(uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout);
+# if defined (GD32H7XX)
+	static_assert(I2S_PERIPH != SPI3);
+	static_assert(I2S_PERIPH != SPI4);
+# else
+	static_assert(I2S_PERIPH != SPI0);
 # endif
-#endif
 
-#if !defined(SPI_BUFFER_SIZE)
-# define SPI_BUFFER_SIZE ((24 * 1024) / 2)
-#endif
+# if defined (GD32F4XX) || defined (GD32H7XX)
+#  define DMA_PARAMETER_STRUCT				dma_single_data_parameter_struct
+#  define DMA_CHMADDR						DMA_CHM0ADDR
+#  define DMA_MEMORY_TO_PERIPHERAL			DMA_MEMORY_TO_PERIPH
+#  define DMA_PERIPHERAL_WIDTH_16BIT		DMA_PERIPH_WIDTH_16BIT
+#  define dma_init							dma_single_data_mode_init
+#  define dma_struct_para_init				dma_single_data_para_struct_init
+#  define dma_memory_to_memory_disable(x,y)
+# else
+#  define DMA_PARAMETER_STRUCT				dma_parameter_struct
+# endif
+
+# ifndef NDEBUG
+#  if !defined (GD32H7XX)
+	void i2s_psc_config_dump(uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout);
+#  endif
+# endif
+
+# if !defined(SPI_BUFFER_SIZE)
+#  define SPI_BUFFER_SIZE ((24 * 1024) / 2)
+# endif
 
 static uint16_t s_TxBuffer[SPI_BUFFER_SIZE] __attribute__ ((aligned (4)));
 
 static void rcu_config() {
-	rcu_periph_clock_enable(I2S_RCU_CLK);
 	rcu_periph_clock_enable(I2S_WS_RCU_GPIOx);
 
 #if defined (GPIO_INIT)
 	rcu_periph_clock_enable(RCU_AF);
+	rcu_periph_clock_enable(I2S_RCU_SPIx);
 	rcu_periph_clock_enable(I2S_RCU_GPIOx);
 #else
 	rcu_periph_clock_enable(I2S_CK_RCU_GPIOx);
@@ -92,15 +99,15 @@ static void gpio_config() {
 	gpio_init(I2S_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, I2S_CK_GPIO_PINx | I2S_SD_GPIO_PINx);
 	gpio_init(I2S_WS_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, I2S_WS_GPIO_PINx);
 #else
-	gpio_af_set(I2S_CK_GPIOx, I2S_GPIO_AF, I2S_CK_GPIO_PINx);
+	gpio_af_set(I2S_CK_GPIOx, I2S_GPIO_AFx, I2S_CK_GPIO_PINx);
     gpio_mode_set(I2S_CK_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, I2S_CK_GPIO_PINx);
     gpio_output_options_set(I2S_CK_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, I2S_CK_GPIO_PINx);
 
-	gpio_af_set(I2S_SD_GPIOx, I2S_GPIO_AF, I2S_SD_GPIO_PINx);
+	gpio_af_set(I2S_SD_GPIOx, I2S_GPIO_AFx, I2S_SD_GPIO_PINx);
     gpio_mode_set(I2S_SD_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, I2S_SD_GPIO_PINx);
     gpio_output_options_set(I2S_SD_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, I2S_SD_GPIO_PINx);
 
-	gpio_af_set(I2S_WS_GPIOx, I2S_GPIO_AF, I2S_WS_GPIO_PINx);
+	gpio_af_set(I2S_WS_GPIOx, I2S_GPIO_AFx, I2S_WS_GPIO_PINx);
     gpio_mode_set(I2S_WS_GPIOx, GPIO_MODE_OUTPUT,GPIO_PUPD_NONE, I2S_WS_GPIO_PINx);
     gpio_output_options_set(I2S_WS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, I2S_WS_GPIO_PINx);
 #endif
@@ -113,7 +120,7 @@ static void spi_i2s_dma_config() {
 	dma_struct_para_init(&dma_init_struct);
 
 #if defined (GD32H7XX)
-	dma_init_struct.request = DMA_REQUEST_I2S_TX;
+	dma_init_struct.request = I2S_DMA_REQUEST_I2S_TX;
 #endif
 	dma_init_struct.direction			= DMA_MEMORY_TO_PERIPHERAL;
 	dma_init_struct.memory_inc			= DMA_MEMORY_INCREASE_ENABLE;
@@ -145,13 +152,6 @@ static void spi_i2s_dma_config() {
 }
 namespace i2s {
 void gd32_spi_dma_begin() {
-#if defined (GD32H7XX)
-	static_assert(I2S_PERIPH != SPI3);
-	static_assert(I2S_PERIPH != SPI4);
-#else
-	static_assert(I2S_PERIPH != SPI0);
-#endif
-
 	rcu_config();
 	gpio_config();
 

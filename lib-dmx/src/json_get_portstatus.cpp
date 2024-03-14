@@ -1,5 +1,5 @@
 /**
- * @file board_gd32f470z_eval.h
+ * @file json_get_portstatus.cpp
  *
  */
 /* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,27 +23,32 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_BOARD_GD32F470Z_EVAL_H_
-#define GD32_BOARD_GD32F470Z_EVAL_H_
+#include <cstdint>
+#include <cstdio>
 
-#include "gd32_board.h"
+#include "dmx.h"
+#include "dmxconst.h"
 
-#define DMX_MAX_PORTS  2
+namespace remoteconfig {
+namespace dmx {
+uint32_t json_get_portstatus(const char cPort, char *pOutBuffer, const uint32_t nOutBufferSize) {
+	const uint32_t nPortIndex = (cPort | 0x20) - 'a';
 
-namespace max {
-	static const uint32_t PORTS = DMX_MAX_PORTS;
-}  // namespace max
+	if (nPortIndex < ::dmx::config::max::PORTS) {
+		auto& statistics = Dmx::Get()->GetTotalStatistics(nPortIndex);
+		auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nOutBufferSize,
+				"{\"port\":\"%c\","
+				"\"dmx\":{\"sent\":\"%u\",\"received\":\"%u\"},"
+				"\"rdm\":{\"sent\":{\"class\":\"%u\",\"discovery\":\"%u\"},\"received\":{\"good\":\"%u\",\"bad\":\"%u\",\"discovery\":\"%u\"}}}",
+				'A' + nPortIndex,
+				statistics.Dmx.Sent,statistics.Dmx.Received,
+				statistics.Rdm.Sent.Class, statistics.Rdm.Sent.DiscoveryResponse,
+				statistics.Rdm.Received.Good, statistics.Rdm.Received.Bad, statistics.Rdm.Received.DiscoveryResponse));
 
-#define DMX_USE_USART2
-#define DMX_USE_USART5
+		return nLength;
+	}
 
-static constexpr auto USART2_PORT = 0;
-static constexpr auto USART5_PORT = 1;
-
-static constexpr auto DIR_PORT_0_GPIO_PORT = GPIOD;
-static constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_0;		///< Not used
-
-static constexpr auto DIR_PORT_1_GPIO_PORT = GPIOD;
-static constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_1;		///< Not used
-
-#endif /* GD32_BOARD_GD32F470Z_EVAL_H_ */
+	return 0;
+}
+}  // namespace dmx
+}  // namespace remoteconfig

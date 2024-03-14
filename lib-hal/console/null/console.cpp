@@ -1,8 +1,8 @@
 /**
- * @file gd32_uart0.cpp
+ * @file console.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,43 +23,13 @@
  * THE SOFTWARE.
  */
 
-#include <cstdarg>
-#include <cstdio>
-
-static char s_buffer[128];
+#include <cstdint>
 
 extern "C" {
-void uart0_putc(int);
-
-void uart0_puts(const char *s) {
-	while (*s != '\0') {
-		if (*s == '\n') {
-			uart0_putc('\r');
-		}
-		uart0_putc(*s++);
-	}
-
-//	uart0_putc('\n'); //TODO Add '\n'
-}
-
-int uart0_printf(const char *fmt, ...) {
-	va_list arp;
-
-	va_start(arp, fmt);
-
-	int i = vsnprintf(s_buffer, sizeof(s_buffer) - 1, fmt, arp);
-
-	va_end(arp);
-
-	char *s = s_buffer;
-
-	while (*s != '\0') {
-		if (*s == '\n') {
-			uart0_putc('\r');
-		}
-		uart0_putc(*s++);
-	}
-
-	return i;
-}
+void console_puts([[maybe_unused]] const char *p) {}
+void console_write([[maybe_unused]] const char *p, [[maybe_unused]] unsigned int i) {}
+void console_status([[maybe_unused]]  uint32_t i, [[maybe_unused]] const char *p) {}
+void console_error([[maybe_unused]] const char *p) {}
+void console_init() {}
+void console_putc([[maybe_unused]] int i) {}
 }

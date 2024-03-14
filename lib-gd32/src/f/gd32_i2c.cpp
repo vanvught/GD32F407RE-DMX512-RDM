@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <cassert>
 
 #include "gd32_i2c.h"
 #include "gd32.h"
@@ -34,7 +35,7 @@ static uint8_t s_nAddress;
 
 static int32_t send_start() {
 	auto nTimeout = TIMEOUT;
-	/* wait until I2C bus is idle */
+
 	while (i2c_flag_get(I2C_PERIPH, I2C_FLAG_I2CBSY)) {
 		if (--nTimeout <= 0) {
 			return -GD32_I2C_NOK_TOUT;
@@ -58,18 +59,18 @@ static int32_t send_slaveaddr() {
 	i2c_master_addressing(I2C_PERIPH, s_nAddress, I2C_TRANSMITTER);
 
 	auto nTimeout = TIMEOUT;
-	/* wait until ADDSEND bit is set */
+
 	while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_ADDSEND)) {
 		if (--nTimeout <= 0) {
 			return -GD32_I2C_NOK_TOUT;
 		}
 	}
 
-	/* clear the ADDSEND bit */
+
 	i2c_flag_clear(I2C_PERIPH, I2C_FLAG_ADDSEND);
 
 	nTimeout = TIMEOUT;
-	/* wait until the transmit data buffer is empty */
+
 	while (SET != i2c_flag_get(I2C_PERIPH, I2C_FLAG_TBE)) {
 		if (--nTimeout <= 0) {
 			return -GD32_I2C_NOK_TOUT;
@@ -98,8 +99,8 @@ static int32_t send_data(const uint8_t *pData, const uint32_t nCount) {
 	for (uint32_t i = 0; i < nCount; i++) {
 		i2c_data_transmit(I2C_PERIPH, *pData);
 		pData++;
-		int32_t nTimeout = TIMEOUT;
-		/* wait until BTC bit is set */
+		auto nTimeout = TIMEOUT;
+
 		while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_BTC)) {
 			if (--nTimeout <= 0) {
 				return -GD32_I2C_NOK_TOUT;
@@ -131,37 +132,48 @@ static int32_t write(const char *pBuffer, const int nLength) {
 	return 0;
 }
 
+static void rcu_config() {
+	rcu_periph_clock_enable(I2C_RCU_I2Cx);
+	rcu_periph_clock_enable(I2C_SCL_RCU_GPIOx);
+	rcu_periph_clock_enable(I2C_SDA_RCU_GPIOx);
+}
+
+static void gpio_config() {
+#if defined (GPIO_INIT)
+	gpio_init(I2C_SCL_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SCL_GPIO_PINx);
+	gpio_init(I2C_SDA_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SDA_GPIO_PINx);
+
+# if defined (I2C_REMAP)
+	if (I2C_REMAP == GPIO_I2C0_REMAP) {
+		gpio_pin_remap_config(GPIO_I2C0_REMAP, ENABLE);
+	} else {
+		assert(0);
+	}
+# endif
+#else
+    gpio_af_set(I2C_SCL_GPIOx, I2C_GPIO_AFx, I2C_SCL_GPIO_PINx);
+	gpio_mode_set(I2C_SCL_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_SCL_GPIO_PINx);
+	gpio_output_options_set(I2C_SCL_GPIOx, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_SCL_GPIO_PINx);
+	gpio_af_set(I2C_SDA_GPIOx, I2C_GPIO_AFx, I2C_SDA_GPIO_PINx);
+	gpio_mode_set(I2C_SDA_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_SDA_GPIO_PINx);
+	gpio_output_options_set(I2C_SDA_GPIOx, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_SDA_GPIO_PINx);
+#endif
+}
+
+static void i2c_config() {
+	i2c_clock_config(I2C_PERIPH, GD32_I2C_FULL_SPEED, I2C_DTCY_2);
+	i2c_enable(I2C_PERIPH);
+	i2c_ack_config(I2C_PERIPH, I2C_ACK_ENABLE);
+}
+
 /*
  * Public API's
  */
 
 void gd32_i2c_begin() {
-	rcu_periph_clock_enable(I2C_RCU_CLK);
-	rcu_periph_clock_enable(I2C_GPIO_SCL_CLK);
-	rcu_periph_clock_enable(I2C_GPIO_SDA_CLK);
-
-#if !defined (GD32F4XX)
-	gpio_init(I2C_GPIO_SCL_PORT, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SCL_PIN);
-	gpio_init(I2C_GPIO_SDA_PORT, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SDA_PIN);
-
-# if defined (I2C_REMAP)
-	if (I2C_REMAP == GPIO_I2C0_REMAP) {
-		gpio_pin_remap_config(GPIO_I2C0_REMAP, ENABLE);
-	}
-# endif
-#else
-    gpio_af_set(I2C_GPIO_SCL_PORT, GPIO_AF_4, I2C_SCL_PIN);
-    gpio_af_set(I2C_GPIO_SCL_PORT, GPIO_AF_4, I2C_SDA_PIN);
-
-	gpio_mode_set(I2C_GPIO_SCL_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_SCL_PIN);
-	gpio_output_options_set(I2C_GPIO_SCL_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_SCL_PIN);
-	gpio_mode_set(I2C_GPIO_SDA_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, I2C_SDA_PIN);
-	gpio_output_options_set(I2C_GPIO_SDA_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, I2C_SDA_PIN);
-#endif
-
-	i2c_clock_config(I2C_PERIPH, GD32_I2C_FULL_SPEED, I2C_DTCY_2);
-	i2c_enable(I2C_PERIPH);
-	i2c_ack_config(I2C_PERIPH, I2C_ACK_ENABLE);
+	rcu_config();
+	gpio_config();
+	i2c_config();
 }
 
 void gd32_i2c_set_baudrate(uint32_t nBaudrate) {
@@ -179,7 +191,7 @@ uint8_t gd32_i2c_write(const char *pBuffer, uint32_t nLength) {
 
 uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 	auto nTimeout = TIMEOUT;
-	/* wait until I2C bus is idle */
+
 	while (i2c_flag_get(I2C_PERIPH, I2C_FLAG_I2CBSY)) {
 		if (--nTimeout <= 0) {
 			send_stop();
@@ -191,11 +203,10 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 		i2c_ackpos_config(I2C_PERIPH, I2C_ACKPOS_NEXT);
 	}
 
-	/* send a start condition to I2C bus */
 	i2c_start_on_bus(I2C_PERIPH);
 
 	nTimeout = TIMEOUT;
-	/* wait until SBSEND bit is set */
+
 	while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_SBSEND)) {
 		if (--nTimeout <= 0) {
 			send_stop();
@@ -206,12 +217,11 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 	i2c_master_addressing(I2C_PERIPH, s_nAddress, I2C_RECEIVER);
 
 	if (nLength < 3) {
-		/* disable acknowledge */
 		i2c_ack_config(I2C_PERIPH, I2C_ACK_DISABLE);
 	}
 
 	nTimeout = TIMEOUT;
-	/* wait until ADDSEND bit is set */
+
 	while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_ADDSEND)) {
 		if (--nTimeout <= 0) {
 			send_stop();
@@ -219,20 +229,18 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 		}
 	}
 
-	/* clear the ADDSEND bit */
 	i2c_flag_clear(I2C_PERIPH, I2C_FLAG_ADDSEND);
 
 	if (1 == nLength) {
-		/* send a stop condition to I2C bus */
 		i2c_stop_on_bus(I2C_PERIPH);
 	}
 
 	auto nTimeoutLoop = TIMEOUT;
-	/* while there is data to be read */
+
 	while (nLength) {
 		if (3 == nLength) {
 			nTimeout = TIMEOUT;
-			/* wait until BTC bit is set */
+
 			while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_BTC)) {
 				if (--nTimeout <= 0) {
 					send_stop();
@@ -245,7 +253,7 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 
 		if (2 == nLength) {
 			nTimeout = TIMEOUT;
-			/* wait until BTC bit is set */
+
 			while (!i2c_flag_get(I2C_PERIPH, I2C_FLAG_BTC)) {
 				if (--nTimeout <= 0) {
 					send_stop();
@@ -256,7 +264,6 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 			i2c_stop_on_bus(I2C_PERIPH);
 		}
 
-		/* wait until the RBNE bit is set and clear it */
 		if (i2c_flag_get(I2C_PERIPH, I2C_FLAG_RBNE)) {
 			*pBuffer = i2c_data_receive(I2C_PERIPH);
 			pBuffer++;
@@ -271,7 +278,7 @@ uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength) {
 	}
 
 	nTimeout = TIMEOUT;
-	/* wait until the stop condition is finished */
+
 	while (I2C_CTL0(I2C_PERIPH) & 0x0200) {
 		if (--nTimeout <= 0) {
 			return GD32_I2C_NOK_TOUT;

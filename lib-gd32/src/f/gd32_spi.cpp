@@ -30,8 +30,6 @@
 #include "gd32_spi.h"
 #include "gd32.h"
 
-#include "debug.h"
-
 static uint8_t s_nChipSelect = GD32_SPI_CS0;
 
 static void cs_high() {
@@ -59,7 +57,7 @@ static uint8_t send_byte(uint8_t byte) {
 }
 
 static void rcu_config() {
-	rcu_periph_clock_enable(SPI_RCU_CLK);
+	rcu_periph_clock_enable(SPI_RCU_SPIx);
 	rcu_periph_clock_enable(SPI_RCU_GPIOx);
 	rcu_periph_clock_enable(SPI_NSS_RCU_GPIOx);
 
@@ -80,18 +78,13 @@ static void gpio_config() {
 		gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
 	}
 # endif
-	gpio_init(SPI_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MOSI_PIN);
-	gpio_init(SPI_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SPI_MISO_PIN);
+	gpio_init(SPI_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, SPI_SCK_GPIO_PINx | SPI_MOSI_GPIO_PINx);
+	gpio_init(SPI_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SPI_MISO_GPIO_PINx);
 	gpio_init(SPI_NSS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #else
-	if (SPI_PERIPH == SPI2) {
-		gpio_af_set(SPI_GPIOx, GPIO_AF_6, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
-	} else {
-		gpio_af_set(SPI_GPIOx, GPIO_AF_5, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
-	}
-
-	gpio_mode_set(SPI_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
-    gpio_output_options_set(SPI_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MOSI_PIN);
+	gpio_af_set(SPI_GPIOx, SPI_GPIO_AFx, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
+	gpio_mode_set(SPI_GPIOx, GPIO_MODE_AF, GPIO_PUPD_NONE, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
+    gpio_output_options_set(SPI_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, SPI_SCK_GPIO_PINx | SPI_MOSI_GPIO_PINx);
 
     gpio_mode_set(SPI_NSS_GPIOx, GPIO_MODE_OUTPUT,GPIO_PUPD_NONE, SPI_NSS_GPIO_PINx);
     gpio_output_options_set(SPI_NSS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, SPI_NSS_GPIO_PINx);
@@ -100,10 +93,7 @@ static void gpio_config() {
 	cs_high();
 }
 
-void gd32_spi_begin()  {
-	rcu_config();
-	gpio_config();
-
+static void spi_config() {
 	spi_disable(SPI_PERIPH);
 	spi_i2s_deinit(SPI_PERIPH);
 
@@ -120,13 +110,23 @@ void gd32_spi_begin()  {
 	spi_enable(SPI_PERIPH);
 }
 
+/*
+ * Public API's
+ */
+
+void gd32_spi_begin()  {
+	rcu_config();
+	gpio_config();
+	spi_config();
+}
+
 void gd32_spi_end() {
 	spi_disable(SPI_PERIPH);
 #if defined (GPIO_INIT)
-	gpio_init(SPI_GPIOx, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
+	gpio_init(SPI_GPIOx, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
 	gpio_init(SPI_NSS_GPIOx, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #else
-	gpio_mode_set(SPI_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_NONE, SPI_SCK_PIN | SPI_MISO_PIN | SPI_MOSI_PIN);
+	gpio_mode_set(SPI_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_NONE, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
     gpio_mode_set(SPI_NSS_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_NONE, SPI_NSS_GPIO_PINx);
 #endif
 }

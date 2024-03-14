@@ -38,6 +38,8 @@
 # error USART0 is used for console
 #endif
 
+#include <stdint.h>
+
 /**
  * LEDs
  */
@@ -75,28 +77,29 @@
  */
 
 #define I2C0_REMAP
-#define I2C_REMAP			GPIO_I2C0_REMAP
-#define I2C_PERIPH			I2C0_PERIPH
-#define I2C_RCU_CLK			I2C0_RCU_CLK
-#define I2C_GPIO_SCL_PORT	I2C0_SCL_GPIOx
-#define I2C_GPIO_SCL_CLK	I2C0_SCL_RCU_GPIOx
-#define I2C_GPIO_SDA_PORT	I2C0_SDA_GPIOx
-#define I2C_GPIO_SDA_CLK	I2C0_SDA_RCU_GPIOx
-#define I2C_SCL_PIN			I2C0_SCL_GPIO_PINx
-#define I2C_SDA_PIN			I2C0_SDA_GPIO_PINx
+#define I2C_REMAP						GPIO_I2C0_REMAP
+#define I2C_PERIPH						I2C0_PERIPH
+#define I2C_RCU_I2Cx					I2C0_RCU_I2C0
+#define I2C_GPIO_AFx					I2C0_GPIO_AFx
+#define I2C_SCL_RCU_GPIOx				I2C0_SCL_RCU_GPIOx
+#define I2C_SCL_GPIOx					I2C0_SCL_GPIOx
+#define I2C_SCL_GPIO_PINx				I2C0_SCL_GPIO_PINx
+#define I2C_SDA_RCU_GPIOx				I2C0_SDA_RCU_GPIOx
+#define I2C_SDA_GPIOx					I2C0_SDA_GPIOx
+#define I2C_SDA_GPIO_PINx				I2C0_SDA_GPIO_PINx
 
 /**
  * SPI
  */
 
 #define SPI_PERIPH			SPI2_PERIPH
-#define SPI_RCU_CLK			SPI2_RCU_CLK
+#define SPI_RCU_SPIx		SPI2_RCU_SPI2
 #define SPI_RCU_GPIOx		SPI2_RCU_GPIOx
-#define SPI_GPIO_AF			SPI2_GPIO_AF
+#define SPI_GPIO_AFx		SPI2_GPIO_AFx
 #define SPI_GPIOx			SPI2_GPIOx
-#define SPI_SCK_PIN			SPI2_SCK_GPIO_PINx
-#define SPI_MISO_PIN		SPI2_MISO_GPIO_PINx
-#define SPI_MOSI_PIN		SPI2_MOSI_GPIO_PINx
+#define SPI_SCK_GPIO_PINx	SPI2_SCK_GPIO_PINx
+#define SPI_MISO_GPIO_PINx	SPI2_MISO_GPIO_PINx
+#define SPI_MOSI_GPIO_PINx	SPI2_MOSI_GPIO_PINx
 #define SPI_NSS_GPIOx		SPI2_NSS_GPIOx
 #define SPI_NSS_RCU_GPIOx	SPI2_NSS_RCU_GPIOx
 #define SPI_NSS_GPIO_PINx	SPI2_NSS_GPIO_PINx
@@ -114,6 +117,7 @@
 /**
  * Panel LEDs
  */
+
 #ifdef __cplusplus
 namespace hal {
 namespace panelled {
@@ -146,9 +150,9 @@ static constexpr uint32_t PORT_A_RDM = (1U << 16);
  * SPI flash
  */
 
-#define SPI_FLASH_CS_GPIOx		GPIOB
-#define SPI_FLASH_CS_RCU_GPIOx	RCU_GPIOB
-#define SPI_FLASH_CS_GPIO_PINx	GPIO_PIN_1
+#define SPI_FLASH_CS_RCU_GPIOx			RCU_GPIOB
+#define SPI_FLASH_CS_GPIOx				GPIOB
+#define SPI_FLASH_CS_GPIO_PINx			GPIO_PIN_1
 
 /**
  * EXT PHY
@@ -198,6 +202,12 @@ static constexpr uint32_t PORT_A_RDM = (1U << 16);
 #define GD32_BOARD_STATUS_LED	GD32_BOARD_LED1
 
 /**
+ * LCD
+ */
+
+#define DISPLAYTIMEOUT_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTC, 13)	// KEY2
+
+/**
  * SPI LCD
  */
 
@@ -207,12 +217,6 @@ static constexpr uint32_t PORT_A_RDM = (1U << 16);
 #if defined(SPI_LCD_HAVE_CS_GPIO)
 # define SPI_LCD_CS_GPIO		GPIO_EXT_24
 #endif
-
-/**
- * LCD
- */
-
-#define DISPLAYTIMEOUT_GPIO		GD32_PORT_TO_GPIO(GD32_GPIO_PORTC, 13)	// KEY2
 
 #include "gpio_header.h"
 

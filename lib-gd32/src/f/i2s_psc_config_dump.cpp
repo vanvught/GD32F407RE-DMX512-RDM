@@ -45,7 +45,7 @@
 #define RCU_CFG1_PREDV1_OFFSET          4U                       /* PREDV1 offset in RCU_CFG1 */
 #define RCU_CFG1_PLL2MF_OFFSET          12U                      /* PLL2MF offset in RCU_CFG1 */
 
-void i2s_psc_config_dump(__attribute__((unused)) uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
+void i2s_psc_config_dump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
 	uint32_t i2sdiv = 2U, i2sof = 0U;
 	uint32_t clks = 0U;
 	uint32_t i2sclock = 0U;

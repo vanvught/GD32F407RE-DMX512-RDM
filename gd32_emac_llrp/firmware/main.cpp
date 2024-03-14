@@ -63,7 +63,6 @@ void Hardware::RebootHandler() {
 
 void main() {
 	Hardware hw;
-	hw.SetMode(hardware::ledblink::Mode::OFF_ON);
 	DisplayUdf display;
 	ConfigStore configStore;
 	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, Display7SegmentMessage::INFO_NETWORK_INIT, CONSOLE_YELLOW);

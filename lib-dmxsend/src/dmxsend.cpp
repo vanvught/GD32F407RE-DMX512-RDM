@@ -105,7 +105,7 @@ void DmxSend::Sync(uint32_t const nPortIndex) {
 void DmxSend::Sync(const bool doForce) {
 	Dmx::Get()->SetOutput(doForce);
 
-	for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::OUT; nPortIndex++) {
+	for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::PORTS; nPortIndex++) {
 		if (lightset::Data::GetLength(nPortIndex) != 0) {
 			lightset::Data::ClearLength(nPortIndex);
 			hal::panel_led_on(hal::panelled::PORT_A_TX << nPortIndex);

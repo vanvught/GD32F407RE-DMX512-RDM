@@ -1,8 +1,8 @@
 /**
- * @file networkdisplay.cpp
+ * @file dmxstatistics.h
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,24 +23,30 @@
  * THE SOFTWARE.
  */
 
-#include "network.h"
+#ifndef DMXSTATISTICS_H_
+#define DMXSTATISTICS_H_
 
-namespace network {
-void display_emac_config() {}
-void display_emac_start() {}
-void display_emac_status([[maybe_unused]] const bool isLinkUp) {}
+#include <cstdint>
 
-void display_ip() {}
+namespace dmx {
+struct TotalStatistics {
+	struct  {
+		uint32_t Sent;
+		uint32_t Received;
+	} Dmx;
 
-void display_netmask() {}
+	struct {
+		struct  {
+			uint32_t Good;
+			uint32_t Bad;
+			uint32_t DiscoveryResponse;
+		} Received;
+		struct  {
+			uint32_t Class;
+			uint32_t DiscoveryResponse;
+		} Sent;
+	} Rdm;
+};
+}  // namespace dmx
 
-void display_gateway() {}
-
-void display_hostname() {}
-
-void display_emac_shutdown() {}
-
-// DHCP Client
-void display_dhcp_status([[maybe_unused]] network::dhcp::ClientStatus nStatus) {}
-}  // namespace network
-
+#endif /* DMXSTATISTICS_H_ */

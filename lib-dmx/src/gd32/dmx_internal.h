@@ -123,42 +123,42 @@ inline void _gpio_mode_af(const uint32_t gpio_periph, const uint32_t pin, const 
 	switch (usart_periph) {
 #if defined (DMX_USE_USART0)
 	case USART0:
-		gpio_af_set(gpio_periph, USART0_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, USART0_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_USART1)
 	case USART1:
-		gpio_af_set(gpio_periph, USART1_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, USART1_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_USART2)
 	case USART2:
-		gpio_af_set(gpio_periph, USART2_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, USART2_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_UART3)
 	case UART3:
-		gpio_af_set(gpio_periph, UART3_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, UART3_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_UART4)
 	case UART4:
-		gpio_af_set(gpio_periph, UART4_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, UART4_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_USART5)
 	case USART5:
-		gd32_gpio_af_set(gpio_periph, USART5_GPIO_AF, pin);
+		gd32_gpio_af_set(gpio_periph, USART5_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_UART6)
 	case UART6:
-		gpio_af_set(gpio_periph, UART6_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, UART6_GPIO_AFx, pin);
 		break;
 #endif
 #if defined (DMX_USE_UART7)
 	case UART7:
-		gpio_af_set(gpio_periph, UART7_GPIO_AF, pin);
+		gpio_af_set(gpio_periph, UART7_GPIO_AFx, pin);
 		break;
 #endif
 	default:
@@ -179,6 +179,11 @@ inline void _gpio_mode_af(const uint32_t gpio_periph, const uint32_t pin, const 
 # define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
 # define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
 #else
+// U(S)ART
+# define USART_TDATA						USART_DATA
+# define USART_RDATA						USART_DATA
+# define USART_TDATA_TDATA					USART_DATA_DATA
+# define USART_RDATA_TDATA					USART_DATA_DATA
 // GPIO
 inline void _gpio_mode_output(const uint32_t gpio_periph, const uint32_t pin) {
 	gpio_init(gpio_periph, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, pin);

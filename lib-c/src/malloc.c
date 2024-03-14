@@ -8,7 +8,7 @@
  * Copyright (C) 2014-2016  R. Stange <rsta2@o2online.de>
  * https://github.com/rsta2/circle/blob/master/lib/alloc.cpp
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@
 #include <stddef.h>
 #include <assert.h>
 
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 #include <stdio.h>
 #endif
 
@@ -58,7 +58,7 @@ struct block_header {
 
 struct block_bucket {
 	unsigned int size;
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 	unsigned int count;
 	unsigned int max_count;
 #endif
@@ -83,7 +83,7 @@ size_t get_allocated(void *p) {
 }
 
 void *malloc(size_t size) {
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 	printf("malloc: %u\n", size);
 #endif
 	struct block_bucket *bucket;
@@ -96,7 +96,7 @@ void *malloc(size_t size) {
 	for (bucket = s_block_bucket; bucket->size > 0; bucket++) {
 		if (size <= bucket->size) {
 			size = bucket->size;
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 			if (++bucket->count > bucket->max_count) {
 				bucket->max_count = bucket->count;
 			}
@@ -120,7 +120,7 @@ void *malloc(size_t size) {
 		assert(((unsigned)next & (unsigned)3) == 0);
 
 		if (next > block_limit) {
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 			printf("malloc: next > block_limit\n");
 #endif
 			return NULL;
@@ -133,7 +133,7 @@ void *malloc(size_t size) {
 	}
 
 	header->next = 0;
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 	printf("malloc: pBlockHeader=%p, size=%d, data=%p\n", header, (int) size, (void *)header->data);
 #endif
 
@@ -150,7 +150,7 @@ void free(void *p) {
 
 	struct block_header *header = (struct block_header *) ((void *) p - sizeof(struct block_header));
 
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 	printf("free: pBlockHeader = %p, pBlock = %p\n", header, p);
 #endif
 
@@ -164,7 +164,7 @@ void free(void *p) {
 
 			header->next = bucket->free_list;
 			bucket->free_list = header;
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 			bucket->count--;
 #endif
 			break;
@@ -259,7 +259,7 @@ void *realloc(void *ptr, size_t size) {
 }
 
 void mem_info(void) {
-#ifdef MEM_DEBUG
+#ifdef DEBUG_HEAP
 	struct block_bucket *pBucket;
 	struct block_header *pBlockHeader;
 	printf("s_pNextBlock = %p\n", next_block);

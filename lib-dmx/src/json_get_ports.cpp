@@ -1,5 +1,5 @@
 /**
- * @file board_gd32f470z_eval.h
+ * @file json_get_ports.cpp
  *
  */
 /* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,27 +23,36 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_BOARD_GD32F470Z_EVAL_H_
-#define GD32_BOARD_GD32F470Z_EVAL_H_
+#include <cstdint>
+#include <cstdio>
 
-#include "gd32_board.h"
+#include "dmx.h"
+#include "dmxconst.h"
+#include "lightset.h"
 
-#define DMX_MAX_PORTS  2
+namespace remoteconfig {
+namespace dmx {
+static uint32_t get_portstatus(const uint32_t nPortIndex, char *pOutBuffer, const uint32_t nOutBufferSize) {
+	const auto direction = Dmx::Get()->GetPortDirection(nPortIndex) == ::dmx::PortDirection::INP ? ::lightset::PortDir::INPUT : ::lightset::PortDir::OUTPUT;
+	auto nLength = static_cast<uint32_t>(snprintf(pOutBuffer, nOutBufferSize,
+			"{\"port\":\"%c\",\"direction\":\"%s\"},",
+			'A' + nPortIndex,
+			lightset::get_direction(direction)));
 
-namespace max {
-	static const uint32_t PORTS = DMX_MAX_PORTS;
-}  // namespace max
+	return nLength;
+}
 
-#define DMX_USE_USART2
-#define DMX_USE_USART5
+uint32_t json_get_ports(char *pOutBuffer, const uint32_t nOutBufferSize) {
+	pOutBuffer[0] = '[';
+	uint32_t nLength = 1;
 
-static constexpr auto USART2_PORT = 0;
-static constexpr auto USART5_PORT = 1;
+	for (uint32_t nPortIndex = 0; nPortIndex < ::dmx::config::max::PORTS; nPortIndex++) {
+		nLength += get_portstatus(nPortIndex, &pOutBuffer[nLength], nOutBufferSize - nLength);
+	}
 
-static constexpr auto DIR_PORT_0_GPIO_PORT = GPIOD;
-static constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_0;		///< Not used
+	pOutBuffer[nLength - 1] = ']';
 
-static constexpr auto DIR_PORT_1_GPIO_PORT = GPIOD;
-static constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_1;		///< Not used
-
-#endif /* GD32_BOARD_GD32F470Z_EVAL_H_ */
+	return nLength;
+}
+}  // namespace dmx
+}  // namespace remoteconfig

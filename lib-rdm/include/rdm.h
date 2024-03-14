@@ -50,7 +50,7 @@ public:
 	}
 
 	static void Send(const uint32_t nPortIndex, struct TRdmMessage *pRdmCommand) {
-		assert(nPortIndex < dmx::config::max::OUT);
+		assert(nPortIndex < dmx::config::max::PORTS);
 		assert(pRdmCommand != nullptr);
 
 		auto *pData = reinterpret_cast<uint8_t*>(pRdmCommand);
@@ -72,7 +72,7 @@ public:
 	}
 
 	static void SendRawRespondMessage(const uint32_t nPortIndex, const uint8_t *pRdmData, const uint32_t nLength) {
-		assert(nPortIndex < dmx::config::max::OUT);
+		assert(nPortIndex < dmx::config::max::PORTS);
 		assert(pRdmData != nullptr);
 		assert(nLength != 0);
 
@@ -96,7 +96,7 @@ public:
 	}
 
 private:
-	static uint8_t s_TransactionNumber[dmx::config::max::OUT];
+	static uint8_t s_TransactionNumber[dmx::config::max::PORTS];
 };
 
 #endif /* RDM_H_ */
