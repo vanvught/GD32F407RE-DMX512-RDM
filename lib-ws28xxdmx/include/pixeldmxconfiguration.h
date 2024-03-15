@@ -105,8 +105,7 @@ public:
 			m_nGroupingCount = GetCount();
 		}
 
-		m_nGroups = GetCount() / m_nGroupingCount;
-
+		m_nGroups = PixelConfiguration::GetCount() / m_nGroupingCount;
 		m_nOutputPorts = std::min(nPortsMax, m_nOutputPorts);
 		m_nUniverses = (1U + (m_nGroups  / (1U + portInfo.nBeginIndexPort[1])));
 

@@ -602,10 +602,10 @@ void RDMHandler::GetDeviceInfo(uint16_t nSubDevice) {
 	const auto *pRdmDeviceInfoRequested = RDMDeviceResponder::Get()->GetDeviceInfo(nSubDevice);
 
 	auto *pRdmDataOut = reinterpret_cast<struct TRdmMessage *>(m_pRdmDataOut);
-	auto *pDeviceInfoOut = reinterpret_cast<struct TRDMDeviceInfo*>(pRdmDataOut->param_data);
+	auto *pDeviceInfoOut = reinterpret_cast<struct rdm::device::responder::DeviceInfo*>(pRdmDataOut->param_data);
 
-	pRdmDataOut->param_data_length = sizeof(struct TRDMDeviceInfo);
-	memcpy(pDeviceInfoOut, pRdmDeviceInfoRequested, sizeof(struct TRDMDeviceInfo));
+	pRdmDataOut->param_data_length = sizeof(struct rdm::device::responder::DeviceInfo);
+	memcpy(pDeviceInfoOut, pRdmDeviceInfoRequested, sizeof(struct rdm::device::responder::DeviceInfo));
 
 	RespondMessageAck();
 }

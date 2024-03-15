@@ -38,28 +38,26 @@ static uint32_t s_tmp;
 
 WS28xx *WS28xx::s_pThis;
 
-WS28xx::WS28xx(PixelConfiguration& pixelConfiguration) {
+WS28xx::WS28xx(PixelConfiguration *pPixelConfiguration): m_pPixelConfiguration(pPixelConfiguration) {
 	DEBUG_ENTRY
 
 	assert(s_pThis == nullptr);
 	s_pThis = this;
 
-	m_PixelConfiguration = pixelConfiguration;
-
 	uint32_t nLedsPerPixel;
-	pixelConfiguration.Validate(nLedsPerPixel);
-	pixelConfiguration.Dump();
+	m_pPixelConfiguration->Validate(nLedsPerPixel);
+	m_pPixelConfiguration->Dump();
 
-	const auto nCount = m_PixelConfiguration.GetCount();
+	const auto nCount = m_pPixelConfiguration->GetCount();
 
 	m_nBufSize = nCount * nLedsPerPixel;
 
-	if (m_PixelConfiguration.IsRTZProtocol()) {
+	if (m_pPixelConfiguration->IsRTZProtocol()) {
 		m_nBufSize *= 8;
 		m_nBufSize += 1;
 	}
 
-	const auto type = m_PixelConfiguration.GetType();
+	const auto type = m_pPixelConfiguration->GetType();
 
 	if ((type == pixel::Type::APA102) || (type == pixel::Type::SK9822) || (type == pixel::Type::P9813)) {
 		m_nBufSize += nCount;
@@ -69,7 +67,7 @@ WS28xx::WS28xx(PixelConfiguration& pixelConfiguration) {
 	SetupBuffers();
 
 	i2s::gd32_spi_dma_begin();
-	i2s::gd32_spi_dma_set_speed_hz(pixelConfiguration.GetClockSpeedHz());
+	i2s::gd32_spi_dma_set_speed_hz(m_pPixelConfiguration->GetClockSpeedHz());
 
 	DEBUG_EXIT
 }
@@ -130,8 +128,8 @@ void WS28xx::Blackout() {
 	auto *pBuffer = m_pBuffer;
 	m_pBuffer = m_pBlackoutBuffer;
 
-	const auto type = m_PixelConfiguration.GetType();
-	const auto nCount = m_PixelConfiguration.GetCount();
+	const auto type = m_pPixelConfiguration->GetType();
+	const auto nCount = m_pPixelConfiguration->GetCount();
 
 	if ((type == pixel::Type::APA102) || (type == pixel::Type::SK9822) || (type == pixel::Type::P9813)) {
 		memset(m_pBuffer, 0, 4);
@@ -147,7 +145,7 @@ void WS28xx::Blackout() {
 		}
 	} else {
 		m_pBuffer[0] = 0x00;
-		memset(&m_pBuffer[1], type == pixel::Type::WS2801 ? 0 : m_PixelConfiguration.GetLowCode(), m_nBufSize);
+		memset(&m_pBuffer[1], type == pixel::Type::WS2801 ? 0 : m_pPixelConfiguration->GetLowCode(), m_nBufSize);
 	}
 
 	Update();
@@ -173,8 +171,8 @@ void WS28xx::FullOn() {
 	auto *pBuffer = m_pBuffer;
 	m_pBuffer = m_pBlackoutBuffer;
 
-	const auto type = m_PixelConfiguration.GetType();
-	const auto nCount = m_PixelConfiguration.GetCount();
+	const auto type = m_pPixelConfiguration->GetType();
+	const auto nCount = m_pPixelConfiguration->GetCount();
 
 	if ((type == pixel::Type::APA102) || (type == pixel::Type::SK9822) || (type == pixel::Type::P9813)) {
 		memset(m_pBuffer, 0, 4);
@@ -190,7 +188,7 @@ void WS28xx::FullOn() {
 		}
 	} else {
 		m_pBuffer[0] = 0x00;
-		memset(&m_pBuffer[1], type == pixel::Type::WS2801 ? 0xFF : m_PixelConfiguration.GetHighCode(), m_nBufSize);
+		memset(&m_pBuffer[1], type == pixel::Type::WS2801 ? 0xFF : m_pPixelConfiguration->GetHighCode(), m_nBufSize);
 	}
 
 	Update();

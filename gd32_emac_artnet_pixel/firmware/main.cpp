@@ -116,7 +116,7 @@ void main() {
 	pixelDmxParams.Load();
 	pixelDmxParams.Set(&pixelDmxConfiguration);
 
-	WS28xxDmx pixelDmx(pixelDmxConfiguration);
+	WS28xxDmx pixelDmx(&pixelDmxConfiguration);
 
 	const auto nUniverses = pixelDmx.GetUniverses();
 
