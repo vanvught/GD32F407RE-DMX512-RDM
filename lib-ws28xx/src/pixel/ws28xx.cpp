@@ -62,11 +62,13 @@ void WS28xx::SetColorWS28xx(uint32_t nOffset, uint8_t nValue) {
 void WS28xx::SetPixel(uint32_t nPixelIndex, uint8_t nRed, uint8_t nGreen, uint8_t nBlue) {
 	assert(nPixelIndex < m_pPixelConfiguration->GetCount());
 
+#if defined(CONFIG_PIXELDMX_ENABLE_GAMMATABLE)
 	const auto pGammaTable = m_pPixelConfiguration->GetGammaTable();
 
 	nRed = pGammaTable[nRed];
 	nGreen = pGammaTable[nGreen];
 	nBlue = pGammaTable[nBlue];
+#endif
 
 	if (m_pPixelConfiguration->IsRTZProtocol()) {
 		const auto nOffset = nPixelIndex * 24U;
@@ -126,12 +128,14 @@ void WS28xx::SetPixel(uint32_t nPixelIndex, uint8_t nRed, uint8_t nGreen, uint8_
 	assert(nPixelIndex < m_pPixelConfiguration->GetCount());
 	assert(m_pPixelConfiguration->GetType() == pixel::Type::SK6812W);
 
+#if defined(CONFIG_PIXELDMX_ENABLE_GAMMATABLE)
 	const auto pGammaTable = m_pPixelConfiguration->GetGammaTable();
 
 	nRed = pGammaTable[nRed];
 	nGreen = pGammaTable[nGreen];
 	nBlue = pGammaTable[nBlue];
 	nWhite = pGammaTable[nWhite];
+#endif
 
 	const auto nOffset = nPixelIndex * 32U;
 

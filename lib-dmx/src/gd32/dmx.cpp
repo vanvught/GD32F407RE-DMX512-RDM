@@ -146,15 +146,18 @@ static constexpr DirGpio s_DirGpio[DMX_MAX_PORTS] = {
 };
 
 static volatile PortState sv_PortState[dmx::config::max::PORTS] ALIGNED;
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 static volatile dmx::TotalStatistics sv_TotalStatistics[dmx::config::max::PORTS] ALIGNED;
+#endif
 
 // DMX RX
 
-[[maybe_unused]] static uint8_t s_RxDmxPrevious[dmx::config::max::PORTS][dmx::buffer::SIZE] ALIGNED;
+[[maybe_unused]] static uint8_t sv_RxDmxPrevious[dmx::config::max::PORTS][dmx::buffer::SIZE] ALIGNED;
 static volatile RxDmxPackets sv_nRxDmxPackets[dmx::config::max::PORTS] ALIGNED;
 
 // RDM RX
-volatile uint32_t gv_RdmDataReceiveEnd;
+volatile uint32_t gsv_RdmDataReceiveEnd;
 
 // DMX RDM RX
 
@@ -226,7 +229,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			break;
 		case E120_SC_RDM:
 			sv_RxBuffer[nPortIndex].data[0] = E120_SC_RDM;
-//			sv_RxBuffer[nPortIndex].Rdm.nChecksum = E120_SC_RDM;
 			sv_RxBuffer[nPortIndex].Rdm.nIndex = 1;
 			sv_RxBuffer[nPortIndex].State = TxRxState::RDMDATA;
 			break;
@@ -310,7 +312,6 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			nIndex = sv_RxBuffer[nPortIndex].Rdm.nIndex;
 			sv_RxBuffer[nPortIndex].data[nIndex] = data;
 			sv_RxBuffer[nPortIndex].Rdm.nIndex++;
-//			sv_RxBuffer[nPortIndex].Rdm.nChecksum = static_cast<uint16_t>(sv_RxBuffer[nPortIndex].Rdm.nChecksum + data);
 
 			const auto *p = reinterpret_cast<volatile struct TRdmMessage*>(&sv_RxBuffer[nPortIndex].data[0]);
 
@@ -327,29 +328,15 @@ static void irq_handler_dmx_rdm_input(const uint32_t uart, const uint32_t nPortI
 			nIndex = sv_RxBuffer[nPortIndex].Rdm.nIndex;
 			sv_RxBuffer[nPortIndex].data[nIndex] = data;
 			sv_RxBuffer[nPortIndex].Rdm.nIndex++;
-//			sv_RxBuffer[nPortIndex].Rdm.nChecksum = static_cast<uint16_t>(sv_RxBuffer[nPortIndex].Rdm.nChecksum - static_cast<uint16_t>(data << 8));
 			sv_RxBuffer[nPortIndex].State = TxRxState::CHECKSUML;
 			break;
-		case TxRxState::CHECKSUML: {
+		case TxRxState::CHECKSUML:
 			nIndex = sv_RxBuffer[nPortIndex].Rdm.nIndex;
 			sv_RxBuffer[nPortIndex].data[nIndex] = data;
-			sv_RxBuffer[nPortIndex].Rdm.nIndex++;
-//			sv_RxBuffer[nPortIndex].Rdm.nChecksum = static_cast<uint16_t>(sv_RxBuffer[nPortIndex].Rdm.nChecksum - data);
-
-//			const auto *p = reinterpret_cast<volatile struct TRdmMessage *>(&sv_RxBuffer[nPortIndex].data[0]);
-//
-//			if (!((sv_RxBuffer[nPortIndex].Rdm.nChecksum == 0) && (p->sub_start_code == E120_SC_SUB_MESSAGE))) {
-//				sv_RxBuffer[nPortIndex].Dmx.nSlotsInPacket= 0; // This is correct.
-//				sv_TotalStatistics[nPortIndex].Rdm.Received.Bad++;
-//			} else {
-				sv_RxBuffer[nPortIndex].Rdm.nIndex |= 0x4000;
-				gv_RdmDataReceiveEnd = DWT->CYCCNT;
-//				sv_TotalStatistics[nPortIndex].Rdm.Received.Good++;
-//			}
-
+			sv_RxBuffer[nPortIndex].Rdm.nIndex |= 0x4000;
 			sv_RxBuffer[nPortIndex].State = TxRxState::IDLE;
-		}
-		break;
+			gsv_RdmDataReceiveEnd = DWT->CYCCNT;
+			break;
 		case TxRxState::RDMDISC:
 			nIndex = sv_RxBuffer[nPortIndex].Rdm.nIndex;
 
@@ -508,7 +495,7 @@ static void timer1_config() {
 	timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3, ~0);
 #endif
 
-	NVIC_SetPriority(TIMER1_IRQn, 0);
+	NVIC_SetPriority(TIMER1_IRQn, 1);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 
 	timer_enable(TIMER1);
@@ -552,7 +539,7 @@ static void timer4_config() {
 	timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3, ~0);
 #endif
 
-	NVIC_SetPriority(TIMER4_IRQn, 0);
+	NVIC_SetPriority(TIMER4_IRQn, 1);
 	NVIC_EnableIRQ(TIMER4_IRQn);
 
 	timer_enable(TIMER4);
@@ -582,7 +569,7 @@ static void timer2_config() {
 	timer_channel_output_mode_config(TIMER2, TIMER_CH_2, TIMER_OC_MODE_ACTIVE);
 	timer_channel_output_mode_config(TIMER2, TIMER_CH_3, TIMER_OC_MODE_ACTIVE);
 
-	NVIC_SetPriority(TIMER2_IRQn, 1);
+	NVIC_SetPriority(TIMER2_IRQn, 2);
 	NVIC_EnableIRQ(TIMER2_IRQn);
 
 	timer_enable(TIMER2);
@@ -612,7 +599,7 @@ static void timer3_config() {
 	timer_channel_output_mode_config(TIMER3, TIMER_CH_2, TIMER_OC_MODE_ACTIVE);
 	timer_channel_output_mode_config(TIMER3, TIMER_CH_3, TIMER_OC_MODE_ACTIVE);
 
-	NVIC_SetPriority(TIMER3_IRQn, 1);
+	NVIC_SetPriority(TIMER3_IRQn, 2);
 	NVIC_EnableIRQ(TIMER3_IRQn);
 
 	timer_enable(TIMER3);
@@ -1299,11 +1286,9 @@ void TIMER2_IRQHandler() {
 		if (sv_RxBuffer[0].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[0].State = TxRxState::IDLE;
 			sv_RxBuffer[0].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[0].Dmx.Received++;
 		} else if (sv_RxBuffer[0].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[0].State = TxRxState::IDLE;
 			sv_RxBuffer[0].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[0].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 #if DMX_MAX_PORTS >= 2
@@ -1311,11 +1296,9 @@ void TIMER2_IRQHandler() {
 		if (sv_RxBuffer[1].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[1].State = TxRxState::IDLE;
 			sv_RxBuffer[1].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[1].Dmx.Received++;
 		} else if (sv_RxBuffer[1].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[1].State = TxRxState::IDLE;
 			sv_RxBuffer[1].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[1].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 #endif
@@ -1324,11 +1307,9 @@ void TIMER2_IRQHandler() {
 		if (sv_RxBuffer[2].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[2].State = TxRxState::IDLE;
 			sv_RxBuffer[2].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[2].Dmx.Received++;
 		} else if (sv_RxBuffer[2].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[2].State = TxRxState::IDLE;
 			sv_RxBuffer[2].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[2].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 #endif
@@ -1337,11 +1318,9 @@ void TIMER2_IRQHandler() {
 		if (sv_RxBuffer[3].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[3].State = TxRxState::IDLE;
 			sv_RxBuffer[3].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[3].Dmx.Received++;
 		} else if (sv_RxBuffer[3].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[3].State = TxRxState::IDLE;
 			sv_RxBuffer[3].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[3].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 #endif
@@ -1355,11 +1334,9 @@ void TIMER3_IRQHandler() {
 		if (sv_RxBuffer[4].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[4].State = TxRxState::IDLE;
 			sv_RxBuffer[4].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[4].Dmx.Received++;
 		} else if (sv_RxBuffer[4].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[4].State = TxRxState::IDLE;
 			sv_RxBuffer[4].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[4].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 # if DMX_MAX_PORTS >= 6
@@ -1367,11 +1344,9 @@ void TIMER3_IRQHandler() {
 		if (sv_RxBuffer[5].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[5].State = TxRxState::IDLE;
 			sv_RxBuffer[5].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[5].Dmx.Received++;
 		} else if (sv_RxBuffer[5].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[5].State = TxRxState::IDLE;
 			sv_RxBuffer[5].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[5].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 # endif
@@ -1380,11 +1355,9 @@ void TIMER3_IRQHandler() {
 		if (sv_RxBuffer[6].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[6].State = TxRxState::IDLE;
 			sv_RxBuffer[6].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[6].Dmx.Received++;
 		} else if (sv_RxBuffer[6].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[6].State = TxRxState::IDLE;
 			sv_RxBuffer[6].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[6].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 # endif
@@ -1393,11 +1366,9 @@ void TIMER3_IRQHandler() {
 		if (sv_RxBuffer[7].State == TxRxState::DMXDATA) {
 			sv_RxBuffer[7].State = TxRxState::IDLE;
 			sv_RxBuffer[7].Dmx.nSlotsInPacket |= 0x8000;
-//			sv_TotalStatistics[7].Dmx.Received++;
 		} else if (sv_RxBuffer[7].State == TxRxState::RDMDISC) {
 			sv_RxBuffer[7].State = TxRxState::IDLE;
 			sv_RxBuffer[7].Dmx.nSlotsInPacket |= 0x4000;
-//			sv_TotalStatistics[7].Rdm.Received.DiscoveryResponse++;
 		}
 	}
 # endif
@@ -1437,6 +1408,10 @@ void DMA1_Channel7_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_0 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART0_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH7, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1452,6 +1427,10 @@ void DMA0_Channel3_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_0 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART0_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART0_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1472,6 +1451,10 @@ void DMA0_Channel6_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART1_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART1_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH6, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1492,6 +1475,10 @@ void DMA0_Channel3_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART2_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1509,6 +1496,10 @@ void DMA0_Channel1_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_2 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART2_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART2_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1530,6 +1521,10 @@ void DMA0_Channel4_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART3_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1545,6 +1540,10 @@ void DMA1_Channel4_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_3 , TIMER_CNT(TIMER1) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART3_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART3_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1566,6 +1565,10 @@ void DMA1_Channel3_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_0 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART4_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART4_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1583,6 +1586,10 @@ void DMA0_Channel7_IRQHandler() {
 			s_TxBuffer[dmx::config::UART4_PORT].State = TxRxState::DMXINTER;
 		}
 	}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART4_PORT].Dmx.Sent++;
+#endif
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH7, DMA_INTERRUPT_FLAG_CLEAR);
 }
@@ -1602,6 +1609,10 @@ void DMA1_Channel6_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_1 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::USART5_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::USART5_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH6, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1622,6 +1633,10 @@ void DMA1_Channel4_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_2 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART6_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART6_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1638,6 +1653,10 @@ void DMA0_Channel1_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_2 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART6_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART6_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1659,6 +1678,10 @@ void DMA1_Channel3_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART7_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART7_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA1, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1675,6 +1698,10 @@ void DMA0_Channel0_IRQHandler() {
 			timer_channel_output_pulse_value_config(TIMER4, TIMER_CH_3 , TIMER_CNT(TIMER4) + s_nDmxTransmitInterTime);
 			s_TxBuffer[dmx::config::UART7_PORT].State = TxRxState::DMXINTER;
 		}
+
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
+		sv_TotalStatistics[dmx::config::UART7_PORT].Dmx.Sent++;
+#endif
 	}
 
 	dma_interrupt_flag_clear(DMA0, DMA_CH0, DMA_INTERRUPT_FLAG_CLEAR);
@@ -1730,34 +1757,42 @@ Dmx::Dmx() {
 
 #if defined (DMX_USE_USART0)
 	uart_dmx_config(USART0);
+	NVIC_SetPriority(USART0_IRQn, 0);
 	NVIC_EnableIRQ(USART0_IRQn);
 #endif
 #if defined (DMX_USE_USART1)
 	uart_dmx_config(USART1);
+	NVIC_SetPriority(USART1_IRQn, 0);
 	NVIC_EnableIRQ(USART1_IRQn);
 #endif
 #if defined (DMX_USE_USART2)
 	uart_dmx_config(USART2);
+	NVIC_SetPriority(USART2_IRQn, 0);
 	NVIC_EnableIRQ(USART2_IRQn);
 #endif
 #if defined (DMX_USE_UART3)
 	uart_dmx_config(UART3);
+	NVIC_SetPriority(UART3_IRQn, 0);
 	NVIC_EnableIRQ(UART3_IRQn);
 #endif
 #if defined (DMX_USE_UART4)
 	uart_dmx_config(UART4);
+	NVIC_SetPriority(UART4_IRQn, 0);
 	NVIC_EnableIRQ(UART4_IRQn);
 #endif
 #if defined (DMX_USE_USART5)
 	uart_dmx_config(USART5);
+	NVIC_SetPriority(USART5_IRQn, 0);
 	NVIC_EnableIRQ(USART5_IRQn);
 #endif
 #if defined (DMX_USE_UART6)
 	uart_dmx_config(UART6);
+	NVIC_SetPriority(UART6_IRQn, 0);
 	NVIC_EnableIRQ(UART6_IRQn);
 #endif
 #if defined (DMX_USE_UART7)
 	uart_dmx_config(UART7);
+	NVIC_SetPriority(UART7_IRQn, 0);
 	NVIC_EnableIRQ(UART7_IRQn);
 #endif
 
@@ -1798,10 +1833,12 @@ void Dmx::ClearData(const uint32_t nPortIndex) {
 	memset(p->dmx.data, 0, dmx::buffer::SIZE);
 }
 
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 volatile dmx::TotalStatistics& Dmx::GetTotalStatistics(const uint32_t nPortIndex) {
 	sv_TotalStatistics[nPortIndex].Dmx.Received = sv_nRxDmxPackets[nPortIndex].nCount;
 	return sv_TotalStatistics[nPortIndex];
 }
+#endif
 
 void Dmx::StartDmxOutput(const uint32_t nPortIndex) {
 	assert(nPortIndex < dmx::config::max::PORTS);
@@ -2134,8 +2171,7 @@ void Dmx::SetOutput(const bool doForce) {
 	if (doForce) {
 		s_doForce = true;
 		for (uint32_t nPortIndex = 0; nPortIndex < dmx::config::max::PORTS; nPortIndex++) {
-			if ((sv_PortState[nPortIndex] == dmx::PortState::TX)
-					&& (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
+			if ((sv_PortState[nPortIndex] == dmx::PortState::TX) && (s_TxBuffer[nPortIndex].outputStyle == dmx::OutputStyle::CONTINOUS)) {
 				StopData(_port_to_uart(nPortIndex), nPortIndex);
 			}
 		}
@@ -2238,7 +2274,7 @@ const uint8_t *Dmx::GetDmxChanged([[maybe_unused]] uint32_t nPortIndex) {
 	}
 
 	const auto *pSrc16 = reinterpret_cast<const uint16_t*>(p);
-	auto *pDst16 = reinterpret_cast<uint16_t *>(&s_RxDmxPrevious[nPortIndex][0]);
+	auto *pDst16 = reinterpret_cast<uint16_t *>(&sv_RxDmxPrevious[nPortIndex][0]);
 
 	auto isChanged = false;
 
@@ -2267,8 +2303,9 @@ const uint8_t *Dmx::GetDmxAvailable([[maybe_unused]] uint32_t nPortIndex)  {
 	sv_RxBuffer[nPortIndex].Dmx.nSlotsInPacket &= ~0x8000;
 	sv_RxBuffer[nPortIndex].Dmx.nSlotsInPacket--;	// Remove SC from length
 
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 	sv_TotalStatistics[nPortIndex].Dmx.Received++;
-
+#endif
 	return const_cast<const uint8_t *>(sv_RxBuffer[nPortIndex].data);
 #else
 	return nullptr;
@@ -2430,7 +2467,9 @@ void Dmx::RdmSendRaw(const uint32_t nPortIndex, const uint8_t* pRdmData, uint32_
 #endif
 	}
 
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 	sv_TotalStatistics[nPortIndex].Rdm.Sent.Class++;
+#endif
 }
 
 void Dmx::RdmSendDiscoveryRespondMessage(uint32_t nPortIndex, const uint8_t *pRdmData, uint32_t nLength) {
@@ -2439,7 +2478,7 @@ void Dmx::RdmSendDiscoveryRespondMessage(uint32_t nPortIndex, const uint8_t *pRd
 	assert(nLength != 0);
 
 	// 3.2.2 Responder Packet spacing
-	udelay(RDM_RESPONDER_PACKET_SPACING, gv_RdmDataReceiveEnd);
+	udelay(RDM_RESPONDER_PACKET_SPACING, gsv_RdmDataReceiveEnd);
 
 	SetPortDirection(nPortIndex, dmx::PortDirection::OUTP, false);
 
@@ -2471,7 +2510,9 @@ void Dmx::RdmSendDiscoveryRespondMessage(uint32_t nPortIndex, const uint8_t *pRd
 
 	SetPortDirection(nPortIndex, dmx::PortDirection::INP, true);
 
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 	sv_TotalStatistics[nPortIndex].Rdm.Sent.DiscoveryResponse++;
+#endif
 }
 
 // RDM Receive
@@ -2503,15 +2544,20 @@ const uint8_t *Dmx::RdmReceive(const uint32_t nPortIndex) {
 
 		if (p[i++] == static_cast<uint8_t>(nChecksum >> 8)) {
 			if (p[i] == static_cast<uint8_t>(nChecksum)) {
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 				sv_TotalStatistics[nPortIndex].Rdm.Received.Good++;
+#endif
 				return p;
 			}
 		}
-
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 		sv_TotalStatistics[nPortIndex].Rdm.Received.Bad++;
+#endif
 		return nullptr;
 	} else {
+#if !defined (CONFIG_DMX_DISABLE_STATISTICS)
 		sv_TotalStatistics[nPortIndex].Rdm.Received.DiscoveryResponse++;
+#endif
 	}
 
 	return p;

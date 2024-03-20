@@ -170,9 +170,7 @@ void main() {
 		server.Run();
 		remoteConfig.Run();
 		configStore.Flash();
-		if (__builtin_expect((PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE), 0)) {
-			pixelTestPattern.Run();
-		}
+		pixelTestPattern.Run();
 		mDns.Run();
 #if defined (ENABLE_NTP_CLIENT)
 		ntpClient.Run();

@@ -76,9 +76,9 @@ public:
 		assert(pRdmData != nullptr);
 		assert(nLength != 0);
 
-		extern volatile uint32_t gv_RdmDataReceiveEnd;
+		extern volatile uint32_t gsv_RdmDataReceiveEnd;
 		// 3.2.2 Responder Packet spacing
-		udelay(RDM_RESPONDER_PACKET_SPACING, gv_RdmDataReceiveEnd);
+		udelay(RDM_RESPONDER_PACKET_SPACING, gsv_RdmDataReceiveEnd);
 
 		SendRaw(nPortIndex, pRdmData, nLength);
 	}

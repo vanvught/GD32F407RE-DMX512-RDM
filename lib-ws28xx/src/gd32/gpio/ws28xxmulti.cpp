@@ -893,11 +893,13 @@ void WS28xxMulti::SetPixel4Bytes(const uint32_t nPortIndex, const uint32_t nPixe
 }
 
 void WS28xxMulti::SetPixel(const uint32_t nPortIndex, const uint32_t nPixelIndex, uint8_t nRed, uint8_t nGreen, uint8_t nBlue) {
+#if defined(CONFIG_PIXELDMX_ENABLE_GAMMATABLE)
 	const auto pGammaTable = m_PixelConfiguration.GetGammaTable();
 
 	nRed = pGammaTable[nRed];
 	nGreen = pGammaTable[nGreen];
 	nBlue = pGammaTable[nBlue];
+#endif
 
 	if (m_PixelConfiguration.IsRTZProtocol()) {
 		SetColourRTZ(nPortIndex, nPixelIndex, nRed, nGreen, nBlue);
@@ -931,12 +933,14 @@ void WS28xxMulti::SetPixel(const uint32_t nPortIndex, const uint32_t nPixelIndex
 	assert(nPortIndex < 16);
 	assert(nPixelIndex < m_nBufSize / 8);	//FIXME 8
 
+#if defined(CONFIG_PIXELDMX_ENABLE_GAMMATABLE)
 	const auto pGammaTable = m_PixelConfiguration.GetGammaTable();
 
 	nRed = pGammaTable[nRed];
 	nGreen = pGammaTable[nGreen];
 	nBlue = pGammaTable[nBlue];
 	nWhite = pGammaTable[nWhite];
+#endif
 
 	const auto k = nPixelIndex * pixel::single::RGBW;
 	const auto nBit = nPortIndex + GPIO_PIN_OFFSET;

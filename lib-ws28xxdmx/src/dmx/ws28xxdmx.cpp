@@ -122,7 +122,7 @@ void WS28xxDmx::Stop([[maybe_unused]] uint32_t nPortIndex) {
 #endif
 }
 
-void WS28xxDmx::SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate) {
+void WS28xxDmx::SetData([[maybe_unused]] uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate) {
 	assert(pData != nullptr);
 	assert(nLength <= lightset::dmx::UNIVERSE_SIZE);
 
@@ -132,9 +132,17 @@ void WS28xxDmx::SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLen
 
 	uint32_t d = 0;
 
+#if !defined(LIGHTSET_PORTS)
+	static constexpr uint32_t nSwitch = 0;
+#else
 	const auto nSwitch = nPortIndex & 0x03;
+#endif
 	const auto nGroups = m_pPixelDmxConfiguration->GetGroups();
+#if !defined(LIGHTSET_PORTS)
+	static constexpr uint32_t beginIndex = 0;
+#else
 	const auto beginIndex = m_PortInfo.nBeginIndexPort[nSwitch];
+#endif
 	const auto endIndex = std::min(nGroups, (beginIndex + (nLength / m_nChannelsPerPixel)));
 
 	if ((nSwitch == 0) && (nGroups < m_PortInfo.nBeginIndexPort[1])) {
@@ -215,7 +223,11 @@ void WS28xxDmx::SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLen
 		}
 	}
 
+#if !defined(LIGHTSET_PORTS)
+	if (doUpdate) {
+#else
 	if ((doUpdate) && (nPortIndex == m_PortInfo.nProtocolPortIndexLast)) {
+#endif
 		if (__builtin_expect((m_bBlackout), 0)) {
 			return;
 		}

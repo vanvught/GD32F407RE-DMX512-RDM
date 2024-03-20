@@ -138,7 +138,7 @@ void main() {
 	const auto nTestPattern = static_cast<pixelpatterns::Pattern>(pixelDmxParams.GetTestPattern());
 	PixelTestPattern pixelTestPattern(nTestPattern, 1);
 
-	if (PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE) {
+	if (PixelTestPattern::Get()->GetPattern() != pixelpatterns::Pattern::NONE) {
 		node.SetOutput(nullptr);
 	} else {
 		node.SetOutput(&pixelDmx);
@@ -238,9 +238,7 @@ void main() {
 #endif
 		remoteConfig.Run();
 		configStore.Flash();
-		if (__builtin_expect((PixelTestPattern::GetPattern() != pixelpatterns::Pattern::NONE), 0)) {
-			pixelTestPattern.Run();
-		}
+		pixelTestPattern.Run();
 		mDns.Run();
 #if defined (ENABLE_NTP_CLIENT)
 		ntpClient.Run();

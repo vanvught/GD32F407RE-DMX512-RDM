@@ -65,7 +65,7 @@ void factorydefaults();
 
 class RDMDeviceResponder: public RDMDevice {
 public:
-	RDMDeviceResponder(RDMPersonality **pRDMPersonalities, uint32_t nPersonalityCount);
+	RDMDeviceResponder(RDMPersonality **pRDMPersonalities, const uint32_t nPersonalityCount, const uint32_t nCurrentPersonality = rdm::device::responder::DEFAULT_CURRENT_PERSONALITY);
 	virtual ~RDMDeviceResponder() = default;
 
 	void Init();

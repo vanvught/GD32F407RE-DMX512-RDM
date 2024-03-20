@@ -234,13 +234,9 @@ bool Hardware::Reboot() {
 	
 	RebootHandler();
 
-	WatchdogInit();
+	SetMode(hardware::ledblink::Mode::OFF_OFF);
 
-	SetMode(hardware::ledblink::Mode::REBOOT);
-
-	for (;;) {
-		Run();
-	}
+	NVIC_SystemReset();
 
 	__builtin_unreachable();
 	return true;
