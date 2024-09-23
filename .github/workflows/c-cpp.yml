@@ -15,12 +15,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install arm-none-eabi
       run: sudo apt install gcc-arm-none-eabi
-    - name: make Board-tester
-      run: |
-        cd Board-tester
-        make -f Makefile.GD32 clean
-        make -f Makefile.GD32
-        cd -
     - name: make gd32_emac_artnet_dmx_multi
       run: |
         cd gd32_emac_artnet_dmx_multi
