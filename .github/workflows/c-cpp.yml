@@ -21,21 +21,9 @@ jobs:
         make -f Makefile.GD32 clean
         make -f Makefile.GD32
         cd -
-    - name: make gd32_emac_artnet_pixel_multi
-      run: |
-        cd gd32_emac_artnet_pixel_multi
-        make -f Makefile.GD32 clean
-        make -f Makefile.GD32
-        cd -
     - name: make gd32_emac_e131_dmx_multi
       run: |
         cd gd32_emac_e131_dmx_multi
-        make -f Makefile.GD32 clean
-        make -f Makefile.GD32
-        cd -
-    - name: make gd32_emac_e131_pixel_multi
-      run: |
-        cd gd32_emac_e131_pixel_multi
         make -f Makefile.GD32 clean
         make -f Makefile.GD32
         cd -
