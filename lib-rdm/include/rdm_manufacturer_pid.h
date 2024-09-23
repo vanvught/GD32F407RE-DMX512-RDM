@@ -1,5 +1,26 @@
-/*
- * rdm_manufacturer_pid.h
+/**
+ * @file rdm_manufacturer_pid.h
+ *
+ */
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 #ifndef RDM_MANUFACTURER_PID_H_
@@ -41,7 +62,7 @@ struct ManufacturerPid {
 
 template <typename T, size_t N>
 struct Description {
-    static constexpr size_t size = N - 1;
+    static constexpr auto size = N - 1U;
     static_assert(size <= DEVICE_DESCRIPTION_MAX_LENGTH, "Description is too long");
     static constexpr char const* value = T::description;
 };
@@ -54,7 +75,7 @@ struct ManufacturerParamData {
 };
 
 bool handle_manufactureer_pid_get(const uint16_t nPid, const ManufacturerParamData *pIn, ManufacturerParamData *pOut, uint16_t& nReason);
-
+bool handle_manufactureer_pid_set(const bool isBroadcast, const uint16_t nPid, const rdm::ParameterDescription &parameterDescription, const ManufacturerParamData *pIn, ManufacturerParamData *pOut, uint16_t& nReason);
 }  // namespace rdm
 
 #endif /* RDM_MANUFACTURER_PID_H_ */

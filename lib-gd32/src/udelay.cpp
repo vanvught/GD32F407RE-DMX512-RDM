@@ -2,7 +2,7 @@
  * @file udelay.cpp
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@
 
 #include "gd32.h"
 
-static constexpr auto TICKS_PER_US = (MCU_CLOCK_FREQ / 1000000U);
+static constexpr uint32_t TICKS_PER_US = (MCU_CLOCK_FREQ / 1000000U);
 
-void udelay_init(void) {
+void udelay_init() {
 	assert(MCU_CLOCK_FREQ == SystemCoreClock);
 
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -38,21 +38,20 @@ void udelay_init(void) {
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-void udelay(uint32_t nUs, uint32_t nOffsetCYCCNT) {
-	const auto nTicks = nUs * TICKS_PER_US;
+void udelay(uint32_t nMicros, uint32_t nOffsetMicros) {
+	const auto nTicks = nMicros * TICKS_PER_US;
 
 	uint32_t nTicksCount = 0;
-	uint32_t nTicksNow;
 	uint32_t nTicksPrevious;
 
-	if (nOffsetCYCCNT == 0) {
+	if (nOffsetMicros == 0) {
 		nTicksPrevious = DWT->CYCCNT;
 	} else {
-		nTicksPrevious = nOffsetCYCCNT;
+		nTicksPrevious = nOffsetMicros;
 	}
 
 	while (1) {
-		nTicksNow = DWT->CYCCNT;
+		const auto nTicksNow = DWT->CYCCNT;
 
 		if (nTicksNow != nTicksPrevious) {
 			if (nTicksNow > nTicksPrevious) {

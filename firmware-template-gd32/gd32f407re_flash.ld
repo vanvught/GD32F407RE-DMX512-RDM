@@ -39,23 +39,6 @@ SECTIONS
     KEEP (*(.fini))
     . = ALIGN(4);
     _etext = .;
-    
-    . = ALIGN(8);
-     
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP (*(.preinit_array*))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
-
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array*))
-    PROVIDE_HIDDEN (__init_array_end = .);
-
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP (*(.fini_array*))
-    KEEP (*(SORT(.fini_array.*)))
-    PROVIDE_HIDDEN (__fini_array_end = .);
-    
   } >FLASH
 
   .rodata :
@@ -64,6 +47,29 @@ SECTIONS
     *(.rodata)
     *(.rodata*)
     . = ALIGN(4);
+  } >FLASH
+  
+  .preinit_array :
+  {
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array*))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+  } >FLASH
+  
+  .init_array :
+  {
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array*))
+    PROVIDE_HIDDEN (__init_array_end = .);
+  } >FLASH
+  
+  .fini_array :
+  {
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(.fini_array*))
+    KEEP (*(SORT(.fini_array.*)))
+    PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
   .stack :
@@ -81,11 +87,10 @@ SECTIONS
     *(.tcmsram)
     *(.tcmsram*)
     . = ALIGN(4);
-    _snetwork = .;	
-	*(.network*)
+    _snetwork = .;
+    *(.network*)
     . = ALIGN(4);
-	_enetwork = .;	
-    . = ALIGN(4);
+    _enetwork = .;
   } >TCMSRAM
   
   .heap :
@@ -155,9 +160,9 @@ SECTIONS
   	. = ALIGN(4);
     *(.ramadd)
     *(.ramadd*)
-	. = ALIGN(4);
+    . = ALIGN(4);
     _eramadd = .;
-  } >RAMADD AT>RAMADD
+  } >RAMADD
 
   .bkpsram :
   {
@@ -165,7 +170,7 @@ SECTIONS
     *(.bkpsram)
     *(.bkpsram*)
     *(.configstore*)
-  } >BKPSRAM AT>BKPSRAM
+  } >BKPSRAM
 
   /DISCARD/ :
   {
@@ -175,5 +180,4 @@ SECTIONS
   }
 }
 
- /* input sections */
-GROUP(libgcc.a libc.a)
+GROUP(libgcc.a)

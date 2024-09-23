@@ -2,7 +2,7 @@
  * @file rdmdeviceparams.cpp
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,13 +30,12 @@
 
 #include <cstdint>
 #include <cstring>
-#ifndef NDEBUG
-# include <cstdio>
-#endif
+#include <cstdio>
 #include <cassert>
 
 #include "rdmdeviceparams.h"
 #include "rdmdeviceparamsconst.h"
+#include "rdmdevice.h"
 
 #include "rdm_e120.h"
 
@@ -45,12 +44,11 @@
 
 #include "readconfigfile.h"
 #include "sscan.h"
-
 #include "propertiesbuilder.h"
 
 #include "debug.h"
 
-RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore *pRDMDeviceParamsStore): m_pRDMDeviceParamsStore(pRDMDeviceParamsStore) {
+RDMDeviceParams::RDMDeviceParams() {
 	DEBUG_ENTRY
 	
 	memset(&m_Params, 0, sizeof(struct rdm::deviceparams::Params));
@@ -61,7 +59,7 @@ RDMDeviceParams::RDMDeviceParams(RDMDeviceParamsStore *pRDMDeviceParamsStore): m
 	DEBUG_EXIT
 }
 
-bool RDMDeviceParams::Load() {
+void RDMDeviceParams::Load() {
 	DEBUG_ENTRY
 
 #if !defined(DISABLE_FS)
@@ -70,20 +68,15 @@ bool RDMDeviceParams::Load() {
 	ReadConfigFile configfile(RDMDeviceParams::staticCallbackFunction, this);
 
 	if (configfile.Read(RDMDeviceParamsConst::FILE_NAME)) {
-		if (m_pRDMDeviceParamsStore != nullptr) {
-			m_pRDMDeviceParamsStore->Update(&m_Params);
-		}
+		RDMDeviceParamsStore::Update(&m_Params);
 	} else
 #endif
-	if (m_pRDMDeviceParamsStore != nullptr) {
-		m_pRDMDeviceParamsStore->Copy(&m_Params);
-	} else {
-		DEBUG_EXIT
-		return false;
-	}
+	RDMDeviceParamsStore::Copy(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
-	return true;
 }
 
 void RDMDeviceParams::Load(const char *pBuffer, uint32_t nLength) {
@@ -98,9 +91,11 @@ void RDMDeviceParams::Load(const char *pBuffer, uint32_t nLength) {
 
 	config.Read(pBuffer, nLength);
 
-	assert(m_pRDMDeviceParamsStore != nullptr);
-	m_pRDMDeviceParamsStore->Update(&m_Params);
+	RDMDeviceParamsStore::Update(&m_Params);
 
+#ifndef NDEBUG
+	Dump();
+#endif
 	DEBUG_EXIT
 }
 
@@ -163,22 +158,39 @@ void RDMDeviceParams::Set(RDMDevice *pRDMDevice) {
 	}
 }
 
-void RDMDeviceParams::Dump() {
-#ifndef NDEBUG
-	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, RDMDeviceParamsConst::FILE_NAME);
+void RDMDeviceParams::Builder(const struct rdm::deviceparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize) {
+	DEBUG_ENTRY
 
-	if (isMaskSet(rdm::deviceparams::Mask::LABEL)) {
-		printf(" %s=%.*s\n", RDMDeviceParamsConst::LABEL, m_Params.nDeviceRootLabelLength, m_Params.aDeviceRootLabel);
+	assert(pBuffer != nullptr);
+
+	if (pParams != nullptr) {
+		memcpy(&m_Params, pParams, sizeof(struct rdm::deviceparams::Params));
+	} else {
+		RDMDeviceParamsStore::Copy(&m_Params);
 	}
 
-	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_CATEGORY)) {
-		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory);
+	PropertiesBuilder builder(RDMDeviceParamsConst::FILE_NAME, pBuffer, nLength);
+
+	const auto isProductCategory = isMaskSet(rdm::deviceparams::Mask::PRODUCT_CATEGORY);
+
+	if (!isProductCategory) {
+		m_Params.nProductCategory = RDMDevice::Get()->GetProductCategory();
 	}
 
-	if (isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL)) {
-		printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail);
+	builder.AddHex16(RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory, isProductCategory);
+
+	const auto isProductDetail = isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL);
+
+	if (!isProductDetail) {
+		m_Params.nProductDetail = RDMDevice::Get()->GetProductDetail();
 	}
-#endif
+
+	builder.AddHex16(RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail, isProductDetail);
+
+	nSize = builder.GetSize();
+
+	DEBUG_PRINTF("nSize=%d", nSize);
+	DEBUG_EXIT
 }
 
 void RDMDeviceParams::staticCallbackFunction(void *p, const char *s) {
@@ -188,25 +200,9 @@ void RDMDeviceParams::staticCallbackFunction(void *p, const char *s) {
 	(static_cast<RDMDeviceParams *>(p))->callbackFunction(s);
 }
 
-void RDMDeviceParams::Builder(const struct rdm::deviceparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize) {
-	DEBUG_ENTRY
-
-	assert(pBuffer != nullptr);
-
-	if (pParams != nullptr) {
-		memcpy(&m_Params, pParams, sizeof(struct rdm::deviceparams::Params));
-	} else {
-		assert(m_pRDMDeviceParamsStore != nullptr);
-		m_pRDMDeviceParamsStore->Copy(&m_Params);
-	}
-
-	PropertiesBuilder builder(RDMDeviceParamsConst::FILE_NAME, pBuffer, nLength);
-
-	builder.AddHex16(RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory, isMaskSet(rdm::deviceparams::Mask::PRODUCT_CATEGORY));
-	builder.AddHex16(RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail, isMaskSet(rdm::deviceparams::Mask::PRODUCT_DETAIL));
-
-	nSize = builder.GetSize();
-
-	DEBUG_PRINTF("nSize=%d", nSize);
-	DEBUG_EXIT
+void RDMDeviceParams::Dump() {
+	printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, RDMDeviceParamsConst::FILE_NAME);
+	printf(" %s=%.*s\n", RDMDeviceParamsConst::LABEL, m_Params.nDeviceRootLabelLength, m_Params.aDeviceRootLabel);
+	printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_CATEGORY, m_Params.nProductCategory);
+	printf(" %s=%.4x\n", RDMDeviceParamsConst::PRODUCT_DETAIL, m_Params.nProductDetail);
 }

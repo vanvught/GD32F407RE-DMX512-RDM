@@ -100,6 +100,32 @@ bool PropertiesBuilder::AddIpAddress(const char *pProperty, uint32_t nValue, boo
 	return true;
 }
 
+bool PropertiesBuilder::AddUtcOffset(const char *pProperty, const int8_t nHours, const uint8_t nMinutes) {
+	if (m_nSize >= m_nLength) {
+		return false;
+	}
+
+	auto *p = &m_pBuffer[m_nSize];
+	const auto nSize = static_cast<size_t>(m_nLength - m_nSize);
+
+	int i;
+
+	if (m_bJson) {
+		i = snprintf(p, nSize, "\"%s\":\"%s%.2d:%.2u\",", pProperty, nHours > 0 ? "+" : "", nHours, nMinutes);
+	} else {
+		i = snprintf(p, nSize, "%s=%s%.2d:%.2u", pProperty, nHours > 0 ? "+" : "", nHours, nMinutes);
+	}
+
+	if (i > static_cast<int>(nSize)) {
+		return false;
+	}
+
+	m_nSize = static_cast<uint16_t>(m_nSize + i);
+
+	DEBUG_PRINTF("m_nLength=%d, m_nSize=%d", m_nLength, m_nSize);
+	return true;
+}
+
 bool PropertiesBuilder::AddComment(const char *pComment) {
 	if (m_bJson) {
 		return true;
@@ -121,6 +147,31 @@ bool PropertiesBuilder::AddComment(const char *pComment) {
 	m_nSize = static_cast<uint16_t>(m_nSize + i);
 
 	DEBUG_PRINTF("pComment=%s, m_nLength=%d, m_nSize=%d", pComment, m_nLength, m_nSize);
+
+	return true;
+}
+
+bool PropertiesBuilder::AddRaw(const char *pRaw) {
+	if (m_bJson) {
+		return true;
+	}
+
+	if (m_nSize >= m_nLength) {
+		return false;
+	}
+
+	auto *p = &m_pBuffer[m_nSize];
+	const auto nSize = static_cast<size_t>(m_nLength - m_nSize);
+
+	const auto i = snprintf(p, nSize, "%s\n", pRaw);
+
+	if (i > static_cast<int>(nSize)) {
+		return false;
+	}
+
+	m_nSize = static_cast<uint16_t>(m_nSize + i);
+
+	DEBUG_PRINTF("pRaw=%s, m_nLength=%d, m_nSize=%d", pRaw, m_nLength, m_nSize);
 
 	return true;
 }

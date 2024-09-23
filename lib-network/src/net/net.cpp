@@ -2,7 +2,7 @@
  * @file net.cpp
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,200 +23,160 @@
  * THE SOFTWARE.
  */
 
+#if defined (DEBUG_NET_NET)
+# if defined (NDEBUG)
+#  undef NDEBUG
+# endif
+#endif
+
+#if !defined (CONFIG_REMOTECONFIG_MINIMUM)
+# pragma GCC push_options
+# pragma GCC optimize ("O2")
+# pragma GCC optimize ("no-tree-loop-distribute-patterns")
+#endif
+
 #include <cstdint>
 #include <cstring>
 
+#include "../../config/net_config.h"
+
 #include "net.h"
 #include "net_private.h"
-#include "net_packets.h"
-#include "net_debug.h"
 
-#include "../../config/net_config.h"
+#include "netif.h"
+#include "net/acd.h"
+#include "net/dhcp.h"
+
+#include "debug.h"
+
+static struct net::acd::Acd s_acd;
+
+namespace network {
+__attribute__((weak)) void mdns_shutdown() {}
+}  // namespace network
 
 namespace net {
 namespace globals {
-struct IpInfo ipInfo  ALIGNED;
 uint32_t nBroadcastMask;
 uint32_t nOnNetworkMask;
-uint8_t macAddress[ETH_ADDR_LEN]  ALIGNED;
 }  // namespace globals
-}  // namespace net
+#if defined (CONFIG_ENET_ENABLE_PTP)
+void ptp_init();
+void ptp_handle(const uint8_t *, const uint32_t);
+#endif
 
-static uint8_t *s_p;
-static bool s_isDhcp = false;
-
-static void refresh_and_init(struct IpInfo *pIpInfo, bool doInit) {
-	net::globals::ipInfo.broadcast_ip.addr = net::globals::ipInfo.ip.addr | ~net::globals::ipInfo.netmask.addr;
-
-	net::globals::nBroadcastMask = ~(net::globals::ipInfo.netmask.addr);
-	net::globals::nOnNetworkMask = net::globals::ipInfo.ip.addr & net::globals::ipInfo.netmask.addr;
-
-	if (doInit) {
-		arp_init();
-		ip_set_ip();
-	}
-
-	const auto *pSrc = reinterpret_cast<const uint8_t *>(&net::globals::ipInfo);
-	auto *pDst = reinterpret_cast<uint8_t *>(pIpInfo);
-
-	memcpy(pDst, pSrc, sizeof(struct IpInfo));
-}
-
-void set_secondary_ip() {
-	net::globals::ipInfo.ip.addr = net::globals::ipInfo.secondary_ip.addr;
-	net::globals::ipInfo.netmask.addr = 255;
-	net::globals::ipInfo.gw.addr = net::globals::ipInfo.ip.addr;
-}
-
-void __attribute__((cold)) net_init(const uint8_t *const pMacAddress, struct IpInfo *pIpInfo, const char *pHostname, bool *bUseDhcp, bool *isZeroconfUsed) {
+void net_shutdown() {
 	DEBUG_ENTRY
 
-	memcpy(net::globals::macAddress, pMacAddress, ETH_ADDR_LEN);
-
-	const auto *pSrc = reinterpret_cast<const uint8_t *>(pIpInfo);
-	auto *pDst = reinterpret_cast<uint8_t *>(&net::globals::ipInfo);
-
-	memcpy(pDst, pSrc, sizeof(struct IpInfo));
-
-	net::globals::ipInfo.secondary_ip.addr = 2
-			+ ((static_cast<uint32_t>(net::globals::macAddress[3])) << 8)
-			+ ((static_cast<uint32_t>(net::globals::macAddress[4])) << 16)
-			+ ((static_cast<uint32_t>(net::globals::macAddress[5])) << 24);
-
-
-	if (net::globals::ipInfo.ip.addr == 0) {
-		set_secondary_ip();
-	}
-	/*
-	 * The macAddress is set
-	 */
-	ip_init();
-
-	*isZeroconfUsed = false;
-
-	if (*bUseDhcp) {
-		if (dhcp_client(pHostname) < 0) {
-			*bUseDhcp = false;
-			DEBUG_PUTS("DHCP Client failed");
-			*isZeroconfUsed = rfc3927();
-		}
-	}
-
-	refresh_and_init(pIpInfo, true);
-
-	s_isDhcp = *bUseDhcp;
-
-	if (!arp_do_probe()) {
-		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
-		arp_send_announcement();
-	} else {
-		console_error("IP Conflict!\n");
-	}
+	net::netif_set_link_down();
 
 	DEBUG_EXIT
 }
 
-void __attribute__((cold)) net_shutdown() {
-	ip_shutdown();
+static void primary_ip_conflict_callback(net::acd::Callback callback) {
+	auto &netif = net::globals::netif_default;
 
-	if (s_isDhcp) {
-		dhcp_client_release();
+	switch (callback) {
+	case net::acd::Callback::ACD_IP_OK:
+		if (s_acd.ipaddr.addr == netif.secondary_ip.addr) {
+			net_set_secondary_ip();
+		} else {
+			net::netif_set_ipaddr(s_acd.ipaddr);
+		}
+		dhcp_inform();
+		netif_set_flags(netif::NETIF_FLAG_STATICIP_OK);
+		break;
+	case net::acd::Callback::ACD_RESTART_CLIENT:
+		break;
+	case net::acd::Callback::ACD_DECLINE:
+		netif_clear_flags(netif::NETIF_FLAG_STATICIP_OK);
+		break;
+	default:
+		break;
 	}
 }
 
-void net_set_ip(struct IpInfo *pIpInfo) {
-	net::globals::ipInfo.ip.addr = pIpInfo->ip.addr;
+void net_set_primary_ip(const ip4_addr_t ipaddr) {
+	auto &netif = net::globals::netif_default;
 
-	if (net::globals::ipInfo.ip.addr == 0) {
-			set_secondary_ip();
-	}
+	net::dhcp_release_and_stop();
 
-	refresh_and_init(pIpInfo, true);
+	acd_add(&s_acd, primary_ip_conflict_callback);
 
-	if (!arp_do_probe()) {
-		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
-		arp_send_announcement();
+	if (ipaddr.addr  == 0) {
+		acd_start(&s_acd, netif.secondary_ip);
 	} else {
-		console_error("IP Conflict!\n");
+		acd_start(&s_acd, ipaddr);
 	}
 }
 
-void net_set_netmask(struct IpInfo *pIpInfo) {
-	net::globals::ipInfo.netmask.addr = pIpInfo->netmask.addr;
-
-	refresh_and_init(pIpInfo, false);
+void net_set_secondary_ip() {
+	auto &netif = net::globals::netif_default;
+	ip4_addr_t netmask;
+	netmask.addr = 255;
+	net::netif_set_addr(netif.secondary_ip, netmask, netif.secondary_ip);
 }
 
-void net_set_gw(struct IpInfo *pIpInfo) {
-	net::globals::ipInfo.gw.addr = pIpInfo->gw.addr;
+void __attribute__((cold)) net_init(const net::Link link, ip4_addr_t ipaddr, ip4_addr_t netmask, ip4_addr_t gw, bool &bUseDhcp) {
+	DEBUG_ENTRY
+	globals::netif_default.secondary_ip.addr = 2
+			+ ((static_cast<uint32_t>(globals::netif_default.hwaddr[3])) << 8)
+			+ ((static_cast<uint32_t>(globals::netif_default.hwaddr[4])) << 16)
+			+ ((static_cast<uint32_t>(globals::netif_default.hwaddr[5])) << 24);
 
-	ip_set_ip();
-}
+	net::arp_init();
+	ip_init();
 
-bool net_set_dhcp(struct IpInfo *pIpInfo, const char *const pHostname, bool *isZeroconfUsed) {
-	bool isDhcp = false;
-	*isZeroconfUsed = false;
+	if (net::Link::STATE_UP == link) {
+		net::netif_set_flags(net::netif::NETIF_FLAG_LINK_UP);
 
-	if (dhcp_client(pHostname) < 0) {
-		DEBUG_PUTS("DHCP Client failed");
-		*isZeroconfUsed = rfc3927();
+		if (bUseDhcp) {
+			dhcp_start();
+		} else {
+//			if (ipaddr.addr == 0) {
+//				net_set_secondary_ip();
+//			} else {
+//				net::netif_set_addr(ipaddr, netmask, gw);
+//			}
+//			dhcp_inform();
+			if (ipaddr.addr != 0) {
+				net::netif_set_netmask(netmask);
+				net::netif_set_gw(gw);
+			}
+			net_set_primary_ip(ipaddr);
+		}
 	} else {
-		isDhcp = true;
+		net::netif_clear_flags(net::netif::NETIF_FLAG_LINK_UP);
 	}
 
-	refresh_and_init(pIpInfo, true);
+#if defined (CONFIG_ENET_ENABLE_PTP)
+	net::ptp_init();
+#endif
 
-	s_isDhcp = isDhcp;
-
-	if (!arp_do_probe()) {
-		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
-		arp_send_announcement();
-	} else {
-		console_error("IP Conflict!\n");
-	}
-
-	return isDhcp;
-}
-
-void net_dhcp_release() {
-	dhcp_client_release();
-	s_isDhcp = false;
-}
-
-bool net_set_zeroconf(struct IpInfo *pIpInfo) {
-	const auto b = rfc3927();
-
-	if (b) {
-		refresh_and_init(pIpInfo, true);
-
-		s_isDhcp = false;
-
-		DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(net::globals::ipInfo.ip.addr), MAC2STR(net::globals::macAddress));
-		arp_send_announcement();
-
-		return true;
-	}
-
-	DEBUG_PUTS("Zeroconf failed");
-	return false;
+	DEBUG_EXIT
 }
 
 __attribute__((hot)) void net_handle() {
+	uint8_t *s_p;
 	const auto nLength = emac_eth_recv(&s_p);
 
 	if (__builtin_expect((nLength > 0), 0)) {
 		const auto *const eth = reinterpret_cast<struct ether_header *>(s_p);
 
-		if (eth->type == __builtin_bswap16(ETHER_TYPE_IPv4)) {
-			ip_handle(reinterpret_cast<struct t_ip4 *>(s_p));
-		} else if (eth->type == __builtin_bswap16(ETHER_TYPE_ARP)) {
-			arp_handle(reinterpret_cast<struct t_arp *>(s_p));
-		} else {
-			DEBUG_PRINTF("type %04x is not implemented", __builtin_bswap16(eth->type));
-		}
+#if defined (CONFIG_ENET_ENABLE_PTP)
+		if (eth->type == __builtin_bswap16(ETHER_TYPE_PTP)) {
+			net::ptp_handle(const_cast<const uint8_t *>(s_p), nLength);
+		} else
+#endif
+			if (eth->type == __builtin_bswap16(ETHER_TYPE_IPv4)) {
+				ip_handle(reinterpret_cast<struct t_ip4 *>(s_p));
+			} else if (eth->type == __builtin_bswap16(ETHER_TYPE_ARP)) {
+				net::arp_handle(reinterpret_cast<struct t_arp *>(s_p));
+			} else {
+				DEBUG_PRINTF("type %04x is not implemented", __builtin_bswap16(eth->type));
+			}
 
 		emac_free_pkt();
 	}
-
-	net_timers_run();
 }
+}  // namespace net

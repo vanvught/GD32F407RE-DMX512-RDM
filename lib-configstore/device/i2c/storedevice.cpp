@@ -27,8 +27,9 @@
 #include <cstdio>
 #include <cassert>
 
-#include "storedevice.h"
+#include "configstoredevice.h"
 #include "i2c/at24cxx.h"
+
 #include "debug.h"
 
 namespace storedevice {
@@ -81,7 +82,7 @@ bool StoreDevice::Read(uint32_t nOffset, uint32_t nLength, uint8_t *pBuffer, sto
 	return true;
 }
 
-bool StoreDevice::Erase(__attribute__((unused)) uint32_t nOffset, __attribute__((unused)) uint32_t nLength, storedevice::result& nResult) {
+bool StoreDevice::Erase([[maybe_unused]] uint32_t nOffset, [[maybe_unused]] uint32_t nLength, storedevice::result& nResult) {
 	DEBUG_ENTRY
 
 	nResult = storedevice::result::OK;

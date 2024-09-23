@@ -2,7 +2,7 @@
  * @file display.h
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,10 @@
 # include "spi/ili9341.h"
 #else
 # include "spi/st7789.h"
+#endif
+
+#if defined (DISPLAYTIMEOUT_GPIO)
+# include "hal_gpio.h"
 #endif
 
 #include "hardware.h"
@@ -101,10 +105,6 @@ public:
 		m_bClearEndOfLine = true;
 	}
 
-	void Status(__attribute__((unused)) Display7SegmentMessage nValue) { }
-
-	void Status(__attribute__((unused)) uint8_t nValue, __attribute__((unused)) bool bHex) {}
-
 	void Text(const char *pData, uint32_t nLength) {
 		if (nLength > m_nCols) {
 			nLength = m_nCols;
@@ -158,20 +158,14 @@ public:
 		Write(m_nRows, pText);
 	}
 
-	void TextStatus(const char *pText, Display7SegmentMessage message, uint32_t nConsoleColor = UINT32_MAX) {
+	void TextStatus(const char *pText, uint32_t nConsoleColor) {
 		TextStatus(pText);
-		Status(message);
 
 		if (nConsoleColor == UINT32_MAX) {
 			return;
 		}
 
 		console_status(nConsoleColor, pText);
-	}
-
-	void TextStatus(const char *pText, uint8_t nValue7Segment, bool bHex = false) {
-		TextStatus(pText);
-		Status(nValue7Segment, bHex);
 	}
 
 	void Progress() {
@@ -242,9 +236,11 @@ public:
 				SetSleep(true);
 			}
 		} else {
-			if (__builtin_expect((display::timeout::gpio_renew()), 0)) {
+#if defined (DISPLAYTIMEOUT_GPIO)
+			if (__builtin_expect(((FUNC_PREFIX(gpio_lev(DISPLAYTIMEOUT_GPIO)) == LOW)), 0)) {
 				SetSleep(false);
 			}
+#endif
 		}
 	}
 

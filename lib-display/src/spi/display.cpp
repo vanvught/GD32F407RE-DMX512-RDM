@@ -2,7 +2,7 @@
  * @file display.cpp
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,13 +58,13 @@ Display::Display() : m_nMillis(Hardware::Get()->Millis()) {
 	FUNC_PREFIX(spi_set_speed_hz(20000000));
 	FUNC_PREFIX(spi_setDataMode(SPI_MODE0));
 
-#if defined (SPI_LCD_RST_PIN)
-	FUNC_PREFIX(gpio_fsel(SPI_LCD_RST_PIN, GPIO_FSEL_OUTPUT));
+#if defined (SPI_LCD_RST_GPIO)
+	FUNC_PREFIX(gpio_fsel(SPI_LCD_RST_GPIO, GPIO_FSEL_OUTPUT));
 #endif
-	FUNC_PREFIX(gpio_fsel(SPI_LCD_DC_PIN, GPIO_FSEL_OUTPUT));
-	FUNC_PREFIX(gpio_fsel(SPI_LCD_BL_PIN, GPIO_FSEL_OUTPUT));
-#if defined(SPI_LCD_HAVE_CS_PIN)
-	FUNC_PREFIX(gpio_fsel(SPI_LCD_CS_PIN, GPIO_FSEL_OUTPUT));
+	FUNC_PREFIX(gpio_fsel(SPI_LCD_DC_GPIO, GPIO_FSEL_OUTPUT));
+	FUNC_PREFIX(gpio_fsel(SPI_LCD_BL_GPIO, GPIO_FSEL_OUTPUT));
+#if defined(SPI_LCD_HAVE_CS_GPIO)
+	FUNC_PREFIX(gpio_fsel(SPI_LCD_CS_GPIO, GPIO_FSEL_OUTPUT));
 #endif
 
 	SpiLcd.SetBackLight(1);
@@ -75,7 +75,10 @@ Display::Display() : m_nMillis(Hardware::Get()->Millis()) {
 	m_nCols = static_cast<uint8_t>(SpiLcd.GetWidth() / s_pFONT->Width);
 	m_nRows = static_cast<uint8_t>(SpiLcd.GetHeight() / s_pFONT->Height);
 
-	display::timeout::gpio_init();
+#if defined (DISPLAYTIMEOUT_GPIO)
+	FUNC_PREFIX(gpio_fsel(DISPLAYTIMEOUT_GPIO, GPIO_FSEL_INPUT));
+	FUNC_PREFIX(gpio_set_pud(DISPLAYTIMEOUT_GPIO, GPIO_PULL_UP));
+#endif
 
 	PrintInfo();
 	DEBUG_EXIT

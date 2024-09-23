@@ -1,4 +1,3 @@
-#if defined (BARE_METAL) || defined (RASPPI)
 /**
  * @file rdmsubdevicebwrelay.cpp
  *
@@ -27,14 +26,14 @@
 #include <cstdint>
 #include <cstring>
 
-#include "rdmsubdevicebwrelay.h"
+#include "spi/rdmsubdevicebwrelay.h"
 
 #include "bwspirelay.h"
 
 static constexpr uint32_t DMX_FOOTPRINT = 2;
 static RDMPersonality *s_RDMPersonalities[] = {new RDMPersonality("Relays", DMX_FOOTPRINT)};
 
-RDMSubDeviceBwRelay::RDMSubDeviceBwRelay(uint16_t nDmxStartAddress, char nChipSselect, uint8_t nSlaveAddress, __attribute__((unused)) uint32_t nSpiSpeed) :
+RDMSubDeviceBwRelay::RDMSubDeviceBwRelay(uint16_t nDmxStartAddress, char nChipSselect, uint8_t nSlaveAddress, [[maybe_unused]] uint32_t nSpiSpeed) :
 	RDMSubDevice("bw_spi_relay", nDmxStartAddress), m_BwSpiRelay(nChipSselect, nSlaveAddress)
 {
 	SetDmxFootprint(DMX_FOOTPRINT);
@@ -62,4 +61,3 @@ void RDMSubDeviceBwRelay::UpdateEvent(TRDMSubDeviceUpdateEvent tUpdateEvent) {
 		Stop();
 	}
 }
-#endif

@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"); to deal
@@ -34,7 +34,7 @@
 #include <cassert>
 
 #include "artnet.h"
-
+#include "configstore.h"
 #include "lightset.h"
 
 namespace artnetparams {
@@ -122,27 +122,28 @@ struct Mask {
 
 class ArtNetParamsStore {
 public:
-	virtual ~ArtNetParamsStore() {}
+	static void Update(const struct artnetparams::Params *pParams) {
+		ConfigStore::Get()->Update(configstore::Store::NODE, pParams, sizeof(struct artnetparams::Params));
+	}
 
-	virtual void Update(const artnetparams::Params *pArtNetParams)=0;
-	virtual void Copy(artnetparams::Params *pArtNetParams)=0;
+	static void Copy(struct artnetparams::Params *pParams) {
+		ConfigStore::Get()->Copy(configstore::Store::NODE, pParams, sizeof(struct artnetparams::Params));
+	}
 };
 
 class ArtNetParams {
 public:
-	ArtNetParams(ArtNetParamsStore *pArtNetParamsStore);
+	ArtNetParams();
 
 	bool Load();
 	void Load(const char *pBuffer, uint32_t nLength);
 
-	void Builder(const struct artnetparams::Params *pArtNetParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
+	void Builder(const struct artnetparams::Params *pParams, char *pBuffer, uint32_t nLength, uint32_t& nSize);
 	void Save(char *pBuffer, uint32_t nLength, uint32_t& nSize) {
 		Builder(nullptr, pBuffer, nLength, nSize);
 	}
 
-	void Set(uint32_t nPortIndexOffset);
-
-	void Dump();
+	void Set();
 
 	bool IsRdm() const {
 		return isMaskSet(artnetparams::Mask::ENABLE_RDM);
@@ -161,12 +162,6 @@ public:
 		}
 		return lightset::PortDir::DISABLE;
 	}
-
-#if defined (ESP8266)
-	lightset::OutputType GetOutputType() const {
-		return static_cast<lightset::OutputType>(m_Params.Filler1);
-	}
-#endif
 
 	static void staticCallbackFunction(void *p, const char *s);
 
@@ -187,6 +182,7 @@ private:
 		return static_cast<artnet::PortProtocol>((m_Params.nProtocol >> (nPortIndex * 2)) & 0x3);
 	}
 
+	void Dump();
 	void callbackFunction(const char *pLine);
 	void SetBool(const uint8_t nValue, const uint32_t nMask);
 	bool isMaskSet(uint32_t nMask) const {
@@ -197,7 +193,6 @@ private:
 	}
 
 private:
-	ArtNetParamsStore *m_pArtNetParamsStore;
 	artnetparams::Params m_Params;
 };
 

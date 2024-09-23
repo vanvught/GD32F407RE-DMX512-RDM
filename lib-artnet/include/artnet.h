@@ -5,7 +5,7 @@
 /**
  * Art-Net Designed by and Copyright Artistic Licence Holdings Ltd.
  */
-/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,34 @@ static constexpr uint32_t NETWORK_DATA_LOSS_TIMEOUT = 10;	///< Seconds
 enum class PortProtocol {
 	ARTNET,	///< Output both DMX512 and RDM packets from the Art-Net protocol (default).
 	SACN	///< Output DMX512 data from the sACN protocol and RDM data from the Art-Net protocol.
+};
+
+/**
+ * Table 3 – NodeReport Codes
+ * The NodeReport code defines generic error, advisory and status messages for both Nodes and Controllers.
+ * The NodeReport is returned in ArtPollReply.
+ */
+enum class ReportCode : uint8_t {
+	RCDEBUG,
+	RCPOWEROK,
+	RCPOWERFAIL,
+	RCSOCKETWR1,
+	RCPARSEFAIL,
+	RCUDPFAIL,
+	RCSHNAMEOK,
+	RCLONAMEOK,
+	RCDMXERROR,
+	RCDMXUDPFULL,
+	RCDMXRXFULL,
+	RCSWITCHERR,
+	RCCONFIGERR,
+	RCDMXSHORT,
+	RCFIRMWAREFAIL,
+	RCUSERFAIL
+};
+
+enum class Status : uint8_t {
+	OFF, STANDBY, ON
 };
 
 /**
@@ -171,6 +199,14 @@ struct PortCommand {
 	static constexpr uint8_t RDM_DISABLE3 = 0xd3;	///< Disable RDM on output port 3
 };
 
+struct TodControlCommand {
+	static constexpr uint8_t ATC_NONE = 0x00;	///< No action.
+	static constexpr uint8_t ATC_FLUSH = 0x01;	///< The port flushes its TOD and instigates full discovery.
+	static constexpr uint8_t ATC_END = 0x02;	///< The port ends current discovery but does not flush ToD.
+	static constexpr uint8_t ATC_INCON = 0x03;	///< The port enables incremental discovery.
+	static constexpr uint8_t ATC_INCOFF = 0x04;	///< The port disables incremental discovery.
+};
+
 struct Program {
 	static constexpr uint8_t NO_CHANGE = 0x7F;
 	static constexpr uint8_t DEFAULTS = 0x00;
@@ -211,16 +247,19 @@ struct Status2 {
 };
 
 struct Status3 {
-	static constexpr uint8_t NETWORKLOSS_MASK = (3U << 6);		///< bit 76
-	static constexpr uint8_t NETWORKLOSS_LAST_STATE = (0 << 6);	///< bit 76 = 00 If network data is lost, it will hold last state
-	static constexpr uint8_t NETWORKLOSS_OFF_STATE = (1U << 6);	///< bit 76 = 01 If network data is lost, it will set all outputs to off state
-	static constexpr uint8_t NETWORKLOSS_ON_STATE = (2U << 6);	///< bit 76 = 10 If network data is lost, it will set all outputs to full on
-	static constexpr uint8_t NETWORKLOSS_PLAYBACK = (3U << 6);	///< bit 76 = 11 If network data is lost, it will playback the fail-over scene
-	static constexpr uint8_t FAILSAFE_NO_CONTROL = (0 << 5);	///< bit 5 = 0 Node is not able to control failsafe mode by ArtCommand
-	static constexpr uint8_t FAILSAFE_CONTROL = (1U << 5);		///< bit 5 = 1 Node is able to control failsafe mode by ArtCommand
-	static constexpr uint8_t SUPPORTS_LLRP = (1U << 4);			///< bit 4 = 1 Node supports LLRP (Low Level Recovery Protocol
-	static constexpr uint8_t OUTPUT_NO_SWITCH = (0 << 3);  		///< bit 3 = 0 Outputs cannot be switched to an input
-	static constexpr uint8_t OUTPUT_SWITCH = (1U << 3);  		///< bit 3 = 1 Outputs can be switched to an input
+	static constexpr uint8_t NETWORKLOSS_MASK = (3U << 6);				///< bit 76
+	static constexpr uint8_t NETWORKLOSS_LAST_STATE = (0 << 6);			///< bit 76 = 00 If network data is lost, it will hold last state
+	static constexpr uint8_t NETWORKLOSS_OFF_STATE = (1U << 6);			///< bit 76 = 01 If network data is lost, it will set all outputs to off state
+	static constexpr uint8_t NETWORKLOSS_ON_STATE = (2U << 6);			///< bit 76 = 10 If network data is lost, it will set all outputs to full on
+	static constexpr uint8_t NETWORKLOSS_PLAYBACK = (3U << 6);			///< bit 76 = 11 If network data is lost, it will playback the fail-over scene
+	static constexpr uint8_t FAILSAFE_NO_CONTROL = (0 << 5);			///< bit 5 = 0 Node is not able to control failsafe mode by ArtCommand
+	static constexpr uint8_t FAILSAFE_CONTROL = (1U << 5);				///< bit 5 = 1 Node is able to control failsafe mode by ArtCommand
+	static constexpr uint8_t SUPPORTS_LLRP = (1U << 4);					///< bit 4 = 1 Node supports LLRP (Low Level Recovery Protocol
+	static constexpr uint8_t OUTPUT_NO_SWITCH = (0 << 3);  				///< bit 3 = 0 Outputs cannot be switched to an input
+	static constexpr uint8_t OUTPUT_SWITCH = (1U << 3);  				///< bit 3 = 1 Outputs can be switched to an input
+	static constexpr uint8_t SUPPORTS_RDMNET = (1U << 2);				///< bit 2 = 1 Node supports RDMnet
+	static constexpr uint8_t SUPPORTS_BACKGROUNDQUEUE = (1U << 1);		///< bit 1 = 1 BackgroundQueue is supported
+	static constexpr uint8_t SUPPORTS_BACKGROUNDDISCOVERY = (1U << 0);	///< bit 0 = 1 Programmable background discovery is supported.
 };
 
 struct Flags {
@@ -253,6 +292,10 @@ struct GoodOutputB {
 	static constexpr uint8_t RDM_ENABLED = (0 << 7);			///< bit 7 = 0 RDM is enabled.
 	static constexpr uint8_t STYLE_CONSTANT = (1U << 6);		///< bit 6 = 1 Output style is continuous.
 	static constexpr uint8_t STYLE_DELTA = (0 << 6);			///< bit 6 = 0 Output style is delta.
+	static constexpr uint8_t DISCOVERY_NOT_RUNNING = (1U << 5);	///< bit 5 = 1 Discovery is currently not running.
+	static constexpr uint8_t DISCOVERY_IS_RUNNING = (0 << 5);	///< bit 5 = 0 Discovery is currently running.
+	static constexpr uint8_t DISCOVERY_DISABLED = (1U << 4);	///< bit 4 = 1 Background discovery is disabled.
+	static constexpr uint8_t DISCOVERY_ENABLED = (0 << 4);		///< bit 4 = 0 Background Discovery is enabled.
 };
 
 struct GoodInput {
@@ -312,6 +355,7 @@ enum class OpCodes: uint16_t {
 	OP_TODDATA = 0x8100,	///< This is an ArtTodData packet. It is used to send a Table of Devices (ToD) for RDM discovery.
 	OP_TODCONTROL = 0x8200,	///< This is an ArtTodControl packet. It is used to send RDM discovery control messages
 	OP_RDM = 0x8300, 		///< This is an ArtRdm packet. It is used to send all non discovery RDM messages.
+	OP_RDMSUB = 0x8400, 	///< This is an ArtRdmSub packet. It is used to send compressed, RDM Sub-Device data.
 	OP_TIMECODE = 0x9700,	///< This is an ArtTimeCode packet. It is used to transport time code over the network.
 	OP_TIMESYNC = 0x9800,	///< Used to synchronize real time date and clock
 	OP_TRIGGER = 0x9900,	///< Used to send trigger macros
@@ -372,7 +416,15 @@ struct ArtPollReply {
 	uint8_t GoodOutputB[artnet::PORTS];	///< This array defines output status of the node.
 	uint8_t Status3;					///< General Status register
 	uint8_t DefaultUidResponder[6];		///< RDMnet & LLRP UID
-	uint8_t Filler[15];					///< Transmit as zero. For future expansion.
+	uint8_t UserHi;			///< Available for user specific data
+	uint8_t UserLo;			///< Available for user specific data
+	uint8_t RefreshRateHi;	///< Hi byte of RefreshRate
+	uint8_t RefreshRateLo;	///< Lo Byte of RefreshRate.
+	 	 	 	 	 	 	///< RefreshRate allows the device to specify the maximum refresh rate, expressed in Hz, at which it can process ArtDmx.
+	 	 	 	 	 	 	///< This is designed to allow refresh rates above DMX512 rates, for gateways that implement other protocols such as SPI.
+	 	 	 	 	 	 	///< A value of 0 to 44 represents the maximum DMX512 rate of 44Hz.
+	uint8_t BackgroundQueuePolicy; ///< The BackgroundQueuePolicy defines the method by with the node retrieves STATUS_MESSAGE and QUEUED_MESSAGE pids from the connected RDM devices.
+	uint8_t Filler[10];	///< Transmit as zero. For future expansion.
 }PACKED;
 
 /**
@@ -592,7 +644,30 @@ struct ArtRdm {
 	uint8_t Net;			///< The top 7 bits of the 15 bit Port-Address of Nodes that must respond to this packet.
 	uint8_t Command;		///< 0x00 ArProcess Process RDM Packet0x00 AtcNone No action. 0x01 AtcFlush The node flushes its TOD and instigates full discovery.
 	uint8_t Address;		///< The low 8 bits of the Port-Address that should action this command.
-	uint8_t RdmPacket[255];	///< The RDM data packet excluding the DMX StartCode.
+	uint8_t RdmPacket[256];	///< The RDM data packet excluding the DMX StartCode with Checksum
+}PACKED;
+
+/**
+ * The ArtRdmSub packet is used to transfer Get, Set, GetResponse and SetResponse data to and from multiple sub-devices within an RDM device.
+ */
+struct ArtRdmSub {
+	uint8_t Id[8];			///< Array of 8 characters, the final character is a null termination. Value = ‘A’ ‘r’ ‘t’ ‘-‘ ‘N’ ‘e’ ‘t’ 0x00
+	uint16_t OpCode;		///< OpAddress \ref TOpCodes
+	uint8_t ProtVerHi;		///< High byte of the Art-Net protocol revision number.
+	uint8_t ProtVerLo;		///< Low byte of the Art-Net protocol revision number. Current value 14.
+	uint8_t RdmVer;			///< Art-Net Devices that only support RDM DRAFT V1.0 set field to 0x00. Devices that support RDM STANDARD V1.0 set field to 0x01.
+	uint8_t Filler2;		///< Transmit as zero, receivers don’t test.
+	uint8_t UID[6];			///< UID of target RDM device.
+	uint8_t Spare1;			///< Transmit as zero, receivers don’t test.
+	uint8_t CommandClass;	///< As per RDM specification. This field defines whether this is a Get, Set, GetResponse, SetResponse.
+	uint8_t ParameterId[2];	///< As per RDM specification. This field defines the type of parameter contained in this packet. Big- endian.
+	uint8_t SubDevice[2];	///< Defines the first device information contained in packet. This follows the RDM convention that 0 = root device and 1 = first subdevice. Big-endian.
+	uint8_t SubCount[2];	///< The number of sub devices packed into packet. Zero is illegal. Big-endian.
+	uint8_t Spare2;			///< Transmit as zero, receivers don’t test.
+	uint8_t Spare3;			///< Transmit as zero, receivers don’t test.
+	uint8_t Spare4;			///< Transmit as zero, receivers don’t test.
+	uint8_t Spare5;			///< Transmit as zero, receivers don’t test.
+	uint8_t Data[231];
 }PACKED;
 
 struct ArtIpProg {
@@ -710,6 +785,15 @@ union UArtPacket {
 	struct ArtTrigger ArtTrigger;				///< ArtTrigger packet
 	struct ArtDirectory ArtDirectory;			///< ArtDirectory packet
 	struct ArtDirectoryReply ArtDirectoryReply;///< ArtDirectoryReply packet
+};
+
+struct ArtPollQueue {
+	uint32_t ArtPollMillis;
+	uint32_t ArtPollReplyIpAddress;
+	struct {
+		uint16_t TargetPortAddressTop;
+		uint16_t TargetPortAddressBottom;
+	} ArtPollReply;
 };
 }  // namespace artnet
 

@@ -1,15 +1,41 @@
-DEFINES =DISABLE_FS 
-#DEFINES+=NDEBUG
+$(info "lib-network/Makefile.GD32")
 
-EXTRA_INCLUDES=../lib-properties/include
+DEFINES =DISABLE_FS
+DEFINES+=NDEBUG
+
+EXTRA_INCLUDES=../lib-properties/include ../lib-display/include
 EXTRA_SRCDIR=src/emac/gd32
 
-ifeq ($(findstring RTL8201F,$(PHY_TYPE)), RTL8201F)
-	EXTRA_SRCDIR+=src/emac/gd32/rtl8201f
-	DEFINES+=RTL8201F_LED1_LINK_ALL
-	DEFINES+=ENET_LINK_CHECK_USE_INT
+ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring gd32f10x,$(FAMILY)), gd32f10x)
+		EXTRA_SRCDIR+=src/emac/gd32/f
+	endif
+	ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)
+		EXTRA_SRCDIR+=src/emac/gd32/f
+	endif
+	ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
+		EXTRA_SRCDIR+=src/emac/gd32/f
+	endif
+	ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
+		EXTRA_SRCDIR+=src/emac/gd32/h
+	endif
+	
+	ifeq ($(findstring RTL8201F,$(MAKE_FLAGS)), RTL8201F)
+		EXTRA_SRCDIR+=src/emac/gd32/rtl8201f
+	endif
+	
+	ifeq ($(findstring ENABLE_PHY_SWITCH,$(MAKE_FLAGS)), ENABLE_PHY_SWITCH)	
+  	EXTRA_SRCDIR+=src/emac/gd32/dsa/88e6161
+  endif
+  
+  ifeq ($(findstring CONFIG_ENET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_ENET_ENABLE_PTP)	
+  	ifeq ($(findstring ENABLE_NTP_PTP_CLIENT,$(MAKE_FLAGS)), ENABLE_NTP_PTP_CLIENT)
+ 			EXTRA_SRCDIR+=src/net/apps/ntp/gd32/ptp
+  	endif
+  endif
 else
-	#DEFINES+=ENET_LINK_CHECK_REG_POLL
+	EXTRA_SRCDIR+=src/emac/gd32/f
+	ENET_PHY=RTL8201F
 endif
 
 include Rules.mk

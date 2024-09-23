@@ -15,9 +15,9 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 	endif
 	ifndef COND
-		EXTRA_SRCDIR+=src/apps/mdns src/apps/ntp src/apps/tftp
-		EXTRA_SRCDIR+=src/emac src/params src/net
-		EXTRA_SRCDIR+=src/emac/phy
+		EXTRA_SRCDIR+=src/net/apps/mdns src/net/apps/ntp src/net/apps/tftp
+		EXTRA_SRCDIR+=src/emac src/net src/emac/phy
+		EXTRA_SRCDIR+=src/params 
 		ifeq ($(findstring ENABLE_PHY_SWITCH,$(MAKE_FLAGS)), ENABLE_PHY_SWITCH)
 			EXTRA_SRCDIR+=src/emac/dsa
 		endif		
@@ -39,9 +39,10 @@ ifneq ($(MAKE_FLAGS),)
 		endif
 	endif
 else
-	EXTRA_SRCDIR+=src/apps/mdns src/apps/ntp src/apps/tftp
+	EXTRA_SRCDIR+=src/net/apps/mdns src/net/apps/ntp src/net/apps/tftp
 	EXTRA_SRCDIR+=src/emac src/net
 	EXTRA_SRCDIR+=src/emac/phy
 	EXTRA_SRCDIR+=src/emac/phy/dp83848 src/emac/phy/lan8700 src/emac/phy/phygen src/emac/phy/rtl8201f
+	EXTRA_SRCDIR+=src/params
 	DEFINES+=RTL8201F_LED1_LINK_ALL
 endif

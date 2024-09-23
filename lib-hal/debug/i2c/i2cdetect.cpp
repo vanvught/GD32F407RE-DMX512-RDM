@@ -2,7 +2,7 @@
  * @file i2cdetect.cpp
  *
  */
-/* Copyright (C) 2020-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020-2023 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,15 @@
  * THE SOFTWARE.
  */
 
+#undef NDEBUG
+
 #include <cstdio>
 
 #include "i2cdetect.h"
 
 #include "hal_i2c.h"
+
+#include "debug.h"
 
 inline static bool i2c_is_connected(uint8_t nAddress) {
 	uint8_t nResult;

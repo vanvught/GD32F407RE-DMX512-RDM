@@ -2,7 +2,7 @@
  * @file displayudf.h
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@
 
 #if !defined (NO_EMAC)
 # include "network.h"
+# include "net/protocol/dhcp.h"
 #endif
 
 #if defined (NODE_ARTNET_MULTI)
@@ -60,11 +61,7 @@
 #endif
 
 #if defined (RDM_RESPONDER)
-# if defined (NODE_ARTNET)
-#   include "artnetrdmresponder.h"
-# else
-#   include "rdmresponder.h"
-# endif
+# include "rdmdeviceresponder.h"
 #endif
 
 namespace displayudf {
@@ -165,32 +162,11 @@ public:
 	void Show();
 
 	/**
-	 * Node
-	 */
-
-#if defined (NODE_NODE)
-	void Show(Node *pNode);
-	void ShowNodeName();
-	void ShowUniverse();
-	void ShowDestinationIp();
-#endif
-
-	/**
 	 * Art-Net
 	 */
 
 #if defined (NODE_ARTNET)
-	void Show(ArtNetNode *pArtNetNode, uint32_t nPortIndexOffset = 0);
-	void ShowUniverse(ArtNetNode *pArtNetNode);
-	void ShowDestinationIp(ArtNetNode *pArtNetNode);
-#endif
-
-	/**
-	 * sACN E1.31
-	 */
-
-#if defined (NODE_E131)
-	void Show(E131Bridge *pE131Bridge, uint32_t nPortIndexOffset = 0);
+	void ShowUniverseArtNetNode();
 #endif
 
 	/**
@@ -219,13 +195,8 @@ public:
 
 #if defined (RDM_RESPONDER)
 	void ShowDmxStartAddress() {
-# if defined (NODE_ARTNET)
-		const auto nDmxStartAddress = ArtNetRdmResponder::Get()->GetDmxStartAddress();
-		const auto nDmxFootprint = ArtNetRdmResponder::Get()->GetDmxFootPrint();
-# else
-		const auto nDmxStartAddress = RDMResponder::Get()->GetDmxStartAddress();
-		const auto nDmxFootprint = RDMResponder::Get()->GetDmxFootPrint();
-# endif
+		const auto nDmxStartAddress = RDMDeviceResponder::Get()->GetDmxStartAddress();
+		const auto nDmxFootprint = RDMDeviceResponder::Get()->GetDmxFootPrint();
 		Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::DMX_START_ADDRESS)], "DMX S:%3u F:%3u", nDmxStartAddress, nDmxFootprint);
 	}
 #endif
@@ -271,25 +242,15 @@ public:
 		Write(m_aLabels[static_cast<uint32_t>(displayudf::Labels::HOSTNAME)], Network::Get()->GetHostName());
 	}
 
-	void ShowDhcpStatus(network::dhcp::ClientStatus nStatus) {
-		switch (nStatus) {
-		case network::dhcp::ClientStatus::IDLE:
+	void ShowDhcpStatus(net::dhcp::State state) {
+		switch (state) {
+		case net::dhcp::State::STATE_OFF:
 			break;
-		case network::dhcp::ClientStatus::RENEW:
-			Display::Get()->Status(Display7SegmentMessage::INFO_DHCP);
+		case net::dhcp::State::STATE_RENEWING:
 			ClearEndOfLine();
 			Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::IP)], "DHCP renewing");
 			break;
-		case network::dhcp::ClientStatus::GOT_IP:
-			Display::Get()->Status(Display7SegmentMessage::INFO_NONE);
-			break;
-		case network::dhcp::ClientStatus::RETRYING:
-			Display::Get()->Status(Display7SegmentMessage::INFO_DHCP);
-			ClearEndOfLine();
-			Printf(m_aLabels[static_cast<uint32_t>(displayudf::Labels::IP)], "DHCP retrying");
-			break;
-		case network::dhcp::ClientStatus::FAILED:
-			Display::Get()->Status(Display7SegmentMessage::ERROR_DHCP);
+		case net::dhcp::State::STATE_BOUND:
 			break;
 		default:
 			break;
@@ -297,7 +258,7 @@ public:
 	}
 
 	void ShowShutdown() {
-		TextStatus("Network shutdown", Display7SegmentMessage::INFO_NETWORK_SHUTDOWN);
+		TextStatus("Network shutdown");
 	}
 #endif
 
@@ -306,11 +267,37 @@ public:
 	}
 
 private:
+	/**
+	 * Art-Net
+	 */
+
+#if defined (NODE_ARTNET)
+	void ShowArtNetNode();
+	void ShowDestinationIpArtNetNode();
+#endif
+
+	/**
+	 * sACN E1.31
+	 */
+
+#if defined (NODE_E131)
+	void ShowE131Bridge();
+#endif
+
+	/**
+	 * Node
+	 */
+
+#if defined (NODE_NODE)
+	void ShowNode();
+	void ShowNodeNameNode();
+	void ShowUniverseNode();
+	void ShowDestinationIpNode();
+#endif
+
+private:
 	char m_aTitle[32];
 	uint8_t m_aLabels[static_cast<uint32_t>(displayudf::Labels::UNKNOWN)];
-#if defined (NODE_ARTNET) || defined (NODE_E131)	
-	uint32_t m_nPortIndexOffset { 0 };
-#endif
 #if defined (DISPLAYUDF_DMX_INFO)
 	struct DmxInfo {
 		displayudf::dmx::PortDir portDir;

@@ -1,62 +1,96 @@
+/**
+ * @file startup_gd32f407.S
+ *
+ */
+/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
   .syntax unified
   .cpu cortex-m4
   .fpu softvfp
   .thumb
 
-.global  Default_Handler
+.global Default_Handler
 
-.word  _sidata
-.word  _sdata
-.word  _edata
-.word  _sbss
-.word  _ebss
+/* Necessary symbols defined in linker script to initialize data */
+.word _sdata
+.word _sidata
+.word _edata
+.word _sbss
+.word _ebss
 
-.section  .text.Reset_Handler
+.section .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 
 Reset_Handler:
-  movs r1, #0
-  b DataInit
-
+/* Copy .data section from FLASH to RAM */
 CopyData:
-  ldr r3, =_sidata
-  ldr r3, [r3, r1]
-  str r3, [r0, r1]
-  adds r1, r1, #4
-    
-DataInit:
-  ldr r0, =_sdata
-  ldr r3, =_edata
-  adds r2, r0, r1
-  cmp r2, r3
-  bcc CopyData
-  ldr r2, =_sbss
-  b Zerobss
-FillZerobss:
-  movs r3, #0
-  str r3, [r2], #4
-    
-Zerobss:
-  ldr r3, = _ebss
-  cmp r2, r3
-  bcc FillZerobss
+  ldr r1, =_sdata           /* Load the start address of .data section (RAM) into r1 */
+  ldr r2, =_sidata          /* Load the start address of .data section (FLASH) into r2 */
+  ldr r3, =_edata           /* Load the end address of .data section (RAM) into r3 */
+  subs r3, r3, r1           /* Calculate the size of .data section by subtracting start from end */
+  beq ZeroBSS               /* If size is zero, jump to ZeroBSS */
+CopyDataLoop:
+  ldrb r4, [r2], #1         /* Load a byte from Flash (source), post-increment r2 by 1 */
+  strb r4, [r1], #1         /* Store the byte to RAM (destination), post-increment r1 by 1 */
+  subs r3, r3, #1           /* Decrement the remaining byte count by 1 */
+  bgt CopyDataLoop          /* If there are still bytes left, continue looping */
+/* Initialize .bss section to zero */
+ZeroBSS:
+  ldr r2, =_sbss            /* Load the start address of the .bss section */
+  ldr r3, =_ebss            /* Load the end address of the .bss section */
+  sub r3, r3, r2            /* Calculate bytes count (r3 = (end - start) */
+  mov r4, #0                /* Load zero into r4 */
+ZeroBSSLoop:
+  str r4, [r2], #4          /* Store zero to memory location, increment address */
+  subs r3, r3, #4           /* Subtract 4 bytes from the remaining byte count */
+  bgt ZeroBSSLoop           /* If there are still bytes left, continue looping */
+/* Call stack_debug_init function if in debug mode */
 #if defined (DEBUG_STACK)
-  bl stack_debug_init
+  bl stack_debug_init       /* Branch to stack_debug_init if DEBUG_STACK is defined */
 #endif
+/* Call SystemInit function to perform system-specific initialization */
   bl  SystemInit
+/* Call static constructors to initialize global objects */
+  bl __libc_init_array
+/* Call the main function to start the application */
   bl main
+/* Return from main (in case main returns) */
   bx lr
+/* NOP to align the code (optional) */
+  nop                        /* No operation; used for code alignment and readability */
+
 .size Reset_Handler, .-Reset_Handler
 
 .section .text.Default_Handler,"ax",%progbits
+
 Default_Handler:
 Infinite_Loop:
   b Infinite_Loop
-  .size Default_Handler, .-Default_Handler
 
-   .section  .vectors,"a",%progbits
-   .global __gVectors
+.size Default_Handler, .-Default_Handler
+
+.section .vectors,"a",%progbits
+.global __gVectors
 
 __gVectors:
                     .word _sp                                 /* Top of Stack */
@@ -75,8 +109,7 @@ __gVectors:
                     .word 0                                   /* Reserved */
                     .word PendSV_Handler                      /* 14:PendSV Handler */
                     .word SysTick_Handler                     /* 15:SysTick Handler */
-
-                    /* external interrupts handler */
+										/* External Interrupts */
                     .word WWDGT_IRQHandler                    /* 16:Window Watchdog Timer */
                     .word LVD_IRQHandler                      /* 17:LVD through EXTI Line detect */
                     .word TAMPER_STAMP_IRQHandler             /* 18:Tamper and TimeStamp through EXTI Line detect */
@@ -161,6 +194,12 @@ __gVectors:
                     .word FPU_IRQHandler                      /* 97:FPU*/
 
    .size   __gVectors, . - __gVectors
+
+/*******************************************************************************
+* Provide weak aliases for each Exception handler to the Default_Handler.
+* As they are weak aliases, any function with the same name will override
+* this definition.
+*******************************************************************************/
 
   .weak NMI_Handler
   .thumb_set NMI_Handler,Default_Handler

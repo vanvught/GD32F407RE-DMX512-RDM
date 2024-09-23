@@ -2,7 +2,7 @@
  * @file generate_content.cpp
  *
  */
-/* Copyright (C) 2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,21 @@ static constexpr char content_header[] =
 
 static constexpr char HAVE_DSA_BEGIN[] = "#if defined (ENABLE_PHY_SWITCH)\n";
 static constexpr char HAVE_DSA_END[] = "#endif /* (ENABLE_PHY_SWITCH) */\n";
+
+static constexpr char HAVE_DMX_BEGIN[] = "#if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))\n";
+static constexpr char HAVE_DMX_END[] = "#endif /* !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI)) */\n";
+
+static constexpr char HAVE_RDM_BEGIN[] = "#if !defined (CONFIG_HTTP_HTML_NO_RDM) && defined (RDM_CONTROLLER)\n";
+static constexpr char HAVE_RDM_END[] = "#endif /* !defined (CONFIG_HTTP_HTML_NO_RDM) && defined (RDM_CONTROLLER) */\n";
+
+static constexpr char HAVE_SHOWFILE_BEGIN[] = "#if defined (NODE_SHOWFILE)\n";
+static constexpr char HAVE_SHOWFILE_END[] = "#endif /* (NODE_SHOWFILE) */\n";
+
+static constexpr char HAVE_TIME_BEGIN[] = "#if !defined (CONFIG_HTTP_HTML_NO_TIME)\n";
+static constexpr char HAVE_TIME_END[] = "#endif /* !defined (CONFIG_HTTP_HTML_NO_TIME) */\n";
+
+static constexpr char HAVE_RTC_BEGIN[] = "#if !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)\n";
+static constexpr char HAVE_RTC_END[] = "#endif /* !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC) */\n";
 
 static FILE *pFileContent;
 static FILE *pFileIncludes;
@@ -105,13 +120,63 @@ static int convert_to_h(const char *pFileName) {
 		fwrite(HAVE_DSA_BEGIN, sizeof(char),sizeof(HAVE_DSA_BEGIN) - 1, pFileIncludes);
 	}
 
-	auto i = snprintf(buffer, sizeof(buffer) - 1, "#include \"%s\"\n", pFileNameOut);
+	const auto bHasDMX = (strstr(pFileNameOut, "dmx") != nullptr);
+
+	if (bHasDMX)  {
+		fwrite(HAVE_DMX_BEGIN, sizeof(char),sizeof(HAVE_DMX_BEGIN) - 1, pFileIncludes);
+	}
+
+	const auto bHasRDM = (strstr(pFileNameOut, "rdm") != nullptr);
+
+	if (bHasRDM)  {
+		fwrite(HAVE_RDM_BEGIN, sizeof(char),sizeof(HAVE_RDM_BEGIN) - 1, pFileIncludes);
+	}
+
+	const auto bHasSHOWFILE = (strstr(pFileNameOut, "showfile") != nullptr);
+
+	if (bHasSHOWFILE)  {
+		fwrite(HAVE_SHOWFILE_BEGIN, sizeof(char),sizeof(HAVE_SHOWFILE_BEGIN) - 1, pFileIncludes);
+	}
+
+	const auto bHasTIME = (strstr(pFileNameOut, "time") != nullptr);
+
+	if (bHasTIME)  {
+		fwrite(HAVE_TIME_BEGIN, sizeof(char),sizeof(HAVE_TIME_BEGIN) - 1, pFileIncludes);
+	}
+
+	const auto bHasRTC = (strstr(pFileNameOut, "rtc") != nullptr);
+
+	if (bHasRTC)  {
+		fwrite(HAVE_RTC_BEGIN, sizeof(char),sizeof(HAVE_RTC_BEGIN) - 1, pFileIncludes);
+	}
+
+	auto i = snprintf(buffer, sizeof(buffer) - 1, "#%sinclude \"%s\"\n", (bHasDSA || bHasDMX || bHasRDM || bHasSHOWFILE || bHasTIME || bHasRTC) ? " " : "" , pFileNameOut);
 	assert(i < static_cast<int>(sizeof(buffer)));
 
 	fwrite(buffer, sizeof(char), i, pFileIncludes);
 
 	if (bHasDSA)  {
 		fwrite(HAVE_DSA_END, sizeof(char),sizeof(HAVE_DSA_END) - 1, pFileIncludes);
+	}
+
+	if (bHasDMX)  {
+		fwrite(HAVE_DMX_END, sizeof(char),sizeof(HAVE_DMX_END) - 1, pFileIncludes);
+	}
+
+	if (bHasRDM)  {
+		fwrite(HAVE_RDM_END, sizeof(char),sizeof(HAVE_RDM_END) - 1, pFileIncludes);
+	}
+
+	if (bHasSHOWFILE)  {
+		fwrite(HAVE_SHOWFILE_END, sizeof(char),sizeof(HAVE_SHOWFILE_END) - 1, pFileIncludes);
+	}
+
+	if (bHasTIME)  {
+		fwrite(HAVE_TIME_END, sizeof(char),sizeof(HAVE_TIME_END) - 1, pFileIncludes);
+	}
+
+	if (bHasRTC)  {
+		fwrite(HAVE_RTC_END, sizeof(char),sizeof(HAVE_RTC_END) - 1, pFileIncludes);
 	}
 
 	fwrite("static constexpr char ", sizeof(char), 22, pFileOut);
@@ -200,9 +265,34 @@ int main() {
 				assert(pFileName != nullptr);
 
 				const auto bHasDSA = (strstr(pDirEntry->d_name, "dsa") != nullptr);
+				const auto bHasDMX = (strstr(pDirEntry->d_name, "dmx") != nullptr);
+				const auto bHasRDM = (strstr(pDirEntry->d_name, "rdm") != nullptr);
+				const auto bHasSHOWFILE = (strstr(pDirEntry->d_name, "showfile") != nullptr);
+				const auto bHasTIME = (strstr(pDirEntry->d_name, "time") != nullptr);
+				const auto bHasRTC = (strstr(pDirEntry->d_name, "rtc") != nullptr);
 
 				if (bHasDSA)  {
 					fwrite(HAVE_DSA_BEGIN, sizeof(char),sizeof(HAVE_DSA_BEGIN) - 1, pFileContent);
+				}
+
+				if (bHasDMX)  {
+					fwrite(HAVE_DMX_BEGIN, sizeof(char),sizeof(HAVE_DMX_BEGIN) - 1, pFileContent);
+				}
+
+				if (bHasRDM)  {
+					fwrite(HAVE_RDM_BEGIN, sizeof(char),sizeof(HAVE_RDM_BEGIN) - 1, pFileContent);
+				}
+
+				if (bHasSHOWFILE)  {
+					fwrite(HAVE_SHOWFILE_BEGIN, sizeof(char),sizeof(HAVE_SHOWFILE_BEGIN) - 1, pFileContent);
+				}
+
+				if (bHasTIME)  {
+					fwrite(HAVE_TIME_BEGIN, sizeof(char),sizeof(HAVE_TIME_BEGIN) - 1, pFileContent);
+				}
+
+				if (bHasRTC)  {
+					fwrite(HAVE_RTC_BEGIN, sizeof(char),sizeof(HAVE_RTC_BEGIN) - 1, pFileContent);
 				}
 
 				auto i = snprintf(pFileName, strlen(pDirEntry->d_name) + 8, "\t{ \"%s\", ", pDirEntry->d_name);
@@ -220,6 +310,26 @@ int main() {
 
 				if (bHasDSA)  {
 					fwrite(HAVE_DSA_END, sizeof(char),sizeof(HAVE_DSA_END) - 1, pFileContent);
+				}
+
+				if (bHasDMX)  {
+					fwrite(HAVE_DMX_END, sizeof(char),sizeof(HAVE_DMX_END) - 1, pFileContent);
+				}
+
+				if (bHasRDM)  {
+					fwrite(HAVE_RDM_END, sizeof(char),sizeof(HAVE_RDM_END) - 1, pFileContent);
+				}
+
+				if (bHasSHOWFILE)  {
+					fwrite(HAVE_SHOWFILE_END, sizeof(char),sizeof(HAVE_SHOWFILE_END) - 1, pFileContent);
+				}
+
+				if (bHasTIME)  {
+					fwrite(HAVE_TIME_END, sizeof(char),sizeof(HAVE_TIME_END) - 1, pFileContent);
+				}
+
+				if (bHasRTC)  {
+					fwrite(HAVE_RTC_END, sizeof(char),sizeof(HAVE_RTC_END) - 1, pFileContent);
 				}
 			}
 		}

@@ -2,7 +2,7 @@
  * @file lightsetdata.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@
  * https://www.gd32-dmx.org/memory.html
  */
 # include "gd32.h"
-# if defined (GD32F450VI)
+# if defined (GD32F450VI) || defined (GD32H7XX)
 #  define SECTION_LIGHTSET __attribute__ ((section (".lightset")))
 # else
 #  define SECTION_LIGHTSET
@@ -50,7 +50,7 @@ namespace lightset {
 
 class Data {
 public:
-	Data(const Data&) = delete;
+//	Data(const Data&) = delete;
 
 	static Data& Get() {
 		static Data instance SECTION_LIGHTSET;
@@ -89,6 +89,10 @@ public:
 		Get().IClearLength(nPortIndex);
 	}
 
+	static uint32_t GetLength(const uint32_t nPortIndex) {
+		return Get().IGetLength(nPortIndex);
+	}
+
 	static const uint8_t *Backup(const uint32_t nPortIndex) {
 		return Get().IBackup(nPortIndex);
 	}
@@ -98,7 +102,7 @@ public:
 	}
 
 private:
-	Data() {}
+//	Data() {}
 
 	void IMergeSourceA(const uint32_t nPortIndex, const uint8_t *pData, const uint32_t nLength, const MergeMode mergeMode) {
 		assert(nPortIndex < PORTS);
@@ -169,6 +173,10 @@ private:
 		m_OutputPort[nPortIndex].nLength = 0;
 	}
 
+	uint32_t IGetLength(const uint32_t nPortIndex) const {
+		return m_OutputPort[nPortIndex].nLength;
+	}
+
 	const uint8_t *IBackup(const uint32_t nPortIndex) {
 		assert(nPortIndex < PORTS);
 		return const_cast<const uint8_t *>(m_OutputPort[nPortIndex].data);
@@ -193,13 +201,13 @@ private:
 #endif
 
 	struct Source {
-		uint8_t data[dmx::UNIVERSE_SIZE];
+		uint8_t data[dmx::UNIVERSE_SIZE] __attribute__ ((aligned (4)));
 	};
 
 	struct OutputPort {
 		Source sourceA;
 		Source sourceB;
-		uint8_t data[dmx::UNIVERSE_SIZE];
+		uint8_t data[dmx::UNIVERSE_SIZE] __attribute__ ((aligned (4)));
 		uint32_t nLength;
 	};
 

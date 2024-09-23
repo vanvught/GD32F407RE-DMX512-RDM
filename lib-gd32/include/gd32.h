@@ -2,7 +2,7 @@
  * @file gd32.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,16 +26,21 @@
 #ifndef GD32_H_
 #define GD32_H_
 
-#include <stdint.h>
+# include <stdint.h>
 
-#if !defined  __cplusplus
- void udelay(uint32_t us);
-#else
-# if !defined(GD32_UDELAY)
-#  define GD32_UDELAY
+#ifdef __cplusplus
+# if !defined(UDELAY)
+#  define UDELAY
  void udelay(uint32_t us, uint32_t offset = 0);
 # endif
 #endif
+
+struct HwTimersSeconds {
+#if !defined (CONFIG_ENET_ENABLE_PTP)
+	volatile uint32_t nTimeval;
+#endif
+ 	volatile uint32_t nUptime;
+};
 
 /*
  * Needed for GD32 Firmware and CMSIS
@@ -45,25 +50,23 @@
 #ifdef __cplusplus
 # pragma GCC diagnostic ignored "-Wold-style-cast"
 # pragma GCC diagnostic ignored "-Wuseless-cast"
+# if __cplusplus > 201402
+// error: compound assignment with 'volatile'-qualified left operand is deprecated
+#  pragma GCC diagnostic ignored "-Wvolatile"
+# endif
 extern "C" {
 #endif
 
-#if defined  (GD32F10X_HD) || defined (GD32F10X_CL)
-# define GD32F10X
+#if defined (GD32F10X_HD) || defined (GD32F10X_CL)
 # include "gd32f10x.h"
-# include "gd32f10x_libopt.h"
 #elif defined (GD32F20X_CL)
-# define GD32F20X
 # include "gd32f20x.h"
-# include "gd32f20x_libopt.h"
 #elif defined (GD32F30X_HD)
-# define GD32F30X
 # include "gd32f30x.h"
-# include "gd32f30x_libopt.h"
-#elif defined (GD32F407) || defined (GD32F450)
-# define GD32F4XX
+#elif defined (GD32F407) || defined (GD32F450) || defined (GD32F470)
 # include "gd32f4xx.h"
-# include "gd32f4xx_libopt.h"
+#elif defined (GD32H759)
+# include "gd32h7xx.h"
 #else
 # error MCU is not supported
 #endif
@@ -77,7 +80,7 @@ extern "C" {
 # define bkp_data_read		bkp_read_data
 #endif
 
-#if defined(GD32F4XX) && defined(__cplusplus)
+#if (defined(GD32F4XX) || defined (GD32H7XX)) && defined(__cplusplus)
 typedef enum
 {
     BKP_DATA_0,
@@ -86,6 +89,34 @@ typedef enum
 void bkp_data_write(bkp_data_register_enum register_number, uint16_t data);
 uint16_t bkp_data_read(bkp_data_register_enum register_number);
 #endif
+
+#if !(defined (GD32F4XX) || defined (GD32H7XX))
+#define GPIO_INIT
+#endif
+
+#if defined (GD32H7XX)
+# define GPIO_OSPEED	GPIO_OSPEED_60MHZ
+#else
+# define GPIO_OSPEED	GPIO_OSPEED_50MHZ
+#endif
+
+#define GD32_PORT_TO_GPIO(p,n)	((p * 16) + n)
+#define GD32_GPIO_TO_PORT(g)	(uint8_t)(g / 16)
+#define GD32_GPIO_TO_NUMBER(g)	(uint8_t)(g - (16 * GD32_GPIO_TO_PORT(g)))
+
+typedef enum T_GD32_Port {
+	GD32_GPIO_PORTA = 0,
+	GD32_GPIO_PORTB,
+	GD32_GPIO_PORTC,
+	GD32_GPIO_PORTD,
+	GD32_GPIO_PORTE,
+	GD32_GPIO_PORTF,
+	GD32_GPIO_PORTG,
+	GD32_GPIO_PORTH,
+	GD32_GPIO_PORTI,
+	GD32_GPIO_PORTJ,
+	GD32_GPIO_PORTK
+} GD32_Port_TypeDef;
 
 #include "gd32_board.h"
 

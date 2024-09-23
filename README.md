@@ -1,5 +1,5 @@
 ![GitHub](https://img.shields.io/github/license/vanvught/GD32F407RE-DMX512-RDM)
-[![C++ Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://img.shields.io/badge/C%2B%2B-11%-blue.svg)
+[![C++ Standard](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://img.shields.io/badge/C%2B%2B-11%-blue.svg)
 ![GitHub issues](https://img.shields.io/github/issues-raw/vanvught/GD32F407RE-DMX512-RDM)
 ![GitHub contributors](https://img.shields.io/github/contributors/vanvught/GD32F407RE-DMX512-RDM)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/vanvught)
@@ -20,9 +20,18 @@ The ready to use firmware is build to use with the bootloader TFTP server -> [ht
 * Full Art-Net 4 implementation
 * Default firmware is using USART2 en USART5
 
+### Art-Net 4 Pixel 8x 4 Universes
+* Full Art-Net 4 implementation
+* No FPS limitation, except for what there is with the pixel chip protocol
+
 ### sACN E1.31 DMX 1-4 ports
 * Full sACN E1.31 implementation
 * Default firmware is using USART2 en USART5
+* RDMNet LLRP Device only
+
+### sACN E1.31 Pixel 8x 4 Universes
+* Full sACN E1.31 implementation
+* No FPS limitation, except for what there is with the pixel chip protocol
 * RDMNet LLRP Device only
 
 ## Remote Configuration Manager

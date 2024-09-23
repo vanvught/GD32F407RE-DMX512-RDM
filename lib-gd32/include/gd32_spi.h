@@ -2,7 +2,7 @@
  * @file gd32_spi.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,10 +62,21 @@ void gd32_spi_writenb(const char *pTxBuffer, uint32_t nDataLength);
  * DMA support
  */
 
-void gd32_spi_dma_begin();
-void gd32_spi_dma_set_speed_hz(uint32_t speed_hz);
-const uint8_t *gd32_spi_dma_tx_prepare(uint32_t *data_length);
-void gd32_spi_dma_tx_start(const uint8_t *tx_buffer, uint32_t length);
+const uint8_t *gd32_spi_dma_tx_prepare(uint32_t&  nLength);
+void gd32_spi_dma_tx_start(const uint8_t *pTxBuffer, uint32_t nLength);
 bool gd32_spi_dma_tx_is_active();
+
+/**
+ * SPI DMA implementation using I2S.
+ * Limitation SPI is that you cannot set the speed exactly.
+ * Exact speed is needed for pixels (WS2812B, etc).
+ */
+namespace i2s {
+void gd32_spi_dma_begin();
+void gd32_spi_dma_set_speed_hz(uint32_t nSpeedHz);
+const uint8_t *gd32_spi_dma_tx_prepare(uint32_t *pLength);
+void gd32_spi_dma_tx_start(const uint8_t *pTxBuffer, uint32_t nLength);
+bool gd32_spi_dma_tx_is_active();
+}  // namespace i2s
 
 #endif /* GD32_SPI_H_ */

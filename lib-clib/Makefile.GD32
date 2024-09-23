@@ -1,0 +1,25 @@
+DEFINES=NDEBUG
+
+EXTRA_INCLUDES=
+
+EXTRA_SRCDIR=
+
+ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring CONFIG_ENET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_ENET_ENABLE_PTP)	
+  	EXTRA_SRCDIR+=src/gd32/time_ptp
+  else
+  	ifeq ($(findstring CONFIG_TIME_USE_TIMER,$(MAKE_FLAGS)), CONFIG_TIME_USE_TIMER)
+  		EXTRA_SRCDIR+=src/gd32/time_timer
+  	else
+  		EXTRA_SRCDIR+=src/gd32/time_systick
+  	endif
+  endif
+else
+  EXTRA_SRCDIR+=src/gd32/time_systick
+  
+	EXTRA_SRCDIR+=src/gd32/time_timer
+	DEFINES+=CONFIG_TIME_USE_TIMER
+endif
+  
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

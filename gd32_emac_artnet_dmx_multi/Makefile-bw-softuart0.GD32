@@ -1,0 +1,21 @@
+BOARD=BOARD_BW_OPIDMX4
+
+DEFINES=LIGHTSET_PORTS=4
+
+DEFINES+=ENET_RXBUF_NUM=16 ENET_TXBUF_NUM=4
+
+#
+
+DEFINES+=CONFIG_USE_SOFTUART0
+
+DEFINES+=DEBUG_STACK
+DEFINES+=NDEBUG
+
+LIBS=
+
+SRCDIR=firmware lib
+
+include Common.mk
+include ../firmware-template-gd32/Rules.mk
+
+prerequisites:

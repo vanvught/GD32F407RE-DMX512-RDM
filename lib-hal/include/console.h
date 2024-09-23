@@ -2,7 +2,7 @@
  * @file console.h
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,11 +56,11 @@ typedef enum {
 # endif
 #elif defined (CONSOLE_NULL)
 inline void console_init(void) {}
-inline void console_putc(__attribute__((unused)) int i) {}
-inline void console_puts(__attribute__((unused)) const char *p) {}
-inline void console_write(__attribute__((unused)) const char *p, __attribute__((unused)) unsigned int i) {}
-inline void console_status(__attribute__((unused)) uint32_t i, __attribute__((unused)) const char *p) {}
-inline void console_error(__attribute__((unused)) const char *p) {}
+inline void console_putc([[maybe_unused]] int i) {}
+inline void console_puts([[maybe_unused]] const char *p) {}
+inline void console_write([[maybe_unused]] const char *p, [[maybe_unused]] unsigned int i) {}
+inline void console_status([[maybe_unused]] uint32_t i, [[maybe_unused]] const char *p) {}
+extern "C" inline void console_error([[maybe_unused]] const char *p) {}
 #else
 #ifdef __cplusplus
 extern "C" {
@@ -74,21 +74,19 @@ extern void console_set_bg_color(uint16_t);
 #endif
 #endif
 
+#if !defined (CONSOLE_NULL)
+extern void console_init();
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#if !defined (CONSOLE_NULL)
-extern void console_init(void);
 extern void console_putc(int);
 extern void console_puts(const char*);
 extern void console_write(const char*, unsigned int);
 extern void console_status(uint32_t, const char *);
 extern void console_error(const char*);
-#endif
-
 #ifdef __cplusplus
 }
+#endif
 #endif
 
 #endif /* CONSOLE_H_ */

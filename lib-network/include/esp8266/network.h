@@ -85,13 +85,13 @@ public:
 	void MacAddressCopyTo(uint8_t *pMacAddress);
 
 	void JoinGroup(int32_t nHandle, uint32_t nIp);
-	void LeaveGroup(__attribute__((unused)) int32_t nHandle, __attribute__((unused)) uint32_t nIp)  {
+	void LeaveGroup([[maybe_unused]] int32_t nHandle, [[maybe_unused]] uint32_t nIp)  {
 		// Not supported
 	}
 
-	uint16_t RecvFrom(int32_t nHandle, void *pBuffer, uint16_t nLength, uint32_t *pFromIp, uint16_t *pFromPort);
-	uint16_t RecvFrom(int32_t nHandle, const void **ppBuffer, uint32_t *pFromIp, uint16_t *pFromPort);
-	void SendTo(int32_t nHandle, const void *pBuffer, uint16_t nLength, uint32_t nToIp, uint16_t nRemotePort) ;
+	uint32_t RecvFrom(int32_t nHandle, void *pBuffer, uint32_t nLength, uint32_t *pFromIp, uint16_t *pFromPort);
+	uint32_t RecvFrom(int32_t nHandle, const void **ppBuffer, uint32_t *pFromIp, uint16_t *pFromPort);
+	void SendTo(int32_t nHandle, const void *pBuffer, uint32_t nLength, uint32_t nToIp, uint16_t nRemotePort) ;
 
 	void Print() {
 	}
@@ -112,14 +112,14 @@ public:
 		return m_nLocalIp;
 	}
 
-	void SetIp(__attribute__((unused)) uint32_t nIp) {
+	void SetIp([[maybe_unused]] uint32_t nIp) {
 	}
 
 	uint32_t GetIp() const {
 		return m_nLocalIp;
 	}
 
-	void SetNetmask(__attribute__((unused)) uint32_t nNetmask) {
+	void SetNetmask([[maybe_unused]] uint32_t nNetmask) {
 	}
 
 	uint32_t GetNetmask() const {
@@ -130,7 +130,7 @@ public:
 		return m_aHostName;
 	}
 
-	void SetGatewayIp(__attribute__((unused)) uint32_t nGatewayIp) {
+	void SetGatewayIp([[maybe_unused]] uint32_t nGatewayIp) {
 	}
 
 	uint32_t GetGatewayIp() const {

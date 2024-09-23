@@ -31,7 +31,6 @@
 
 #include "rdmdevice.h"
 #include "rdmconst.h"
-#include "rdm.h"
 #include "rdm_e120.h"
 
 #include "network.h"
@@ -61,10 +60,17 @@
 # endif
 #endif
 
+RDMDevice *RDMDevice::s_pThis;
+
 RDMDevice::RDMDevice() {
 	DEBUG_ENTRY
+	assert(s_pThis == nullptr);
+	s_pThis = this;
 
-#if defined (NO_EMAC)
+	m_aUID[0] = RDMConst::MANUFACTURER_ID[0];
+	m_aUID[1] = RDMConst::MANUFACTURER_ID[1];
+
+#if defined (NO_EMAC) || !defined(CONFIG_RDMDEVICE_UUID_IP)
 	uint8_t aMacAddress[network::MAC_SIZE];
 	Network::Get()->MacAddressCopyTo(aMacAddress);
 
@@ -72,28 +78,14 @@ RDMDevice::RDMDevice() {
 	m_aUID[3] = aMacAddress[3];
 	m_aUID[4] = aMacAddress[4];
 	m_aUID[5] = aMacAddress[5];
-#else
-	const auto nIp = Network::Get()->GetIp();
-# if !defined(CONFIG_RDMDEVICE_REVERSE_UID)
-	m_aUID[5] = static_cast<uint8_t>(nIp >> 24);
-	m_aUID[4] = (nIp >> 16) & 0xFF;
-	m_aUID[3] = (nIp >> 8) & 0xFF;
-	m_aUID[2] = nIp & 0xFF;
-# else
-	m_aUID[2] = static_cast<uint8_t>(nIp >> 24);
-	m_aUID[3] = (nIp >> 16) & 0xFF;
-	m_aUID[4] = (nIp >> 8) & 0xFF;
-	m_aUID[5] = nIp & 0xFF;
-# endif
-#endif
-
-	m_aUID[0] = RDMConst::MANUFACTURER_ID[0];
-	m_aUID[1] = RDMConst::MANUFACTURER_ID[1];
 
 	m_aSN[0] = m_aUID[5];
 	m_aSN[1] = m_aUID[4];
 	m_aSN[2] = m_aUID[3];
 	m_aSN[3] = m_aUID[2];
+#else
+	// Calculated with GetUID and GetSN
+#endif
 
 	m_nFactoryRootLabelLength = sizeof(DEVICE_LABEL) - 1;
 	memcpy(m_aFactoryRootLabel, DEVICE_LABEL, m_nFactoryRootLabelLength);
@@ -102,7 +94,7 @@ RDMDevice::RDMDevice() {
 }
 
 void RDMDevice::Print() {
-	printf("RDM Device configuration\n");
+	puts("RDM Device configuration");
 	const auto nLength = static_cast<uint8_t>(std::min(static_cast<size_t>(RDM_MANUFACTURER_LABEL_MAX_LENGTH), strlen(RDMConst::MANUFACTURER_NAME)));
 	printf(" Manufacturer Name : %.*s\n", nLength, const_cast<char *>(&RDMConst::MANUFACTURER_NAME[0]));
 	printf(" Manufacturer ID   : %.2X%.2X\n", m_aUID[0], m_aUID[1]);

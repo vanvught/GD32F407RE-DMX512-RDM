@@ -2,7 +2,7 @@
  * @file hardware.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #define GD32_HARDWARE_H_
 
 #include <cstdint>
+#include <cstring>
 #include <time.h>
 #include <uuid/uuid.h>
 
@@ -34,12 +35,19 @@
 
 #include "gd32.h"
 #include "gd32_adc.h"
-#include "gd32_micros.h"
+
+#if !defined (CONFIG_LEDBLINK_USE_PANELLED) && (defined (GD32F4XX) || defined(GD32H7XX))
+# define HAL_HAVE_PORT_BIT_TOGGLE
+#endif
 
 #if defined (ENABLE_USB_HOST) && defined (CONFIG_USB_HOST_MSC)
 extern "C" {
 #include "usbh_core.h"
-extern usbh_host usb_host_msc;
+#if defined (GD32H7XX) || defined (GD32F4XX)
+ extern usbh_host usb_host_msc;
+#else
+ extern usbh_host usb_host;
+#endif
 }
 #endif
 
@@ -50,12 +58,13 @@ extern usbh_host usb_host_msc;
  void emac_debug_run();
 #endif
 
-#if defined (USE_LEDBLINK_BITBANGING595)
-# include "gd32_bitbanging595.h"
-# include "panel_led.h"
+#ifdef NDEBUG
+ extern "C" void console_error(const char *);
 #endif
 
-extern volatile uint32_t s_nSysTickMillis;
+#include "panel_led.h"
+
+#include "debug.h"
 
 class Hardware {
 public:
@@ -65,40 +74,77 @@ public:
 		return 0;	// FIXME GetReleaseId
 	}
 
-	void GetUuid(uuid_t out);
+	void GetUuid(uuid_t out) {
+		memcpy(out, m_uuid, sizeof(uuid_t));
+	}
 
 	uint32_t Millis() {
-		extern volatile uint32_t s_nSysTickMillis;
-		return s_nSysTickMillis;
+#if defined (CONFIG_HAL_USE_SYSTICK)
+		extern volatile uint32_t gv_nSysTickMillis;
+		return gv_nSysTickMillis;
+#else
+		extern uint32_t timer6_get_elapsed_milliseconds();
+		return timer6_get_elapsed_milliseconds();
+#endif
 	}
 
 	uint32_t Micros() {
-		return micros();
+		static uint32_t nMicrosPrevious;
+		static uint32_t nResult;
+		const auto nMicros = DWT->CYCCNT / (MCU_CLOCK_FREQ / 1000000U);
+
+		if (nMicros > nMicrosPrevious) {
+			nResult += (nMicros - nMicrosPrevious);
+		} else {
+			nResult += ((UINT32_MAX / (MCU_CLOCK_FREQ / 1000000U)) - nMicrosPrevious + nMicros);
+		}
+
+		nMicrosPrevious = nMicros;
+
+		return nResult;
 	}
 
-	uint32_t GetUpTime() {
-		return Millis() / 1000U;
+	uint32_t GetUpTime() const {
+		extern struct HwTimersSeconds g_Seconds;
+		return g_Seconds.nUptime;
 	}
 
-	bool SetTime(const struct tm *pTime);
-	void GetTime(struct tm *pTime);
+	bool SetTime(__attribute__((unused)) const struct tm *pTime) {
+#if !defined(DISABLE_RTC)
+		m_HwClock.Set(pTime);
+		return true;
+#else
+		return false;
+#endif
+	}
 
-	const char *GetBoardName(uint8_t &nLength) {
+#if !defined(DISABLE_RTC)
+	bool SetAlarm(const struct tm *pTime) {
+		const auto b = m_HwClock.AlarmSet(pTime);
+		return b;
+	}
+
+	void GetAlarm(struct tm *pTime) {
+		m_HwClock.AlarmGet(pTime);
+	}
+#endif
+
+	const char *GetBoardName(uint8_t& nLength) {
 		nLength = sizeof(GD32_BOARD_NAME) - 1U;
 		return GD32_BOARD_NAME;
 	}
 
-	const char *GetSysName(uint8_t &nLength) {
+	const char* GetSysName(uint8_t& nLength) {
 		nLength = 8;
 		return "Embedded";
 	}
 
-	const char *GetSocName(uint8_t &nLength) {
-		nLength = 5;
-		return "GD32F";
+	const char* GetSocName(uint8_t& nLength) {
+		nLength = 4;
+		return "GD32";
 	}
 
-	const char *GetCpuName(uint8_t &nLength) {
+	const char *GetCpuName(uint8_t& nLength) {
 		nLength = sizeof(GD32_MCU_NAME) - 1U;
 		return GD32_MCU_NAME;
 	}
@@ -112,8 +158,8 @@ public:
 	}
 
 	void WatchdogInit() {
-		const auto status = fwdgt_config(0xFFFF, FWDGT_PSC_DIV16);
-		m_bIsWatchdog = (SUCCESS == status);
+		m_bIsWatchdog = (SUCCESS == fwdgt_config(0xFFFF, FWDGT_PSC_DIV16));
+
 		if (m_bIsWatchdog) {
 			fwdgt_enable();
 		}
@@ -138,11 +184,11 @@ public:
 		return gd32_adc_gettemp();
 	}
 
-	float GetCoreTemperatureMin() {
+	float GetCoreTemperatureMin() const {
 		return -40.0f;
 	}
 
-	float GetCoreTemperatureMax() {
+	float GetCoreTemperatureMax() const {
 		return 85.0f;
 	}
 
@@ -152,35 +198,85 @@ public:
 		return m_Mode;
 	}
 
-	void Run() {
-#if defined (ENABLE_USB_HOST) && defined (CONFIG_USB_HOST_MSC)
-		usbh_core_task(&usb_host_msc);
-#endif
-		if (__builtin_expect (m_nTicksPerSecond != 0, 1)) {
-			if (__builtin_expect (!(s_nSysTickMillis - m_nMillisPrevious < m_nTicksPerSecond), 1)) {
-				m_nMillisPrevious = s_nSysTickMillis;
+	struct Timer {
+	    uint32_t nExpireTime;
+	    uint32_t nIntervalMillis;
+	    int32_t nId;
+	    hal::TimerCallback callback;
+	};
 
-				m_nToggleLed ^= 0x1;
+	int32_t SoftwareTimerAdd(const uint32_t nIntervalMillis, const hal::TimerCallback callback) {
+	    if (m_nTimersCount >= hal::SOFTWARE_TIMERS_MAX) {
+#ifdef NDEBUG
+            console_error("SoftwareTimerAdd\n");
+#endif
+	        return -1;
+	    }
 
-				if (m_nToggleLed != 0) {
-#if defined (USE_LEDBLINK_BITBANGING595)
-					hal::panel_led_on(hal::panelled::ACTIVITY);
-#else
-					GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
-				} else {
-#if defined (USE_LEDBLINK_BITBANGING595)
-					hal::panel_led_off(hal::panelled::ACTIVITY);
-#else
-					GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
+	    const auto nCurrentTime = Hardware::Millis();
+
+		Timer newTimer = {
+				.nExpireTime = nCurrentTime + nIntervalMillis,
+				.nIntervalMillis = nIntervalMillis,
+				.nId = m_nNextId++,
+				.callback = callback,
+		};
+
+	    m_Timers[m_nTimersCount++] = newTimer;
+
+	    return newTimer.nId;
+	}
+
+	bool SoftwareTimerDelete(int32_t& nId) {
+		if (nId >= 0) {
+			for (uint32_t i = 0; i < m_nTimersCount; ++i) {
+				if (m_Timers[i].nId == nId) {
+					for (uint32_t j = i; j < m_nTimersCount - 1; ++j) {
+						m_Timers[j] = m_Timers[j + 1];
+					}
+					--m_nTimersCount;
+					nId = -1;
+					return true;
 				}
 			}
 		}
 
-#if defined (USE_LEDBLINK_BITBANGING595)
-		bitBanging595.Run();
+		return false;
+	}
+
+	bool SoftwareTimerChange(const int32_t nId, const uint32_t nIntervalMillis) {
+		if (nId >= 0) {
+			for (uint32_t i = 0; i < m_nTimersCount; ++i) {
+				if (m_Timers[i].nId == nId) {
+					m_Timers[i].nExpireTime = Hardware::Millis() + nIntervalMillis;
+					m_Timers[i].nIntervalMillis = nIntervalMillis;
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	void Run() {
+#if defined (ENABLE_USB_HOST) && defined (CONFIG_USB_HOST_MSC)
+# if defined (GD32H7XX) || defined (GD32F4XX)
+		usbh_core_task(&usb_host_msc);
+# else
+		usbh_core_task(&usb_host);
+# endif
 #endif
+	    const auto nCurrentTime = Hardware::Get()->Millis();
+
+	    for (uint32_t i = 0; i < m_nTimersCount; i++) {
+	        if (m_Timers[i].nExpireTime <= nCurrentTime) {
+	        	m_Timers[i].callback();
+	            m_Timers[i].nExpireTime = nCurrentTime + m_Timers[i].nIntervalMillis;
+	        }
+	    }
+
+		hal::panel_led_run();
 
 #if defined (DEBUG_STACK)
 		stack_debug_run();
@@ -198,54 +294,94 @@ public:
 private:
 	void RebootHandler();
 
+	static void ledblink() {
+#if defined(HAL_HAVE_PORT_BIT_TOGGLE)
+		GPIO_TG(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+#else
+		m_nToggleLed = -m_nToggleLed;
+
+		if (m_nToggleLed > 0) {
+# if defined (CONFIG_LEDBLINK_USE_PANELLED)
+			hal::panel_led_on(hal::panelled::ACTIVITY);
+# else
+			GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+# endif
+		} else {
+# if defined (CONFIG_LEDBLINK_USE_PANELLED)
+			hal::panel_led_off(hal::panelled::ACTIVITY);
+# else
+			GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+# endif
+		}
+#endif
+	}
+
 	void SetFrequency(const uint32_t nFreqHz) {
+		DEBUG_ENTRY
+		DEBUG_PRINTF("m_nTimerId=%d, nFreqHz=%u", m_nTimerId, nFreqHz);
+
+		if (m_nTimerId < 0) {
+			m_nTimerId = SoftwareTimerAdd((1000U / nFreqHz), ledblink);
+			DEBUG_EXIT
+			return;
+		}
+
 		switch (nFreqHz) {
 		case 0:
-			m_nTicksPerSecond = 0;
-#if defined (USE_LEDBLINK_BITBANGING595)
+			SoftwareTimerDelete(m_nTimerId);
+#if defined (CONFIG_LEDBLINK_USE_PANELLED)
 			hal::panel_led_off(hal::panelled::ACTIVITY);
 #else
 			GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
 			break;
+# if !defined (CONFIG_HAL_USE_MINIMUM)
 		case 1:
-			m_nTicksPerSecond = (1000 / 1);
+			SoftwareTimerChange(m_nTimerId, (1000U / 1));
 			break;
 		case 3:
-			m_nTicksPerSecond = (1000 / 3);
+			SoftwareTimerChange(m_nTimerId, (1000U / 3));
 			break;
 		case 5:
-			m_nTicksPerSecond = (1000 / 5);
+			SoftwareTimerChange(m_nTimerId, (1000U / 5));
 			break;
+		case 8:
+			SoftwareTimerChange(m_nTimerId, (1000U / 8));
+			break;
+# endif
 		case 255:
-			m_nTicksPerSecond = 0;
-#if defined (USE_LEDBLINK_BITBANGING595)
+			SoftwareTimerDelete(m_nTimerId);
+#if defined (CONFIG_LEDBLINK_USE_PANELLED)
 			hal::panel_led_on(hal::panelled::ACTIVITY);
 #else
 			GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
 			break;
 		default:
-			m_nTicksPerSecond = (1000 / nFreqHz);
+			SoftwareTimerChange(m_nTimerId, (1000U / nFreqHz));
 			break;
 		}
+
+		DEBUG_EXIT
 	}
 
 private:
 #if !defined(DISABLE_RTC)
 	HwClock m_HwClock;
 #endif
+	uuid_t m_uuid;
 	bool m_bIsWatchdog { false };
-
-#if defined (USE_LEDBLINK_BITBANGING595)
-	BitBanging595 bitBanging595;
-#endif
 	hardware::ledblink::Mode m_Mode { hardware::ledblink::Mode::UNKNOWN };
 	bool m_doLock { false };
-	uint32_t m_nTicksPerSecond { 1000 / 2 };
-	int32_t m_nToggleLed { 0 };
-	uint32_t m_nMillisPrevious { 0 };
+	int32_t m_nTimerId { -1 };
 
+	Timer m_Timers[hal::SOFTWARE_TIMERS_MAX];
+	uint32_t m_nTimersCount { 0 };
+	int32_t m_nNextId { 0 };
+
+#if !defined(HAL_HAVE_PORT_BIT_TOGGLE)
+	static inline int32_t m_nToggleLed { 1 };
+#endif
 	static Hardware *s_pThis;
 };
 

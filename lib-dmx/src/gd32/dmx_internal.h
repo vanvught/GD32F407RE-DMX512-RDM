@@ -2,7 +2,7 @@
  * @file dmx_internal.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,50 @@
 #include <cassert>
 
 #include "gd32.h"
+#include "gd32_gpio.h"
 #include "gd32/dmx_config.h"
 
-static uint32_t _port_to_uart(const uint32_t nPort) {
+#ifdef ALIGNED
+#undef ALIGNED
+#endif
+#define ALIGNED __attribute__ ((aligned (4)))
+
+/**
+ * Needed for older GD32F firmware
+ */
+#if !defined(USART_TRANSMIT_DMA_ENABLE)
+# define USART_TRANSMIT_DMA_ENABLE			USART_DENT_ENABLE
+#endif
+
+/**
+ * GD32F10X is different
+ */
+#if defined(GD32F10X)
+# define USART_FLAG_IDLE					USART_FLAG_IDLEF
+#endif
+
+/**
+ * https://www.gd32-dmx.org/memory.html
+ */
+#if defined (GD32F20X) || defined (GD32F4XX) || defined (GD32H7XX)
+# define SECTION_DMA_BUFFER					__attribute__ ((section (".dmx")))
+#else
+# define SECTION_DMA_BUFFER
+#endif
+
+#if defined (GD32F4XX) || defined (GD32H7XX)
+# define DMA_INTERRUPT_ENABLE				(DMA_CHXCTL_FTFIE)
+# define DMA_INTERRUPT_DISABLE				(DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
+# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
+# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
+#else
+# define DMA_INTERRUPT_ENABLE				(DMA_INT_FTF)
+# define DMA_INTERRUPT_DISABLE				(DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
+# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
+# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
+#endif
+
+inline constexpr uint32_t dmx_port_to_uart(const uint32_t nPort) {
 	switch (nPort) {
 #if defined (DMX_USE_USART0)
 	case dmx::config::USART0_PORT:
@@ -85,79 +126,72 @@ static uint32_t _port_to_uart(const uint32_t nPort) {
 	return 0;
 }
 
-#if defined (GD32F4XX)
-// GPIO
-static void _gpio_mode_output(uint32_t gpio_periph, uint32_t pin) {
-	gpio_af_set(gpio_periph, GPIO_AF_0, pin); //TODO This needs some research. Is it really needed?
-	gpio_mode_set(gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin);
-}
-static void _gpio_mode_af(const uint32_t gpio_periph, uint32_t pin, const uint32_t usart_periph) {
-	gpio_mode_set(gpio_periph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, pin);
-
+#if defined (GD32F4XX) || defined (GD32H7XX)
+constexpr uint32_t get_usart_af(const uint32_t usart_periph) {
 	switch (usart_periph) {
-#if defined (DMX_USE_USART0)
-	case USART0:
-#endif
-#if defined (DMX_USE_USART1)
+#if defined(DMX_USE_USART0)
+    case USART0: return USART0_GPIO_AFx;
+    #endif
+#if defined(DMX_USE_USART1)
 	case USART1:
+		return USART1_GPIO_AFx;
 #endif
-#if defined (DMX_USE_USART2)
+#if defined(DMX_USE_USART2)
 	case USART2:
+		return USART2_GPIO_AFx;
 #endif
-#if defined (DMX_USE_USART0) || defined (DMX_USE_USART1) || defined(DMX_USE_USART2)
-		gpio_af_set(gpio_periph, GPIO_AF_7, pin);
-		break;
-#endif
-#if defined (DMX_USE_UART3)
-	case UART3:
-#endif
-#if defined (DMX_USE_UART4)
+#if defined(DMX_USE_UART3)
+    case UART3: return UART3_GPIO_AFx;
+    #endif
+#if defined(DMX_USE_UART4)
 	case UART4:
+		return UART4_GPIO_AFx;
 #endif
-#if defined (DMX_USE_USART5)
+#if defined(DMX_USE_USART5)
 	case USART5:
+		return USART5_GPIO_AFx;
 #endif
-#if defined (DMX_USE_UART6)
+#if defined(DMX_USE_UART6)
 	case UART6:
+		return UART6_GPIO_AFx;
 #endif
-#if defined (DMX_USE_UART7)
+#if defined(DMX_USE_UART7)
 	case UART7:
-#endif
-#if defined (DMX_USE_UART3) || defined (DMX_USE_UART4) || defined(DMX_USE_USART5) || defined (DMX_USE_UART6) || defined (DMX_USE_UART7)
-		gpio_af_set(gpio_periph, GPIO_AF_8, pin);
-		break;
+		return UART7_GPIO_AFx;
 #endif
 	default:
-		assert(0);
 		__builtin_unreachable();
-		break;
+		return 0;
 	}
+
+	__builtin_unreachable();
+	return 0;
 }
-// DMA
-# define DMA_PARAMETER_STRUCT				dma_single_data_parameter_struct
-# define DMA_CHMADDR						DMA_CHM0ADDR
-# define DMA_MEMORY_TO_PERIPHERAL			DMA_MEMORY_TO_PERIPH
-# define DMA_PERIPHERAL_WIDTH_8BIT			DMA_PERIPH_WIDTH_8BIT
-# define dma_init							dma_single_data_mode_init
-# define dma_memory_to_memory_disable(x,y)
-# define DMA_INTERRUPT_ENABLE				(DMA_CHXCTL_FTFIE)
-# define DMA_INTERRUPT_DISABLE				(DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
-# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
-# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
+
+template<uint32_t gpio_periph, uint32_t pin>
+inline void gd32_gpio_mode_output() {
+	gd32_gpio_mode_set<gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin>();
+}
+
+template<uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph>
+inline void gd32_gpio_mode_af() {
+	gd32_gpio_mode_set<gpio_periph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, pin>();
+
+	constexpr uint32_t af = get_usart_af(usart_periph);
+	static_assert(af != 0, "Invalid USART peripheral");
+
+	gd32_gpio_af_set<gpio_periph, af, pin>();
+}
 #else
-// GPIO
-static void _gpio_mode_output(uint32_t gpio_periph, uint32_t pin) {
-	gpio_init(gpio_periph, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, pin);
+template<uint32_t gpio_periph, uint32_t pin>
+inline void gd32_gpio_mode_output() {
+	gd32_gpio_init<gpio_periph, GPIO_MODE_OUT_PP, pin>();
 }
-static void _gpio_mode_af(uint32_t gpio_periph, uint32_t pin, __attribute__((unused)) const uint32_t usart_periph ) {
-	gpio_init(gpio_periph, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, pin);
+
+template<uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph>
+inline void gd32_gpio_mode_af() {
+	gd32_gpio_init<gpio_periph, GPIO_MODE_AF_PP, pin>();
 }
-// DMA
-# define DMA_PARAMETER_STRUCT				dma_parameter_struct
-# define DMA_INTERRUPT_ENABLE				(DMA_INT_FTF)
-# define DMA_INTERRUPT_DISABLE				(DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
-# define DMA_INTERRUPT_FLAG_GET				(DMA_INT_FLAG_FTF)
-# define DMA_INTERRUPT_FLAG_CLEAR			(DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
 #endif
 
 #endif /* GD32_DMX_INTERNAL_H_ */

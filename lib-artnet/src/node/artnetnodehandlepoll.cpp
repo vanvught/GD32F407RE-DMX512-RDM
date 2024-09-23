@@ -48,7 +48,7 @@ union uip {
 	uint8_t u8[4];
 } static ip;
 
-void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unused)) uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
+void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, [[maybe_unused]] uint32_t& NumPortsInput, uint32_t& NumPortsOutput) {
 	if (m_Node.Port[nPortIndex].direction == lightset::PortDir::OUTPUT) {
 #if (ARTNET_VERSION >= 4)
 		if (m_Node.Port[nPortIndex].protocol == artnet::PortProtocol::SACN) {
@@ -87,7 +87,7 @@ void ArtNetNode::ProcessPollRelply(const uint32_t nPortIndex, __attribute__((unu
 #endif
 }
 
-void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp, artnetnode::ArtPollQueue *pQueue) {
+void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDestinationIp, artnet::ArtPollQueue *pQueue) {
 	DEBUG_PRINTF("nBindIndex=%u", nBindIndex);
 
 	ip.u32 = Network::Get()->GetIp();
@@ -130,7 +130,14 @@ void ArtNetNode::SendPollRelply(const uint32_t nBindIndex, const uint32_t nDesti
 
 		ProcessPollRelply(nPortIndex, nPortsInput, nPortsOutput);
 
+		if (__builtin_expect((m_pLightSet != nullptr), 1)) {
+			const auto nRefreshRate = m_pLightSet->GetRefreshRate();
+			m_ArtPollReply.RefreshRateLo = static_cast<uint8_t>(nRefreshRate);
+			m_ArtPollReply.RefreshRateHi = static_cast<uint8_t>(nRefreshRate >> 8);
+		}
+
 		m_ArtPollReply.NumPortsLo = static_cast<uint8_t>(std::max(nPortsInput, nPortsOutput));
+
 		m_State.ArtPollReplyCount++;
 
 		uint8_t nSysNameLenght;

@@ -56,7 +56,7 @@ void TFTPFileServer::Exit() {
 }
 
 
-bool TFTPFileServer::FileOpen(__attribute__((unused)) const char* pFileName, __attribute__((unused)) tftp::Mode tMode) {
+bool TFTPFileServer::FileOpen([[maybe_unused]] const char *pFileName, [[maybe_unused]] tftp::Mode tMode) {
 	DEBUG_ENTRY
 
 	DEBUG_EXIT
@@ -78,7 +78,7 @@ bool TFTPFileServer::FileCreate(const char* pFileName, tftp::Mode mode) {
 		return false;
 	}
 
-	Display::Get()->TextStatus("TFTP Started", Display7SegmentMessage::INFO_TFTP_STARTED, CONSOLE_GREEN);
+	Display::Get()->TextStatus("TFTP Started", CONSOLE_GREEN);
 
 	m_nFileSize = 0;
 
@@ -91,13 +91,13 @@ bool TFTPFileServer::FileClose() {
 
 	m_bDone = true;
 
-	Display::Get()->TextStatus("TFTP Ended", Display7SegmentMessage::INFO_TFTP_ENDED, CONSOLE_GREEN);
+	Display::Get()->TextStatus("TFTP Ended", CONSOLE_GREEN);
 
 	DEBUG_EXIT
 	return true;
 }
 
-size_t TFTPFileServer::FileRead(__attribute__((unused)) void* pBuffer, __attribute__((unused)) size_t nCount, __attribute__((unused)) unsigned nBlockNumber) {
+size_t TFTPFileServer::FileRead([[maybe_unused]] void* pBuffer, [[maybe_unused]] size_t nCount, [[maybe_unused]] unsigned nBlockNumber) {
 	DEBUG_ENTRY
 
 	DEBUG_EXIT

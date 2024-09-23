@@ -2,7 +2,7 @@
  * @file dmx_config.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,8 +48,12 @@ namespace config {
 # include "board_gd32f450ve.h"
 #elif defined (BOARD_GD32F450VI)
 # include "board_gd32f450vi.h"
+#elif defined (BOARD_GD32F470Z_EVAL)
+# include "board_gd32f470z_eval.h"
 #elif defined (BOARD_GD32F207C_EVAL)
 # include "board_gd32f207c_eval.h"
+#elif defined (BOARD_GD32H759I_EVAL)
+# include "board_gd32h759i_eval.h"
 #elif defined (BOARD_BW_OPIDMX4)
 # include "board_bw_opidmx4.h"
 #elif defined (BOARD_DMX3)
@@ -64,18 +68,15 @@ namespace config {
 
 namespace dmx {
 namespace buffer {
-static constexpr auto SIZE = 514;	// multiple of uint16_t
+static constexpr auto SIZE = 516;	// multiple of uint32_t
 }  // namespace buffer
 }  // namespace dmx
 
-/**
- * PORTs check
- */
-static_assert(DMX_MAX_PORTS <= dmx::config::max::IN, "IN: DMX_MAX_PORTS");
-static_assert(DMX_MAX_PORTS <= dmx::config::max::OUT, "OUT: DMX_MAX_PORTS");
-
 #if defined(GD32F10X_HD) || defined (GD32F10X_CL)
  static_assert(DMX_MAX_PORTS <= 4, "Too many ports defined");
+#endif
+#if defined (GD32F20X_CL)
+ static_assert(DMX_MAX_PORTS <= 6, "Too many ports defined");
 #endif
 
 /**

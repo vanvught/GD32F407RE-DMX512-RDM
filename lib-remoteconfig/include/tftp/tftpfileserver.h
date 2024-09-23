@@ -2,7 +2,7 @@
  * @file tftpfileserver.h
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "tftpdaemon.h"
+#include "net/apps/tftpdaemon.h"
 
 #if defined (GD32)
 # include "gd32.h"
@@ -37,7 +37,8 @@
 
 namespace tftpfileserver {
 	bool is_valid(const void *pBuffer);
-#if defined (BARE_METAL)
+#if defined(__linux__) || defined (__APPLE__)
+#else
 # if defined (H3)
 #  if defined(ORANGE_PI)
 	static constexpr char FILE_NAME[] = "orangepi_zero.uImage";
@@ -51,8 +52,10 @@ namespace tftpfileserver {
     static constexpr char FILE_NAME[] = "gd32f207.bin";
 #  elif defined (GD32F4XX)
     static constexpr char FILE_NAME[] = "gd32f4xx.bin";
+#  elif defined (GD32H7XX)
+    static constexpr char FILE_NAME[] = "gd32h7xx.bin";
 #  else
-#   error MCU is not defined
+#   error FAMILY is not defined
 #  endif
 # endif
 #endif

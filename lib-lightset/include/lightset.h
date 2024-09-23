@@ -2,7 +2,7 @@
  * @file lightset.h
  *
  */
-/* Copyright (C) 2016-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ namespace node {
 static constexpr uint32_t LABEL_NAME_LENGTH = 18;
 
 inline void get_short_name_default(const uint32_t nPortIndex, char *pShortName) {
-	snprintf(pShortName, node::LABEL_NAME_LENGTH - 1, "Port %u", 1U + nPortIndex);
+	snprintf(pShortName, node::LABEL_NAME_LENGTH - 1, "Port %u", static_cast<unsigned int>(1 + nPortIndex));
 }
 }  // namespace node
 
@@ -68,12 +68,6 @@ struct SlotInfo {
 	uint8_t nType;
 };
 
-#if defined (ESP8266)
-enum class OutputType {
-	DMX, SPI, MONITOR, UNDEFINED
-};
-#endif
-
 inline MergeMode get_merge_mode(const char *pMergeMode) {
 	if (pMergeMode != nullptr) {
 		if (((pMergeMode[0] | 0x20) == 'l')
@@ -85,14 +79,14 @@ inline MergeMode get_merge_mode(const char *pMergeMode) {
 	return MergeMode::HTP;
 }
 
-inline const char* get_merge_mode(const MergeMode mergeMode, const bool bToUpper = false) {
+inline const char *get_merge_mode(const MergeMode mergeMode, const bool bToUpper = false) {
 	if (bToUpper) {
 		return (mergeMode == MergeMode::HTP) ? "HTP" : "LTP";
 	}
 	return (mergeMode == MergeMode::HTP) ? "htp" : "ltp";
 }
 
-inline const char* get_merge_mode(const unsigned m, const bool bToUpper = false) {
+inline const char *get_merge_mode(const unsigned m, const bool bToUpper = false) {
 	return get_merge_mode(static_cast<MergeMode>(m), bToUpper);
 }
 
@@ -151,27 +145,15 @@ inline FailSafe get_failsafe(const char *pFailSafe) {
 }
 
 inline const char* get_failsafe(const FailSafe failsafe) {
-	switch (failsafe) {
-	case FailSafe::HOLD:
-		return "hold";
-		break;
-	case FailSafe::OFF:
+	if (failsafe == FailSafe::OFF) {
 		return "off";
-		break;
-	case FailSafe::ON:
+	} else if (failsafe == FailSafe::ON) {
 		return "on";
-		break;
-	case FailSafe::PLAYBACK:
+	} else if (failsafe == FailSafe::PLAYBACK) {
 		return "playback";
-		break;
-	default:
-		assert(0);
-		__builtin_unreachable();
-		break;
 	}
 
-	__builtin_unreachable();
-	return "";
+	return "hold";
 }
 
 inline OutputStyle get_output_style(const char *pOutputStyle) {
@@ -203,38 +185,38 @@ public:
 
 	virtual void Start(const uint32_t nPortIndex)= 0;
 	virtual void Stop(const uint32_t nPortIndex)= 0;
-	virtual void SetData(uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate = true)= 0;
+	virtual void SetData(const uint32_t nPortIndex, const uint8_t *pData, uint32_t nLength, const bool doUpdate = true)= 0;
 	/**
 	 * This is used for preparing the lightset output for a SYNC
 	 * Typically used with DMX512 output
 	 * @param [IN] PortIndex
 	 */
 	virtual void Sync(const uint32_t PortIndex)= 0;
-	/**
-	 *
-	 * @param [IN] doForce This parameter is used with Art-Net ArtSync only.
-	 */
-	virtual void Sync(const bool doForce = false)= 0;
+	virtual void Sync()= 0;
 #if defined (OUTPUT_HAVE_STYLESWITCH)
 	virtual void SetOutputStyle(const uint32_t nPortIndex, const lightset::OutputStyle outputStyle)=0;
 	virtual lightset::OutputStyle GetOutputStyle(const uint32_t nPortIndex) const=0;
 #endif
 	// Optional
-	virtual void Blackout(__attribute__((unused)) bool bBlackout) {}
+	virtual uint32_t GetRefreshRate() { return 0; }
+	virtual void Blackout([[maybe_unused]] bool bBlackout) {}
 	virtual void FullOn() {}
 	virtual void Print() {}
 	// RDM Optional
-	virtual bool SetDmxStartAddress(uint16_t nDmxStartAddress);
-	virtual uint16_t GetDmxStartAddress();
-	virtual uint16_t GetDmxFootprint();
-	virtual bool GetSlotInfo(uint16_t nSlotOffset, lightset::SlotInfo &tSlotInfo);
-#if defined (LIGHTSET_HAVE_RUN)
-	virtual void Run()= 0;
-#endif
-#if defined (ESP8266)
-	static const char *GetOutputType(lightset::OutputType type);
-	static lightset::OutputType GetOutputType(const char *sType);
-#endif
+	virtual bool SetDmxStartAddress([[maybe_unused]] const uint16_t nDmxStartAddress) {
+		return false;
+	}
+	virtual uint16_t GetDmxStartAddress() {
+		return lightset::dmx::START_ADDRESS_DEFAULT;
+	}
+	virtual uint16_t GetDmxFootprint() {
+		return lightset::dmx::UNIVERSE_SIZE;
+	}
+	virtual bool GetSlotInfo([[maybe_unused]] const uint16_t nSlotOffset, lightset::SlotInfo &slotInfo) {
+		slotInfo.nType = 0x00; // ST_PRIMARY
+		slotInfo.nCategory = 0x0001; // SD_INTENSITY
+		return true;
+	}
 };
 
 #endif /* LIGHTSET_H_ */

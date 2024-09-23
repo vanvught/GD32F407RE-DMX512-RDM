@@ -2,7 +2,7 @@
  * @file gd32f407_mcu.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,18 +35,19 @@
 /**
  * 	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
  *
- * CK_APB1 x 4 = 168000000
+ * CK_APB1 x 4 = 200000000
  * TIMER1,2,3,4,5,6,11,12,13
  *
- * CK_APB2 x 2 = 168000000
+ * CK_APB2 x 2 = 200000000
  * TIMER0,7,8,9,10
  */
 
-#define MCU_CLOCK_FREQ      (uint32_t)(168000000)
-#define APB1_CLOCK_FREQ     (uint32_t)(42000000)
-#define APB2_CLOCK_FREQ     (uint32_t)(84000000)
-#define TIMER_PSC_1MHZ      (uint16_t)(167)
-#define TIMER_PSC_10KHZ     (uint16_t)(16799)
+#define MCU_CLOCK_FREQ      (uint32_t)(200000000)
+#define AHB_CLOCK_FREQ     	(uint32_t)(200000000)
+#define APB1_CLOCK_FREQ     (uint32_t)(50000000)
+#define APB2_CLOCK_FREQ     (uint32_t)(100000000)
+#define TIMER_PSC_1MHZ      (uint16_t)(199)
+#define TIMER_PSC_10KHZ     (uint16_t)(19999)
 
 #include "gd32f4xx_mcu.h"
 

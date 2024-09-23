@@ -1,26 +1,39 @@
 DEFINES=NDEBUG
 
-ifneq ($(MAKE_FLAGS),)
-	ifeq ($(findstring USE_LEDBLINK_BITBANGING595,$(MAKE_FLAGS)), USE_LEDBLINK_BITBANGING595)
-		EXTRA_SRCDIR=src/gd32/bitbanging
+EXTRA_SRCDIR=
+
+ifneq ($(MAKE_FLAGS),)	
+	ifeq (,$(findstring DISABLE_RTC,$(MAKE_FLAGS)))	  
+		ifeq (,$(findstring DISABLE_INTERNAL_RTC,$(MAKE_FLAGS)))
+			EXTRA_SRCDIR+=rtc/gd32
+  	endif
+  endif
+  
+	ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
+		ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
+			EXTRA_SRCDIR+=device/usb/host/gd32/h
+			EXTRA_INCLUDES+=device/usb/host/gd32/h
+		else
+			EXTRA_SRCDIR+=device/usb/host/gd32/f
+			EXTRA_INCLUDES+=device/usb/host/gd32/f
+		endif
+		EXTRA_SRCDIR+=device/usb/host/gd32
+		EXTRA_INCLUDES+=device/usb/host/gd32
 	endif
-	
-	ifneq (,$(findstring DEBUG_EMAC,$(MAKE_FLAGS)))
+  
+  ifneq (,$(findstring DEBUG_EMAC,$(MAKE_FLAGS)))
 		EXTRA_SRCDIR+=debug/emac/gd32
 	endif
-	
-	ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)
-  	EXTRA_SRCDIR+=device/usb/host/gd32
-  	EXTRA_INCLUDES+=device/usb/host/gd32
-  endif  
 else
-	EXTRA_SRCDIR+=debug/emac/gd32
-	EXTRA_SRCDIR+=ff12c ff12c/option
+	ifneq (, $(shell test -d '../lib-network/src/noemac' && echo -n yes))
+	else
+		EXTRA_SRCDIR+=debug/emac/gd32	
+	endif	
+	EXTRA_SRCDIR+=rtc/gd32
+#	EXTRA_SRCDIR+=device/usb/host/gd32
+#	EXTRA_INCLUDES+=device/usb/host/gd32
 	
-	EXTRA_SRCDIR+=device/usb/host/gd32
-  EXTRA_INCLUDES+=device/usb/host/gd32
-	
-	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
+#	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
 endif
 
 include Rules.mk

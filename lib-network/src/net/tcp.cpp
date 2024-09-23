@@ -2,7 +2,7 @@
  * @file tcp.cpp
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,38 +29,42 @@
  * LISTEN -> ESTABLISHED -> CLOSE_WAIT -> LAST_ACK -> CLOSED:LISTEN
  */
 
+#if defined (DEBUG_NET_TCP)
+# undef NDEBUG
+#endif
+
+#pragma GCC diagnostic push
 #if (__GNUC__ < 10)
-# pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wconversion"
 # pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
+#pragma GCC push_options
+#pragma GCC optimize ("O2")
+#pragma GCC optimize ("no-tree-loop-distribute-patterns")
 
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
 #include <cassert>
 
+#include "../config/net_config.h"
+
 #include "net.h"
+#include "net/protocol/tcp.h"
+
+#include "net_memcpy.h"
 #include "net_private.h"
 
 #include "hardware.h"
 
-#include "../config/net_config.h"
+#include "debug.h"
 
+namespace net {
 #define TCP_RX_MSS						(TCP_DATA_SIZE)
 #define TCP_RX_MAX_ENTRIES				(1U << 1) // Must always be a power of 2
 #define TCP_RX_MAX_ENTRIES_MASK			(TCP_RX_MAX_ENTRIES - 1)
 #define TCP_MAX_RX_WND 					(TCP_RX_MAX_ENTRIES * TCP_RX_MSS);
-
 #define TCP_TX_MSS						(TCP_DATA_SIZE)
-
-#define MAX_TCBS_ALLOWED				6
-
-namespace net {
-namespace globals {
-extern uint8_t macAddress[ETH_ADDR_LEN];
-}  // namespace globals
-}  // namespace net
 
 /**
  * Transmission control block (TCB)
@@ -128,7 +132,7 @@ struct ReceiveQueue {
 };
 
 struct Port {
-	tcb TCB[MAX_TCBS_ALLOWED];
+	tcb TCB[TCP_MAX_TCBS_ALLOWED];
 	ReceiveQueue receiveQueue;
 	uint16_t nLocalPort;
 };
@@ -253,13 +257,13 @@ static constexpr bool SEQ_GT(const uint32_t x, const uint32_t y) {
 	return static_cast<int32_t>(x - y) > 0;
 }
 
-static constexpr bool SEQ_GEQ(const uint32_t x, const uint32_t y) {
-	return static_cast<int32_t>(x - y) >= 0;
-}
-
-static constexpr bool SEQ_BETWEEN(const uint32_t l, const uint32_t x, const uint32_t h) {
-	return SEQ_LT(l, x) && SEQ_LT(x, h);
-}
+//static constexpr bool SEQ_GEQ(const uint32_t x, const uint32_t y) {
+//	return static_cast<int32_t>(x - y) >= 0;
+//}
+//
+//static constexpr bool SEQ_BETWEEN(const uint32_t l, const uint32_t x, const uint32_t h) {
+//	return SEQ_LT(l, x) && SEQ_LT(x, h);
+//}
 
 static constexpr bool  SEQ_BETWEEN_L(const uint32_t l, const uint32_t x, const uint32_t h)	{
 	return SEQ_LEQ(l, x) && SEQ_LT(x, h);	// low border inclusive
@@ -322,7 +326,7 @@ __attribute__((cold)) void tcp_init() {
 	DEBUG_ENTRY
 
 	/* Ethernet */
-	memcpy(s_tcp.ether.src, net::globals::macAddress, ETH_ADDR_LEN);
+	std::memcpy(s_tcp.ether.src, net::globals::netif_default.hwaddr, ETH_ADDR_LEN);
 	s_tcp.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
 	/* IPv4 */
 	s_tcp.ip4.ver_ihl = 0x45;
@@ -360,8 +364,8 @@ static uint16_t _chksum(struct t_tcp *pTcp, const struct tcb *pTcb, uint16_t nLe
 	memcpy(buf, pseu, TCP_PSEUDO_LEN);
 
 	// Generate TCP psuedo header
-	memcpy(pseu->srcIp, pTcb->localIp, IPv4_ADDR_LEN);
-	memcpy(pseu->dstIp, pTcb->remoteIp, IPv4_ADDR_LEN);
+	std::memcpy(pseu->srcIp, pTcb->localIp, IPv4_ADDR_LEN);
+	std::memcpy(pseu->dstIp, pTcb->remoteIp, IPv4_ADDR_LEN);
 	pseu->zero = 0;
 	pseu->proto = IPv4_PROTO_TCP;
 	pseu->length = __builtin_bswap16(nLength);
@@ -391,12 +395,12 @@ static void send_package(const struct tcb *pTcb, const struct SendInfo &sendInfo
 	const auto tcplen = nHeaderLength + pTcb->TX.size;
 
 	/* Ethernet */
-	memcpy(s_tcp.ether.dst, pTcb->remoteEthAddr, ETH_ADDR_LEN);
+	std::memcpy(s_tcp.ether.dst, pTcb->remoteEthAddr, ETH_ADDR_LEN);
 	/* IPv4 */
 	s_tcp.ip4.id = s_id++;
 	s_tcp.ip4.len = __builtin_bswap16(static_cast<uint16_t>(tcplen + sizeof(struct ip4_header)));
-	memcpy(s_tcp.ip4.src, pTcb->localIp, IPv4_ADDR_LEN);
-	memcpy(s_tcp.ip4.dst, pTcb->remoteIp, IPv4_ADDR_LEN);
+	std::memcpy(s_tcp.ip4.src, pTcb->localIp, IPv4_ADDR_LEN);
+	std::memcpy(s_tcp.ip4.dst, pTcb->remoteIp, IPv4_ADDR_LEN);
 	s_tcp.ip4.chksum = 0;
 #if !defined (CHECKSUM_BY_HARDWARE)
 	s_tcp.ip4.chksum = net_chksum(reinterpret_cast<void *>(&s_tcp.ip4), 20);
@@ -545,24 +549,77 @@ static void scan_options(struct t_tcp *pTcp, struct tcb *pTcb, const int32_t nDa
 }
 
 __attribute__((hot)) void tcp_run() {
-	for (auto nIndexPort = 0; nIndexPort < TCP_MAX_PORTS_ALLOWED; nIndexPort++) {
-		for (auto nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
-			auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
-
-			if (pTCB->state == STATE_CLOSE_WAIT) {
-				struct SendInfo info;
-				info.SEQ = pTCB->SND.NXT;
-				info.ACK = pTCB->RCV.NXT;
+	for (auto& port : s_Port) {
+		for (auto& tcb : port.TCB) {
+			if (tcb.state == STATE_CLOSE_WAIT) {
+				SendInfo info;
+				info.SEQ = tcb.SND.NXT;
+				info.ACK = tcb.RCV.NXT;
 				info.CTL = Control::FIN | Control::ACK;
 
-				send_package(pTCB, info);
+				send_package(&tcb, info);
 
-				NEW_STATE(pTCB, STATE_LAST_ACK);
+				NEW_STATE(&tcb, STATE_LAST_ACK);
 
-				pTCB->SND.NXT++;
+				tcb.SND.NXT++;
 			}
 		}
 	}
+}
+
+static bool find_matching_tcb(const t_tcp *pTcp, const uint32_t nIndexPort, uint32_t& nIndexTCB) {
+    for (nIndexTCB = 0; nIndexTCB < TCP_MAX_TCBS_ALLOWED; nIndexTCB++) {
+        auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
+
+        if (pTCB->state == STATE_LISTEN) {
+            continue;
+        }
+
+        if (pTCB->nRemotePort == pTcp->tcp.srcpt && memcmp(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool find_available_tcb(const uint32_t nIndexPort, uint32_t& nIndexTCB) {
+    for (nIndexTCB = 0; nIndexTCB < TCP_MAX_TCBS_ALLOWED; nIndexTCB++) {
+        auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
+
+        if (pTCB->state == STATE_LISTEN) {
+            DEBUG_PUTS("pTCB->state == STATE_LISTEN");
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void find_tcb(const t_tcp *pTcp, uint32_t& nIndexPort, uint32_t& nIndexTCB) {
+    // Search each port for a match with the destination port
+    for (nIndexPort = 0; nIndexPort < TCP_MAX_PORTS_ALLOWED; nIndexPort++) {
+        if (s_Port[nIndexPort].nLocalPort != pTcp->tcp.dstpt) {
+            continue;
+        }
+
+        // Search for an existing active TCB matching the source IP and port
+        if (find_matching_tcb(pTcp, nIndexPort, nIndexTCB)) {
+            DEBUG_EXIT
+            return;
+        }
+
+        // If no matching TCB, find an available TCB in listening state
+        if (find_available_tcb(nIndexPort, nIndexTCB)) {
+            DEBUG_EXIT
+            return;
+        }
+
+        // If no available TCB, trigger retransmission
+        DEBUG_PUTS("MAX_TCB_ALLOWED -> Force retransmission");
+        DEBUG_EXIT
+        return;
+    }
 }
 
 /**
@@ -576,69 +633,33 @@ __attribute__((hot)) void tcp_handle(struct t_tcp *pTcp) {
 
 	DEBUG_PRINTF(IPSTR ":%d[%d] -> %d", pTcp->ip4.src[0], pTcp->ip4.src[1], pTcp->ip4.src[2], pTcp->ip4.src[3], pTcp->tcp.dstpt, pTcp->tcp.srcpt, tcplen);
 
-	uint32_t nIndexPort;
-	/*
-	  src/net/tcp.cpp: In function 'void tcp_handle(t_tcp*)':
-src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this function [-Werror=maybe-uninitialized]
-  871 |                 switch (pTCB->state) {
-	 */
+	uint32_t nIndexPort = 0;
 	uint32_t nIndexTCB = 0;
-
-	// Find a TCB
-	for (nIndexPort = 0; nIndexPort < TCP_MAX_PORTS_ALLOWED; nIndexPort++) {
-		if (s_Port[nIndexPort].nLocalPort == pTcp->tcp.dstpt) {
-			// Find an active TCB
-			for (nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
-				auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
-				if (pTCB->state != STATE_LISTEN) {
-					if ((pTCB->nRemotePort == pTcp->tcp.srcpt) && (memcmp(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN) == 0)) {
-						break;
-					}
-				}
-			}
-
-			if (nIndexTCB == MAX_TCBS_ALLOWED) {
-				// Find an available TCB
-				for (nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
-					auto *pTCB = &s_Port[nIndexPort].TCB[nIndexTCB];
-					if (pTCB->state == STATE_LISTEN) {
-						break;
-					}
-				}
-
-				if (nIndexTCB == MAX_TCBS_ALLOWED) {
-					DEBUG_PUTS("MAX_TCB_ALLOWED -> Force retransmission");
-					DEBUG_EXIT
-					return;
-				}
-			}
-
-			break;
-		}
-	}
+	find_tcb(pTcp, nIndexPort, nIndexTCB);
+	DEBUG_PRINTF("nIndexPort=%u, nIndexTCB=%u", nIndexPort, nIndexTCB);
 
 	const auto nDataOffset = offset2octets(pTcp->tcp.offset);
 
 	// https://www.rfc-editor.org/rfc/rfc9293.html#name-closed-state
 	// CLOSED (i.e., TCB does not exist)
 	if (nIndexPort == TCP_MAX_PORTS_ALLOWED) {
-		DEBUG_PUTS("TCP_MAX_PORTS_ALLOWED");
 		struct tcb TCB;
 
-		memset(&TCB, 0, sizeof(struct tcb));
+		std::memset(&TCB, 0, sizeof(struct tcb));
 
 		TCB.nLocalPort = pTcp->tcp.dstpt;
-		memcpy(TCB.localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
+		std::memcpy(TCB.localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
 
 		TCB.nRemotePort = pTcp->tcp.srcpt;
-		memcpy(TCB.remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
-		memcpy(TCB.remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
+		std::memcpy(TCB.remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
+		std::memcpy(TCB.remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
 
 		_bswap32(pTcp);
 
 		scan_options(pTcp, &TCB, nDataOffset);
 		send_reset(pTcp, &TCB);
 
+		DEBUG_PUTS("TCP_MAX_PORTS_ALLOWED");
 		DEBUG_EXIT
 		return;
 	}
@@ -648,19 +669,6 @@ src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this fun
 	_bswap32(pTcp);
 	pTcp->tcp.window = __builtin_bswap16(pTcp->tcp.window);
 	pTcp->tcp.urgent = __builtin_bswap16(pTcp->tcp.urgent);
-
-	DEBUG_PRINTF("%c%c%c%c%c%c SEQ=%u, ACK=%u, tcplen=%u, data_offset=%u, data_length=%u",
-			pTcp->tcp.control & Control::URG ? 'U' : '-',
-			pTcp->tcp.control & Control::ACK ? 'A' : '-',
-			pTcp->tcp.control & Control::PSH ? 'P' : '-',
-			pTcp->tcp.control & Control::RST ? 'R' : '-',
-			pTcp->tcp.control & Control::SYN ? 'S' : '-',
-			pTcp->tcp.control & Control::FIN ? 'F' : '-',
-			_get_seqnum(pTcp),
-			_get_acknum(pTcp),
-			tcplen,
-			nDataOffset,
-			nDataLength);
 
 	SendInfo sendInfo;
 
@@ -691,11 +699,11 @@ src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this fun
 
 	// https://www.rfc-editor.org/rfc/rfc9293.html#name-listen-state
 	if (pTCB->state == STATE_LISTEN) {
-		memcpy(pTCB->localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
+		std::memcpy(pTCB->localIp, pTcp->ip4.dst, IPv4_ADDR_LEN);
 
 		pTCB->nRemotePort = pTcp->tcp.srcpt;
-		memcpy(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
-		memcpy(pTCB->remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
+		std::memcpy(pTCB->remoteIp, pTcp->ip4.src, IPv4_ADDR_LEN);
+		std::memcpy(pTCB->remoteEthAddr, pTcp->ether.src, ETH_ADDR_LEN);
 
 		// First, check for a RST
 		// An incoming RST should be ignored.
@@ -711,6 +719,7 @@ src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this fun
 		if (pTcp->tcp.control & Control::ACK) {
 			send_reset(pTcp, pTCB);
 
+			DEBUG_PUTS("pTcp->tcp.control & Control::ACK");
 			DEBUG_EXIT
 			return;
 		}
@@ -848,8 +857,9 @@ src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this fun
 				return;
 			}
 
-			DEBUG_PUTS("_send_reset");
 			send_reset(pTcp, pTCB);
+
+			DEBUG_PUTS("pTcp->tcp.control & Control::SYN");
 		}
 
 		/*  fifth check the ACK field, *//* Page 72 */
@@ -874,8 +884,9 @@ src/net/tcp.cpp:871:31: error: 'nIndexTCB' may be used uninitialized in this fun
 				return;
 			} else {
 				// <SEQ=SEG.ACK><CTL=RST>
-				DEBUG_PUTS("_send_reset");
 				send_reset(pTcp, pTCB);
+
+				DEBUG_PUTS("<SEQ=SEG.ACK><CTL=RST>");
 			}
 			break;
 		case STATE_ESTABLISHED:
@@ -1083,7 +1094,7 @@ int tcp_begin(const uint16_t nLocalPort) {
 		if (s_Port[i].nLocalPort == 0) {
 			s_Port[i].nLocalPort = nLocalPort;
 
-			for (uint32_t nIndexTCB = 0; nIndexTCB < MAX_TCBS_ALLOWED; nIndexTCB++) {
+			for (uint32_t nIndexTCB = 0; nIndexTCB < TCP_MAX_TCBS_ALLOWED; nIndexTCB++) {
 				// create transmission control block's (TCB)
 				_init_tcb(&s_Port[i].TCB[nIndexTCB], nLocalPort);
 			}
@@ -1125,15 +1136,17 @@ uint16_t tcp_read(const int32_t nHandleListen, const uint8_t **pData, uint32_t &
 	return pQueueEntry->nSize;
 }
 
-void tcp_write(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLength, uint32_t nHandleConnection) {
-	assert(nHandleListen >= 0);
-	assert(nHandleListen < TCP_MAX_PORTS_ALLOWED);
-	assert(pBuffer != nullptr);
-	assert(nHandleConnection < MAX_TCBS_ALLOWED);
+static void _write(struct tcb *pTCB, const uint8_t *pBuffer, const uint32_t nLength, const bool isLastSegment) {
+	assert(nLength != 0);
+	assert(nLength <= static_cast<uint32_t>(TCP_DATA_SIZE));
 
-	nLength = std::min(nLength, static_cast<uint16_t>(TCP_DATA_SIZE));
+	DEBUG_PRINTF("nLength=%u, pTCB->SND.WND=%u", nLength, pTCB->SND.WND);
 
-	auto *pTCB = &s_Port[nHandleListen].TCB[nHandleConnection];
+    if (nLength > pTCB->SND.WND) {
+    	console_error("Retry or queue the data for later transmission\n");
+        // TODO retry or queue the data for later transmission.
+        return;
+    }
 
 	pTCB->TX.data = const_cast<uint8_t *>(pBuffer);
 	pTCB->TX.size = nLength;
@@ -1141,14 +1154,38 @@ void tcp_write(const int32_t nHandleListen, const uint8_t *pBuffer, uint16_t nLe
 	struct SendInfo info;
 	info.SEQ = pTCB->SND.NXT;
 	info.ACK = pTCB->RCV.NXT;
-	info.CTL = Control::ACK | Control::PSH;
+	info.CTL = Control::ACK;
+	if (isLastSegment) {
+		info.CTL |= Control::PSH;
+	}
 
 	send_package(pTCB, info);
 
 	pTCB->TX.data = nullptr;
 	pTCB->TX.size = 0;
 
-	pTCB->SND.NXT += nLength;
+    pTCB->SND.NXT += nLength;
+    pTCB->SND.WND -= nLength;
 }
 
+void tcp_write(const int32_t nHandleListen, const uint8_t *pBuffer, uint32_t nLength, uint32_t nHandleConnection) {
+	assert(nHandleListen >= 0);
+	assert(nHandleListen < TCP_MAX_PORTS_ALLOWED);
+	assert(pBuffer != nullptr);
+	assert(nHandleConnection < TCP_MAX_TCBS_ALLOWED);
+
+	auto *pTCB = &s_Port[nHandleListen].TCB[nHandleConnection];
+	assert(pTCB != nullptr);
+
+	const auto *p = pBuffer;
+
+	while (nLength > 0) {
+		const auto nWriteLength = (nLength > TCP_DATA_SIZE) ? TCP_DATA_SIZE : nLength;
+		const bool isLastSegment = (nLength < TCP_DATA_SIZE);
+		_write(pTCB, p, nWriteLength, isLastSegment);
+		p += nWriteLength;
+		nLength -= nWriteLength;
+	}
+}
+}  // namespace net
 // <---

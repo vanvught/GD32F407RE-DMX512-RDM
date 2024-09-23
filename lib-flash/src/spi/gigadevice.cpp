@@ -12,7 +12,7 @@
 /*
  * Original code : https://github.com/martinezjavier/u-boot/blob/master/drivers/mtd/spi/gigadevice.c
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,11 @@ static constexpr struct gigadevice_spi_flash_params gigadevice_spi_flash_table[]
 		"GD25LQ",
 	},
 	{
+		0x4015,
+		8,
+		"GD25Q40",
+	},
+	{
 		0x4017,
 		128,
 		"GD25Q64B",
@@ -68,10 +73,11 @@ int spi_flash_probe_gigadevice(struct spi_flash *flash, uint8_t *idcode) {
 	}
 
 	if (i == ARRAY_SIZE(gigadevice_spi_flash_table)) {
-		DEBUG_PRINTF("SF: Unsupported Gigadevice ID %02x%02x", idcode[1], idcode[2]);
+		DEBUG_PRINTF("SF: Unsupported GigaDevice ID %02x%02x", idcode[1], idcode[2]);
 		return -1;
 	}
 
+	flash->name = params->name;
 	flash->page_size = 256;
 	flash->sector_size = flash->page_size * 16;
 	flash->size = flash->sector_size * 16 * params->nr_blocks;

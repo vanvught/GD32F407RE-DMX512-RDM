@@ -1,4 +1,3 @@
-#if defined (BARE_METAL) || defined (RASPPI)
 /**
  * @file rdmsubdevicebwlcd.cpp
  *
@@ -30,7 +29,7 @@
 
 #include "cstdio"
 
-#include "rdmsubdevicebwlcd.h"
+#include "spi/rdmsubdevicebwlcd.h"
 
 #include "bwspilcd.h"
 
@@ -42,7 +41,7 @@ static constexpr uint32_t DMX_FOOTPRINT = 4;
 static RDMPersonality *s_RDMPersonalities[] = {new RDMPersonality("LCD 4-slots H", DMX_FOOTPRINT), new RDMPersonality("LCD 4-slots D", DMX_FOOTPRINT), new RDMPersonality("LCD 4-slots %%", DMX_FOOTPRINT)};
 static constexpr char s_aLine[bw::lcd::max_characters + 1] = "--- --- --- --- ";
 
-RDMSubDeviceBwLcd::RDMSubDeviceBwLcd(uint16_t nDmxStartAddress, char nChipSselect, uint8_t nSlaveAddress, __attribute__((unused)) uint32_t nSpiSpeed):
+RDMSubDeviceBwLcd::RDMSubDeviceBwLcd(uint16_t nDmxStartAddress, char nChipSselect, uint8_t nSlaveAddress, [[maybe_unused]] uint32_t nSpiSpeed):
 	RDMSubDevice("bw_spi_lcd", nDmxStartAddress), m_BwSpiLcd(nChipSselect, nSlaveAddress)
 {
 	SetDmxFootprint(DMX_FOOTPRINT);
@@ -271,4 +270,3 @@ void RDMSubDeviceBwLcd::DisplayUpdatePersonality() {
 		break;
 	}
 }
-#endif

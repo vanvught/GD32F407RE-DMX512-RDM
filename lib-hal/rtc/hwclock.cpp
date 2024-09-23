@@ -2,7 +2,7 @@
  * @file hwclock.cpp
  *
  */
-/* Copyright (C) 2020-2021 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2020-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +34,7 @@
 
 #include "debug.h"
 
-using namespace rtc;
-
-HwClock *HwClock::s_pThis = nullptr;
+HwClock *HwClock::s_pThis;
 
 HwClock::HwClock() {
 	assert(s_pThis == nullptr);
@@ -52,27 +50,25 @@ void HwClock::Print() {
 	const char *pType = "Unknown";
 
 	switch (m_Type) {
-	case Type::MCP7941X:
+	case rtc::Type::MCP7941X:
 		pType = "MCP7941X";
 		break;
-	case Type::DS3231:
+	case rtc::Type::DS3231:
 		pType = "DS3231";
 		break;
-	case Type::PCF8563:
+	case rtc::Type::PCF8563:
 		pType = "PCF8563";
 		break;
-	case Type::SOC_INTERNAL:
+	case rtc::Type::SOC_INTERNAL:
 		pType = "SOC_INTERNAL";
 		break;
 	default:
 		break;
 	}
 
-	printf("%s\n", pType);
-
-	struct rtc_time tm;
+	struct tm tm;
 	RtcGet(&tm);
-	printf("%.4d/%.2d/%.2d %.2d:%.2d:%.2d\n", 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	printf("%s %.4d/%.2d/%.2d %.2d:%.2d:%.2d\n", pType, 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 }
 
 /*
@@ -85,39 +81,28 @@ void HwClock::HcToSys() {
 		return;
 	}
 
-	assert(Hardware::Get() != nullptr);
-	const bool bIsWatchdog = Hardware::Get()->IsWatchdog();
+	const auto bIsWatchdog = Hardware::Get()->IsWatchdog();
 
 	if (bIsWatchdog) {
 		Hardware::Get()->WatchdogStop();
 	}
 
-	struct rtc_time rtcT1;
-	struct rtc_time rtcT2;
-
+	struct tm rtcT1;
 	struct timeval tvT1;
-	struct timeval tvT2;
 
 	RtcGet(&rtcT1);
 	gettimeofday(&tvT1, nullptr);
 
-	const int32_t nSecondsT1 = rtcT1.tm_sec + rtcT1.tm_min * 60;
+	const auto nSecondsT1 = rtcT1.tm_sec + rtcT1.tm_min * 60;
+	const auto nSeconds = mktime(&rtcT1);
 
-	struct tm tm;
-
-	tm.tm_sec = rtcT1.tm_sec;
-	tm.tm_min = rtcT1.tm_min;
-	tm.tm_hour = rtcT1.tm_hour;
-	tm.tm_mday = rtcT1.tm_mday;
-	tm.tm_mon = rtcT1.tm_mon;
-	tm.tm_year = rtcT1.tm_year;
-
-	const time_t nSeconds = mktime(&tm);
+	struct tm rtcT2;
+	struct timeval tvT2;
 
 	while(true) {
 		RtcGet(&rtcT2);
 
-		const int32_t nSeconds2 = rtcT2.tm_sec + rtcT2.tm_min * 60;
+		const auto nSeconds2 = rtcT2.tm_sec + rtcT2.tm_min * 60;
 
 		if (nSecondsT1 != nSeconds2) {
 			gettimeofday(&tvT2, nullptr);
@@ -159,8 +144,7 @@ void HwClock::SysToHc() {
 		return;
 	}
 
-	assert(Hardware::Get() != nullptr);
-	const bool bIsWatchdog = Hardware::Get()->IsWatchdog();
+	const auto bIsWatchdog = Hardware::Get()->IsWatchdog();
 
 	if (bIsWatchdog) {
 		Hardware::Get()->WatchdogStop();
@@ -174,18 +158,8 @@ void HwClock::SysToHc() {
 		gettimeofday(&tv2, nullptr);
 
 		if (tv2.tv_sec >= (tv1.tv_sec + 1)) {
-			const struct tm *tm = localtime(&tv2.tv_sec);
-
-			struct rtc_time rtc;
-
-			rtc.tm_sec = tm->tm_sec;
-			rtc.tm_min = tm->tm_min;
-			rtc.tm_hour = tm->tm_hour;
-			rtc.tm_mday = tm->tm_mday;
-			rtc.tm_mon = tm->tm_mon;
-			rtc.tm_year = tm->tm_year;
-
-			RtcSet(&rtc);
+			const auto *tm = gmtime(&tv2.tv_sec);
+			RtcSet(tm);
 			break;
 		}
 	}

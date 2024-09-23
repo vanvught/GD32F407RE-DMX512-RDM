@@ -7,15 +7,15 @@ LD	= $(PREFIX)ld
 AR	= $(PREFIX)ar
 
 ROOT = ./../../..
-INCLUDES := -I$(ROOT)/lib-network/include -I$(ROOT)/lib-remoteconfig/include
+INCLUDES := -I$(ROOT)/lib-hal/include -I$(ROOT)/lib-network/include -I$(ROOT)/lib-remoteconfig/include -I$(ROOT)/lib-configstore/include -I$(ROOT)/lib-debug/include
 COPS := -std=c++11 -Wall -Werror
 
 all : content generate_json_switch
 
 clean : 
-	rm generate_content
-	rm generate_json_switch
-	rm *.h
+	rm -rf generate_content
+	rm -rf generate_json_switch
+	rm -rf *.h
 		
 generate_content : Makefile generate_content.cpp
 	$(CPP) generate_content.cpp $(INCLUDES) $(COPS) -o generate_content 
