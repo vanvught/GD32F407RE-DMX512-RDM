@@ -1,8 +1,7 @@
 /**
  * @file oscserver.cpp
- *
  */
-/* Copyright (C) 2017-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +22,10 @@
  * THE SOFTWARE.
  */
 
+#if defined(DEBUG_OSCSERVER)
+#undef NDEBUG
+#endif
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -33,368 +36,381 @@
 #include "oscsimplemessage.h"
 #include "oscsimplesend.h"
 #include "oscblob.h"
+#include "dmxnode.h"
+#include "hal_boardinfo.h"
+#include "firmware/debug/debug_dump.h"
+ #include "firmware/debug/debug_debug.h"
 
-#include "lightset.h"
-#include "network.h"
-
-#include "hardware.h"
-
-#include "debug.h"
-
-#define OSCSERVER_DEFAULT_PATH_PRIMARY		"/dmx1"
-#define OSCSERVER_DEFAULT_PATH_SECONDARY	OSCSERVER_DEFAULT_PATH_PRIMARY"/*"
-#define OSCSERVER_DEFAULT_PATH_INFO			"/2"
-#define OSCSERVER_DEFAULT_PATH_BLACKOUT		OSCSERVER_DEFAULT_PATH_PRIMARY "/blackout"
+#define OSCSERVER_DEFAULT_PATH_PRIMARY "/dmx1"
+#define OSCSERVER_DEFAULT_PATH_SECONDARY OSCSERVER_DEFAULT_PATH_PRIMARY "/*"
+#define OSCSERVER_DEFAULT_PATH_INFO "/2"
+#define OSCSERVER_DEFAULT_PATH_BLACKOUT OSCSERVER_DEFAULT_PATH_PRIMARY "/blackout"
 
 #define SOFTWARE_VERSION "1.0"
 
-char OscServer::s_aPath[osc::server::Max::PATH_LENGTH];
-char OscServer::s_aPathSecond[osc::server::Max::PATH_LENGTH];
-char OscServer::s_aPathInfo[osc::server::Max::PATH_LENGTH];
-char OscServer::s_aPathBlackOut[osc::server::Max::PATH_LENGTH];
+OscServer::OscServer()
+{
+    DEBUG_ENTRY();
 
-char *OscServer::s_pUdpBuffer;
-uint8_t OscServer::s_pData[lightset::dmx::UNIVERSE_SIZE];
-uint8_t OscServer::s_pOsc[lightset::dmx::UNIVERSE_SIZE];
+    assert(s_this == nullptr);
+    s_this = this;
 
-OscServer *OscServer::s_pThis;
+    memset(s_path, 0, sizeof(s_path));
+    strcpy(s_path, OSCSERVER_DEFAULT_PATH_PRIMARY);
 
-OscServer::OscServer() {
-	DEBUG_ENTRY
-	assert(s_pThis == nullptr);
-	s_pThis = this;
+    memset(s_path_second, 0, sizeof(s_path_second));
+    strcpy(s_path_second, OSCSERVER_DEFAULT_PATH_SECONDARY);
 
-	memset(s_aPath, 0, sizeof(s_aPath));
-	strcpy(s_aPath, OSCSERVER_DEFAULT_PATH_PRIMARY);
+    memset(s_path_info, 0, sizeof(s_path_info));
+    strcpy(s_path_info, OSCSERVER_DEFAULT_PATH_INFO);
 
-	memset(s_aPathSecond, 0, sizeof(s_aPathSecond));
-	strcpy(s_aPathSecond, OSCSERVER_DEFAULT_PATH_SECONDARY);
+    memset(s_path_blackout, 0, sizeof(s_path_blackout));
+    strcpy(s_path_blackout, OSCSERVER_DEFAULT_PATH_BLACKOUT);
 
-	memset(s_aPathInfo, 0, sizeof(s_aPathInfo));
-	strcpy(s_aPathInfo, OSCSERVER_DEFAULT_PATH_INFO);
+    snprintf(os_, sizeof(os_) - 1, "[V%s] %s", SOFTWARE_VERSION, __DATE__);
 
-	memset(s_aPathBlackOut, 0, sizeof(s_aPathBlackOut));
-	strcpy(s_aPathBlackOut, OSCSERVER_DEFAULT_PATH_BLACKOUT);
+    uint8_t text_length;
+    model_ = hal::BoardName(text_length);
+    soc_ = hal::SocName(text_length);
 
-	snprintf(m_Os, sizeof(m_Os) - 1, "[V%s] %s", SOFTWARE_VERSION, __DATE__);
+    if (soc_[0] == '\0')
+    {
+        soc_ = hal::CpuName(text_length);
+    }
 
-	uint8_t nHwTextLength;
-	m_pModel = Hardware::Get()->GetBoardName(nHwTextLength);
-	m_pSoC = Hardware::Get()->GetSocName(nHwTextLength);
-
-	if (m_pSoC[0] == '\0') {
-		m_pSoC = Hardware::Get()->GetCpuName(nHwTextLength);
-	}
-
-	DEBUG_EXIT
+    DEBUG_EXIT();
 }
 
-OscServer::~OscServer() {
-	DEBUG_ENTRY
+void OscServer::SetPath(const char* path)
+{
+    if (*path == '/')
+    {
+        auto length = sizeof(s_path) - 3; // We need space for '\0' and "/*"
+        strncpy(s_path, path, length);
+        s_path[sizeof(s_path) - 1] = '\0';
 
-	DEBUG_EXIT
+        length = strlen(s_path);
+
+        if (s_path[length - 1] == '/')
+        {
+            s_path[length - 1] = '\0';
+        }
+
+        strncpy(s_path_second, s_path, sizeof(s_path_second) - 3);
+
+        length = strlen(s_path_second);
+        assert(length < (sizeof(s_path_second) - 3));
+
+        s_path_second[length++] = '/';
+        s_path_second[length++] = '*';
+        s_path_second[length] = '\0';
+    }
+
+    DEBUG_PUTS(s_path);
+    DEBUG_PUTS(s_path_second);
 }
 
-void OscServer::Start() {
-	DEBUG_ENTRY
+void OscServer::SetPathInfo(const char* path_info)
+{
+    if (*path_info == '/')
+    {
+        strncpy(s_path_info, path_info, sizeof(s_path_info));
+        s_path_info[sizeof(s_path_info) - 1] = '\0';
 
-	m_nHandle = Network::Get()->Begin(m_nPortIncoming);
-	assert(m_nHandle != -1);
+        const auto kLength = strlen(s_path_info);
 
-	OscSimpleSend MsgSend(m_nHandle, Network::Get()->GetIp() | ~(Network::Get()->GetNetmask()), m_nPortIncoming, "/ping", nullptr);
+        if (s_path_info[kLength - 1] == '/')
+        {
+            s_path_info[kLength - 1] = '\0';
+        }
+    }
 
-	Hardware::Get()->SetMode(hardware::ledblink::Mode::NORMAL);
-
-	DEBUG_EXIT
+    DEBUG_PUTS(s_path_info);
 }
 
-void OscServer::Stop() {
-	if (m_pLightSet != nullptr) {
-		m_pLightSet->Stop(0);
-	}
+void OscServer::SetPathBlackOut(const char* path_black_out)
+{
+    if (*path_black_out == '/')
+    {
+        strncpy(s_path_blackout, path_black_out, sizeof(s_path_info));
+        s_path_blackout[sizeof(s_path_info) - 1] = '\0';
+
+        const auto kLength = strlen(s_path_blackout);
+
+        if (s_path_blackout[kLength - 1] == '/')
+        {
+            s_path_blackout[kLength - 1] = '\0';
+        }
+    }
+
+    DEBUG_PUTS(s_path_blackout);
 }
 
-void OscServer::SetPath(const char* pPath) {
-	if (*pPath == '/') {
-		auto nLength = sizeof(s_aPath) - 3; // We need space for '\0' and "/*"
-		strncpy(s_aPath, pPath, nLength);
-		s_aPath[sizeof(s_aPath) - 1] = '\0';
+int OscServer::GetChannel(const char* p)
+{
+    assert(p != nullptr);
 
-		nLength = strlen(s_aPath);
+    auto* s = const_cast<char*>(p) + strlen(s_path) + 1;
+    int channel = 0;
+    int i;
 
-		if (s_aPath[nLength - 1] == '/') {
-			s_aPath[nLength - 1] = '\0';
-		}
+    for (i = 0; (i < 3) && (*s != '\0'); i++)
+    {
+        int c = *s;
 
-		strncpy(s_aPathSecond, s_aPath, sizeof(s_aPathSecond) - 3);
+        if ((c < '0') || (c > '9'))
+        {
+            return -1;
+        }
 
-		nLength = strlen(s_aPathSecond);
-		assert(nLength < (sizeof(s_aPathSecond) - 3));
+        channel = channel * 10 + c - '0';
+        s++;
+    }
 
-		s_aPathSecond[nLength++] = '/';
-		s_aPathSecond[nLength++] = '*';
-		s_aPathSecond[nLength] = '\0';
-	}
+    if (channel > static_cast<int32_t>(dmxnode::kUniverseSize))
+    {
+        return -1;
+    }
 
-	DEBUG_PUTS(s_aPath);
-	DEBUG_PUTS(s_aPathSecond);
+    return channel;
 }
 
-void OscServer::SetPathInfo(const char* pPathInfo) {
-	if (*pPathInfo == '/') {
-		strncpy(s_aPathInfo, pPathInfo, sizeof(s_aPathInfo));
-		s_aPathInfo[sizeof(s_aPathInfo) - 1] = '\0';
+bool OscServer::IsDmxDataChanged(const uint8_t* data, uint16_t start_channel, uint32_t length)
+{
+    assert(data != nullptr);
+    assert(length <= dmxnode::kUniverseSize);
 
-		auto nLength = strlen(s_aPathInfo);
+    auto is_changed = false;
+    const auto* src = data;
+    auto* dst = &s_data[--start_channel];
+    const auto kEnd = start_channel + length;
 
-		if (s_aPathInfo[nLength - 1] == '/') {
-			s_aPathInfo[nLength - 1] = '\0';
-		}
-	}
+    assert(kEnd <= dmxnode::kUniverseSize);
 
-	DEBUG_PUTS(s_aPathInfo);
+    for (uint32_t i = start_channel; i < kEnd; i++)
+    {
+        if (*dst != *src)
+        {
+            *dst = *src;
+            is_changed = true;
+        }
+        dst++;
+        src++;
+    }
+
+    return is_changed;
 }
 
-void OscServer::SetPathBlackOut(const char* pPathBlackOut) {
-	if (*pPathBlackOut == '/') {
-		strncpy(s_aPathBlackOut, pPathBlackOut, sizeof(s_aPathInfo));
-		s_aPathBlackOut[sizeof(s_aPathInfo) - 1] = '\0';
+void OscServer::Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port)
+{
+    auto is_dmx_data_changed = false;
 
-		auto nLength = strlen(s_aPathBlackOut);
+    OscSimpleMessage msg(buffer, size);
 
-		if (s_aPathBlackOut[nLength - 1] == '/') {
-			s_aPathBlackOut[nLength - 1] = '\0';
-		}
-	}
+    auto* udp_buffer = reinterpret_cast<const char*>(buffer);
 
-	DEBUG_PUTS(s_aPathBlackOut);
-}
+    debug::Dump(udp_buffer, size);
 
-int OscServer::GetChannel(const char* p) {
-	assert(p != nullptr);
+    DEBUG_PRINTF("[%d] path : %s", size, osc::get_path(const_cast<char*>(udp_buffer), size));
 
-	auto *s = const_cast<char *>(p) + strlen(s_aPath) + 1;
-	int nChannel = 0;
-	int i;
+    if (osc::is_match(udp_buffer, s_path))
+    {
+        const auto kArgc = msg.GetArgc();
 
-	for (i = 0; (i < 3) && (*s != '\0'); i++) {
-		int c = *s;
+        if ((kArgc == 1) && (msg.GetType(0) == osc::type::BLOB))
+        {
+            DEBUG_PUTS("Blob received");
 
-		if ((c < '0') || (c > '9')) {
-			return -1;
-		}
+            OSCBlob blob = msg.GetBlob(0);
+            const auto kSize = static_cast<uint16_t>(blob.GetDataSize());
 
-		nChannel = nChannel * 10 + c - '0';
-		s++;
-	}
+            if (kSize <= dmxnode::kUniverseSize)
+            {
+                const auto* ptr = blob.GetDataPtr();
 
-	if (nChannel > static_cast<int32_t>(lightset::dmx::UNIVERSE_SIZE)) {
-		return -1;
-	}
+                is_dmx_data_changed = IsDmxDataChanged(ptr, 1, kSize);
 
-	return nChannel;
-}
+                if (is_dmx_data_changed || enable_no_change_update_)
+                {
+                    if ((!partial_transmission_) || (kSize == dmxnode::kUniverseSize))
+                    {
+                        dmxnode_output_type_->SetData<true>(0, s_data, dmxnode::kUniverseSize);
+                    }
+                    else
+                    {
+                        last_channel_ = (kSize > last_channel_ ? kSize : last_channel_);
+                        dmxnode_output_type_->SetData<true>(0, s_data, last_channel_);
+                    }
 
-bool OscServer::IsDmxDataChanged(const uint8_t* pData, uint16_t nStartChannel, uint32_t nLength) {
-	assert(pData != nullptr);
-	assert(nLength <= lightset::dmx::UNIVERSE_SIZE);
+                    if (!is_running_)
+                    {
+                        is_running_ = true;
+                        dmxnode_output_type_->Start(0);
+                    }
+                }
+            }
+            else
+            {
+                DEBUG_PUTS("Too many channels");
+                return;
+            }
+        }
+        else if ((kArgc == 2) && (msg.GetType(0) == osc::type::INT32))
+        {
+            auto channel = static_cast<uint16_t>(1 + msg.GetInt(0));
 
-	auto isChanged = false;
-	const auto *src = pData;
-	auto *dst = &s_pData[--nStartChannel];
-	const auto nEnd = nStartChannel + nLength;
+            if ((channel < 1) || (channel > dmxnode::kUniverseSize))
+            {
+                DEBUG_PRINTF("Invalid channel [%d]", channel);
+                return;
+            }
 
-	assert(nEnd <= lightset::dmx::UNIVERSE_SIZE);
+            uint8_t data;
 
-	for (uint32_t i = nStartChannel; i < nEnd; i++) {
-		if (*dst != *src) {
-			*dst = *src;
-			isChanged = true;
-		}
-		dst++;
-		src++;
-	}
+            if (msg.GetType(1) == osc::type::INT32)
+            {
+                DEBUG_PUTS("ii received");
+                data = static_cast<uint8_t>(msg.GetInt(1));
+            }
+            else if (msg.GetType(1) == osc::type::FLOAT)
+            {
+                DEBUG_PUTS("if received");
+                data = static_cast<uint8_t>(msg.GetFloat(1) * dmxnode::kDmxMaxValue);
+            }
+            else
+            {
+                return;
+            }
 
-	return isChanged;
-}
+            DEBUG_PRINTF("channel = %d, data = %.2x", channel, data);
 
-void OscServer::Run() {
-	uint32_t nRemoteIp;
-	uint16_t nRemotePort;
+            is_dmx_data_changed = IsDmxDataChanged(&data, channel, 1);
 
-	const auto nBytesReceived = Network::Get()->RecvFrom(m_nHandle, const_cast<const void **>(reinterpret_cast<void **>(&s_pUdpBuffer)), &nRemoteIp, &nRemotePort);
+            if (is_dmx_data_changed || enable_no_change_update_)
+            {
+                if (!partial_transmission_)
+                {
+                    dmxnode_output_type_->SetData<true>(0, s_data, dmxnode::kUniverseSize);
+                }
+                else
+                {
+                    last_channel_ = channel > last_channel_ ? channel : last_channel_;
+                    dmxnode_output_type_->SetData<true>(0, s_data, last_channel_);
+                }
 
-	if (__builtin_expect((nBytesReceived == 0), 1)) {
-		return;
-	}
+                if (!is_running_)
+                {
+                    is_running_ = true;
+                    dmxnode_output_type_->Start(0);
+                }
+            }
+        }
 
-	auto bIsDmxDataChanged = false;
+        return;
+    }
 
-	OscSimpleMessage Msg(s_pUdpBuffer, nBytesReceived);
+    if ((handler_ != nullptr) && (osc::is_match(udp_buffer, s_path_blackout)))
+    {
+        if (msg.GetType(0) != osc::type::FLOAT)
+        {
+            DEBUG_PUTS("No float");
+            return;
+        }
 
-	debug_dump(s_pUdpBuffer, nBytesReceived);
+        if (msg.GetFloat(0) != 0)
+        {
+            handler_->Blackout();
+            DEBUG_PUTS("Blackout");
+        }
+        else
+        {
+            handler_->Update();
+            DEBUG_PUTS("Update");
+        }
 
-	DEBUG_PRINTF("[%d] path : %s", nBytesReceived, osc::get_path(s_pUdpBuffer, nBytesReceived));
+        return;
+    }
 
-	if (osc::is_match(s_pUdpBuffer, s_aPath)) {
-		const auto nArgc = Msg.GetArgc();
+    if (osc::is_match(udp_buffer, s_path_second))
+    {
+        const auto kArgc = msg.GetArgc();
 
-		if ((nArgc == 1) && (Msg.GetType(0) == osc::type::BLOB)) {
-			DEBUG_PUTS("Blob received");
+        if (kArgc == 1)
+        { // /path/N 'i' or 'f'
+            const auto kChannel = static_cast<uint16_t>(GetChannel(udp_buffer));
 
-			OSCBlob blob = Msg.GetBlob(0);
-			const auto size = static_cast<uint16_t>(blob.GetDataSize());
+            if (kChannel >= 1 && kChannel <= dmxnode::kUniverseSize)
+            {
+                uint8_t data;
 
-			if (size <= lightset::dmx::UNIVERSE_SIZE) {
-				const auto *ptr = blob.GetDataPtr();
+                if (msg.GetType(0) == osc::type::INT32)
+                {
+                    DEBUG_PUTS("i received");
+                    data = static_cast<uint8_t>(msg.GetInt(0));
+                }
+                else if (msg.GetType(0) == osc::type::FLOAT)
+                {
+                    DEBUG_PRINTF("f received %f", msg.GetFloat(0));
+                    data = static_cast<uint8_t>(msg.GetFloat(0) * dmxnode::kDmxMaxValue);
+                }
+                else
+                {
+                    return;
+                }
 
-				bIsDmxDataChanged = IsDmxDataChanged(ptr, 1, size);
+                is_dmx_data_changed = IsDmxDataChanged(&data, kChannel, 1);
 
-				if (bIsDmxDataChanged || m_bEnableNoChangeUpdate) {
-					if ((!m_bPartialTransmission) || (size == lightset::dmx::UNIVERSE_SIZE)) {
-						m_pLightSet->SetData(0, s_pData, lightset::dmx::UNIVERSE_SIZE);
-					} else {
-						m_nLastChannel = static_cast<uint16_t>(size > m_nLastChannel ? size : m_nLastChannel);
-						m_pLightSet->SetData(0, s_pData, m_nLastChannel);
-					}
+                DEBUG_PRINTF(
+					"Channel = %d, Data = %.2x, is_dmx_data_changed=%u, enable_no_change_update_=%u", 
+                	kChannel, 
+                	data, 
+                	static_cast<uint32_t>(is_dmx_data_changed),
+                	static_cast<uint32_t>(enable_no_change_update_)
+                );
 
-					if (!m_bIsRunning) {
-						m_bIsRunning = true;
-						m_pLightSet->Start(0);
-					}
-				}
-			} else {
-				DEBUG_PUTS("Too many channels");
-				return;
-			}
-		} else if ((nArgc == 2) && (Msg.GetType(0) == osc::type::INT32)) {
-			auto nChannel = static_cast<uint16_t>(1 + Msg.GetInt(0));
+                if (is_dmx_data_changed || enable_no_change_update_)
+                {
+                    if (!partial_transmission_)
+                    {
+                        dmxnode_output_type_->SetData<true>(0, s_data, dmxnode::kUniverseSize);
+                    }
+                    else
+                    {
+                        last_channel_ = kChannel > last_channel_ ? kChannel : last_channel_;
+                        dmxnode_output_type_->SetData<true>(0, s_data, last_channel_);
+                    }
 
-			if ((nChannel < 1) || (nChannel > lightset::dmx::UNIVERSE_SIZE)) {
-				DEBUG_PRINTF("Invalid channel [%d]", nChannel);
-				return;
-			}
+                    if (!is_running_)
+                    {
+                        is_running_ = true;
+                        dmxnode_output_type_->Start(0);
+                    }
+                }
+            }
+        }
 
-			uint8_t nData;
+        return;
+    }
 
-			if (Msg.GetType(1) == osc::type::INT32) {
-				DEBUG_PUTS("ii received");
-				nData = static_cast<uint8_t>(Msg.GetInt(1));
-			} else if (Msg.GetType(1) == osc::type::FLOAT) {
-				DEBUG_PUTS("if received");
-				nData = static_cast<uint8_t>(Msg.GetFloat(1) * lightset::dmx::MAX_VALUE);
-			} else {
-				return;
-			}
+    if (osc::is_match(udp_buffer, "/ping"))
+    {
+        OscSimpleSend send(handle_, from_ip, port_outgoing_, "/pong", nullptr);
 
-			DEBUG_PRINTF("Channel = %d, Data = %.2x", nChannel, nData);
+        DEBUG_PUTS("ping received, pong sent");
+        return;
+    }
 
-			bIsDmxDataChanged = IsDmxDataChanged(&nData, nChannel, 1);
+    if (osc::is_match(udp_buffer, s_path_info))
+    {
+        OscSimpleSend send_info(handle_, from_ip, port_outgoing_, "/info/os", "s", os_);
+        OscSimpleSend send_model(handle_, from_ip, port_outgoing_, "/info/model", "s", model_);
+        OscSimpleSend send_soc(handle_, from_ip, port_outgoing_, "/info/soc", "s", soc_);
 
-			if (bIsDmxDataChanged || m_bEnableNoChangeUpdate) {
-				if (!m_bPartialTransmission) {
-					m_pLightSet->SetData(0, s_pData, lightset::dmx::UNIVERSE_SIZE);
-				} else {
-					m_nLastChannel = nChannel > m_nLastChannel ? nChannel : m_nLastChannel;
-					m_pLightSet->SetData(0, s_pData, m_nLastChannel);
-				}
+        if (handler_ != nullptr)
+        {
+            handler_->Info(handle_, from_ip, port_outgoing_);
+        }
 
-				if (!m_bIsRunning) {
-					m_bIsRunning = true;
-					m_pLightSet->Start(0);
-				}
-			}
-		}
-
-		return;
-	}
-
-	if ((m_pOscServerHandler != nullptr) && (osc::is_match(s_pUdpBuffer, s_aPathBlackOut))) {
-		OscSimpleMessage Msg(s_pUdpBuffer, nBytesReceived);
-
-		if (Msg.GetType(0) != osc::type::FLOAT) {
-			DEBUG_PUTS("No float");
-			return;
-		}
-
-		if (Msg.GetFloat(0) != 0) {
-			m_pOscServerHandler->Blackout();
-			DEBUG_PUTS("Blackout");
-		} else {
-			m_pOscServerHandler->Update();
-			DEBUG_PUTS("Update");
-		}
-
-		return;
-	}
-
-	if (osc::is_match(s_pUdpBuffer, s_aPathSecond)) {
-		const auto nArgc = Msg.GetArgc();
-
-		if (nArgc == 1) { // /path/N 'i' or 'f'
-			const auto nChannel = static_cast<uint16_t>(GetChannel(s_pUdpBuffer));
-
-			if (nChannel >= 1 && nChannel <= lightset::dmx::UNIVERSE_SIZE) {
-				uint8_t nData;
-
-				if (Msg.GetType(0) == osc::type::INT32) {
-					DEBUG_PUTS("i received");
-					nData = static_cast<uint8_t>(Msg.GetInt(0));
-				} else if (Msg.GetType(0) == osc::type::FLOAT) {
-					DEBUG_PRINTF("f received %f", Msg.GetFloat(0));
-					nData = static_cast<uint8_t>(Msg.GetFloat(0) * lightset::dmx::MAX_VALUE);
-				} else {
-					return;
-				}
-
-				DEBUG_PRINTF("Channel = %d, Data = %.2x", nChannel, nData);
-
-				bIsDmxDataChanged = IsDmxDataChanged(&nData, nChannel, 1);
-
-				if (bIsDmxDataChanged || m_bEnableNoChangeUpdate) {
-					if (!m_bPartialTransmission) {
-						m_pLightSet->SetData(0, s_pData, lightset::dmx::UNIVERSE_SIZE);
-					} else {
-						m_nLastChannel = nChannel > m_nLastChannel ? nChannel : m_nLastChannel;
-						m_pLightSet->SetData(0, s_pData, m_nLastChannel);
-					}
-
-					if (!m_bIsRunning) {
-						m_bIsRunning = true;
-						m_pLightSet->Start(0);
-					}
-				}
-			}
-		}
-
-		return;
-	}
-
-	if (osc::is_match(s_pUdpBuffer, "/ping")) {
-		DEBUG_PUTS("ping received");
-		OscSimpleSend MsgSend(m_nHandle, nRemoteIp, m_nPortOutgoing, "/pong", nullptr);
-
-		return;
-	}
-
-	if (osc::is_match(s_pUdpBuffer, s_aPathInfo)) {
-		OscSimpleSend MsgSendInfo(m_nHandle, nRemoteIp, m_nPortOutgoing, "/info/os", "s", m_Os);
-		OscSimpleSend MsgSendModel(m_nHandle, nRemoteIp, m_nPortOutgoing, "/info/model", "s", m_pModel);
-		OscSimpleSend MsgSendSoc(m_nHandle, nRemoteIp, m_nPortOutgoing, "/info/soc", "s", m_pSoC);
-
-		if (m_pOscServerHandler != nullptr) {
-			m_pOscServerHandler->Info(m_nHandle, nRemoteIp, m_nPortOutgoing);
-		}
-
-		return;
-	}
-}
-
-void OscServer::Print() {
-	puts("OSC Server");
-	printf(" Incoming Port        : %d\n", m_nPortIncoming);
-	printf(" Outgoing Port        : %d\n", m_nPortOutgoing);
-	printf(" DMX Path             : [%s][%s]\n", s_aPath, s_aPathSecond);
-	printf("  Blackout Path       : [%s]\n", s_aPathBlackOut);
-	printf(" Partial Transmission : %s\n", m_bPartialTransmission ? "Yes" : "No");
+        return;
+    }
 }

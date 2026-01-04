@@ -2,11 +2,14 @@ DEFINES =NDEBUG
 
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring CONFIG_STORE_USE_RAM,$(MAKE_FLAGS)))
-		EXTRA_SRCDIR=device/ram/gd32
+		EXTRA_SRCDIR+=device/gd32/ram
+	endif
+	ifneq (,$(findstring CONFIG_STORE_USE_ROM,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=device/gd32/rom
 	endif
 else
-	EXTRA_SRCDIR=device/ram/gd32
 	DEFINES+=CONFIG_STORE_USE_RAM
+	EXTRA_SRCDIR=device/gd32/ram
 endif
 
 include Rules.mk

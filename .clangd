@@ -1,0 +1,7 @@
+CompileFlags:
+  CompilationDatabase: .
+
+Diagnostics:
+  ClangTidy:
+    Add: []
+

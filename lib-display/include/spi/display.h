@@ -2,7 +2,7 @@
  * @file display.h
  *
  */
-/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,249 +26,334 @@
 #ifndef SPI_DISPLAY_H_
 #define SPI_DISPLAY_H_
 
-#if !defined (CONFIG_DISPLAY_USE_SPI)
-# error
+#if !defined(CONFIG_DISPLAY_USE_SPI)
+#error
+#endif
+
+#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
+#pragma GCC push_options
+#if defined(CONFIG_SPI_LCD_OPTIMIZE_O2)
+#pragma GCC optimize("O2")
+#else
+#pragma GCC optimize("O3")
+#endif
+#pragma GCC optimize("no-tree-loop-distribute-patterns")
+#pragma GCC optimize("-fprefetch-loop-arrays")
+#endif
 #endif
 
 #include <cstdarg>
 #include <cstdint>
 #include <cstdio>
-#include <cassert>
 
-#if defined (CONFIG_USE_ILI9341)
-# include "spi/ili9341.h"
+#if defined(CONFIG_USE_ILI9341)
+#include "spi/ili9341.h"
+using LcdDriver = ILI9341;
+#elif defined(CONFIG_USE_ST7735S)
+#include "spi/st7735s.h"
+using LcdDriver = ST7735S;
 #else
-# include "spi/st7789.h"
+#include "spi/st7789.h"
+using LcdDriver = ST7789;
+#endif
+#include "spi/lcd_font.h"
+#include "spi/spilcd.h"
+#include "console.h"
+#if defined(DISPLAYTIMEOUT_GPIO)
+#include "hal_gpio.h"
 #endif
 
-#if defined (DISPLAYTIMEOUT_GPIO)
-# include "hal_gpio.h"
-#endif
-
-#include "hardware.h"
-
-class Display {
-public:
-	Display();
-	~Display() {
-		s_pThis = nullptr;
-	}
-
-	bool isDetected() const {
-		return true;
-	}
-
-	void PrintInfo() {
-#if defined (CONFIG_USE_ILI9341)
-		printf("ILI9341 ");
+#if defined(SPI_LCD_HAVE_CS_GPIO)
+inline constexpr uint32_t CS_GPIO = SPI_LCD_CS_GPIO;
 #else
-		printf("ST7789 ");
+inline constexpr uint32_t CS_GPIO = 0;
 #endif
-		printf("(%d,%d)\n", m_nRows, m_nCols);
-	}
 
-	void Cls();
-	void SetCursorPos(uint32_t nCol, uint32_t nRow);
-	void PutChar(int c);
+ #include "firmware/debug/debug_debug.h"
 
-	void PutString(const char *p) {
-		for (uint32_t i = 0; *p != '\0'; i++) {
-			PutChar(static_cast<int>(*p));
-			p++;
-		}
-	}
+class Display : public LcdDriver
+{
+   public:
+    Display(uint32_t cs = CS_GPIO) : LcdDriver(cs)
+    {
+        DEBUG_ENTRY();
 
-	void ClearLine(uint32_t nLine) {
-		if (__builtin_expect((!(nLine <= m_nRows)), 0)) {
-			return;
-		}
+        s_this = this;
 
-		SetCursorPos(0, (nLine - 1U));
+        SetBackLight(1);
+        SetFlipVertically(false);
+        FillColour(kColorBackground);
 
-		for (uint32_t i = 0; i < m_nCols; i++) {
-			PutChar(' ');
-		}
-
-		SetCursorPos(0, (nLine - 1U));
-	}
-
-	void TextLine(uint32_t nLine, const char *pText, uint32_t nLength) {
-		if (__builtin_expect((!(nLine <= m_nRows)), 0)) {
-			return;
-		}
-
-		SetCursorPos(0, (nLine - 1U));
-		Text(pText, nLength);
-	}
-
-	void ClearEndOfLine() {
-		m_bClearEndOfLine = true;
-	}
-
-	void Text(const char *pData, uint32_t nLength) {
-		if (nLength > m_nCols) {
-			nLength = m_nCols;
-		}
-
-		for (uint32_t i = 0; i < nLength; i++) {
-			PutChar(pData[i]);
-		}
-	}
-
-	int Write(uint32_t nLine, const char *pText) {
-		const auto *p = pText;
-		int nCount = 0;
-
-		const auto nColumns = static_cast<int>(m_nCols);
-
-		while ((*p != 0) && (nCount++ < nColumns)) {
-			++p;
-		}
-
-		TextLine(nLine, pText, static_cast<uint8_t>(nCount));
-
-		return nCount;
-	}
-
-	int Printf(uint8_t nLine, const char *format, ...) {
-		char buffer[32];
-
-		va_list arp;
-
-		va_start(arp, format);
-
-		auto i = vsnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), format, arp);
-
-		va_end(arp);
-
-		TextLine(nLine, buffer, static_cast<uint16_t>(i));
-
-		return i;
-	}
-
-	void TextStatus(const char *pText) {
-		SetCursorPos(0, static_cast<uint8_t>(m_nRows - 1));
-
-		for (uint32_t i = 0; i < static_cast<uint32_t>(m_nCols - 1); i++) {
-			PutChar(' ');
-		}
-
-		SetCursorPos(0, static_cast<uint8_t>(m_nRows - 1));
-
-		Write(m_nRows, pText);
-	}
-
-	void TextStatus(const char *pText, uint32_t nConsoleColor) {
-		TextStatus(pText);
-
-		if (nConsoleColor == UINT32_MAX) {
-			return;
-		}
-
-		console_status(nConsoleColor, pText);
-	}
-
-	void Progress() {
-		static constexpr char SYMBOLS[] = { '/' , '-', '\\' , '|' };
-		static uint32_t nSymbolsIndex;
-
-		Display::Get()->SetCursorPos(Display::Get()->GetColumns() - 1U, Display::Get()->GetRows() - 1U);
-		Display::Get()->PutChar(SYMBOLS[nSymbolsIndex++]);
-
-		if (nSymbolsIndex >= sizeof(SYMBOLS)) {
-			nSymbolsIndex = 0;
-		}
-	}
-
-	void SetContrast(uint8_t nContrast) {
-		SpiLcd.SetBackLight(nContrast);
-	}
-
-	void SetSleep(bool bSleep) {
-		m_bIsSleep = bSleep;
-
-		SpiLcd.EnableSleep(bSleep);
-
-		if (!bSleep) {
-			m_nMillis = Hardware::Get()->Millis();
-		}
-	}
-
-	bool isSleep() const {
-		return m_bIsSleep;
-	}
-
-	void SetSleepTimeout(uint32_t nSleepTimeout = display::Defaults::SEEP_TIMEOUT) {
-		m_nSleepTimeout = 1000U * 60U * nSleepTimeout;
-	}
-
-	uint32_t GetSleepTimeout() const {
-		return m_nSleepTimeout / 1000U / 60U;
-	}
-
-	void SetFlipVertically(bool doFlipVertically) {
-		SpiLcd.SetRotation(doFlipVertically ? 3 : 1);
-	}
-
-	uint32_t GetColumns() const {
-		return m_nCols;
-	}
-
-	uint32_t GetRows() const {
-		return m_nRows;
-	}
-
-	uint8_t GetContrast() const {
-		return m_nContrast;
-	}
-
-	bool GetFlipVertically() const {
-		return m_bIsFlippedVertically;
-	}
-
-	void Run() {
-		if (m_nSleepTimeout == 0) {
-			return;
-		}
-
-		if (!m_bIsSleep) {
-			if (__builtin_expect(((Hardware::Get()->Millis() - m_nMillis) > m_nSleepTimeout), 0)) {
-				SetSleep(true);
-			}
-		} else {
-#if defined (DISPLAYTIMEOUT_GPIO)
-			if (__builtin_expect(((FUNC_PREFIX(gpio_lev(DISPLAYTIMEOUT_GPIO)) == LOW)), 0)) {
-				SetSleep(false);
-			}
+        cols_ = (GetWidth() / s_pFONT->kWidth);
+        rows_ = (GetHeight() / s_pFONT->kHeight);
+#if defined(DISPLAYTIMEOUT_GPIO)
+        FUNC_PREFIX(GpioFsel(DISPLAYTIMEOUT_GPIO, GPIO_FSEL_INPUT));
+        FUNC_PREFIX(GpioSetPud(DISPLAYTIMEOUT_GPIO, GPIO_PULL_UP));
 #endif
-		}
-	}
 
-	static Display* Get() {
-		return s_pThis;
-	}
+        PrintInfo();
+        DEBUG_EXIT();
+    }
 
-private:
-#if defined (CONFIG_USE_ILI9341)
-	ILI9341 SpiLcd;
+    ~Display() {}
+
+    bool isDetected() const { return true; }
+
+    void PrintInfo()
+    {
+#if defined(CONFIG_USE_ILI9341)
+        printf("ILI9341 ");
+#elif defined(CONFIG_USE_ST7735S)
+        printf("ST7735S ");
 #else
-	ST7789	SpiLcd;
+        printf("ST7789 ");
 #endif
-	uint32_t m_nCols;
-	uint32_t m_nRows;
-	uint32_t m_nSleepTimeout { 1000U * 60U * display::Defaults::SEEP_TIMEOUT };
-	uint32_t m_nMillis { 0 };
+        printf("(%u,%u)\n", rows_, cols_);
+    }
 
-	bool m_bIsFlippedVertically { false };
-	bool m_bIsSleep { false };
-	bool m_bClearEndOfLine { false };
+    void Cls() { FillColour(kColorBackground); }
 
-	uint16_t m_nCursorX { 0 };
-	uint16_t m_nCursorY { 0 };
+    void SetCursorPos(const uint32_t nCol, const uint32_t row)
+    {
+        cursor_x_ = nCol * s_pFONT->kWidth;
+        cursor_y_ = row * s_pFONT->kHeight;
+    }
 
-	uint8_t m_nContrast { 0x7F };
+    void PutChar(const int c)
+    {
+        DrawChar(cursor_x_, cursor_y_, static_cast<char>(c), s_pFONT, kColorBackground, kColorForeground);
 
-	static Display *s_pThis;
+        cursor_x_ += s_pFONT->kWidth;
+
+        if (cursor_x_ >= GetWidth())
+        {
+            cursor_x_ = 0;
+
+            cursor_y_ += s_pFONT->kHeight;
+
+            if (cursor_y_ >= GetHeight())
+            {
+                cursor_y_ = 0;
+            }
+        }
+    }
+
+    void PutString(const char* p)
+    {
+        for (uint32_t i = 0; *p != '\0'; i++)
+        {
+            PutChar(static_cast<int>(*p));
+            p++;
+        }
+    }
+
+    void ClearLine(const uint32_t nLine)
+    {
+        if (__builtin_expect((!(nLine <= rows_)), 0))
+        {
+            return;
+        }
+
+        SetCursorPos(0, (nLine - 1U));
+
+        for (uint32_t i = 0; i < cols_; i++)
+        {
+            PutChar(' ');
+        }
+
+        SetCursorPos(0, (nLine - 1U));
+    }
+
+    void TextLine(const uint32_t nLine, const char* pText, const uint32_t nLength)
+    {
+        if (__builtin_expect((!(nLine <= rows_)), 0))
+        {
+            return;
+        }
+
+        SetCursorPos(0, (nLine - 1U));
+        Text(pText, nLength);
+    }
+
+    void ClearEndOfLine() { clear_end_of_line_ = true; }
+
+    void Text(const char* pData, uint32_t nLength)
+    {
+        if (nLength > cols_)
+        {
+            nLength = cols_;
+        }
+
+        for (uint32_t i = 0; i < nLength; i++)
+        {
+            PutChar(pData[i]);
+        }
+    }
+
+    int Write(const uint32_t nLine, const char* pText)
+    {
+        const auto* p = pText;
+        int nCount = 0;
+
+        const auto columns = static_cast<int>(cols_);
+
+        while ((*p != 0) && (nCount++ < columns))
+        {
+            ++p;
+        }
+
+        TextLine(nLine, pText, static_cast<uint8_t>(nCount));
+
+        return nCount;
+    }
+
+    int Printf(const uint8_t nLine, const char* format, ...)
+    {
+        char buffer[32];
+
+        va_list arp;
+
+        va_start(arp, format);
+
+        auto i = vsnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), format, arp);
+
+        va_end(arp);
+
+        TextLine(nLine, buffer, static_cast<uint16_t>(i));
+
+        return i;
+    }
+
+    void TextStatus(const char* pText)
+    {
+        SetCursorPos(0, static_cast<uint8_t>(rows_ - 1));
+
+        for (uint32_t i = 0; i < (cols_ - 1); i++)
+        {
+            PutChar(' ');
+        }
+
+        SetCursorPos(0, static_cast<uint8_t>(rows_ - 1));
+
+        Write(rows_, pText);
+    }
+
+    void TextStatus(const char* text, console::Colours colour)
+    {
+        TextStatus(text);
+
+        if (static_cast<uint32_t>(colour) == UINT32_MAX)
+        {
+            return;
+        }
+
+        console::Status(colour, text);
+    }
+
+    void Progress()
+    {
+        static constexpr char SYMBOLS[] = {'/', '-', '\\', '|'};
+        static uint32_t nSymbolsIndex;
+
+        SetCursorPos(GetColumns() - 1U, GetRows() - 1U);
+        PutChar(SYMBOLS[nSymbolsIndex++]);
+
+        if (nSymbolsIndex >= sizeof(SYMBOLS))
+        {
+            nSymbolsIndex = 0;
+        }
+    }
+
+    void SetContrast(const uint8_t nContrast) { SetBackLight(nContrast); }
+
+    void SetSleep(const bool bSleep)
+    {
+        is_sleep_ = bSleep;
+
+        EnableSleep(bSleep);
+
+        if (!bSleep)
+        {
+            SetSleepTimer(sleep_timeout_ != 0);
+        }
+    }
+
+    bool IsSleep() const { return is_sleep_; }
+
+    void SetSleepTimeout(uint32_t nSleepTimeout = display::Defaults::kSleepTimeout)
+    {
+        sleep_timeout_ = 1000U * 60U * nSleepTimeout;
+        SetSleepTimer(sleep_timeout_ != 0);
+    }
+
+    uint32_t GetSleepTimeout() const { return sleep_timeout_ / 1000U / 60U; }
+
+    void SetFlipVertically(bool doFlipVertically) { SetRotation(doFlipVertically ? 3 : 1); }
+
+    uint32_t GetColumns() const { return cols_; }
+
+    uint32_t GetRows() const { return rows_; }
+
+    uint8_t GetContrast() const { return contrast_; }
+
+    bool GetFlipVertically() const { return is_flipped_vertically_; }
+
+    void Run()
+    {
+        if (sleep_timeout_ == 0)
+        {
+            return;
+        }
+
+        if (is_sleep_)
+        {
+#if defined(DISPLAYTIMEOUT_GPIO)
+            if (__builtin_expect(((FUNC_PREFIX(GpioLev(DISPLAYTIMEOUT_GPIO)) == 0)), 0))
+            {
+                SetSleep(false);
+            }
+#endif
+        }
+    }
+
+    static Display* Get() { return s_this; }
+
+   private:
+    void SetSleepTimer(const bool bActive);
+
+   private:
+    uint32_t cols_;
+    uint32_t rows_;
+    uint32_t sleep_timeout_{1000U * 60U * display::Defaults::kSleepTimeout};
+    uint32_t cursor_x_{0};
+    uint32_t cursor_y_{0};
+
+    uint8_t contrast_{0x7F};
+
+    bool is_flipped_vertically_{false};
+    bool is_sleep_{false};
+    bool clear_end_of_line_{false};
+
+    static inline Display* s_this;
+
+#if defined(SPI_LCD_240X320)
+    static constexpr sFONT* s_pFONT = &Font16x24;
+#elif defined(SPI_LCD_128X128)
+    static constexpr sFONT* s_pFONT = &Font8x8;
+#elif defined(SPI_LCD_160X80)
+    static constexpr sFONT* s_pFONT = &Font8x8;
+#else
+    static constexpr sFONT* s_pFONT = &Font12x12;
+#endif
+    static constexpr uint16_t kColorBackground = 0x001F;
+    static constexpr uint16_t kColorForeground = 0xFFE0;
 };
 
-#endif /* SPI_DISPLAY_H_ */
+#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
+#pragma GCC pop_options
+#endif
+#endif
+
+#endif  // SPI_DISPLAY_H_

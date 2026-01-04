@@ -1,8 +1,8 @@
 /**
- * @file time.c
+ * @file time.cpp
  *
  */
-/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,82 +24,90 @@
  */
 
 #pragma GCC push_options
-#pragma GCC optimize ("O2")
+#pragma GCC optimize("O2")
 
-#include <cstddef>
 #include <sys/time.h>
 #include <cstdint>
 #include <cassert>
 
 extern volatile uint32_t gv_nSysTickMillis;
 
-static uint32_t nPreviousSysTickMillis;
+static uint32_t previous_systick_millis;
 static struct timeval s_tv;
 
-extern "C" {
-/*
- * number of seconds and microseconds since the Epoch,
- *     1970-01-01 00:00:00 +0000 (UTC).
- */
+extern "C"
+{
+    /*
+     * number of seconds and microseconds since the Epoch,
+     *     1970-01-01 00:00:00 +0000 (UTC).
+     */
 
-int gettimeofday(struct timeval *tv, __attribute__((unused))    struct timezone *tz) {
-	assert(tv != 0);
+    int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz)
+    {
+        assert(tv != 0);
 
-	const auto nCurrentSysTickMillis = gv_nSysTickMillis;
+        const auto kCurrentSysTickMillis = gv_nSysTickMillis;
 
-	uint32_t nMillisElapsed;
+        uint32_t millis_elapsed;
 
-	if (nCurrentSysTickMillis >= nPreviousSysTickMillis) {
-		nMillisElapsed = nCurrentSysTickMillis - nPreviousSysTickMillis;
-	} else {
-		nMillisElapsed = (UINT32_MAX - nPreviousSysTickMillis) + nCurrentSysTickMillis + 1;
-	}
+        if (kCurrentSysTickMillis >= previous_systick_millis)
+        {
+            millis_elapsed = kCurrentSysTickMillis - previous_systick_millis;
+        }
+        else
+        {
+            millis_elapsed = (UINT32_MAX - previous_systick_millis) + kCurrentSysTickMillis + 1;
+        }
 
-	nPreviousSysTickMillis = nCurrentSysTickMillis;
+        previous_systick_millis = kCurrentSysTickMillis;
 
-	const auto nSeconds = nMillisElapsed / 1000U;
-	const auto nMicroSeconds = (nMillisElapsed % 1000U) * 1000U;
+        const auto kSeconds = millis_elapsed / 1000U;
+        const auto kMicroSeconds = (millis_elapsed % 1000U) * 1000U;
 
-	s_tv.tv_sec += static_cast<time_t>(nSeconds);
-	s_tv.tv_usec += static_cast<suseconds_t>(nMicroSeconds);
+        s_tv.tv_sec += static_cast<time_t>(kSeconds);
+        s_tv.tv_usec += static_cast<suseconds_t>(kMicroSeconds);
 
-	if (s_tv.tv_usec >= 1000000) {
-		s_tv.tv_sec++;
-		s_tv.tv_usec -= 1000000;
-	}
+        if (s_tv.tv_usec >= 1000000)
+        {
+            s_tv.tv_sec++;
+            s_tv.tv_usec -= 1000000;
+        }
 
-	tv->tv_sec = s_tv.tv_sec;
-	tv->tv_usec = s_tv.tv_usec;
+        tv->tv_sec = s_tv.tv_sec;
+        tv->tv_usec = s_tv.tv_usec;
 
-	return 0;
-}
+        return 0;
+    }
 
-int settimeofday(const struct timeval *tv, __attribute__((unused))  const struct timezone *tz) {
-	assert(tv != 0);
+    int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz)
+    {
+        assert(tv != 0);
 
-	struct timeval g;
-	gettimeofday(&g, nullptr);
+        struct timeval g;
+        gettimeofday(&g, nullptr);
 
-	nPreviousSysTickMillis = gv_nSysTickMillis;
+        previous_systick_millis = gv_nSysTickMillis;
 
-	s_tv.tv_sec = tv->tv_sec;
-	s_tv.tv_usec = tv->tv_usec;
+        s_tv.tv_sec = tv->tv_sec;
+        s_tv.tv_usec = tv->tv_usec;
 
-	return 0;
-}
+        return 0;
+    }
 
-/*
- *  time() returns the time as the number of seconds since the Epoch,
-       1970-01-01 00:00:00 +0000 (UTC).
- */
-time_t time(time_t *__timer) {
-	struct timeval tv;
-	gettimeofday(&tv, nullptr);
+    /*
+     *  time() returns the time as the number of seconds since the Epoch,
+           1970-01-01 00:00:00 +0000 (UTC).
+     */
+    time_t time(time_t* __timer) //NOLINT
+    {
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
 
-	if (__timer != nullptr) {
-		*__timer = tv.tv_sec;
-	}
+        if (__timer != nullptr)
+        {
+            *__timer = tv.tv_sec;
+        }
 
-	return tv.tv_sec;
-}
+        return tv.tv_sec;
+    }
 }

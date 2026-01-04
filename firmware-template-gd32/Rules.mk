@@ -10,25 +10,29 @@ AR	 = $(PREFIX)ar
 
 BOARD?=BOARD_GD32F407RE
 ENET_PHY?=DP83848
+MCU?=GD32F407RE
 
 TARGET=$(FAMILY).bin
 LIST=$(FAMILY).list
 MAP=$(FAMILY).map
 SIZE=$(FAMILY).size
 BUILD=build_gd32/
-
 FIRMWARE_DIR=./../firmware-template-gd32/
+
+PROJECT=$(notdir $(patsubst %/,%,$(CURDIR)))
+$(info $$PROJECT [${PROJECT}])
 
 DEFINES:=$(addprefix -D,$(DEFINES))
 
-MCU=GD32F407RE
-
-include ../firmware-template-gd32/Board.mk
-include ../firmware-template-gd32/Mcu.mk
+include ../common/make/gd32/Board.mk
+include ../common/make/gd32/Mcu.mk
 include ../firmware-template/libs.mk
-include ../firmware-template-gd32/Includes.mk
-include ../firmware-template-gd32/Artnet.mk
-include ../firmware-template-gd32/Validate.mk
+include ../common/make/DmxNodeNodeType.mk
+include ../common/make/DmxNodeOutputType.mk
+include ../common/make/gd32/Includes.mk
+include ../common/make/Artnet.mk
+include ../common/make/gd32/mbedtls.mk
+include ../common/make/gd32/Validate.mk
 
 LIBS+=gd32 clib
 
@@ -53,27 +57,23 @@ COPS+=-Os -nostartfiles -ffreestanding -nostdlib
 COPS+=-fstack-usage
 COPS+=-ffunction-sections -fdata-sections
 COPS+=-Wall -Werror -Wpedantic -Wextra -Wunused -Wsign-conversion -Wconversion -Wduplicated-cond -Wlogical-op
+COPS+=--specs=nosys.specs
 
-CPPOPS=-std=c++20
-CPPOPS+=-Wnon-virtual-dtor -Woverloaded-virtual -Wnull-dereference -fno-rtti -fno-exceptions -fno-unwind-tables
-CPPOPS+=-Wuseless-cast -Wold-style-cast
-CPPOPS+=-fno-threadsafe-statics
+include ../common/make/CppOps.mk
 
 LDOPS=--gc-sections --print-gc-sections --print-memory-usage
 
 PLATFORM_LIBGCC+= -L $(shell dirname `$(CC) $(COPS) -print-libgcc-file-name`)
-PLATFORM_LIBC+= -L $(shell dirname `$(CC) $(COPS) --print-file-name=libc.a`)
 
 $(info $$PLATFORM_LIBGCC [${PLATFORM_LIBGCC}])
-$(info $$PLATFORM_LIBC [${PLATFORM_LIBC}])
 
 C_OBJECTS=$(foreach sdir,$(SRCDIR),$(patsubst $(sdir)/%.c,$(BUILD)$(sdir)/%.o,$(wildcard $(sdir)/*.c)))
-C_OBJECTS+=$(foreach sdir,$(SRCDIR),$(patsubst $(sdir)/%.cpp,$(BUILD)$(sdir)/%.o,$(wildcard $(sdir)/*.cpp)))
+CPP_OBJECTS+=$(foreach sdir,$(SRCDIR),$(patsubst $(sdir)/%.cpp,$(BUILD)$(sdir)/%.o,$(wildcard $(sdir)/*.cpp)))
 ASM_OBJECTS=$(foreach sdir,$(SRCDIR),$(patsubst $(sdir)/%.S,$(BUILD)$(sdir)/%.o,$(wildcard $(sdir)/*.S)))
 
 BUILD_DIRS:=$(addprefix $(BUILD),$(SRCDIR))
 
-OBJECTS:=$(ASM_OBJECTS) $(C_OBJECTS)
+OBJECTS:=$(strip $(ASM_OBJECTS) $(C_OBJECTS) $(CPP_OBJECTS))
 
 define compile-objects
 $(BUILD)$1/%.o: $1/%.cpp
@@ -110,20 +110,17 @@ clean: $(LIBDEP)
 lisdep: $(LIBDEP)
 
 $(LIBDEP):
-	$(MAKE) -f Makefile.GD32 $(MAKECMDGOALS) 'FAMILY=${FAMILY}' 'BOARD=${BOARD}' 'ENET_PHY=${ENET_PHY}' 'MAKE_FLAGS=$(DEFINES)' -C $@
+	$(MAKE) -f Makefile.GD32 $(MAKECMDGOALS) 'PROJECT=${PROJECT}' 'FAMILY=${FAMILY}' 'MCU=${MCU}' 'BOARD=${BOARD}' 'ENET_PHY=${ENET_PHY}' 'MAKE_FLAGS=$(DEFINES)' -C $@
 
 #
 # Build bin
 #
 
-$(BUILD_DIRS) :
-	mkdir -p $(BUILD_DIRS)
-
 $(BUILD)startup_$(LINE).o : $(FIRMWARE_DIR)/startup_$(LINE).S
 	$(AS) $(COPS) -D__ASSEMBLY__ -c $(FIRMWARE_DIR)/startup_$(LINE).S -o $(BUILD)startup_$(LINE).o
 
-$(BUILD)hardfault_handler.o : $(FIRMWARE_DIR)/hardfault_handler.c	
-	$(CC) $(COPS) -c $(FIRMWARE_DIR)/hardfault_handler.c -o $(BUILD)hardfault_handler.o
+$(BUILD)hardfault_handler.o : $(FIRMWARE_DIR)/hardfault_handler.cpp	
+	$(CPP) $(COPS) $(CPPOPS) -c $(FIRMWARE_DIR)/hardfault_handler.cpp -o $(BUILD)hardfault_handler.o
 
 $(BUILD)main.elf: Makefile.GD32 $(LINKER) $(BUILD)startup_$(LINE).o $(BUILD)hardfault_handler.o $(OBJECTS) $(LIBDEP)
 	$(LD) $(BUILD)startup_$(LINE).o $(BUILD)hardfault_handler.o $(OBJECTS) -Map $(MAP) -T $(LINKER) $(LDOPS) -o $(BUILD)main.elf $(LIBGD32) $(LDLIBS) $(PLATFORM_LIBGCC) -lgcc

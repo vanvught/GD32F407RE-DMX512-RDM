@@ -1,6 +1,7 @@
 $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
 EXTRA_SRCDIR+=debug
+EXTRA_SRCDIR+=src/json
 
 ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring CONSOLE_I2C,$(MAKE_FLAGS)))
@@ -36,7 +37,7 @@ ifneq ($(MAKE_FLAGS),)
 		ifneq (,$(findstring DISABLE_INTERNAL_RTC,$(MAKE_FLAGS)))
 			EXTRA_SRCDIR+=rtc/i2c
 		endif
-		EXTRA_INCLUDES+=../lib-properties/include
+		EXTRA_INCLUDES+=
 	endif
 	
 	ifneq (,$(findstring DEBUG_I2C,$(MAKE_FLAGS)))
@@ -47,12 +48,16 @@ ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring DEBUG_STACK,$(MAKE_FLAGS)))
 		EXTRA_SRCDIR+=debug/stack
 	endif
+	
+	ifeq (,$(findstring USE_FREE_RTOS,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=superloop
+	endif
 else
 	DEFINES+=DEBUG_I2C DEBUG_STACK DEBUG_POSIX
-	DEFINES+=LOGIC_ANALYZER
 	EXTRA_INCLUDES+=debug/i2c debug/stack
 	EXTRA_SRCDIR+=console/i2c console/null console/uart0 
 	EXTRA_SRCDIR+=posix
 	EXTRA_SRCDIR+=rtc rtc/i2c
-	EXTRA_INCLUDES+=../lib-properties/include
+	EXTRA_SRCDIR+=superloop
+	EXTRA_INCLUDES+=
 endif

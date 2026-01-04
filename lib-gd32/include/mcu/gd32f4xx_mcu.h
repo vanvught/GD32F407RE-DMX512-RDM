@@ -160,47 +160,62 @@
 
 #define I2C0_PERIPH				I2C0
 #define I2C0_RCU_I2C0			RCU_I2C0
+#define I2C0_GPIO_AFx			GPIO_AF_4
+#define I2C0_SCL_RCU_GPIOx		RCU_GPIOB
+#define I2C0_SCL_GPIOx			GPIOB
+#define I2C0_SDA_RCU_GPIOx		RCU_GPIOB
+#define I2C0_SDA_GPIOx			GPIOB
 #if defined (I2C0_REMAP)
-# define I2C0_GPIO_AFx			GPIO_AF_4
-# define I2C0_SCL_RCU_GPIOx		RCU_GPIOB
-# define I2C0_SCL_GPIOx			GPIOB
 # define I2C0_SCL_GPIO_PINx		GPIO_PIN_8
-# define I2C0_SDA_RCU_GPIOx		RCU_GPIOB
-# define I2C0_SDA_GPIOx			GPIOB
 # define I2C0_SDA_GPIO_PINx		GPIO_PIN_9
+#elif defined (I2C0_REMAP_CUSTOM)
+// defined in board file
 #else
-# define I2C0_GPIO_AFx			GPIO_AF_4
-# define I2C0_SCL_RCU_GPIOx		RCU_GPIOB
-# define I2C0_SCL_GPIOx			GPIOB
 # define I2C0_SCL_GPIO_PINx		GPIO_PIN_6
-# define I2C0_SDA_RCU_GPIOx		RCU_GPIOB
-# define I2C0_SDA_GPIOx			GPIOB
 # define I2C0_SDA_GPIO_PINx		GPIO_PIN_7
 #endif
 
 #define I2C1_PERIPH				I2C1
 #define I2C1_RCU_I2C1			RCU_I2C1
 #define I2C1_GPIO_AFx			GPIO_AF_4
-#define I2C1_SCL_RCU_GPIOx		RCU_GPIOB
-#define I2C1_SCL_GPIOx			GPIOB
-#define I2C1_SCL_GPIO_PINx		GPIO_PIN_10
-#define I2C1_SDA_RCU_GPIOx		RCU_GPIOB
-#define I2C1_SDA_GPIOx			GPIOB
-#define I2C1_SDA_GPIO_PINx		GPIO_PIN_11
-//TODO I2C1 REMAP
+#if defined (I2C1_REMAP10)
+# define I2C1_SCL_RCU_GPIOx		RCU_GPIOH
+# define I2C1_SCL_GPIOx			GPIOH
+# define I2C1_SCL_GPIO_PINx		GPIO_PIN_4
+# define I2C1_SDA_RCU_GPIOx		RCU_GPIOH
+# define I2C1_SDA_GPIOx			GPIOH
+# define I2C1_SDA_GPIO_PINx		GPIO_PIN_5
+#elif defined (I2C1_REMAP11)
+# define I2C1_SCL_RCU_GPIOx		RCU_GPIOF
+# define I2C1_SCL_GPIOx			GPIOF
+# define I2C1_SCL_GPIO_PINx		GPIO_PIN_0
+# define I2C1_SDA_RCU_GPIOx		RCU_GPIOF
+# define I2C1_SDA_GPIOx			GPIOF
+# define I2C1_SDA_GPIO_PINx		GPIO_PIN_1
+#elif defined (I2C1_REMAP_CUSTOM)
+// defined in board file
+#else
+# define I2C1_SCL_RCU_GPIOx		RCU_GPIOB
+# define I2C1_SCL_GPIOx			GPIOB
+# define I2C1_SCL_GPIO_PINx		GPIO_PIN_10
+# define I2C1_SDA_RCU_GPIOx		RCU_GPIOB
+# define I2C1_SDA_GPIOx			GPIOB
+# define I2C1_SDA_GPIO_PINx		GPIO_PIN_11
+#endif
 
 #define I2C2_PERIPH				I2C2
 #define I2C2_RCU_I2C2			RCU_I2C2
+#define I2C2_GPIO_AFx			GPIO_AF_4
 #if defined (I2C2_REMAP)
-# define I2C2_GPIO_AFx			GPIO_AF_4
 # define I2C2_SCL_RCU_GPIOx		RCU_GPIOH
 # define I2C2_SCL_GPIOx			GPIOH
 # define I2C2_SCL_GPIO_PINx		GPIO_PIN_7
 # define I2C2_SDA_RCU_GPIOx		RCU_GPIOH
 # define I2C2_SDA_GPIOx			GPIOH
 # define I2C2_SDA_GPIO_PINx		GPIO_PIN_8
+#elif defined (I2C2_REMAP_CUSTOM)
+// defined in board file
 #else
-# define I2C2_GPIO_AFx			GPIO_AF_4
 # define I2C2_SCL_RCU_GPIOx		RCU_GPIOA
 # define I2C2_SCL_GPIOx			GPIOA
 # define I2C2_SCL_GPIO_PINx		GPIO_PIN_8
@@ -388,6 +403,17 @@
 #define TIMER2_CH2_DMA_SUBPERIx DMA_SUBPERI5
 #define TIMER2_CH3_DMA_CHx      DMA_CH2
 #define TIMER2_CH3_DMA_SUBPERIx DMA_SUBPERI5
+
+#define TIMER4_RCU_DMAx         RCU_DMA0
+#define TIMER4_DMAx             DMA0
+#define TIMER4_CH0_DMA_CHx      DMA_CH2
+#define TIMER4_CH0_DMA_SUBPERIx DMA_SUBPERI6
+#define TIMER4_CH1_DMA_CHx      DMA_CH4
+#define TIMER4_CH1_DMA_SUBPERIx DMA_SUBPERI6
+#define TIMER4_CH2_DMA_CHx      DMA_CH0
+#define TIMER4_CH2_DMA_SUBPERIx DMA_SUBPERI6
+#define TIMER4_CH3_DMA_CHx      DMA_CH1
+#define TIMER4_CH3_DMA_SUBPERIx DMA_SUBPERI6
 
 #define TIMER7_RCU_DMAx         RCU_DMA1
 #define TIMER7_DMAx             DMA1

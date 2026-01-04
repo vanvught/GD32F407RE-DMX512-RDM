@@ -1,5 +1,5 @@
 /**
- * @file time.c
+ * @file asctime.c
  *
  */
 /* Copyright (C) 2019 by Arjan van Vught mailto:info@orangepi-dmx.nl

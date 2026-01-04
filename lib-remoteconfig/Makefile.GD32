@@ -1,11 +1,9 @@
-DEFINES =DISABLE_FS 
-DEFINES+=DISABLE_TFTP 
+DEFINES=DISABLE_FS 
 DEFINES+=NDEBUG
 
-ifneq ($(MAKE_FLAGS),)
-else
-	EXTRA_SRCDIR+=src/httpd
-endif
+ENET_PHY=RTL8201F
+
+EXTRA_INCLUDES=../lib-dmxnode/include
 
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

@@ -1,5 +1,5 @@
 /**
- * @file net_config
+ * @file net_config.h
  *
  */
 /* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -27,7 +27,7 @@
 #define NET_CONFIG_H_
 
 #if defined(__linux__) || defined (__APPLE__)
-# define UDP_MAX_PORTS_ALLOWED			16
+# define UDP_MAX_PORTS_ALLOWED			32
 # define IGMP_MAX_JOINS_ALLOWED			(4 + (8 * 4)) /* 8 outputs x 4 Universes */
 # define TCP_MAX_TCBS_ALLOWED			16
 # define TCP_MAX_PORTS_ALLOWED			2

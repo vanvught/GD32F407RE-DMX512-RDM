@@ -2,7 +2,7 @@
  * @file hal_api.h
  *
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,6 @@
 #ifndef GD32_HAL_API_H_
 #define GD32_HAL_API_H_
 
-#define FUNC_PREFIX(x) gd32_##x
+#define FUNC_PREFIX(x) Gd32##x
 
-#endif /* GD32_HAL_API_H_ */
+#endif  // GD32_HAL_API_H_

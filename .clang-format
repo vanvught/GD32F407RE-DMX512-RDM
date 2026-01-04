@@ -1,0 +1,29 @@
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 240
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+
+BreakBeforeBraces: Allman
+
+DerivePointerAlignment: false
+
+SpacesBeforeTrailingComments: 1
+
+SortIncludes: false
+IncludeBlocks: Preserve
+
+Cpp11BracedListStyle: true
+
+AlwaysBreakAfterReturnType: None
+AlwaysBreakTemplateDeclarations: MultiLine

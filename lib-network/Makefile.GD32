@@ -1,12 +1,17 @@
 $(info "lib-network/Makefile.GD32")
+$(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
 DEFINES =DISABLE_FS
 DEFINES+=NDEBUG
 
 EXTRA_INCLUDES=../lib-properties/include ../lib-display/include
-EXTRA_SRCDIR=src/emac/gd32
+EXTRA_SRCDIR=
 
 ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)),)
+		EXTRA_SRCDIR+=src/emac/gd32
+	endif
+
 	ifeq ($(findstring gd32f10x,$(FAMILY)), gd32f10x)
 		EXTRA_SRCDIR+=src/emac/gd32/f
 	endif
@@ -27,14 +32,15 @@ ifneq ($(MAKE_FLAGS),)
 	ifeq ($(findstring ENABLE_PHY_SWITCH,$(MAKE_FLAGS)), ENABLE_PHY_SWITCH)	
   	EXTRA_SRCDIR+=src/emac/gd32/dsa/88e6161
   endif
-  
-  ifeq ($(findstring CONFIG_ENET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_ENET_ENABLE_PTP)	
-  	ifeq ($(findstring ENABLE_NTP_PTP_CLIENT,$(MAKE_FLAGS)), ENABLE_NTP_PTP_CLIENT)
- 			EXTRA_SRCDIR+=src/net/apps/ntp/gd32/ptp
+
+ 	ifeq ($(findstring CONFIG_NET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_NET_ENABLE_PTP)  
+ 		ifeq ($(findstring CONFIG_NET_ENABLE_PTP_NTP_CLIENT,$(MAKE_FLAGS)), CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
+			EXTRA_SRCDIR+=src/net/apps/ntp/gd32/ptp
   	endif
   endif
 else
-	EXTRA_SRCDIR+=src/emac/gd32/f
+	EXTRA_SRCDIR+=src/emac/gd32
+	EXTRA_SRCDIR+=src/net/apps/ntp/gd32/ptp
 	ENET_PHY=RTL8201F
 endif
 

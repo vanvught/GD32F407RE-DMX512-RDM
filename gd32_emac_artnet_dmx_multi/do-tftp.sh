@@ -29,38 +29,45 @@ done
 
 echo [$ON_LINE]
 
-sleep 1
-echo -e "Rebooting..."
-echo '?reboot##' | udp_send $1 
-
 ON_LINE=$(echo '?list#' | udp_send $1 ) || true
 
-while  [ "$ON_LINE" == "" ]
- do
-  ON_LINE=$(echo '?list#' | udp_send $1 )  || true
-done
-
-echo '!tftp#1' | udp_send $1 
-ON_LINE=$(echo '?tftp#' | udp_send $1 ) || true
 echo [$ON_LINE]
 
-while  [ "$ON_LINE" == "" ]
- do
-    sleep 1
-    echo '!tftp#1' | udp_send $1 
-    ON_LINE=$(echo '?tftp#' | udp_send $1 )  || true
-done
-
-echo [$ON_LINE]
-
-while  [ "$ON_LINE" == "tftp:Off" ]
- do
-    sleep 1
-    echo '!tftp#1' | udp_send $1 
-    ON_LINE=$(echo '?tftp#' | udp_send $1 )  || true
-done
-
-echo [$ON_LINE]
+SUB='Bootloader'
+if [[ "$ON_LINE" != *"$SUB"* ]]; then
+  sleep 1
+  echo -e "Rebooting..."
+  echo '?reboot##' | udp_send $1 
+  
+  ON_LINE=$(echo '?list#' | udp_send $1 ) || true
+  
+  while  [ "$ON_LINE" == "" ]
+   do
+    ON_LINE=$(echo '?list#' | udp_send $1 )  || true
+  done
+  
+  echo '!tftp#1' | udp_send $1 
+  ON_LINE=$(echo '?tftp#' | udp_send $1 ) || true
+  echo [$ON_LINE]
+  
+  while  [ "$ON_LINE" == "" ]
+   do
+      sleep 1
+      echo '!tftp#1' | udp_send $1 
+      ON_LINE=$(echo '?tftp#' | udp_send $1 )  || true
+  done
+  
+  echo [$ON_LINE]
+  
+  while  [ "$ON_LINE" == "tftp:Off" ]
+   do
+      sleep 1
+      echo '!tftp#1' | udp_send $1 
+      ON_LINE=$(echo '?tftp#' | udp_send $1 )  || true
+  done
+  
+  echo [$ON_LINE]
+fi
 
 tftp $1 << -EOF
 binary

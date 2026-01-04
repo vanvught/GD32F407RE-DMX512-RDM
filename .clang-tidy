@@ -1,0 +1,87 @@
+Checks: >
+  google-*,
+  readability-identifier-naming,
+  modernize-redundant-void-arg,
+  modernize-concat-nested-namespaces,
+  modernize-use-nullptr,
+  modernize-use-default-member-init,
+  modernize-use-override,
+  -google-runtime-references,
+  -clang-analyzer-*,
+  -misc-unused-include
+
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.IgnoreMainLikeFunctions
+    value: 'true'
+
+  - key: readability-identifier-naming.IgnoreOverrideFunctions
+    value: 'true'
+
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: '^([A-Za-z0-9_]+_(IRQHandler|Handler))$'
+
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
+
+  - key: readability-identifier-naming.PublicMemberCase
+    value: lower_case
+
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantPrefix
+    value: k
+
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: k
+
+  - key: readability-identifier-naming.LocalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.LocalConstantPrefix
+    value: k
+
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: k
+
+  - key: readability-identifier-naming.EnumConstantMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantMemberPrefix
+    value: k
+
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+
+  - key: readability-identifier-naming.TreatAsConstant
+    value: 'constexpr'
+
+  - key: readability-identifier-naming.VariableConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableConstantPrefix
+    value: k
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: none

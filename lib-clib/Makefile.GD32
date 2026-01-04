@@ -5,7 +5,7 @@ EXTRA_INCLUDES=
 EXTRA_SRCDIR=
 
 ifneq ($(MAKE_FLAGS),)
-	ifeq ($(findstring CONFIG_ENET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_ENET_ENABLE_PTP)	
+	ifeq ($(findstring CONFIG_NET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_NET_ENABLE_PTP)	
   	EXTRA_SRCDIR+=src/gd32/time_ptp
   else
   	ifeq ($(findstring CONFIG_TIME_USE_TIMER,$(MAKE_FLAGS)), CONFIG_TIME_USE_TIMER)
@@ -14,6 +14,9 @@ ifneq ($(MAKE_FLAGS),)
   		EXTRA_SRCDIR+=src/gd32/time_systick
   	endif
   endif
+	ifeq ($(findstring CONFIG_HAVE_CRC32_HW,$(MAKE_FLAGS)), CONFIG_HAVE_CRC32_HW)
+		EXTRA_SRCDIR+=src/gd32/crc32
+	endif
 else
   EXTRA_SRCDIR+=src/gd32/time_systick
   

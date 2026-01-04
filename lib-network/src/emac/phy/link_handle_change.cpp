@@ -1,8 +1,7 @@
 /**
- * link_handle_change.cpp
- *
+ * @file link_handle_change.cpp
  */
-/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,41 +22,49 @@
  * THE SOFTWARE.
  */
 
-#include "hardware.h"
-#include "network.h"
-#include "netif.h"
-
-#include "debug.h"
-
-#if !defined(PHY_ADDRESS)
-# define PHY_ADDRESS	1
+#if defined(DEBUG_NET_PHY)
+#undef NDEBUG
 #endif
 
-extern void emac_adjust_link(const net::PhyStatus);
+#include "hal_watchdog.h"
+#include "emac/emac.h"
+#include "emac/phy.h"
+#include "net/netif.h"
+ #include "firmware/debug/debug_debug.h"
 
-namespace net {
-void link_handle_change(const net::Link state) {
-	DEBUG_PRINTF("net::Link %s", state == net::Link::STATE_UP ? "UP" : "DOWN");
+#if !defined(PHY_ADDRESS)
+#define PHY_ADDRESS 1
+#endif
 
-	if (Link::STATE_UP == state) {
-		const bool isWatchdog = Hardware::Get()->IsWatchdog();
-		if (isWatchdog) {
-			Hardware::Get()->WatchdogStop();
-		}
+namespace net
+{
+void LinkHandleChange(net::phy::Link state)
+{
+    DEBUG_PRINTF("net::phy::Link %s", state == net::phy::Link::kStateUp ? "UP" : "DOWN");
 
-		PhyStatus phyStatus;
-		phy_start(PHY_ADDRESS, phyStatus);
+    if (phy::Link::kStateUp == state)
+    {
+        const auto kIsWatchdog = hal::Watchdog();
 
-		emac_adjust_link(phyStatus);
+        if (kIsWatchdog)
+        {
+            hal::WatchdogStop();
+        }
 
-		if (isWatchdog) {
-			Hardware::Get()->WatchdogInit();
-		}
+        phy::Status phy_status;
+        phy::Start(PHY_ADDRESS, phy_status);
 
-		netif_set_link_up();
-		return;
-	}
+        net::emac::AdjustLink(phy_status);
 
-	netif_set_link_down();
+        if (kIsWatchdog)
+        {
+            hal::WatchdogInit();
+        }
+
+        netif::SetLinkUp();
+        return;
+    }
+
+    netif::SetLinkDown();
 }
-}  // namespace net
+} // namespace net

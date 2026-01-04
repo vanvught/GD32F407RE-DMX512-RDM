@@ -2,7 +2,7 @@
  * @file hal_uart.h
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,18 +28,17 @@
 
 #include "gd32_uart.h"
 
-namespace hal {
-namespace uart {
-static constexpr auto BITS_8 = GD32_UART_BITS_8;
-static constexpr auto BITS_9 = GD32_UART_BITS_9;
+namespace hal::uart
+{
+inline constexpr auto BITS_8 = gd32::kUartBits8;
+inline constexpr auto BITS_9 = gd32::kUartBits9;
 
-static constexpr auto PARITY_NONE = GD32_UART_PARITY_NONE;
-static constexpr auto PARITY_ODD = GD32_UART_PARITY_ODD;
-static constexpr auto PARITY_EVEN = GD32_UART_PARITY_EVEN;
+inline constexpr auto PARITY_NONE = gd32::kUartParityNone;
+inline constexpr auto PARITY_ODD = gd32::kUartParityOdd;
+inline constexpr auto PARITY_EVEN = gd32::kUartParityEven;
 
-static constexpr auto STOP_1BIT = GD32_UART_STOP_1BIT;
-static constexpr auto STOP_2BITS = GD32_UART_STOP_2BITS;
-}  // namespace uart
-}  // namespace hal
+inline constexpr auto STOP_1BIT = gd32::kUartStop1Bit;
+inline constexpr auto STOP_2BITS = gd32::kUartStop2Bits;
+} // namespace hal::uart
 
-#endif /* GD32_HAL_UART_H_ */
+#endif // GD32_HAL_UART_H_

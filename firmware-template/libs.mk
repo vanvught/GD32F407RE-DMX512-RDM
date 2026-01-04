@@ -6,17 +6,19 @@ else
 endif
 
 ifeq ($(findstring NODE_ARTNET,$(DEFINES)),NODE_ARTNET)
-	ifeq ($(findstring ARTNET_VERSION=3,$(DEFINES)),ARTNET_VERSION=3)
-		LIBS+=artnet
-	else
-		LIBS+=artnet e131
-	endif
+  	ARTNET=1
+  	DMXNODE=1
+  	ifeq ($(findstring ARTNET_VERSION=3,$(DEFINES)),ARTNET_VERSION=3)
+  	else
+  		E131=1
+  	endif
 endif
-
+  
 ifeq ($(findstring NODE_E131,$(DEFINES)),NODE_E131)
-	ifneq ($(findstring e131,$(LIBS)),e131)
-		LIBS+=e131
-	endif
+  	ifneq ($(findstring e131,$(LIBS)),e131)
+  		E131=1
+  		DMXNODE=1
+  	endif
 endif
 
 ifeq ($(findstring NODE_OSC_CLIENT,$(DEFINES)),NODE_OSC_CLIENT)
@@ -39,6 +41,18 @@ ifeq ($(findstring NODE_RDMNET_LLRP_ONLY,$(DEFINES)),NODE_RDMNET_LLRP_ONLY)
 	endif
 endif
 
+ifdef ARTNET
+  	LIBS+=artnet
+endif
+  
+ifdef E131
+  	LIBS+=e131
+endif
+
+ifdef DMXNODE
+  	LIBS+=dmxnode
+endif
+
 ifdef RDM
 	LIBS+=rdm
 endif
@@ -57,6 +71,6 @@ ifeq ($(findstring DISPLAY_UDF,$(DEFINES)),DISPLAY_UDF)
 	LIBS+=displayudf
 endif
 
-LIBS+=lightset flash properties display device hal
+LIBS+=flash display device hal
 
 $(info $$LIBS [${LIBS}])

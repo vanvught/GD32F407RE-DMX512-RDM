@@ -2,7 +2,7 @@
  * @file net_private.h
  *
  */
-/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,69 +23,112 @@
  * THE SOFTWARE.
  */
 
-#ifndef NET_PRIVATE_H_
-#define NET_PRIVATE_H_
+#ifndef NET_NET_PRIVATE_H_
+#define NET_NET_PRIVATE_H_
 
 #include <cstdint>
 
 #include "net_platform.h"
-
-#include "net/arp.h"
 #include "net/protocol/icmp.h"
 #include "net/protocol/igmp.h"
 #include "net/protocol/udp.h"
 #include "net/protocol/tcp.h"
 
 #ifndef ALIGNED
-# define ALIGNED __attribute__ ((aligned (4)))
+#define ALIGNED __attribute__((aligned(4)))
 #endif
 
-namespace net::arp {
-enum class EthSend {
-	IS_NORMAL
-#if defined CONFIG_ENET_ENABLE_PTP
-	, IS_TIMESTAMP
-#endif
-};
-} // namespace net::arp
+namespace console
+{
+void Error(const char*);
+}
 
-extern "C" void console_error(const char *);
-
-void emac_eth_send(void *, uint32_t);
-#if defined CONFIG_ENET_ENABLE_PTP
-void emac_eth_send_timestamp(void *, uint32_t);
+uint8_t* emac_eth_send_get_dma_buffer();
+void emac_eth_send(const uint32_t);
+void emac_eth_send(void*, const uint32_t);
+#if defined CONFIG_NET_ENABLE_PTP
+void emac_eth_send_timestamp(const uint32_t);
+void emac_eth_send_timestamp(void*, const uint32_t);
 #endif
-int emac_eth_recv(uint8_t **);
+uint32_t emac_eth_recv(uint8_t**);
 void emac_free_pkt();
 
-namespace net {
-void net_handle();
+namespace net
+{
+inline uint16_t Chksum(const void* data, uint32_t length)
+{
+    auto* ptr = reinterpret_cast<const uint16_t*>(data);
+    uint32_t sum = 0;
 
-uint16_t net_chksum(const void *, uint32_t);
-void net_timers_run();
+    while (length > 1)
+    {
+        sum += *ptr;
+        ptr++;
+        length -= 2;
+    }
 
-void ip_init();
-void ip_set_ip();
-void ip_shutdown();
-void ip_handle(struct t_ip4 *);
+    // Add left-over byte, if any
+    if (length > 0)
+    {
+        sum += __builtin_bswap16(static_cast<uint16_t>(*(reinterpret_cast<const uint8_t*>(ptr)) << 8));
+    }
 
-void udp_init();
-void udp_set_ip();
-void udp_handle(struct t_udp *);
-void udp_shutdown();
+    // Fold 32-bit sum into 16 bits
+    while (sum >> 16)
+    {
+        sum = (sum >> 16) + (sum & 0xFFFF);
+    }
 
-void igmp_init();
-void igmp_set_ip();
-void igmp_handle(struct t_igmp *);
-void igmp_shutdown();
+    return static_cast<uint16_t>(~sum);
+}
 
-void icmp_handle(struct t_icmp *);
-void icmp_shutdown();
+namespace arp
+{
+enum class EthSend
+{
+    kIsNormal
+#if defined CONFIG_NET_ENABLE_PTP
+    ,
+    kIsTimestamp
+#endif
+};
+} // namespace arp
 
-void tcp_init();
-void tcp_run();
-void tcp_handle(struct t_tcp *);
-void tcp_shutdown();
-}  // namespace net
+namespace ip
+{
+void Init();
+void Shutdown();
+void Handle(struct t_ip4*);
+} // namespace ip
 
-#endif /* NET_PRIVATE_H_ */
+namespace udp
+{
+void Init();
+void Input(const struct t_udp*);
+void Shutdown();
+} // namespace udp
+
+namespace igmp
+{
+void Init();
+void Input(const struct t_igmp*);
+void Shutdown();
+} // namespace igmp
+
+namespace icmp
+{
+void Input(struct t_icmp*);
+void Shutdown();
+} // namespace icmp
+
+namespace tcp
+{
+void Init();
+void Input(struct t_tcp*);
+void Shutdown();
+void Run();
+} // namespace tcp
+
+} // namespace net
+
+#endif // NET_NET_PRIVATE_H_

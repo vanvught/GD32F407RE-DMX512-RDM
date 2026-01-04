@@ -2,7 +2,7 @@
  * @file rdmnetdevice.h
  *
  */
-/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,55 +27,44 @@
 #define RDMNETDEVICE_H_
 
 #include <cstdint>
-#include <cstring>
 
-#include "rdmdeviceresponder.h"
+#include "e117.h"
 #include "llrp/llrpdevice.h"
+#include "hal_uuid.h"
+#include "firmware/debug/debug_debug.h"
 
-#include "rdmhandler.h"
-#include "e131.h"
+class RDMNetDevice final : public LLRPDevice
+{
+   public:
+    RDMNetDevice()
+    {
+        DEBUG_ENTRY();
 
-#include "hardware.h"
+        DEBUG_EXIT();
+    }
 
-#include "debug.h"
+    ~RDMNetDevice()
+    {
+        DEBUG_ENTRY();
 
-#if defined (RDM_RESPONDER)
-# error "Cannot be both RDMNet Device and RDM Responder"
-#endif
+        DEBUG_EXIT();
+    };
 
-class RDMNetDevice final: public RDMDeviceResponder, public LLRPDevice {
-public:
-	RDMNetDevice(RDMPersonality **pRDMPersonalities, uint32_t nPersonalityCount) : RDMDeviceResponder(pRDMPersonalities, nPersonalityCount) {
-		DEBUG_ENTRY
+    void Print()
+    {
+        static constexpr auto kUuidStringLength = 36;
+        char uuid_str[kUuidStringLength + 1];
+        uuid_str[kUuidStringLength] = '\0';
 
-		DEBUG_EXIT
-	}
+        uint8_t cid[e117::kCidLength];
+        hal::UuidCopy(cid);
+        uuid_unparse(cid, uuid_str);
 
-	~RDMNetDevice() {
-		DEBUG_ENTRY
+        printf("RDMNet\n");
+        printf(" CID : %s\n", uuid_str);
 
-		DEBUG_EXIT
-	};
-
-	void Run() {
-		LLRPDevice::Run();
-	}
-
-	void Print() {
-		static constexpr auto UUID_STRING_LENGTH = 36;
-		char uuid_str[UUID_STRING_LENGTH + 1];
-		uuid_str[UUID_STRING_LENGTH] = '\0';
-
-		uint8_t s_Cid[e131::CID_LENGTH];
-		Hardware::Get()->GetUuid(s_Cid);
-		uuid_unparse(s_Cid, uuid_str);
-
-		printf("RDMNet\n");
-		printf(" CID : %s\n", uuid_str);
-
-		LLRPDevice::Print();
-		RDMDeviceResponder::Print();
-	}
+        LLRPDevice::Print();
+    }
 };
 
 #endif /* RDMNETDEVICE_H_ */

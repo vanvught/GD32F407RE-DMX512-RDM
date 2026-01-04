@@ -1,8 +1,6 @@
 DEFINES=NDEBUG
 
-EXTRA_INCLUDES=
-
-EXTRA_SRCDIR=
+EXTRA_INCLUDES=../lib-network/include ../lib-properties/include
 
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk

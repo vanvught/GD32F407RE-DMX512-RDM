@@ -2,7 +2,7 @@
  * @file acd.h
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,41 +31,40 @@
 
 #include <cstdint>
 
-#include "netif.h"
-#include "arp.h"
+#include "net/protocol/arp.h"
 #include "net/protocol/acd.h"
-#include "ip4_address.h"
+#include "net/ip4_address.h"
 
 /**
  * https://datatracker.ietf.org/doc/html/rfc5227.html
  * IPv4 Address Conflict Detection
  */
 
-namespace net {
-typedef void (*acd_conflict_callback_t)(acd::Callback callback);
+namespace net::acd
+{
+typedef void (*conflict_callback_t)(acd::Callback callback);
 
-namespace acd {
-struct Acd {
-	ip4_addr_t ipaddr;
-	State state;
-	uint8_t sent_num;
-	uint8_t lastconflict;
-	uint8_t num_conflicts;
-	acd_conflict_callback_t acd_conflict_callback;
-	uint16_t ttw;
+struct Acd
+{
+    ip4_addr_t ipaddr;
+    State state;
+    uint8_t sent_num;
+    uint8_t lastconflict;
+    uint8_t num_conflicts;
+    conflict_callback_t conflict_callback;
+    uint16_t ttw;
 };
-}  // namespace acd
 
-void acd_add(struct acd::Acd *, acd_conflict_callback_t);
-void acd_remove(struct acd::Acd *);
+void Add(struct acd::Acd*, conflict_callback_t);
+void Remove(struct acd::Acd*);
 
-void acd_start(struct acd::Acd *, const ip4_addr_t ipaddr);
-void acd_stop(struct acd::Acd *);
+void Start(struct acd::Acd*, ip4_addr_t ipaddr);
+void Stop(struct acd::Acd*);
 
-void acd_arp_reply(struct t_arp *);
+void ArpReply(const struct t_arp*);
 
-void acd_network_changed_link_down();
-void acd_netif_ip_addr_changed(const ip4_addr_t nOldIpAddress, const ip4_addr_t nNewIpAddress);
-}  // namespace net
+void NetworkChangedLinkDown();
+void NetifIpAddrChanged(ip4_addr_t old_ip_address, ip4_addr_t new_ip_address);
+} // namespace net::acd
 
-#endif /* NET_ACD_H_ */
+#endif  // NET_ACD_H_

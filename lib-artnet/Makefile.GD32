@@ -1,7 +1,7 @@
 DEFINES =DISABLE_FS 
 DEFINES+=NDEBUG
 
-EXTRA_INCLUDES=../lib-lightset/include ../lib-properties/include ../lib-hal/include ../lib-network/include
+EXTRA_INCLUDES=../lib-dmxnode/include
 
 ifeq ($(findstring ARTNET_HAVE_FAILSAFE_RECORD,$(MAKE_FLAGS)), ARTNET_HAVE_FAILSAFE_RECORD)
 	EXTRA_SRCDIR+=src/node/failsafe/spi

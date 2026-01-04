@@ -2,7 +2,7 @@
  * @file spi_flash.h
  *
  */
-/* Copyright (C) 2018-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,30 @@
  * THE SOFTWARE.
  */
 
-#ifndef SPI_FLASH_H_
-#define SPI_FLASH_H_
+#ifndef SPI_SPI_FLASH_H_
+#define SPI_SPI_FLASH_H_
 
 #include <cstdint>
-#include <cstddef>
 
-int spi_flash_probe(unsigned int cs, unsigned int max_hz, unsigned int spi_mode);
+namespace spi::flash
+{
+inline constexpr uint32_t PAGE_SIZE = 256;
+inline constexpr uint32_t SECTOR_SIZE = 4096;
+} // namespace spi::flash
 
-const char *spi_flash_get_name();
+bool spi_flash_probe();
+
+const char* spi_flash_get_name();
 uint32_t spi_flash_get_size();
-uint32_t spi_flash_get_sector_size();
 
-int spi_flash_cmd_read_fast(uint32_t offset, size_t len, uint8_t *data);
-int spi_flash_cmd_write_multi(uint32_t offset, size_t len, const uint8_t *buf);
-int spi_flash_cmd_erase(uint32_t offset, size_t len);
-int spi_flash_cmd_write_status(uint8_t sr);
+inline uint32_t spi_flash_get_sector_size()
+{
+    return spi::flash::SECTOR_SIZE;
+}
 
-#endif /* SPI_FLASH_H_ */
+bool spi_flash_cmd_read_fast(uint32_t offset, uint32_t length, uint8_t* data);
+bool spi_flash_cmd_write_multi(uint32_t offset, uint32_t length, const uint8_t* buffer);
+bool spi_flash_cmd_erase(uint32_t offset, uint32_t length);
+bool spi_flash_cmd_write_status(uint8_t sr);
+
+#endif  // SPI_SPI_FLASH_H_

@@ -6,6 +6,8 @@ DEFINES=NDEBUG
 
 EXTRA_SRCDIR=
 
+GD32=
+
 ifneq ($(MAKE_FLAGS),)
   ifeq ($(findstring CONFIG_HAL_USE_SYSTICK,$(MAKE_FLAGS)), CONFIG_HAL_USE_SYSTICK)
     EXTRA_SRCDIR+=src/systick
@@ -14,7 +16,7 @@ ifneq ($(MAKE_FLAGS),)
   ifeq ($(findstring gd32f10x,$(FAMILY)), gd32f10x)
   	EXTRA_SRCDIR+=gd32f10x/CMSIS/GD/GD32F10x/Source
   	EXTRA_SRCDIR+=gd32f10x/GD32F10x_standard_peripheral/Source
-  	EXTRA_SRCDIR+=src/f
+  	GD32=F
   endif
 
   ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)
@@ -32,13 +34,13 @@ ifneq ($(MAKE_FLAGS),)
   			EXTRA_SRCDIR+=gd32f20x/GD32F20x_usbfs_library/host/class/msc/Source
   		endif
   	endif
-  	EXTRA_SRCDIR+=src/f
+  	GD32=F
   endif
 
   ifeq ($(findstring gd32f30x,$(FAMILY)), gd32f30x)
   	EXTRA_SRCDIR+=gd32f30x/CMSIS/GD/GD32F30x/Source
   	EXTRA_SRCDIR+=gd32f30x/GD32F30x_standard_peripheral/Source
-  	EXTRA_SRCDIR+=src/f
+  	GD32=F
   endif
   
   ifeq ($(findstring gd32f4xx,$(FAMILY)), gd32f4xx)
@@ -56,7 +58,15 @@ ifneq ($(MAKE_FLAGS),)
   			EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_usb_library/host/class/msc/Source
   		endif
   	endif
-  	EXTRA_SRCDIR+=src/f
+  	
+  	 ifeq ($(findstring ENABLE_USB_DEVICE,$(MAKE_FLAGS)), ENABLE_USB_DEVICE)
+ 	    	EXTRA_SRCDIR+=gd32f4xx/GD32F4xx_usb_library/device/core/Source
+ 	    	EXTRA_C_SOURCE_FILES=gd32f4xx/GD32F4xx_usb_library/driver/Source/drv_usb_core.c
+ 	    	EXTRA_C_SOURCE_FILES+=gd32f4xx/GD32F4xx_usb_library/driver/Source/drv_usb_dev.c
+ 	    	EXTRA_C_SOURCE_FILES+=gd32f4xx/GD32F4xx_usb_library/driver/Source/drv_usbd_int.c
+  	 endif
+  	
+  	GD32=F
   endif
   
  	ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
@@ -74,13 +84,25 @@ ifneq ($(MAKE_FLAGS),)
 	  	 		EXTRA_SRCDIR+=gd32h7xx/GD32H7xx_usbhs_library/host/class/msc/Source
 	  	 	endif
   		endif
-		EXTRA_SRCDIR+=src/h
-  	endif
+		GD32=H
+  endif
+  
+  ifeq ($(strip $(GD32)),H)
+  	EXTRA_SRCDIR+=src/h
+  else
+  	EXTRA_SRCDIR+=src/f
+  endif
 
   ifeq ($(findstring NO_EMAC,$(MAKE_FLAGS)), NO_EMAC)
   else
-   	ifeq ($(findstring CONFIG_ENET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_ENET_ENABLE_PTP)	
-  		EXTRA_SRCDIR+=src/ptp
+  	EXTRA_SRCDIR+=device/enet
+  	ifeq ($(strip $(GD32)),H)
+  		EXTRA_SRCDIR+=device/enet/h
+  	else
+  		EXTRA_SRCDIR+=device/enet/f
+  	endif
+   	ifeq ($(findstring CONFIG_NET_ENABLE_PTP,$(MAKE_FLAGS)), CONFIG_NET_ENABLE_PTP)	
+  		EXTRA_SRCDIR+=device/enet/ptp
   	endif
   endif
    
@@ -96,30 +118,16 @@ ifneq ($(MAKE_FLAGS),)
   ifeq ($(findstring ENABLE_USB_HOST,$(MAKE_FLAGS)), ENABLE_USB_HOST)		
   	EXTRA_SRCDIR+=device/usb
   endif
-  
-  ifeq ($(findstring USE_FREE_RTOS,$(MAKE_FLAGS)), USE_FREE_RTOS)	
-  	EXTRA_SRCDIR+=FreeRTOS/FreeRTOS-Kernel
-  	EXTRA_SRCDIR+=FreeRTOS/FreeRTOS-Kernel/portable/Common
-  	ifeq ($(findstring ARM_CM3,$(MAKE_FLAGS)), ARM_CM3)	
-#			EXTRA_SRCDIR+=FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM3
-  	endif
-  	ifeq ($(findstring ARM_CM3,$(MAKE_FLAGS)), ARM_CM4F)	
- # 		EXTRA_SRCDIR+=FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM4F
-  	endif
-  	ifeq ($(findstring ARM_CM3,$(MAKE_FLAGS)), ARM_CM7)	
- # 		EXTRA_SRCDIR+=FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1
-  	endif
-  endif
 else
 	ifeq ($(FAMILY),)
 		ifneq (, $(shell test -d '../lib-gd32/gd32f10x' && echo -n yes))
 			FAMILY=gd32f10x
-			EXTRA_SRCDIR+=src/f
+#			EXTRA_SRCDIR+=src/f
 		endif
 		ifneq (, $(shell test -d '../lib-gd32/gd32f20x' && echo -n yes))
 			FAMILY=gd32f20x
 			HAVE_SOFTUART=1
- # 		EXTRA_SRCDIR+=src/f
+  		EXTRA_SRCDIR+=src/f
 		endif
 		ifneq (, $(shell test -d '../lib-gd32/gd32f30x' && echo -n yes))
 			FAMILY=gd32f30x
@@ -137,14 +145,20 @@ else
 		endif
 	endif
 	
-	EXTRA_SRCDIR+=device/emac
+  ifneq (, $(shell test -d '../lib-gd32/gd32f20x' && echo -n yes))
+  	EXTRA_SRCDIR+=device/enet
+	 	EXTRA_SRCDIR+=device/enet/f
+	 	EXTRA_SRCDIR+=device/enet/ptp
+  endif	
 	EXTRA_SRCDIR+=device/usb
+	EXTRA_SRCDIR+=device/usb/f
 	EXTRA_SRCDIR+=src/uart0 
 	ifdef HAVE_SOFTUART
 		EXTRA_SRCDIR+=src/softuart0
 	endif
 	
-	DEFINES=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
+	DEFINES+=CONFIG_ENABLE_I2C1
+	DEFINES+=ENABLE_USB_HOST CONFIG_USB_HOST_MSC
 endif
 
 $(info $$FAMILY [${FAMILY}])

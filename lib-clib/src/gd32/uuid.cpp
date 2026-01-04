@@ -2,7 +2,7 @@
  * @file uuid.cpp
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,36 +23,46 @@
  * THE SOFTWARE.
  */
 
+#if !defined(__clang__)
+#pragma GCC push_options
+#pragma GCC optimize("O2")
+#pragma GCC optimize("no-tree-loop-distribute-patterns")
+#pragma GCC optimize("-funroll-loops")
+#endif
+
 #include <cstdint>
 #include <cstring>
 #include <uuid/uuid.h>
 
 #include "gd32.h"
 
-namespace hal {
-typedef union pcast32 {
-	uuid_t uuid;
-	uint32_t u32[4];
+namespace hal
+{
+typedef union pcast32
+{
+    uuid_t uuid;
+    uint32_t u32[4];
 } _pcast32;
 
-void uuid_init(uuid_t out) {
-	_pcast32 cast;
+void UuidCopy(uuid_t out)
+{
+    _pcast32 cast;
 
-#if defined (GD32H7XX)
-	cast.u32[0] = REG32(0x1FF0F7E8);
-	cast.u32[1] = REG32(0x1FF0F7EC);
-	cast.u32[2] = REG32(0x1FF0F7F0);
-#elif defined (GD32F4XX)
-	cast.u32[0] = REG32(0x1FFF7A10);
-	cast.u32[1] = REG32(0x1FFF7A14);
-	cast.u32[2] = REG32(0x1FFF7A18);
+#if defined(GD32H7XX)
+    cast.u32[0] = REG32(0x1FF0F7E8);
+    cast.u32[1] = REG32(0x1FF0F7EC);
+    cast.u32[2] = REG32(0x1FF0F7F0);
+#elif defined(GD32F4XX)
+    cast.u32[0] = REG32(0x1FFF7A10);
+    cast.u32[1] = REG32(0x1FFF7A14);
+    cast.u32[2] = REG32(0x1FFF7A18);
 #else
-	cast.u32[0] = REG32(0x1FFFF7E8);
-	cast.u32[1] = REG32(0x1FFFF7EC);
-	cast.u32[2] = REG32(0x1FFFF7F0);
+    cast.u32[0] = REG32(0x1FFFF7E8);
+    cast.u32[1] = REG32(0x1FFFF7EC);
+    cast.u32[2] = REG32(0x1FFFF7F0);
 #endif
-	cast.u32[3] = cast.u32[0] + cast.u32[1] + cast.u32[2];
+    cast.u32[3] = cast.u32[0] + cast.u32[1] + cast.u32[2];
 
-	memcpy(out, cast.uuid, sizeof(uuid_t));
+    memcpy(out, cast.uuid, sizeof(uuid_t));
 }
-}  // namespace hal
+} // namespace hal

@@ -1,8 +1,8 @@
 /**
- * @file arp_private.h
+ * @file arp.h
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,29 +23,30 @@
  * THE SOFTWARE.
  */
 
-#ifndef ARP_PRIVATE_H_
-#define ARP_PRIVATE_H_
+#ifndef NET_ARP_H_
+#define NET_ARP_H_
 
-#include "netif.h"
-#include "net/protocol/ip4.h"
+#include "net/ip4_address.h"
 #include "net/protocol/arp.h"
 #include "net/protocol/udp.h"
 
-namespace net {
-namespace arp {
-enum class Flags {
-	FLAG_INSERT, FLAG_UPDATE
+namespace net::arp
+{
+enum class Flags
+{
+    FLAG_INSERT,
+    FLAG_UPDATE
 };
-}  // namespace arp
 
-void arp_init();
-void arp_handle(struct t_arp *);
-void arp_send(struct t_udp *, const uint32_t, const uint32_t);
-#if defined CONFIG_ENET_ENABLE_PTP
-void arp_send_timestamp(struct t_udp *, const uint32_t, const uint32_t);
+void Init();
+void Input(const struct t_arp*);
+void Send(struct t_udp*, const uint32_t, const uint32_t);
+#if defined CONFIG_NET_ENABLE_PTP
+void SendTimestamp(struct t_udp*, const uint32_t, const uint32_t);
 #endif
-void arp_acd_probe(const ip4_addr_t ipaddr);
-void arp_acd_send_announcement(const ip4_addr_t ipaddr);
-}  // namespace net
+void AcdProbe(ip4_addr_t ipaddr);
+void AcdSendAnnouncement(ip4_addr_t ipaddr);
 
-#endif /* ARP_PRIVATE_H_ */
+} // namespace net::arp
+
+#endif  // NET_ARP_H_

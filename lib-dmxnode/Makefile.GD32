@@ -1,0 +1,8 @@
+DEFINES=NDEBUG
+
+ifeq ($(findstring ARTNET_HAVE_FAILSAFE_RECORD,$(MAKE_FLAGS)), ARTNET_HAVE_FAILSAFE_RECORD)
+	EXTRA_SRCDIR+=src/scenes/spi
+endif
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk

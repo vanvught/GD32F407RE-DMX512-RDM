@@ -2,7 +2,7 @@
  * @file gd32f407_mcu.h
  *
  */
-/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,10 +35,10 @@
 /**
  * 	rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
  *
- * CK_APB1 x 4 = 200000000
+ * CK_APB1 = AHB = 200000000
  * TIMER1,2,3,4,5,6,11,12,13
  *
- * CK_APB2 x 2 = 200000000
+ * CK_APB2 = AHB = 200000000
  * TIMER0,7,8,9,10
  */
 

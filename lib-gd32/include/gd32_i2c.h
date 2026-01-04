@@ -2,7 +2,7 @@
  * @file gd32_i2c.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,34 +26,48 @@
 #ifndef GD32_I2C_H_
 #define GD32_I2C_H_
 
-#include <stdint.h>
+#include <cstdint>
 
-typedef enum GD32_I2C_BAUDRATE {
-	GD32_I2C_NORMAL_SPEED = 100000,
-	GD32_I2C_FULL_SPEED = 400000
-} gd32_i2c_baudrate_t;
+namespace gd32
+{
+inline constexpr uint32_t kI2CNormalSpeed = 100000;
+inline constexpr uint32_t kI2CFullSpeed = 400000;
+} // namespace gd32
 
-typedef enum GD32_I2C_RC {
-	GD32_I2C_OK = 0,
-	GD32_I2C_NOK,
-	GD32_I2C_NACK,
-	GD32_I2C_NOK_LA,
-	GD32_I2C_NOK_TOUT
+typedef enum GD32_I2C_RC
+{
+    GD32_I2C_OK = 0,
+    GD32_I2C_NOK,
+    GD32_I2C_NACK,
+    GD32_I2C_NOK_LA,
+    GD32_I2C_NOK_TOUT
 } gd32_i2c_rc_t;
 
-#ifdef __cplusplus
-extern "C" {
+void Gd32I2cBegin();
+void Gd32I2cSetBaudrate(uint32_t baudrate);
+void Gd32I2cSetAddress(uint8_t address);
+uint8_t Gd32I2cWrite(const char* buffer, uint32_t length);
+uint8_t Gd32I2cWrite(uint8_t address, const char* buffer, uint32_t length);
+uint8_t Gd32I2cRead(char* buffer, uint32_t length);
+uint8_t Gd32I2cRead(uint8_t address, char* buffer, uint32_t length);
+bool Gd32I2cIsConnected(uint8_t address, uint32_t baudrate = gd32::kI2CNormalSpeed);
+void Gd32I2cWriteReg(uint8_t reg, uint8_t value);
+void Gd32I2cWriteReg(uint8_t address, uint8_t reg, uint8_t value);
+void Gd32I2cReadReg(uint8_t reg, uint8_t& value);
+void Gd32I2cReadReg(uint8_t address, uint8_t reg, uint8_t& value);
+
+#if defined(CONFIG_ENABLE_I2C1)
+void Gd32I2c1Begin();
+void Gd32I2c1SetBaudrate(uint32_t baudrate);
+void Gd32I2c1SetAddress(uint8_t address);
+uint8_t Gd32I2c1Write(const char* buffer, uint32_t length);
+uint8_t Gd32I2c1Write(uint8_t address, const char* buffer, uint32_t length);
+uint8_t Gd32I2c1Read(char* buffer, uint32_t length);
+uint8_t Gd32I2c1Read(uint8_t address, char* buffer, uint32_t length);
+bool Gd32I2c1IsConnected(uint8_t address, uint32_t baudrate = gd32::kI2CNormalSpeed);
+void Gd32I2c1WriteReg(uint8_t reg, uint8_t value);
+void Gd32I2c1WriteReg(uint8_t address, uint8_t reg, uint8_t value);
+void Gd32I2c1ReadReg(uint8_t reg, uint8_t& value);
 #endif
 
-void gd32_i2c_begin(void);
-void gd32_i2c_end(void);
-extern uint8_t gd32_i2c_write(const char *pBuffer, uint32_t nLength);
-uint8_t gd32_i2c_read(char *pBuffer, uint32_t nLength);
-void gd32_i2c_set_baudrate(uint32_t nBaudrate);
-void gd32_i2c_set_address(uint8_t nAddress);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* GD32_I2C_H_ */
+#endif  // GD32_I2C_H_

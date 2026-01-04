@@ -2,7 +2,7 @@
  * @file i2cdetect.h
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2020-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,9 @@
 #ifndef I2CDETECT_H_
 #define I2CDETECT_H_
 
-class I2cDetect {
-public:
-	I2cDetect();
-};
+void I2cDetect();
+#if defined(CONFIG_ENABLE_I2C1)
+void I2c1Detect();
+#endif
 
 #endif /* I2CDETECT_H_ */

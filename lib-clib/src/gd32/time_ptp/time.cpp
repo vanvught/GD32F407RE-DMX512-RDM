@@ -2,7 +2,7 @@
  * @file time.cpp
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,76 +24,80 @@
  */
 
 #pragma GCC push_options
-#pragma GCC optimize ("O2")
+#pragma GCC optimize("O2")
 
-#include <cstdint>
 #include <time.h>
 #include <sys/time.h>
 #include <cassert>
 
-#include "gd32.h"
 #include "gd32_ptp.h"
 
-#if defined (GD32H7XX)
-# define enet_ptp_timestamp_function_config(x)		enet_ptp_timestamp_function_config(ENETx, x)
-# define enet_ptp_timestamp_update_config(x,y,z)	enet_ptp_timestamp_update_config(ENETx, x, y, z)
-# define enet_ptp_system_time_get(x)				enet_ptp_system_time_get(ENETx, x)
+#if defined(GD32H7XX)
+#define enet_ptp_timestamp_function_config(x) enet_ptp_timestamp_function_config(ENETx, x)
+#define enet_ptp_timestamp_update_config(x, y, z) enet_ptp_timestamp_update_config(ENETx, x, y, z)
+#define enet_ptp_system_time_get(x) enet_ptp_system_time_get(ENETx, x)
 #endif
 
-extern "C" {
-/*
- * number of seconds and microseconds since the Epoch,
- *     1970-01-01 00:00:00 +0000 (UTC).
- */
+extern "C"
+{
+    /*
+     * number of seconds and microseconds since the Epoch,
+     *     1970-01-01 00:00:00 +0000 (UTC).
+     */
 
-int gettimeofday(struct timeval *tv, [[maybe_unused]] struct timezone *tz) {
-	assert(tv != 0);
+    int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz)
+    {
+        assert(tv != 0);
 
-	enet_ptp_systime_struct systime;
-	enet_ptp_system_time_get(&systime);
+        enet_ptp_systime_struct systime;
+        enet_ptp_system_time_get(&systime);
 
-	tv->tv_sec = systime.second;
+        tv->tv_sec = systime.second;
 
-#if !defined (GD32F4XX)
-	const auto nNanoSecond = systime.nanosecond;
+#if !defined(GD32F4XX)
+        const auto kNanoSecond = systime.nanosecond;
 #else
-	const auto nNanoSecond = gd32::ptp_subsecond_2_nanosecond(systime.subsecond);
+        const auto kNanoSecond = gd32::ptp_subsecond_2_nanosecond(systime.subsecond);
 #endif
 
-	tv->tv_usec = nNanoSecond / 1000U;
+        tv->tv_usec = kNanoSecond / 1000U;
 
-	return 0;
-}
+        return 0;
+    }
 
-int settimeofday(const struct timeval *tv, [[maybe_unused]] const struct timezone *tz) {
-	assert(tv != 0);
+    int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz)
+    {
+        assert(tv != 0);
 
-	const uint32_t nSign = ENET_PTP_ADD_TO_TIME;
-	const uint32_t nSecond = tv->tv_sec;
-	const uint32_t nNanoSecond = tv->tv_usec * 1000U;
-	const auto nSubSecond = gd32::ptp_nanosecond_2_subsecond(nNanoSecond);
+        const uint32_t kSign = ENET_PTP_ADD_TO_TIME;
+        const uint32_t kSecond = tv->tv_sec;
+        const uint32_t kNanoSecond = tv->tv_usec * 1000U;
+        const auto kSubSecond = gd32::ptp_nanosecond_2_subsecond(kNanoSecond);
 
-	enet_ptp_timestamp_update_config(nSign, nSecond, nSubSecond);
+        enet_ptp_timestamp_update_config(kSign, kSecond, kSubSecond);
 
-	if (SUCCESS == enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_INIT)) {
-		return 0;
-	}
+        if (SUCCESS == enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_INIT))
+        {
+            return 0;
+        }
 
-	return -1;
-}
+        return -1;
+    }
 
-/*
- *  time() returns the time as the number of seconds since the Epoch,
-       1970-01-01 00:00:00 +0000 (UTC).
- */
-time_t time(time_t *__timer) {
-	struct timeval tv;
-	gettimeofday(&tv, 0);
+    /*
+     *  time() returns the time as the number of seconds since the Epoch,
+           1970-01-01 00:00:00 +0000 (UTC).
+     */
+    time_t time(time_t* __timer) // NOLINT
+    {
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
 
-	if (__timer != nullptr) {
-		*__timer = tv.tv_sec;
-	}
+        if (__timer != nullptr)
+        {
+            *__timer = tv.tv_sec;
+        }
 
-	return tv.tv_sec;
-}
+        return tv.tv_sec;
+    }
 }

@@ -2,7 +2,7 @@
  * @file arp.h
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,9 @@
 #ifndef NET_PROTOCOL_ARP_H_
 #define NET_PROTOCOL_ARP_H_
 
-#include "ip4_address.h"
 #include "net/protocol/ethernet.h"
 #include "net/protocol/ieee.h"
+#include "net/protocol/ip4.h"
 
 #if !defined (PACKED)
 # define PACKED __attribute__((packed))
@@ -73,4 +73,4 @@ struct t_arp {
 	struct arp_packet arp;
 } PACKED;
 
-#endif /* NET_PROTOCOL_ARP_H_ */
+#endif  // NET_PROTOCOL_ARP_H_

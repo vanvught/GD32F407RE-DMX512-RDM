@@ -1,4 +1,0 @@
-DEFINES=DISABLE_FS NDEBUG
-EXTRA_INCLUDES=../lib-network/include
-
-include ../firmware-template-gd32/lib/Rules.mk

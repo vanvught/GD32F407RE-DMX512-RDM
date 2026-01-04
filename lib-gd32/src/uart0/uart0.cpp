@@ -2,7 +2,7 @@
  * @file uart0.cpp
  *
  */
-/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,55 +29,92 @@
 #include "gd32.h"
 #include "gd32_uart.h"
 
-extern "C" {
-void uart0_init(void) {
-	gd32_uart_begin(USART0, 115200U, GD32_UART_BITS_8, GD32_UART_PARITY_NONE, GD32_UART_STOP_1BIT);
+namespace uart0
+{
+static char s_buffer[128];
+
+void Init()
+{
+    Gd32UartBegin(USART0, 115200U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop1Bit);
 }
 
-void uart0_putc(int c) {
-	if (c == '\n') {
-		while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-			;
-#if defined (GD32H7XX)
-		USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t)'\r';
+void Putc(int c)
+{
+    if (c == '\n')
+    {
+        while (RESET == usart_flag_get(USART0, USART_FLAG_TBE));
+#if defined(GD32H7XX)
+        USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t)'\r';
 #else
-		USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) '\r');
+        USART_DATA(USART0) = static_cast<uint16_t>(USART_DATA_DATA & static_cast<uint8_t>('\r'));
 #endif
-	}
+    }
 
-	while (RESET == usart_flag_get(USART0, USART_FLAG_TBE))
-		;
-#if defined (GD32H7XX)
-	USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t) c;
+    while (RESET == usart_flag_get(USART0, USART_FLAG_TBE));
+#if defined(GD32H7XX)
+    USART_TDATA(USART0) = USART_TDATA_TDATA & (uint32_t)c;
 #else
-	USART_DATA(USART0) = ((uint16_t) USART_DATA_DATA & (uint8_t) c);
+    USART_DATA(USART0) = static_cast<uint16_t>(USART_DATA_DATA & static_cast<uint8_t>(c));
 #endif
 }
 
-void uart0_puts(const char *s) {
-	while (*s != '\0') {
-		if (*s == '\n') {
-			uart0_putc('\r');
-		}
-		uart0_putc(*s++);
-	}
+int Printf(const char* fmt, ...)
+{
+    va_list arp;
+
+    va_start(arp, fmt);
+
+    int i = vsnprintf(s_buffer, sizeof(s_buffer), fmt, arp);
+    s_buffer[sizeof(s_buffer) - 1] = '\0';
+
+    va_end(arp);
+
+    char* s = s_buffer;
+
+    while (*s != '\0')
+    {
+        if (*s == '\n')
+        {
+            Putc('\r');
+        }
+
+        Putc(*s++);
+    }
+
+    return i;
 }
 
-int uart0_getc(void) {
-	if (__builtin_expect((!gd32_usart_flag_get<USART_FLAG_RBNE>(USART0)), 1)) {
-		return EOF;
-	}
+void Puts(const char* s)
+{
+    while (*s != '\0')
+    {
+        if (*s == '\n')
+        {
+            Putc('\r');
+        }
+        Putc(*s++);
+    }
 
-#if defined (GD32H7XX)
-	const auto c = static_cast<int>(USART_RDATA(USART0));
+    Putc('\n');
+}
+
+int Getc()
+{
+    if (__builtin_expect((!Gd32UsartFlagGet<USART_FLAG_RBNE>(USART0)), 1))
+    {
+        return EOF;
+    }
+
+#if defined(GD32H7XX)
+    const auto kC = static_cast<int>(USART_RDATA(USART0));
 #else
-	const auto c = static_cast<int>(USART_DATA(USART0));
+    const auto kC = static_cast<int>(USART_DATA(USART0));
 #endif
 
-#if defined (UART0_ECHO)
-	uart0_putc(c);
+#if defined(UART0_ECHO)
+    Putc(c);
 #endif
 
-	return c;
+    return kC;
 }
-}
+} // namespace uart0

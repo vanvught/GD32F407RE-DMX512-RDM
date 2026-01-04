@@ -2,7 +2,7 @@
  * @file llrpdevice.h
  *
  */
-/* Copyright (C) 2019-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2019-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,117 +23,133 @@
  * THE SOFTWARE.
  */
 
-#ifndef LLRPDEVICE_H_
-#define LLRPDEVICE_H_
+#ifndef LLRP_LLRPDEVICE_H_
+#define LLRP_LLRPDEVICE_H_
 
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
 
+#include "network.h"
 #include "llrp/llrppacket.h"
 #include "e133.h"
-#include "rdmconst.h"
+#include "e120.h"
 #include "rdmhandler.h"
+#include "net/ip4_address.h"
+#include "net/igmp.h"
+#include "net/apps/mdns.h"
+#include "firmware/debug/debug_debug.h"
 
-#include "network.h"
+namespace llrp::device
+{
+static constexpr auto kIpV4LlrpRequest = net::convert_to_uint(239, 255, 250, 133);
+static constexpr auto kIpV4LlrpResponse = net::convert_to_uint(239, 255, 250, 134);
+static constexpr uint16_t kLlrpPort = 5569;
+} // namespace llrp::device
 
-#include "debug.h"
+class LLRPDevice
+{
+   public:
+    LLRPDevice()
+    {
+        DEBUG_ENTRY();
+        assert(s_this == nullptr);
+        s_this = this;
 
-namespace llrp {
-namespace device {
-static constexpr auto IPV4_LLRP_REQUEST = network::convert_to_uint(239, 255, 250, 133);
-static constexpr auto IPV4_LLRP_RESPONSE = network::convert_to_uint(239, 255, 250, 134);
-static constexpr uint16_t LLRP_PORT = 5569;
-}  // namespace device
-}  // namespace llrp
+        handle_llrp = net::udp::Begin(llrp::device::kLlrpPort, LLRPDevice::StaticCallbackFunction);
+        assert(handle_llrp != -1);
+        net::igmp::JoinGroup(handle_llrp, llrp::device::kIpV4LlrpRequest);
 
-class LLRPDevice {
-public:
-	LLRPDevice() {
-		DEBUG_ENTRY
+        mdns::ServiceRecordAdd(nullptr, mdns::Services::RDMNET_LLRP, "node=RDMNet LLRP Only");
 
-		s_nHandleLLRP = Network::Get()->Begin(llrp::device::LLRP_PORT);
-		assert(s_nHandleLLRP != -1);
-		Network::Get()->JoinGroup(s_nHandleLLRP, llrp::device::IPV4_LLRP_REQUEST);
+        DEBUG_EXIT();
+    }
 
-		DEBUG_EXIT
-	}
+    ~LLRPDevice()
+    {
+        DEBUG_ENTRY();
 
-	~LLRPDevice() {
-		DEBUG_ENTRY
+		mdns::ServiceRecordDelete(mdns::Services::RDMNET_LLRP);
+		
+        net::igmp::LeaveGroup(handle_llrp, llrp::device::kIpV4LlrpRequest);
+        net::udp::End(llrp::device::kLlrpPort);
 
-		Network::Get()->LeaveGroup(s_nHandleLLRP, llrp::device::IPV4_LLRP_REQUEST);
-		Network::Get()->End(llrp::device::LLRP_PORT);
+        s_this = nullptr;
 
-		DEBUG_EXIT
-	}
+        DEBUG_EXIT();
+    }
 
-	void Run() {
-		uint16_t nForeignPort;
-
-		const auto nBytesReceived = Network::Get()->RecvFrom(s_nHandleLLRP, const_cast<const void **>(reinterpret_cast<void **>(&s_pLLRP)), &s_nIpAddressFrom, &nForeignPort) ;
-
-		if (__builtin_expect((nBytesReceived < sizeof(struct TLLRPCommonPacket)), 1)) {
-			return;
-		}
+    void Input(const uint8_t* buffer, [[maybe_unused]] uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port)
+    {
+        llrp = const_cast<uint8_t*>(buffer);
+        ip_address_from = from_ip;
 
 #ifndef NDEBUG
-		DumpCommon();
+        DumpCommon();
 #endif
 
-		const auto *pCommon = reinterpret_cast<struct TLLRPCommonPacket *>(s_pLLRP);
+        const auto* common = reinterpret_cast<struct TLLRPCommonPacket*>(llrp);
 
-		switch (__builtin_bswap32(pCommon->LlrpPDU.Vector)) {
-		case VECTOR_LLRP_PROBE_REQUEST:
+        switch (__builtin_bswap32(common->LlrpPDU.vector))
+        {
+            case VECTOR_LLRP_PROBE_REQUEST:
 #ifdef SHOW_LLRP_MESSAGE
-			printf("> VECTOR_LLRP_PROBE_REQUEST\n");
-			DumpLLRP();
+                printf("> VECTOR_LLRP_PROBE_REQUEST\n");
+                DumpLLRP();
 #endif
-			HandleRequestMessage();
-			break;
-		case VECTOR_LLRP_PROBE_REPLY:
-			// Nothing to do here
-			DEBUG_PUTS("VECTOR_LLRP_PROBE_REPLY");
-			break;
-		case VECTOR_LLRP_RDM_CMD:
+                HandleRequestMessage();
+                break;
+            case VECTOR_LLRP_PROBE_REPLY:
+                // Nothing to do here
+                DEBUG_PUTS("VECTOR_LLRP_PROBE_REPLY");
+                break;
+            case VECTOR_LLRP_RDM_CMD:
 #ifdef SHOW_LLRP_MESSAGE
-			printf("> VECTOR_LLRP_RDM_CMD\n");
-			DumpLLRP();
+                printf("> VECTOR_LLRP_RDM_CMD\n");
+                DumpLLRP();
 #endif
-			HandleRdmCommand();
-			break;
-		default:
-			break;
-		}
-	}
+                HandleRdmCommand();
+                break;
+            default:
+                break;
+        }
+    }
 
-	void Print() {
-		printf("LLRP Device\n");
-		printf(" Port UDP           : %d\n", llrp::device::LLRP_PORT);
-		printf(" Join Request       : " IPSTR "\n", IP2STR(llrp::device::IPV4_LLRP_REQUEST));
-		printf(" Multicast Response : " IPSTR "\n", IP2STR(llrp::device::IPV4_LLRP_RESPONSE));
-	}
+    void Print()
+    {
+        puts("LLRP Device");
+        printf(" Port UDP           : %d\n", llrp::device::kLlrpPort);
+        printf(" Join Request       : " IPSTR "\n", IP2STR(llrp::device::kIpV4LlrpRequest));
+        printf(" Multicast Response : " IPSTR "\n", IP2STR(llrp::device::kIpV4LlrpResponse));
+    }
 
-private:
-	uint8_t *LLRPHandleRdmCommand(const uint8_t *pRdmDataNoSC) {
-		m_RDMHandler.HandleData(pRdmDataNoSC, reinterpret_cast<uint8_t*>(&s_RdmCommand));
-		return reinterpret_cast<uint8_t*>(&s_RdmCommand);
-	}
+   private:
+    uint8_t* LLRPHandleRdmCommand(const uint8_t* rdm_data_no_sc)
+    {
+        rdm_handler_.HandleData(rdm_data_no_sc, reinterpret_cast<uint8_t*>(&rdm_command));
+        return reinterpret_cast<uint8_t*>(&rdm_command);
+    }
 
-	void HandleRequestMessage();
-	void HandleRdmCommand();
-	// DEBUG subject for deletions
-	void DumpCommon();
-	void DumpLLRP();
-	void DumpRdmMessageInNoSc();
+    void HandleRequestMessage();
+    void HandleRdmCommand();
+    // DEBUG subject for deletions
+    void DumpCommon();
+    void DumpLLRP();
+    void DumpRdmMessageInNoSc();
 
-private:
-	RDMHandler m_RDMHandler { false };
+    void static StaticCallbackFunction(const uint8_t* buffer, uint32_t size, uint32_t from_ip, uint16_t from_port)
+    {
+        s_this->Input(buffer, size, from_ip, from_port);
+    }
 
-	static int32_t s_nHandleLLRP;
-	static uint32_t s_nIpAddressFrom;
-	static uint8_t *s_pLLRP;
-	static TRdmMessage s_RdmCommand;
+   private:
+    RDMHandler rdm_handler_{false};
+
+    static inline int32_t handle_llrp;
+    static inline uint32_t ip_address_from;
+    static inline uint8_t* llrp;
+    static inline TRdmMessage rdm_command;
+    static inline LLRPDevice* s_this;
 };
 
-#endif /* LLRPDEVICE_H_ */
+#endif // LLRP_LLRPDEVICE_H_

@@ -2,7 +2,7 @@
  * @file ntpclient.h
  *
  */
-/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2019-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,121 +27,48 @@
 #define NET_APPS_NTPCLIENT_H_
 
 #include <cstdint>
-#include <cstdio>
-#include <time.h>
 
 #include "net/protocol/ntp.h"
-#include "hardware.h"
 
-#include "debug.h"
-
-#if !defined(CONFIG_NTP_CLIENT_POLL_POWER)
-# define CONFIG_NTP_CLIENT_POLL_POWER 10
+#if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MIN)
+#define CONFIG_NTP_CLIENT_POLL_POWER_MIN 3
+#endif
+#if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MAX)
+#define CONFIG_NTP_CLIENT_POLL_POWER_MAX 12
 #endif
 
-namespace ntpclient {
-static constexpr uint32_t TIMEOUT_MILLIS = 3000;
-static constexpr uint8_t POLL_POWER = CONFIG_NTP_CLIENT_POLL_POWER;
-static constexpr uint32_t POLL_SECONDS = (1U << POLL_POWER);
+namespace ntpclient
+{
 
-void display_status(const ::ntp::Status status);
-}  // namespace ntpclient
+inline constexpr uint32_t kTimeoutSeconds = 3;
+inline constexpr uint32_t kTimeoutMillis = kTimeoutSeconds * 1000;
+inline constexpr uint8_t kPollPowerMin = CONFIG_NTP_CLIENT_POLL_POWER_MIN;
+inline constexpr uint8_t kPollPowerMax = CONFIG_NTP_CLIENT_POLL_POWER_MAX;
+inline constexpr uint32_t kPollSecondsMin = (1U << kPollPowerMin);
+static_assert(kPollSecondsMin >= ntp::MINPOLL);
+inline constexpr uint32_t kPollSecondsMax = (1U << kPollPowerMax);
 
-class NtpClient {
-public:
-	NtpClient();
+void DisplayStatus(::ntp::Status status);
 
-	void Start();
-	void Stop();
-	void Print();
+// Main NTP client interface
+void Init();
+void Start();
+void Stop(bool do_disable = false);
+void SetServerIp(uint32_t server_ip);
+uint32_t GetServerIp();
+ntp::Status GetStatus();
 
-	void SetServerIp(const uint32_t nServerIp) {
-		m_nServerIp = nServerIp;
-	}
+// PTP wrapper (GD32 only)
+namespace ptp
+{
+void Init();
+void Start();
+void Stop(bool do_disable = false);
+void SetServerIp(uint32_t server_ip);
+uint32_t GetServerIp();
+ntp::Status GetStatus();
+} // namespace ptp
 
-	ntp::Status GetStatus() const {
-		return m_Status;
-	}
+} // namespace ntpclient
 
-	void Run() {
-		if (m_Status == ntp::Status::STOPPED) {
-			return;
-		}
-
-		if ((m_Status == ntp::Status::IDLE) || (m_Status == ntp::Status::FAILED)) {
-			if (__builtin_expect(((Hardware::Get()->Millis() - m_MillisLastPoll) > (1000 * ntpclient::POLL_SECONDS)), 0)) {
-				Send();
-				m_MillisRequest = Hardware::Get()->Millis();
-				m_Status = ntp::Status::WAITING;
-				ntpclient::display_status(ntp::Status::WAITING);
-				DEBUG_PUTS("ntp::Status::WAITING");
-			}
-
-			return;
-		}
-
-		if (m_Status == ntp::Status::WAITING) {
-			uint8_t LiVnMode;
-
-			if (!Receive(LiVnMode)) {
-				if (__builtin_expect(((Hardware::Get()->Millis() - m_MillisRequest) > ntpclient::TIMEOUT_MILLIS), 0)) {
-					m_Status = ntp::Status::FAILED;
-					ntpclient::display_status(ntp::Status::FAILED);
-					DEBUG_PUTS("ntp::Status::FAILED");
-				}
-
-				return;
-			}
-
-			if (__builtin_expect(((LiVnMode & ntp::MODE_SERVER) == ntp::MODE_SERVER), 1)) {
-				m_MillisLastPoll = Hardware::Get()->Millis();
-
-				SetTimeOfDay();
-#ifndef NDEBUG
-				const auto nTime = time(nullptr);
-				const auto *pLocalTime = localtime(&nTime);
-				DEBUG_PRINTF("localtime: %.4d/%.2d/%.2d %.2d:%.2d:%.2d", pLocalTime->tm_year + 1900, pLocalTime->tm_mon + 1, pLocalTime->tm_mday, pLocalTime->tm_hour, pLocalTime->tm_min, pLocalTime->tm_sec);
-#endif
-			} else {
-				DEBUG_PUTS("!>> Invalid reply <<!");
-			}
-
-			m_Status = ntp::Status::IDLE;
-			ntpclient::display_status(ntp::Status::IDLE);
-			DEBUG_PUTS("ntp::Status::IDLE");
-		}
-	}
-
-	static NtpClient *Get() {
-		return s_pThis;
-	}
-
-private:
-	void GetTimeNtpFormat(uint32_t &nSeconds, uint32_t &nFraction);
-	void Send();
-	bool Receive(uint8_t& LiVnMode);
-
-	void Difference(const struct ntp::TimeStamp& Start, const struct ntp::TimeStamp& Stop, int32_t &nDiffSeconds, int32_t &nDiffMicroSeconds);
-	void SetTimeOfDay();
-
-	void PrintNtpTime(const char *pText, const struct ntp::TimeStamp *pNtpTime);
-
-private:
-	uint32_t m_nServerIp;
-	int32_t m_nHandle { -1 };
-	uint32_t m_MillisRequest { 0 };
-	uint32_t m_MillisLastPoll { 0 };
-
-	struct ntp::TimeStamp T1 { 0, 0 };	// time request sent by client
-	struct ntp::TimeStamp T2 { 0, 0 };	// time request received by server
-	struct ntp::TimeStamp T3 { 0, 0 };	// time reply sent by server
-	struct ntp::TimeStamp T4 { 0, 0 };	// time reply received by client
-
-	struct ntp::Packet m_Request;
-
-	ntp::Status m_Status { ntp::Status::STOPPED };
-
-	static NtpClient *s_pThis;
-};
-
-#endif /* NET_APPS_NTPCLIENT_H_ */
+#endif  // NET_APPS_NTPCLIENT_H_

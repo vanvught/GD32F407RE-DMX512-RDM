@@ -29,30 +29,30 @@
  * Description is taken from newlib https://sourceware.org/newlib/
  *
  * DESCRIPTION
-	Use this macro to embed debugging diagnostic statements in
-	your programs.  The argument <[expression]> should be an
-	expression which evaluates to true (nonzero) when your program
-	is working as you intended.
-	When <[expression]> evaluates to false (zero), <<assert>>
-	calls <<abort>>, after first printing a message showing what
-	failed and where:
+    Use this macro to embed debugging diagnostic statements in
+    your programs.  The argument <[expression]> should be an
+    expression which evaluates to true (nonzero) when your program
+    is working as you intended.
+    When <[expression]> evaluates to false (zero), <<assert>>
+    calls <<abort>>, after first printing a message showing what
+    failed and where:
 
 . Assertion failed: <[expression]>, file <[filename]>, line <[lineno]>, function: <[func]>
 
-	If the name of the current function is not known (for example,
-	when using a C89 compiler that does not understand __func__),
-	the function location is omitted.
-	The macro is defined to permit you to turn off all uses of
-	<<assert>> at compile time by defining <<NDEBUG>> as a
-	preprocessor variable.   If you do this, the <<assert>> macro
-	expands to
+    If the name of the current function is not known (for example,
+    when using a C89 compiler that does not understand __func__),
+    the function location is omitted.
+    The macro is defined to permit you to turn off all uses of
+    <<assert>> at compile time by defining <<NDEBUG>> as a
+    preprocessor variable.   If you do this, the <<assert>> macro
+    expands to
 
 . (void(0))
  */
 
-void __assert_func(const char *file, int line, const char *func, const char *failedexpr) {
-	printf("assertion \"%s\" failed: file \"%s\", line %d%s%s\n", failedexpr, file, line, func ? ", function: " : "", func ? func : "");
+void __assert_func(const char* file, int line, const char* func, const char* failedexpr)
+{
+    printf("assertion \"%s\" failed: file \"%s\", line %d%s%s\n", failedexpr, file, line, func ? ", function: " : "", func ? func : "");
 
-	for (;;)
-		;
+    for (;;);
 }

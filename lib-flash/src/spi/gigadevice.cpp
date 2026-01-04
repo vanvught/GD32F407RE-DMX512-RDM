@@ -12,7 +12,7 @@
 /*
  * Original code : https://github.com/martinezjavier/u-boot/blob/master/drivers/mtd/spi/gigadevice.c
  */
-/* Copyright (C) 2021-2023 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,16 +35,18 @@
 
 #include <cstdint>
 
-#include "debug.h"
+#include "spi/spi_flash.h"
 #include "spi_flash_internal.h"
+ #include "firmware/debug/debug_debug.h"
 
-struct gigadevice_spi_flash_params {
-	uint16_t	id;
-	uint16_t	nr_blocks;
-	const char	*name;
+struct GigadeviceSpiFlashParams
+{
+    const uint16_t kId;
+    const uint16_t kNrBlocks;
+    const char* const kName;
 };
 
-static constexpr struct gigadevice_spi_flash_params gigadevice_spi_flash_table[] = {
+static constexpr struct GigadeviceSpiFlashParams kGigadeviceSpiFlashTable[] = {
 	{
 		0x6016,
 		64,
@@ -62,25 +64,28 @@ static constexpr struct gigadevice_spi_flash_params gigadevice_spi_flash_table[]
 	},
 };
 
-int spi_flash_probe_gigadevice(struct spi_flash *flash, uint8_t *idcode) {
-	const struct gigadevice_spi_flash_params *params;
-	unsigned int i;
+bool SpiFlashProbeGigadevice(struct SpiFlashInfo* flash, uint8_t* idcode)
+{
+    const struct GigadeviceSpiFlashParams* params;
+    unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(gigadevice_spi_flash_table); i++) {
-		params = &gigadevice_spi_flash_table[i];
-		if (params->id == ((idcode[1] << 8) | idcode[2]))
-			break;
-	}
+    for (i = 0; i < ARRAY_SIZE(kGigadeviceSpiFlashTable); i++)
+    {
+        params = &kGigadeviceSpiFlashTable[i];
+        if (params->kId == ((idcode[1] << 8) | idcode[2]))
+        {
+            break;
+        }
+    }
 
-	if (i == ARRAY_SIZE(gigadevice_spi_flash_table)) {
-		DEBUG_PRINTF("SF: Unsupported GigaDevice ID %02x%02x", idcode[1], idcode[2]);
-		return -1;
-	}
+    if (i == ARRAY_SIZE(kGigadeviceSpiFlashTable))
+    {
+        DEBUG_PRINTF("SF: Unsupported GigaDevice ID %02x%02x", idcode[1], idcode[2]);
+        return false;
+    }
 
-	flash->name = params->name;
-	flash->page_size = 256;
-	flash->sector_size = flash->page_size * 16;
-	flash->size = flash->sector_size * 16 * params->nr_blocks;
+    flash->name = params->kName;
+    flash->size = 16U * spi::flash::SECTOR_SIZE * params->kNrBlocks;
 
-	return 0;
+    return true;
 }

@@ -2,7 +2,7 @@
  * @file malloc.h
  *
  */
-/* Copyright (C) 2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,6 @@
 #ifndef GD32_MALLOC_H_
 #define GD32_MALLOC_H_
 
-static struct block_bucket s_block_bucket[] __attribute__((aligned(4))) = {{0x10, 0}, {0x20, 0}, {0x40, 0}, {0x60, 0}, {0x80,0}, {0x100,0}, {0x140,0}, {0x180,0}, {0x200,0}, {0x300,0}, {0x400,0}, {0x500,0}, {0,0}};
+static struct BlockBucket s_block_bucket[] __attribute__((aligned(4))) = {{0x10, 0}, {0x20, 0}, {0x40, 0}, {0x60, 0}, {0x80,0}, {0x100,0}, {0x140,0}, {0x180,0}, {0x200,0}, {0x300,0}, {0x400,0}, {0x500,0}, {0,0}};
 
-#endif /* GD32_MALLOC_H_ */
+#endif  // GD32_MALLOC_H_

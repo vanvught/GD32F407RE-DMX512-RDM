@@ -2,7 +2,7 @@
  * @file main.cpp
  *
  */
-/* Copyright (C) 2022-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,173 +23,99 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
-#include <cassert>
-
-#include "hardware.h"
+#include "gd32/hal.h"
+#include "gd32/hal_watchdog.h"
 #include "network.h"
-#include "networkconst.h"
-
-#include "net/apps/mdns.h"
-
-#if defined (ENABLE_NTP_CLIENT)
-# include "net/apps/ntpclient.h"
-#endif
-
 #include "displayudf.h"
-#include "displayudfparams.h"
-#include "displayhandler.h"
-
-#include "artnetnode.h"
-#include "artnetparams.h"
-#include "artnetmsgconst.h"
-#include "artnetrdmcontroller.h"
-
-#include "dmxparams.h"
+#include "json/displayudfparams.h"
 #include "dmxsend.h"
-#include "rdmdeviceparams.h"
-#include "dmxconfigudp.h"
-
-#if defined (NODE_SHOWFILE)
-# include "showfile.h"
-# include "showfileparams.h"
+#include "json/dmxsendparams.h"
+#include "dmxnodenode.h"
+#include "dmxnodemsgconst.h"
+#if defined(NODE_SHOWFILE)
+#include "showfile.h"
 #endif
-
 #include "remoteconfig.h"
-#include "remoteconfigparams.h"
-
 #include "configstore.h"
-
 #include "firmwareversion.h"
 #include "software_version.h"
 
-namespace artnetnode {
-namespace configstore {
-uint32_t DMXPORT_OFFSET = 0;
-}  // namespace configstore
-}  // namespace artnetnode
-
-void Hardware::RebootHandler() {
-	Dmx::Get()->Blackout();
-	ArtNetNode::Get()->Stop();
+namespace hal
+{
+void RebootHandler()
+{
+    Dmx::Get()->Blackout();
+    ArtNetNode::Get()->Stop();
 }
+} // namespace hal
 
-int main() {
-	Hardware hw;
-	DisplayUdf display;
-	ConfigStore configStore;
-	display.TextStatus(NetworkConst::MSG_NETWORK_INIT, CONSOLE_YELLOW);
-	Network nw;
-	MDNS mDns;
-	display.TextStatus(NetworkConst::MSG_NETWORK_STARTED, CONSOLE_GREEN);
-	FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
+int main() // NOLINT
+{
+    hal::Init();
+    DisplayUdf display;
+    ConfigStore config_store;
+    network::Init();
+    FirmwareVersion fw(SOFTWARE_VERSION, __DATE__, __TIME__);
 
-	fw.Print("Art-Net 4 DMX/RDM controller {" STR(LIGHTSET_PORTS) " Universes}");
+    fw.Print("Art-Net 4 DMX/RDM controller {" STR(DMXNODE_PORTS) " Universes}");
 
-#if defined (ENABLE_NTP_CLIENT)
-	NtpClient ntpClient;
-	ntpClient.Start();
-	ntpClient.Print();
+    Dmx dmx;
+
+    json::DmxSendParams dmx_params;
+    dmx_params.Load();
+    dmx_params.Set();
+
+    DmxSend dmx_send;
+    dmx_send.Print();
+
+    DmxNodeNode dmxnode_node;
+    dmxnode_node.SetOutput(&dmx_send);
+
+    for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++)
+    {
+        const auto kPortDirection = (dmxnode_node.GetPortDirection(port_index) == dmxnode::PortDirection::kOutput ? dmx::PortDirection::kOutput : dmx::PortDirection::kInput);
+        dmx.SetPortDirection(port_index, kPortDirection, false);
+    }
+
+    const auto kIsRdmEnabled = dmxnode_node.GetRdm();
+
+#if defined(NODE_SHOWFILE)
+    ShowFile showfile;
+    showfile.Print();
 #endif
 
-	ArtNetNode node;
+    dmxnode_node.Print();
 
-	ArtNetParams artnetParams;
-	artnetParams.Load();
-	artnetParams.Set();
+    const auto kActivePorts = dmxnode_node.GetActiveInputPorts() + dmxnode_node.GetActiveOutputPorts();
 
-	for (uint32_t nPortIndex = 0; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		node.SetUniverse(nPortIndex, artnetParams.GetDirection(nPortIndex), artnetParams.GetUniverse(nPortIndex));
-	}
+    display.SetTitle("Art-Net 4 %u", kActivePorts);
+    display.Set(2, displayudf::Labels::kIp);
+    display.Set(3, displayudf::Labels::kVersion);
+    display.Set(4, displayudf::Labels::kUniversePortA);
+    display.Set(5, displayudf::Labels::kUniversePortB);
 
-	Dmx dmx;
+    json::DisplayUdfParams displayudf_params;
+    displayudf_params.Load();
+    displayudf_params.SetAndShow();
 
-	DmxParams dmxparams;
-	dmxparams.Load();
-	dmxparams.Set(&dmx);
+    RemoteConfig remote_config( kIsRdmEnabled ? remoteconfig::Output::RDM : remoteconfig::Output::DMX, kActivePorts);
 
-	for (uint32_t nPortIndex = artnetnode::configstore::DMXPORT_OFFSET; nPortIndex < artnetnode::MAX_PORTS; nPortIndex++) {
-		const auto nDmxPortIndex = nPortIndex - artnetnode::configstore::DMXPORT_OFFSET;
-		const auto portDirection = (node.GetPortDirection(nPortIndex) == lightset::PortDir::OUTPUT ? dmx::PortDirection::OUTP : dmx::PortDirection::INP);
-		dmx.SetPortDirection(nDmxPortIndex, portDirection , false);
-	}
+    display.TextStatus(DmxNodeMsgConst::START, console::Colours::kConsoleYellow);
 
-	DmxSend dmxSend;
-	dmxSend.Print();
+    dmxnode_node.Start();
 
-	node.SetOutput(&dmxSend);
+    display.TextStatus(DmxNodeMsgConst::STARTED, console::Colours::kConsoleGreen);
 
-	RDMDeviceParams rdmDeviceParams;
-	ArtNetRdmController artNetRdmController;
+    hal::WatchdogInit();
 
-	rdmDeviceParams.Load();
-	rdmDeviceParams.Set(&artNetRdmController);
-
-	artNetRdmController.Init();
-	artNetRdmController.Print();
-
-	node.SetRdmController(&artNetRdmController, artnetParams.IsRdm());
-
-#if defined (NODE_SHOWFILE)
-	ShowFile showFile;
-
-	ShowFileParams showFileParams;
-	showFileParams.Load();
-	showFileParams.Set();
-
-	showFile.Print();
+    for (;;)
+    {
+        hal::WatchdogFeed();
+        network::Run();
+        dmxnode_node.Run();
+#if defined(NODE_SHOWFILE)
+        showfile.Run();
 #endif
-
-	node.Print();
-
-	const auto nActivePorts = static_cast<uint32_t>(node.GetActiveInputPorts() + node.GetActiveOutputPorts());
-
-	display.SetTitle("Art-Net 4 %u", nActivePorts);
-	display.Set(2, displayudf::Labels::IP);
-	display.Set(3, displayudf::Labels::VERSION);
-	display.Set(4, displayudf::Labels::UNIVERSE_PORT_A);
-	display.Set(5, displayudf::Labels::UNIVERSE_PORT_B);
-
-	DisplayUdfParams displayUdfParams;
-
-	displayUdfParams.Load();
-	displayUdfParams.Set(&display);
-
-	display.Show();
-
-	RemoteConfig remoteConfig(remoteconfig::Node::ARTNET, artnetParams.IsRdm() ? remoteconfig::Output::RDM : remoteconfig::Output::DMX, nActivePorts);
-
-	RemoteConfigParams remoteConfigParams;
-	remoteConfigParams.Load();
-	remoteConfigParams.Set(&remoteConfig);
-
-	while (configStore.Flash())
-		;
-
-	mDns.Print();
-
-	display.TextStatus(ArtNetMsgConst::START, CONSOLE_YELLOW);
-
-	node.Start();
-
-	display.TextStatus(ArtNetMsgConst::STARTED, CONSOLE_GREEN);
-
-	hw.WatchdogInit();
-
-	for (;;) {
-		hw.WatchdogFeed();
-		nw.Run();
-		node.Run();
-#if defined (NODE_SHOWFILE)
-		showFile.Run();
-#endif
-		remoteConfig.Run();
-		configStore.Flash();
-		mDns.Run();
-#if defined (ENABLE_NTP_CLIENT)
-		ntpClient.Run();
-#endif
-		display.Run();
-		hw.Run();
-	}
+        hal::Run();
+    }
 }

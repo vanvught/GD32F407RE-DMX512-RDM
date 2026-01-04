@@ -1,0 +1,45 @@
+$(info "Validate.mk")
+$(info $$MAKE_FLAGS [${MAKE_FLAGS}])
+$(info $$DEFINES [${DEFINES}])
+
+FLAGS:=$(MAKE_FLAGS)
+ifeq ($(FLAGS),)
+	FLAGS:=$(DEFINES)
+endif
+
+ifneq ($(findstring _TIME_STAMP_YEAR_,$(FLAGS)),_TIME_STAMP_YEAR_)
+	DEFINES+=-D_TIME_STAMP_YEAR_=$(shell date  +"%Y") -D_TIME_STAMP_MONTH_=$(shell date  +"%-m") -D_TIME_STAMP_DAY_=$(shell date  +"%-d")
+endif
+
+ifneq (,$(findstring OUTPUT_DMX_SEND,$(FLAGS))$(findstring CONFIG_RDM,$(FLAGS))$(findstring RDM_CONTROLLER,$(FLAGS))$(findstring LTC,$(FLAGS)))
+	TIMER6_HAVE_IRQ_HANDLER=1
+	ifneq (,$(findstring CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER,$(MAKE_FLAGS)))
+		$(error CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER is set)
+	endif
+endif
+
+ifndef TIMER6_HAVE_IRQ_HANDLER
+	DEFINES+=-DCONFIG_TIMER6_HAVE_NO_IRQ_HANDLER
+endif
+
+ifneq ($(findstring USE_FREE_RTOS,$(FLAGS)),USE_FREE_RTOS)
+	DEFINES+=-DCONFIG_HAL_USE_SYSTICK
+endif
+
+ifeq ($(findstring ENABLE_TFTP_SERVER,$(FLAGS)),ENABLE_TFTP_SERVER)
+  ifneq ($(findstring CONFIG_HAL_USE_SYSTICK,$(FLAGS)),CONFIG_HAL_USE_SYSTICK)
+  	DEFINES+=-DCONFIG_HAL_USE_SYSTICK
+  endif
+endif
+
+ifeq ($(findstring NODE_LTC_SMPTE,$(FLAGS)),NODE_LTC_SMPTE)
+	DEFINES+=-DCONFIG_USE_EXTI10_15_IRQHandler
+endif
+
+ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+	DEFINES+=-DCONFIG_NET_APPS_NO_MDNS
+else
+	DEFINES+=-DCONFIG_EMAC_HASH_MULTICAST_FILTER
+endif
+
+$(info $$DEFINES [${DEFINES}])

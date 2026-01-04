@@ -2,7 +2,7 @@
  * @file gd32_adc.h
  *
  */
-/* Copyright (C) 2021-2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,18 +26,10 @@
 #ifndef GD32_ADC_H_
 #define GD32_ADC_H_
 
-float gd32_adc_gettemp();
-float gd32_adc_getvref();
-#if defined (GD32F4XX)
-float gd32_adc_getvbat();
+float G32AdcGetTemp();
+float Gd32AdcGetVref();
+#if defined(GD32F4XX)
+float Gd32AdcGetVbat();
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* GD32_ADC_H_ */
+#endif // GD32_ADC_H_

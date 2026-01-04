@@ -213,8 +213,10 @@ static constexpr uint32_t PORT_A_TX = 0;
  * MCU and BOARD name
  */
 
-#define GD32_MCU_NAME			"GD32F407RE"
-#define GD32_BOARD_NAME			"GD32F407RE"
+#define GD32_MCU_NAME   "GD32F407RE"
+#if !defined(GD32_BOARD_NAME)
+#define GD32_BOARD_NAME "GD32F407RE"
+#endif
 
 #include "mcu/gd32f407_mcu.h"
 #include "gd32_gpio.h"

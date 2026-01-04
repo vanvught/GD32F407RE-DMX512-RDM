@@ -26,58 +26,51 @@
 #include <cstdint>
 
 #include "./../../spi/spi_flash_internal.h"
-
 #include "gd32_spi.h"
 #include "gd32_gpio.h"
 #include "gd32.h"
+#include "firmware/debug/debug_debug.h"
 
-#include "debug.h"
+void SpiInit() {
+	Gd32SpiBegin();
+	Gd32SpiChipSelect(GD32_SPI_CS_NONE);
+	Gd32SpiSetSpeedHz(SPI_XFER_SPEED_HZ);
+	Gd32SpiSetDataMode(GD32_SPI_MODE0);
 
-int spi_init() {
-	gd32_spi_begin();
-	gd32_spi_chipSelect(GD32_SPI_CS_NONE);
-	gd32_spi_set_speed_hz(SPI_XFER_SPEED_HZ);
-	gd32_spi_setDataMode(GD32_SPI_MODE0);
-
-	gpio_fsel(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx, GPIO_FSEL_OUTPUT);
-	gpio_bit_set(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx);
+	Gd32GpioFsel(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx, GPIO_FSEL_OUTPUT);
+	GPIO_BOP(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
 
 #if defined (SPI_FLASH_WP_GPIO_PINx)
-	gpio_fsel(SPI_GPIOx, SPI_FLASH_WP_GPIO_PINx, GPIO_FSEL_OUTPUT);
-	gpio_bit_set(SPI_GPIOx, SPI_FLASH_WP_GPIO_PINx);
+	Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_WP_GPIO_PINx, GPIO_FSEL_OUTPUT);
+	GPIO_BOP(SPI_GPIOx) = SPI_FLASH_WP_GPIO_PINx;
 #endif
 
 #if defined (SPI_FLASH_HOLD_GPIO_PINx)
-	gpio_fsel(SPI_GPIOx, SPI_FLASH_HOLD_GPIO_PINx, GPIO_FSEL_OUTPUT);
-	gpio_bit_set(SPI_GPIOx, SPI_FLASH_HOLD_GPIO_PINx);
+	Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_HOLD_GPIO_PINx, GPIO_FSEL_OUTPUT);
+	GPIO_BOP(SPI_GPIOx) = SPI_FLASH_HOLD_GPIO_PINx;
 #endif
-
-	return 0;
 }
 
-inline static void spi_transfern(char *pBuffer, uint32_t nLength) {
-	gd32_spi_transfernb(pBuffer, pBuffer, nLength);
+inline static void SpiTransfern(char *buffer, uint32_t length) {
+	Gd32SpiTransfernb(buffer, buffer, length);
 }
 
-int spi_xfer(uint32_t nLength, const uint8_t *pOut, uint8_t *pIn, uint32_t nFlags) {
-
-	if (nFlags & SPI_XFER_BEGIN) {
-		gpio_bit_reset(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx);
+void SpiXfer(uint32_t length, const uint8_t *out, uint8_t *in, uint32_t flags) {
+	if (flags & SPI_XFER_BEGIN) {
+		GPIO_BC(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
 	}
 
-	if (nLength != 0) {
-		if (pIn == 0) {
-			gd32_spi_writenb(reinterpret_cast<const char *>(pOut), nLength);
-		} else if (pOut == 0) {
-			spi_transfern(reinterpret_cast<char *>(pIn), nLength);
+	if (length != 0) {
+		if (in == nullptr) {
+			Gd32SpiWritenb(reinterpret_cast<const char *>(out), length);
+		} else if (out == nullptr) {
+			SpiTransfern(reinterpret_cast<char *>(in), length);
 		} else {
-			gd32_spi_transfernb(reinterpret_cast<const char *>(pOut), reinterpret_cast<char *>(pIn), nLength);
+			Gd32SpiTransfernb(reinterpret_cast<const char *>(out), reinterpret_cast<char *>(in), length);
 		}
 	}
 
-	if (nFlags & SPI_XFER_END) {
-		gpio_bit_set(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx);
+	if (flags & SPI_XFER_END) {
+		GPIO_BOP(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
 	}
-
-	return 0;
 }

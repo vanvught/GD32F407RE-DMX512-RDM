@@ -20,20 +20,11 @@ The ready to use firmware is build to use with the bootloader TFTP server -> [ht
 * Full Art-Net 4 implementation
 * Default firmware is using USART2 en USART5
 
-### Art-Net 4 Pixel 8x 4 Universes
-* Full Art-Net 4 implementation
-* No FPS limitation, except for what there is with the pixel chip protocol
-
 ### sACN E1.31 DMX 1-4 ports
 * Full sACN E1.31 implementation
 * Default firmware is using USART2 en USART5
 * RDMNet LLRP Device only
 
-### sACN E1.31 Pixel 8x 4 Universes
-* Full sACN E1.31 implementation
-* No FPS limitation, except for what there is with the pixel chip protocol
-* RDMNet LLRP Device only
-
-## Remote Configuration Manager
-[https://github.com/vanvught/Remote-Config-UI/releases](https://github.com/vanvught/Remote-Config-UI/releases)<br>
-<img alt="GitHub release" src="https://img.shields.io/github/v/release/vanvught/Remote-Config-UI">
+## GD32 Firmware Update UI
+[https://github.com/vanvught/GD32F-Firmware-Update-UI/releases](https://github.com/vanvught/GD32F-Firmware-Update-UI/releases)<br>
+<img alt="GitHub release" src="https://img.shields.io/github/v/release/vanvught/GD32F-Firmware-Update-UI">

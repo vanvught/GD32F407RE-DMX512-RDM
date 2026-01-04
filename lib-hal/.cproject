@@ -24,7 +24,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1492552715" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1079801750" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/firmware-template-gd32/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/firmware-template-gd32/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/CMSIS/GD/GD32F4xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/GD32F4xx_standard_peripheral/Include}&quot;"/>
@@ -49,7 +48,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1275240370" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.950024656" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/firmware-template-gd32/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/firmware-template-gd32/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/CMSIS/GD/GD32F4xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/GD32F4xx_standard_peripheral/Include}&quot;"/>
