@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
+ 
 #include <cstdint>
 
 #include "emac/phy.h"
@@ -31,10 +31,10 @@
 #include "enet_config.h"
 #include "firmware/debug/debug_debug.h"
 
-namespace net
+namespace net::link
 {
 #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void link_gpio_init()
+void GpioInit()
 {
     rcu_periph_clock_enable(LINK_CHECK_GPIO_CLK);
     LINK_CHECK_GPIO_CONFIG;
@@ -42,7 +42,7 @@ void link_gpio_init()
 #endif
 
 #if defined(ENET_LINK_CHECK_USE_INT)
-void link_exti_init()
+void ExtiInit()
 {
     rcu_periph_clock_enable(LINK_CHECK_EXTI_CLK);
 
@@ -57,17 +57,17 @@ void link_exti_init()
 #endif
 
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void link_pin_poll()
+void PinPoll()
 {
     if (RESET == gpio_input_bit_get(LINK_CHECK_GPIO_PORT, LINK_CHECK_GPIO_PIN))
     {
-        link_pin_recovery();
-        LinkHandleChange(link_status_read());
+        PinRecovery();
+        HandleChange(StatusRead());
     }
 }
 #endif
 
-} // namespace net
+} // namespace net::link
 
 #if defined(ENET_LINK_CHECK_USE_INT)
 extern "C"
@@ -77,8 +77,8 @@ extern "C"
         if (RESET != exti_interrupt_flag_get(LINK_CHECK_EXTI_LINE))
         {
             exti_interrupt_flag_clear(LINK_CHECK_EXTI_LINE);
-            net::link_pin_recovery();
-            net::LinkHandleChange(net::link_status_read());
+            net::link::PinRecovery();
+            net::link::HandleChange(net::link::StatusRead());
         }
     }
 }

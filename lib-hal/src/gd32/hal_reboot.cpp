@@ -2,7 +2,7 @@
  * @file hal_reboot.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,10 @@
 #include "configstore.h"
 
 #if !defined(NO_EMAC)
-namespace net
+namespace network
 {
 void Shutdown();
-} // namespace net
+} // namespace network
 #endif
 
 namespace hal
@@ -62,7 +62,7 @@ bool Reboot()
 #endif
     hal::RebootHandler();
 #if !defined(NO_EMAC)
-    net::Shutdown();
+    network::Shutdown();
 #endif
     hal::statusled::SetMode(hal::statusled::Mode::OFF_OFF);
 

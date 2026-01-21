@@ -5,7 +5,7 @@
  * This class handles HTTP requests and integrates with the network and mDNS subsystems.
  * It uses placement new to construct and destruct request handlers explicitly.
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,12 @@
 #include <cassert>
 #include <new>
 
+#include "core/protocol/iana.h"
 #include "httpdhandlerequest.h"
-#include "net/tcp.h"
-#include "net/apps/mdns.h"
+#include "network_tcp.h"
+#include "apps/mdns.h"
 #include "../../lib-network/config/net_config.h"
-
- #include "firmware/debug/debug_debug.h"
+#include "firmware/debug/debug_debug.h"
 
 /**
  * @class HttpDaemon
@@ -46,30 +46,29 @@
  *
  * The HttpDaemon class sets up an HTTP server, handles incoming requests, and integrates with mDNS.
  */
- 
+
 class HttpDaemon
 {
    public:
-    /**
-     * @brief Constructor for HttpDaemon.
-     *
-     * Initializes the HTTP daemon, sets up the TCP listener on port 80,
-     * creates request handlers, and registers the service with mDNS.
-     */
     HttpDaemon()
     {
         DEBUG_ENTRY();
+        assert(is_listening_ == false);
 
-        assert(handle_ == -1);
-        handle_ = net::tcp::Begin(80, Input);
-        assert(handle_ != -1);
+        is_listening_ = network::tcp::Listen(network::iana::Ports::kPortHttp, Input);
+        assert(is_listening_ == true);
 
-        for (uint32_t index = 0; index < TCP_MAX_TCBS_ALLOWED; index++)
+        // IMPORTANT:
+        // Connection handles are now GLOBAL indices into s_Tcbs[].
+        // Therefore the HTTP request handler table must also be global-sized.
+        for (uint32_t i = 0; i < TCP_MAX_TCBS_ALLOWED; ++i)
         {
-            new (&s_handle_request[index]) HttpDeamonHandleRequest(index, handle_);
+            // Each HttpDeamonHandleRequest corresponds to ONE possible TCB slot.
+            // It can be addressed directly by conn_handle.
+            new (&s_handle_request[i]) HttpDeamonHandleRequest(i);
         }
 
-        mdns::ServiceRecordAdd(nullptr, mdns::Services::HTTP);
+        network::apps::mdns::ServiceRecordAdd(nullptr, network::apps::mdns::Services::kHttp);
 
         DEBUG_EXIT();
     }
@@ -77,25 +76,30 @@ class HttpDaemon
     ~HttpDaemon() = default;
 
    private:
-    static void Input(int32_t connection_handle, const uint8_t* buffer, uint32_t size)
+    static void Input(network::tcp::ConnHandle conn_handle, const uint8_t* buffer, uint32_t size)
     {
-        s_handle_request[connection_handle].HandleRequest(size, const_cast<char*>(reinterpret_cast<const char*>(buffer)));
+        // Defensive: bounds check in debug builds
+        assert(conn_handle < TCP_MAX_TCBS_ALLOWED);
+
+        // Route the request to the per-connection request handler instance.
+        // This preserves your "one handler per connection slot" design.
+        s_handle_request[conn_handle].HandleRequest(size, const_cast<char*>(reinterpret_cast<const char*>(buffer)));
     }
 
-    /**
-     * https://www.gd32-dmx.org/memory.html
-     */
 #if defined(GD32F207RG) || defined(GD32F450VE) || defined(GD32F470ZK)
 #define SECTION_HTTPD __attribute__((section(".httpd")))
 #else
 #define SECTION_HTTPD
 #endif
-    /*
-     * Each handler corresponds to a connection handle. Objects are constructed
-     * using placement new and must be explicitly destructed.
-     */
+
+    // NOTE:
+    // The array size must match the GLOBAL connection pool size.
+    // Otherwise you'd index out of bounds when multiple listeners or client conns exist.
     static inline HttpDeamonHandleRequest s_handle_request[TCP_MAX_TCBS_ALLOWED] __attribute__((aligned(4))) SECTION_HTTPD;
-    int32_t handle_{-1};
+
+    // In the new design, we typically don't store a "listener handle" at all.
+    // But if you want to keep Begin() returning something for now, you can store bool.
+    bool is_listening_{false};
 };
 
-#endif  // HTTPD_HTTPD_H_
+#endif // HTTPD_HTTPD_H_

@@ -1,7 +1,7 @@
 /**
  * @file handledmxin.cpp
  */
-/* Copyright (C) 2019-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2019-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,14 +73,14 @@ void ArtNetNode::HandleDmxIn()
                 input_port_[port_index].good_input |= artnet::GoodInput::kDataRecieved;
 
                 const auto* udp_data = reinterpret_cast<const uint8_t*>(&art_dmx_);
-                net::udp::Send(handle_, udp_data, sizeof(struct artnet::ArtDmx), input_port_[port_index].destination_ip, artnet::kUdpPort);
+                network::udp::Send(handle_, udp_data, sizeof(struct artnet::ArtDmx), input_port_[port_index].destination_ip, artnet::kUdpPort);
 
                 SendDiag(artnet::PriorityCodes::kDiagLow, "%u: Input DMX sent", port_index);
 
                 if (node_.port[port_index].local_merge)
                 {
                     receive_buffer_ = reinterpret_cast<uint8_t*>(&art_dmx_);
-                    ip_address_from_ = net::IPADDR_LOOPBACK;
+                    ip_address_from_ = network::kIpaddrLoopback;
                     HandleDmx();
 
                     SendDiag(artnet::PriorityCodes::kDiagLow, "%u: Input DMX local merge", port_index);
@@ -150,14 +150,14 @@ void ArtNetNode::HandleDmxIn()
                     art_dmx_.Length = static_cast<uint8_t>(length & 0xFF);
 
                     const auto* udp_data = reinterpret_cast<const uint8_t*>(&art_dmx_);
-                    net::udp::Send(handle_, udp_data, sizeof(struct artnet::ArtDmx), input_port_[port_index].destination_ip, artnet::kUdpPort);
+                    network::udp::Send(handle_, udp_data, sizeof(struct artnet::ArtDmx), input_port_[port_index].destination_ip, artnet::kUdpPort);
 
                     SendDiag(artnet::PriorityCodes::kDiagLow, "%u: Input DMX sent (timeout)", port_index);
 
                     if (node_.port[port_index].local_merge)
                     {
                         receive_buffer_ = reinterpret_cast<uint8_t*>(&art_dmx_);
-                        ip_address_from_ = net::IPADDR_LOOPBACK;
+                        ip_address_from_ = network::kIpaddrLoopback;
                         HandleDmx();
 
                         SendDiag(artnet::PriorityCodes::kDiagLow, "%u: Input DMX local merge", port_index);

@@ -27,24 +27,21 @@
 #define NETWORK_IFACE_H_
 
 #include <cstdint>
-#include <cstring>
-
-#include "net/netif.h"
 
 namespace network::iface
 {
+inline constexpr uint32_t kMacSize = 6;
+inline constexpr uint32_t kHostnameSize = 64;   ///< Including a terminating null byte.
+inline constexpr uint32_t kDomainnameSize = 64; ///< Including a terminating null byte.
+inline constexpr uint32_t kNameserversCount = 3;
+
 void EthernetInput(const uint8_t*, uint32_t);
 
-inline void CopyMacAddressTo(uint8_t* mac_address)
-{
-    memcpy(mac_address, netif::HwAddr(), NETIF_MAX_HWADDR_LEN);
-}
+void CopyMacAddressTo(uint8_t* mac_address);
 
 void SetHostname(const char* hostname);
-inline const char* GetHostName()
-{
-    return netif::globals::netif_default.hostname;
-}
+void SetHostnameAuto();
+const char* HostName();
 
 void SetDomainName(const char* domainname);
 const char* DomainName();
@@ -60,11 +57,7 @@ inline constexpr uint32_t InterfaceIndex()
 }
 
 uint32_t NameServer(uint32_t index);
-
-inline constexpr uint32_t NameServerCount()
-{
-    return net::NAMESERVERS_COUNT;
-}
+uint32_t NameServerCount();
 
 // Zeroconfig / AutoIp
 inline bool IsAutoIpCapable()
@@ -73,11 +66,7 @@ inline bool IsAutoIpCapable()
 }
 
 void SetAutoIp();
-
-inline bool IsAutoIpUsed()
-{
-    return netif::AutoIp();
-}
+bool AutoIp();
 
 // DHCP
 inline constexpr bool IsDhcpCapable()
@@ -91,17 +80,13 @@ inline constexpr bool IsDhcpKnown()
 }
 
 void EnableDhcp();
-
-inline bool IsDhcpUsed()
-{
-    return netif::Dhcp();
-}
+bool Dhcp();
 
 inline char AddressingMode()
 {
-    if (netif::AutoIp()) return 'Z';                     // Zeroconf
-    if (IsDhcpKnown()) return netif::Dhcp() ? 'D' : 'S'; // DHCP or Static
-    return 'U';                                          // Unknown
+    if (AutoIp()) return 'Z';                     // Zeroconf
+    if (IsDhcpKnown()) return Dhcp() ? 'D' : 'S'; // DHCP or Static
+    return 'U';                                   // Unknown
 }
 
 struct Counters

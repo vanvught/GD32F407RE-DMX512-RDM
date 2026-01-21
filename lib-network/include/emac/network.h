@@ -2,7 +2,7 @@
  * @file network.h
  *
  */
-/* Copyright (C) 2017-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2017-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,26 +32,27 @@
 
 #include <cstdint>
 
-#include "network_net.h" // IWYU pragma: keep
+#include "../src/core/net_private.h"
+#include "network_config.h" // IWYU pragma: keep
 #include "network_iface.h"
-#include "net/udp.h" // IWYU pragma: keep
+#include "network_udp.h"  // IWYU pragma: keep
+#include "network_igmp.h" // IWYU pragma: keep
 #if defined(ENABLE_HTTPD)
-#include "net/tcp.h" // IWYU pragma: keep
+#include "network_tcp.h" // IWYU pragma: keep
 #endif
 #include "emac/phy.h"
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL) || defined(ENET_LINK_CHECK_REG_POLL)
 #include "emac/net_link_check.h"
 #endif
 
-namespace global::network
-{
-extern net::phy::Link linkState;
-} // namespace global::network
-
 uint32_t emac_eth_recv(uint8_t**);
 
 namespace network
 {
+namespace global
+{
+extern net::phy::Link link_state;
+}
 void Init();
 
 #if defined(CONFIG_NET_ENABLE_PTP)
@@ -74,17 +75,20 @@ inline void Run()
             length = emac_eth_recv(&ethernet_buffer);
         } while (length > 0);
     }
+#if defined(ENABLE_HTTPD)
+    network::tcp::Run();
+#endif
 #if defined(CONFIG_NET_ENABLE_PTP)
     network::ptp::Run();
 #endif
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL)
-    net::link_pin_poll();
+    net::link::PinPoll();
 #elif defined(ENET_LINK_CHECK_REG_POLL)
-    const net::phy::Link link_state = net::link_status_read();
-    if (link_state != global::network::linkState)
+    const net::phy::Link link_state = net::link::StatusRead();
+    if (link_state != global::link_state)
     {
-        global::network::linkState = link_state;
-        net::LinkHandleChange(link_state);
+        global::link_state = link_state;
+        net::link::HandleChange(link_state);
     }
 #endif
 }

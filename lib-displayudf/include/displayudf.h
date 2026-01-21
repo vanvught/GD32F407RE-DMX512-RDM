@@ -33,7 +33,7 @@
 #include "firmwareversion.h"
 #if !defined(NO_EMAC)
 #include "network.h"
-#include "net/protocol/dhcp.h"
+#include "core/protocol/dhcp.h"
 #endif
 #if defined(NODE_ARTNET_MULTI)
 #define NODE_ARTNET
@@ -57,13 +57,13 @@
 #if defined(RDM_RESPONDER) || defined(OUTPUT_DMX_MONITOR) || defined(OUTPUT_DMX_PCA9685) || defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_TLC59711)
 #define HAVE_DMX_START_ADDRESS
 #endif
- #include "firmware/debug/debug_debug.h"
+#include "firmware/debug/debug_debug.h"
 
 namespace displayudf
 {
 inline constexpr uint32_t kLabelMaxRows = 6;
 
-enum class Labels: uint8_t
+enum class Labels : uint8_t
 {
     kTitle,
     kBoardname,
@@ -86,7 +86,7 @@ enum class Labels: uint8_t
     UNIVERSE_PORT_D,
 #endif
 #if defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
-    kDestinationIpPortA, 
+    kDestinationIpPortA,
 #if (DMX_MAX_PORTS > 1)
     kDestinationIpPortB,
 #endif
@@ -178,40 +178,39 @@ class DisplayUdf final : public Display
     void ShowIpAddress()
     {
         ClearEndOfLine();
-        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kIp)], "" IPSTR "/%d %c", IP2STR(net::GetPrimaryIp()), net::GetNetmaskCIDR(),
-               network::iface::AddressingMode());
+        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kIp)], "" IPSTR "/%d %c", IP2STR(network::GetPrimaryIp()), network::GetNetmaskCIDR(), network::iface::AddressingMode());
     }
 
     void ShowNetmask()
     {
         ClearEndOfLine();
-        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kNetmask)], "N: " IPSTR "", IP2STR(net::GetNetmask()));
+        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kNetmask)], "N: " IPSTR "", IP2STR(network::GetNetmask()));
         ShowIpAddress();
     }
 
     void ShowGatewayIp()
     {
         ClearEndOfLine();
-        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kDefaultGateway)], "G: " IPSTR "", IP2STR(net::GetGatewayIp()));
+        Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kDefaultGateway)], "G: " IPSTR "", IP2STR(network::GetGatewayIp()));
     }
 
     void ShowHostName()
     {
         ClearEndOfLine();
-        Write(labels_[static_cast<uint32_t>(displayudf::Labels::kHostname)],  network::iface::GetHostName());
+        Write(labels_[static_cast<uint32_t>(displayudf::Labels::kHostname)], network::iface::HostName());
     }
 
-    void ShowDhcpStatus(net::dhcp::State state)
+    void ShowDhcpStatus(network::dhcp::State state)
     {
         switch (state)
         {
-            case net::dhcp::State::STATE_OFF:
+            case network::dhcp::State::kOff:
                 break;
-            case net::dhcp::State::STATE_RENEWING:
+            case network::dhcp::State::kRenewing:
                 ClearEndOfLine();
                 Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kIp)], "DHCP renewing");
                 break;
-            case net::dhcp::State::STATE_BOUND:
+            case network::dhcp::State::kBound:
                 break;
             default:
                 break;
@@ -248,4 +247,4 @@ class DisplayUdf final : public Display
     inline static DisplayUdf* s_this;
 };
 
-#endif  // DISPLAYUDF_H_
+#endif // DISPLAYUDF_H_

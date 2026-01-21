@@ -33,15 +33,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "net/ip4_address.h"
+#include "ip4/ip4_address.h"
 #include "network.h"
 #include "configstore.h"
 #include "json/networkparams.h"
 #include "json/networkparamsconst.h"
 #include "json/json_parser.h"
-#include "net/ip4_helpers.h"
+#include "ip4/ip4_helpers.h"
 #if defined(HAVE_NTP_CLIENT)
-#include "net/apps/ntpclient.h"
+#include "apps/ntpclient.h"
 #endif
 #include "common/utils/utils_flags.h"
 
@@ -103,11 +103,11 @@ void NetworkParams::Store(const char* buffer, uint32_t buffer_size)
 
 void NetworkParams::Set()
 {
-    if (strncmp( network::iface::GetHostName(), reinterpret_cast<char*>(store_network.host_name), common::store::network::kHostnameSize - 1) != 0)
+    if (strncmp(network::iface::HostName(), reinterpret_cast<char*>(store_network.host_name), common::store::network::kHostnameSize - 1) != 0)
     {
-          network::iface::SetHostname(reinterpret_cast<char*>(store_network.host_name));
+        network::iface::SetHostname(reinterpret_cast<char*>(store_network.host_name));
         // When default is set, copy the hostname back
-        strncpy(reinterpret_cast<char*>(store_network.host_name),  network::iface::GetHostName(), common::store::network::kHostnameSize - 1);
+        strncpy(reinterpret_cast<char*>(store_network.host_name), network::iface::HostName(), common::store::network::kHostnameSize - 1);
         store_network.host_name[common::store::network::kHostnameSize - 1] = 0;
     }
 
@@ -115,20 +115,20 @@ void NetworkParams::Set()
 
     if (kUseStaticIp)
     {
-        net::SetGatewayIp(store_network.gateway_ip);
-        net::SetNetmask(store_network.netmask);
-        net::SetPrimaryIp(store_network.local_ip);
+        network::SetGatewayIp(store_network.gateway_ip);
+        network::SetNetmask(store_network.netmask);
+        network::SetPrimaryIp(store_network.local_ip);
     }
     else
     {
-         network::iface::EnableDhcp();
+        network::iface::EnableDhcp();
     }
 
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
-    ntpclient::SetServerIp(store_network.ntp_server_ip);
+    network::apps::ntpclient::SetServerIp(store_network.ntp_server_ip);
 #endif
 #if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
-    ntpclient::ptp::SetServerIp(store_network.ntp_server_ip);
+    network::apps::ntpclient::ptp::SetServerIp(store_network.ntp_server_ip);
 #endif
 
 #ifndef NDEBUG

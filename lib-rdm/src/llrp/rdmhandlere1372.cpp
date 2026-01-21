@@ -48,7 +48,7 @@ enum class Mode : uint8_t
 
 static dhcp::Mode GetDhcpMode()
 {
-    if (network::iface::IsDhcpUsed())
+    if (network::iface::Dhcp())
     {
         return dhcp::Mode::kActive;
     }
@@ -89,7 +89,7 @@ static void SetQueuedStaticIp(uint32_t static_ip, uint32_t netmask)
     }
     else
     {
-        s_queued_config.static_ip = net::GetPrimaryIp();
+        s_queued_config.static_ip = network::GetPrimaryIp();
     }
 
     if (netmask != 0)
@@ -98,7 +98,7 @@ static void SetQueuedStaticIp(uint32_t static_ip, uint32_t netmask)
     }
     else
     {
-        s_queued_config.netmask = net::GetNetmask();
+        s_queued_config.netmask = network::GetNetmask();
     }
 
     s_queued_config.mask |= QueuedConfig::kStaticIp;
@@ -115,7 +115,7 @@ static void SetQueuedDefaultRoute(uint32_t gateway_ip)
     }
     else
     {
-        s_queued_config.gateway = net::GetGatewayIp();
+        s_queued_config.gateway = network::GetGatewayIp();
     }
 
     s_queued_config.mask |= QueuedConfig::kGw;
@@ -148,17 +148,17 @@ static bool ApplyQueuedConfig()
         // After SetIp all ip address might be zero.
         if (IsQueuedMaskSet(QueuedConfig::kStaticIp))
         {
-            net::SetPrimaryIp(s_queued_config.static_ip);
+            network::SetPrimaryIp(s_queued_config.static_ip);
         }
 
         if (IsQueuedMaskSet(QueuedConfig::kNetmask))
         {
-            net::SetNetmask(s_queued_config.netmask);
+            network::SetNetmask(s_queued_config.netmask);
         }
 
         if (IsQueuedMaskSet(QueuedConfig::kGw))
         {
-            net::SetGatewayIp(s_queued_config.gateway);
+            network::SetGatewayIp(s_queued_config.gateway);
         }
 
         s_queued_config.mask = QueuedConfig::kNone;
@@ -306,7 +306,7 @@ void RDMHandler::GetDHCPMode([[maybe_unused]] uint16_t sub_device)
     auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
-    rdm_data_out->param_data[4] = network::iface::IsDhcpUsed() ? 1 : 0;
+    rdm_data_out->param_data[4] = network::iface::Dhcp() ? 1 : 0;
 
     rdm_data_out->param_data_length = 5;
 
@@ -396,7 +396,7 @@ void RDMHandler::GetZeroconf([[maybe_unused]] uint16_t sub_device)
     auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
-    rdm_data_out->param_data[4] = network::iface::IsAutoIpCapable() ? (network::iface::IsAutoIpUsed()) : 0;
+    rdm_data_out->param_data[4] = network::iface::IsAutoIpCapable() ? (network::iface::AutoIp()) : 0;
 
     rdm_data_out->param_data_length = 5;
 
@@ -468,7 +468,7 @@ void RDMHandler::RenewDhcp([[maybe_unused]] bool is_broadcast, [[maybe_unused]] 
         return;
     }
 
-    if (!network::iface::IsDhcpUsed())
+    if (!network::iface::Dhcp())
     {
         RespondMessageNack(E137_2_NR_ACTION_NOT_SUPPORTED);
 
@@ -497,12 +497,12 @@ void RDMHandler::GetAddressNetmask([[maybe_unused]] uint16_t sub_device)
 
     auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
 
-    auto ip_address = net::GetPrimaryIp();
+    auto ip_address = network::GetPrimaryIp();
     const auto* p = reinterpret_cast<const uint8_t*>(&ip_address);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
     memcpy(&rdm_data_out->param_data[4], p, 4);
-    rdm_data_out->param_data[8] = static_cast<uint8_t>(net::GetNetmaskCIDR());
+    rdm_data_out->param_data[8] = static_cast<uint8_t>(network::GetNetmaskCIDR());
     rdm_data_out->param_data[9] = static_cast<uint8_t>(GetDhcpMode());
 
     rdm_data_out->param_data_length = 10;
@@ -526,12 +526,12 @@ void RDMHandler::GetStaticAddress([[maybe_unused]] uint16_t sub_device)
 
     auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
 
-    uint32_t ip_address = net::GetPrimaryIp();
+    uint32_t ip_address = network::GetPrimaryIp();
     const auto* p = reinterpret_cast<const uint8_t*>(&ip_address);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
     memcpy(&rdm_data_out->param_data[4], p, 4);
-    rdm_data_out->param_data[8] = static_cast<uint8_t>(net::GetNetmaskCIDR());
+    rdm_data_out->param_data[8] = static_cast<uint8_t>(network::GetNetmaskCIDR());
 
     rdm_data_out->param_data_length = 9;
 
@@ -564,7 +564,7 @@ void RDMHandler::SetStaticAddress([[maybe_unused]] bool is_broadcast, [[maybe_un
     auto* p = reinterpret_cast<uint8_t*>(&ip_address);
     memcpy(p, &rdm_data_in->param_data[4], 4);
 
-    SetQueuedStaticIp(ip_address, net::cidr_to_netmask(rdm_data_in->param_data[8]));
+    SetQueuedStaticIp(ip_address, network::CidrToNetmask(rdm_data_in->param_data[8]));
 
     RespondMessageAck();
 
@@ -610,7 +610,7 @@ void RDMHandler::GetDefaultRoute([[maybe_unused]] uint16_t sub_device)
 
     auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
 
-    uint32_t ip_address = net::GetGatewayIp();
+    uint32_t ip_address = network::GetGatewayIp();
     const auto* p = reinterpret_cast<const uint8_t*>(&ip_address);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
@@ -658,7 +658,7 @@ void RDMHandler::GetHostName([[maybe_unused]] uint16_t sub_device)
 {
     DEBUG_ENTRY();
 
-    const auto* host_name = network::iface::GetHostName();
+    const auto* host_name = network::iface::HostName();
     HandleString(host_name, static_cast<uint32_t>(strlen(host_name)));
 
     RespondMessageAck();

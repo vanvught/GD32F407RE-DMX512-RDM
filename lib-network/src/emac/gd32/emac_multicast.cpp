@@ -32,7 +32,7 @@
 
 #include "gd32.h"
 #include "gd32_enet.h"
-#include "net/ip4_address.h"
+#include "ip4/ip4_address.h"
 #include "firmware/debug/debug_debug.h"
 
 namespace network

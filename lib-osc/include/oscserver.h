@@ -29,7 +29,7 @@
 #include <cstdio>
 #include <cassert>
 
-#include "net/apps/mdns.h"
+#include "apps/mdns.h"
 #include "hal_statusled.h"
 #include "network.h"
 #include "dmxnode.h"
@@ -70,10 +70,10 @@ class OscServer
         DEBUG_ENTRY();
 
         assert(handle_ == -1);
-        handle_ = net::udp::Begin(port_incoming_, StaticCallbackFunction);
+        handle_ = network::udp::Begin(port_incoming_, StaticCallbackFunction);
         assert(handle_ != -1);
 
-        mdns::ServiceRecordAdd(nullptr, mdns::Services::OSC, "type=server", port_incoming_);
+        network::apps::mdns::ServiceRecordAdd(nullptr, network::apps::mdns::Services::kOsc, "type=server", port_incoming_);
 
         hal::statusled::SetMode(hal::statusled::Mode::NORMAL);
 
@@ -89,10 +89,10 @@ class OscServer
             dmxnode_output_type_->Stop(0);
         }
 
-        mdns::ServiceRecordDelete(mdns::Services::OSC);
+        network::apps::mdns::ServiceRecordDelete(network::apps::mdns::Services::kOsc);
 
         assert(handle_ != -1);
-        net::udp::End(port_incoming_);
+        network::udp::End(port_incoming_);
         handle_ = -1;
 
         DEBUG_EXIT();

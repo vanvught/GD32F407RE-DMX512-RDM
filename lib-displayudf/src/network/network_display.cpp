@@ -24,7 +24,7 @@
  */
 
 #include "displayudf.h"
-#include "net/protocol/dhcp.h"
+#include "core/protocol/dhcp.h"
 
 namespace net::emac::display
 {
@@ -55,7 +55,7 @@ void EmacShutdown()
     DisplayUdf::Get()->ShowShutdown();
 }
 
-void DhcpStatus(net::dhcp::State state)
+void DhcpStatus(network::dhcp::State state)
 {
     DisplayUdf::Get()->ShowDhcpStatus(state);
 }

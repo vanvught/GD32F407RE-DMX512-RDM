@@ -33,10 +33,10 @@
 #include "json/networkparamsconst.h"
 #include "json/networkparams.h"
 #include "json/json_helpers.h"
-#include "net/ip4_helpers.h"
-#include "net/netif.h"
+#include "ip4/ip4_helpers.h"
+#include "core/netif.h"
 #if defined(HAVE_NTP_CLIENT)
-#include "net/apps/ntpclient.h"
+#include "apps/ntpclient.h"
 #endif
 
 namespace json::config
@@ -46,22 +46,22 @@ uint32_t GetNetwork(char* buffer, uint32_t length)
 #if defined(HAVE_NTP_CLIENT)
     uint32_t ntp_server_ip = 0;
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
-    ntp_server_ip = ntpclient::GetServerIp();
+    ntp_server_ip = network::apps::ntpclient::GetServerIp();
 #endif
 #if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
-    ntp_server_ip = ntpclient::ptp::GetServerIp();
+    ntp_server_ip = network::apps::ntpclient::ptp::GetServerIp();
 #endif
 #endif
 
 	return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
 	    char ip[net::kIpBufferSize];
 
-	    doc[json::NetworkParamsConst::kSecondaryIp.name] = net::FormatIp(net::GetSecondaryIp(), ip);
-	    doc[json::NetworkParamsConst::kUseStaticIp.name] = !netif::Dhcp() ? 1 : 0;
-	    doc[json::NetworkParamsConst::kIpAddress.name] = net::FormatIp(net::GetPrimaryIp(), ip);
-	    doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(net::GetNetmask(), ip);
-	    doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(net::GetGatewayIp(), ip);
-	    doc[json::NetworkParamsConst::kHostname.name] =  network::iface::GetHostName();
+	    doc[json::NetworkParamsConst::kSecondaryIp.name] = net::FormatIp(network::GetSecondaryIp(), ip);
+	    doc[json::NetworkParamsConst::kUseStaticIp.name] = !network::iface::Dhcp() ? 1 : 0;
+	    doc[json::NetworkParamsConst::kIpAddress.name] = net::FormatIp(network::GetPrimaryIp(), ip);
+	    doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(network::GetNetmask(), ip);
+	    doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(network::GetGatewayIp(), ip);
+	    doc[json::NetworkParamsConst::kHostname.name] =  network::iface::HostName();
 #if defined(HAVE_NTP_CLIENT)    
 	    doc[json::NetworkParamsConst::kNtpServer.name] = net::FormatIp(ntp_server_ip, ip);
 #endif

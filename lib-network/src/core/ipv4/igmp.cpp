@@ -2,7 +2,7 @@
  * @file igmp.cpp
  *
  */
-/* Copyright (C) 2018-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_NET_IGMP)
+#if defined(DEBUG_NETWORK_IGMP)
 #undef NDEBUG
 #endif
 
@@ -31,7 +31,6 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#pragma GCC optimize("-fprefetch-loop-arrays")
 #endif
 
 #include <cstdint>
@@ -40,12 +39,12 @@
 #include <cassert>
 
 #include "net_config.h"
-#include "net_memcpy.h"
-#include "net_private.h"
-#include "net/netif.h"
-#include "net/igmp.h"
-#include "net/protocol/ieee.h"
-#include "net/protocol/igmp.h"
+#include "../src/core/net_memcpy.h"
+#include "../src/core/net_private.h"
+#include "core/netif.h"
+#include "core/ip4/igmp.h"
+#include "core/protocol/ieee.h"
+#include "core/protocol/igmp.h"
 #include "softwaretimers.h"
 #include "firmware/debug/debug_debug.h"
 
@@ -54,7 +53,7 @@
  * Internet Group Management Protocol, Version 2
  */
 
-namespace net::igmp
+namespace network::igmp
 {
 static constexpr uint32_t kIgmpTmrInterval = 100; /* Milliseconds */
 static constexpr uint32_t kIgmpJoinDelayingMemberTmr = (500 / kIgmpTmrInterval);
@@ -79,9 +78,9 @@ typedef union pcast32
     uint8_t u8[4];
 } _pcast32;
 
-static struct t_igmp s_report SECTION_NETWORK ALIGNED;
-static struct t_igmp s_leave SECTION_NETWORK ALIGNED;
-static uint8_t s_multicast_mac[ETH_ADDR_LEN] SECTION_NETWORK ALIGNED;
+static struct Header s_report SECTION_NETWORK ALIGNED;
+static struct Header s_leave SECTION_NETWORK ALIGNED;
+static uint8_t s_multicast_mac[network::ethernet::kAddressLength] SECTION_NETWORK ALIGNED;
 static struct GroupInfo s_groups[IGMP_MAX_JOINS_ALLOWED] SECTION_NETWORK ALIGNED;
 static uint16_t s_id SECTION_NETWORK ALIGNED;
 static TimerHandle_t s_timer_id;
@@ -100,21 +99,21 @@ static void SendReport(uint32_t group_address)
     DEBUG_PRINTF(IPSTR " " MACSTR, IP2STR(group_address), MAC2STR(s_multicast_mac));
 
     // Ethernet
-    std::memcpy(s_report.ether.dst, s_multicast_mac, ETH_ADDR_LEN);
+    std::memcpy(s_report.ether.dst, s_multicast_mac, network::ethernet::kAddressLength);
     // IPv4
     s_report.ip4.id = ++s_id;
-    net::memcpy_ip(s_report.ip4.src, netif::globals::netif_default.ip.addr);
-    std::memcpy(s_report.ip4.dst, multicast_ip.u8, IPv4_ADDR_LEN);
+    network::memcpy_ip(s_report.ip4.src, netif::global::netif_default.ip.addr);
+    std::memcpy(s_report.ip4.dst, multicast_ip.u8, network::ip4::kAddressLength);
     s_report.ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_report.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_report.ip4), 24); // TODO(avv)
 #endif
     // IGMP
-    std::memcpy(s_report.igmp.report.igmp.group_address, multicast_ip.u8, IPv4_ADDR_LEN);
+    std::memcpy(s_report.igmp.report.igmp.group_address, multicast_ip.u8, network::ip4::kAddressLength);
     s_report.igmp.report.igmp.checksum = 0;
-    s_report.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_report.ip4), IPv4_IGMP_REPORT_HEADERS_SIZE);
+    s_report.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_report.ip4), kIPv4IgmpReportHeadersSize);
 
-    emac_eth_send(reinterpret_cast<void*>(&s_report), IGMP_REPORT_PACKET_SIZE);
+    emac_eth_send(reinterpret_cast<void*>(&s_report), kReportPacketSize);
 
     DEBUG_EXIT();
 }
@@ -160,21 +159,21 @@ void __attribute__((cold)) Init()
     s_multicast_mac[2] = 0x5E;
 
     // Ethernet
-    std::memcpy(s_report.ether.src, netif::globals::netif_default.hwaddr, ETH_ADDR_LEN);
-    s_report.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
+    std::memcpy(s_report.ether.src, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    s_report.ether.type = __builtin_bswap16(network::ethernet::Type::kIPv4);
 
     // IPv4
     s_report.ip4.ver_ihl = 0x46; // TODO(avv):
     s_report.ip4.tos = 0;
-    s_report.ip4.flags_froff = __builtin_bswap16(IPv4_FLAG_DF);
+    s_report.ip4.flags_froff = __builtin_bswap16(network::ip4::Flags::kFlagDf);
     s_report.ip4.ttl = 1;
-    s_report.ip4.proto = IPv4_PROTO_IGMP;
-    s_report.ip4.len = __builtin_bswap16(IPv4_IGMP_REPORT_HEADERS_SIZE);
+    s_report.ip4.proto = network::ip4::Proto::kIgmp;
+    s_report.ip4.len = __builtin_bswap16(kIPv4IgmpReportHeadersSize);
     // IPv4 options
     s_report.igmp.report.ip4_options = 0x00000494; // TODO(avv):
 
     // IGMP
-    s_report.igmp.report.igmp.type = IGMP_TYPE_REPORT;
+    s_report.igmp.report.igmp.type = Type::kReport;
     s_report.igmp.report.igmp.max_resp_time = 0;
 
     // Ethernet
@@ -184,16 +183,16 @@ void __attribute__((cold)) Init()
     s_leave.ether.dst[3] = 0x00;
     s_leave.ether.dst[4] = 0x00;
     s_leave.ether.dst[5] = 0x02;
-    std::memcpy(s_leave.ether.src, netif::globals::netif_default.hwaddr, ETH_ADDR_LEN);
-    s_leave.ether.type = __builtin_bswap16(ETHER_TYPE_IPv4);
+    std::memcpy(s_leave.ether.src, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    s_leave.ether.type = __builtin_bswap16(network::ethernet::Type::kIPv4);
 
     // IPv4
     s_leave.ip4.ver_ihl = 0x46; // TODO(avv):
     s_leave.ip4.tos = 0;
-    s_leave.ip4.flags_froff = __builtin_bswap16(IPv4_FLAG_DF);
+    s_leave.ip4.flags_froff = __builtin_bswap16(network::ip4::Flags::kFlagDf);
     s_leave.ip4.ttl = 1;
-    s_leave.ip4.proto = IPv4_PROTO_IGMP;
-    s_leave.ip4.len = __builtin_bswap16(IPv4_IGMP_REPORT_HEADERS_SIZE);
+    s_leave.ip4.proto = network::ip4::Proto::kIgmp;
+    s_leave.ip4.len = __builtin_bswap16(kIPv4IgmpReportHeadersSize);
     s_leave.ip4.dst[0] = 0xE0; // 224
     s_leave.ip4.dst[1] = 0x00; // 0
     s_leave.ip4.dst[2] = 0x00; // 0
@@ -202,7 +201,7 @@ void __attribute__((cold)) Init()
     s_leave.igmp.report.ip4_options = 0x00000494; // TODO (avv)
 
     // IGMP
-    s_leave.igmp.report.igmp.type = IGMP_TYPE_LEAVE;
+    s_leave.igmp.report.igmp.type = Type::kLeave;
     s_leave.igmp.report.igmp.max_resp_time = 0;
 
     s_timer_id = SoftwareTimerAdd(kIgmpTmrInterval, Timer);
@@ -247,26 +246,26 @@ static void SendLeave(uint32_t group_address)
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_leave.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), 24); // TODO(avv):
 #endif
-    net::memcpy_ip(s_leave.ip4.src, netif::globals::netif_default.ip.addr);
+    network::memcpy_ip(s_leave.ip4.src, netif::global::netif_default.ip.addr);
     // IGMP
-    net::memcpy_ip(s_leave.igmp.report.igmp.group_address, group_address);
+    network::memcpy_ip(s_leave.igmp.report.igmp.group_address, group_address);
     s_leave.igmp.report.igmp.checksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
-    s_leave.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), IPv4_IGMP_REPORT_HEADERS_SIZE);
+    s_leave.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), kIPv4IgmpReportHeadersSize);
 #endif
 
-    emac_eth_send(reinterpret_cast<void*>(&s_leave), IGMP_REPORT_PACKET_SIZE);
+    emac_eth_send(reinterpret_cast<void*>(&s_leave), kReportPacketSize);
 
     s_id++;
 
     DEBUG_EXIT();
 }
 
-__attribute__((hot)) void Input(const struct t_igmp* p_igmp)
+__attribute__((hot)) void Input(const struct Header* p_igmp)
 {
     DEBUG_ENTRY();
 
-    if ((p_igmp->ip4.ver_ihl == 0x45) && (p_igmp->igmp.igmp.type == IGMP_TYPE_QUERY))
+    if ((p_igmp->ip4.ver_ihl == 0x45) && (p_igmp->igmp.igmp.type == Type::kQuery))
     {
         DEBUG_PRINTF(IPSTR, p_igmp->ip4.dst[0], p_igmp->ip4.dst[1], p_igmp->ip4.dst[2], p_igmp->ip4.dst[3]);
 
@@ -290,7 +289,7 @@ __attribute__((hot)) void Input(const struct t_igmp* p_igmp)
             _pcast32 group_address;
             group_address.u32 = group.group_address;
 
-            if (is_general_request || (memcmp(p_igmp->ip4.dst, group_address.u8, IPv4_ADDR_LEN) == 0))
+            if (is_general_request || (memcmp(p_igmp->ip4.dst, group_address.u8, network::ip4::kAddressLength) == 0))
             {
                 if (group.state == kDelayingMember)
                 {
@@ -441,7 +440,7 @@ bool LookupGroup(uint32_t group_address)
     }
 
     DEBUG_EXIT();
-    return (group_address == net::convert_to_uint(224, 0, 0, 1));
+    return (group_address == network::ConvertToUint(224, 0, 0, 1));
 }
 
 void ReportGroups()
@@ -452,7 +451,7 @@ void ReportGroups()
     }
 }
 // <---
-} // namespace net::igmp
+} // namespace network::igmp
 
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
 #pragma GCC pop_options

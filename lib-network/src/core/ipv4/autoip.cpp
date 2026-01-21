@@ -30,31 +30,31 @@
  * Dynamic Configuration of IPv4 Link-Local Addresses
  */
 
-#ifdef DEBUG_AUTOIP
+#ifdef DEBUG_NETWORK_AUTOIP
 #undef NDEBUG
 #endif
 
 #include <cstring>
 #include <cassert>
 
-#include "net/netif.h"
-#include "net/autoip.h"
-#include "net/protocol/autoip.h"
-#include "net/acd.h"
+#include "core/netif.h"
+#include "core/ip4/autoip.h"
+#include "core/protocol/autoip.h"
+#include "core/ip4/acd.h"
 #include "firmware/debug/debug_debug.h"
 
-namespace net
+namespace network::autoip
 {
 static void Bind()
 {
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
     assert(autoip != nullptr);
 
-    autoip->state = autoip::State::AUTOIP_STATE_BOUND;
+    autoip->state = autoip::State::kBound;
 
     ip4_addr_t sn_mask, gw_addr;
 
-    sn_mask.addr = net::convert_to_uint(255, 255, 0, 0);
+    sn_mask.addr = network::ConvertToUint(255, 255, 0, 0);
     gw_addr.addr = 0;
 
     netif::SetAddr(autoip->llipaddr, sn_mask, gw_addr);
@@ -62,30 +62,30 @@ static void Bind()
 
 static void Restart()
 {
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
     assert(autoip != nullptr);
 
     autoip->tried_llipaddr++;
     autoip::Start();
 }
 
-static void ConflictCallback(net::acd::Callback state)
+static void ConflictCallback(network::acd::Callback state)
 {
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
     assert(autoip != nullptr);
 
     switch (state)
     {
-        case net::acd::Callback::ACD_IP_OK:
+        case network::acd::Callback::kAcdIpOk:
             Bind();
             netif::SetFlags(netif::Netif::kNetifFlagAutoipOk);
             break;
-        case net::acd::Callback::ACD_RESTART_CLIENT:
+        case network::acd::Callback::kAcdRestartClient:
             Restart();
             break;
-        case net::acd::Callback::ACD_DECLINE:
+        case network::acd::Callback::kAcdDecline:
             // "delete" conflicting address so a new one will be selected in autoip::Start()
-            autoip->llipaddr.addr = net::IPADDR_ANY;
+            autoip->llipaddr.addr = network::kIpaddrAny;
             autoip::Stop();
             netif::ClearFlags(netif::Netif::kNetifFlagAutoipOk);
             break;
@@ -96,26 +96,25 @@ static void ConflictCallback(net::acd::Callback state)
 
 static void CreateAddr(uint32_t& ipaddr)
 {
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
     assert(autoip != nullptr);
 
-    /* Here we create an IP-Address out of range 169.254.1.0 to 169.254.254.255
-     * compliant to RFC 3927 Section 2.1 */
-    const auto kMask = netif::globals::netif_default.hwaddr[3] + (netif::globals::netif_default.hwaddr[4] << 8);
-    ipaddr = static_cast<uint32_t>(kMask << 16) | autoip::AUTOIP_RANGE_START;
+    // Here we create an IP-Address out of range 169.254.1.0 to 169.254.254.255 compliant to RFC 3927 Section 2.1
+    const auto kMask = netif::global::netif_default.hwaddr[3] + (netif::global::netif_default.hwaddr[4] << 8);
+    ipaddr = static_cast<uint32_t>(kMask << 16) | autoip::kRangeStart;
     ipaddr = __builtin_bswap32(ipaddr);
 
     ipaddr += autoip->tried_llipaddr;
-    ipaddr = __builtin_bswap32(autoip::AUTOIP_NET) | (ipaddr & 0xffff);
+    ipaddr = __builtin_bswap32(autoip::kNet) | (ipaddr & 0xffff);
 
-    if (ipaddr < __builtin_bswap32(autoip::AUTOIP_RANGE_START))
+    if (ipaddr < __builtin_bswap32(autoip::kRangeStart))
     {
-        ipaddr += __builtin_bswap32(autoip::AUTOIP_RANGE_END) - __builtin_bswap32(autoip::AUTOIP_RANGE_START) + 1;
+        ipaddr += __builtin_bswap32(autoip::kRangeEnd) - __builtin_bswap32(autoip::kRangeStart) + 1;
     }
 
-    if (ipaddr > __builtin_bswap32(autoip::AUTOIP_RANGE_END))
+    if (ipaddr > __builtin_bswap32(autoip::kRangeEnd))
     {
-        ipaddr -= __builtin_bswap32(autoip::AUTOIP_RANGE_END) - __builtin_bswap32(autoip::AUTOIP_RANGE_START) + 1;
+        ipaddr -= __builtin_bswap32(autoip::kRangeEnd) - __builtin_bswap32(autoip::kRangeStart) + 1;
     }
 
     ipaddr = __builtin_bswap32(ipaddr);
@@ -127,11 +126,11 @@ static void CreateAddr(uint32_t& ipaddr)
  * Public interface
  */
 
-void autoip::Start()
+void Start()
 {
     DEBUG_ENTRY();
 
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
 
     if (autoip == nullptr)
     {
@@ -140,21 +139,20 @@ void autoip::Start()
         memset(autoip, 0, sizeof(struct autoip::Autoip));
     }
 
-    if (autoip->state == autoip::State::AUTOIP_STATE_OFF)
+    if (autoip->state == autoip::State::kOff)
     {
-        net::acd::Add(&autoip->acd, ConflictCallback);
+        network::acd::Add(&autoip->acd, ConflictCallback);
 
-        /* In accordance to RFC3927 section 2.1:
-         * Keep using the same link local address as much as possible.
-         * Only when there is none or when there was a conflict, select a new one.
-         */
-        if (!net::is_linklocal_ip(autoip->llipaddr.addr))
+        // In accordance to RFC3927 section 2.1:
+        // Keep using the same link local address as much as possible.
+        // Only when there is none or when there was a conflict, select a new one.
+        if (!network::IsLinklocalIp(autoip->llipaddr.addr))
         {
             CreateAddr(autoip->llipaddr.addr);
         }
 
-        autoip->state = autoip::State::AUTOIP_STATE_CHECKING;
-        net::acd::Start(&autoip->acd, autoip->llipaddr);
+        autoip->state = autoip::State::kChecking;
+        network::acd::Start(&autoip->acd, autoip->llipaddr);
     }
     else
     {
@@ -164,19 +162,19 @@ void autoip::Start()
     DEBUG_EXIT();
 }
 
-void autoip::Stop()
+void Stop()
 {
     DEBUG_ENTRY();
-    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::globals::netif_default.autoip);
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
 
     if (autoip != nullptr)
     {
-        autoip->state = autoip::State::AUTOIP_STATE_OFF;
+        autoip->state = autoip::State::kOff;
 
         ip4_addr_t any;
-        any.addr = net::IPADDR_ANY;
+        any.addr = network::kIpaddrAny;
 
-        if (net::is_linklocal_ip(netif::globals::netif_default.ip.addr))
+        if (network::IsLinklocalIp(netif::global::netif_default.ip.addr))
         {
             netif::SetAddr(any, any, any);
         }
@@ -184,4 +182,39 @@ void autoip::Stop()
 
     DEBUG_EXIT();
 }
-} // namespace net
+
+bool SuppliedAddress()
+{
+    const auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
+
+    return (autoip != nullptr) && (netif::global::netif_default.ip.addr == autoip->llipaddr.addr) && (autoip->state == autoip::State::kBound);
+}
+
+void NetworkChangedLinkUp()
+{
+    DEBUG_ENTRY();
+
+    auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
+
+    if ((autoip != nullptr) && (autoip->state != autoip::State::kOff))
+    {
+        network::acd::Start(&autoip->acd, autoip->llipaddr);
+    }
+
+    DEBUG_EXIT();
+}
+
+void NetworkChangedLinkDown()
+{
+    DEBUG_EXIT();
+
+    const auto* autoip = reinterpret_cast<struct autoip::Autoip*>(netif::global::netif_default.autoip);
+
+    if ((autoip != nullptr) && (autoip->state != autoip::State::kOff))
+    {
+        autoip::Stop();
+    }
+
+    DEBUG_EXIT();
+}
+} // namespace network::autoip

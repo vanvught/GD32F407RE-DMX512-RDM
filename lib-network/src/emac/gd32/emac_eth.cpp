@@ -42,7 +42,7 @@
 
 #include "gd32.h"
 #include "gd32_enet.h"
-#include "../src/net/net_memcpy.h"
+#include "../src/core/net_memcpy.h"
 #include "firmware/debug/debug_dump.h"
 #include "firmware/debug/debug_debug.h"
 
@@ -247,7 +247,7 @@ template <bool T> static void ptpframe_transmit(const void* buffer, const uint32
     assert(length <= ENET_MAX_FRAME_SIZE);
 
     auto* pDst = reinterpret_cast<uint8_t*>(dma_current_ptp_txdesc->buffer1_addr);
-    net::memcpy(pDst, buffer, length); ///< Copy frame to DMA buffer
+    network::memcpy(pDst, buffer, length); ///< Copy frame to DMA buffer
 
     ptpframe_transmit<T>(length);
 }
@@ -400,7 +400,7 @@ void emac_eth_send(void* buffer, uint32_t length)
     assert(length <= ENET_MAX_FRAME_SIZE);
 
     auto* dest = emac_eth_send_get_dma_buffer();
-    net::memcpy(dest, buffer, length); ///< Copy frame to DMA buffer
+    network::memcpy(dest, buffer, length); ///< Copy frame to DMA buffer
 
     emac_eth_send(length);
 }

@@ -93,7 +93,7 @@ void AdjustLink(net::phy::Status phy_status)
 {
     DEBUG_ENTRY();
 
-    printf("Link %s, %d, %s\n", phy_status.link == net::phy::Link::kStateUp ? "Up" : "Down", phy_status.speed == net::phy::Speed::kSpeed10 ? 10 : 100, phy_status.duplex == net::phy::Duplex::DUPLEX_HALF ? "HALF" : "FULL");
+    printf("Link %s, %d, %s\n", phy_status.link == net::phy::Link::kStateUp ? "Up" : "Down", phy_status.speed == net::phy::Speed::kSpeed10 ? 10 : 100, phy_status.duplex == net::phy::Duplex::kDuplexHalf ? "HALF" : "FULL");
 
 #ifndef NDEBUG
     {
@@ -119,7 +119,7 @@ void AdjustLink(net::phy::Status phy_status)
 
     if (phy_status.speed == net::phy::Speed::kSpeed100)
     {
-        if (phy_status.duplex == net::phy::Duplex::DUPLEX_FULL)
+        if (phy_status.duplex == net::phy::Duplex::kDuplexFull)
         {
             mediamode = ENET_100M_FULLDUPLEX;
         }
@@ -128,7 +128,7 @@ void AdjustLink(net::phy::Status phy_status)
             mediamode = ENET_100M_HALFDUPLEX;
         }
     }
-    else if (phy_status.duplex == net::phy::Duplex::DUPLEX_FULL)
+    else if (phy_status.duplex == net::phy::Duplex::kDuplexFull)
     {
         mediamode = ENET_10M_FULLDUPLEX;
     }
