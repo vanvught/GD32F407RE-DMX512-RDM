@@ -2,7 +2,7 @@
  * @file gd32_i2c.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -345,7 +345,7 @@ static void GpioConfigI2c()
     }
     else
     {
-        assert(0);
+        assert(false && "Invalid I2C_REMAP");
     }
 #endif
 #else
@@ -380,7 +380,7 @@ static void GpioConfigI2c1()
     }
     else
     {
-        assert(0);
+        assert(false && "Invalid I2C1_REMAP");
     }
 #endif
 #else

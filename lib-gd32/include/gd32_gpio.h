@@ -196,7 +196,7 @@ inline uint32_t Gd32GpioToPeriph(uint32_t gpio)
             break;
 #endif
         default:
-            assert(0);
+            assert(false && "Invalid gpio");
             return 0;
             break;
     }

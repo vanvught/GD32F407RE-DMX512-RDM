@@ -2,7 +2,7 @@
  * @file gd32_dma.h
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
             interrupt_enable = DMA_CHCTL(dma_periph, channelx) & DMA_CHXCTL_ERRIE;
             break;
         default:
-            [[unlikely]] assert(0);
+            [[unlikely]] assert(false && "Invalid flag");
     }
 
     return interrupt_flag && interrupt_enable;
@@ -97,7 +97,7 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
             interrupt_enable = DMA_CHCTL(dma_periph, channelx) & gif_enable;
             break;
         default:
-            [[unlikely]] assert(0);
+            [[unlikely]] assert(false && "Invalid flag");
     }
 
     return (interrupt_flag && interrupt_enable);
@@ -132,7 +132,7 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
                 interrupt_enable = (DMA_CHCTL(dma_periph, channelx) & DMA_CHXCTL_FTFIE);
                 break;
             default:
-                [[unlikely]] assert(0);
+                [[unlikely]] assert(false && "Invalid flag");
                 break;
         }
     }
@@ -162,13 +162,13 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
                 interrupt_enable = DMA_CHCTL(dma_periph, channelx) & DMA_CHXCTL_FTFIE;
                 break;
             default:
-                [[unlikely]] assert(0);
+                [[unlikely]] assert(false && "Invalid flag");
                 break;
         }
     }
     else
     {
-        [[unlikely]] assert(0);
+        [[unlikely]] assert(false && "Invalid channelx");
     }
 
     return (interrupt_flag && interrupt_enable);
