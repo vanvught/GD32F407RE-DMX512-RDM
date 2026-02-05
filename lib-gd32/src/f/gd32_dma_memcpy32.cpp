@@ -2,7 +2,7 @@
  * @file gd32_dma_memcpy32.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-#include "gd32.h"
 #include "gd32_dma.h"
 
 namespace dma::memcpy32
@@ -49,10 +48,12 @@ void Init()
     dma_circulation_disable(DMA0, DMA_CH3);
     dma_memory_to_memory_enable(DMA0, DMA_CH3);
 
+#if !defined(DMA_MEMCPY32_DISABLE_IRQ)
     Gd32DmaInterruptFlagClear<DMA0, DMA_CH3, (DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)>();
 
     NVIC_SetPriority(DMA0_Channel3_IRQn, 0);
     NVIC_EnableIRQ(DMA0_Channel3_IRQn);
+#endif
 #else
     rcu_periph_clock_enable(RCU_DMA1);
     dma_deinit(DMA1, DMA_CH0);
@@ -73,10 +74,12 @@ void Init()
 
     dma_multi_data_mode_init(DMA1, DMA_CH0, &dma_init_parameter);
 
-    Gd32DmaInterruptFlagClear<DMA1, DMA_CH3, (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)>();
+#if !defined(DMA_MEMCPY32_DISABLE_IRQ)
+    Gd32DmaInterruptFlagClear<DMA1, DMA_CH0, (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)>();
 
     NVIC_SetPriority(DMA1_Channel0_IRQn, 0);
     NVIC_EnableIRQ(DMA1_Channel0_IRQn);
+#endif
 #endif
 }
 } // namespace dma::memcpy32
