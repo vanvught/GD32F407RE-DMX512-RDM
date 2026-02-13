@@ -59,3 +59,4 @@ udp_send
 *._*
 /.cache
 compile_commands.json
+/common/scripts/gd32/venv
