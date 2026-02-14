@@ -60,3 +60,4 @@ udp_send
 /.cache
 compile_commands.json
 /common/scripts/gd32/venv
+software_version_id.h
