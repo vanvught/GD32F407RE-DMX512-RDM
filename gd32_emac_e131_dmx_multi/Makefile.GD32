@@ -28,5 +28,3 @@ SRCDIR=firmware lib
 include ../firmware-template-gd32/Rules.mk
 
 prerequisites:
-	mkdir -p ./include
-	@echo "constexpr uint32_t DEVICE_SOFTWARE_VERSION_ID="$(shell date "+%s")";" > ./include/software_version_id.h
