@@ -68,18 +68,6 @@ extern volatile uint32_t gv_nSysTickMillis;
 
 namespace hal
 {
-inline constexpr uint32_t kBoardId =
-#if defined(GD32_BOARD_ID)
-    GD32_BOARD_ID;
-#else
-    0;
-#endif
-static constexpr uint32_t kReleaseId =
-#if defined(RELEASE_ID)
-    RELEASE_ID;
-#else
-    0;
-#endif
 inline constexpr const char kWebsite[] = "https://gd32-dmx.org";
 inline constexpr float kCoreTemperatureMin = -40.0;
 inline constexpr float kCoreTemperatureMax = +85.0;

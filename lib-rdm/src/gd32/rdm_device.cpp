@@ -1,8 +1,8 @@
 /**
- * @file dmxnode_utils.h
+ * @file rdm_device.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,52 @@
  * THE SOFTWARE.
  */
 
-#ifndef DMXNODE_UTILS_H_
-#define DMXNODE_UTILS_H_
-
 #include <cstdint>
 
-namespace json
+#include "gd32_board.h"
+#include "firmwareversion.h"
+
+namespace rdm::device
 {
-template <class S> static void PortSet(uint32_t port_index, S s, uint16_t& n)
+static constexpr char kRootLabel[] =
+#if defined(CONFIG_RDM_DEVICE_ROOT_LABEL)
+    CONFIG_RDM_DEVICE_ROOT_LABEL;
+#else
+    GD32_BOARD_NAME " RDM Device";
+#endif
+
+const char* RootLabel(uint8_t& length)
 {
-    uint16_t value = n; // Create a local copy
-    value &= static_cast<uint16_t>(~(0x3 << (port_index * 2)));
-    value |= static_cast<uint16_t>((static_cast<uint32_t>(s) & 0x3) << (port_index * 2));
-    n = value; // Write back to the original field
+    length = sizeof(rdm::device::kRootLabel) - 1;
+    return kRootLabel;
 }
 
-template <class S> static S PortGet(uint32_t port_index, uint16_t n)
+uint16_t DeviceModel()
 {
-    return static_cast<S>((n >> (port_index * 2)) & 0x3);
+#if defined(GD32_BOARD_ID)
+    return GD32_BOARD_ID;
+#else
+    return 0;
+#endif
 }
-} // namespace json
 
-#endif  // DMXNODE_UTILS_H_
+uint32_t BootSoftwareVersionId()
+{
+#if defined(RELEASE_ID)
+    return RELEASE_ID;
+#else
+    return 0;
+#endif
+}
+
+uint32_t SoftwareVersionId()
+{
+    return _TIME_STAMP_;
+}
+
+const char* SoftwareVersionLabel(uint32_t& length)
+{
+    length = firmwareversion::length::kSoftwareVersion;
+    return FirmwareVersion::Get()->GetSoftwareVersion();
+}
+} // namespace rdm::device

@@ -1,8 +1,8 @@
 /**
- * @file rdmdeviceparamsconst.h
+ * @file dmxnode_utils.h
  *
  */
-/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef JSON_RDMDEVICEPARAMSCONST_H_
-#define JSON_RDMDEVICEPARAMSCONST_H_
+#ifndef COMMON_UTILS_UTILS_PORT_H_
+#define COMMON_UTILS_UTILS_PORT_H_
 
-#include "json/json_key.h"
+#include <cstdint>
 
-namespace json
+namespace common
 {
-struct RdmDeviceParamsConst
+template <class S> void PortSet(uint32_t port_index, S s, uint16_t& n)
 {
-    static constexpr char kFileName[] = "rdmdevice.json";
+    uint16_t value = n; // Create a local copy
+    value &= static_cast<uint16_t>(~(0x3 << (port_index * 2)));
+    value |= static_cast<uint16_t>((static_cast<uint32_t>(s) & 0x3) << (port_index * 2));
+    n = value; // Write back to the original field
+}
 
-    static constexpr json::SimpleKey kLabel{"label", 5, Fnv1a32("label", 5)};
-};
-} // namespace json
+template <class S> S PortGet(uint32_t port_index, uint16_t n)
+{
+    return static_cast<S>((n >> (port_index * 2)) & 0x3);
+}
+} // namespace common
 
-#endif // JSON_RDMDEVICEPARAMSCONST_H_
+#endif // COMMON_UTILS_UTILS_PORT_H_
