@@ -35,6 +35,10 @@ ifneq ($(MAKE_FLAGS),)
 		ARTNET=1
 	endif
 	
+	ifneq (,$(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-rdm/include
+	endif
+	
 	ifdef E131
 		EXTRA_INCLUDES+=../lib-e131/include
 		EXTRA_INCLUDES+=../lib-dmx/include

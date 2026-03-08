@@ -39,13 +39,15 @@ namespace rdm
 {
 namespace discovery
 {
-	enum class Type {
-		kFull, kIncremental
-	};
-	
-	void Starting(uint32_t port_index, Type type);
-	void Finished(uint32_t port_index, Type type);
-}
+enum class Type
+{
+    kFull,
+    kIncremental
+};
+
+void Starting(uint32_t port_index, Type type);
+void Finished(uint32_t port_index, Type type);
+} // namespace discovery
 inline static constexpr uint32_t kBackgroundIntervalMinutes = 1;
 
 class Discovery : rdm::discovery::StateMachine
@@ -70,9 +72,6 @@ class Discovery : rdm::discovery::StateMachine
     {
         assert(port_index < kPorts);
         enabled_ |= (1U << port_index);
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     bool IsEnabled(uint32_t port_index) const { return (((1U << port_index) & enabled_) == (1U << port_index)); }
@@ -81,9 +80,6 @@ class Discovery : rdm::discovery::StateMachine
     {
         assert(port_index < kPorts);
         enabled_ &= ~(1U << port_index);
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     void EnableBackground(uint32_t port_index)
@@ -99,9 +95,6 @@ class Discovery : rdm::discovery::StateMachine
             s_timer_id = SoftwareTimerAdd((1000U * 60U) * kBackgroundIntervalMinutes, TimerBackGround);
             printf("s_timer_id=%d\n", s_timer_id);
         }
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     void DisableBackground(uint32_t port_index)
@@ -117,9 +110,6 @@ class Discovery : rdm::discovery::StateMachine
         {
             SoftwareTimerDelete(s_timer_id);
         }
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     bool IsEnabledBackground(uint32_t port_index) const { return (((1U << port_index) & s_bg_discovery) == (1U << port_index)); }
@@ -133,9 +123,6 @@ class Discovery : rdm::discovery::StateMachine
             type_ |= (1U << port_index);
             running_ = true;
         }
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     void Incremental(uint32_t port_index)
@@ -147,9 +134,6 @@ class Discovery : rdm::discovery::StateMachine
             type_ &= ~(1U << port_index);
             running_ = true;
         }
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     void Stop(uint32_t port_index)
@@ -168,9 +152,6 @@ class Discovery : rdm::discovery::StateMachine
                 }
             }
         }
-
-        printf("%s: %u -> enabled=%.2x, bg=%.2x, waiting=%.2x, type=%.2x [running=%d]\n", __FUNCTION__, port_index, enabled_, s_bg_discovery, waiting_, type_,
-               running_);
     }
 
     bool IsRunning(uint32_t portindex, bool& is_incremental) { return rdm::discovery::StateMachine::IsRunning(portindex, is_incremental); }
@@ -217,26 +198,43 @@ class Discovery : rdm::discovery::StateMachine
             return;
         }
 
-        uint32_t port_index;
+        if (rdm::discovery::StateMachine::IsRunning()) return;
+
         bool is_incremental;
 
-        const auto kIsRunning = rdm::discovery::StateMachine::IsRunning(port_index, is_incremental);
+        uint32_t port_index;
+        if (rdm::discovery::StateMachine::IsFinished(port_index, is_incremental))
+        {
+            assert(port_index_ == port_index);
+            printf("Finished:%u\n", port_index_);
+            rdm::discovery::Finished(port_index_, is_incremental ? rdm::discovery::Type::kIncremental : rdm::discovery::Type::kFull);
 
-        if ((!kIsRunning) && (waiting_))
+            port_index_++;
+            if (port_index_ == kPorts) port_index_ = 0;
+
+            if (waiting_ == 0)
+            {
+                running_ = false;
+                port_index_ = 0;
+            }
+        }
+
+        if (waiting_)
         {
             if (((1U << port_index_) & waiting_) == (1U << port_index_))
             {
                 if (((1U << port_index_) & type_) == (1U << port_index_))
+
                 {
-					rdm::discovery::Starting(port_index, rdm::discovery::Type::kFull);
+                    rdm::discovery::Starting(port_index_, rdm::discovery::Type::kFull);
                     rdm::discovery::StateMachine::Full(port_index_, &s_tod[port_index_]);
-					printf("Full:%u\n", port_index_);
+                    printf("Full:%u\n", port_index_);
                 }
                 else
                 {
-					rdm::discovery::Starting(port_index, rdm::discovery::Type::kIncremental);
+                    rdm::discovery::Starting(port_index_, rdm::discovery::Type::kIncremental);
                     rdm::discovery::StateMachine::Incremental(port_index_, &s_tod[port_index_]);
-					printf("Incremental:%u\n", port_index_);
+                    printf("Incremental:%u\n", port_index_);
                 }
 
                 waiting_ &= ~(1U << port_index_);
@@ -248,22 +246,6 @@ class Discovery : rdm::discovery::StateMachine
             }
 
             return;
-        }
-
-        if (rdm::discovery::StateMachine::IsFinished(port_index, is_incremental))
-        {
-            assert(port_index_ == port_index);
-            printf("Finished:%u\n", port_index);
-			rdm::discovery::Finished(port_index, is_incremental ? rdm::discovery::Type::kIncremental : rdm::discovery::Type::kFull);
-
-            port_index_++;
-            if (port_index_ == kPorts) port_index_ = 0;
-
-            if (waiting_ == 0)
-            {
-                running_ = false;
-                port_index_ = 0;
-            }
         }
     }
 
