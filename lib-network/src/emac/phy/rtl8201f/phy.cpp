@@ -147,7 +147,7 @@ void CustomizedLed()
 #if defined(GD32F4XX)
 #define RMSR_RX_TIMING_VAL 0x4
 #if defined(GD32F407)
-#define RMSR_TX_TIMING_VAL 0x2 // The GD32F407 is now running at 200MHz
+#define RMSR_TX_TIMING_VAL 0x2
 #elif defined(GD32F470)
 #define RMSR_TX_TIMING_VAL 0x1
 #else

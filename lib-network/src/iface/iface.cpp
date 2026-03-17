@@ -23,14 +23,17 @@
  * THE SOFTWARE.
  */
 
+#include <cctype>
+#include <cstdint>
 #include <cstring>
 #include <cassert>
 
-#include "network.h"
+#include "core/netif.h"
 #include "core/ip4/dhcp.h"
 #include "core/ip4/autoip.h"
 #include "net_config.h"
 #include "network_iface.h"
+#include "common/utils/utils_hex.h"
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
 #include "apps/mdns.h"
 #endif
@@ -44,14 +47,9 @@ static char s_hostname[kHostnameSize];
 static char s_domain_name[kDomainnameSize];
 static uint32_t s_nameservers[kNameserversCount];
 
-static constexpr char ToHex(char i)
-{
-    return static_cast<char>(((i) < 10) ? '0' + i : 'A' + (i - 10));
-}
-
 void CopyMacAddressTo(uint8_t* mac_address)
 {
-	assert(mac_address != nullptr);
+    assert(mac_address != nullptr);
     memcpy(mac_address, netif::HwAddr(), kMacSize);
 }
 
@@ -74,6 +72,8 @@ const char* DomainName()
 
 static void BuildDefaultHostname()
 {
+    DEBUG_ENTRY();
+
     uint32_t k = 0;
 
     static constexpr uint32_t kSuffixLen = 6;            // 3 bytes -> 6 hex chars
@@ -86,16 +86,19 @@ static void BuildDefaultHostname()
         s_hostname[k++] = HOST_NAME_PREFIX[i];
     }
 
-    const auto& hw = netif::global::netif_default.hwaddr; // expects at least 6 bytes
+    const auto* hw = netif::global::netif_default.hwaddr; // expects at least 6 bytes
 
-    s_hostname[k++] = ToHex(hw[3] >> 4);
-    s_hostname[k++] = ToHex(hw[3]);
-    s_hostname[k++] = ToHex(hw[4] >> 4);
-    s_hostname[k++] = ToHex(hw[4]);
-    s_hostname[k++] = ToHex(hw[5] >> 4);
-    s_hostname[k++] = ToHex(hw[5]);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[3] >> 4);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[3] & 0xF);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[4] >> 4);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[4] & 0xF);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[5] >> 4);
+    s_hostname[k++] = common::hex::ToCharUppercase(hw[5] & 0xF);
 
     s_hostname[k] = '\0';
+
+    DEBUG_PUTS(s_hostname);
+    DEBUG_EXIT();
 }
 
 void SetHostnameAuto()
@@ -117,7 +120,30 @@ void SetHostname(const char* hostname)
     }
     else
     {
-        strncpy(s_hostname, hostname, kHostnameSize - 1);
+        auto n = kHostnameSize - 1;
+        auto* dst = s_hostname;
+        const auto* src = hostname;
+
+        while (n > 0 && *src != '\0')
+        {
+            const int kC = *src;
+            if (isprint(kC))
+            {
+                *dst++ = *src++;
+				--n;
+            }
+            else
+            {
+                src++;
+            }
+        }
+
+        while (n > 0)
+        {
+            *dst++ = '\0';
+            --n;
+        }
+
         s_hostname[kHostnameSize - 1] = '\0';
     }
 
