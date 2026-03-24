@@ -2,7 +2,7 @@
  * @file hal.h
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,13 @@
 
 #include <cstdint>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
-#if defined(ENABLE_USB_HOST) && defined(CONFIG_USB_HOST_MSC)
+#if defined(ENABLE_USB_HOST)
 extern "C"
 {
 #include "usbh_core.h"
-#if defined(GD32H7XX) || defined(GD32F4XX)
-    extern usbh_host usb_host_msc;
-#else
     extern usbh_host usb_host;
-#endif
 }
 #endif
 
@@ -54,10 +50,10 @@ void emac_debug_run();
 #include "task.h"
 #endif
 
-#include "softwaretimers.h"
+#include "softwaretimers.h" // IWYU pragma: keep
 
 #if !defined(DISABLE_RTC)
-#include "hwclock.h"
+#include "hwclock.h" // IWYU pragma: keep
 #endif
 
 #include "hal_panelled.h"
@@ -74,12 +70,8 @@ inline constexpr float kCoreTemperatureMax = +85.0;
 
 inline void Run()
 {
-#if defined(ENABLE_USB_HOST) && defined(CONFIG_USB_HOST_MSC)
-#if defined(GD32H7XX) || defined(GD32F4XX)
-    usbh_core_task(&usb_host_msc);
-#else
+#if defined(ENABLE_USB_HOST)
     usbh_core_task(&usb_host);
-#endif
 #endif
 #if !defined(USE_FREE_RTOS)
     SoftwareTimerRun();
