@@ -14,7 +14,7 @@ AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Attach
 
 DerivePointerAlignment: false
 
