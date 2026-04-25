@@ -59,22 +59,8 @@
 #define SECTION_DMA_BUFFER
 #endif
 
-#if defined(GD32F4XX) || defined(GD32H7XX)
-#define DMA_INTERRUPT_ENABLE (DMA_CHXCTL_FTFIE)
-#define DMA_INTERRUPT_DISABLE (DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
-#define DMA_INTERRUPT_FLAG_GET (DMA_INT_FLAG_FTF)
-#define DMA_INTERRUPT_FLAG_CLEAR (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
-#else
-#define DMA_INTERRUPT_ENABLE (DMA_INT_FTF)
-#define DMA_INTERRUPT_DISABLE (DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
-#define DMA_INTERRUPT_FLAG_GET (DMA_INT_FLAG_FTF)
-#define DMA_INTERRUPT_FLAG_CLEAR (DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
-#endif
-
-inline constexpr uint32_t DmxPortToUart(uint32_t port)
-{
-    switch (port)
-    {
+inline constexpr uint32_t DmxPortToUart(uint32_t port) {
+    switch (port) {
 #if defined(DMX_USE_USART0)
         case dmx::config::USART0_PORT:
             return USART0;
@@ -115,8 +101,8 @@ inline constexpr uint32_t DmxPortToUart(uint32_t port)
             return UART7;
             break;
 #endif
-        default: [[unlikely]]
-            assert(0);
+        default:
+            [[unlikely]] assert(0);
             break;
     }
 
@@ -125,10 +111,8 @@ inline constexpr uint32_t DmxPortToUart(uint32_t port)
 }
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-inline constexpr uint32_t GetUsartAf(uint32_t usart_periph)
-{
-    switch (usart_periph)
-    {
+inline constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
+    switch (usart_periph) {
 #if defined(DMX_USE_USART0)
         case USART0:
             return USART0_GPIO_AFx;
@@ -161,20 +145,18 @@ inline constexpr uint32_t GetUsartAf(uint32_t usart_periph)
         case UART7:
             return UART7_GPIO_AFx;
 #endif
-        default:  [[unlikely]]
-            return 0;
+        default:
+            [[unlikely]] return 0;
     }
 
     return 0;
 }
 
-template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput()
-{
+template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput() {
     Gd32GpioModeSet<gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin>();
 }
 
-template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf()
-{
+template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf() {
     Gd32GpioModeSet<gpio_periph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, pin>();
 
     constexpr uint32_t kAf = GetUsartAf(usart_periph);
@@ -183,15 +165,13 @@ template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void
     Gd32GpioAfSet<gpio_periph, kAf, pin>();
 }
 #else
-template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput()
-{
+template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput() {
     gd32_gpio_init<gpio_periph, GPIO_MODE_OUT_PP, pin>();
 }
 
-template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf()
-{
+template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf() {
     gd32_gpio_init<gpio_periph, GPIO_MODE_AF_PP, pin>();
 }
 #endif
 
-#endif  // GD32_DMX_INTERNAL_H_
+#endif // GD32_DMX_INTERNAL_H_

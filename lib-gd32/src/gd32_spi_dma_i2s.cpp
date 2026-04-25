@@ -2,7 +2,7 @@
  * @file gd32_spi_dma_i2s.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,8 +61,7 @@ void I2sPscConfigDump(uint32_t spi_periph, uint32_t audiosample, uint32_t framef
 
 static uint16_t s_tx_buffer[SPI_BUFFER_SIZE] __attribute__((aligned(4)));
 
-static void RcuConfig()
-{
+static void RcuConfig() {
     rcu_periph_clock_enable(I2S_WS_RCU_GPIOx);
 
 #if defined(GPIO_INIT)
@@ -74,12 +73,9 @@ static void RcuConfig()
     rcu_periph_clock_enable(I2S_SD_RCU_GPIOx);
 #endif
 
-    if (I2S_DMAx == DMA0)
-    {
+    if (I2S_DMAx == DMA0) {
         rcu_periph_clock_enable(RCU_DMA0);
-    }
-    else
-    {
+    } else {
         rcu_periph_clock_enable(RCU_DMA1);
     }
 
@@ -88,18 +84,15 @@ static void RcuConfig()
 #endif
 }
 
-static void GpioConfig()
-{
+static void GpioConfig() {
 #if defined(GPIO_INIT)
 #if defined(I2S_REMAP_GPIO)
     gpio_pin_remap_config(I2S_REMAP_GPIO, ENABLE);
-    if (I2S_PERIPH == SPI0)
-    {
+    if (I2S_PERIPH == SPI0) {
         gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
     }
 #else
-    if (I2S_PERIPH == SPI2)
-    {
+    if (I2S_PERIPH == SPI2) {
         gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
     }
 #endif
@@ -120,8 +113,7 @@ static void GpioConfig()
 #endif
 }
 
-static void SpiI2sDmaConfig()
-{
+static void SpiI2sDmaConfig() {
     dma_deinit(I2S_DMAx, I2S_DMA_CHx);
 
     DMA_PARAMETER_STRUCT dma_init_struct;
@@ -158,10 +150,8 @@ static void SpiI2sDmaConfig()
 
     DMA_CHCNT(I2S_DMAx, I2S_DMA_CHx) = 0;
 }
-namespace i2s
-{
-void Gd32SpiDmaBegin()
-{
+namespace i2s {
+void Gd32SpiDmaBegin() {
     RcuConfig();
     GpioConfig();
 
@@ -177,8 +167,7 @@ void Gd32SpiDmaBegin()
 #endif
 }
 
-void Gd32SpiDmaSetSpeedHz(uint32_t speed_hz)
-{
+void Gd32SpiDmaSetSpeedHz(uint32_t speed_hz) {
     const auto kAudiosample = speed_hz / 16U / 2U;
 
     i2s_disable(I2S_PERIPH);
@@ -186,14 +175,12 @@ void Gd32SpiDmaSetSpeedHz(uint32_t speed_hz)
     i2s_enable(I2S_PERIPH);
 }
 
-const uint8_t* Gd32SpiDmaTxPrepare(uint32_t* length)
-{
+const uint8_t* Gd32SpiDmaTxPrepare(uint32_t* length) {
     *length = (sizeof(s_tx_buffer) / sizeof(s_tx_buffer[0])) * 2;
     return reinterpret_cast<const uint8_t*>(s_tx_buffer);
 }
 
-void Gd32SpiDmaTxStart(const uint8_t* tx_buffer, uint32_t length)
-{
+void Gd32SpiDmaTxStart(const uint8_t* tx_buffer, uint32_t length) {
     assert(((uint32_t)tx_buffer & 0x1) != 0x1);
     assert((uint32_t)tx_buffer >= (uint32_t)s_tx_buffer);
     assert(length != 0);
@@ -217,8 +204,7 @@ void Gd32SpiDmaTxStart(const uint8_t* tx_buffer, uint32_t length)
     spi_dma_enable(I2S_PERIPH, SPI_DMA_TRANSMIT);
 }
 
-bool Gd32SpiDmaTxIsActive()
-{
+bool Gd32SpiDmaTxIsActive() {
     return DMA_CHCNT(I2S_DMAx, I2S_DMA_CHx) != 0;
 }
 } // namespace i2s

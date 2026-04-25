@@ -1,8 +1,8 @@
 /**
- * @file gd32_mac_address.cpp
+ * @file macaddress.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,7 @@
 
 #include "firmware/debug/debug_debug.h"
 
-void mac_address_get(uint8_t paddr[])
-{
+void MacAddress(uint8_t paddr[]) {
 #if defined(GD32H7XX)
     const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7E8);
     const auto kMacAddressLow = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7EC);

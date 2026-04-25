@@ -2,7 +2,7 @@
  * @file timer6.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,25 +30,21 @@
 
 struct HwTimersSeconds g_Seconds;
 
-extern "C"
-{
+extern "C" {
 #if defined(CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER)
-    void TIMER6_IRQHandler()
-    {
-        const auto kIntFlag = TIMER_INTF(TIMER6);
+void TIMER6_IRQHandler() {
+    const auto kIntFlag = TIMER_INTF(TIMER6);
 
-        if ((kIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP)
-        {
-            g_Seconds.nUptime++;
-        }
-
-        TIMER_INTF(TIMER6) = static_cast<uint32_t>(~kIntFlag);
+    if ((kIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) {
+        g_Seconds.nUptime = g_Seconds.nUptime + 1;
     }
+
+    TIMER_INTF(TIMER6) = static_cast<uint32_t>(~kIntFlag);
+}
 #endif
 }
 
-void Timer6Config()
-{
+void Timer6Config() {
     g_Seconds.nUptime = 0;
 
     rcu_periph_clock_enable(RCU_TIMER6);
@@ -72,15 +68,13 @@ void Timer6Config()
     timer_enable(TIMER6);
 }
 
-uint32_t Timer6GetElapsedMilliseconds()
-{
+uint32_t Timer6GetElapsedMilliseconds() {
     const auto kUptimeFirst = g_Seconds.nUptime;
     auto timer_count = TIMER_CNT(TIMER6);
     const auto kUptimeSecond = g_Seconds.nUptime;
 
     // Check for consistency
-    if (__builtin_expect((kUptimeFirst == kUptimeSecond), 1))
-    {
+    if (__builtin_expect((kUptimeFirst == kUptimeSecond), 1)) {
         // No overflow detected, return the calculated time
         return (kUptimeFirst * 1000U) + (timer_count / 10U);
     }

@@ -2,7 +2,7 @@
  * EnetGpioConfig.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #undef NDEBUG
 #endif
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 #include "firmware/debug/debug_debug.h"
 
 // Needed for older GD32F firmware
@@ -35,8 +35,7 @@
 #define GPIO_OSPEED_MAX GPIO_OSPEED_200MHZ
 #endif
 
-void EnetGpioConfig()
-{
+void EnetGpioConfig() {
     DEBUG_ENTRY();
 #if defined(GD32F10X) || defined(GD32F20X)
     rcu_periph_clock_enable(RCU_GPIOA);

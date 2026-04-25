@@ -2,7 +2,7 @@
  * @file gd32_pwm.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,8 +60,7 @@
 
 #include "firmware/debug/debug_debug.h"
 
-namespace pwm
-{
+namespace pwm {
 #if !defined(PWM_CHANNEL_0_DUTYCYCLE)
 #define PWM_CHANNEL_0_DUTYCYCLE 50
 #endif
@@ -93,8 +92,7 @@ static constexpr uint32_t kTimerPeriod = 19999; // 50KHz
 
 #if defined(PWM_RCU_TIMERx) && defined(PWM_TIMERx)
 
-static void Dump()
-{
+static void Dump() {
 #if 1
     DEBUG_ENTRY();
 #ifndef NDEBUG
@@ -132,8 +130,7 @@ static void Dump()
 #endif
 }
 
-static void GpioConfig()
-{
+static void GpioConfig() {
 #if defined(PWM_CH0_RCU_GPIOx)
     rcu_periph_clock_enable(PWM_CH0_RCU_GPIOx);
 #endif
@@ -188,8 +185,7 @@ static void GpioConfig()
 #endif
 }
 
-static void TimerConfig()
-{
+static void TimerConfig() {
 #if defined(PWM_RCU_TIMERx) && defined(PWM_TIMERx)
     rcu_periph_clock_enable(PWM_RCU_TIMERx);
 
@@ -243,8 +239,7 @@ static void TimerConfig()
 #endif
 }
 
-void gd32_pwm_begin()
-{
+void gd32_pwm_begin() {
     DEBUG_ENTRY();
 
     Dump();
@@ -268,34 +263,32 @@ void gd32_pwm_begin()
     DEBUG_EXIT();
 }
 
-void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle)
-{
+void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle) {
     DEBUG_ENTRY();
 
-    const uint32_t nPulse = (duty_cycle > 100 ? 100 : duty_cycle) * (pwm::kTimerPeriod / 100U);
+    const uint32_t kPulse = (duty_cycle > 100 ? 100 : duty_cycle) * (pwm::kTimerPeriod / 100U);
 
     DEBUG_PRINTF("Channel=%u, nDutyCycle=%u, nPulse=%u", static_cast<unsigned>(channel), duty_cycle, static_cast<unsigned>(nPulse));
 
-    switch (channel)
-    {
+    switch (channel) {
 #if defined(PWM_CH0_RCU_GPIOx)
         case pwm::Channel::PWM_CHANNEL_0:
-            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_0, nPulse);
+            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_0, kPulse);
             break;
 #endif
 #if defined(PWM_CH1_RCU_GPIOx)
         case pwm::Channel::PWM_CHANNEL_1:
-            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_1, nPulse);
+            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_1, kPulse);
             break;
 #endif
 #if defined(PWM_CH2_RCU_GPIOx)
         case pwm::Channel::PWM_CHANNEL_2:
-            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_2, nPulse);
+            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_2, kPulse);
             break;
 #endif
 #if defined(PWM_CH3_RCU_GPIOx)
         case pwm::Channel::PWM_CHANNEL_3:
-            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_3, nPulse);
+            timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_3, kPulse);
             break;
 #endif
         default:

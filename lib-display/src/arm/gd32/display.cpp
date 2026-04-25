@@ -2,7 +2,7 @@
  * @file display.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,32 +27,34 @@
 #undef NDEBUG
 #endif
 
-#include "display.h"
+#include "firmware/debug/debug_debug.h"
 
+#if defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)
+namespace display::timeout {
+void irq_init() {
+    DEBUG_PUTS("Display timeout with IRQ disabled.");
+}
+} // namespace display::timeout
+#else // defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)
+
+#include "display.h"
 #include "gd32.h"
 #include "gd32_gpio.h"
 
-#include "firmware/debug/debug_debug.h"
-
 #if defined(DISPLAYTIMEOUT_CONFIG_IRQ) && !defined(CONFIG_USE_EXTI10_15_IRQHandler)
-extern "C"
-{
-    void DISPLAYTIMEOUT_IRQ_HANDLE()
-    {
-        if (RESET != exti_interrupt_flag_get(DISPLAYTIMEOUT_EXTI_LINE))
-        {
-            exti_interrupt_flag_clear(DISPLAYTIMEOUT_EXTI_LINE);
-            Display::Get()->SetSleep(false);
-            DEBUG_PUTS("Key pressed.");
-        }
+extern "C" {
+void DISPLAYTIMEOUT_IRQ_HANDLE() {
+    if (RESET != exti_interrupt_flag_get(DISPLAYTIMEOUT_EXTI_LINE)) {
+        exti_interrupt_flag_clear(DISPLAYTIMEOUT_EXTI_LINE);
+        Display::Get()->SetSleep(false);
+        DEBUG_PUTS("Key pressed.");
     }
+}
 }
 #endif
 
-namespace display::timeout
-{
-void irq_init()
-{
+namespace display::timeout {
+void irq_init() {
 #if defined(DISPLAYTIMEOUT_CONFIG_IRQ) && !defined(CONFIG_USE_EXTI10_15_IRQHandler)
     DEBUG_ENTRY();
 
@@ -73,3 +75,4 @@ void irq_init()
 #endif
 }
 } // namespace display::timeout
+#endif // defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)

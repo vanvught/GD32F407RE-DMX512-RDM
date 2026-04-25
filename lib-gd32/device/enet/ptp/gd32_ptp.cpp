@@ -28,8 +28,8 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "gd32.h" // IWYU pragma: keep
 #include "gd32_ptp.h"
-#include "gd32.h"
 #include "firmware/debug/debug_debug.h"
 
 void Error(const char*);
@@ -42,24 +42,20 @@ void Error(const char*);
 #define enet_ptp_timestamp_addend_config(x) enet_ptp_timestamp_addend_config(ENETx, x)
 #define enet_ptp_timestamp_update_config(x, y, z) enet_ptp_timestamp_update_config(ENETx, x, y, z)
 #define enet_ptp_system_time_get(x) enet_ptp_system_time_get(ENETx, x)
-static FlagStatus EnetPtpflagstatusGet(uint32_t flag)
-{
+static FlagStatus EnetPtpflagstatusGet(uint32_t flag) {
     FlagStatus bitstatus = RESET;
 
-    if (0 != (ENET_PTP_TSCTL(ENETx) & flag))
-    {
+    if (0 != (ENET_PTP_TSCTL(ENETx) & flag)) {
         bitstatus = SET;
     }
 
     return bitstatus;
 }
 #else
-static FlagStatus EnetPtpflagstatusGet(uint32_t flag)
-{
+static FlagStatus EnetPtpflagstatusGet(uint32_t flag) {
     FlagStatus bitstatus = RESET;
 
-    if (0 != (ENET_PTP_TSCTL & flag))
-    {
+    if (0 != (ENET_PTP_TSCTL & flag)) {
         bitstatus = SET;
     }
 
@@ -67,8 +63,7 @@ static FlagStatus EnetPtpflagstatusGet(uint32_t flag)
 }
 #endif
 
-static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] uint32_t carry_cfg, uint32_t accuracy_cfg)
-{
+static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] uint32_t carry_cfg, uint32_t accuracy_cfg) {
     DEBUG_ENTRY();
 
     enet_interrupt_disable(ENET_MAC_INT_TMSTIM);
@@ -94,8 +89,7 @@ static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] u
     DEBUG_EXIT();
 }
 
-void gd32_ptp_start()
-{
+void gd32_ptp_start() {
     DEBUG_ENTRY();
     DEBUG_PRINTF("PTP_TICK=%u", gd32::ptp::PTP_TICK);
     DEBUG_PRINTF("ADJ_FREQ_BASE_INCREMENT=%u", gd32::ptp::ADJ_FREQ_BASE_INCREMENT);
@@ -119,8 +113,7 @@ void gd32_ptp_start()
     DEBUG_EXIT();
 }
 
-void gd32_ptp_get_time(gd32::ptp::ptptime* ptp_time)
-{
+void gd32_ptp_get_time(gd32::ptp::ptptime* ptp_time) {
     enet_ptp_systime_struct systime;
 
     enet_ptp_system_time_get(&systime);
@@ -133,8 +126,7 @@ void gd32_ptp_get_time(gd32::ptp::ptptime* ptp_time)
 #endif
 }
 
-void gd32_ptp_set_time(const gd32::ptp::ptptime* ptp_time)
-{
+void gd32_ptp_set_time(const gd32::ptp::ptptime* ptp_time) {
     const auto kSign = ENET_PTP_ADD_TO_TIME;
     const auto kSecond = ptp_time->tv_sec;
     const auto kNanoSecond = ptp_time->tv_nsec;
@@ -145,20 +137,16 @@ void gd32_ptp_set_time(const gd32::ptp::ptptime* ptp_time)
     while (EnetPtpflagstatusGet(ENET_PTP_SYSTIME_INIT) == SET);
 }
 
-void gd32_ptp_update_time(const gd32::ptp::time_t* time)
-{
+void gd32_ptp_update_time(const gd32::ptp::time_t* time) {
     uint32_t sign;
     uint32_t second;
     uint32_t nano_second;
 
-    if (time->tv_sec < 0 || (time->tv_sec == 0 && time->tv_nsec < 0))
-    {
+    if (time->tv_sec < 0 || (time->tv_sec == 0 && time->tv_nsec < 0)) {
         sign = ENET_PTP_SUBSTRACT_FROM_TIME;
         second = -time->tv_sec;
         nano_second = -time->tv_nsec;
-    }
-    else
-    {
+    } else {
         sign = ENET_PTP_ADD_TO_TIME;
         second = time->tv_sec;
         nano_second = time->tv_nsec;
@@ -179,16 +167,14 @@ void gd32_ptp_update_time(const gd32::ptp::time_t* time)
     enet_ptp_timestamp_function_config(ENET_PTP_ADDEND_UPDATE);
 }
 
-bool gd32_adj_frequency(int32_t adjust_ppb)
-{
+bool gd32_adj_frequency(int32_t adjust_ppb) {
     const uint32_t kAddend = gd32::ptp::ADJ_FREQ_BASE_ADDEND + static_cast<int32_t>((((static_cast<int64_t>(gd32::ptp::ADJ_FREQ_BASE_ADDEND)) * adjust_ppb) / 1000000000ULL));
 
     enet_ptp_timestamp_addend_config(kAddend);
 
     const auto kReval = enet_ptp_timestamp_function_config(ENET_PTP_ADDEND_UPDATE);
 
-    if (kReval == ERROR)
-    {
+    if (kReval == ERROR) {
         Error("enet_ptp_timestamp_addend_config\n");
     }
 

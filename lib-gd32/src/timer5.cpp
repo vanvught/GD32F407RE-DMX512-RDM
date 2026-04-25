@@ -2,7 +2,7 @@
  * @file timer5.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,9 @@
  * THE SOFTWARE.
  */
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
-void Timer5Config()
-{
+void Timer5Config() {
     rcu_periph_clock_enable(RCU_TIMER5);
 
     timer_deinit(TIMER5);

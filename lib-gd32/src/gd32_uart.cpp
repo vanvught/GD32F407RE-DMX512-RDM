@@ -26,16 +26,14 @@
 #include <cstdint>
 #include <cassert>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 #include "gd32_uart.h"
 
-static void RcuConfig(uint32_t usart_periph)
-{
+static void RcuConfig(uint32_t usart_periph) {
 #ifndef NDEBUG
     bool is_set = false;
 #endif
-    switch (usart_periph)
-    {
+    switch (usart_periph) {
         case USART0:
             rcu_periph_clock_enable(USART0_RCU_USART0);
             rcu_periph_clock_enable(USART0_RCU_GPIOx);
@@ -109,12 +107,10 @@ static void RcuConfig(uint32_t usart_periph)
 }
 
 #if !(defined(GD32F4XX) || defined(GD32H7XX))
-static void GpioConfig(uint32_t usart_periph)
-{
+static void GpioConfig(uint32_t usart_periph) {
     rcu_periph_clock_enable(RCU_AF);
 
-    switch (usart_periph)
-    {
+    switch (usart_periph) {
         case USART0:
             gpio_init(USART0_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART0_TX_GPIO_PINx);
             gpio_init(USART0_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART0_RX_GPIO_PINx);
@@ -181,10 +177,8 @@ static void GpioConfig(uint32_t usart_periph)
     }
 }
 #else
-static void GpioConfig(uint32_t usart_periph)
-{
-    switch (usart_periph)
-    {
+static void GpioConfig(uint32_t usart_periph) {
+    switch (usart_periph) {
         case USART0:
             gpio_af_set(USART0_GPIOx, USART0_GPIO_AFx, USART0_TX_GPIO_PINx);
             gpio_mode_set(USART0_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, USART0_TX_GPIO_PINx);
@@ -264,8 +258,7 @@ static void GpioConfig(uint32_t usart_periph)
 }
 #endif
 
-void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits)
-{
+void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits) {
     RcuConfig(usart_periph);
     GpioConfig(usart_periph);
 
@@ -277,8 +270,7 @@ void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint
     usart_word_length_set(usart_periph, bits == gd32::kUartBits9 ? USART_WL_9BIT : USART_WL_8BIT);
     usart_stop_bit_set(usart_periph, stop_bits == gd32::kUartStop2Bits ? USART_STB_2BIT : USART_STB_1BIT);
 
-    switch (parity)
-    {
+    switch (parity) {
         case gd32::kUartParityEven:
             usart_parity_config(usart_periph, USART_PM_EVEN);
             break;
@@ -299,8 +291,7 @@ void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint
     USART_CTL0(usart_periph) |= USART_CTL0_UEN;
 }
 
-void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate)
-{
+void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate) {
     assert(baudrate != 0);
 
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
@@ -310,15 +301,12 @@ void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate)
     USART_CTL0(usart_periph) |= USART_CTL0_UEN;
 }
 
-void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length)
-{
-    if (data == nullptr) [[unlikely]]
-    {
+void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length) {
+    if (data == nullptr) [[unlikely]] {
         return;
     }
 
-    while (length-- != 0)
-    {
+    while (length-- != 0) {
         while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE));
 #if defined(GD32H7XX)
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & (uint32_t)*data++;
@@ -328,15 +316,12 @@ void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t lengt
     }
 }
 
-void Gd32UartTransmitString(uint32_t usart_periph, const char* data)
-{
-    if (data == nullptr) [[unlikely]]
-    {
+void Gd32UartTransmitString(uint32_t usart_periph, const char* data) {
+    if (data == nullptr) [[unlikely]] {
         return;
     }
 
-    while (*data != '\0')
-    {
+    while (*data != '\0') {
         while (RESET == usart_flag_get(USART0, USART_FLAG_TBE));
 #if defined(GD32H7XX)
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & (uint32_t)*data++;
