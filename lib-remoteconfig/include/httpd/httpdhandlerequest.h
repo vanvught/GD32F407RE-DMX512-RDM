@@ -29,7 +29,7 @@
 #include <cstdint>
 
 #include "http/http.h"
-#include "core/protocol/tcp.h"
+#include "core/protocol/tcp.h" // IWYU pragma: keep
 #include "network_tcp.h"
 #include "firmware/debug/debug_debug.h"
 
@@ -46,16 +46,16 @@ static constexpr uint32_t kBufsize =
 class HttpDeamonHandleRequest
 {
    public:
-    HttpDeamonHandleRequest() : connection_handle_(network::tcp::kInvalidConnHandle)
-    {
-        DEBUG_ENTRY();
-        DEBUG_EXIT();
-    }
-
     explicit HttpDeamonHandleRequest(network::tcp::ConnHandle connection_handle) : connection_handle_(connection_handle)
     {
         DEBUG_ENTRY();
         DEBUG_PRINTF("[%u] connection_handle=%u", httpd::kBufsize, connection_handle);
+        DEBUG_EXIT();
+    }
+
+    HttpDeamonHandleRequest() : connection_handle_(network::tcp::kInvalidConnHandle)
+    {
+        DEBUG_ENTRY();
         DEBUG_EXIT();
     }
 

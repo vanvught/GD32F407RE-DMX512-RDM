@@ -1,7 +1,8 @@
 /**
- * @file json_config_getdirectory.cpp
+ * @file utils_string.h
+ *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +23,22 @@
  * THE SOFTWARE.
  */
 
-#include <cstddef>
+#ifndef COMMON_UTILS_UTILS_STRING_H_
+#define COMMON_UTILS_UTILS_STRING_H_
+
 #include <cstdint>
-#include <cstdio>
 
-#include "http/json_infos.h"
-
-namespace json::config
+namespace common
 {
-uint32_t GetDirectory(char* out_buffer, uint32_t out_buffer_size)
+constexpr uint32_t ConstStrLen(const char* s)
 {
-    uint32_t total = 0;
-
-    total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "{\"files\":{"));
-
-    for (size_t i = 0; i < kFileInfosSize; ++i)
+    uint32_t len = 0;
+    while (s[len] != '\0')
     {
-        const auto& entry = kFileInfos[i];
-        if ((entry.label != nullptr) && (entry.label[0] != '\0'))
-        {
-            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "\"%s\":\"%s\"%s", entry.name, entry.label, (i + 1 < kFileInfosSize) ? "," : ""));
-        }
+        ++len;
     }
-
-    if (out_buffer[total - 1] == ',')
-    {
-        out_buffer[total - 1] = '}';
-    }
-    else
-    {
-        out_buffer[total++] = '}';
-    }
-
-    out_buffer[total++] = '}';
-    return total;
+    return len;
 }
-} // namespace json::config
+} // namespace common
+
+#endif // COMMON_UTILS_UTILS_STRING_H_

@@ -1,7 +1,7 @@
 /**
- * @file json_status_identify.cpp
+ * @file json_status_directory.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +22,32 @@
  * THE SOFTWARE.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 
-#include "hal_statusled.h"
+#include "http/json_infos.h"
 
 namespace json::status {
-uint32_t Identify(char* out_buffer, uint32_t out_buffer_size) {
-    const bool kIsOn = hal::statusled::GetMode() == hal::statusled::Mode::FAST;
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"identify\":%d}", 
-		kIsOn));
-    return kLength;
+uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
+    uint32_t total = 0;
+
+    total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "{\"files\":{"));
+
+    for (size_t i = 0; i < kFileInfosSize; ++i) {
+        const auto& entry = kFileInfos[i];
+        if ((entry.status_label != nullptr) && (entry.status_label[0] != '\0')) {
+            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "\"%s\":\"%s\"%s", entry.name, entry.status_label, (i + 1 < kFileInfosSize) ? "," : ""));
+        }
+    }
+
+    if (out_buffer[total - 1] == ',') {
+        out_buffer[total - 1] = '}';
+    } else {
+        out_buffer[total++] = '}';
+    }
+
+    out_buffer[total++] = '}';
+    return total;
 }
 } // namespace json::status
