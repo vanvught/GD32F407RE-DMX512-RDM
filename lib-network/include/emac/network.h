@@ -32,7 +32,7 @@
 
 #include <cstdint>
 
-#include "../src/core/net_private.h"
+#include "../src/core/network_private.h"
 #include "network_config.h" // IWYU pragma: keep
 #include "network_iface.h"
 #include "network_udp.h"  // IWYU pragma: keep
@@ -40,39 +40,33 @@
 #if defined(ENABLE_HTTPD)
 #include "network_tcp.h" // IWYU pragma: keep
 #endif
-#include "emac/phy.h"
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL) || defined(ENET_LINK_CHECK_REG_POLL)
-#include "emac/net_link_check.h"
+#include "emac/emac_link_check.h"
 #endif
+#include "emac/emac_phy.h"
 
-uint32_t emac_eth_recv(uint8_t**);
+uint32_t emac::eth::Recv(uint8_t**);
 
-namespace network
-{
-namespace global
-{
-extern net::phy::Link link_state;
+namespace network {
+namespace global {
+extern emac::phy::Link link_state;
 }
 void Init();
 
 #if defined(CONFIG_NET_ENABLE_PTP)
-namespace ptp
-{
+namespace ptp {
 void Run();
 }
 #endif
 
-inline void Run()
-{
+inline void Run() {
     uint8_t* ethernet_buffer;
-    auto length = emac_eth_recv(&ethernet_buffer);
+    auto length = emac::eth::Recv(&ethernet_buffer);
 
-    if (__builtin_expect((length > 0), 0))
-    {
-        do
-        {
+    if (__builtin_expect((length > 0), 0)) {
+        do {
             network::iface::EthernetInput(ethernet_buffer, length);
-            length = emac_eth_recv(&ethernet_buffer);
+            length = emac::eth::Recv(&ethernet_buffer);
         } while (length > 0);
     }
 #if defined(ENABLE_HTTPD)
@@ -82,13 +76,12 @@ inline void Run()
     network::ptp::Run();
 #endif
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL)
-    net::link::PinPoll();
+    emac::link::PinPoll();
 #elif defined(ENET_LINK_CHECK_REG_POLL)
-    const net::phy::Link link_state = net::link::StatusRead();
-    if (link_state != global::link_state)
-    {
+    const emac::phy::Link link_state = emac::link::StatusRead();
+    if (link_state != global::link_state) {
         global::link_state = link_state;
-        net::link::HandleChange(link_state);
+        emac::link::HandleChange(link_state);
     }
 #endif
 }

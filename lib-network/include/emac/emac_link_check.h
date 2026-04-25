@@ -1,8 +1,8 @@
 /**
- * JsonGetPhystatus.cpp
+ * @file emac_link_check.h
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,27 @@
  * THE SOFTWARE.
  */
 
-#include <cstdio>
+#ifndef EMAC_NET_LINK_CHECK_H_
+#define EMAC_NET_LINK_CHECK_H_
 
-#include "emac/phy.h"
+#include "emac_phy.h"
 
-namespace remoteconfig::net
-{
-uint32_t JsonGetPhystatus(char* out_buffer, uint32_t out_buffer_size)
-{
-    ::net::phy::Status phy_status;
-    ::net::phy::CustomizedStatus(phy_status);
+namespace emac::link {
+emac::phy::Link StatusRead();
+void HandleChange(emac::phy::Link state);
+// Platform defined implementations
+// #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
+void GpioInit();
+void PinEnable();
+void PinRecovery();
+// #endif
+// #if defined(ENET_LINK_CHECK_USE_INT)
+void ExtiInit();
+void InterruptInit();
+// #elif defined(ENET_LINK_CHECK_USE_PIN_POLL)
+void PinPollInit();
+void PinPoll();
+// #endif
+} // namespace emac::link
 
-    const auto kLength = static_cast<uint32_t>(snprintf(
-        out_buffer, out_buffer_size, "{\"link\":\"%s\",\"speed\":\"%s\",\"duplex\":\"%s\",\"autonegotiation\":\"%s\"}", ::net::phy::ToString(phy_status.link),
-        ::net::phy::ToString(phy_status.speed), ::net::phy::ToString(phy_status.duplex), ::net::phy::ToStringAutonegotiation(phy_status.autonegotiation)));
-    return kLength;
-}
-} // namespace remoteconfig::net
+#endif // EMAC_NET_LINK_CHECK_H_

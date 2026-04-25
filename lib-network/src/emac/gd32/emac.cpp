@@ -2,7 +2,7 @@
  * emac.cpp
  *
  */
-/* Copyright (C) 2021-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,24 +29,25 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 
-#include "gd32.h"
-#include "emac/phy.h"
+#include "emac_counters.h"
+#include "emac/emac_phy.h"
 #if defined(CONFIG_NET_ENABLE_PTP)
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
 #endif
 #endif
 #include "firmware/debug/debug_debug.h"
+#include "gd32.h" // IWYU pragma: keep
 
-namespace console
-{
+namespace console {
 void Error(const char*);
 }
 
 extern void EnetGpioConfig();
 extern enet_descriptors_struct txdesc_tab[ENET_TXBUF_NUM];
-extern void mac_address_get(uint8_t paddr[]);
+extern void MacAddress(uint8_t paddr[]);
 
 #if defined(CONFIG_NET_ENABLE_PTP)
 #include "gd32_ptp.h"
@@ -54,13 +55,16 @@ enet_descriptors_struct ptp_rxdesc_tab[ENET_RXBUF_NUM] __attribute__((aligned(4)
 enet_descriptors_struct ptp_txdesc_tab[ENET_TXBUF_NUM] __attribute__((aligned(4)));
 #endif
 
+namespace emac::eth::globals {
+extern uint32_t sent;
+extern uint32_t received;
+} // namespace emac::eth::globals
+
 /*
  * Public function
  */
-namespace net::emac
-{
-void __attribute__((cold)) Config()
-{
+namespace emac {
+void __attribute__((cold)) Config() {
     DEBUG_ENTRY();
 #if (PHY_TYPE == LAN8700)
     puts("LAN8700");
@@ -81,19 +85,17 @@ void __attribute__((cold)) Config()
     enet_deinit(ENETx);
     enet_software_reset(ENETx);
 
-    if (!net::phy::Config(PHY_ADDRESS))
-    {
-        console::Error("net::phy::Config(PHY_ADDRESS)\n");
+    if (!emac::phy::Config(PHY_ADDRESS)) {
+        console::Error("emac::phy::Config(PHY_ADDRESS)\n");
     }
 
     DEBUG_EXIT();
 }
 
-void AdjustLink(net::phy::Status phy_status)
-{
+void AdjustLink(emac::phy::Status phy_status) {
     DEBUG_ENTRY();
 
-    printf("Link %s, %d, %s\n", phy_status.link == net::phy::Link::kStateUp ? "Up" : "Down", phy_status.speed == net::phy::Speed::kSpeed10 ? 10 : 100, phy_status.duplex == net::phy::Duplex::kDuplexHalf ? "HALF" : "FULL");
+    printf("Link %s, %d, %s\n", phy_status.link == emac::phy::Link::kStateUp ? "Up" : "Down", phy_status.speed == emac::phy::Speed::kSpeed10 ? 10 : 100, phy_status.duplex == emac::phy::Duplex::kDuplexHalf ? "HALF" : "FULL");
 
 #ifndef NDEBUG
     {
@@ -117,19 +119,13 @@ void AdjustLink(net::phy::Status phy_status)
 
     enet_mediamode_enum mediamode = ENET_10M_HALFDUPLEX;
 
-    if (phy_status.speed == net::phy::Speed::kSpeed100)
-    {
-        if (phy_status.duplex == net::phy::Duplex::kDuplexFull)
-        {
+    if (phy_status.speed == emac::phy::Speed::kSpeed100) {
+        if (phy_status.duplex == emac::phy::Duplex::kDuplexFull) {
             mediamode = ENET_100M_FULLDUPLEX;
-        }
-        else
-        {
+        } else {
             mediamode = ENET_100M_HALFDUPLEX;
         }
-    }
-    else if (phy_status.duplex == net::phy::Duplex::kDuplexFull)
-    {
+    } else if (phy_status.duplex == emac::phy::Duplex::kDuplexFull) {
         mediamode = ENET_10M_FULLDUPLEX;
     }
 
@@ -139,8 +135,7 @@ void AdjustLink(net::phy::Status phy_status)
     const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
 #endif
 
-    if (kEnetInitStatus != SUCCESS)
-    {
+    if (kEnetInitStatus != SUCCESS) {
     }
 
     DEBUG_PRINTF("kEnetInitStatus=%s", kEnetInitStatus == SUCCESS ? "SUCCES" : "ERROR");
@@ -167,19 +162,18 @@ void AdjustLink(net::phy::Status phy_status)
     DEBUG_EXIT();
 }
 
-void __attribute__((cold)) Start(uint8_t mac_address[], net::phy::Link& link)
-{
+void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("ENET_RXBUF_NUM=%u, ENET_TXBUF_NUM=%u", ENET_RXBUF_NUM, ENET_TXBUF_NUM);
 
-    net::phy::Status phy_status;
-    net::phy::Start(PHY_ADDRESS, phy_status);
+    emac::phy::Status phy_status;
+    emac::phy::Start(PHY_ADDRESS, phy_status);
 
     link = phy_status.link;
 
     AdjustLink(phy_status);
 
-    mac_address_get(mac_address);
+    MacAddress(mac_address);
 
 #if defined(GD32H7XX)
     enet_mac_address_set(ENETx, ENET_MAC_ADDRESS0, mac_address);
@@ -201,8 +195,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], net::phy::Link& link)
 #endif
 #endif
 
-    for (uint32_t i = 0; i < ENET_TXBUF_NUM; i++)
-    {
+    for (uint32_t i = 0; i < ENET_TXBUF_NUM; i++) {
         enet_transmit_checksum_config(&txdesc_tab[i], ENET_CHECKSUM_TCPUDPICMP_FULL);
     }
 
@@ -215,7 +208,9 @@ void __attribute__((cold)) Start(uint8_t mac_address[], net::phy::Link& link)
 #endif
 
     enet_enable(ENETx);
-
+    
+    memset(&emac::eth::globals::counter, 0, sizeof(emac::eth::globals::Counters));
+    
     DEBUG_EXIT();
 }
-} // namespace net::emac
+} // namespace emac

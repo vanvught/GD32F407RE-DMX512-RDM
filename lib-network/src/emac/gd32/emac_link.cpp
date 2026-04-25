@@ -22,28 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
-#include <cstdint>
 
-#include "emac/phy.h"
-#include "emac/net_link_check.h"
-#include "gd32.h"
+#include "emac/emac_phy.h"
+#include "emac/emac_link_check.h"
+#include "gd32.h" // IWYU pragma: keep
 #include "enet_config.h"
-#include "firmware/debug/debug_debug.h"
 
-namespace net::link
-{
+namespace emac::link {
 #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void GpioInit()
-{
+void GpioInit() {
     rcu_periph_clock_enable(LINK_CHECK_GPIO_CLK);
     LINK_CHECK_GPIO_CONFIG;
 }
 #endif
 
 #if defined(ENET_LINK_CHECK_USE_INT)
-void ExtiInit()
-{
+void ExtiInit() {
     rcu_periph_clock_enable(LINK_CHECK_EXTI_CLK);
 
     NVIC_SetPriority(LINK_CHECK_EXTI_IRQn, 7);
@@ -57,29 +51,24 @@ void ExtiInit()
 #endif
 
 #if defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void PinPoll()
-{
-    if (RESET == gpio_input_bit_get(LINK_CHECK_GPIO_PORT, LINK_CHECK_GPIO_PIN))
-    {
+void PinPoll() {
+    if (RESET == gpio_input_bit_get(LINK_CHECK_GPIO_PORT, LINK_CHECK_GPIO_PIN)) {
         PinRecovery();
         HandleChange(StatusRead());
     }
 }
 #endif
 
-} // namespace net::link
+} // namespace emac::link
 
 #if defined(ENET_LINK_CHECK_USE_INT)
-extern "C"
-{
-    void LINK_CHECK_IRQ_HANDLE()
-    {
-        if (RESET != exti_interrupt_flag_get(LINK_CHECK_EXTI_LINE))
-        {
-            exti_interrupt_flag_clear(LINK_CHECK_EXTI_LINE);
-            net::link::PinRecovery();
-            net::link::HandleChange(net::link::StatusRead());
-        }
+extern "C" {
+void LINK_CHECK_IRQ_HANDLE() {
+    if (RESET != exti_interrupt_flag_get(LINK_CHECK_EXTI_LINE)) {
+        exti_interrupt_flag_clear(LINK_CHECK_EXTI_LINE);
+        emac::link::PinRecovery();
+        emac::link::HandleChange(emac::link::StatusRead());
     }
+}
 }
 #endif

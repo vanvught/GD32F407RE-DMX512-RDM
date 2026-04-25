@@ -8,7 +8,7 @@
  * @note This implementation is optimized for Cortex-M3/M4/M7 processors and assumes a standalone environment
  *       without a standard library.
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,18 +62,20 @@ T4 - local receive timestamp of the previous response (t4)
 #endif
 
 #pragma GCC push_options
-#pragma GCC optimize("O2")
+#pragma GCC optimize("O3")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
 
 #include <cstdint>
+#include <cstring>
+#include <sys/time.h>
+#ifndef NDEBUG
 #include <cstdlib>
 #include <cstdio>
-#include <cstring>
 #include <ctime>
-#include <sys/time.h>
+#endif
 
 #include "configstore.h"
-#include "network.h"
+#include "network_udp.h"
 #include "core/protocol/iana.h"
 #include "core/protocol/ntp.h"
 #include "apps/ntpclient.h"
@@ -81,23 +83,18 @@ T4 - local receive timestamp of the previous response (t4)
 #include "softwaretimers.h"
 #include "firmware/debug/debug_debug.h"
 
-namespace net::globals
-{
-extern uint32_t ptpTimestamp[2];
+namespace net::globals::ptp {
+extern uint32_t timestamp[2];
 } // namespace net::globals
 
 #define _NTPFRAC_(x) (4294U * static_cast<uint32_t>(x) + ((1981U * static_cast<uint32_t>(x)) >> 11) + ((2911U * static_cast<uint32_t>(x)) >> 28))
 #define NTPFRAC(x) _NTPFRAC_(x / 1000)
-
-/**
- * The reverse of the above, needed if we want to set our microsecond
- * clock (via clock_settime) based on the incoming time in NTP format.
- * Basically exact.
- */
+// The reverse of the above, needed if we want to set our microsecond
+// clock (via clock_settime) based on the incoming time in NTP format.
+// Basically exact.
 #define USEC(x) (((x) >> 12) - 759 * ((((x) >> 10) + 32768) >> 16))
 
-struct NtpClient
-{
+struct NtpClient {
     uint32_t server_ip;
     int32_t handle;
     TimerHandle_t timer_id;
@@ -112,8 +109,7 @@ struct NtpClient
     ntp::TimeStamp t3; // time reply sent by server
     ntp::TimeStamp t4; // time reply received by client
     ntp::TimeStamp cookie_basic;
-    struct
-    {
+    struct {
         ntp::TimeStamp previous_receive;
         ntp::TimeStamp dst; // destination timestamp
         ntp::TimeStamp sent_a;
@@ -130,38 +126,33 @@ static NtpClient s_ntp_client;
 static uint16_t s_id;
 static constexpr uint16_t kRequestSize = sizeof s_ntp_client.request;
 
-static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const struct ntp::TimeStamp* pNtpTime)
-{
+static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const struct ntp::TimeStamp* timestamp) {
 #ifndef NDEBUG
-    const auto kSeconds = static_cast<time_t>(pNtpTime->seconds - ntp::kJan1970);
+    const auto kSeconds = static_cast<time_t>(timestamp->seconds - ntp::kJan1970);
     const auto* local_time = localtime(&kSeconds);
-    printf("%s %02d:%02d:%02d.%06d %04d [%u][0x%.8x]\n", text, local_time->tm_hour, local_time->tm_min, local_time->tm_sec, USEC(pNtpTime->fraction), local_time->tm_year + 1900, pNtpTime->seconds, pNtpTime->fraction);
+    printf("%s %02d:%02d:%02d.%06d %04d [%u][0x%.8x]\n", text, local_time->tm_hour, local_time->tm_min, local_time->tm_sec, USEC(timestamp->fraction), local_time->tm_year + 1900, timestamp->seconds, timestamp->fraction);
 #endif
 }
 
 static void Process();
 
-static void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port)
-{
+static void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
     DEBUG_ENTRY();
 
     // Invalid packet size
-    if (__builtin_expect((size != sizeof(struct ntp::Packet)), 1))
-    {
+    if (__builtin_expect((size != sizeof(struct ntp::Packet)), 1)) {
         DEBUG_EXIT();
         return;
     }
 
     // Not for us
-    if (__builtin_expect((from_ip != s_ntp_client.server_ip), 0))
-    {
+    if (__builtin_expect((from_ip != s_ntp_client.server_ip), 0)) {
         DEBUG_EXIT();
         return;
     }
 
     // Ignore duplicates
-    if (s_ntp_client.state.missed_responses == 0)
-    {
+    if (s_ntp_client.state.missed_responses == 0) {
         DEBUG_EXIT();
         return;
     }
@@ -175,21 +166,17 @@ static void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[mayb
 
 static void Send();
 
-static void PtpNtpTimer([[maybe_unused]] TimerHandle_t handle)
-{
+static void PtpNtpTimer([[maybe_unused]] TimerHandle_t handle) {
     assert(s_ntp_client.status != ntp::Status::kStopped);
     assert(s_ntp_client.status != ntp::Status::kDisabled);
 
-    if (s_ntp_client.status == ntp::Status::kWaiting)
-    {
-        if (s_ntp_client.request_timeout_seconds > 1)
-        {
+    if (s_ntp_client.status == ntp::Status::kWaiting) {
+        if (s_ntp_client.request_timeout_seconds > 1) {
             s_ntp_client.request_timeout_seconds--;
             return;
         }
 
-        if (s_ntp_client.request_timeout_seconds == 1)
-        {
+        if (s_ntp_client.request_timeout_seconds == 1) {
             s_ntp_client.status = ntp::Status::kFailed;
             network::apps::ntpclient::DisplayStatus(ntp::Status::kFailed);
             s_ntp_client.poll_seconds = network::apps::ntpclient::kPollSecondsMin;
@@ -198,35 +185,25 @@ static void PtpNtpTimer([[maybe_unused]] TimerHandle_t handle)
         return;
     }
 
-    if (s_ntp_client.poll_seconds > 1)
-    {
+    if (s_ntp_client.poll_seconds > 1) {
         s_ntp_client.poll_seconds--;
         return;
     }
 
-    if (s_ntp_client.poll_seconds == 1)
-    {
+    if (s_ntp_client.poll_seconds == 1) {
         Send();
     }
 }
 
-/**
- * The interleaved client/server mode is similar to the basic client/ server mode.
- * The difference between the two modes is in the values saved to the origin and transmit timestamp fields.
- */
-
-static void Send()
-{
+// The interleaved client/server mode is similar to the basic client/ server mode.
+// The difference between the two modes is in the values saved to the origin and transmit timestamp fields.
+static void Send() {
     s_ntp_client.state.missed_responses++;
-
-    /**
-     * The first request from a client is always in the basic mode and so is the server response.
-     * It has a zero origin timestamp and zero receive timestamp.
-     * Only when the client receives a valid response from the server,
-     * it will be able to send a request in the interleaved mode
-     */
-    if (s_ntp_client.state.missed_responses > 4)
-    {
+    // The first request from a client is always in the basic mode and so is the server response.
+    // It has a zero origin timestamp and zero receive timestamp.
+    // Only when the client receives a valid response from the server,
+    // it will be able to send a request in the interleaved mode
+    if (s_ntp_client.state.missed_responses > 4) {
         s_ntp_client.cookie_basic.seconds = random();
         s_ntp_client.cookie_basic.fraction = 0;
 
@@ -235,33 +212,23 @@ static void Send()
 
         s_ntp_client.request.receive_timestamp_s = 0;
         s_ntp_client.request.receive_timestamp_f = 0;
-
-        /**
-         * The origin timestamp is a cookie which is used to detect that a received packet
-         * is a response to the last packet sent in the other direction of the association.
-         */
+        // The origin timestamp is a cookie which is used to detect that a received packet
+        // is a response to the last packet sent in the other direction of the association.
         s_ntp_client.request.transmit_timestamp_s = __builtin_bswap32(s_ntp_client.cookie_basic.seconds);
         s_ntp_client.request.transmit_timestamp_f = __builtin_bswap32(s_ntp_client.cookie_basic.fraction);
-    }
-    else
-    {
-        /**
-         * A client request in the interleaved mode has an origin timestamp equal to
-         *  the receive timestamp from the last valid server response.
-         */
+    } else {
+        // A client request in the interleaved mode has an origin timestamp equal to
+        // the receive timestamp from the last valid server response.
         s_ntp_client.request.origin_timestamp_s = __builtin_bswap32(s_ntp_client.state.dst.seconds);
         s_ntp_client.request.origin_timestamp_f = __builtin_bswap32(s_ntp_client.state.dst.fraction);
 
         s_ntp_client.request.receive_timestamp_s = __builtin_bswap32(s_ntp_client.state.previous_receive.seconds);
         s_ntp_client.request.receive_timestamp_f = __builtin_bswap32(s_ntp_client.state.previous_receive.fraction);
 
-        if (s_ntp_client.state.x > 0)
-        {
+        if (s_ntp_client.state.x > 0) {
             s_ntp_client.request.transmit_timestamp_s = __builtin_bswap32(s_ntp_client.state.sent_b.seconds);
             s_ntp_client.request.transmit_timestamp_f = __builtin_bswap32(s_ntp_client.state.sent_b.fraction);
-        }
-        else
-        {
+        } else {
             s_ntp_client.request.transmit_timestamp_s = __builtin_bswap32(s_ntp_client.state.sent_a.seconds);
             s_ntp_client.request.transmit_timestamp_f = __builtin_bswap32(s_ntp_client.state.sent_a.fraction);
         }
@@ -275,15 +242,12 @@ static void Send()
            __builtin_bswap32(s_ntp_client.request.transmit_timestamp_f));
 #endif
 
-    if (s_ntp_client.state.x > 0)
-    {
-        s_ntp_client.state.sent_a.seconds = net::globals::ptpTimestamp[1] + ntp::kJan1970;
-        s_ntp_client.state.sent_a.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptpTimestamp[0]));
-    }
-    else
-    {
-        s_ntp_client.state.sent_b.seconds = net::globals::ptpTimestamp[1] + ntp::kJan1970;
-        s_ntp_client.state.sent_b.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptpTimestamp[0]));
+    if (s_ntp_client.state.x > 0) {
+        s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
+        s_ntp_client.state.sent_a.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
+    } else {
+        s_ntp_client.state.sent_b.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
+        s_ntp_client.state.sent_b.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
     }
 
     s_ntp_client.state.x = -s_ntp_client.state.x;
@@ -294,8 +258,7 @@ static void Send()
     network::apps::ntpclient::DisplayStatus(ntp::Status::kWaiting);
 }
 
-static void Difference(const ntp::TimeStamp& start, const ntp::TimeStamp& stop, int32_t& diff_seconds, int32_t& diff_nano_seconds)
-{
+static void Difference(const ntp::TimeStamp& start, const ntp::TimeStamp& stop, int32_t& diff_seconds, int32_t& diff_nano_seconds) {
     gd32::ptp::time_t r;
     const gd32::ptp::time_t kX = {.tv_sec = static_cast<int32_t>(stop.seconds), .tv_nsec = static_cast<int32_t>(USEC(stop.fraction) * 1000)};
     const gd32::ptp::time_t kY = {.tv_sec = static_cast<int32_t>(start.seconds), .tv_nsec = static_cast<int32_t>(USEC(start.fraction) * 1000)};
@@ -305,13 +268,11 @@ static void Difference(const ntp::TimeStamp& start, const ntp::TimeStamp& stop, 
     diff_nano_seconds = r.tv_nsec;
 }
 
-static inline int32_t AbsInt32(int32_t x)
-{
+static inline int32_t AbsInt32(int32_t x) {
     return (x < 0) ? -x : x;
 }
 
-static void UpdatePtpTime()
-{
+static void UpdatePtpTime() {
     int32_t diff_seconds1, diff_nano_seconds1;
     Difference(s_ntp_client.t1, s_ntp_client.t2, diff_seconds1, diff_nano_seconds1);
 
@@ -334,17 +295,13 @@ static void UpdatePtpTime()
     s_ntp_client.request.reference_timestamp_s = __builtin_bswap32(static_cast<uint32_t>(ptp_get.tv_sec) + ntp::kJan1970);
     s_ntp_client.request.reference_timestamp_f = __builtin_bswap32(NTPFRAC(ptp_get.tv_nsec));
 
-    if ((ptp_offset.tv_sec == 0) && (ptp_offset.tv_nsec > -999999) && (ptp_offset.tv_nsec < 999999))
-    {
+    if ((ptp_offset.tv_sec == 0) && (ptp_offset.tv_nsec > -999999) && (ptp_offset.tv_nsec < 999999)) {
         s_ntp_client.status = ntp::Status::kLocked;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kLocked);
-        if (++s_ntp_client.locked_count == 4)
-        {
+        if (++s_ntp_client.locked_count == 4) {
             s_ntp_client.poll_seconds = network::apps::ntpclient::kPollSecondsMax;
         }
-    }
-    else
-    {
+    } else {
         s_ntp_client.status = ntp::Status::kIdle;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kIdle);
         s_ntp_client.poll_seconds = network::apps::ntpclient::kPollSecondsMin;
@@ -358,13 +315,10 @@ static void UpdatePtpTime()
     gd32::ptp::time_t diff1;
     gd32::ptp::time_t diff2;
 
-    if (s_ntp_client.state.mode == ntp::Modes::kBasic)
-    {
+    if (s_ntp_client.state.mode == ntp::Modes::kBasic) {
         Difference(s_ntp_client.t1, s_ntp_client.t4, diff1.tv_sec, diff1.tv_nsec);
         Difference(s_ntp_client.t2, s_ntp_client.t3, diff2.tv_sec, diff2.tv_nsec);
-    }
-    else
-    {
+    } else {
         ntp::TimeStamp start;
         start.seconds = __builtin_bswap32(s_ntp_client.request.transmit_timestamp_s);
         start.fraction = __builtin_bswap32(s_ntp_client.request.transmit_timestamp_f);
@@ -386,14 +340,12 @@ static void UpdatePtpTime()
 
     char sign = '+';
 
-    if (ptp_offset.tv_sec < 0)
-    {
+    if (ptp_offset.tv_sec < 0) {
         ptp_offset.tv_sec = -ptp_offset.tv_sec;
         sign = '-';
     }
 
-    if (ptp_offset.tv_nsec < 0)
-    {
+    if (ptp_offset.tv_nsec < 0) {
         ptp_offset.tv_nsec = -ptp_offset.tv_nsec;
         sign = '-';
     }
@@ -414,50 +366,34 @@ static void UpdatePtpTime()
  *    If the origin timestamp is equal to the receive timestamp, the response is in the interleaved mode.
  */
 
-static void Process()
-{
+static void Process() {
     const auto* const kReply = s_ntp_client.reply;
 #ifndef NDEBUG
     printf("Response: org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n", __builtin_bswap32(kReply->origin_timestamp_s), __builtin_bswap32(kReply->origin_timestamp_f), __builtin_bswap32(kReply->receive_timestamp_s),
            __builtin_bswap32(kReply->receive_timestamp_f), __builtin_bswap32(kReply->transmit_timestamp_s), __builtin_bswap32(kReply->transmit_timestamp_f));
 #endif
-    /**
-     * If the origin timestamp is equal to the transmit timestamp,
-     * the response is in the basic mode.
-     */
-    if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f))
-    {
-        if (s_ntp_client.state.x < 0)
-        {
+    // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
+    if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {
+        if (s_ntp_client.state.x < 0) {
             s_ntp_client.t1.seconds = s_ntp_client.state.sent_a.seconds;
             s_ntp_client.t1.fraction = s_ntp_client.state.sent_a.fraction;
-        }
-        else
-        {
+        } else {
             s_ntp_client.t1.seconds = s_ntp_client.state.sent_b.seconds;
             s_ntp_client.t1.fraction = s_ntp_client.state.sent_b.fraction;
         }
 
-        s_ntp_client.t4.seconds = net::globals::ptpTimestamp[1] + ntp::kJan1970;
-        s_ntp_client.t4.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptpTimestamp[0]));
+        s_ntp_client.t4.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
+        s_ntp_client.t4.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
 #ifndef NDEBUG
         s_ntp_client.state.mode = ntp::Modes::kBasic;
 #endif
-    }
-    else
-        /**
-         * If the origin timestamp is equal to the receive timestamp,
-         * the response is in the interleaved mode.
-         */
-        if ((kReply->origin_timestamp_s == s_ntp_client.request.receive_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.receive_timestamp_f))
-        {
-            if (s_ntp_client.state.x > 0)
-            {
+    } else
+        // If the origin timestamp is equal to the receive timestamp, the response is in the interleaved mode.
+        if ((kReply->origin_timestamp_s == s_ntp_client.request.receive_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.receive_timestamp_f)) {
+            if (s_ntp_client.state.x > 0) {
                 s_ntp_client.t1.seconds = s_ntp_client.state.sent_b.seconds;
                 s_ntp_client.t1.fraction = s_ntp_client.state.sent_b.fraction;
-            }
-            else
-            {
+            } else {
                 s_ntp_client.t1.seconds = s_ntp_client.state.sent_a.seconds;
                 s_ntp_client.t1.fraction = s_ntp_client.state.sent_a.fraction;
             }
@@ -467,9 +403,7 @@ static void Process()
 #ifndef NDEBUG
             s_ntp_client.state.mode = ntp::Modes::kInterleaved;
 #endif
-        }
-        else
-        {
+        } else {
             DEBUG_PUTS("INVALID RESPONSE");
             return;
         }
@@ -483,8 +417,8 @@ static void Process()
     s_ntp_client.state.dst.seconds = __builtin_bswap32(kReply->receive_timestamp_s);
     s_ntp_client.state.dst.fraction = __builtin_bswap32(kReply->receive_timestamp_f);
 
-    s_ntp_client.state.previous_receive.seconds = net::globals::ptpTimestamp[1] + ntp::kJan1970;
-    s_ntp_client.state.previous_receive.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptpTimestamp[0]));
+    s_ntp_client.state.previous_receive.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
+    s_ntp_client.state.previous_receive.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
 
     UpdatePtpTime();
 
@@ -496,8 +430,7 @@ static void Process()
     Print("T4: ", &s_ntp_client.t4);
 }
 
-namespace network::apps::ntpclient::ptp
-{
+namespace network::apps::ntpclient::ptp {
 #pragma GCC pop_options
 #pragma GCC push_options
 #pragma GCC optimize("Os")
@@ -518,8 +451,7 @@ namespace network::apps::ntpclient::ptp
  *
  * @note This function must be called before starting the NTP client.
  */
-void Init()
-{
+void Init() {
     DEBUG_ENTRY();
 
     memset(&s_ntp_client, 0, sizeof(struct NtpClient));
@@ -555,18 +487,15 @@ void Init()
  * @note The function will not start the client if it is disabled or if the server
  *       IP address is not configured.
  */
-void Start()
-{
+void Start() {
     DEBUG_ENTRY();
 
-    if (s_ntp_client.status == ntp::Status::kDisabled)
-    {
+    if (s_ntp_client.status == ntp::Status::kDisabled) {
         DEBUG_EXIT();
         return;
     }
 
-    if (s_ntp_client.server_ip == 0)
-    {
+    if (s_ntp_client.server_ip == 0) {
         s_ntp_client.status = ntp::Status::kStopped;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kStopped);
         DEBUG_EXIT();
@@ -594,18 +523,15 @@ void Start()
  *
  * @param[in] doDisable Set to `true` to disable the client after stopping.
  */
-void Stop(bool do_disable)
-{
+void Stop(bool do_disable) {
     DEBUG_ENTRY();
 
-    if (do_disable)
-    {
+    if (do_disable) {
         s_ntp_client.status = ntp::Status::kDisabled;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kDisabled);
     }
 
-    if (s_ntp_client.status == ntp::Status::kStopped)
-    {
+    if (s_ntp_client.status == ntp::Status::kStopped) {
         return;
     }
 
@@ -614,8 +540,7 @@ void Stop(bool do_disable)
     network::udp::End(network::iana::Ports::kPortNtp);
     s_ntp_client.handle = -1;
 
-    if (!do_disable)
-    {
+    if (!do_disable) {
         s_ntp_client.status = ntp::Status::kStopped;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kStopped);
     }
@@ -630,8 +555,7 @@ void Stop(bool do_disable)
  *
  * @param[in] server_ip The IP address of the NTP server.
  */
-void SetServerIp(uint32_t server_ip)
-{
+void SetServerIp(uint32_t server_ip) {
     Stop(false);
 
     s_ntp_client.server_ip = server_ip;
@@ -644,8 +568,7 @@ void SetServerIp(uint32_t server_ip)
  *
  * @return The IP address of the NTP server.
  */
-uint32_t GetServerIp()
-{
+uint32_t GetServerIp() {
     return s_ntp_client.server_ip;
 }
 
@@ -656,8 +579,8 @@ uint32_t GetServerIp()
  *
  * @return The status of the NTP client as an `ntp::Status` enum.
  */
-ntp::Status GetStatus()
-{
+ntp::Status GetStatus() {
     return s_ntp_client.status;
 }
 } // namespace network::apps::ntpclient::ptp
+#pragma GCC pop_options

@@ -2,7 +2,7 @@
  * net_phy.cpp
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,16 +29,14 @@
 
 #include <cstdint>
 
-#include "emac/phy.h"
+#include "emac/emac_phy.h"
 #include "emac/mmi.h"
-#include "gd32.h"
 #include "gd32_millis.h"
 #include "firmware/debug/debug_debug.h"
+#include "gd32.h" // IWYU pragma: keep
 
-namespace net::phy
-{
-bool Read(uint32_t address, uint32_t reg, uint16_t& value)
-{
+namespace emac::phy {
+bool Read(uint32_t address, uint32_t reg, uint16_t& value) {
 #if defined(GD32H7XX)
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_READ, address, reg, &value) == SUCCESS;
 #else
@@ -47,8 +45,7 @@ bool Read(uint32_t address, uint32_t reg, uint16_t& value)
     return kResult;
 }
 
-bool Write(uint32_t address, uint32_t reg, uint16_t value)
-{
+bool Write(uint32_t address, uint32_t reg, uint16_t value) {
 #if defined(GD32H7XX)
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_WRITE, address, reg, &value) == SUCCESS;
 #else
@@ -57,8 +54,7 @@ bool Write(uint32_t address, uint32_t reg, uint16_t value)
     return kResult;
 }
 
-bool Config(uint32_t address)
-{
+bool Config(uint32_t address) {
     DEBUG_ENTRY();
 
 #if defined(GD32H7XX)
@@ -73,110 +69,64 @@ bool Config(uint32_t address)
     DEBUG_PRINTF("kAhbClk=%u", kAhbClk);
 
 #if defined GD32F10X_CL
-    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U))
-    {
+    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
         reg |= ENET_MDC_HCLK_DIV16;
-    }
-    else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U)) {
         reg |= ENET_MDC_HCLK_DIV26;
-    }
-    else if (ENET_RANGE(kAhbClk, 60000000U, 90000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 60000000U, 90000000U)) {
         reg |= ENET_MDC_HCLK_DIV42;
-    }
-    else if ((ENET_RANGE(kAhbClk, 90000000U, 108000000U)) || (108000000U == kAhbClk))
-    {
+    } else if ((ENET_RANGE(kAhbClk, 90000000U, 108000000U)) || (108000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV62;
-    }
-    else
-    {
+    } else {
         DEBUG_EXIT();
         return false;
     }
 #elif defined GD32F20X
-    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U))
-    {
+    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
         reg |= ENET_MDC_HCLK_DIV16;
-    }
-    else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U)) {
         reg |= ENET_MDC_HCLK_DIV26;
-    }
-    else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U)) {
         reg |= ENET_MDC_HCLK_DIV42;
-    }
-    else if ((ENET_RANGE(kAhbClk, 100000000U, 120000000U)) || (120000000U == kAhbClk))
-    {
+    } else if ((ENET_RANGE(kAhbClk, 100000000U, 120000000U)) || (120000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV62;
-    }
-    else
-    {
+    } else {
         DEBUG_EXIT();
         return false;
     }
 #elif defined GD32F4XX
-    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U))
-    {
+    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
         reg |= ENET_MDC_HCLK_DIV16;
-    }
-    else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U)) {
         reg |= ENET_MDC_HCLK_DIV26;
-    }
-    else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U)) {
         reg |= ENET_MDC_HCLK_DIV42;
-    }
-    else if (ENET_RANGE(kAhbClk, 100000000U, 150000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 100000000U, 150000000U)) {
         reg |= ENET_MDC_HCLK_DIV62;
-    }
-    else if ((ENET_RANGE(kAhbClk, 150000000U, 240000000U)) || (240000000U == kAhbClk))
-    {
+    } else if ((ENET_RANGE(kAhbClk, 150000000U, 240000000U)) || (240000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV102;
-    }
-    else
-    {
+    } else {
         DEBUG_EXIT();
         return false;
     }
 #elif defined GD32H7XX
-    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U))
-    {
+    if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
         reg |= ENET_MDC_HCLK_DIV16;
-    }
-    else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 35000000U, 60000000U)) {
         reg |= ENET_MDC_HCLK_DIV26;
-    }
-    else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 60000000U, 100000000U)) {
         reg |= ENET_MDC_HCLK_DIV42;
-    }
-    else if (ENET_RANGE(kAhbClk, 100000000U, 150000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 100000000U, 150000000U)) {
         reg |= ENET_MDC_HCLK_DIV62;
-    }
-    else if ((ENET_RANGE(kAhbClk, 150000000U, 180000000U)) || (180000000U == kAhbClk))
-    {
+    } else if ((ENET_RANGE(kAhbClk, 150000000U, 180000000U)) || (180000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV102;
-    }
-    else if (ENET_RANGE(kAhbClk, 250000000U, 300000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 250000000U, 300000000U)) {
         reg |= ENET_MDC_HCLK_DIV124;
-    }
-    else if (ENET_RANGE(kAhbClk, 300000000U, 350000000U))
-    {
+    } else if (ENET_RANGE(kAhbClk, 300000000U, 350000000U)) {
         reg |= ENET_MDC_HCLK_DIV142;
-    }
-    else if ((ENET_RANGE(kAhbClk, 350000000U, 400000000U)) || (400000000U == kAhbClk))
-    {
+    } else if ((ENET_RANGE(kAhbClk, 350000000U, 400000000U)) || (400000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV162;
-    }
-    else
-    {
+    } else {
         DEBUG_EXIT();
         return false;
     }
@@ -190,8 +140,7 @@ bool Config(uint32_t address)
     ENET_MAC_PHY_CTL = reg;
 #endif
 
-    if (!phy::Write(address, mmi::REG_BMCR, mmi::BMCR_RESET))
-    {
+    if (!phy::Write(address, emac::mmi::REG_BMCR, emac::mmi::BMCR_RESET)) {
         DEBUG_PUTS("PHY reset failed");
         DEBUG_EXIT();
         return false;
@@ -206,25 +155,21 @@ bool Config(uint32_t address)
     const auto kMillis = millis();
     uint16_t value;
 
-    while (millis() - kMillis < 500U)
-    {
-        if (!phy::Read(address, mmi::REG_BMCR, value))
-        {
+    while (millis() - kMillis < 500U) {
+        if (!phy::Read(address, emac::mmi::REG_BMCR, value)) {
             DEBUG_PUTS("PHY status read failed");
             DEBUG_EXIT();
             return false;
         }
 
-        if (!(value & mmi::BMCR_RESET))
-        {
+        if (!(value & emac::mmi::BMCR_RESET)) {
             DEBUG_PRINTF("%u", millis() - kMillis);
             DEBUG_EXIT();
             return true;
         }
     }
 
-    if (value & mmi::BMCR_RESET)
-    {
+    if (value & emac::mmi::BMCR_RESET) {
         DEBUG_PUTS("PHY reset timed out");
         DEBUG_EXIT();
         return false;
@@ -234,4 +179,4 @@ bool Config(uint32_t address)
     DEBUG_EXIT();
     return true;
 }
-} // namespace net::phy
+} // namespace emac::phy

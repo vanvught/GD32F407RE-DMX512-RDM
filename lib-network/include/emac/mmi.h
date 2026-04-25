@@ -2,7 +2,7 @@
  * @file mmi.h
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,7 @@
 
 #include <cstdint>
 
-namespace net::mmi
-{
+namespace emac::mmi {
 /* Generic MII registers. */
 inline constexpr uint32_t REG_BMCR = 0x00;      /* Basic mode control register    */
 inline constexpr uint32_t REG_BMSR = 0x01;      /* Basic mode status register     */
@@ -94,6 +93,6 @@ inline constexpr uint16_t LPA_RFAULT = 0x2000;          /* Link partner faulted 
 inline constexpr uint16_t LPA_LPACK = 0x4000;           /* Link partner acked us       */
 inline constexpr uint16_t LPA_NPAGE = 0x8000;           /* Next page bit               */
 
-} // namespace net::mmi
+} // namespace emac::mmi
 
 #endif // EMAC_MMI_H_

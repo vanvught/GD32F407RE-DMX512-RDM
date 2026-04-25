@@ -1,8 +1,8 @@
 /**
- * net_link_check.cpp
+ * @file emac_phy.cpp
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,41 +25,44 @@
 
 #include <cstdint>
 
-#include "emac/net_link_check.h"
-#include "emac/phy.h"
+#include "emac/emac_phy.h"
+#include "emac/emac_link_check.h"
 #include "emac/mmi.h"
+#include "firmware/debug/debug_debug.h"
+
+#if !defined(BIT)
+#define BIT(x) static_cast<uint16_t>(1U << (x))
+#endif
 
 #if !defined(PHY_ADDRESS)
 #define PHY_ADDRESS 1
 #endif
 
-#define PHY_REG_IER 0x13
-#define IER_INT_ENABLE (1U << 13)
+namespace emac::phy {
+void CustomizedLed() {
+    DEBUG_ENTRY();
 
-#define PHY_REG_ISR 0x1e
-#define ISR_LINK (1U << 11)
-
-namespace net::phy
-{
-void WritePaged(uint16_t phy_page, uint16_t phy_reg, uint16_t phy_value, uint16_t mask = 0x0);
+    DEBUG_EXIT();
 }
 
-namespace net::link
-{
-#if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void PinEnable()
-{
-    net::phy::WritePaged(0x07, PHY_REG_IER, IER_INT_ENABLE, IER_INT_ENABLE);
-    // Clear interrupt
-    uint16_t phy_value;
-    phy::Read(PHY_ADDRESS, PHY_REG_ISR, phy_value);
+void CustomizedTiming() {
+    DEBUG_ENTRY();
+
+    DEBUG_EXIT();
 }
 
-void PinRecovery()
-{
-    uint16_t phy_value;
-    phy::Read(PHY_ADDRESS, PHY_REG_ISR, phy_value);
-    phy::Read(PHY_ADDRESS, mmi::REG_BMSR, phy_value);
+/**
+ * PHY SPECIAL CONTROL/STATUS REGISTER Index (In Decimal): 31
+ * @param phyStatus
+ */
+void CustomizedStatus(emac::phy::Status& phy_status) {
+    phy_status.link = link::StatusRead();
+
+    uint16_t value;
+    phy::Read(PHY_ADDRESS, 0x1f, value);
+
+    phy_status.duplex = ((value & BIT(4)) == BIT(4)) ? phy::Duplex::kDuplexFull : phy::Duplex::kDuplexHalf;
+    phy_status.speed = ((value & BIT(2)) == BIT(2)) ? phy::Speed::kSpeed10 : phy::Speed::kSpeed100;
+    phy_status.autonegotiation = ((value & BIT(12)) == BIT(12));
 }
-#endif
-} // namespace net::link
+} // namespace emac::phy

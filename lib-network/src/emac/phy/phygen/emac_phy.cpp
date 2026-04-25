@@ -1,7 +1,8 @@
 /**
- * @file link_handle_change.cpp
+ * @file emac_phy.cpp
+ *
  */
-/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,49 +23,43 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_NET_PHY)
-#undef NDEBUG
-#endif
+#include <cstdint>
 
-#include "hal_watchdog.h"
-#include "emac/emac.h"
-#include "emac/phy.h"
-#include "core/netif.h"
+#include "emac/emac_phy.h"
+#include "emac/mmi.h"
+#include "firmware/debug/debug_printbits.h"
 #include "firmware/debug/debug_debug.h"
+
+#if !defined(BIT)
+#define BIT(x) static_cast<uint16_t>(1U << (x))
+#endif
 
 #if !defined(PHY_ADDRESS)
 #define PHY_ADDRESS 1
 #endif
 
-namespace net::link
-{
-void HandleChange(net::phy::Link state)
-{
-    DEBUG_PRINTF("net::phy::Link %s", state == net::phy::Link::kStateUp ? "UP" : "DOWN");
+namespace emac::phy {
+void CustomizedLed() {
+    DEBUG_ENTRY();
 
-    if (phy::Link::kStateUp == state)
-    {
-        const auto kIsWatchdog = hal::Watchdog();
-
-        if (kIsWatchdog)
-        {
-            hal::WatchdogStop();
-        }
-
-        phy::Status phy_status;
-        phy::Start(PHY_ADDRESS, phy_status);
-
-        net::emac::AdjustLink(phy_status);
-
-        if (kIsWatchdog)
-        {
-            hal::WatchdogInit();
-        }
-
-        netif::SetLinkUp();
-        return;
-    }
-
-    netif::SetLinkDown();
+    DEBUG_EXIT();
 }
-} // namespace net::link
+
+void CustomizedTiming() {
+    DEBUG_ENTRY();
+
+    DEBUG_EXIT();
+}
+
+void CustomizedStatus(emac::phy::Status& phy_status) {
+    uint16_t value;
+    emac::phy::Read(PHY_ADDRESS, emac::mmi::REG_BMSR, value);
+
+    debug::PrintBits(value);
+
+    phy_status.duplex = emac::phy::Duplex::kDuplexFull;
+    phy_status.speed = emac::phy::Speed::kSpeed100;
+    phy_status.link = (value & emac::mmi::BMSR_LINKED_STATUS) ? emac::phy::Link::kStateUp : emac::phy::Link::kStateDown;
+    phy_status.autonegotiation = (value & emac::mmi::BMSR_AUTONEGO_COMPLETE);
+}
+} // namespace emac::phy

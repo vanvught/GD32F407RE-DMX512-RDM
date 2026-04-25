@@ -1,8 +1,8 @@
 /**
- * @file net_link_check.h
+ * @file display.cpp
  *
  */
-/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,54 @@
  * THE SOFTWARE.
  */
 
-#ifndef EMAC_NET_LINK_CHECK_H_
-#define EMAC_NET_LINK_CHECK_H_
+#include "displayudf.h"
+#include "core/protocol/dhcp.h"
 
-#include "phy.h"
+namespace emac::display {
+void Config() {
+    DisplayUdf::Get()->ShowEmacInit();
+}
 
-namespace net::link
-{
-net::phy::Link StatusRead();
-void HandleChange(net::phy::Link state);
-// Platform defined implementations
-// #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void GpioInit();
-void PinEnable();
-void PinRecovery();
-// #endif
-// #if defined(ENET_LINK_CHECK_USE_INT)
-void ExtiInit();
-void InterruptInit();
-// #elif defined(ENET_LINK_CHECK_USE_PIN_POLL)
-void PinPollInit();
-void PinPoll();
-// #endif
-} // namespace net::link
+void Start() {
+    DisplayUdf::Get()->ShowEmacStart();
+}
+void Status(bool is_link_up) {
+    DisplayUdf::Get()->ShowEmacStatus(is_link_up);
+}
+} // namespace emac::display
 
-#endif // EMAC_NET_LINK_CHECK_H_
+namespace network::display {
+void Hostname() {
+    DisplayUdf::Get()->ShowHostName();
+}
+
+void EmacShutdown() {
+    DisplayUdf::Get()->ShowShutdown();
+}
+
+void DhcpStatus(network::dhcp::State state) {
+    DisplayUdf::Get()->ShowDhcpStatus(state);
+}
+} // namespace network::display
+
+namespace network::event {
+void LinkUp() {
+    DisplayUdf::Get()->ShowIpAddress();
+}
+
+void LinkDown() {
+    DisplayUdf::Get()->ShowEmacStatus(false);
+}
+
+void Ipv4AddressChanged() {
+    DisplayUdf::Get()->ShowIpAddress();
+}
+
+void Ipv4NetmaskChanged() {
+    DisplayUdf::Get()->ShowNetmask();
+}
+
+void Ipv4GatewayChanged() {
+    DisplayUdf::Get()->ShowGatewayIp();
+}
+} // namespace network::event

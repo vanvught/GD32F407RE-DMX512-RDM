@@ -6,7 +6,7 @@
  * packet transmission and reception. It also supports Precision Time Protocol
  * (PTP) functionality if enabled.
  */
-/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
  */
 
 #if defined(DEBUG_EMAC)
-#undef NDEBUG ///< Disable NDEBUG for debugging
+#undef NDEBUG
 #endif
 
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
@@ -40,11 +40,12 @@
 #include <cstdint>
 #include <cassert>
 
-#include "gd32.h"
 #include "gd32_enet.h"
-#include "../src/core/net_memcpy.h"
+#include "../src/core/network_memcpy.h"
+#include "emac_counters.h"
 #include "firmware/debug/debug_dump.h"
 #include "firmware/debug/debug_debug.h"
+#include "gd32.h" // IWYU pragma: keep
 
 #if defined(CONFIG_NET_ENABLE_PTP)
 #include "gd32_ptp.h"
@@ -54,13 +55,9 @@ extern enet_descriptors_struct* dma_current_ptp_rxdesc;
 /// Current PTP transmit descriptor
 extern enet_descriptors_struct* dma_current_ptp_txdesc;
 
-namespace net
-{
-namespace globals
-{
-extern uint32_t ptpTimestamp[2];
-} // namespace globals
-} // namespace net
+namespace net::globals::ptp {
+extern uint32_t timestamp[2];
+} // namespace net::globals::ptp
 #endif
 
 /// Current receive descriptor
@@ -68,23 +65,22 @@ extern enet_descriptors_struct* dma_current_rxdesc;
 /// Current transmit descriptor
 extern enet_descriptors_struct* dma_current_txdesc;
 
-/**
- * @brief Receives an Ethernet packet.
- *
- * @param[out] ppPacket Pointer to the received packet buffer.
- * @return Length of the received packet in bytes, or 0 if no packet is available.
- */
-uint32_t emac_eth_recv(uint8_t** packet)
-{
-    const auto kLength = Gd32EnetDescInformationGet<RXDESC_FRAME_LENGTH>(dma_current_rxdesc);
+namespace emac::eth {
+namespace globals {
+struct Counters counter;
+}
 
-    if (kLength > 0)
-    {
+// Receives an Ethernet packet.
+uint32_t Recv(uint8_t** packet) {
+    const auto kLength = gd32::enet::DescInformationGet<RXDESC_FRAME_LENGTH>(dma_current_rxdesc);
+
+    if (kLength > 0) {
 #if defined(CONFIG_NET_ENABLE_PTP)
         *packet = reinterpret_cast<uint8_t*>(dma_current_ptp_rxdesc->buffer1_addr);
 #else
         *packet = reinterpret_cast<uint8_t*>(dma_current_rxdesc->buffer1_addr);
 #endif
+        emac::eth::globals::counter.received++;
         return kLength;
     }
 
@@ -92,13 +88,10 @@ uint32_t emac_eth_recv(uint8_t** packet)
 }
 
 #if defined(CONFIG_NET_ENABLE_PTP)
-/**
- * @brief Handles reception of a PTP frame in normal mode.
- */
-static void ptpframe_receive_normal_mode()
-{
-    net::globals::ptpTimestamp[0] = dma_current_rxdesc->buffer1_addr;
-    net::globals::ptpTimestamp[1] = dma_current_rxdesc->buffer2_next_desc_addr;
+// Handles reception of a PTP frame in normal mode.
+static void PtpFrameReceiveNormalMode() {
+    net::globals::ptp::timestamp[0] = dma_current_rxdesc->buffer1_addr;
+    net::globals::ptp::timestamp[1] = dma_current_rxdesc->buffer2_next_desc_addr;
 
     dma_current_rxdesc->buffer1_addr = dma_current_ptp_rxdesc->buffer1_addr;
     dma_current_rxdesc->buffer2_next_desc_addr = dma_current_ptp_rxdesc->buffer2_next_desc_addr;
@@ -108,20 +101,17 @@ static void ptpframe_receive_normal_mode()
     __DMB();
 #endif
 
-    Gd32EnetHandleRxBufferUnavailable();
+    gd32::enet::HandleRxBufferUnavailable();
 
     assert(0 != (dma_current_rxdesc->control_buffer_size & ENET_RDES1_RCHM)); /// chained mode
 
     /// update the current RxDMA descriptor pointer to the next descriptor in RxDMA descriptor table
     dma_current_rxdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_ptp_rxdesc->buffer2_next_desc_addr);
     /// if it is the last ptp descriptor */
-    if (0 != dma_current_ptp_rxdesc->status)
-    {
+    if (0 != dma_current_ptp_rxdesc->status) {
         /// pointer back to the first ptp descriptor address in the desc_ptptab list address
         dma_current_ptp_rxdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_ptp_rxdesc->status);
-    }
-    else
-    {
+    } else {
         /// Set pointer to the next ptp descriptor
         dma_current_ptp_rxdesc++;
     }
@@ -130,11 +120,10 @@ static void ptpframe_receive_normal_mode()
 /**
  * @brief Handles reception of a standard Ethernet frame.
  */
-static void FrameReceive()
-{
+static void FrameReceive() {
     dma_current_rxdesc->status = ENET_RDES0_DAV;
 
-    Gd32EnetHandleRxBufferUnavailable();
+    gd32::enet::HandleRxBufferUnavailable();
 
     assert(0 != (dma_current_rxdesc->control_buffer_size & ENET_RDES1_RCHM));
 
@@ -146,15 +135,13 @@ static void FrameReceive()
 /**
  * @brief Frees the current packet from the DMA buffer.
  */
-void emac_free_pkt()
-{
-    while (0 != (dma_current_rxdesc->status & ENET_RDES0_DAV))
-    {
+void FreePkt() {
+    while (0 != (dma_current_rxdesc->status & ENET_RDES0_DAV)) {
         __DMB();
     }
 
 #if defined(CONFIG_NET_ENABLE_PTP)
-    ptpframe_receive_normal_mode();
+    PtpFrameReceiveNormalMode();
 #else
     FrameReceive();
 #endif
@@ -166,10 +153,8 @@ void emac_free_pkt()
  *
  * @return Pointer to the DMA buffer for transmission.
  */
-uint8_t* emac_eth_send_get_dma_buffer()
-{
-    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV))
-    {
+uint8_t* SendGetDmaBuffer() {
+    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV)) {
         __DMB(); ///< Wait until descriptor is available
     }
 
@@ -182,8 +167,7 @@ uint8_t* emac_eth_send_get_dma_buffer()
  * @tparam T Whether timestamping is enabled.
  * @param length Length of the frame to transmit.
  */
-template <bool T> static void ptpframe_transmit(const uint32_t length)
-{
+template <bool T> static void PtpFrameTransmit(uint32_t length) {
     dma_current_txdesc->control_buffer_size = length;              ///< Set the frame length
     dma_current_txdesc->status |= ENET_TDES0_LSG | ENET_TDES0_FSG; ///< Set the segment of frame, frame is transmitted in one descriptor
     dma_current_txdesc->status |= ENET_TDES0_DAV;                  ///< Enable DMA transmission
@@ -192,15 +176,13 @@ template <bool T> static void ptpframe_transmit(const uint32_t length)
     __DMB();
 #endif
 
-    Gd32EnetClearDmaTxFlagsAndResume(); ///< Handle transmission flags
+    gd32::enet::ClearDmaTxFlagsAndResume(); ///< Handle transmission flags
 
     uint32_t timeout = 0;
     uint32_t tdes0_ttmss_flag;
 
-    if constexpr (T)
-    { // Handle timestamping
-        do
-        {
+    if constexpr (T) { // Handle timestamping
+        do {
             tdes0_ttmss_flag = (dma_current_txdesc->status & ENET_TDES0_TTMSS);
             __DMB();
             timeout++;
@@ -210,8 +192,8 @@ template <bool T> static void ptpframe_transmit(const uint32_t length)
 
         dma_current_txdesc->status &= ~ENET_TDES0_TTMSS; ///< Clear timestamp flag
 
-        net::globals::ptpTimestamp[0] = dma_current_txdesc->buffer1_addr;
-        net::globals::ptpTimestamp[1] = dma_current_txdesc->buffer2_next_desc_addr;
+        net::globals::ptp::timestamp[0] = dma_current_txdesc->buffer1_addr;
+        net::globals::ptp::timestamp[1] = dma_current_txdesc->buffer2_next_desc_addr;
     }
 
     dma_current_txdesc->buffer1_addr = dma_current_ptp_txdesc->buffer1_addr;
@@ -222,13 +204,10 @@ template <bool T> static void ptpframe_transmit(const uint32_t length)
     /// Update the current TxDMA descriptor pointer to the next descriptor in TxDMA descriptor table
     dma_current_txdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_ptp_txdesc->buffer2_next_desc_addr);
     /// if it is the last ptp descriptor */
-    if (0 != dma_current_ptp_txdesc->status)
-    {
+    if (0 != dma_current_ptp_txdesc->status) {
         /// pointer back to the first ptp descriptor address in the desc_ptptab list address
         dma_current_ptp_txdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_ptp_txdesc->status);
-    }
-    else
-    {
+    } else {
         /// Set pointer to the next ptp descriptor
         dma_current_ptp_txdesc++;
     }
@@ -241,15 +220,14 @@ template <bool T> static void ptpframe_transmit(const uint32_t length)
  * @param buffer Pointer to the frame buffer.
  * @param length Length of the frame in bytes.
  */
-template <bool T> static void ptpframe_transmit(const void* buffer, const uint32_t length)
-{
+template <bool T> static void PtpFrameTransmit(const void* buffer, uint32_t length) {
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    auto* pDst = reinterpret_cast<uint8_t*>(dma_current_ptp_txdesc->buffer1_addr);
-    network::memcpy(pDst, buffer, length); ///< Copy frame to DMA buffer
+    auto* dst = reinterpret_cast<uint8_t*>(dma_current_ptp_txdesc->buffer1_addr);
+    std::memcpy(dst, buffer, length); ///< Copy frame to DMA buffer
 
-    ptpframe_transmit<T>(length);
+    PtpFrameTransmit<T>(length);
 }
 
 /**
@@ -257,19 +235,18 @@ template <bool T> static void ptpframe_transmit(const void* buffer, const uint32
  *
  * @param length Length of the frame to transmit.
  */
-void emac_eth_send(const uint32_t length)
-{
+void Send(uint32_t length) {
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    auto nStatus = dma_current_txdesc->status;
-    nStatus &= ~ENET_TDES0_TTSEN;
-    dma_current_txdesc->status = nStatus;
+    auto status = dma_current_txdesc->status;
+    status &= ~ENET_TDES0_TTSEN;
+    dma_current_txdesc->status = status;
 
 #if defined(GD32H7XX)
     __DMB();
 #endif
 
-    ptpframe_transmit<false>(length);
+    PtpFrameTransmit<false>(length);
 }
 
 /**
@@ -278,25 +255,23 @@ void emac_eth_send(const uint32_t length)
  * @param buffer Pointer to the frame buffer.
  * @param length Length of the frame in bytes.
  */
-void emac_eth_send(void* buffer, const uint32_t length)
-{
+void Send(void* buffer, const uint32_t length) {
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV))
-    {
-        __DMB(); ///< Wait until descriptor is available
+    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV)) {
+        __DMB(); // Wait until descriptor is available
     }
 
-    auto nStatus = dma_current_txdesc->status;
-    nStatus &= ~ENET_TDES0_TTSEN; ///< Disable timestamping
-    dma_current_txdesc->status = nStatus;
+    auto status = dma_current_txdesc->status;
+    status &= ~ENET_TDES0_TTSEN; // Disable timestamping
+    dma_current_txdesc->status = status;
 
 #if defined(GD32H7XX)
     __DMB();
 #endif
 
-    ptpframe_transmit<false>(buffer, length);
+    PtpFrameTransmit<false>(buffer, length);
 }
 
 /**
@@ -304,19 +279,18 @@ void emac_eth_send(void* buffer, const uint32_t length)
  *
  * @param length Length of the frame in bytes.
  */
-void emac_eth_send_timestamp(const uint32_t length)
-{
+void SendTimestamp(uint32_t length) {
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    auto nStatus = dma_current_txdesc->status;
-    nStatus |= ENET_TDES0_TTSEN; ///< Enable timestamping
-    dma_current_txdesc->status = nStatus;
+    auto status = dma_current_txdesc->status;
+    status |= ENET_TDES0_TTSEN; ///< Enable timestamping
+    dma_current_txdesc->status = status;
 
 #if defined(GD32H7XX)
     __DMB();
 #endif
 
-    ptpframe_transmit<true>(length);
+    PtpFrameTransmit<true>(length);
 }
 
 /**
@@ -325,25 +299,23 @@ void emac_eth_send_timestamp(const uint32_t length)
  * @param buffer Pointer to the frame buffer.
  * @param length Length of the frame in bytes.
  */
-void emac_eth_send_timestamp(void* buffer, const uint32_t length)
-{
+void SendTimestamp(void* buffer, uint32_t length) {
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV))
-    {
+    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV)) {
         __DMB();
     }
 
-    auto nStatus = dma_current_txdesc->status;
-    nStatus |= ENET_TDES0_TTSEN; ///< Enable timestamping
-    dma_current_txdesc->status = nStatus;
+    auto status = dma_current_txdesc->status;
+    status |= ENET_TDES0_TTSEN; // Enable timestamping
+    dma_current_txdesc->status = status;
 
 #if defined(GD32H7XX)
     __DMB();
 #endif
 
-    ptpframe_transmit<true>(buffer, length);
+    PtpFrameTransmit<true>(buffer, length);
 }
 #else
 /**
@@ -351,23 +323,20 @@ void emac_eth_send_timestamp(void* buffer, const uint32_t length)
  *
  * @return Pointer to the DMA buffer for transmission.
  */
-uint8_t* emac_eth_send_get_dma_buffer()
-{
-    while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV))
-    {
-        __DMB(); ///< Wait until descriptor is available
+uint8_t* SendGetDmaBuffer() {
+    // The descriptor is busy due to own by the DMA
+    if (0 != (dma_current_txdesc->status & ENET_TDES0_DAV)) {
+        emac::eth::globals::counter.send_busy++;
+        while (0 != (dma_current_txdesc->status & ENET_TDES0_DAV)) {
+            __DMB(); ///< Wait until descriptor is available
+        }
     }
 
     return reinterpret_cast<uint8_t*>(dma_current_txdesc->buffer1_addr);
 }
 
-/**
- * @brief Transmits an Ethernet frame.
- *
- * @param length Length of the frame to transmit.
- */
-void emac_eth_send(uint32_t length)
-{
+// Transmits an Ethernet frame.
+void Send(uint32_t length) {
     debug::Dump(reinterpret_cast<uint8_t*>(dma_current_txdesc->buffer1_addr), length);
 
     dma_current_txdesc->control_buffer_size = length;              ///< Set the frame length
@@ -378,30 +347,27 @@ void emac_eth_send(uint32_t length)
     __DMB();
 #endif
 
-    Gd32EnetClearDmaTxFlagsAndResume(); ///< Handle transmission flags
+    gd32::enet::ClearDmaTxFlagsAndResume(); ///< Handle transmission flags
 
     assert(0 != (dma_current_txdesc->status & ENET_TDES0_TCHM)); /// Chained mode
 
     /// Update the current TxDMA descriptor pointer to the next descriptor in TxDMA descriptor table
     dma_current_txdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_txdesc->buffer2_next_desc_addr);
+
+    emac::eth::globals::counter.sent++;
 }
 
-/**
- * @brief Transmits an Ethernet frame with data copying.
- *
- * @param buffer Pointer to the frame buffer.
- * @param length Length of the frame in bytes.
- */
-void emac_eth_send(void* buffer, uint32_t length)
-{
+// Transmits an Ethernet frame with data copying.
+void Send(void* buffer, uint32_t length) {
     DEBUG_PRINTF("%p -> %u", buffer, length);
 
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);
 
-    auto* dest = emac_eth_send_get_dma_buffer();
-    network::memcpy(dest, buffer, length); ///< Copy frame to DMA buffer
+    auto* dest = SendGetDmaBuffer();
+    std::memcpy(dest, buffer, length); ///< Copy frame to DMA buffer
 
-    emac_eth_send(length);
+    Send(length);
 }
 #endif
+} // namespace emac::eth
