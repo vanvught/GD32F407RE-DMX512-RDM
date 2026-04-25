@@ -1,5 +1,5 @@
 /**
- * @file log.c
+ * @file log.cpp
  *
  */
 /*
@@ -9,7 +9,7 @@
  * Reference https://www.doc.ic.ac.uk/~eedwards/compsys/float/nan.html
  * and http://steve.hollasch.net/cgindex/coding/ieeefloat.html
  */
-/* Copyright (C) 2017-2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2017-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,13 +33,13 @@
 #include <stdint.h>
 
 typedef union {
-	float number;
-	int32_t bits;
+    float number;
+    int32_t bits;
 } float2bits;
 
 /* Natural log of 2 */
 #ifndef _M_LN2
-#define _M_LN2        0.693147180559945309417f
+#define _M_LN2 0.693147180559945309417f
 #endif
 
 /**
@@ -50,31 +50,32 @@ typedef union {
  * If x is 0, the result is -infinity
  * If x is negative a NaN (not a number) is returned.
  */
-float log2f(float x) {
-	float2bits m;
+extern "C" float log2f(float x) { // NOLINT
+    float2bits m;
 
-	m.number = x;
+    m.number = x;
 
-	if (x == 0) {
-		m.bits = (int32_t) 0xFF800000;	// -inf
-		return m.number;
-	} else if (x == 1) {
-		return (float) 0;
-	} else if (x < 0) {
-		m.bits = (int32_t) 0x7F800001;	// nan
-		return m.number;
-	}
+    if (x == 0) {
+        m.bits = (int32_t)0xFF800000; // -inf
+        return m.number;
+    } else if (x == 1) {
+        return (float)0;
+    } else if (x < 0) {
+        m.bits = (int32_t)0x7F800001; // nan
+        return m.number;
+    }
 
-	register float log2 = (float)(((m.bits >> 23) & 0x00FF) - 128);
+    float log2 = (float)(((m.bits >> 23) & 0x00FF) - 128);
 
-	m.bits &= ~(255 << 23);
-	m.bits += (127 << 23);
+    m.bits &= ~(255 << 23);
+    m.bits += (127 << 23);
 
-	log2 += ((-0.34484843f) * m.number + 2.02466578f) * m.number - 0.67487759f;
+    log2 += ((-0.34484843f) * m.number + 2.02466578f) * m.number - 0.67487759f;
 
-	return log2;
+    return log2;
 }
 
-float logf(float v) {
-	return log2f(v) * _M_LN2;
+extern "C" float logf(float v) // NOLINT
+{
+    return log2f(v) * _M_LN2;
 }

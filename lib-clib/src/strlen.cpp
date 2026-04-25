@@ -1,8 +1,8 @@
 /**
- * @file random.c
+ * @file strlen.cpp
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@orangepi-dmx.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +23,14 @@
  * THE SOFTWARE.
  */
 
-/**
- * https://en.wikipedia.org/wiki/Linear-feedback_shift_register
- */
+#include <stddef.h>
 
-static long int lfsr = 0xACE1u;
-static long int bit;
+extern "C" size_t strlen(const char* s) { // NOLINT
+    const char* p = s;
 
-void srandom(unsigned int seed) {
-	if (seed != 0) {
-		lfsr = seed & 0xFFFFu;
-	} else {
-		lfsr = 0xACE1u;
-	}
+    while (*s != (char)0) {
+        ++s;
+    }
+
+    return (size_t)(s - p);
 }
-
-long int random(void) {
-	bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1;
-	return lfsr = (lfsr >> 1) | (bit << 15);
-}
-
