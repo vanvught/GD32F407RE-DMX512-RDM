@@ -10,7 +10,7 @@ async function getJSON(json) {
 
 async function list() {
 	const l = await getJSON('list')
-	document.getElementById("idList").innerHTML = "<li>"+l.list.name+"</li><li>"+l.list.node.type+"</li><li>"+l.list.node.port.type+"</li>"
+	document.getElementById("idList").innerHTML = "<li>"+l.list.name+"</li><li>"+l.list.node.type+"</li><li>"+l.list.node.output.type+"</li>"
 }
 
 async function version() {
