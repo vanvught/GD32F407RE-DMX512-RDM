@@ -33,9 +33,6 @@
 #include "json/dmxsendparams.h"
 #include "dmxnodenode.h"
 #include "dmxnodemsgconst.h"
-#if defined(NODE_RDMNET_LLRP_ONLY)
-#include "rdmnetdevice.h"
-#endif
 #if defined(NODE_SHOWFILE)
 #include "showfile.h"
 #endif
@@ -79,11 +76,6 @@ int main() // NOLINT
     }
 
     const auto kActivePorts = dmxnode_node.GetActiveInputPorts() + dmxnode_node.GetActiveOutputPorts();
-
-#if defined(NODE_RDMNET_LLRP_ONLY)
-    RDMNetDevice llrp_only_device;
-    llrp_only_device.Print();
-#endif
 
 #if defined(NODE_SHOWFILE)
     ShowFile showfile;
