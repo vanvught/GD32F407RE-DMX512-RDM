@@ -64,7 +64,7 @@ bool Reboot()
 #if !defined(NO_EMAC)
     network::Shutdown();
 #endif
-    hal::statusled::SetMode(hal::statusled::Mode::OFF_OFF);
+    hal::statusled::SetMode(hal::statusled::Mode::kOffOff);
 
     NVIC_SystemReset();
 

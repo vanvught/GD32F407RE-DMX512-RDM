@@ -26,7 +26,7 @@
 #ifndef GD32_HAL_SPI_H_
 #define GD32_HAL_SPI_H_
 
-#include "gd32_spi.h"
+#include "gd32_spi.h" // IWYU pragma: keep
 
 #define SPI_MODE0 GD32_SPI_MODE0
 #define SPI_MODE1 GD32_SPI_MODE1

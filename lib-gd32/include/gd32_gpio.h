@@ -2,7 +2,7 @@
  * @file gd32_gpio.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,35 +32,33 @@
 #include "gd32.h"
 
 #if defined(GD32F10X) || defined(GD32F20X) || defined(GD32F30X)
-#define GPIO_FSEL_OUTPUT GPIO_MODE_OUT_PP
-#define GPIO_FSEL_INPUT GPIO_MODE_IPU
-#define GPIO_PULL_UP GPIO_MODE_IPU
-#define GPIO_PULL_DOWN GPIO_MODE_IPD
-#define GPIO_PULL_DISABLE GPIO_MODE_IN_FLOATING
+#define GPIO_FSEL_OUTPUT      GPIO_MODE_OUT_PP
+#define GPIO_FSEL_INPUT       GPIO_MODE_IPU
+#define GPIO_PULL_UP          GPIO_MODE_IPU
+#define GPIO_PULL_DOWN        GPIO_MODE_IPD
+#define GPIO_PULL_DISABLE     GPIO_MODE_IN_FLOATING
 #define GPIO_INT_CFG_NEG_EDGE EXTI_TRIG_FALLING
-#define GPIO_INT_CFG_BOTH EXTI_TRIG_BOTH
+#define GPIO_INT_CFG_BOTH     EXTI_TRIG_BOTH
 #elif defined(GD32F4XX) || defined(GD32H7XX)
-#define GPIO_FSEL_OUTPUT GPIO_MODE_OUTPUT
-#define GPIO_FSEL_INPUT GPIO_MODE_INPUT
-#define GPIO_PULL_UP GPIO_PUPD_PULLUP
-#define GPIO_PULL_DOWN GPIO_PUPD_PULLDOWN
-#define GPIO_PULL_DISABLE GPIO_PUPD_NONE
+#define GPIO_FSEL_OUTPUT      GPIO_MODE_OUTPUT
+#define GPIO_FSEL_INPUT       GPIO_MODE_INPUT
+#define GPIO_PULL_UP          GPIO_PUPD_PULLUP
+#define GPIO_PULL_DOWN        GPIO_PUPD_PULLDOWN
+#define GPIO_PULL_DISABLE     GPIO_PUPD_NONE
 #endif
 
 #if defined(GD32F4XX)
 #define GPIOx_OCTL_OFFSET 0x14U;
-#define GPIOx_BOP_OFFSET 0x18U;
-#define GPIOx_BC_OFFSET 0x28U;
+#define GPIOx_BOP_OFFSET  0x18U;
+#define GPIOx_BC_OFFSET   0x28U;
 #else
-#define GPIOx_BOP_OFFSET 0x10U;
-#define GPIOx_BC_OFFSET 0x14U;
+#define GPIOx_BOP_OFFSET  0x10U;
+#define GPIOx_BC_OFFSET   0x14U;
 #endif
 
 #ifdef __cplusplus
-inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel)
-{
-    switch (gpio_periph)
-    {
+inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel) {
+    switch (gpio_periph) {
         case GPIOA:
             rcu_periph_clock_enable(RCU_GPIOA);
             break;
@@ -105,10 +103,8 @@ inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel)
     }
 
 #if defined(GD32F10X) || defined(GD32F20X) || defined(GD32F30X)
-    if (gpio_periph == GPIOA)
-    {
-        if ((pin == GPIO_PIN_13) || (pin == GPIO_PIN_14))
-        {
+    if (gpio_periph == GPIOA) {
+        if ((pin == GPIO_PIN_13) || (pin == GPIO_PIN_14)) {
             rcu_periph_clock_enable(RCU_AF);
             gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
         }
@@ -116,13 +112,10 @@ inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel)
 
     gpio_init(gpio_periph, fsel, GPIO_OSPEED_50MHZ, pin);
 #elif defined(GD32F4XX) || defined(GD32H7XX)
-    if (fsel == GPIO_FSEL_OUTPUT)
-    {
+    if (fsel == GPIO_FSEL_OUTPUT) {
         gpio_mode_set(gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin);
         gpio_output_options_set(gpio_periph, GPIO_OTYPE_PP, GPIO_OSPEED, pin);
-    }
-    else
-    {
+    } else {
         gpio_mode_set(gpio_periph, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, pin);
     }
 #else
@@ -131,12 +124,10 @@ inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel)
 }
 
 #if !defined(GD32H7XX)
-inline void Gd32GpioIntCfg(uint32_t gpio, uint32_t trig_type)
-{
+inline void Gd32GpioIntCfg(uint32_t gpio, uint32_t trig_type) {
     const uint32_t kLinex = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
-    switch (trig_type)
-    {
+    switch (trig_type) {
         case EXTI_TRIG_RISING:
             EXTI_RTEN |= kLinex;
             EXTI_FTEN &= ~kLinex;
@@ -164,10 +155,8 @@ inline void Gd32GpioIntCfg(uint32_t gpio, uint32_t trig_type)
 }
 #endif
 
-inline uint32_t Gd32GpioToPeriph(uint32_t gpio)
-{
-    switch ((GD32_Port_TypeDef)GD32_GPIO_TO_PORT(gpio))
-    {
+inline uint32_t Gd32GpioToPeriph(uint32_t gpio) {
+    switch ((GD32_Port_TypeDef)GD32_GPIO_TO_PORT(gpio)) {
         case GD32_GPIO_PORTA:
         case GD32_GPIO_PORTB:
         case GD32_GPIO_PORTC:
@@ -202,76 +191,61 @@ inline uint32_t Gd32GpioToPeriph(uint32_t gpio)
     }
 }
 
-inline void Gd32GpioFsel(uint32_t gpio, uint32_t fsel)
-{
+inline void Gd32GpioFsel(uint32_t gpio, uint32_t fsel) {
     const uint32_t kGpioPeriph = Gd32GpioToPeriph(gpio);
     const uint32_t kPin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
     Gd32GpioFsel(kGpioPeriph, kPin, fsel);
 }
 
-inline void Gd32GpioClr(uint32_t gpio)
-{
+inline void Gd32GpioClr(uint32_t gpio) {
     const uint32_t kGpioPeriph = Gd32GpioToPeriph(gpio);
     const uint32_t kPin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
     GPIO_BC(kGpioPeriph) = kPin;
 }
 
-inline void Gd32GpioSet(uint32_t gpio)
-{
+inline void Gd32GpioSet(uint32_t gpio) {
     const uint32_t kGpioPeriph = Gd32GpioToPeriph(gpio);
     const uint32_t kPin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
     GPIO_BOP(kGpioPeriph) = kPin;
 }
 
-inline void Gd32GpioWrite(uint32_t gpio, uint32_t level)
-{
-    if (level == 0)
-    {
+inline void Gd32GpioWrite(uint32_t gpio, uint32_t level) {
+    if (level == 0) {
         Gd32GpioClr(gpio);
-    }
-    else
-    {
+    } else {
         Gd32GpioSet(gpio);
     }
 }
 
-inline uint32_t Gd32GpioLev(uint32_t gpio)
-{
+inline uint32_t Gd32GpioLev(uint32_t gpio) {
     const uint32_t kGpioPeriph = Gd32GpioToPeriph(gpio);
     const uint32_t kPin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
     return static_cast<uint32_t>(0 != (GPIO_ISTAT(kGpioPeriph) & kPin));
 }
 
-inline void Gd32GpioSetPud(uint32_t gpio, uint32_t pud)
-{
-    const uint32_t gpio_periph = Gd32GpioToPeriph(gpio);
-    const uint32_t pin = BIT(GD32_GPIO_TO_NUMBER(gpio));
+inline void Gd32GpioSetPud(uint32_t gpio, uint32_t pud) {
+    const uint32_t kGpioPeriph = Gd32GpioToPeriph(gpio);
+    const uint32_t kPin = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
 #if defined(GD32F10X) || defined(GD32F20X) || defined(GD32F30X)
-    gpio_init(gpio_periph, pud, GPIO_OSPEED_50MHZ, pin);
+    gpio_init(kGpioPeriph, pud, GPIO_OSPEED_50MHZ, kPin);
 #elif defined(GD32F4XX) || defined(GD32H7XX)
-    if (pud == GPIO_PULL_UP)
-    {
-        gpio_mode_set(gpio_periph, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, pin);
-    }
-    else if (pud == GPIO_PULL_DOWN)
-    {
-        gpio_mode_set(gpio_periph, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN, pin);
-    }
-    else
-    {
-        gpio_mode_set(gpio_periph, GPIO_MODE_INPUT, GPIO_PUPD_NONE, pin);
+    if (pud == GPIO_PULL_UP) {
+        gpio_mode_set(kGpioPeriph, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, kPin);
+    } else if (pud == GPIO_PULL_DOWN) {
+        gpio_mode_set(kGpioPeriph, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN, kPin);
+    } else {
+        gpio_mode_set(kGpioPeriph, GPIO_MODE_INPUT, GPIO_PUPD_NONE, kPin);
     }
 #endif
 }
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t pin> inline void Gd32GpioModeSet()
-{
+template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t pin> inline void Gd32GpioModeSet() {
     static_assert(pin != 0, "pin cannot be zero");
     static_assert(pin == (1U << __builtin_ctz(pin)), "Only single pin values are allowed");
 
@@ -294,8 +268,7 @@ template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t p
     GPIO_PUD(gpio_periph) = pupd;
 }
 
-template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void Gd32GpioAfSet()
-{
+template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void Gd32GpioAfSet() {
     static_assert(pin != 0, "pin cannot be zero");
     static_assert(pin == (1U << __builtin_ctz(pin)), "Only single pin values are allowed");
 
@@ -304,14 +277,11 @@ template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void
     auto afrl = GPIO_AFSEL0(gpio_periph);
     auto afrh = GPIO_AFSEL1(gpio_periph);
 
-    if constexpr (kPin < 8U)
-    {
+    if constexpr (kPin < 8U) {
         /* clear the specified pin alternate function bits */
         afrl &= ~GPIO_AFR_MASK(kPin);
         afrl |= GPIO_AFR_SET(kPin, alt_func_num);
-    }
-    else if constexpr (kPin < 16U)
-    {
+    } else if constexpr (kPin < 16U) {
         /* clear the specified pin alternate function bits */
         afrh &= ~GPIO_AFR_MASK(kPin - 8U);
         afrh |= GPIO_AFR_SET(kPin - 8U, alt_func_num);
@@ -321,22 +291,19 @@ template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void
     GPIO_AFSEL1(gpio_periph) = afrh;
 }
 #else
-template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GPIO_OSPEED_50MHZ> inline void gd32_gpio_init()
-{
+template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GPIO_OSPEED_50MHZ> inline void gd32_gpio_init() {
     /* GPIO mode configuration */
     auto temp_mode = (mode & 0x0F);
 
     /* GPIO speed configuration */
-    if constexpr ((0x00U) != (mode & (0x10U)))
-    {
+    if constexpr ((0x00U) != (mode & (0x10U))) {
         /* output mode max speed: 10MHz, 2MHz, 50MHz */
         temp_mode |= speed;
     }
 
     constexpr uint32_t kPinPos = 31U - __builtin_clz(pin);
 
-    if constexpr (kPinPos < 8U)
-    {
+    if constexpr (kPinPos < 8U) {
         uint32_t reg = GPIO_CTL0(gpio_periph);
         /* clear the specified pin mode bits */
         reg &= ~GPIO_MODE_MASK(kPinPos);
@@ -344,24 +311,18 @@ template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GP
         reg |= GPIO_MODE_SET(kPinPos, temp_mode);
 
         /* set IPD or IPU */
-        if constexpr (GPIO_MODE_IPD == mode)
-        {
+        if constexpr (GPIO_MODE_IPD == mode) {
             /* reset the corresponding OCTL bit */
             GPIO_BC(gpio_periph) = (1U << kPinPos);
-        }
-        else
-        {
+        } else {
             /* set the corresponding OCTL bit */
-            if constexpr (GPIO_MODE_IPU == mode)
-            {
+            if constexpr (GPIO_MODE_IPU == mode) {
                 GPIO_BOP(gpio_periph) = (1U << kPinPos);
             }
         }
         /* set GPIO_CTL0 register */
         GPIO_CTL0(gpio_periph) = reg;
-    }
-    else
-    {
+    } else {
         /* configure the eight high port pins with GPIO_CTL1 */
         constexpr uint32_t kHighPinPos = kPinPos - 8U;
         uint32_t reg = GPIO_CTL1(gpio_periph);
@@ -371,16 +332,12 @@ template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GP
         reg |= GPIO_MODE_SET(kHighPinPos, temp_mode);
 
         /* set IPD or IPU */
-        if constexpr (GPIO_MODE_IPD == mode)
-        {
+        if constexpr (GPIO_MODE_IPD == mode) {
             /* reset the corresponding OCTL bit */
             GPIO_BC(gpio_periph) = (1U << kPinPos);
-        }
-        else
-        {
+        } else {
             /* set the corresponding OCTL bit */
-            if (GPIO_MODE_IPU == mode)
-            {
+            if (GPIO_MODE_IPU == mode) {
                 GPIO_BOP(gpio_periph) = (1U << kPinPos);
             }
         }

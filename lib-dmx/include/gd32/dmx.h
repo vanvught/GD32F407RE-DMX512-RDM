@@ -32,19 +32,16 @@
 #include "dmx/dmx_config.h"
 #include "dmxstatistics.h"
 
-struct Statistics
-{
+struct Statistics {
     uint32_t nSlotsInPacket;
 };
 
-struct Data
-{
-    uint8_t Data[dmx::buffer::SIZE];
+struct Data {
+    uint8_t Data[dmx::buffer::kSize];
     struct Statistics Statistics;
 };
 
-class Dmx
-{
+class Dmx {
    public:
     Dmx();
 
@@ -112,9 +109,9 @@ class Dmx
    private:
     uint32_t m_nDmxTransmitPeriod{dmx::transmit::kPeriodDefault};
     uint32_t m_nDmxTransmitPeriodRequested{dmx::transmit::kPeriodDefault};
-    uint32_t m_nDmxTransmissionLength[dmx::config::max::PORTS];
+    uint32_t m_nDmxTransmissionLength[dmx::config::max::kPorts];
     uint32_t m_nDmxTransmitSlots{dmx::kChannelsMax};
-    dmx::PortDirection m_dmxPortDirection[dmx::config::max::PORTS];
+    dmx::PortDirection m_dmxPortDirection[dmx::config::max::kPorts];
     bool m_bHasContinuosOutput{false};
 
     inline static Dmx* s_this;
@@ -124,10 +121,8 @@ class Dmx
     case i:                                \
         return SetSendDataInternal<i, SC, STYLE>(pData, length)
 
-template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendData(uint32_t port_index, const uint8_t* pData, uint32_t length)
-{
-    switch (port_index)
-    {
+template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendData(uint32_t port_index, const uint8_t* pData, uint32_t length) {
+    switch (port_index) {
         DMX_HANDLE_SEND_CASE(0, true, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2
         DMX_HANDLE_SEND_CASE(1, true, dmxSendStyle);
@@ -155,10 +150,8 @@ template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendData(uint32_t por
     }
 }
 
-template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendDataWithoutSC(uint32_t port_index, const uint8_t* pData, uint32_t length)
-{
-    switch (port_index)
-    {
+template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendDataWithoutSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
+    switch (port_index) {
         DMX_HANDLE_SEND_CASE(0, false, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2
         DMX_HANDLE_SEND_CASE(1, false, dmxSendStyle);
@@ -188,4 +181,4 @@ template <dmx::SendStyle dmxSendStyle> inline void Dmx::SetSendDataWithoutSC(uin
 
 #undef DMX_HANDLE_SEND_CASE
 
-#endif  // GD32_DMX_H_
+#endif // GD32_DMX_H_

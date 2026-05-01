@@ -2,7 +2,7 @@
  * @file hal_panelled.h
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,16 @@
 
 #include <cstdint>
 
+#if defined(PANELLED_595_COUNT)
 #include "gd32.h"
+#endif
 
-namespace hal::panelled
-{
-namespace global
-{
+namespace hal::panelled {
+namespace global {
 extern uint32_t data;
 }
 
-inline void LedSpi([[maybe_unused]] uint32_t data)
-{
+inline void LedSpi([[maybe_unused]] uint32_t data) {
 #if defined(PANELLED_595_COUNT)
     GPIO_BC(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
 
@@ -83,18 +82,15 @@ inline void LedSpi([[maybe_unused]] uint32_t data)
 #endif
 }
 
-inline void Init()
-{
+inline void Init() {
 #if defined(PANELLED_595_COUNT)
 
 #endif
 }
 
-inline void On([[maybe_unused]] uint32_t on)
-{
+inline void On([[maybe_unused]] uint32_t on) {
 #if defined(PANELLED_595_COUNT)
-    if (global::data == (global::data | on))
-    {
+    if (global::data == (global::data | on)) {
         return;
     }
 
@@ -104,11 +100,9 @@ inline void On([[maybe_unused]] uint32_t on)
 #endif
 }
 
-inline void Off([[maybe_unused]] uint32_t off)
-{
+inline void Off([[maybe_unused]] uint32_t off) {
 #if defined(PANELLED_595_COUNT)
-    if (global::data == (global::data & ~off))
-    {
+    if (global::data == (global::data & ~off)) {
         return;
     }
 
@@ -118,8 +112,7 @@ inline void Off([[maybe_unused]] uint32_t off)
 #endif
 }
 
-inline void Run()
-{
+inline void Run() {
 #if defined(PANELLED_595_COUNT)
 
 #endif

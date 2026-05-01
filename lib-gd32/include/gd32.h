@@ -2,7 +2,7 @@
  * @file gd32.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -107,19 +107,18 @@ uint16_t bkp_data_read(bkp_data_register_enum register_number);
 #define GD32_GPIO_TO_PORT(g) (uint8_t)(g / 16)
 #define GD32_GPIO_TO_NUMBER(g) (uint8_t)(g - (16 * GD32_GPIO_TO_PORT(g)))
 
-typedef enum T_GD32_Port
-{
-    GD32_GPIO_PORTA = 0,
-    GD32_GPIO_PORTB,
-    GD32_GPIO_PORTC,
-    GD32_GPIO_PORTD,
-    GD32_GPIO_PORTE,
-    GD32_GPIO_PORTF,
-    GD32_GPIO_PORTG,
-    GD32_GPIO_PORTH,
-    GD32_GPIO_PORTI,
-    GD32_GPIO_PORTJ,
-    GD32_GPIO_PORTK
+typedef enum T_GD32_Port { 
+  GD32_GPIO_PORTA = 0, 
+  GD32_GPIO_PORTB, 
+  GD32_GPIO_PORTC, 
+  GD32_GPIO_PORTD, 
+  GD32_GPIO_PORTE, 
+  GD32_GPIO_PORTF, 
+  GD32_GPIO_PORTG, 
+  GD32_GPIO_PORTH, 
+  GD32_GPIO_PORTI, 
+  GD32_GPIO_PORTJ, 
+  GD32_GPIO_PORTK 
 } GD32_Port_TypeDef;
 
 #include "gd32_board.h"

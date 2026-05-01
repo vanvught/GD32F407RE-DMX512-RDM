@@ -2,7 +2,7 @@
  * @file hal_millis.h
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,10 +35,8 @@ extern volatile uint32_t gv_nSysTickMillis;
 #include "task.h"
 #endif
 
-namespace hal
-{
-inline uint32_t Millis()
-{
+namespace hal {
+inline uint32_t Millis() {
 #if defined(CONFIG_HAL_USE_SYSTICK)
     return gv_nSysTickMillis;
 #elif defined(USE_FREE_RTOS)

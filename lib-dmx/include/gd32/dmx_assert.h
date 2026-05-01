@@ -37,8 +37,8 @@
 #define DMX_CHECK_PORT_INDEX_VOID(x)                     \
     do                                                   \
     {                                                    \
-        assert((x) < dmx::config::max::PORTS);           \
-        if ((x) >= dmx::config::max::PORTS) [[unlikely]] \
+        assert((x) < dmx::config::max::kPorts);           \
+        if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return;                                      \
     } while (0)
 #endif
@@ -50,8 +50,8 @@
 #define DMX_CHECK_PORT_INDEX_RET(x, ret)                 \
     do                                                   \
     {                                                    \
-        assert((x) < dmx::config::max::PORTS);           \
-        if ((x) >= dmx::config::max::PORTS) [[unlikely]] \
+        assert((x) < dmx::config::max::kPorts);           \
+        if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return ret;                                  \
     } while (0)
 #endif
@@ -63,8 +63,8 @@
 #define DMX_CHECK_PORT_INDEX_PTR(x)                      \
     do                                                   \
     {                                                    \
-        assert((x) < dmx::config::max::PORTS);           \
-        if ((x) >= dmx::config::max::PORTS) [[unlikely]] \
+        assert((x) < dmx::config::max::kPorts);           \
+        if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return nullptr;                              \
     } while (0)
 #endif

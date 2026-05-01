@@ -2,7 +2,7 @@
  * @file hal_micros.h
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +30,8 @@
 
 uint32_t Gd32Micros();
 
-namespace hal
-{
-inline uint32_t Micros()
-{
+namespace hal {
+inline uint32_t Micros() {
     return Gd32Micros();
 }
 } // namespace hal

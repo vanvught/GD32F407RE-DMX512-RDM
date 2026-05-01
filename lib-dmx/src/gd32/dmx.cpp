@@ -35,17 +35,18 @@
 #include <algorithm>
 #include <cassert>
 
-#include "dmx.h"
+#include "dmx.h" // IWYU pragma: keep
 #include "dmxconst.h"
 #include "rdm.h"
 #include "rdm_e120.h"
 #include "gd32.h"
 #include "gd32_dma.h"
 #include "gd32_uart.h"
+#include "gd32_gpio.h"
 #include "dmx_internal.h"
 #include "dmx/dmx_config.h"
 #include "gd32/dmx_assert.h"
-#include "gd32/dmx_dma_check.h" // Do not reorder/move
+#include "gd32/dmx_dma_check.h" // IWYU pragma: keep // Do not reorder/move
 #if defined(LOGIC_ANALYZER)
 #include "logic_analyzer.h"
 #endif
@@ -69,7 +70,7 @@ enum class TxRxState {
 enum class PortState { kIdle, kTx, kRx };
 
 struct TxDmxDataPacket {
-    uint8_t data[dmx::buffer::SIZE]; // multiple of uint32_t
+    uint8_t data[dmx::buffer::kSize]; // multiple of uint32_t
     uint32_t length;
 };
 
@@ -99,7 +100,7 @@ struct RxDmxPackets {
 };
 
 struct RxDmxData {
-    uint8_t data[dmx::buffer::SIZE] ALIGNED; // multiple of uint32_t
+    uint8_t data[dmx::buffer::kSize] ALIGNED; // multiple of uint32_t
     uint32_t slots_in_packet;
 };
 
@@ -146,26 +147,26 @@ static constexpr dmx::DirGpio kDirGpio[DMX_MAX_PORTS] = {
 #endif
 };
 
-static volatile dmx::PortState sv_port_state[dmx::config::max::PORTS] ALIGNED;
+static volatile dmx::PortState sv_port_state[dmx::config::max::kPorts] ALIGNED;
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-static volatile dmx::TotalStatistics sv_total_statistics[dmx::config::max::PORTS] ALIGNED;
+static volatile dmx::TotalStatistics sv_total_statistics[dmx::config::max::kPorts] ALIGNED;
 #endif
 
 // DMX RX
 
-static volatile dmx::RxDmxPackets sv_rx_dmx_packets[dmx::config::max::PORTS] ALIGNED;
+static volatile dmx::RxDmxPackets sv_rx_dmx_packets[dmx::config::max::kPorts] ALIGNED;
 
 // RDM RX
 volatile uint32_t gsv_RdmDataReceiveEnd;
 
 // DMX RDM RX
 
-static volatile dmx::RxData sv_rx_buffer[dmx::config::max::PORTS] ALIGNED;
+static volatile dmx::RxData sv_rx_buffer[dmx::config::max::kPorts] ALIGNED;
 
 // DMX TX
 
-static dmx::TxData s_TxBuffer[dmx::config::max::PORTS] ALIGNED SECTION_DMA_BUFFER;
+static dmx::TxData s_TxBuffer[dmx::config::max::kPorts] ALIGNED SECTION_DMA_BUFFER;
 static dmx::DmxTransmit s_dmx_transmit;
 
 template <uint32_t uart, uint32_t port_index> void IrqHandlerDmxRdmInput() {
@@ -1390,11 +1391,11 @@ void Dmx::SetPortDirection(uint32_t port_index, dmx::PortDirection port_directio
 }
 
 void Dmx::ClearData(uint32_t port_index) {
-    assert(port_index < dmx::config::max::PORTS);
+    assert(port_index < dmx::config::max::kPorts);
 
     auto* p = &s_TxBuffer[port_index].dmx.data[0];
     p->length = 513; // Including START Code
-    __builtin_memset(p->data, 0, dmx::buffer::SIZE);
+    __builtin_memset(p->data, 0, dmx::buffer::kSize);
 }
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
@@ -1499,13 +1500,13 @@ template <uint32_t port_index, uint32_t nUart> static void StartDmxOutput() {
 }
 
 template <uint32_t portIndex> static void StartDmxOutputPort() {
-    if constexpr (portIndex < dmx::config::max::PORTS) {
+    if constexpr (portIndex < dmx::config::max::kPorts) {
         StartDmxOutput<portIndex, DmxPortToUart(portIndex)>();
     }
 }
 
 void Dmx::StartDmxOutput(uint32_t port_index) {
-    assert(port_index < dmx::config::max::PORTS);
+    assert(port_index < dmx::config::max::kPorts);
 
     switch (port_index) {
         case 0:
@@ -1649,7 +1650,7 @@ void Dmx::FullOn() {
             auto* __restrict__ p = &s_TxBuffer[port_index].dmx.data[0];
             auto* p32 = reinterpret_cast<uint32_t*>(p->data);
 
-            for (auto i = 0; i < dmx::buffer::SIZE / 4; i++) {
+            for (auto i = 0; i < dmx::buffer::kSize / 4; i++) {
                 *p32++ = UINT32_MAX;
             }
 
@@ -1672,7 +1673,7 @@ void Dmx::StartOutput(uint32_t port_index) {
 }
 
 void Dmx::Sync() {
-    for (uint32_t port_index = 0; port_index < dmx::config::max::PORTS; port_index++) {
+    for (uint32_t port_index = 0; port_index < dmx::config::max::kPorts; port_index++) {
         auto& tx_buffer = s_TxBuffer[port_index];
 
         if (!tx_buffer.dmx.data_pending) {
@@ -1737,7 +1738,7 @@ const uint8_t* Dmx::GetDmxChanged(uint32_t port_index) {
     if (sv_rx_buffer[port_index].dmx.current.slots_in_packet != sv_rx_buffer[port_index].dmx.previous.slots_in_packet) {
         sv_rx_buffer[port_index].dmx.previous.slots_in_packet = sv_rx_buffer[port_index].dmx.current.slots_in_packet;
 
-        for (size_t i = 0; i < dmx::buffer::SIZE / 4; ++i) {
+        for (size_t i = 0; i < dmx::buffer::kSize / 4; ++i) {
             dst32[i] = src32[i];
         }
 
@@ -1746,7 +1747,7 @@ const uint8_t* Dmx::GetDmxChanged(uint32_t port_index) {
 
     bool is_changed = false;
 
-    for (size_t i = 0; i < dmx::buffer::SIZE / 4; ++i) {
+    for (size_t i = 0; i < dmx::buffer::kSize / 4; ++i) {
         const auto kSrcValue = src32[i];
         auto dst_value = dst32[i];
 
@@ -2168,7 +2169,7 @@ void Dmx::SetDmxPeriodTime(uint32_t period) {
 
     auto length_max = s_TxBuffer[0].dmx.data[0].length;
 
-    for (uint32_t port_index = 1; port_index < dmx::config::max::PORTS; port_index++) {
+    for (uint32_t port_index = 1; port_index < dmx::config::max::kPorts; port_index++) {
         const auto kLength = s_TxBuffer[port_index].dmx.data[0].length;
         if (kLength > length_max) {
             length_max = kLength;
@@ -2207,7 +2208,7 @@ void Dmx::SetDmxSlots(uint16_t slots) {
     if ((slots >= 2) && (slots <= dmx::kChannelsMax)) {
         m_nDmxTransmitSlots = slots;
 
-        for (uint32_t i = 0; i < dmx::config::max::PORTS; i++) {
+        for (uint32_t i = 0; i < dmx::config::max::kPorts; i++) {
             m_nDmxTransmissionLength[i] = static_cast<uint32_t>(slots);
         }
 
@@ -2230,20 +2231,20 @@ void Dmx::SetOutputStyle(uint32_t port_index, dmx::OutputStyle output_style) {
             return;
         }
 
-        for (uint32_t index = 0; index < dmx::config::max::PORTS; index++) {
+        for (uint32_t index = 0; index < dmx::config::max::kPorts; index++) {
             if ((s_TxBuffer[index].output_style == dmx::OutputStyle::kConstant) && (m_dmxPortDirection[index] == dmx::PortDirection::kOutput)) {
                 StopData(index);
             }
         }
 
-        for (uint32_t index = 0; index < dmx::config::max::PORTS; index++) {
+        for (uint32_t index = 0; index < dmx::config::max::kPorts; index++) {
             if ((s_TxBuffer[index].output_style == dmx::OutputStyle::kConstant) && (m_dmxPortDirection[index] == dmx::PortDirection::kOutput)) {
                 StartDmxOutput(index);
             }
         }
     } else {
         m_bHasContinuosOutput = false;
-        for (uint32_t index = 0; index < dmx::config::max::PORTS; index++) {
+        for (uint32_t index = 0; index < dmx::config::max::kPorts; index++) {
             if (s_TxBuffer[index].output_style == dmx::OutputStyle::kConstant) {
                 m_bHasContinuosOutput = true;
                 return;
@@ -2273,12 +2274,7 @@ Dmx::Dmx() {
     s_dmx_transmit.inter_time = dmx::transmit::kPeriodDefault - s_dmx_transmit.break_time - s_dmx_transmit.mab_time - (dmx::kChannelsMax * 44) - 44;
 
     for (auto port_index = 0; port_index < DMX_MAX_PORTS; port_index++) {
-#if defined(GPIO_INIT)
-        gpio_init(kDirGpio[port_index].port, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, kDirGpio[port_index].pin);
-#else
-        gpio_mode_set(kDirGpio[port_index].port, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, kDirGpio[port_index].pin);
-        gpio_output_options_set(kDirGpio[port_index].port, GPIO_OTYPE_PP, GPIO_OSPEED, kDirGpio[port_index].pin);
-#endif
+        Gd32GpioFsel(kDirGpio[port_index].port, kDirGpio[port_index].pin, GPIO_FSEL_OUTPUT);
         m_nDmxTransmissionLength[port_index] = dmx::kChannelsMax;
         sv_rx_buffer[port_index].state = dmx::TxRxState::kIdle;
         s_TxBuffer[port_index].state = dmx::TxRxState::kIdle;
@@ -2286,7 +2282,7 @@ Dmx::Dmx() {
         SetOutputStyle(port_index, dmx::OutputStyle::kDelta);
         ClearData(port_index);
     }
-    
+
     SetDmxBreakTime(dmx::transmit::kBreakTimeTypical);
     SetDmxMabTime(dmx::transmit::kMabTimeMin);
     SetDmxSlots(dmx::kChannelsMax);

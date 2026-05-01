@@ -110,31 +110,26 @@
 #define USART0_REMAP
 #define USART2_PARTIAL_REMAP
 
-/**
- * Panel LEDs
- */
-
+// Panel LEDs
 #ifdef __cplusplus
-namespace hal {
-namespace panelled {
-static constexpr uint32_t ACTIVITY = 0;
-static constexpr uint32_t ARTNET = 0;
-static constexpr uint32_t DDP = 0;
-static constexpr uint32_t SACN = 0;
-static constexpr uint32_t LTC_IN = 0;
-static constexpr uint32_t LTC_OUT = 0;
-static constexpr uint32_t MIDI_IN = 0;
-static constexpr uint32_t MIDI_OUT = 0;
-static constexpr uint32_t OSC_IN = 0;
-static constexpr uint32_t OSC_OUT = 0;
-static constexpr uint32_t TCNET = 0;
+namespace hal::panelled {
+inline constexpr uint32_t kActivity = 0;
+inline constexpr uint32_t kArtnet = 0;
+inline constexpr uint32_t kDdp = 0;
+inline constexpr uint32_t kSacn = 0;
+inline constexpr uint32_t kLtcIn = 0;
+inline constexpr uint32_t kLtcOut = 0;
+inline constexpr uint32_t kMidiIn = 0;
+inline constexpr uint32_t kMidiOut = 0;
+inline constexpr uint32_t kOscIn = 0;
+inline constexpr uint32_t kOscOut = 0;
+inline constexpr uint32_t kTcnet = 0;
 // DMX
-static constexpr uint32_t PORT_A_TX  = (1U << 0);
-static constexpr uint32_t PORT_A_RX  = (1U << 8);
+inline constexpr uint32_t kPortATx = (1U << 0);
+inline constexpr uint32_t kPortARx = (1U << 8);
 #define CONFIG_PANELLED_RDM_PORT
-static constexpr uint32_t PORT_A_RDM = (1U << 16);
-}  // namespace panelled
-}  // namespace hal
+inline constexpr uint32_t kPortARdm = (1U << 16);
+} // namespace hal::panelled
 #endif
 
 #define PANELLED_595_COUNT			2
