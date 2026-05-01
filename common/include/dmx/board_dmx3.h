@@ -1,6 +1,3 @@
-#ifndef DMX_BOARD_DMX3_H_
-#define DMX_BOARD_DMX3_H_
-
 /**
  * @file board_dmx3.h
  *
@@ -26,31 +23,35 @@
  * THE SOFTWARE.
  */
 
+#ifndef DMX_BOARD_DMX3_H_
+#define DMX_BOARD_DMX3_H_
+
 #include <cstdint>
-#include "gd32_board.h"
+
+#include "gd32.h" // IWYU pragma: keep
 
 #define DMX_MAX_PORTS 3
 
-namespace max
-{
-static constexpr uint32_t PORTS = DMX_MAX_PORTS;
+namespace dmx::config {
+namespace max {
+inline constexpr uint32_t kPorts = DMX_MAX_PORTS;
 } // namespace max
 
 #define DMX_USE_USART2
 #define DMX_USE_UART4
 #define DMX_USE_USART5
 
-static constexpr auto USART2_PORT = 0;
-static constexpr auto UART4_PORT = 1;
-static constexpr auto USART5_PORT = 2;
+inline constexpr auto USART2_PORT = 0;
+inline constexpr auto UART4_PORT = 1;
+inline constexpr auto USART5_PORT = 2;
 
-static constexpr auto DIR_PORT_0_GPIO_PORT = GPIOB;
-static constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_10;
+inline constexpr auto DIR_PORT_0_GPIO_PORT = GPIOB;
+inline constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_10;
 
-static constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;
-static constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_5;
+inline constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;
+inline constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_5;
 
-static constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;
-static constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_14;
-
-#endif  // DMX_BOARD_DMX3_H_
+inline constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;
+inline constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_14;
+} // namespace dmx::config
+#endif // DMX_BOARD_DMX3_H_

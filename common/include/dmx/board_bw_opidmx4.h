@@ -1,6 +1,3 @@
-#ifndef DMX_BOARD_BW_OPIDMX4_H_
-#define DMX_BOARD_BW_OPIDMX4_H_
-
 /**
  * @file board_bw_opidmx4.h
  *
@@ -26,14 +23,18 @@
  * THE SOFTWARE.
  */
 
+#ifndef DMX_BOARD_BW_OPIDMX4_H_
+#define DMX_BOARD_BW_OPIDMX4_H_
+
 #include <cstdint>
-#include "gd32_board.h"
+
+#include "gd32.h" // IWYU pragma: keep
 
 #define DMX_MAX_PORTS 4
 
-namespace max
-{
-static constexpr uint32_t PORTS = DMX_MAX_PORTS;
+namespace dmx::config {
+namespace max {
+inline constexpr uint32_t kPorts = DMX_MAX_PORTS;
 } // namespace max
 
 #define DMX_USE_USART0
@@ -41,21 +42,21 @@ static constexpr uint32_t PORTS = DMX_MAX_PORTS;
 #define DMX_USE_UART4
 #define DMX_USE_USART5
 
-static constexpr auto USART0_PORT = 3; // OPi One UART0
-static constexpr auto USART2_PORT = 2; // OPi One UART3
-static constexpr auto UART4_PORT = 0;  // OPi One UART1	Pin 38 TX, Pin 40 RX
-static constexpr auto USART5_PORT = 1; // OPi One UART2
+inline constexpr auto USART0_PORT = 3; // OPi One UART0
+inline constexpr auto USART2_PORT = 2; // OPi One UART3
+inline constexpr auto UART4_PORT = 0;  // OPi One UART1	Pin 38 TX, Pin 40 RX
+inline constexpr auto USART5_PORT = 1; // OPi One UART2
 
-static constexpr auto DIR_PORT_0_GPIO_PORT = GPIOA;     // OPi One UART1
-static constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_4; // GPIO_EXT_32
+inline constexpr auto DIR_PORT_0_GPIO_PORT = GPIOA;     // OPi One UART1
+inline constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_4; // GPIO_EXT_32
 
-static constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;      // OPi One UART2
-static constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_11; // GPIO_EXT_22
+inline constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;      // OPi One UART2
+inline constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_11; // GPIO_EXT_22
 
-static constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;      // OPi One UART3
-static constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_10; // GPIO_EXT_12
+inline constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;      // OPi One UART3
+inline constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_10; // GPIO_EXT_12
 
-static constexpr auto DIR_PORT_3_GPIO_PORT = GPIOA;     // OPi One UART0
-static constexpr auto DIR_PORT_3_GPIO_PIN = GPIO_PIN_5; // GPIO_EXT_31
-
-#endif  // DMX_BOARD_BW_OPIDMX4_H_
+inline constexpr auto DIR_PORT_3_GPIO_PORT = GPIOA;     // OPi One UART0
+inline constexpr auto DIR_PORT_3_GPIO_PIN = GPIO_PIN_5; // GPIO_EXT_31
+} // namespace dmx::config
+#endif // DMX_BOARD_BW_OPIDMX4_H_
