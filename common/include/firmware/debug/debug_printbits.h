@@ -42,8 +42,8 @@ namespace debug
 #ifdef NDEBUG
 inline void PrintBits([[maybe_unused]] uint32_t u) {}
 #else
-inline void PrintBits(uint32_t u)
-{
+inline void PrintBits(uint32_t u) {
+	printf("%.8x ", u);
     uint32_t b = 1U << 31;
 
     for (uint32_t i = 0; i < 32; i++)

@@ -7,6 +7,7 @@ INCLUDES+=-I../CMSIS/Core/Include
 INCLUDES+=-I../lib-gd32/${FAMILY}/${FAMILY_UC}_standard_peripheral/Include
 INCLUDES+=-I../lib-gd32/${FAMILY}/CMSIS/GD/${FAMILY_UC}/Include
 INCLUDES+=-I../lib-gd32/include
+INCLUDES+=-I../lib-hwclock/include
 INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 
 ALL_FLAGS := $(DEFINES) $(MAKE_FLAGS)

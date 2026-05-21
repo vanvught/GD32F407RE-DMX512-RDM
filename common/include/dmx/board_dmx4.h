@@ -2,7 +2,7 @@
  * @file board_dmx4.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,21 +42,21 @@ inline constexpr uint32_t kPorts = DMX_MAX_PORTS;
 #define DMX_USE_UART4
 #define DMX_USE_USART5
 
-inline constexpr auto USART0_PORT = 0;
-inline constexpr auto USART2_PORT = 1;
-inline constexpr auto UART4_PORT = 2;
-inline constexpr auto USART5_PORT = 3;
+inline constexpr auto kUsart0Port = 0;
+inline constexpr auto kUsart2Port = 1;
+inline constexpr auto kUart4Port = 2;
+inline constexpr auto kUsart5Port = 3;
 
-inline constexpr auto DIR_PORT_0_GPIO_PORT = GPIOA;
-inline constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_4;
+inline constexpr auto kDirPort0GpioPort = GPIOA;
+inline constexpr auto kDirPort0GpioPin = GPIO_PIN_4;
 
-inline constexpr auto DIR_PORT_1_GPIO_PORT = GPIOB;
-inline constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_10;
+inline constexpr auto kDirPort1GpioPort = GPIOB;
+inline constexpr auto kDirPort1GpioPin = GPIO_PIN_10;
 
-inline constexpr auto DIR_PORT_2_GPIO_PORT = GPIOA;
-inline constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_5;
+inline constexpr auto kDirPort2GpioPort = GPIOA;
+inline constexpr auto kDirPort2GpioPin = GPIO_PIN_5;
 
-inline constexpr auto DIR_PORT_3_GPIO_PORT = GPIOB;
-inline constexpr auto DIR_PORT_3_GPIO_PIN = GPIO_PIN_14;
+inline constexpr auto kDirPort3GpioPort = GPIOB;
+inline constexpr auto kDirPort3GpioPin = GPIO_PIN_14;
 } // namespace dmx::config
 #endif // DMX_BOARD_DMX4_H_

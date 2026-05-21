@@ -2,7 +2,7 @@
  * @file board_bw_opidmx4.h
  *
  */
-/* Copyright (C) 2022 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,21 +42,21 @@ inline constexpr uint32_t kPorts = DMX_MAX_PORTS;
 #define DMX_USE_UART4
 #define DMX_USE_USART5
 
-inline constexpr auto USART0_PORT = 3; // OPi One UART0
-inline constexpr auto USART2_PORT = 2; // OPi One UART3
-inline constexpr auto UART4_PORT = 0;  // OPi One UART1	Pin 38 TX, Pin 40 RX
-inline constexpr auto USART5_PORT = 1; // OPi One UART2
+inline constexpr auto kUsart0Port = 3; // OPi One UART0
+inline constexpr auto kUsart2Port = 2; // OPi One UART3
+inline constexpr auto kUart4Port = 0;  // OPi One UART1	Pin 38 TX, Pin 40 RX
+inline constexpr auto kUsart5Port = 1; // OPi One UART2
 
-inline constexpr auto DIR_PORT_0_GPIO_PORT = GPIOA;     // OPi One UART1
-inline constexpr auto DIR_PORT_0_GPIO_PIN = GPIO_PIN_4; // GPIO_EXT_32
+inline constexpr auto kDirPort0GpioPort = GPIOA;     // OPi One UART1
+inline constexpr auto kDirPort0GpioPin = GPIO_PIN_4; // GPIO_EXT_32
 
-inline constexpr auto DIR_PORT_1_GPIO_PORT = GPIOA;      // OPi One UART2
-inline constexpr auto DIR_PORT_1_GPIO_PIN = GPIO_PIN_11; // GPIO_EXT_22
+inline constexpr auto kDirPort1GpioPort = GPIOA;      // OPi One UART2
+inline constexpr auto kDirPort1GpioPin = GPIO_PIN_11; // GPIO_EXT_22
 
-inline constexpr auto DIR_PORT_2_GPIO_PORT = GPIOB;      // OPi One UART3
-inline constexpr auto DIR_PORT_2_GPIO_PIN = GPIO_PIN_10; // GPIO_EXT_12
+inline constexpr auto kDirPort2GpioPort = GPIOB;      // OPi One UART3
+inline constexpr auto kDirPort2GpioPin = GPIO_PIN_10; // GPIO_EXT_12
 
-inline constexpr auto DIR_PORT_3_GPIO_PORT = GPIOA;     // OPi One UART0
-inline constexpr auto DIR_PORT_3_GPIO_PIN = GPIO_PIN_5; // GPIO_EXT_31
+inline constexpr auto kDirPort3GpioPort = GPIOA;     // OPi One UART0
+inline constexpr auto kDirPort3GpioPin = GPIO_PIN_5; // GPIO_EXT_31
 } // namespace dmx::config
 #endif // DMX_BOARD_BW_OPIDMX4_H_
