@@ -2,7 +2,7 @@
  * @file gd32_adc.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
  */
 
 #include "gd32.h"
+#include "timing.h"
 
-void Gd32AdcInit()
-{
+void Gd32AdcInit() {
     rcu_periph_clock_enable(RCU_ADC0);
 #if !defined(GD32F4XX)
     rcu_adc_clock_config(RCU_CKADC_CKAPB2_DIV12);
@@ -78,39 +78,35 @@ void Gd32AdcInit()
 #endif
     /* enable ADC interface */
     adc_enable(ADC0);
-    udelay(1000);
+    timing::DelayUs(1000);
     /* ADC calibration and reset calibration */
     adc_calibration_enable(ADC0);
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 }
 
-float G32AdcGetTemp()
-{
-    const float kTemperature = (1.43f - ADC_IDATA0(ADC0) * 3.3f / 4096) * 1000 / 4.3f + 25;
+float G32AdcGetTemp() {
+    const float kTemperature = (1.43f - ADC_IDATA0(ADC0) * 3.3f / 4096U) * 1000U / 4.3f + 25U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kTemperature;
 }
 
-float Gd32AdcGetVref()
-{
-    const float kVrefValue = (ADC_IDATA1(ADC0) * 3.3f / 4096);
+float Gd32AdcGetVref() {
+    const float kVrefValue = (ADC_IDATA1(ADC0) * 3.3f / 4096U);
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kVrefValue;
 }
 
 #if defined(GD32F4XX)
-float Gd32AdcGetVbat()
-{
-    const float kVrefValue = (ADC_IDATA2(ADC0) * 3.3f / 4096) * 4;
+float Gd32AdcGetVbat() {
+    const float kVrefValue = (ADC_IDATA2(ADC0) * 3.3f / 4096U) * 4U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kVrefValue;
 }
 #endif
 
 namespace hal {
-float CoreTemperatureCurrent()
-{
+float CoreTemperatureCurrent() {
     return G32AdcGetTemp();
 }
-}
+} // namespace hal

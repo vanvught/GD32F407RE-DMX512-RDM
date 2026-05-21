@@ -1,8 +1,8 @@
 /**
- * @file timer5.cpp
+ * @file uart0.h
  *
  */
-/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,15 @@
  * THE SOFTWARE.
  */
 
-#include "gd32.h" // IWYU pragma: keep
+#ifndef UART0_H_
+#define UART0_H_
 
-void Timer5Config() {
-    rcu_periph_clock_enable(RCU_TIMER5);
+namespace uart0 {
+void Init();
+void PutChar(int c);
+void Puts(const char* s);
+int Printf(const char* fmt, ...);
+int GetChar();
+} // namespace uart0
 
-    timer_deinit(TIMER5);
-
-    timer_parameter_struct timer_initpara;
-    timer_struct_para_init(&timer_initpara);
-
-    timer_initpara.prescaler = TIMER_PSC_1MHZ;
-    timer_initpara.period = UINT32_MAX;
-    timer_init(TIMER5, &timer_initpara);
-    timer_enable(TIMER5);
-}
+#endif // UART0_H_

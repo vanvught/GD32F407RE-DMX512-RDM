@@ -2,7 +2,7 @@
  * @file gd32_ptp.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,11 +89,11 @@ static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] u
     DEBUG_EXIT();
 }
 
-void gd32_ptp_start() {
+void Gd32PtpStart() {
     DEBUG_ENTRY();
-    DEBUG_PRINTF("PTP_TICK=%u", gd32::ptp::PTP_TICK);
-    DEBUG_PRINTF("ADJ_FREQ_BASE_INCREMENT=%u", gd32::ptp::ADJ_FREQ_BASE_INCREMENT);
-    DEBUG_PRINTF("ADJ_FREQ_BASE_ADDEND=x%X", gd32::ptp::ADJ_FREQ_BASE_ADDEND);
+    DEBUG_PRINTF("PTP_TICK=%u", gd32::ptp::kPtpTick);
+    DEBUG_PRINTF("ADJ_FREQ_BASE_INCREMENT=%u", gd32::ptp::kAdjFreqBaseIncrement);
+    DEBUG_PRINTF("ADJ_FREQ_BASE_ADDEND=x%X", gd32::ptp::kAdjFreqBaseAddend);
 
     struct tm tmbuf;
     memset(&tmbuf, 0, sizeof(struct tm));
@@ -101,7 +101,7 @@ void gd32_ptp_start() {
     tmbuf.tm_mon = _TIME_STAMP_MONTH_ - 1;    // The number of months since January, in the range 0 to 11.
     tmbuf.tm_year = _TIME_STAMP_YEAR_ - 1900; // The number of years since 1900.
 
-    PtpStart(mktime(&tmbuf), 0, gd32::ptp::ADJ_FREQ_BASE_ADDEND, gd32::ptp::ADJ_FREQ_BASE_INCREMENT);
+    PtpStart(static_cast<uint32_t>(mktime(&tmbuf)), 0, gd32::ptp::kAdjFreqBaseAddend, gd32::ptp::kAdjFreqBaseIncrement);
 
 #ifndef NDEBUG
     struct timeval tv;
@@ -113,7 +113,7 @@ void gd32_ptp_start() {
     DEBUG_EXIT();
 }
 
-void gd32_ptp_get_time(gd32::ptp::ptptime* ptp_time) {
+void Gd32PtpGetTime(gd32::ptp::ptptime* ptp_time) {
     enet_ptp_systime_struct systime;
 
     enet_ptp_system_time_get(&systime);
@@ -122,37 +122,37 @@ void gd32_ptp_get_time(gd32::ptp::ptptime* ptp_time) {
 #if !defined(GD32F4XX)
     ptp_time->tv_nsec = systime.nanosecond;
 #else
-    ptp_time->tv_nsec = gd32::ptp_subsecond_2_nanosecond(systime.subsecond);
+    ptp_time->tv_nsec = gd32::PtpSubsecond2Nanosecond(systime.subsecond);
 #endif
 }
 
-void gd32_ptp_set_time(const gd32::ptp::ptptime* ptp_time) {
+void Gd32PtpSetTime(const gd32::ptp::ptptime* ptp_time) {
     const auto kSign = ENET_PTP_ADD_TO_TIME;
     const auto kSecond = ptp_time->tv_sec;
     const auto kNanoSecond = ptp_time->tv_nsec;
-    const auto kSubSecond = gd32::ptp_nanosecond_2_subsecond(kNanoSecond);
+    const auto kSubSecond = gd32::PtpNanosecond2Subsecond(kNanoSecond);
 
     enet_ptp_timestamp_update_config(kSign, kSecond, kSubSecond);
     enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_INIT);
     while (EnetPtpflagstatusGet(ENET_PTP_SYSTIME_INIT) == SET);
 }
 
-void gd32_ptp_update_time(const gd32::ptp::time_t* time) {
+void Gd32PtpUpdateTime(const gd32::ptp::time_t* time) {
     uint32_t sign;
     uint32_t second;
     uint32_t nano_second;
 
     if (time->tv_sec < 0 || (time->tv_sec == 0 && time->tv_nsec < 0)) {
         sign = ENET_PTP_SUBSTRACT_FROM_TIME;
-        second = -time->tv_sec;
-        nano_second = -time->tv_nsec;
+        second = static_cast<uint32_t>(-time->tv_sec);
+        nano_second = static_cast<uint32_t>(-time->tv_nsec);
     } else {
         sign = ENET_PTP_ADD_TO_TIME;
-        second = time->tv_sec;
-        nano_second = time->tv_nsec;
+        second = static_cast<uint32_t>(time->tv_sec);
+        nano_second = static_cast<uint32_t>(time->tv_nsec);
     }
 
-    const auto kSubSecond = gd32::ptp_nanosecond_2_subsecond(nano_second);
+    const auto kSubSecond = gd32::PtpNanosecond2Subsecond(nano_second);
 #if defined(GD32H7XX)
     const auto kAddend = ENET_PTP_TSADDEND(ENETx);
 #else
@@ -167,8 +167,9 @@ void gd32_ptp_update_time(const gd32::ptp::time_t* time) {
     enet_ptp_timestamp_function_config(ENET_PTP_ADDEND_UPDATE);
 }
 
-bool gd32_adj_frequency(int32_t adjust_ppb) {
-    const uint32_t kAddend = gd32::ptp::ADJ_FREQ_BASE_ADDEND + static_cast<int32_t>((((static_cast<int64_t>(gd32::ptp::ADJ_FREQ_BASE_ADDEND)) * adjust_ppb) / 1000000000ULL));
+bool Gd32AdjFrequency(uint32_t adjust_ppb) {
+    const uint64_t kAdjust = static_cast<uint64_t>(gd32::ptp::kAdjFreqBaseAddend) * adjust_ppb;
+    const uint32_t kAddend = gd32::ptp::kAdjFreqBaseAddend + (kAdjust / 1000000000ULL);
 
     enet_ptp_timestamp_addend_config(kAddend);
 

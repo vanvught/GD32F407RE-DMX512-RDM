@@ -229,8 +229,8 @@ static void TimersConfig() {
 
     timer_init(TIMERx, &timer_initpara);
 
-    timer_flag_clear(TIMERx, ~0);
-    timer_interrupt_flag_clear(TIMERx, ~0);
+    timer_flag_clear(TIMERx, UINT32_MAX);
+    timer_interrupt_flag_clear(TIMERx, UINT32_MAX);
 
     timer_interrupt_enable(TIMERx, TIMER_INT_UP);
 

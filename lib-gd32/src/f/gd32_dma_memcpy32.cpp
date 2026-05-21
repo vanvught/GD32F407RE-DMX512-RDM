@@ -25,10 +25,8 @@
 
 #include "gd32_dma.h"
 
-namespace dma::memcpy32
-{
-void Init()
-{
+namespace dma::memcpy32 {
+void Init() {
 #if !defined(GD32F4XX)
     rcu_periph_clock_enable(RCU_DMA0);
     dma_deinit(DMA0, DMA_CH3);

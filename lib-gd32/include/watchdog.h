@@ -1,5 +1,5 @@
 /**
- * @file timer5.cpp
+ * @file watchdog.h
  *
  */
 /* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,18 +23,35 @@
  * THE SOFTWARE.
  */
 
+#ifndef GD32_HAL_WATCHDOG_H_
+#define GD32_HAL_WATCHDOG_H_
+
 #include "gd32.h" // IWYU pragma: keep
 
-void Timer5Config() {
-    rcu_periph_clock_enable(RCU_TIMER5);
-
-    timer_deinit(TIMER5);
-
-    timer_parameter_struct timer_initpara;
-    timer_struct_para_init(&timer_initpara);
-
-    timer_initpara.prescaler = TIMER_PSC_1MHZ;
-    timer_initpara.period = UINT32_MAX;
-    timer_init(TIMER5, &timer_initpara);
-    timer_enable(TIMER5);
+namespace watchdog {
+namespace global {
+extern bool watchdog;
 }
+inline void Init() {
+    global::watchdog = (SUCCESS == fwdgt_config(0xFFFF, FWDGT_PSC_DIV16));
+
+    if (global::watchdog) {
+        fwdgt_enable();
+    }
+}
+
+inline void Feed() {
+    fwdgt_counter_reload();
+}
+
+inline void Stop() {
+    global::watchdog = false;
+    fwdgt_config(0xFFFF, FWDGT_PSC_DIV64);
+}
+
+inline bool Watchdog() {
+    return global::watchdog;
+}
+} // namespace watchdog
+
+#endif // GD32_HAL_WATCHDOG_H_

@@ -1,5 +1,5 @@
 /**
- * @file udelay.cpp
+ * @file delayus.cpp
  *
  */
 /* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 
+#pragma GCC push_options
+#pragma GCC optimize("O2")
+
 #if defined(DEBUG_UDELAY)
 #undef NDEBUG
 #endif
@@ -42,7 +45,8 @@ void UdelayInit() {
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-void udelay(uint32_t micros, uint32_t offset_micros) {
+namespace timing {
+void DelayUs(uint32_t micros, uint32_t offset_micros) {
     const auto kTicks = micros * kTicksPerUs;
 
     uint32_t ticks_count = 0;
@@ -72,20 +76,28 @@ void udelay(uint32_t micros, uint32_t offset_micros) {
         }
     }
 }
+} // namespace timing
 
-static uint32_t micros_previous;
-static uint32_t result;
-
+// Use for:
+// microsecond delays
+// profiling
+// short protocol timing
+// busy waits
 uint32_t Gd32Micros() {
-    const auto kMicros = DWT->CYCCNT / kTicksPerUs;
+    static uint32_t cycles_previous;
+    static uint32_t micros_accumulated;
+    static uint32_t cycle_remainder;
 
-    if (kMicros > micros_previous) {
-        result += (kMicros - micros_previous);
-    } else {
-        result += ((UINT32_MAX / kTicksPerUs) - micros_previous + kMicros);
-    }
+    const uint32_t kCyclesNow = DWT->CYCCNT;
+    const uint32_t kDeltaCycles = kCyclesNow - cycles_previous;
+    cycles_previous = kCyclesNow;
 
-    micros_previous = kMicros;
+    const uint32_t kTotal = cycle_remainder + kDeltaCycles;
 
-    return result;
+    micros_accumulated += kTotal / kTicksPerUs;
+    cycle_remainder = kTotal % kTicksPerUs;
+
+    return micros_accumulated;
 }
+
+#pragma GCC pop_options

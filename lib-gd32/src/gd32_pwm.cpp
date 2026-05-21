@@ -266,7 +266,7 @@ void gd32_pwm_begin() {
 void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle) {
     DEBUG_ENTRY();
 
-    const uint32_t kPulse = (duty_cycle > 100 ? 100 : duty_cycle) * (pwm::kTimerPeriod / 100U);
+    const uint32_t kPulse = (duty_cycle > 100U ? 100U : duty_cycle) * (pwm::kTimerPeriod / 100U);
 
     DEBUG_PRINTF("Channel=%u, nDutyCycle=%u, nPulse=%u", static_cast<unsigned>(channel), duty_cycle, static_cast<unsigned>(nPulse));
 

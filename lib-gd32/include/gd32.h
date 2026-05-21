@@ -22,25 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
- #ifndef GD32_H_
- #define GD32_H_
+
+#ifndef GD32_H_
+#define GD32_H_
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-#if !defined(UDELAY)
-#define UDELAY
-void udelay(uint32_t us, uint32_t offset = 0);
-#endif
-#endif
-
-struct HwTimersSeconds
-{
+struct HwTimersSeconds {
 #if !defined(CONFIG_NET_ENABLE_PTP)
-    volatile uint32_t nTimeval;
+    volatile uint32_t timeval;
 #endif
-    volatile uint32_t nUptime;
+    volatile uint32_t uptime;
 };
 
 /*
@@ -51,31 +43,35 @@ struct HwTimersSeconds
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #if __cplusplus > 201402
 // error: compound assignment with 'volatile'-qualified left operand is deprecated
 #pragma GCC diagnostic ignored "-Wvolatile"
 #endif
 #endif
-extern "C"
-{
+extern "C" {
 #endif
 
 #if defined(GD32F10X_HD) || defined(GD32F10X_CL)
-#include "gd32f10x.h"
+#include "gd32f10x.h" // IWYU pragma: keep
 #elif defined(GD32F20X_CL)
-#include "gd32f20x.h"
+#include "gd32f20x.h" // IWYU pragma: keep
 #elif defined(GD32F30X_HD)
-#include "gd32f30x.h"
+#include "gd32f30x.h" // IWYU pragma: keep
 #elif defined(GD32F407) || defined(GD32F450) || defined(GD32F470)
-#include "gd32f4xx.h"
+#include "gd32f4xx.h" // IWYU pragma: keep
 #elif defined(GD32H757) || defined(GD32H759)
-#include "gd32h7xx.h"
+#include "gd32h7xx.h" // IWYU pragma: keep
 #else
 #error MCU is not supported
 #endif
 
 #ifdef __cplusplus
 }
+#if !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 #if defined(GD32F30X)
@@ -84,11 +80,7 @@ extern "C"
 #endif
 
 #if (defined(GD32F4XX) || defined(GD32H7XX)) && defined(__cplusplus)
-typedef enum
-{
-    BKP_DATA_0,
-    BKP_DATA_1
-} bkp_data_register_enum;
+typedef enum { BKP_DATA_0, BKP_DATA_1 } bkp_data_register_enum;
 void bkp_data_write(bkp_data_register_enum register_number, uint16_t data);
 uint16_t bkp_data_read(bkp_data_register_enum register_number);
 #endif
@@ -121,6 +113,6 @@ typedef enum T_GD32_Port {
   GD32_GPIO_PORTK 
 } GD32_Port_TypeDef;
 
-#include "gd32_board.h"
+#include "gd32_board.h" // IWYU pragma: keep
 
-#endif  // GD32_H_
+#endif // GD32_H_

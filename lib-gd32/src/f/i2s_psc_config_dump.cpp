@@ -2,7 +2,7 @@
  * @file i2s_psc_config_dump.cpp
  *
  */
-/* Copyright (C) 2022-2023 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,39 +44,30 @@
 #define RCU_CFG1_PREDV1_OFFSET 4U                        /* PREDV1 offset in RCU_CFG1 */
 #define RCU_CFG1_PLL2MF_OFFSET 12U                       /* PLL2MF offset in RCU_CFG1 */
 
-void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout)
-{
+void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
     uint32_t i2sdiv = 2U, i2sof = 0U;
     uint32_t clks = 0U;
     uint32_t i2sclock = 0U;
 
 #if defined(GD32F10X_CL) || defined(GD32F20X_CL)
     /* get the I2S clock source */
-    if (SPI1 == spi_periph)
-    {
+    if (SPI1 == spi_periph) {
         /* I2S1 clock source selection */
         clks = I2S1_CLOCK_SEL;
-    }
-    else
-    {
+    } else {
         /* I2S2 clock source selection */
         clks = I2S2_CLOCK_SEL;
     }
 
-    if (0U != (RCU_CFG1 & clks))
-    {
+    if (0U != (RCU_CFG1 & clks)) {
         /* get RCU PLL2 clock multiplication factor */
         clks = ((RCU_CFG1 & I2S_CLOCK_MUL_MASK) >> RCU_CFG1_PLL2MF_OFFSET);
 
-        if ((clks > 5U) && (clks < 15U))
-        {
+        if ((clks > 5U) && (clks < 15U)) {
             /* multiplier is between 8 and 14 */
             clks += 2U;
-        }
-        else
-        {
-            if (15U == clks)
-            {
+        } else {
+            if (15U == clks) {
                 /* multiplier is 20 */
                 clks = 20U;
             }
@@ -86,8 +77,7 @@ void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample
         i2sclock = static_cast<uint32_t>(((RCU_CFG1 & I2S_CLOCK_DIV_MASK) >> RCU_CFG1_PREDV1_OFFSET) + 1U);
         /* calculate I2S clock based on PLL2 and PREDV1 */
         i2sclock = static_cast<uint32_t>((HXTAL_VALUE / i2sclock) * clks * 2U);
-    }
-    else
+    } else
 #endif
     {
         /* get system clock */
@@ -95,18 +85,12 @@ void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample
     }
 
     /* config the prescaler depending on the mclk output state, the frame format and audio sample rate */
-    if (I2S_MCKOUT_ENABLE == mckout)
-    {
+    if (I2S_MCKOUT_ENABLE == mckout) {
         clks = static_cast<uint32_t>(((i2sclock / 256U) * 10U) / audiosample);
-    }
-    else
-    {
-        if (I2S_FRAMEFORMAT_DT16B_CH16B == frameformat)
-        {
+    } else {
+        if (I2S_FRAMEFORMAT_DT16B_CH16B == frameformat) {
             clks = static_cast<uint32_t>(((i2sclock / 32U) * 10U) / audiosample);
-        }
-        else
-        {
+        } else {
             clks = static_cast<uint32_t>(((i2sclock / 64U) * 10U) / audiosample);
         }
     }
@@ -118,8 +102,7 @@ void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample
     i2sof = (i2sof << 8U);
 
     /* set the default values */
-    if ((i2sdiv < 2U) || (i2sdiv > 255U))
-    {
+    if ((i2sdiv < 2U) || (i2sdiv > 255U)) {
         i2sdiv = 2U;
         i2sof = 0U;
     }
