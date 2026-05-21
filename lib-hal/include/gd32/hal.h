@@ -52,6 +52,8 @@ void emac_debug_run();
 #include "hal_panelled.h"
 
 namespace hal {
+void Init();
+
 inline constexpr const char kWebsite[] = "https://gd32-dmx.org";
 inline constexpr float kCoreTemperatureMin = -40.0;
 inline constexpr float kCoreTemperatureMax = +85.0;

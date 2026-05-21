@@ -53,11 +53,9 @@ void FreePkt();
 } // namespace emac::eth
 
 namespace network {
-inline void Error([[maybe_unused]]const char* func, [[maybe_unused]]const char* s) {
+inline void Error([[maybe_unused]] const char* func, [[maybe_unused]] const char* s) {}
 
-}
-
-#define ERROR(s)	Error(__func__, (s))
+#define ERROR(s) Error(__func__, (s))
 
 namespace global {
 extern uint32_t broadcast_mask;

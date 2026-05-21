@@ -23,8 +23,7 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
-
+#include "gd32/hal.h"
 #include "watchdog.h"
 #include "network.h"
 #include "displayudf.h"
@@ -70,11 +69,6 @@ int main() // NOLINT
     DmxNodeNode dmxnode_node;
     dmxnode_node.SetOutput(&dmx_send);
 
-    for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
-        const auto kPortDirection = (dmxnode_node.PortDirection(port_index) == dmxnode::Direction::kOutput ? dmx::Direction::kOutput : dmx::Direction::kInput);
-        dmx.SetPortDirection(port_index, kPortDirection, false);
-    }
-
     const auto kActivePorts = dmxnode_node.GetActiveInputPorts() + dmxnode_node.GetActiveOutputPorts();
 
 #if defined(NODE_SHOWFILE)
@@ -96,9 +90,11 @@ int main() // NOLINT
 
     RemoteConfig remote_config(remoteconfig::Output::DMX, kActivePorts);
 
+    display.TextStatus(DmxNodeMsgConst::START, ansi::Colours::Colour::kYellow);
+
     dmxnode_node.Start();
 
-    display.TextStatus(DmxNodeMsgConst::STARTED, console::Colours::kConsoleGreen);
+    display.TextStatus(DmxNodeMsgConst::STARTED, ansi::Colours::Colour::kGreen);
 
     watchdog::Init();
 

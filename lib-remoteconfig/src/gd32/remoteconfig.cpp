@@ -3,7 +3,7 @@
  * @file remoteconfig.cpp
  *
  */
-/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,28 +27,24 @@
 #include "remoteconfig.h"
 #include "display.h"
 #include "gd32.h"
+#include "ansi_colour.h"
 #include "firmware/debug/debug_debug.h"
 
-void RemoteConfig::PlatformHandleTftpSet()
-{
+void RemoteConfig::PlatformHandleTftpSet() {
     DEBUG_ENTRY();
 
-    if (enable_tftp_)
-    {
+    if (enable_tftp_) {
         bkp_data_write(BKP_DATA_1, 0xA5A5);
-        Display::Get()->TextStatus("TFTP On ", console::Colours::kConsoleGreen);
-    }
-    else
-    {
+        Display::Get()->TextStatus("TFTP On ", ansi::Colours::Colour::kGreen);
+    } else {
         bkp_data_write(BKP_DATA_1, 0x0);
-        Display::Get()->TextStatus("TFTP Off", console::Colours::kConsoleGreen);
+        Display::Get()->TextStatus("TFTP Off", ansi::Colours::Colour::kGreen);
     }
 
     DEBUG_EXIT();
 }
 
-void RemoteConfig::PlatformHandleTftpGet()
-{
+void RemoteConfig::PlatformHandleTftpGet() {
     DEBUG_ENTRY();
 
     enable_tftp_ = (bkp_data_read(BKP_DATA_1) == 0xA5A5);
