@@ -1,0 +1,13 @@
+DEFINES=NDEBUG
+
+EXTRA_INCLUDES=
+EXTRA_SRCDIR=
+
+ifeq (,$(findstring DISABLE_RTC,$(MAKE_FLAGS)))	  
+	ifeq (,$(findstring DISABLE_INTERNAL_RTC,$(MAKE_FLAGS)))
+		EXTRA_SRCDIR+=src/gd32/internal
+ 	endif
+ endif
+
+include Rules.mk
+include ../firmware-template-gd32/lib/Rules.mk
