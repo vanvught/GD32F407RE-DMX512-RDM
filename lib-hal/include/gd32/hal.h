@@ -26,8 +26,6 @@
 #ifndef GD32_HAL_H_
 #define GD32_HAL_H_
 
-#include <cstdint>
-
 #include "gd32.h" // IWYU pragma: keep
 
 #if defined(ENABLE_USB_HOST)
