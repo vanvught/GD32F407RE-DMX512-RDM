@@ -40,7 +40,7 @@
 class ArtNetRdmResponder final : public RDMDeviceResponder
 {
    public:
-    ArtNetRdmResponder(RDMPersonality** rdm_personalities, uint32_t personality_count) : RDMDeviceResponder(rdm_personalities, personality_count)
+    ArtNetRdmResponder(RdmPersonality** rdm_personalities, uint32_t personality_count) : RDMDeviceResponder(rdm_personalities, personality_count)
     {
         DEBUG_ENTRY();
 
@@ -60,11 +60,11 @@ class ArtNetRdmResponder final : public RDMDeviceResponder
 
         if (port_index == 0)
         {
-            memcpy(tod, rdm::device::Base::Instance().GetUID(), RDM_UID_SIZE);
+            memcpy(tod, rdm::device::Base::Instance().GetUID(), rdm::kUidSize);
         }
         else
         {
-            memcpy(tod, UID_ALL, RDM_UID_SIZE);
+            memcpy(tod, rdm::kUidAll, rdm::kUidSize);
         }
     }
 

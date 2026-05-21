@@ -125,7 +125,7 @@ struct Node
         uint8_t sw;            ///< Bits 3-0 of the 15 bit Port-Address for a given port are encoded into the bottom 4 bits of this field.
         uint8_t sub_switch;    ///< Bits 7-4 of the 15 bit Port-Address are encoded into the bottom 4 bits of this field.
         uint8_t net_switch;    ///< Bits 14-8 of the 15 bit Port-Address are encoded into the bottom 7 bits of this field.
-        dmxnode::PortDirection direction;
+        dmxnode::Direction direction;
         artnet::PortProtocol protocol; ///< Art-Net 4
         bool local_merge;
     } port[dmxnode::kMaxPorts] ALIGNED;
@@ -210,11 +210,11 @@ class ArtNetNode
     void SetUniverse(uint32_t port_index, uint16_t universe);
     uint16_t GetUniverse(uint32_t port_index) const;
 
-    void SetDirection(uint32_t port_index, dmxnode::PortDirection port_direction);
-    dmxnode::PortDirection GetDirection(uint32_t port_index) const;
+    void SetDirection(uint32_t port_index, dmxnode::Direction port_direction);
+    dmxnode::Direction GetDirection(uint32_t port_index) const;
 
-    void SetUniverse(uint32_t port_index, dmxnode::PortDirection port_direction, uint16_t universe);
-    bool GetUniverse(uint32_t port_index, uint16_t& universe, dmxnode::PortDirection port_direction);
+    void SetUniverse(uint32_t port_index, dmxnode::Direction port_direction, uint16_t universe);
+    bool GetUniverse(uint32_t port_index, uint16_t& universe, dmxnode::Direction port_direction);
 
     void SetMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode);
     dmxnode::MergeMode GetMergeMode(uint32_t port_index) const;
@@ -244,7 +244,7 @@ class ArtNetNode
 #if defined(ARTNET_SHOWFILE)
     void HandleShowFile(const artnet::ArtDmx* artdmx)
     {
-        current_millis_ = hal::Millis();
+        current_millis_ = timing::Millis();
         ip_address_from_ = network::GetPrimaryIp();
         receive_buffer_ = reinterpret_cast<uint8_t*>(const_cast<artnet::ArtDmx*>(artdmx));
         HandleDmx();
@@ -259,26 +259,17 @@ class ArtNetNode
     uint32_t GetActiveInputPorts() const { return state_.enabled_input_ports; }
     uint32_t GetActiveOutputPorts() const { return state_.enabled_output_ports; }
 
-    dmxnode::PortDirection GetPortDirection(uint32_t port_index) const;
+    dmxnode::Direction PortDirection(uint32_t port_index) const;
 
     bool GetPortAddress(uint32_t port_index, uint16_t& address) const;
-    bool GetPortAddress(uint32_t port_index, uint16_t& address, dmxnode::PortDirection port_direction) const;
+    bool GetPortAddress(uint32_t port_index, uint16_t& address, dmxnode::Direction port_direction) const;
 
     bool GetOutputPort(uint16_t universe, uint32_t& port_index);
 
     void StopOutputPort(uint32_t port_index);
 
-#if defined(RDM_CONTROLLER)
-    uint32_t RdmCopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size);
-    uint32_t RdmTodUidCount(uint32_t port_index);
-    uint32_t RdmCopyTod(uint32_t port_index, char* out_buffer, uint32_t out_buffer_size);
-    bool RdmIsRunning(uint32_t port_index);
-    bool RdmIsRunning(uint32_t port_index, bool& is_incremental);
-    bool RdmBgDiscovery(uint32_t port_index);
-#endif
-
 #if defined(RDM_RESPONDER)
-    void SetRdmResponder(ArtNetRdmResponder* pArtNetRdmResponder, const bool doEnable = true);
+    void SetRdmResponder(ArtNetRdmResponder* responder, bool enable = true);
 #endif
 
 #if defined(ARTNET_HAVE_TIMECODE)
@@ -444,9 +435,6 @@ class ArtNetNode
 #include "artnetnode_inline_impl.h" // IWYU pragma: keep
 #if (ARTNET_VERSION >= 4)
 #include "artnetnode4_inline_impl.h" // IWYU pragma: keep
-#endif
-#if defined(RDM_CONTROLLER)
-#include "artnetnode_rdm_controller_inline_impl.h" // IWYU pragma: keep
 #endif
 
 #endif // ARTNETNODE_H_

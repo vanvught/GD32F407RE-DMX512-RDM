@@ -57,14 +57,14 @@ void E131Bridge::HandleDmxIn()
 {
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++)
     {
-        if ((bridge_.port[port_index].direction == dmxnode::PortDirection::kInput) && (!input_port_[port_index].is_disabled))
+        if ((bridge_.port[port_index].direction == dmxnode::Direction::kInput) && (!input_port_[port_index].is_disabled))
         {
             const auto* const kDataChanged = reinterpret_cast<const struct Data*>(Dmx::Get()->GetDmxChanged(port_index));
 
             if (kDataChanged != nullptr)
             {
                 // Root Layer (See Section 5)
-                const auto kLength = (1U + kDataChanged->Statistics.nSlotsInPacket); // Add 1 for SC
+                const auto kLength = (1U + kDataChanged->statistics.slots_in_packet); // Add 1 for SC
                 e131_data_packet_.root_layer.flags_length = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (e131::DataRootLayerLength(kLength))));
                 // E1.31 Framing Layer (See Section 6)
                 e131_data_packet_.frame_layer.flags_length = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (e131::DataFrameLayerLength(kLength))));
@@ -88,7 +88,7 @@ void E131Bridge::HandleDmxIn()
                 if ((s_receiving_mask & (1U << port_index)) != (1U << port_index))
                 {
                     s_receiving_mask |= (1U << port_index);
-                    state_.receiving_dmx |= (1U << static_cast<uint8_t>(dmxnode::PortDirection::kInput));
+                    state_.receiving_dmx |= (1U << static_cast<uint8_t>(dmxnode::Direction::kInput));
                     hal::panelled::On(hal::panelled::kPortARx << port_index);
                 }
 
@@ -108,12 +108,12 @@ void E131Bridge::HandleDmxIn()
 
                     if (s_receiving_mask == 0)
                     {
-                        state_.receiving_dmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(dmxnode::PortDirection::kInput)));
+                        state_.receiving_dmx &= static_cast<uint8_t>(~(1U << static_cast<uint8_t>(dmxnode::Direction::kInput)));
                     }
                 }
                 else if (input_port_[port_index].millis != 0)
                 {
-                    const auto kMillis = hal::Millis();
+                    const auto kMillis = timing::Millis();
                     if ((kMillis - input_port_[port_index].millis) > 1000)
                     {
                         input_port_[port_index].millis = kMillis;
@@ -125,7 +125,7 @@ void E131Bridge::HandleDmxIn()
                 {
                     const auto* const kDataCurrent = reinterpret_cast<const struct Data*>(Dmx::Get()->GetDmxCurrentData(port_index));
                     // Root Layer (See Section 5)
-                    const auto kLength = (1U + kDataCurrent->Statistics.nSlotsInPacket); // Add 1 for SC
+                    const auto kLength = (1U + kDataCurrent->statistics.slots_in_packet); // Add 1 for SC
                     e131_data_packet_.root_layer.flags_length = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (e131::DataRootLayerLength(kLength))));
                     // E1.31 Framing Layer (See Section 6)
                     e131_data_packet_.frame_layer.flags_length = __builtin_bswap16(static_cast<uint16_t>((0x07 << 12) | (e131::DataFrameLayerLength(kLength))));
