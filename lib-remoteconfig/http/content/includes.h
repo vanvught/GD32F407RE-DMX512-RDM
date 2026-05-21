@@ -22,9 +22,7 @@
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 #include "dmx.html.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
-#if defined (NODE_SHOWFILE)
 #include "showfile.html.h"
-#endif // (NODE_SHOWFILE)
 #include "date.js.h"
 #include "default.js.h"
 #if !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
