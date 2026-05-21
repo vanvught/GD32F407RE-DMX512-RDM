@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+#include <cstdio>
+
 #include "gd32/hal.h"
 #include "watchdog.h"
 #include "network.h"
@@ -99,7 +101,7 @@ int main() // NOLINT
 
     dmxnode_node.Start();
 
-    display.TextStatus(DmxNodeMsgConst::STARTED, console::Colours::kConsoleGreen);
+    puts("Running\n");
 
     watchdog::Init();
 
