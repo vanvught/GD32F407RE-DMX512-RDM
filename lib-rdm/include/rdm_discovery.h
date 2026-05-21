@@ -42,12 +42,11 @@ enum class Type { kFull, kIncremental };
 void Starting(uint32_t port_index, Type type);
 void Finished(uint32_t port_index, Type type);
 } // namespace discovery
-inline static constexpr uint32_t kBackgroundIntervalMinutes = 1;
 
 class Discovery : rdm::discovery::StateMachine {
+   public:
     static constexpr auto kPorts = dmx::config::max::kPorts;
 
-   public:
     Discovery() : rdm::discovery::StateMachine(rdm::device::Base::Instance().GetUID()) {
         assert(s_this == nullptr);
         s_this = this;
@@ -79,7 +78,7 @@ class Discovery : rdm::discovery::StateMachine {
         }
 
         if (s_timer_id < 0) {
-            s_timer_id = SoftwareTimerAdd((1000U * 60U) * kBackgroundIntervalMinutes, TimerBackGround);
+            s_timer_id = SoftwareTimerAdd((1000U * 60U) * background_interval_minutes_, TimerBackGround);
             printf("s_timer_id=%d\n", s_timer_id);
         }
     }
@@ -159,6 +158,14 @@ class Discovery : rdm::discovery::StateMachine {
         }
     }
 
+    void SetBackgroundIntervalMinutes(uint8_t background_interval_minutes) {
+        if (background_interval_minutes != 0) {
+            background_interval_minutes_ = background_interval_minutes;
+        }
+    }
+
+    uint8_t GetBackgroundIntervalMinutes() const { return background_interval_minutes_; }
+
     uint32_t CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) { return rdm::discovery::StateMachine::CopyWorkingQueue(out_buffer, out_buffer_size); }
 
     void Run() {
@@ -199,7 +206,7 @@ class Discovery : rdm::discovery::StateMachine {
                     printf("Incremental:%u\n", port_index_);
                 }
 
-                waiting_ &= static_cast<uint8_t>(~Bit(port_index));
+                waiting_ &= static_cast<uint8_t>(~Bit(port_index_));
             } else {
                 port_index_++;
                 if (port_index_ == kPorts) port_index_ = 0;
@@ -214,7 +221,7 @@ class Discovery : rdm::discovery::StateMachine {
         return s_tod[port_index].UidCount();
     }
 
-    bool TodCopyUidEntry(uint32_t port_index, uint32_t index, uint8_t uid[RDM_UID_SIZE]) {
+    bool TodCopyUidEntry(uint32_t port_index, uint32_t index, uint8_t uid[rdm::kUidSize]) {
         assert(port_index < kPorts);
         return s_tod[port_index].CopyUidEntry(index, uid);
     }
@@ -290,6 +297,7 @@ class Discovery : rdm::discovery::StateMachine {
     uint8_t enabled_{0};
     uint8_t waiting_{0};
     uint8_t type_{0};
+    uint8_t background_interval_minutes_{1};
     bool running_{false};
 
     inline static Discovery* s_this;
