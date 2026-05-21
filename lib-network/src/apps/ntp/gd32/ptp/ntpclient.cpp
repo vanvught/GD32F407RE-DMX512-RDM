@@ -204,7 +204,7 @@ static void Send() {
     // Only when the client receives a valid response from the server,
     // it will be able to send a request in the interleaved mode
     if (s_ntp_client.state.missed_responses > 4) {
-        s_ntp_client.cookie_basic.seconds = random();
+        s_ntp_client.cookie_basic.seconds = static_cast<uint32_t>(random());
         s_ntp_client.cookie_basic.fraction = 0;
 
         s_ntp_client.request.origin_timestamp_s = 0;
@@ -244,10 +244,10 @@ static void Send() {
 
     if (s_ntp_client.state.x > 0) {
         s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
-        s_ntp_client.state.sent_a.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
+        s_ntp_client.state.sent_a.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
     } else {
         s_ntp_client.state.sent_b.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
-        s_ntp_client.state.sent_b.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
+        s_ntp_client.state.sent_b.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
     }
 
     s_ntp_client.state.x = -s_ntp_client.state.x;
@@ -262,7 +262,7 @@ static void Difference(const ntp::TimeStamp& start, const ntp::TimeStamp& stop, 
     gd32::ptp::time_t r;
     const gd32::ptp::time_t kX = {.tv_sec = static_cast<int32_t>(stop.seconds), .tv_nsec = static_cast<int32_t>(USEC(stop.fraction) * 1000)};
     const gd32::ptp::time_t kY = {.tv_sec = static_cast<int32_t>(start.seconds), .tv_nsec = static_cast<int32_t>(USEC(start.fraction) * 1000)};
-    gd32::sub_time(&r, &kX, &kY);
+    gd32::SubTime(&r, &kX, &kY);
 
     diff_seconds = r.tv_sec;
     diff_nano_seconds = r.tv_nsec;
@@ -286,11 +286,11 @@ static void UpdatePtpTime() {
     const int32_t kOffsetNanosverage = offset_nano_seconds / 2;
 
     gd32::ptp::time_t ptp_offset = {.tv_sec = kOffsetSecondsAverage, .tv_nsec = kOffsetNanosverage};
-    gd32::normalize_time(&ptp_offset);
-    gd32_ptp_update_time(&ptp_offset);
+    gd32::NormalizeTime(&ptp_offset);
+    Gd32PtpUpdateTime(&ptp_offset);
 
     gd32::ptp::ptptime ptp_get;
-    gd32_ptp_get_time(&ptp_get);
+    Gd32PtpGetTime(&ptp_get);
 
     s_ntp_client.request.reference_timestamp_s = __builtin_bswap32(static_cast<uint32_t>(ptp_get.tv_sec) + ntp::kJan1970);
     s_ntp_client.request.reference_timestamp_f = __builtin_bswap32(NTPFRAC(ptp_get.tv_nsec));
@@ -336,7 +336,7 @@ static void UpdatePtpTime() {
     }
 
     gd32::ptp::time_t ptp_delay;
-    gd32::sub_time(&ptp_delay, &diff1, &diff2);
+    gd32::SubTime(&ptp_delay, &diff1, &diff2);
 
     char sign = '+';
 
@@ -383,7 +383,7 @@ static void Process() {
         }
 
         s_ntp_client.t4.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
-        s_ntp_client.t4.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
+        s_ntp_client.t4.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
 #ifndef NDEBUG
         s_ntp_client.state.mode = ntp::Modes::kBasic;
 #endif
@@ -418,7 +418,7 @@ static void Process() {
     s_ntp_client.state.dst.fraction = __builtin_bswap32(kReply->receive_timestamp_f);
 
     s_ntp_client.state.previous_receive.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
-    s_ntp_client.state.previous_receive.fraction = NTPFRAC(gd32::ptp_subsecond_2_nanosecond(net::globals::ptp::timestamp[0]));
+    s_ntp_client.state.previous_receive.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
 
     UpdatePtpTime();
 

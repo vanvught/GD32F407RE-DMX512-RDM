@@ -40,10 +40,7 @@
 #endif
 #include "firmware/debug/debug_debug.h"
 #include "gd32.h" // IWYU pragma: keep
-
-namespace console {
-void Error(const char*);
-}
+#include "../src/core/network_private.h"
 
 extern void EnetGpioConfig();
 extern enet_descriptors_struct txdesc_tab[ENET_TXBUF_NUM];
@@ -86,7 +83,7 @@ void __attribute__((cold)) Config() {
     enet_software_reset(ENETx);
 
     if (!emac::phy::Config(PHY_ADDRESS)) {
-        console::Error("emac::phy::Config(PHY_ADDRESS)\n");
+        network::Error(__func__, "emac::phy::Config(PHY_ADDRESS)");
     }
 
     DEBUG_EXIT();
@@ -200,7 +197,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
     }
 
 #if defined(CONFIG_NET_ENABLE_PTP)
-    gd32_ptp_start();
+    Gd32PtpStart();
 #if !defined(DISABLE_RTC)
     // Set the System Clock from the Hardware Clock
     HwClock::Get()->HcToSys();

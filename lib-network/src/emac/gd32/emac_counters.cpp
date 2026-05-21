@@ -30,8 +30,8 @@
 #include "gd32.h" // IWYU pragma: keep
 
 namespace network::iface {
-static uint64_t s_rx_fifo_drop_total = 0;
-static uint64_t s_rx_dma_missed_total = 0;
+static uint32_t s_rx_fifo_drop_total = 0;
+static uint32_t s_rx_dma_missed_total = 0;
 
 static void PollHardwareCounters() {
     uint32_t rxfifo_drop;  ///< The number of frames dropped by RxFIFO

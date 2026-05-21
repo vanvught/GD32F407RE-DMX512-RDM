@@ -36,7 +36,7 @@
 #include "gd32.h" // IWYU pragma: keep
 
 namespace emac::phy {
-bool Read(uint32_t address, uint32_t reg, uint16_t& value) {
+bool Read(uint16_t address, uint16_t reg, uint16_t& value) {
 #if defined(GD32H7XX)
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_READ, address, reg, &value) == SUCCESS;
 #else
@@ -45,7 +45,7 @@ bool Read(uint32_t address, uint32_t reg, uint16_t& value) {
     return kResult;
 }
 
-bool Write(uint32_t address, uint32_t reg, uint16_t value) {
+bool Write(uint16_t address, uint16_t reg, uint16_t value) {
 #if defined(GD32H7XX)
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_WRITE, address, reg, &value) == SUCCESS;
 #else
@@ -54,7 +54,7 @@ bool Write(uint32_t address, uint32_t reg, uint16_t value) {
     return kResult;
 }
 
-bool Config(uint32_t address) {
+bool Config(uint16_t address) {
     DEBUG_ENTRY();
 
 #if defined(GD32H7XX)

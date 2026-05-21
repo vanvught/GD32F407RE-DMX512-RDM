@@ -1,8 +1,8 @@
 /**
- * @file phy.cpp
+ * @file emac_link.cpp
  *
  */
-/* Copyright (C) 2023-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,43 +23,40 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
-
+#include "emac/emac_link_check.h"
 #include "emac/emac_phy.h"
+#include "emac/mmi.h"
 #include "firmware/debug/debug_debug.h"
 
-#if !defined(BIT)
-#define BIT(x) static_cast<uint16_t>(1U << (x))
-#endif
+#define PHY_REG_MICR 0x11U
+#define PHY_REG_MISR 0x12U
+#define PHY_INT_AND_OUTPUT_ENABLE 0x03U
+#define PHY_LINK_INT_ENABLE 0x20U
 
 #if !defined(PHY_ADDRESS)
 #define PHY_ADDRESS 1
 #endif
 
-namespace emac::phy {
-void CustomizedLed() {
-    DEBUG_ENTRY();
+namespace emac::link {
+#if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
+void PinEnable() {
+    uint16_t phy_value = PHY_INT_AND_OUTPUT_ENABLE;
+    phy::Write(PHY_ADDRESS, PHY_REG_MICR, phy_value);
 
-    DEBUG_EXIT();
+    phy::Read(PHY_ADDRESS, PHY_REG_MICR, phy_value);
+
+    if (PHY_INT_AND_OUTPUT_ENABLE != phy_value) {
+        DEBUG_PUTS("PHY_INT_AND_OUTPUT_ENABLE != phy_value");
+    }
+
+    phy_value = PHY_LINK_INT_ENABLE;
+    phy::Write(PHY_ADDRESS, PHY_REG_MISR, phy_value);
 }
 
-void CustomizedTiming() {
-    DEBUG_ENTRY();
-
-    DEBUG_EXIT();
+void PinRecovery() {
+    uint16_t phy_value;
+    phy::Read(PHY_ADDRESS, PHY_REG_MISR, phy_value);
+    phy::Read(PHY_ADDRESS, mmi::REG_BMSR, phy_value);
 }
-
-/**
- * PHY Status Register (PHYSTS), address 10h
- * @param phyStatus
- */
-void CustomizedStatus(phy::Status& phy_status) {
-    uint16_t value;
-    phy::Read(PHY_ADDRESS, 0x10, value);
-
-    phy_status.link = ((value & BIT(0)) == BIT(0)) ? phy::Link::kStateUp : phy::Link::kStateDown;
-    phy_status.duplex = ((value & BIT(2)) == BIT(2)) ? phy::Duplex::kDuplexFull : phy::Duplex::kDuplexHalf;
-    phy_status.speed = ((value & BIT(1)) == BIT(1)) ? phy::Speed::kSpeed10 : phy::Speed::kSpeed100;
-    phy_status.autonegotiation = ((value & BIT(4)) == BIT(4));
-}
-} // namespace emac::phy
+#endif
+} // namespace emac::link
