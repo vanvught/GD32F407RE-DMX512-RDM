@@ -2,7 +2,7 @@
  * @file time.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,79 +35,70 @@ extern volatile uint32_t gv_nSysTickMillis;
 static uint32_t previous_systick_millis;
 static struct timeval s_tv;
 
-extern "C"
-{
-    /*
-     * number of seconds and microseconds since the Epoch,
-     *     1970-01-01 00:00:00 +0000 (UTC).
-     */
+extern "C" {
+/*
+ * number of seconds and microseconds since the Epoch,
+ *     1970-01-01 00:00:00 +0000 (UTC).
+ */
 
-    int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz)
-    {
-        assert(tv != 0);
+int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz) {
+    assert(tv != 0);
 
-        const auto kCurrentSysTickMillis = gv_nSysTickMillis;
+    const auto kCurrentSysTickMillis = gv_nSysTickMillis;
 
-        uint32_t millis_elapsed;
+    uint32_t millis_elapsed;
 
-        if (kCurrentSysTickMillis >= previous_systick_millis)
-        {
-            millis_elapsed = kCurrentSysTickMillis - previous_systick_millis;
-        }
-        else
-        {
-            millis_elapsed = (UINT32_MAX - previous_systick_millis) + kCurrentSysTickMillis + 1;
-        }
-
-        previous_systick_millis = kCurrentSysTickMillis;
-
-        const auto kSeconds = millis_elapsed / 1000U;
-        const auto kMicroSeconds = (millis_elapsed % 1000U) * 1000U;
-
-        s_tv.tv_sec += static_cast<time_t>(kSeconds);
-        s_tv.tv_usec += static_cast<suseconds_t>(kMicroSeconds);
-
-        if (s_tv.tv_usec >= 1000000)
-        {
-            s_tv.tv_sec++;
-            s_tv.tv_usec -= 1000000;
-        }
-
-        tv->tv_sec = s_tv.tv_sec;
-        tv->tv_usec = s_tv.tv_usec;
-
-        return 0;
+    if (kCurrentSysTickMillis >= previous_systick_millis) {
+        millis_elapsed = kCurrentSysTickMillis - previous_systick_millis;
+    } else {
+        millis_elapsed = (UINT32_MAX - previous_systick_millis) + kCurrentSysTickMillis + 1;
     }
 
-    int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz)
-    {
-        assert(tv != 0);
+    previous_systick_millis = kCurrentSysTickMillis;
 
-        struct timeval g;
-        gettimeofday(&g, nullptr);
+    const auto kSeconds = millis_elapsed / 1000U;
+    const auto kMicroSeconds = (millis_elapsed % 1000U) * 1000U;
 
-        previous_systick_millis = gv_nSysTickMillis;
+    s_tv.tv_sec += static_cast<time_t>(kSeconds);
+    s_tv.tv_usec += static_cast<suseconds_t>(kMicroSeconds);
 
-        s_tv.tv_sec = tv->tv_sec;
-        s_tv.tv_usec = tv->tv_usec;
-
-        return 0;
+    if (s_tv.tv_usec >= 1000000) {
+        s_tv.tv_sec++;
+        s_tv.tv_usec -= 1000000;
     }
 
-    /*
-     *  time() returns the time as the number of seconds since the Epoch,
-           1970-01-01 00:00:00 +0000 (UTC).
-     */
-    time_t time(time_t* __timer) //NOLINT
-    {
-        struct timeval tv;
-        gettimeofday(&tv, nullptr);
+    tv->tv_sec = s_tv.tv_sec;
+    tv->tv_usec = s_tv.tv_usec;
 
-        if (__timer != nullptr)
-        {
-            *__timer = tv.tv_sec;
-        }
+    return 0;
+}
 
-        return tv.tv_sec;
+int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz) {
+    assert(tv != 0);
+
+    struct timeval g;
+    gettimeofday(&g, nullptr);
+
+    previous_systick_millis = gv_nSysTickMillis;
+
+    s_tv.tv_sec = tv->tv_sec;
+    s_tv.tv_usec = tv->tv_usec;
+
+    return 0;
+}
+
+/*
+ *  time() returns the time as the number of seconds since the Epoch,
+       1970-01-01 00:00:00 +0000 (UTC).
+ */
+time_t time(time_t* __timer) { // NOLINT
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+
+    if (__timer != nullptr) {
+        *__timer = tv.tv_sec;
     }
+
+    return tv.tv_sec;
+}
 }

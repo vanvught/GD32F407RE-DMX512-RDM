@@ -2,7 +2,7 @@
  * @file time.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include <cstdint>
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 
@@ -38,66 +39,60 @@
 #define enet_ptp_system_time_get(x) enet_ptp_system_time_get(ENETx, x)
 #endif
 
-extern "C"
-{
-    /*
-     * number of seconds and microseconds since the Epoch,
-     *     1970-01-01 00:00:00 +0000 (UTC).
-     */
+extern "C" {
+/*
+ * number of seconds and microseconds since the Epoch,
+ *     1970-01-01 00:00:00 +0000 (UTC).
+ */
 
-    int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz)
-    {
-        assert(tv != 0);
+int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
+    assert(tv != 0);
 
-        enet_ptp_systime_struct systime;
-        enet_ptp_system_time_get(&systime);
+    enet_ptp_systime_struct systime;
+    enet_ptp_system_time_get(&systime);
 
-        tv->tv_sec = systime.second;
+    tv->tv_sec = static_cast<time_t>(systime.second);
 
 #if !defined(GD32F4XX)
-        const auto kNanoSecond = systime.nanosecond;
+    const auto kNanoSecond = systime.nanosecond;
 #else
-        const auto kNanoSecond = gd32::ptp_subsecond_2_nanosecond(systime.subsecond);
+    const auto kNanoSecond = gd32::PtpSubsecond2Nanosecond(systime.subsecond);
 #endif
 
-        tv->tv_usec = kNanoSecond / 1000U;
+    tv->tv_usec = static_cast<time_t>(kNanoSecond / 1000U);
 
+    return 0;
+}
+
+int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
+    assert(tv != 0);
+
+    const uint32_t kSign = ENET_PTP_ADD_TO_TIME;
+    const uint32_t kSecond = static_cast<uint32_t>(tv->tv_sec);
+    const uint32_t kNanoSecond = static_cast<uint32_t>(tv->tv_usec) * 1000U;
+    const auto kSubSecond = gd32::PtpNanosecond2Subsecond(kNanoSecond);
+
+    enet_ptp_timestamp_update_config(kSign, kSecond, kSubSecond);
+
+    if (SUCCESS == enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_INIT)) {
         return 0;
     }
 
-    int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz)
-    {
-        assert(tv != 0);
+    return -1;
+}
 
-        const uint32_t kSign = ENET_PTP_ADD_TO_TIME;
-        const uint32_t kSecond = tv->tv_sec;
-        const uint32_t kNanoSecond = tv->tv_usec * 1000U;
-        const auto kSubSecond = gd32::ptp_nanosecond_2_subsecond(kNanoSecond);
+/*
+ *  time() returns the time as the number of seconds since the Epoch,
+       1970-01-01 00:00:00 +0000 (UTC).
+ */
+time_t time(time_t* __timer) { // NOLINT
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
 
-        enet_ptp_timestamp_update_config(kSign, kSecond, kSubSecond);
-
-        if (SUCCESS == enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_INIT))
-        {
-            return 0;
-        }
-
-        return -1;
+    if (__timer != nullptr) {
+        *__timer = tv.tv_sec;
     }
 
-    /*
-     *  time() returns the time as the number of seconds since the Epoch,
-           1970-01-01 00:00:00 +0000 (UTC).
-     */
-    time_t time(time_t* __timer) // NOLINT
-    {
-        struct timeval tv;
-        gettimeofday(&tv, nullptr);
-
-        if (__timer != nullptr)
-        {
-            *__timer = tv.tv_sec;
-        }
-
-        return tv.tv_sec;
-    }
+    return tv.tv_sec;
+}
 }
