@@ -29,11 +29,10 @@
 
 #include <cstdint>
 
-#include "hal.h"
 #include "hal_statusled.h"
 #include "softwaretimers.h"
-#include "gd32.h"
 #include "firmware/debug/debug_debug.h"
+#include "gd32.h" // IWYU pragma: keep
 
 static TimerHandle_t s_timer_id = kTimerIdNone;
 
@@ -41,23 +40,19 @@ static TimerHandle_t s_timer_id = kTimerIdNone;
 static int32_t s_toggle_led = 1;
 #endif
 
-static void Ledblink([[maybe_unused]] TimerHandle_t handle)
-{
+static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
 #if defined(HAL_HAVE_PORT_BIT_TOGGLE)
     GPIO_TG(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #else
     s_toggle_led = -s_toggle_led;
 
-    if (s_toggle_led > 0)
-    {
+    if (s_toggle_led > 0) {
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
         hal::PanelLedOn(hal::panelled::ACTIVITY);
 #else
         GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
-    }
-    else
-    {
+    } else {
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
         hal::PanelLedOff(hal::panelled::ACTIVITY);
 #else
@@ -67,22 +62,18 @@ static void Ledblink([[maybe_unused]] TimerHandle_t handle)
 #endif
 }
 
-namespace hal::statusled
-{
-void SetFrequency(uint32_t frequency_hz)
-{
+namespace hal::statusled {
+void SetFrequency(uint32_t frequency_hz) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", s_timer_id, frequency_hz);
 
-    if (s_timer_id == kTimerIdNone)
-    {
+    if (s_timer_id == kTimerIdNone) {
         s_timer_id = SoftwareTimerAdd((1000U / frequency_hz), Ledblink);
         DEBUG_EXIT();
         return;
     }
 
-    switch (frequency_hz)
-    {
+    switch (frequency_hz) {
         case 0:
             SoftwareTimerDelete(s_timer_id);
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)

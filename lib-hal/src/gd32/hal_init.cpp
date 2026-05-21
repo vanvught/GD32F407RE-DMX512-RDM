@@ -2,7 +2,7 @@
  * @file hal_init.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,18 @@
  * THE SOFTWARE.
  */
 
+#include <cstddef>
+
+#if !defined(_TIME_STAMP_DAY_)
+#define _TIME_STAMP_DAY_ 0
+#endif
+#if !defined(_TIME_STAMP_MONTH_)
+#define _TIME_STAMP_MONTH_ 1
+#endif
+#if !defined(_TIME_STAMP_YEAR_)
+#define _TIME_STAMP_YEAR_ (2026 - 1900)
+#endif
+
 #if defined(DEBUG_HAL)
 #undef NDEBUG
 #endif
@@ -31,7 +43,6 @@
 #error
 #endif
 
-#include <cstdint>
 #include <cstring>
 #include <cstdio>
 #include <cassert>
@@ -40,32 +51,30 @@
 
 #include "gd32.h"
 #include "gd32_i2c.h"
-#include "gd32_adc.h"
+#if defined(CONFIG_CLIB_USE_UART0)
+#include "uart0.h"
+#elif defined(CONFIG_CLIB_USE_NULL)
+#else
+namespace console {
+void Init();
+}
+#endif
 #if defined(CONFIG_NET_ENABLE_PTP)
 #include "gd32_ptp.h"
 #endif
-
+#if defined(ENABLE_USB_HOST)
+#include "device/usb.h"
+#endif
 #if defined(DEBUG_I2C)
 #include "../debug/i2c/i2cdetect.h"
 #endif
-
 #include "hal_statusled.h"
-#include "hal_panelled.h"
+#include "hal_panelled.h" // IWYU pragma: keep
 #include "logic_analyzer.h"
-
-#include "firmware/debug/debug_debug.h"
-
-#if defined(ENABLE_USB_HOST)
-void usb_init();
-#endif
 
 #if defined(CONFIG_HAL_USE_SYSTICK)
 void SystickConfig();
 #endif
-
-namespace console {
-void Init();
-}
 
 void UdelayInit();
 void Gd32AdcInit();
@@ -89,54 +98,47 @@ void Timer7Config();
 
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
-static HwClock hwClock;
+static HwClock hw_clock;
 #endif
 
-extern unsigned char _sdmx;
-extern unsigned char _edmx;
-extern unsigned char _slightset;
-extern unsigned char _elightset;
-extern unsigned char _snetwork;
-extern unsigned char _enetwork;
-extern unsigned char _spixel;
-extern unsigned char _epixel;
+extern unsigned char _sdmx;      // NOLINT
+extern unsigned char _edmx;      // NOLINT
+extern unsigned char _slightset; // NOLINT
+extern unsigned char _elightset; // NOLINT
+extern unsigned char _snetwork;  // NOLINT
+extern unsigned char _enetwork;  // NOLINT
+extern unsigned char _spixel;    // NOLINT
+extern unsigned char _epixel;    // NOLINT
 
-namespace hal
-{
-namespace global
-{
+namespace hal {
+namespace global {
 bool watchdog = false;
 }
-void Init()
-{
-    /*
-     * GD32H7xx Cache and Memory Protection Unit
-     */
-
+void Init() {
+    // GD32H7xx Cache and Memory Protection Unit
 #if defined(GD32H7XX)
     CacheEnable();
     MpuConfig();
 #endif
 
+#if defined(CONFIG_CLIB_USE_UART0)
+    uart0::Init();
+#elif defined(CONFIG_CLIB_USE_NULL)
+#else
     console::Init();
-
-    /*
-     * From here we console output
-     */
-
-    /*
-     * See https://www.gd32-dmx.org/memory.html
-     */
-
+#endif
+    // From here we console output
 #ifndef NDEBUG
     putchar('\n');
 #endif
+
+    // See https://www.gd32-dmx.org/memory.html
 #if !defined(ENABLE_TFTP_SERVER)
 #if defined(GD32F207RG) || defined(GD32F4XX) || defined(GD32H7XX)
 #if !defined(GD32H7XX)
     {
         // Clear section .dmx
-        const auto kSize = (&_edmx - &_sdmx);
+        const auto kSize = static_cast<size_t>(&_edmx - &_sdmx);
         memset(&_sdmx, 0, kSize);
 #ifndef NDEBUG
         printf("Cleared .dmx at %p, size %u\n", &_sdmx, kSize);
@@ -146,7 +148,7 @@ void Init()
 #if defined(GD32F450VI) || defined(GD32H7XX)
     {
         // Clear section .lightset
-        const auto kSize = (&_elightset - &_slightset);
+        const auto kSize = static_cast<size_t>(&_elightset - &_slightset);
         memset(&_slightset, 0, kSize);
 #ifndef NDEBUG
         printf("Cleared .lightset at %p, size %u\n", &_slightset, kSize);
@@ -155,7 +157,7 @@ void Init()
 #endif
     {
         // Clear section .network
-        const auto kSize = (&_enetwork - &_snetwork);
+        const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
 #ifndef NDEBUG
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
@@ -164,7 +166,7 @@ void Init()
 #if !defined(GD32F450VE) && !defined(GD32H7XX)
     {
         // Clear section .pixel
-        const auto kSize = (&_epixel - &_spixel);
+        const auto kSize = static_cast<size_t>(&_epixel - &_spixel);
         memset(&_spixel, 0, kSize);
 #ifndef NDEBUG
         printf("Cleared .pixel at %p, size %u\n", &_spixel, kSize);
@@ -176,7 +178,7 @@ void Init()
 #if defined(GD32F20X) || defined(GD32F4XX) || defined(GD32H7XX)
     {
         // clear section .network
-        const auto kSize = (&_enetwork - &_snetwork);
+        const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
 #ifndef NDEBUG
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
@@ -185,26 +187,23 @@ void Init()
 #endif
 #endif
 
-    /*
-     * Show the AHB and APBx busses frequency
-     */
-
 #ifndef NDEBUG
-    const auto nSYS = rcu_clock_freq_get(CK_SYS);
-    const auto nAHB = rcu_clock_freq_get(CK_AHB);
-    const auto nAPB1 = rcu_clock_freq_get(CK_APB1);
-    const auto nAPB2 = rcu_clock_freq_get(CK_APB2);
-    printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", nSYS, nAHB, nAPB1, nAPB2);
-    assert(nSYS == MCU_CLOCK_FREQ);
-    assert(nAHB == AHB_CLOCK_FREQ);
-    assert(nAPB1 == APB1_CLOCK_FREQ);
-    assert(nAPB2 == APB2_CLOCK_FREQ);
+    // Show the AHB and APBx busses frequency
+    const auto kSys = rcu_clock_freq_get(CK_SYS);
+    const auto kAhb = rcu_clock_freq_get(CK_AHB);
+    const auto kApb1 = rcu_clock_freq_get(CK_APB1);
+    const auto kApb2 = rcu_clock_freq_get(CK_APB2);
+    printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", kSys, kAhb, kApb1, kApb2);
+    assert(kSys == MCU_CLOCK_FREQ);
+    assert(kAhb == AHB_CLOCK_FREQ);
+    assert(kApb1 == APB1_CLOCK_FREQ);
+    assert(kApb2 == APB2_CLOCK_FREQ);
 #if defined(GD32H7XX)
-    const auto nAPB3 = rcu_clock_freq_get(CK_APB3);
-    const auto nAPB4 = rcu_clock_freq_get(CK_APB4);
+    const auto kApb3 = rcu_clock_freq_get(CK_APB3);
+    const auto kApb4 = rcu_clock_freq_get(CK_APB4);
     printf("nCK_APB3=%u\nCK_APB4=%u\n", nAPB3, nAPB4);
-    assert(nAPB3 == APB3_CLOCK_FREQ);
-    assert(nAPB4 == APB4_CLOCK_FREQ);
+    assert(kApb3 == APB3_CLOCK_FREQ);
+    assert(kApb4 == APB4_CLOCK_FREQ);
 #endif
 #endif
 
@@ -308,7 +307,7 @@ void Init()
     hal::panelled::Init();
 
 #if defined ENABLE_USB_HOST
-    usb_init();
+    usb::Init();
 #endif
 
     logic_analyzer::Init();

@@ -31,10 +31,9 @@
 #include "gd32.h" // IWYU pragma: keep
 
 #if defined(ENABLE_USB_HOST)
-extern "C"
-{
+extern "C" {
 #include "usbh_core.h"
-    extern usbh_host usb_host;
+extern usbh_host usb_host;
 }
 #endif
 
@@ -49,27 +48,15 @@ void emac_debug_run();
 #include "FreeRTOS.h"
 #include "task.h"
 #endif
-
 #include "softwaretimers.h" // IWYU pragma: keep
-
-#if !defined(DISABLE_RTC)
-#include "hwclock.h" // IWYU pragma: keep
-#endif
-
 #include "hal_panelled.h"
 
-#if defined(CONFIG_HAL_USE_SYSTICK)
-extern volatile uint32_t gv_nSysTickMillis;
-#endif
-
-namespace hal
-{
+namespace hal {
 inline constexpr const char kWebsite[] = "https://gd32-dmx.org";
 inline constexpr float kCoreTemperatureMin = -40.0;
 inline constexpr float kCoreTemperatureMax = +85.0;
 
-inline void Run()
-{
+inline void Run() {
 #if defined(ENABLE_USB_HOST)
     usbh_core_task(&usb_host);
 #endif

@@ -27,10 +27,8 @@
 
 #include "hal_serialnumber.h"
 
-namespace hal
-{
-void SerialNumber(uint8_t sn[kSnSize])
-{
+namespace hal {
+void SerialNumber(uint8_t sn[kSnSize]) {
 #if defined(GD32H7XX)
     const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7E8);
 #elif defined(GD32F4XX)

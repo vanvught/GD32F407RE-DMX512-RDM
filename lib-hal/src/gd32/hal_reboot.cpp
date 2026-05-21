@@ -29,29 +29,24 @@
 
 #include <cstdio>
 
-#include "gd32.h"
 #include "hal.h"
 #include "hal_statusled.h"
-
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
 #endif
-
 #include "configstore.h"
+#include "gd32.h" // IWYU pragma: keep
 
 #if !defined(NO_EMAC)
-namespace network
-{
+namespace network {
 void Shutdown();
 } // namespace network
 #endif
 
-namespace hal
-{
+namespace hal {
 void RebootHandler();
 
-bool Reboot()
-{
+bool Reboot() {
     puts("Rebooting ...");
 
     fwdgt_config(0xFFFF, FWDGT_PSC_DIV64);
