@@ -62,42 +62,42 @@
 inline constexpr uint32_t DmxPortToUart(uint32_t port) {
     switch (port) {
 #if defined(DMX_USE_USART0)
-        case dmx::config::USART0_PORT:
+        case dmx::config::kUsart0Port:
             return USART0;
             break;
 #endif
 #if defined(DMX_USE_USART1)
-        case dmx::config::USART1_PORT:
+        case dmx::config::kUsart1Port:
             return USART1;
             break;
 #endif
 #if defined(DMX_USE_USART2)
-        case dmx::config::USART2_PORT:
+        case dmx::config::kUsart2Port:
             return USART2;
             break;
 #endif
 #if defined(DMX_USE_UART3)
-        case dmx::config::UART3_PORT:
+        case dmx::config::kUart3Port:
             return UART3;
             break;
 #endif
 #if defined(DMX_USE_UART4)
-        case dmx::config::UART4_PORT:
+        case dmx::config::kUart4Port:
             return UART4;
             break;
 #endif
 #if defined(DMX_USE_USART5)
-        case dmx::config::USART5_PORT:
+        case dmx::config::kUsart5Port:
             return USART5;
             break;
 #endif
 #if defined(DMX_USE_UART6)
-        case dmx::config::UART6_PORT:
+        case dmx::config::kUart6Port:
             return UART6;
             break;
 #endif
 #if defined(DMX_USE_UART7)
-        case dmx::config::UART7_PORT:
+        case dmx::config::kUart7Port:
             return UART7;
             break;
 #endif
