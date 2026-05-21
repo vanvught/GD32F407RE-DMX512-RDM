@@ -71,6 +71,6 @@ ifeq ($(findstring DISPLAY_UDF,$(DEFINES)),DISPLAY_UDF)
 	LIBS+=displayudf
 endif
 
-LIBS+=flash display device hal
+LIBS+=flash display device hal hwclock
 
 $(info $$LIBS [${LIBS}])
