@@ -34,7 +34,7 @@
 # error This file should be included later
 #endif
 
-#if !(defined(CONSOLE_I2C) || defined(CONSOLE_NULL) || defined(CONFIG_USE_SOFTUART0))
+#if !(defined(CONSOLE_I2C) || defined(CONFIG_CLIB_USE_NULL) || defined(CONFIG_USE_SOFTUART0))
 # error USART0 is used for console
 #endif
 
