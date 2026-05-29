@@ -67,3 +67,9 @@ bool Reboot() {
     return true;
 }
 } // namespace hal
+
+namespace board {
+bool Reboot() {
+  return hal::Reboot();
+}
+} // namespace board

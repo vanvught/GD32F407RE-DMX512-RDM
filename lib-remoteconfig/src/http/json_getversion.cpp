@@ -1,7 +1,7 @@
 /**
  * @file json_getversion.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 #include <cstdint>
 #include <cstdio>
 
-#include "hal_boardinfo.h"
+#include "board.h"
 #include "firmwareversion.h"
 
 namespace json {
@@ -37,7 +37,7 @@ uint32_t GetVersion(char* out_buffer, uint32_t out_buffer_size) {
 		"{\"version\":\"%.*s\",\"board\":\"%s\",\"build\":{\"date\":\"%.*s\",\"time\":\"%.*s\"}}", 
 		firmwareversion::length::kSoftwareVersion, 
 		version->software_version, 
-		hal::BoardName(hw_text_length), 
+		board::BoardName(hw_text_length), 
 		firmwareversion::length::kGccDate, version->build_date, 
 		firmwareversion::length::kGccTime, version->build_time));
     return kLength;
