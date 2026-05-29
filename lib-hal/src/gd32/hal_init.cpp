@@ -69,7 +69,7 @@ void Init();
 #include "../debug/i2c/i2cdetect.h"
 #endif
 #include "hal_statusled.h"
-#include "hal_panelled.h" // IWYU pragma: keep
+#include "panelled.h"
 #include "logic_analyzer.h"
 
 #if defined(CONFIG_HAL_USE_SYSTICK)
@@ -111,9 +111,6 @@ extern unsigned char _spixel;    // NOLINT
 extern unsigned char _epixel;    // NOLINT
 
 namespace hal {
-namespace global {
-bool watchdog = false;
-}
 void Init() {
     // GD32H7xx Cache and Memory Protection Unit
 #if defined(GD32H7XX)
@@ -304,7 +301,7 @@ void Init() {
     GPIO_BOP(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
 #endif
 
-    hal::panelled::Init();
+    panelled::Init();
 
 #if defined ENABLE_USB_HOST
     usb::Init();

@@ -105,8 +105,8 @@ float Gd32AdcGetVbat() {
 }
 #endif
 
-namespace hal {
+namespace board {
 float CoreTemperatureCurrent() {
     return G32AdcGetTemp();
 }
-} // namespace hal
+} // namespace board

@@ -112,7 +112,7 @@
 
 // Panel LEDs
 #ifdef __cplusplus
-namespace hal::panelled {
+namespace panelled {
 inline constexpr uint32_t kActivity = 0;
 inline constexpr uint32_t kArtnet = 0;
 inline constexpr uint32_t kDdp = 0;
@@ -129,7 +129,7 @@ inline constexpr uint32_t kPortATx = (1U << 0);
 inline constexpr uint32_t kPortARx = (1U << 8);
 #define CONFIG_PANELLED_RDM_PORT
 inline constexpr uint32_t kPortARdm = (1U << 16);
-} // namespace hal::panelled
+} // namespace panelled
 #endif
 
 #define PANELLED_595_COUNT			2

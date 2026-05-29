@@ -48,13 +48,13 @@ static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
 
     if (s_toggle_led > 0) {
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
-        hal::PanelLedOn(hal::panelled::ACTIVITY);
+        hal::PanelLedOn(panelled::ACTIVITY);
 #else
         GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
     } else {
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
-        hal::PanelLedOff(hal::panelled::ACTIVITY);
+        hal::PanelLedOff(panelled::ACTIVITY);
 #else
         GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
@@ -77,7 +77,7 @@ void SetFrequency(uint32_t frequency_hz) {
         case 0:
             SoftwareTimerDelete(s_timer_id);
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
-            hal::PanelLedOff(hal::panelled::ACTIVITY);
+            hal::PanelLedOff(panelled::ACTIVITY);
 #else
             GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif
@@ -99,7 +99,7 @@ void SetFrequency(uint32_t frequency_hz) {
         case 255:
             SoftwareTimerDelete(s_timer_id);
 #if defined(CONFIG_LEDBLINK_USE_PANELLED)
-            hal::PanelLedOn(hal::panelled::ACTIVITY);
+            hal::PanelLedOn(panelled::ACTIVITY);
 #else
             GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #endif

@@ -1,8 +1,8 @@
 /**
- * @file hal_boardinfo.h
+ * @file board.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,41 @@
  * THE SOFTWARE.
  */
 
-#ifndef HAL_BOARDINFO_H_
-#define HAL_BOARDINFO_H_
+#include "gd32_board.h"
 
-#include <cstdint>
+namespace board {
+static constexpr float kCoreTemperatureMin = -40.0;
+static constexpr float kCoreTemperatureMax = +85.0;
+static constexpr const char kWebsite[] = "https://gd32-dmx.org";
 
-namespace hal
-{
-const char* BoardName(uint8_t& length);
-const char* SocName(uint8_t& length);
-const char* CpuName(uint8_t& length);
-const char* SysName(uint8_t& length);
-const char* MachineName(uint8_t& length);
-} // namespace hal
+const char* Website() {
+    return kWebsite;
+}
 
-#endif  // HAL_BOARDINFO_H_
+float CoreTemperatureMin() {
+    return kCoreTemperatureMin;
+}
+float CoreTemperatureMax() {
+    return kCoreTemperatureMax;
+}
+
+const char* BoardName(uint8_t& length) {
+    length = sizeof(GD32_BOARD_NAME) - 1U;
+    return GD32_BOARD_NAME;
+}
+
+const char* SocName(uint8_t& length) {
+    length = 4;
+    return "GD32";
+}
+
+const char* CpuName(uint8_t& length) {
+    length = sizeof(GD32_MCU_NAME) - 1U;
+    return GD32_MCU_NAME;
+}
+
+const char* SysName(uint8_t& length) {
+    length = 8;
+    return "Embedded";
+}
+} // namespace board

@@ -53,9 +53,11 @@
 #endif
 #include "dmxnode.h"
 #include "dmxnode_data.h"
-#include "hal_boardinfo.h"
+#include "board.h"
 #include "network_udp.h"
-#include "hal.h"
+#include "network_iface.h"
+#include "network_config.h"
+#include "board.h"
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
 #endif
@@ -264,7 +266,7 @@ void ArtNetNode::Stop() {
 #endif
 
     hal::statusled::SetMode(hal::statusled::Mode::kOffOff);
-    hal::panelled::Off(hal::panelled::kArtnet);
+    panelled::Off(panelled::kArtnet);
 
     art_poll_reply_.status1 = static_cast<uint8_t>((art_poll_reply_.status1 & ~artnet::Status1::kIndicatorMask) | artnet::Status1::kIndicatorMuteMode);
     state_.status = artnet::Status::kStandby;
@@ -276,8 +278,8 @@ void ArtNetNode::GetLongNameDefault(char* long_name) {
     DEBUG_ENTRY();
 #if !defined(ARTNET_LONG_NAME)
     uint8_t board_name_length;
-    const auto* const kBoardName = hal::BoardName(board_name_length);
-    snprintf(long_name, artnet::kLongNameLength - 1, "%s %s %u %s", kBoardName, artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion), hal::kWebsite);
+    const auto* const kBoardName = board::BoardName(board_name_length);
+    snprintf(long_name, artnet::kLongNameLength - 1, "%s %s %u %s", kBoardName, artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion), board::Website());
 #else
     uint32_t i;
 
@@ -633,7 +635,7 @@ void ArtNetNode::SetNetworkDataLossCondition() {
     }
 
     hal::statusled::SetMode(hal::statusled::Mode::kNormal);
-    hal::panelled::Off(hal::panelled::kArtnet);
+    panelled::Off(panelled::kArtnet);
 
 #if defined(ARTNET_HAVE_DMXIN)
     SetLocalMerging();
@@ -859,7 +861,7 @@ void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip
             break;
     }
 
-    hal::panelled::On(hal::panelled::kArtnet);
+    panelled::On(panelled::kArtnet);
 }
 
 void ArtNetNode::UpdateMergeStatus(uint32_t port_index) {

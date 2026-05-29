@@ -47,7 +47,7 @@ void emac_debug_run();
 #include "task.h"
 #endif
 #include "softwaretimers.h" // IWYU pragma: keep
-#include "hal_panelled.h"
+#include "panelled.h"
 
 namespace hal {
 void Init();
@@ -63,7 +63,7 @@ inline void Run() {
 #if !defined(USE_FREE_RTOS)
     SoftwareTimerRun();
 #endif
-    hal::panelled::Run();
+    panelled::Run();
 #if defined(DEBUG_STACK)
     stack_debug_run();
 #endif

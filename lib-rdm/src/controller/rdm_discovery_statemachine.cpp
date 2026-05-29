@@ -35,7 +35,7 @@
 #include "timing.h" // IWYU pragma: keep
 #include "firmware/debug/debug_debug.h"
 #if defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
-#include "hal_panelled.h"
+#include "panelled.h"
 #endif
 
 namespace rdm::discovery {
@@ -290,9 +290,9 @@ void StateMachine::Process() {
                 unmute_.is_command_running = true;
 
 #if defined(CONFIG_PANELLED_RDM_PORT)
-                hal::panelled::On(hal::panelled::kPortARdm << port_index_);
+                panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
-                hal::panelled::On(hal::panelled::kRdm << port_index_);
+                panelled::On(panelled::kRdm << port_index_);
 #endif
                 return;
             }
@@ -419,9 +419,9 @@ void StateMachine::Process() {
             discovery_.is_command_running = true;
 
 #if defined(CONFIG_PANELLED_RDM_PORT)
-            hal::panelled::On(hal::panelled::kPortARdm << port_index_);
+            panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
-            hal::panelled::On(hal::panelled::kRdm << port_index_);
+            panelled::On(panelled::kRdm << port_index_);
 #endif
             return;
             break;
@@ -447,9 +447,9 @@ void StateMachine::Process() {
                 discovery_single_device_.is_command_running = true;
 
 #if defined(CONFIG_PANELLED_RDM_PORT)
-                hal::panelled::On(hal::panelled::kPortARdm << port_index_);
+                panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
-                hal::panelled::On(hal::panelled::kRdm << port_index_);
+                panelled::On(panelled::kRdm << port_index_);
 #endif
                 return;
             }
@@ -532,9 +532,9 @@ void StateMachine::Process() {
                 quick_find_.is_command_running = true;
 
 #if defined(CONFIG_PANELLED_RDM_PORT)
-                hal::panelled::On(hal::panelled::kPortARdm << port_index_);
+                panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
-                hal::panelled::On(hal::panelled::kRdm << port_index_);
+                panelled::On(panelled::kRdm << port_index_);
 #endif
                 return;
             }

@@ -1,5 +1,5 @@
 /**
- * @file hal_panelled.h
+ * @file panelled.h
  *
  */
 /* Copyright (C) 2023-2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_HAL_PANELLED_H_
-#define GD32_HAL_PANELLED_H_
+#ifndef PANELLED_H_
+#define PANELLED_H_
 
 #include <cstdint>
 
@@ -32,7 +32,7 @@
 #include "gd32.h"
 #endif
 
-namespace hal::panelled {
+namespace panelled {
 namespace global {
 extern uint32_t data;
 }
@@ -117,6 +117,6 @@ inline void Run() {
 
 #endif
 }
-} // namespace hal::panelled
+} // namespace panelled
 
-#endif // GD32_HAL_PANELLED_H_
+#endif // PANELLED_H_
