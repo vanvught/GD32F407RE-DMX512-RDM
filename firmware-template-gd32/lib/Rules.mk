@@ -78,11 +78,10 @@ all : builddirs $(TARGET)
 
 .PHONY: clean builddirs
 
+BUILD_DIRS_ALL := $(BUILD_DIRS) $(EXTRA_C_BUILD_DIRS) $(EXTRA_CPP_BUILD_DIRS) lib_gd32
+
 builddirs:
-	mkdir -p $(BUILD_DIRS) 
-	if [[ -n "${EXTRA_C_BUILD_DIRS}" ]]; then mkdir -p $(EXTRA_C_BUILD_DIRS); fi
-	if [[ -n "${EXTRA_CPP_BUILD_DIRS}" ]]; then mkdir -p $(EXTRA_CPP_BUILD_DIRS); fi
-	mkdir -p lib_gd32
+	mkdir -p $(BUILD_DIRS_ALL)
 
 clean:
 	rm -rf build_gd32
