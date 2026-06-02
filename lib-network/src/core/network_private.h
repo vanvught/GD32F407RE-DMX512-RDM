@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef NET_NET_PRIVATE_H_
-#define NET_NET_PRIVATE_H_
+#ifndef NETWORK_PRIVATE_H_
+#define NETWORK_PRIVATE_H_
 
 #include <cstdint>
 #include <cstdio>
@@ -33,7 +33,6 @@
 #include "core/protocol/igmp.h"
 #include "core/protocol/udp.h"
 #include "core/protocol/tcp.h"
-
 #include "net_platform.h" // IWYU pragma: keep
 
 #ifndef ALIGNED
@@ -53,9 +52,11 @@ void FreePkt();
 } // namespace emac::eth
 
 namespace network {
-inline void Error([[maybe_unused]] const char* func, [[maybe_unused]] const char* s) {}
+inline void Error(const char* func, const char* s) {
+    printf("%s: %s\n", func, s);
+}
 
-#define ERROR(s) Error(__func__, (s))
+#define ERROR(s)	Error(__func__, (s))
 
 namespace global {
 extern uint32_t broadcast_mask;
@@ -125,4 +126,4 @@ void Run();
 } // namespace tcp
 } // namespace network
 
-#endif // NET_NET_PRIVATE_H_
+#endif // NETWORK_PRIVATE_H_

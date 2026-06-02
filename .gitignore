@@ -62,3 +62,4 @@ compile_commands.json
 /common/scripts/gd32/venv
 software_version_id.h
 lib-remoteconfig/http/content/generate_content
+/lib-network/include/noemac
