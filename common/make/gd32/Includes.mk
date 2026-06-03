@@ -95,7 +95,7 @@ ifeq ($(findstring gd32h7xx,$(FAMILY)), gd32h7xx)
 endif
 
 ifdef USB_HOST_MSC
-		INCLUDES+=-I../lib-hal/ff14b/source
+		INCLUDES+=-I../lib-fatfs
 endif
 
 INCLUDES:= $(strip -I../${PROJECT}/include $(sort $(INCLUDES)))
