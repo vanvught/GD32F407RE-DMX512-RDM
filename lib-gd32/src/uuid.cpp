@@ -2,7 +2,7 @@
  * @file uuid.cpp
  *
  */
-/* Copyright (C) 2024-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,18 +34,14 @@
 #include <cstring>
 #include <uuid/uuid.h>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
-namespace hal
-{
-typedef union pcast32
-{
+typedef union pcast32 {
     uuid_t uuid;
     uint32_t u32[4];
 } _pcast32;
 
-void UuidCopy(uuid_t out)
-{
+void UuidCopy(uuid_t out) {
     _pcast32 cast;
 
 #if defined(GD32H7XX)
@@ -65,4 +61,3 @@ void UuidCopy(uuid_t out)
 
     memcpy(out, cast.uuid, sizeof(uuid_t));
 }
-} // namespace hal

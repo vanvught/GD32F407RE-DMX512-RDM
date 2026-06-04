@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef TIMING_H_
-#define TIMING_H_
+#ifndef GD32_TIMING_H_
+#define GD32_TIMING_H_
 
 #include <cstdint>
 
@@ -59,4 +59,4 @@ void DelayUs(uint32_t us, uint32_t offset = 0);
 [[nodiscard]] uint32_t UpTime();
 } // namespace timing
 
-#endif // TIMING_H_
+#endif // GD32_TIMING_H_

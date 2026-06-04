@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef UART0_H_
-#define UART0_H_
+#ifndef GD32_UART0_H_
+#define GD32_UART0_H_
 
 namespace uart0 {
 void Init();
@@ -34,4 +34,4 @@ int Printf(const char* fmt, ...);
 int GetChar();
 } // namespace uart0
 
-#endif // UART0_H_
+#endif // GD32_UART0_H_

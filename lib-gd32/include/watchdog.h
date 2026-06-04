@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_HAL_WATCHDOG_H_
-#define GD32_HAL_WATCHDOG_H_
+#ifndef GD32_WATCHDOG_H_
+#define GD32_WATCHDOG_H_
 
 #include "gd32.h" // IWYU pragma: keep
 
@@ -54,4 +54,4 @@ inline bool Watchdog() {
 }
 } // namespace watchdog
 
-#endif // GD32_HAL_WATCHDOG_H_
+#endif // GD32_WATCHDOG_H_

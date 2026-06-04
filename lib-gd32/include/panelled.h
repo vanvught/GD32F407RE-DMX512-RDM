@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef PANELLED_H_
-#define PANELLED_H_
+#ifndef GD32_PANELLED_H_
+#define GD32_PANELLED_H_
 
 #include <cstdint>
 
@@ -119,4 +119,4 @@ inline void Run() {
 }
 } // namespace panelled
 
-#endif // PANELLED_H_
+#endif // GD32_PANELLED_H_
