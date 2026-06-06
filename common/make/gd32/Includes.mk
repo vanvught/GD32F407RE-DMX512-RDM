@@ -8,6 +8,7 @@ INCLUDES+=-I../lib-gd32/${FAMILY}/${FAMILY_UC}_standard_peripheral/Include
 INCLUDES+=-I../lib-gd32/${FAMILY}/CMSIS/GD/${FAMILY_UC}/Include
 INCLUDES+=-I../lib-gd32/include
 INCLUDES+=-I../lib-hwclock/include
+
 INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 
 ALL_FLAGS := $(DEFINES) $(MAKE_FLAGS)
@@ -16,11 +17,18 @@ $(info $$ALL_FLAGS [${ALL_FLAGS}])
 # $(call set_if_present,FLAG,VAR)  -> sets VAR=1 if FLAG or -DFLAG is present
 set_if_present = $(eval $(2) := $(if $(filter $(1) -D$(1),$(ALL_FLAGS)),1,))
 
+$(call set_if_present,USE_FREE_RTOS, FREE_RTOS)
 $(call set_if_present,ENABLE_USB_HOST,USB_HOST)
 $(call set_if_present,CONFIG_USB_HOST_MSC,USB_HOST_MSC)
 $(call set_if_present,ENABLE_USB_DEVICE,USB_DEVICE)
 $(call set_if_present,CONFIG_USB_DEVICE_CDC,USB_DEVICE_CDC)
 $(call set_if_present,CONFIG_USB_DEVICE_HID,USB_DEVICE_HID)
+
+ifdef FREE_RTOS
+	INCLUDES+=-I../FreeRTOS/FreeRTOS-Kernel/include
+else
+	INCLUDES+=-I../lib-superloop/include
+endif
 
 ifdef USB_HOST
 	INCLUDES+=-I../lib-gd32/device/usb
