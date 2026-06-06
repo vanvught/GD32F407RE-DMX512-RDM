@@ -27,7 +27,7 @@ $(call set_if_present,CONFIG_USB_DEVICE_HID,USB_DEVICE_HID)
 ifdef FREE_RTOS
 	INCLUDES+=-I../FreeRTOS/FreeRTOS-Kernel/include
 else
-	INCLUDES+=-I../lib-superloop/include
+	INCLUDES+=-I../lib-superloop/include/superloop
 endif
 
 ifdef USB_HOST
