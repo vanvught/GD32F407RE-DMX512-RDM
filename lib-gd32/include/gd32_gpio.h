@@ -156,7 +156,10 @@ inline void Gd32GpioIntCfg(uint32_t gpio, uint32_t trig_type) {
 #endif
 
 inline uint32_t Gd32GpioToPeriph(uint32_t gpio) {
-    switch ((GD32_Port_TypeDef)GD32_GPIO_TO_PORT(gpio)) {
+    const auto kPortIndex = Gd32GpioToPort(gpio);
+    const auto kPort = static_cast<GD32_Port_TypeDef>(kPortIndex);
+
+    switch (kPort) {
         case GD32_GPIO_PORTA:
         case GD32_GPIO_PORTB:
         case GD32_GPIO_PORTC:
@@ -164,25 +167,20 @@ inline uint32_t Gd32GpioToPeriph(uint32_t gpio) {
         case GD32_GPIO_PORTE:
         case GD32_GPIO_PORTF:
         case GD32_GPIO_PORTG:
-            return GPIOA + (GD32_GPIO_TO_PORT(gpio) * 0x400);
-            break;
+            return GPIOA + (kPortIndex * 0x400);
 #if !(defined(GD32F10X) || defined(GD32F30X))
         case GD32_GPIO_PORTH:
             return GPIOH;
-            break;
 #if !defined(GD32H7XX)
         case GD32_GPIO_PORTI:
             return GPIOI;
-            break;
 #endif
 #endif
 #if defined(GD32H7XX)
         case GD32_GPIO_PORTJ:
             return GPIOJ;
-            break;
         case GD32_GPIO_PORTK:
             return GPIOK;
-            break;
 #endif
         default:
             assert(false && "Invalid gpio");

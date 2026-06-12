@@ -252,13 +252,25 @@ template <uint32_t PERIPH> static uint8_t ReadImplementation(char* buffer, uint3
     return GD32_I2C_OK;
 }
 
-template <uint32_t PERIPH> void WriteRegisterImplementation(uint8_t reg, uint8_t value) {
+template <uint32_t PERIPH> 
+void WriteRegisterImplementation(uint8_t reg, uint8_t value) {
     char buffer[2];
 
     buffer[0] = static_cast<char>(reg);
     buffer[1] = static_cast<char>(value);
 
     WriteImplementation<PERIPH>(buffer, 2);
+}
+
+template <uint32_t PERIPH> 
+void WriteRegisterImplementation(uint8_t reg, uint16_t value) {
+  char buffer[3];
+  
+  buffer[0] = static_cast<char>(reg);
+  buffer[1] =   static_cast<char>(value >> 8);
+  buffer[2] =   static_cast<char>(value & 0xFF);
+
+  WriteImplementation<PERIPH>(buffer, 3);
 }
 
 template <uint32_t PERIPH> void ReadRegisterImplementation(uint8_t reg, uint8_t& value) {
@@ -397,6 +409,11 @@ void Gd32I2cWriteReg(uint8_t address, uint8_t reg, uint8_t value) {
     s_address = address << 1;
     WriteRegisterImplementation<I2C_PERIPH>(reg, value);
 }
+
+void Gd32I2cWriteReg(uint8_t reg, uint16_t value) {
+    WriteRegisterImplementation<I2C_PERIPH>(reg, value);
+}
+
 
 void Gd32I2cReadReg(uint8_t reg, uint8_t& value) {
     ReadRegisterImplementation<I2C_PERIPH>(reg, value);

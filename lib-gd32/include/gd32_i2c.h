@@ -53,6 +53,8 @@ uint8_t Gd32I2cRead(uint8_t address, char* buffer, uint32_t length);
 bool Gd32I2cIsConnected(uint8_t address, uint32_t baudrate = gd32::kI2CNormalSpeed);
 void Gd32I2cWriteReg(uint8_t reg, uint8_t value);
 void Gd32I2cWriteReg(uint8_t address, uint8_t reg, uint8_t value);
+void Gd32I2cWriteReg(uint8_t reg, uint16_t value);
+void Gd32I2cWriteReg(uint8_t address, uint8_t reg, uint16_t value);
 void Gd32I2cReadReg(uint8_t reg, uint8_t& value);
 void Gd32I2cReadReg(uint8_t address, uint8_t reg, uint8_t& value);
 

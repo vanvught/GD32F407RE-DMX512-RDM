@@ -95,9 +95,23 @@ uint16_t bkp_data_read(bkp_data_register_enum register_number);
 #define GPIO_OSPEED GPIO_OSPEED_50MHZ
 #endif
 
-#define GD32_PORT_TO_GPIO(p, n) ((p * 16) + n)
-#define GD32_GPIO_TO_PORT(g) (uint8_t)(g / 16)
-#define GD32_GPIO_TO_NUMBER(g) (uint8_t)(g - (16 * GD32_GPIO_TO_PORT(g)))
+#ifdef __cplusplus
+constexpr uint32_t Gd32PortToGpio(uint32_t port, uint32_t pin) {
+    return (port * 16U) + pin;
+}
+
+constexpr uint8_t Gd32GpioToPort(uint32_t gpio) {
+    return static_cast<uint8_t>(gpio / 16U);
+}
+
+constexpr uint8_t Gd32GpioToNumber(uint32_t gpio) {
+    return static_cast<uint8_t>(gpio % 16U);
+}
+
+#define GD32_PORT_TO_GPIO(p, n) Gd32PortToGpio((p), (n))
+#define GD32_GPIO_TO_PORT(g)    Gd32GpioToPort((g))
+#define GD32_GPIO_TO_NUMBER(g)  Gd32GpioToNumber((g))
+#endif
 
 typedef enum T_GD32_Port { 
   GD32_GPIO_PORTA = 0, 
