@@ -137,10 +137,10 @@ class I2c {
         Gd32I2cWrite(kBuffer, 2);
     }
 
-    void WriteRegister(uint8_t reg, uint16_t value) {
+    void WriteRegister(uint8_t reg, uint16_t value, bool do_setup) {
         const char kBuffer[] = {static_cast<char>(reg), static_cast<char>(value >> 8), static_cast<char>(value & 0xFF)};
 
-        Setup();
+        if (do_setup) Setup();
         Gd32I2cWrite(kBuffer, 3);
     }
 

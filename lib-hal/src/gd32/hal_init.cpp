@@ -66,7 +66,7 @@ void Init();
 #include "device/usb.h"
 #endif
 #if defined(DEBUG_I2C)
-#include "../debug/i2c/i2cdetect.h"
+#include "firmware/debug/debug_i2cdetect.h"
 #endif
 #include "hal_statusled.h"
 #include "panelled.h"
@@ -332,10 +332,7 @@ void Init() {
 #endif
 
 #if defined(DEBUG_I2C)
-    I2cDetect();
-#if defined(CONFIG_ENABLE_I2C1)
-    I2c1Detect();
-#endif
+    debug::i2c::Detect();
 #endif
 
 #if !defined(USE_FREE_RTOS)
