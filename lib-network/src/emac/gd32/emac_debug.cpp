@@ -1,8 +1,8 @@
 /**
- * @file iana.h
+ * @file  emac_debug.cpp
  *
  */
-/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2023-2024 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,22 @@
  * THE SOFTWARE.
  */
 
-#ifndef CORE_PROTOCOL_IANA_H_
-#define CORE_PROTOCOL_IANA_H_
+#include <cstdio>
 
-#include <cstdint>
+#include "gd32.h"
 
-namespace network::iana {
-struct Ports {
-    static constexpr uint16_t kPortDhcpServer = 67;
-    static constexpr uint16_t kPortDhcpClient = 68;
-    static constexpr uint16_t kPortTftp = 69;
-    static constexpr uint16_t kPortHttp = 80;
-    static constexpr uint16_t kPortNtp = 123;
-    static constexpr uint16_t kPortMdns = 5353;
-	static constexpr uint16_t kPortHttpAlt = 8080;
-};
-} // namespace network::iana
+static uint32_t s_counter;
 
-#endif // CORE_PROTOCOL_IANA_H_
+void emac_debug_run() {
+    uint32_t rxfifo_drop;
+    uint32_t rxdma_drop;
+#if defined(GD32H7XX)
+    enet_missed_frame_counter_get(ENETx, &rxfifo_drop, &rxdma_drop);
+#else
+    enet_missed_frame_counter_get(&rxfifo_drop, &rxdma_drop);
+#endif
+
+    if ((rxfifo_drop != 0) || (rxdma_drop != 0)) {
+        printf("%u: RxFIFO: %u RxDMA: %u\n", ++s_counter, rxfifo_drop, rxdma_drop);
+    }
+}
