@@ -45,6 +45,7 @@ class GD32Flasher:
             time.sleep(0.1)
             self.port.rts = False
             self.port.close()
+            print("Done. Reset the MCU manually before the next bootloader session.")
             
     def enter_bootloader(self):
         """Enter ROM bootloader mode using DTR/RTS"""
