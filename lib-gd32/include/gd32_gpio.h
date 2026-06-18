@@ -124,7 +124,11 @@ inline void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel) {
 #endif
 }
 
-#if !defined(GD32H7XX)
+#if defined(GD32H7XX)
+inline void Gd32GpioIntCfg([[maybe_unused]] uint32_t gpio, [[maybe_unused]] uint32_t trig_type) {
+    assert(false && "Not implemented");
+}
+#else
 inline void Gd32GpioIntCfg(uint32_t gpio, uint32_t trig_type) {
     const uint32_t kLinex = BIT(GD32_GPIO_TO_NUMBER(gpio));
 
@@ -244,7 +248,8 @@ inline void Gd32GpioSetPud(uint32_t gpio, uint32_t pud) {
 }
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t pin> inline void Gd32GpioModeSet() {
+template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t pin> 
+inline void Gd32GpioModeSet() {
     static_assert(pin != 0, "pin cannot be zero");
     static_assert(pin == (1U << __builtin_ctz(pin)), "Only single pin values are allowed");
 
@@ -267,7 +272,8 @@ template <uint32_t gpio_periph, uint32_t mode, uint32_t pull_up_down, uint32_t p
     GPIO_PUD(gpio_periph) = pupd;
 }
 
-template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void Gd32GpioAfSet() {
+template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> 
+inline void Gd32GpioAfSet() {
     static_assert(pin != 0, "pin cannot be zero");
     static_assert(pin == (1U << __builtin_ctz(pin)), "Only single pin values are allowed");
 
@@ -290,13 +296,14 @@ template <uint32_t gpio_periph, uint32_t alt_func_num, uint32_t pin> inline void
     GPIO_AFSEL1(gpio_periph) = afrh;
 }
 #else
-template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GPIO_OSPEED_50MHZ> inline void gd32_gpio_init() {
-    /* GPIO mode configuration */
+template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GPIO_OSPEED_50MHZ> 
+inline void gd32_gpio_init() {
+    // GPIO mode configuration
     auto temp_mode = (mode & 0x0F);
 
-    /* GPIO speed configuration */
+    // GPIO speed configuration
     if constexpr ((0x00U) != (mode & (0x10U))) {
-        /* output mode max speed: 10MHz, 2MHz, 50MHz */
+        // output mode max speed: 10MHz, 2MHz, 50MHz
         temp_mode |= speed;
     }
 
@@ -304,43 +311,43 @@ template <uint32_t gpio_periph, uint32_t mode, uint32_t pin, uint32_t speed = GP
 
     if constexpr (kPinPos < 8U) {
         uint32_t reg = GPIO_CTL0(gpio_periph);
-        /* clear the specified pin mode bits */
+        // Clear the specified pin mode bits
         reg &= ~GPIO_MODE_MASK(kPinPos);
-        /* set the specified pin mode bits */
+        // Set the specified pin mode bits
         reg |= GPIO_MODE_SET(kPinPos, temp_mode);
 
-        /* set IPD or IPU */
+        // Set IPD or IPU
         if constexpr (GPIO_MODE_IPD == mode) {
-            /* reset the corresponding OCTL bit */
+            // Reset the corresponding OCTL bit
             GPIO_BC(gpio_periph) = (1U << kPinPos);
         } else {
-            /* set the corresponding OCTL bit */
+            // Set the corresponding OCTL bit
             if constexpr (GPIO_MODE_IPU == mode) {
                 GPIO_BOP(gpio_periph) = (1U << kPinPos);
             }
         }
-        /* set GPIO_CTL0 register */
+        // Set GPIO_CTL0 register */
         GPIO_CTL0(gpio_periph) = reg;
     } else {
-        /* configure the eight high port pins with GPIO_CTL1 */
+        // Configure the eight high port pins with GPIO_CTL1
         constexpr uint32_t kHighPinPos = kPinPos - 8U;
         uint32_t reg = GPIO_CTL1(gpio_periph);
-        /* clear the specified pin mode bits */
+        // Clear the specified pin mode bits */
         reg &= ~GPIO_MODE_MASK(kHighPinPos);
-        /* set the specified pin mode bits */
+        // Set the specified pin mode bits */
         reg |= GPIO_MODE_SET(kHighPinPos, temp_mode);
 
-        /* set IPD or IPU */
+        // Set IPD or IPU
         if constexpr (GPIO_MODE_IPD == mode) {
-            /* reset the corresponding OCTL bit */
+            // Reset the corresponding OCTL bit
             GPIO_BC(gpio_periph) = (1U << kPinPos);
         } else {
-            /* set the corresponding OCTL bit */
+            // Set the corresponding OCTL bit
             if (GPIO_MODE_IPU == mode) {
                 GPIO_BOP(gpio_periph) = (1U << kPinPos);
             }
         }
-        /* set GPIO_CTL1 register */
+        // set GPIO_CTL1 register
         GPIO_CTL1(gpio_periph) = reg;
     }
 }
