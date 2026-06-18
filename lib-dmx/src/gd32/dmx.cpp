@@ -50,7 +50,6 @@
 #include "gd32_uart.h"
 #include "gd32_gpio.h"
 #include "dmx_internal.h"
-#include "gd32/dmx_dma_check.h" // IWYU pragma: keep // Do not reorder/move
 #if defined(LOGIC_ANALYZER)
 #include "logic_analyzer.h" // IWYU pragma: keep
 #endif
@@ -197,7 +196,7 @@ static dmx::DmxTransmit s_dmx_transmit;
 // RDM TX
 static dmx::RdmTxData s_RdmTxBuffer[dmx::config::max::kPorts] ALIGNED SECTION_DMA_BUFFER;
 
-template <uint32_t uart, uint32_t port_index> 
+template <uint32_t uart, uint32_t port_index>
 void IrqHandlerDmxRdmInput() {
     auto& rx_buffer = sv_rx_buffer[port_index];
     const auto kIsFlagIdleFrame = (USART_REG_VAL(uart, USART_FLAG_IDLE) & BIT(USART_BIT_POS(USART_FLAG_IDLE))) == BIT(USART_BIT_POS(USART_FLAG_IDLE));
@@ -335,7 +334,7 @@ void IrqHandlerDmxRdmInput() {
     }
 }
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel> 
+template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel>
 void DmaStartTx(const uint8_t* data, uint32_t length) {
     auto dma_chctl = DMA_CHCTL(DmaController, DmaChannel);
     // Disable channel
@@ -353,7 +352,7 @@ void DmaStartTx(const uint8_t* data, uint32_t length) {
     USART_CTL2(UsartPeripheral) |= USART_TRANSMIT_DMA_ENABLE;
 }
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType> 
+template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType>
 void DmaRestartDmxTx(TxBufferType& tx_buffer) {
     auto& dmx = tx_buffer.dmx;
 
@@ -369,7 +368,7 @@ void DmaRestartDmxTx(TxBufferType& tx_buffer) {
 #define DMA_RESTART_DMX_TX(PORT_INDEX, USARTx, DMAx, CHx) \
     DmaRestartDmxTx<USARTx, DMAx, CHx>(s_DmxTxBuffer[PORT_INDEX])
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType> 
+template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType>
 void DmaStartRdmTx(TxBufferType& tx_buffer) {
     const auto& packet = tx_buffer.rdm.data;
 
@@ -490,7 +489,7 @@ void TIMER1_IRQHandler() {
                 } break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
         }
@@ -557,11 +556,9 @@ void TIMER1_IRQHandler() {
                 } break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH1);
@@ -596,7 +593,7 @@ void TIMER1_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
         } else if (s_RdmTxBuffer[dmx::config::kUsart2Port].state != dmx::RdmTxState::kIdle) {
@@ -627,11 +624,9 @@ void TIMER1_IRQHandler() {
                 } break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH2);
@@ -695,11 +690,9 @@ void TIMER1_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH3);
@@ -739,7 +732,7 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
         } else if (s_RdmTxBuffer[dmx::config::kUart4Port].state != dmx::RdmTxState::kIdle) {
@@ -772,11 +765,9 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH0);
@@ -811,7 +802,7 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
         } else if (s_RdmTxBuffer[dmx::config::kUsart5Port].state != dmx::RdmTxState::kIdle) {
@@ -843,11 +834,9 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH1);
@@ -904,11 +893,9 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH2);
@@ -965,11 +952,9 @@ void TIMER4_IRQHandler() {
                     break;
 
                 default:
-                    [[unlikely]] assert(false);
+                    [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else [[unlikely]] {
-            assert(false);
         }
 
         TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH3);
@@ -1063,8 +1048,8 @@ void DMA0_Channel6_IRQHandler() {
                 s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-			const auto kSent = sv_total_statistics[dmx::config::kUsart1Port].dmx.sent + 1;
-			sv_total_statistics[dmx::config::kUsart1Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[dmx::config::kUsart1Port].dmx.sent + 1;
+            sv_total_statistics[dmx::config::kUsart1Port].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
         } else if (s_RdmTxBuffer[dmx::config::kUsart1Port].state != dmx::RdmTxState::kIdle) {
             TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
@@ -1385,8 +1370,8 @@ void Dmx::SetPortDirection(uint32_t port_index, dmx::Direction port_direction, b
             GPIO_BOP(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
         } else if (port_direction == dmx::Direction::kInput) {
             GPIO_BC(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
-        } else [[unlikely]]{
-            assert(false);
+        } else [[unlikely]] {
+            assert(false && "Invalid direction");
         }
     } else if (!enable_data) {
         DataDisable(port_index);
@@ -1397,7 +1382,7 @@ void Dmx::SetPortDirection(uint32_t port_index, dmx::Direction port_direction, b
     }
 }
 
-template <uint32_t port_index, dmx::Direction port_direction, bool enable_data> 
+template <uint32_t port_index, dmx::Direction port_direction, bool enable_data>
 void Dmx::SetPortDirection() {
     DMX_CHECK_PORT_INDEX_VOID(port_index);
 
@@ -1411,7 +1396,7 @@ void Dmx::SetPortDirection() {
         } else if constexpr (port_direction == dmx::Direction::kInput) {
             GPIO_BC(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
         } else {
-            static_assert(false);
+            static_assert(false, "Invalid direction");
         }
     } else if constexpr (!enable_data) {
         DataDisable(port_index);
@@ -1452,7 +1437,7 @@ void Dmx::DataEnable(uint32_t port_index) {
         return;
     }
 
-    assert(false);
+    assert(false && "Not reachable");
 }
 
 void Dmx::DataDisable(uint32_t port_index) {
@@ -1488,7 +1473,7 @@ void Dmx::DataDisable(uint32_t port_index) {
         return;
     }
 
-    assert(false);
+    assert(false && "Not reachable");
 }
 
 void Dmx::ClearData(uint32_t port_index) {
@@ -1545,7 +1530,7 @@ void Dmx::FullOn() {
 }
 
 // DMX Send
-template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle> 
+template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle>
 void Dmx::SetSendDataInternal(const uint8_t* data, uint32_t length) {
     DMX_CHECK_PORT_INDEX_VOID(portIndex);
 
@@ -1585,14 +1570,14 @@ void Dmx::SetSendDataInternal(const uint8_t* data, uint32_t length) {
 
 void Dmx::StartSendStyleDirect(uint32_t port_index) {
     DMX_CHECK_PORT_INDEX_VOID(port_index);
-	
+
     if ((sv_port_state[port_index] == dmx::PortState::kTx) && (s_DmxTxBuffer[port_index].output_style == dmx::OutputStyle::kDelta) && (s_DmxTxBuffer[port_index].state == dmx::TxRxState::kIdle)) {
         StartDmxOutput(port_index);
     }
 }
 
 template <uint32_t port_index, uint32_t nUart>
-static void StartDmxOutputBreak() {
+void StartDmxOutputBreak() {
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
@@ -1674,16 +1659,16 @@ static void StartDmxOutputBreak() {
             break;
 #endif // defined(DMX_USE_UART7)
         default:
-            [[unlikely]] assert(false);
+            [[unlikely]] assert(false && "switch");
 
             break;
     }
 
-    assert(false);
+    assert(false && "Not reachable");
 }
 
-template <uint32_t portIndex> 
-static void StartDmxOutputPort() {
+template <uint32_t portIndex>
+void StartDmxOutputPort() {
     if constexpr (portIndex < dmx::config::max::kPorts) {
         StartDmxOutputBreak<portIndex, DmxPortToUart(portIndex)>();
     }
@@ -1766,17 +1751,17 @@ void Dmx::RdmTransmit(uint32_t port_index, const uint8_t* data, uint32_t length)
         RDM_HANDLE_SEND_CASE(7);
 #endif
         default:
-            [[unlikely]] assert(false);
+            [[unlikely]] assert(false && "switch");
             return;
     }
 }
 
-template <uint32_t portIndex> 
+template <uint32_t portIndex>
 void Dmx::RdmSendDataInternal(const uint8_t* data, uint32_t length) {
     DMX_CHECK_PORT_INDEX_VOID(portIndex);
     assert(data != nullptr);
     assert(length <= sizeof(TRdmMessage));
-    
+
     SetPortDirection<portIndex, dmx::Direction::kOutput, false>();
 
     auto& tx_buffer = s_RdmTxBuffer[portIndex];
@@ -1790,9 +1775,9 @@ void Dmx::RdmSendDataInternal(const uint8_t* data, uint32_t length) {
     StartRdmOutput(portIndex);
 }
 
-template <uint32_t port_index, uint32_t uart> 
-static void StartRdmOutput() {
-    DEBUG_PRINTF("port_index=%u, uart=%u", port_index, uart);
+template <uint32_t port_index, uint32_t uart>
+void StartRdmOutput() {
+    DEBUG_PRINTF("port_index=%u, uart=%p", port_index, reinterpret_cast<void*>(uart));
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
@@ -1881,15 +1866,15 @@ static void StartRdmOutput() {
 #endif // defined(DMX_USE_UART7)
 
         default:
-            [[unlikely]] assert(false);
+            [[unlikely]] assert(false && "switch");
             break;
     }
 
-    assert(false);
+    assert(false && "Not reachable");
 }
 
-template <uint32_t portIndex> 
-static void StartRdmOutputPort() {
+template <uint32_t portIndex>
+void StartRdmOutputPort() {
     if constexpr (portIndex < dmx::config::max::kPorts) {
         StartRdmOutput<portIndex, DmxPortToUart(portIndex)>();
     }
@@ -2465,7 +2450,10 @@ static void UsartDmaConfig() {
     dma_channel_subperipheral_select(UART3_DMAx, UART3_TX_DMA_CHx, UART3_TX_DMA_SUBPERIx);
 #endif
     Gd32DmaInterruptDisable<UART3_DMAx, UART3_TX_DMA_CHx, DMA_INTERRUPT_DISABLE>();
-#if !defined(GD32F4XX)
+#if defined(GD32F30X)
+    NVIC_SetPriority(DMA1_Channel3_Channel4_IRQn, 1);
+    NVIC_EnableIRQ(DMA1_Channel3_Channel4_IRQn);
+#elif !defined(GD32F4XX)
     NVIC_SetPriority(DMA1_Channel4_IRQn, 1);
     NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 #else

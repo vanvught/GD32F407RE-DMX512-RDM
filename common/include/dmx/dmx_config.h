@@ -1,6 +1,3 @@
-#ifndef DMX_DMX_CONFIG_H_
-#define DMX_DMX_CONFIG_H_
-
 /**
  * @file dmx_config.h
  *
@@ -25,6 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+#ifndef DMX_DMX_CONFIG_H_
+#define DMX_DMX_CONFIG_H_
 
 #include "gd32.h" // IWYU pragma: keep
 
@@ -55,13 +55,56 @@
 #elif defined(BOARD_DMX4)
 #include "board_dmx4.h" // IWYU pragma: keep
 #else
-#error
+#error Board is not defined
 #endif
 
 namespace dmx::buffer {
-static constexpr auto kSize = 516; // multiple of uint32_t
+static constexpr auto kSize = 516;
 } // namespace dmx::buffer
+static_assert(dmx::buffer::kSize >= 513);	// 512 with Start Code
+static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 
-#include "gd32/dmx_dma_check.h" // IWYU pragma: keep
+// Maximum available USART check
+#if defined(GD32F10X_HD) || defined(GD32F10X_CL)
+static_assert(DMX_MAX_PORTS <= 4, "Too many ports defined");
+#endif
+#if defined(GD32F20X_CL)
+static_assert(DMX_MAX_PORTS <= 6, "Too many ports defined");
+#endif
+#if defined(GD32F30X_HD)
+static_assert(DMX_MAX_PORTS <= 5, "Too many ports defined");
+#endif
+
+// DMA channel check
+#if defined(GD32F10X_HD) || defined(GD32F10X_CL)
+#if defined(DMX_USE_UART4)
+#error There is no DMA channel for UART4
+#endif
+#if defined(DMX_USE_USART5)
+#error USART5 is not available
+#endif
+#if defined(DMX_USE_UART6)
+#error UART6 is not available
+#endif
+#if defined(DMX_USE_UART7)
+#error UART7 is not available
+#endif
+#endif
+
+#if defined(GD32F20X_CL)
+#if defined(DMX_USE_UART4) && defined(DMX_USE_UART7)
+#error DMA1 Channel 3
+#endif
+
+#if defined(DMX_USE_UART3) && defined(DMX_USE_UART6)
+#error DMA1 Channel 4
+#endif
+#endif
+
+#if defined(GD32F30X_HD)
+#if defined(DMX_USE_UART4)
+#error There is no DMA channel for UART4
+#endif
+#endif
 
 #endif // DMX_DMX_CONFIG_H_

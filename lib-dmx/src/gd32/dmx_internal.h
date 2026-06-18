@@ -2,7 +2,7 @@
  * @file dmx_internal.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,23 +36,17 @@
 #endif
 #define ALIGNED __attribute__((aligned(4)))
 
-/**
- * Needed for older GD32F firmware
- */
+// Needed for older GD32F firmware
 #if !defined(USART_TRANSMIT_DMA_ENABLE)
 #define USART_TRANSMIT_DMA_ENABLE USART_DENT_ENABLE
 #endif
 
-/**
- * GD32F10X is different
- */
+// GD32F10X is different
 #if defined(GD32F10X)
 #define USART_FLAG_IDLE USART_FLAG_IDLEF
 #endif
 
-/**
- * https://www.gd32-dmx.org/memory.html
- */
+// https://www.gd32-dmx.org/memory.html
 #if defined(GD32F20X) || defined(GD32F4XX) || defined(GD32H7XX)
 #define SECTION_DMA_BUFFER __attribute__((section(".dmx")))
 #else
@@ -103,7 +97,7 @@ inline constexpr uint32_t DmxPortToUart(uint32_t port) {
 #endif
         default:
             [[unlikely]] assert(0);
-            break;
+            return 0;
     }
 
     assert(0);
@@ -146,17 +140,21 @@ inline constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
             return UART7_GPIO_AFx;
 #endif
         default:
-            [[unlikely]] return 0;
+            [[unlikely]] assert(0);
+			return 0;
     }
 
+	assert(0);
     return 0;
 }
 
-template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput() {
+template <uint32_t gpio_periph, uint32_t pin>
+inline void Gd32GpioModeOutput() {
     Gd32GpioModeSet<gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin>();
 }
 
-template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf() {
+template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph>
+inline void Gd32GpioModeAf() {
     Gd32GpioModeSet<gpio_periph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, pin>();
 
     constexpr uint32_t kAf = GetUsartAf(usart_periph);
@@ -165,13 +163,63 @@ template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void
     Gd32GpioAfSet<gpio_periph, kAf, pin>();
 }
 #else
-template <uint32_t gpio_periph, uint32_t pin> inline void Gd32GpioModeOutput() {
+template <uint32_t gpio_periph, uint32_t pin>
+inline void Gd32GpioModeOutput() {
     gd32_gpio_init<gpio_periph, GPIO_MODE_OUT_PP, pin>();
 }
 
-template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph> inline void Gd32GpioModeAf() {
+template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph>
+inline void Gd32GpioModeAf() {
     gd32_gpio_init<gpio_periph, GPIO_MODE_AF_PP, pin>();
 }
 #endif
+
+inline void DisableTimerIrqUart(uint32_t gpio_periph) {
+    switch (gpio_periph) {
+#if defined(DMX_USE_USART0)
+        case USART0:
+            timer_interrupt_disable(TIMER1, TIMER_INT_CH0);
+            break;
+#endif
+#if defined(DMX_USE_USART1)
+        case USART1:
+            timer_interrupt_disable(TIMER1, TIMER_INT_CH1);
+            break;
+#endif
+#if defined(DMX_USE_USART2)
+        case USART2:
+            timer_interrupt_disable(TIMER1, TIMER_INT_CH2);
+            break;
+#endif
+#if defined(DMX_USE_UART3)
+        case UART3:
+            timer_interrupt_disable(TIMER1, TIMER_INT_CH3);
+            break;
+#endif
+#if defined(DMX_USE_UART4)
+        case UART4:
+            timer_interrupt_disable(TIMER4, TIMER_INT_CH0);
+            break;
+#endif
+#if defined(DMX_USE_USART5)
+        case USART5:
+            timer_interrupt_disable(TIMER4, TIMER_INT_CH1);
+            break;
+#endif
+#if defined(DMX_USE_UART6)
+        case UART6:
+            timer_interrupt_disable(TIMER4, TIMER_INT_CH2);
+            break;
+#endif
+#if defined(DMX_USE_UART7)
+        case UART7:
+            timer_interrupt_disable(TIMER4, TIMER_INT_CH3);
+            break;
+#endif
+        default:
+            [[unlikely]] assert(0);
+            break;
+    }
+}
 
 #endif // GD32_DMX_INTERNAL_H_
