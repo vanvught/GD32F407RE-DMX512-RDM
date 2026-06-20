@@ -35,44 +35,7 @@ struct HwTimersSeconds {
     volatile uint32_t uptime;
 };
 
-/*
- * Needed for GD32 Firmware and CMSIS
- */
-#ifdef __cplusplus
-#if !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#if __cplusplus > 201402
-// error: compound assignment with 'volatile'-qualified left operand is deprecated
-#pragma GCC diagnostic ignored "-Wvolatile"
-#endif
-#endif
-extern "C" {
-#endif
-
-#if defined(GD32F10X_HD) || defined(GD32F10X_CL)
-#include "gd32f10x.h" // IWYU pragma: keep
-#elif defined(GD32F20X_CL)
-#include "gd32f20x.h" // IWYU pragma: keep
-#elif defined(GD32F30X_HD)
-#include "gd32f30x.h" // IWYU pragma: keep
-#elif defined(GD32F407) || defined(GD32F450) || defined(GD32F470)
-#include "gd32f4xx.h" // IWYU pragma: keep
-#elif defined(GD32H757) || defined(GD32H759)
-#include "gd32h7xx.h" // IWYU pragma: keep
-#else
-#error MCU is not supported
-#endif
-
-#ifdef __cplusplus
-}
-#if !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-#endif
+#include "gd32xxxx.h" // IWYU pragma: keep
 
 #if defined(GD32F30X)
 #define bkp_data_write bkp_write_data
