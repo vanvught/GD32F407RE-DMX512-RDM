@@ -23,19 +23,19 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_HAL)
+#if defined(DEBUG_BOARD)
 #undef NDEBUG
 #endif
 
-#include <cstdio>
-
-#include "hal.h"
-#include "hal_statusled.h"
+#include "board.h"
+#include "display.h"
+#include "h3_watchdog.h"
+#include "arm/synchronize.h"
+#include "board_statusled.h"
+#include "configstore.h"
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
 #endif
-#include "configstore.h"
-#include "gd32.h" // IWYU pragma: keep
 
 #if !defined(NO_EMAC)
 namespace network {
@@ -43,33 +43,41 @@ void Shutdown();
 } // namespace network
 #endif
 
-namespace hal {
-void RebootHandler();
-
+namespace board {
 bool Reboot() {
-    puts("Rebooting ...");
+    Display::Get()->SetSleep(false);
+    Display::Get()->Cls();
+    Display::Get()->TextStatus("Rebooting ...");
 
-    fwdgt_config(0xFFFF, FWDGT_PSC_DIV64);
+    H3WatchdogDisable();
 
     ConfigstoreCommit();
 #if !defined(DISABLE_RTC)
     HwClock::Get()->SysToHc();
 #endif
-    hal::RebootHandler();
+    RebootHandler();
 #if !defined(NO_EMAC)
     network::Shutdown();
 #endif
-    hal::statusled::SetMode(hal::statusled::Mode::kOffOff);
+    clean_data_cache();
+    invalidate_data_cache();
 
-    NVIC_SystemReset();
+    H3GpioFsel(EXT_SPI_MOSI, GPIO_FSEL_INPUT);
+    H3GpioSetPud(EXT_SPI_MOSI, GPIO_PULL_DOWN);
+    H3GpioFsel(EXT_SPI_CLK, GPIO_FSEL_INPUT);
+    H3GpioSetPud(EXT_SPI_CLK, GPIO_PULL_DOWN);
+    H3GpioFsel(EXT_SPI_CS, GPIO_FSEL_INPUT);
+    H3GpioSetPud(EXT_SPI_CS, GPIO_PULL_DOWN);
+
+    board::statusled::SetMode(board::statusled::Mode::kReboot);
+
+    H3WatchdogEnable();
+
+    for (;;) {
+        Run();
+    }
 
     __builtin_unreachable();
     return true;
-}
-} // namespace hal
-
-namespace board {
-bool Reboot() {
-  return hal::Reboot();
 }
 } // namespace board

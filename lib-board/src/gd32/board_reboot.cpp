@@ -1,8 +1,8 @@
 /**
- * @file hal_uart.h
+ * @file hal_reboot.cpp
  *
  */
-/* Copyright (C) 2021 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,45 @@
  * THE SOFTWARE.
  */
 
-#ifndef HAL_UART_H_
-#define HAL_UART_H_
-
-#if defined(__linux__) || defined (__APPLE__)
-# include "linux/hal_api.h"
-# include "linux/hal_uart.h"
-#elif defined(H3)
-# include "h3/hal_api.h"
-# include "h3/hal_uart.h"
-#elif defined(GD32)
-# include "gd32/hal_api.h"
-# include "gd32/hal_uart.h"
-#else
-# error "Not implemented"
+#if defined(DEBUG_HAL)
+#undef NDEBUG
 #endif
 
-#endif /* HAL_UART_H_ */
+#include <cstdio>
+
+#include "board.h"
+#include "board_statusled.h"
+#if !defined(DISABLE_RTC)
+#include "hwclock.h"
+#endif
+#include "configstore.h"
+#include "gd32.h" // IWYU pragma: keep
+
+#if !defined(NO_EMAC)
+namespace network {
+void Shutdown();
+} // namespace network
+#endif
+
+namespace board {
+bool Reboot() {
+    puts("Rebooting ...");
+
+    fwdgt_config(0xFFFF, FWDGT_PSC_DIV64);
+
+    ConfigstoreCommit();
+#if !defined(DISABLE_RTC)
+    HwClock::Get()->SysToHc();
+#endif
+    board::RebootHandler();
+#if !defined(NO_EMAC)
+    network::Shutdown();
+#endif
+    board::statusled::SetMode(board::statusled::Mode::kOffOff);
+
+    NVIC_SystemReset();
+
+    __builtin_unreachable();
+    return true;
+}
+} // namespace board

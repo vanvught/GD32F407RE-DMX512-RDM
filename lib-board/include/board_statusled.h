@@ -1,5 +1,5 @@
 /**
- * @file hal.h
+ * @file hal_statusled.h
  *
  */
 /* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,36 +23,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef HAL_H_
-#define HAL_H_
+#ifndef BOARD_STATUSLED_H_
+#define BOARD_STATUSLED_H_
 
-namespace hal {
-enum class BootDevice { UNKOWN, FEL, MMC0, SPI, HDD, FLASH, RAM };
+#include <cstdint>
 
-BootDevice GetBootDevice();
+namespace board::statusled {
+enum class Mode { kOffOff, kOffOn, kNormal, kData, kFast, kReboot, kUnknown };
 
-void Init();
+namespace global {
+extern Mode g_status_led_mode;
+} // namespace global
 
-float CoreTemperatureCurrent();
+void SetModeWithLock(Mode mode, bool do_lock);
+void SetMode(Mode mode);
+inline Mode GetMode() {
+    return global::g_status_led_mode;
+}
+void SetFrequency(uint32_t frequency_hz);
+void Event(Mode mode);
+} // namespace board::statusled
 
-bool Reboot();
-void RebootHandler();
-} // namespace hal
-
-#if defined(__linux__) || defined(__APPLE__)
-#if defined(CONFIG_HAL_USE_MINIMUM)
-#include "linux/minimum/hal.h"
-#else
-#include "linux/hal.h"
-#endif
-#else
-#if defined(H3)
-#include "h3/hal.h"
-#elif defined(GD32)
-#include "gd32/hal.h"
-#else
-#include "rpi/hal.h"
-#endif
-#endif
-
-#endif // HAL_H_
+#endif // BOARD_STATUSLED_H_

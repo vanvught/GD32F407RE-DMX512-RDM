@@ -28,7 +28,7 @@ include ../common/make/gd32/Includes.mk
 include ../common/make/Artnet.mk
 include ../common/make/gd32/Validate.mk
 
-INCLUDES+=-I../lib-configstore/include -I../lib-device/include -I../lib-display/include -I../lib-flash/include -I../lib-flashcode/include -I../lib-hal/include -I../lib-network/include
+INCLUDES+=-I../lib-configstore/include -I../lib-device/include -I../lib-display/include -I../lib-flash/include -I../lib-flashcode/include -I../lib-board/include -I../lib-network/include
 
 COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
 COPS+=$(strip $(DEFINES) $(MAKE_FLAGS) $(VALIDATE_FLAGS) $(INCLUDES))

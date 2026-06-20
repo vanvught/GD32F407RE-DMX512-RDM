@@ -29,7 +29,7 @@
 
 #include <cstdint>
 
-#include "hal_statusled.h"
+#include "board_statusled.h"
 #include "softwaretimers.h"
 #include "firmware/debug/debug_debug.h"
 #include "gd32.h" // IWYU pragma: keep
@@ -62,7 +62,7 @@ static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
 #endif
 }
 
-namespace hal::statusled {
+namespace board::statusled {
 void SetFrequency(uint32_t frequency_hz) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", s_timer_id, frequency_hz);
@@ -111,4 +111,4 @@ void SetFrequency(uint32_t frequency_hz) {
 
     DEBUG_EXIT();
 }
-} // namespace hal::statusled
+} // namespace board::statusled

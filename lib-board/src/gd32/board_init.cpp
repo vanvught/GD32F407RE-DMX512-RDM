@@ -55,9 +55,7 @@
 #include "uart0.h"
 #elif defined(CONFIG_CLIB_USE_NULL)
 #else
-namespace console {
-void Init();
-}
+#error
 #endif
 #if defined(CONFIG_NET_ENABLE_PTP)
 #include "gd32_ptp.h"
@@ -68,7 +66,7 @@ void Init();
 #if defined(DEBUG_I2C)
 #include "firmware/debug/debug_i2cdetect.h"
 #endif
-#include "hal_statusled.h"
+#include "board_statusled.h"
 #include "panelled.h"
 #include "logic_analyzer.h"
 
@@ -110,7 +108,7 @@ extern unsigned char _enetwork;  // NOLINT
 extern unsigned char _spixel;    // NOLINT
 extern unsigned char _epixel;    // NOLINT
 
-namespace hal {
+namespace board {
 void Init() {
     // GD32H7xx Cache and Memory Protection Unit
 #if defined(GD32H7XX)
@@ -120,9 +118,6 @@ void Init() {
 
 #if defined(CONFIG_CLIB_USE_UART0)
     uart0::Init();
-#elif defined(CONFIG_CLIB_USE_NULL)
-#else
-    console::Init();
 #endif
     // From here we console output
 #ifndef NDEBUG
@@ -336,7 +331,7 @@ void Init() {
 #endif
 
 #if !defined(USE_FREE_RTOS)
-    hal::statusled::SetFrequency(1);
+    board::statusled::SetFrequency(1);
 #endif
 }
-} // namespace hal
+} // namespace board

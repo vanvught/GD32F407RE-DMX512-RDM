@@ -1,8 +1,8 @@
 /**
- * @file board.h
+ * @file hal_statusled.cpp
  *
  */
-/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,31 +23,47 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOARD_H_
-#define BOARD_H_
+#if defined(DEBUG_HAL)
+#undef NDEBUG
+#endif
 
 #include <cstdint>
 
-namespace board {
-enum class BootDevice { kUnkown, kFel, kMmc0, kSpi, kHdd, kFlash, kRam };
+#include "board_statusled.h"
+#include "softwaretimers.h"
+#include "firmware/debug/debug_debug.h"
 
-void Init();
-bool Reboot();
-void RebootHandler();
+void h3_status_led_set(int);
 
-BootDevice GetBootDevice();
+static int32_t s_timer_id = -1;
+static int32_t s_toggle_led;
 
-const char* BoardName(uint8_t& length);
-const char* SocName(uint8_t& length);
-const char* CpuName(uint8_t& length);
-const char* MachineName(uint8_t& length);
-const char* SysName(uint8_t& length);
+static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
+    s_toggle_led ^= 0x1;
+    h3_status_led_set(s_toggle_led);
+}
 
-float CoreTemperatureMin();
-float CoreTemperatureMax();
-float CoreTemperatureCurrent();
+namespace board::statusled {
+void SetFrequency(uint32_t frequency_hz) {
+    if (frequency_hz == 0) {
+        SoftwareTimerDelete(s_timer_id);
+        h3_status_led_set(0);
+        return;
+    }
 
-const char* Website();
-} // namespace board
+    if (frequency_hz == 255) {
+        SoftwareTimerDelete(s_timer_id);
+        h3_status_led_set(1);
+        return;
+    }
 
-#endif // BOARD_H_
+    if (s_timer_id < 0) {
+        s_timer_id = SoftwareTimerAdd((1000U / frequency_hz), Ledblink);
+        DEBUG_PRINTF("s_timer_id=%d", s_timer_id);
+        return;
+    }
+
+    DEBUG_PRINTF("s_timer_id=%d", s_timer_id);
+    SoftwareTimerChange(s_timer_id, (1000U / frequency_hz));
+}
+} // namespace board::statusled

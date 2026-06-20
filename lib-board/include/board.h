@@ -1,8 +1,8 @@
 /**
- * @file hal.h
+ * @file board.h
  *
  */
-/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,54 +23,40 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_HAL_H_
-#define GD32_HAL_H_
+#ifndef BOARD_H_
+#define BOARD_H_
 
-#include "gd32.h" // IWYU pragma: keep
+#include <cstdint>
 
-#if defined(ENABLE_USB_HOST)
-extern "C" {
-#include "usbh_core.h"
-extern usbh_host usb_host;
-}
-#endif
+namespace board {
+enum class BootDevice { kUnkown, kFel, kMmc0, kSpi, kHdd, kFlash, kRam };
 
-#if defined(DEBUG_STACK)
-void stack_debug_run();
-#endif
-#if defined(DEBUG_EMAC)
-void emac_debug_run();
-#endif
-
-#if defined(USE_FREE_RTOS)
-#include "FreeRTOS.h"
-#include "task.h"
-#endif
-#include "softwaretimers.h" // IWYU pragma: keep
-#include "panelled.h"
-
-namespace hal {
 void Init();
+void Print();
+bool Reboot();
+void RebootHandler();
 
-inline constexpr const char kWebsite[] = "https://gd32-dmx.org";
-inline constexpr float kCoreTemperatureMin = -40.0;
-inline constexpr float kCoreTemperatureMax = +85.0;
+BootDevice GetBootDevice();
 
-inline void Run() {
-#if defined(ENABLE_USB_HOST)
-    usbh_core_task(&usb_host);
-#endif
-#if !defined(USE_FREE_RTOS)
-    SoftwareTimerRun();
-#endif
-    panelled::Run();
-#if defined(DEBUG_STACK)
-    stack_debug_run();
-#endif
-#if defined(DEBUG_EMAC)
-    emac_debug_run();
-#endif
-}
-} // namespace hal
+const char* BoardName(uint8_t& length);
+const char* SocName(uint8_t& length);
+const char* CpuName(uint8_t& length);
+const char* MachineName(uint8_t& length);
+const char* SysName(uint8_t& length);
 
-#endif // GD32_HAL_H_
+float CoreTemperatureMin();
+float CoreTemperatureMax();
+float CoreTemperatureCurrent();
+
+const char* Website();
+} // namespace board
+
+#if defined(GD32)
+#include "gd32_board.h"
+#elif defined(H3)
+#include "h3_board.h"
+#else
+#include "linux_board.h"
+#endif
+
+#endif // BOARD_H_

@@ -32,12 +32,10 @@ endif
 
 ifdef USB_HOST
 	INCLUDES+=-I../lib-gd32/device/usb
-	INCLUDES+=-I../lib-hal/device/usb/host/gd32
 endif
 
 ifdef USB_DEVICE
 	INCLUDES+=-I../lib-gd32/device/usb
-	INCLUDES+=-I../lib-hal/device/usb/device/gd32
 endif
 
 ifeq ($(findstring gd32f20x,$(FAMILY)), gd32f20x)

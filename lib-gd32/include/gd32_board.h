@@ -2,7 +2,7 @@
  * @file gd32_board.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -91,5 +91,44 @@
 #else
 #define ENETx
 #endif
+
+#if defined(ENABLE_USB_HOST)
+extern "C" {
+#include "usbh_core.h"
+extern usbh_host usb_host;
+}
+#endif
+
+#if defined(DEBUG_STACK)
+#include "firmware/debug/debug_stack.h"
+#endif
+#if defined(DEBUG_EMAC)
+void emac_debug_run();
+#endif
+
+#if defined(USE_FREE_RTOS)
+#include "FreeRTOS.h"
+#include "task.h"
+#endif
+#include "softwaretimers.h" // IWYU pragma: keep
+#include "panelled.h"
+
+namespace board {
+inline void Run() {
+#if defined(ENABLE_USB_HOST)
+    usbh_core_task(&usb_host);
+#endif
+#if !defined(USE_FREE_RTOS)
+    SoftwareTimerRun();
+#endif
+    panelled::Run();
+#if defined(DEBUG_STACK)
+    debug::stack::Run();
+#endif
+#if defined(DEBUG_EMAC)
+    emac_debug_run();
+#endif
+}
+} // namespace board
 
 #endif // GD32_BOARD_H_
