@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstdint>
 
-#include "gd32.h"
+#include "gd32xxxx.h" // IWYU pragma: keep
 
 extern "C" void HardFault_Handler()
 {
