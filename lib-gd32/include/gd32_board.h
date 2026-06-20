@@ -68,7 +68,7 @@
 #error Board is unknown / not defined
 #endif
 
-#include "board/logic_analyzer.h"
+#include "board/logic_analyzer.h" // IWYU pragma: keep
 
 #if defined(USART0_REMAP) && !defined(I2C0_REMAP)
 #error Configuration error
@@ -92,24 +92,27 @@
 #define ENETx
 #endif
 
+#ifdef __cplusplus
 #if defined(ENABLE_USB_HOST)
 extern "C" {
 #include "usbh_core.h"
 extern usbh_host usb_host;
 }
-#endif
+#endif // defined(ENABLE_USB_HOST)
 
 #if defined(DEBUG_STACK)
 #include "firmware/debug/debug_stack.h"
-#endif
+#endif // defined(DEBUG_STACK)
+
 #if defined(DEBUG_EMAC)
 void emac_debug_run();
-#endif
+#endif // defined(DEBUG_EMAC)
 
 #if defined(USE_FREE_RTOS)
 #include "FreeRTOS.h"
 #include "task.h"
-#endif
+#endif // defined(USE_FREE_RTOS)
+
 #include "softwaretimers.h" // IWYU pragma: keep
 #include "panelled.h"
 
@@ -117,18 +120,19 @@ namespace board {
 inline void Run() {
 #if defined(ENABLE_USB_HOST)
     usbh_core_task(&usb_host);
-#endif
+#endif // defined(ENABLE_USB_HOST)
 #if !defined(USE_FREE_RTOS)
     SoftwareTimerRun();
-#endif
+#endif // !defined(USE_FREE_RTOS)
     panelled::Run();
 #if defined(DEBUG_STACK)
     debug::stack::Run();
-#endif
+#endif // defined(DEBUG_STACK)
 #if defined(DEBUG_EMAC)
     emac_debug_run();
-#endif
+#endif // defined(DEBUG_EMAC)
 }
 } // namespace board
+#endif // __cplusplus
 
 #endif // GD32_BOARD_H_
