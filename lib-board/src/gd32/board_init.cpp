@@ -1,5 +1,5 @@
 /**
- * @file hal_init.cpp
+ * @file board_init.cpp
  *
  */
 /* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org

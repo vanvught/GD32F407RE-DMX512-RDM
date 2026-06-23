@@ -50,6 +50,7 @@
 #elif defined(GD32F407) || defined(GD32F450) || defined(GD32F470)
 #include "gd32f4xx.h" // IWYU pragma: keep
 #elif defined(GD32H757) || defined(GD32H759)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "gd32h7xx.h" // IWYU pragma: keep
 #else
 #error MCU is not supported
