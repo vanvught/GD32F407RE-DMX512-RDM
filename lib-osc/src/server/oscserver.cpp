@@ -55,16 +55,16 @@ OscServer::OscServer() {
     s_this = this;
 
     memset(s_path, 0, sizeof(s_path));
-    strcpy(s_path, kOscserverDefaultPathPrimary);
+    strncpy(s_path, kOscserverDefaultPathPrimary, sizeof(s_path) - 1);
 
     memset(s_path_second, 0, sizeof(s_path_second));
-    strcpy(s_path_second, kOscserverDefaultPathSecondary);
+    strncpy(s_path_second, kOscserverDefaultPathSecondary, sizeof(s_path_second) - 1);
 
     memset(s_path_info, 0, sizeof(s_path_info));
-    strcpy(s_path_info, kOscserverDefaultPathInfo);
+    strncpy(s_path_info, kOscserverDefaultPathInfo, sizeof(s_path_info) - 1);
 
     memset(s_path_blackout, 0, sizeof(s_path_blackout));
-    strcpy(s_path_blackout, kOscserverDefaultPathBlackout);
+    strncpy(s_path_blackout, kOscserverDefaultPathBlackout, sizeof(s_path_blackout) - 1);
 
     snprintf(os_, sizeof(os_) - 1, "[V%s] %s", kSoftwareVersion, __DATE__);
 
@@ -184,6 +184,13 @@ bool OscServer::IsDmxDataChanged(const uint8_t* data, uint16_t start_channel, ui
 }
 
 void OscServer::Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
+    static constexpr uint32_t kMinOscPacketSize = 8U;
+    static constexpr uint32_t kMaxOscPacketSize = 512U;
+
+    if (size < kMinOscPacketSize || size > kMaxOscPacketSize) {
+        return;
+    }
+
     auto is_dmx_data_changed = false;
 
     OscSimpleMessage msg(buffer, size);
