@@ -1,13 +1,14 @@
 $(info "Includes.mk")
 
-INCLUDES:=-I./include 
-INCLUDES+=-I../common/include -I../include 
-INCLUDES+=-I../firmware-template-gd32/include
-INCLUDES+=-I../CMSIS/Core/Include
-INCLUDES+=-I../lib-gd32/${FAMILY}/${FAMILY_UC}_standard_peripheral/Include
-INCLUDES+=-I../lib-gd32/${FAMILY}/CMSIS/GD/${FAMILY_UC}/Include
-INCLUDES+=-I../lib-gd32/include
+INCLUDES:=-I../include
+INCLUDES+=-isystem ../CMSIS/Core/Include
+INCLUDES+=-isystem ../lib-gd32/${FAMILY}/${FAMILY_UC}_standard_peripheral/Include
+INCLUDES+=-isystem ../lib-gd32/${FAMILY}/CMSIS/GD/${FAMILY_UC}/Include
+INCLUDES+=-isystem ../lib-gd32/include
+INCLUDES+=-isystem ../firmware-template-gd32/include
+INCLUDES+=-I../common/include
 INCLUDES+=-I../lib-hwclock/include
+INCLUDES+=-I./include
 
 INCLUDES+=$(addprefix -I,$(EXTRA_INCLUDES))
 
@@ -104,5 +105,5 @@ ifdef USB_HOST_MSC
 		INCLUDES+=-I../lib-fatfs
 endif
 
-INCLUDES:= $(strip -I../${PROJECT}/include $(sort $(INCLUDES)))
+#INCLUDES:= $(strip -I../${PROJECT}/include $(sort $(INCLUDES)))
 $(info $$INCLUDES [${INCLUDES}])

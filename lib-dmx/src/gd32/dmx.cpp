@@ -494,7 +494,7 @@ void TIMER1_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH0);
+        TIMER_INTF(TIMER1) = (~TIMER_INT_FLAG_CH0);
     }
 #endif // defined(DMX_USE_USART0)
 // USART 1
@@ -561,7 +561,7 @@ void TIMER1_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH1);
+        TIMER_INTF(TIMER1) = (~TIMER_INT_FLAG_CH1);
     }
 #endif // defined(DMX_USE_USART1)
 // USART 2
@@ -629,7 +629,7 @@ void TIMER1_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH2);
+        TIMER_INTF(TIMER1) = (~TIMER_INT_FLAG_CH2);
     }
 #endif // defined(DMX_USE_USART2)
 // UART 3
@@ -695,7 +695,7 @@ void TIMER1_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER1) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH3);
+        TIMER_INTF(TIMER1) = (~TIMER_INT_FLAG_CH3);
     }
 #endif // defined(DMX_USE_UART3)
     // Clear all remaining interrupt flags (safety measure)
@@ -770,7 +770,7 @@ void TIMER4_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH0);
+        TIMER_INTF(TIMER4) = (~TIMER_INT_FLAG_CH0);
     }
 #endif // defined(DMX_USE_UART4)
 // USART 5
@@ -839,7 +839,7 @@ void TIMER4_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH1);
+        TIMER_INTF(TIMER4) = (~TIMER_INT_FLAG_CH1);
     }
 #endif // defined(DMX_USE_USART5)
 // UART 6
@@ -898,7 +898,7 @@ void TIMER4_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH2);
+        TIMER_INTF(TIMER4) = (~TIMER_INT_FLAG_CH2);
     }
 #endif // defined(DMX_USE_UART6)
 // UART 7
@@ -957,7 +957,7 @@ void TIMER4_IRQHandler() {
             }
         }
 
-        TIMER_INTF(TIMER4) = static_cast<uint32_t>(~TIMER_INT_FLAG_CH3);
+        TIMER_INTF(TIMER4) = (~TIMER_INT_FLAG_CH3);
     }
 #endif // defined(DMX_USE_UART7)
     // Clear all remaining interrupt flags (safety measure)
@@ -979,7 +979,7 @@ void TIMER6_IRQHandler() {
     }
 
     // Clear all remaining interrupt flags (safety measure)
-    TIMER_INTF(TIMER6) = static_cast<uint32_t>(~kIntFlag);
+    TIMER_INTF(TIMER6) = (~kIntFlag);
 }
 
 // USART 0

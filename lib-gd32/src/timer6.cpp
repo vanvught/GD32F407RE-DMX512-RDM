@@ -41,7 +41,7 @@ void TIMER6_IRQHandler() {
         gv_seconds.uptime = gv_seconds.uptime + 1;
     }
 
-    TIMER_INTF(TIMER6) = static_cast<uint32_t>(~kIntFlag);
+    TIMER_INTF(TIMER6) = ~kIntFlag;
 }
 #endif
 }

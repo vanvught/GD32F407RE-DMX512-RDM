@@ -35,8 +35,13 @@
 #elif defined(GD32F30X)
 #define TIMERx            TIMER7
 #define RCU_TIMERx        RCU_TIMER7
+#if defined (GD32F30X_XD)
+#define TIMERx_IRQHandler TIMER7_UP_TIMER12_IRQHandler
+#define TIMERx_IRQn       TIMER7_UP_TIMER12_IRQn
+#else
 #define TIMERx_IRQHandler TIMER7_UP_IRQHandler
 #define TIMERx_IRQn       TIMER7_UP_IRQn
+#endif
 #else
 #define TIMERx            TIMER9
 #define RCU_TIMERx        RCU_TIMER9
@@ -147,7 +152,7 @@ void TIMERx_IRQHandler() {
         }
     }
 
-    TIMER_INTF(TIMERx) = static_cast<uint32_t>(~kIntFlag);
+    TIMER_INTF(TIMERx) = ~kIntFlag;
 }
 #if defined(SOFTUART0_ENABLE_RX)
 void SOFTUART_RX_EXTIx_IRQHandler() {

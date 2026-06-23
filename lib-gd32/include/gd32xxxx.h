@@ -26,26 +26,11 @@
 #ifndef GD32FXXX_H_
 #define GD32FXXX_H_
 
-// Needed for GD32 Firmware and CMSIS
-
-#ifdef __cplusplus
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#if __cplusplus > 201402
-// error: compound assignment with 'volatile'-qualified left operand is
-// deprecated
-#pragma GCC diagnostic ignored "-Wvolatile"
-#endif
-#endif
-
 #if defined(GD32F10X_HD) || defined(GD32F10X_CL)
 #include "gd32f10x.h" // IWYU pragma: keep
 #elif defined(GD32F20X_CL)
 #include "gd32f20x.h" // IWYU pragma: keep
-#elif defined(GD32F30X_HD)
+#elif defined(GD32F30X_HD) || defined(GD32F30X_XD)
 #include "gd32f30x.h" // IWYU pragma: keep
 #elif defined(GD32F407) || defined(GD32F450) || defined(GD32F470)
 #include "gd32f4xx.h" // IWYU pragma: keep
@@ -54,10 +39,6 @@
 #include "gd32h7xx.h" // IWYU pragma: keep
 #else
 #error MCU is not supported
-#endif
-
-#ifdef __cplusplus
-#pragma GCC diagnostic pop
 #endif
 
 #endif // GD32FXXX_H_ */
