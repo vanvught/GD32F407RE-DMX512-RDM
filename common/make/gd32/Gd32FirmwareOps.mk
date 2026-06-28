@@ -7,3 +7,5 @@ GD32FIRMWAREOPS+=-Wno-error=old-style-cast
 GD32FIRMWAREOPS+=-Wno-error=unused-function
 GD32FIRMWAREOPS+=-Wno-error=unused-variable
 GD32FIRMWAREOPS+=-Wno-error=duplicated-cond
+GD32FIRMWAREOPS+=-Wno-error=missing-field-initializers
+GD32FIRMWAREOPS+=-Wno-error=implicit-function-declaration
