@@ -265,7 +265,7 @@ static inline char BitbangSpiWriteRead(char c) {
         GPIO_BOP(SPI_BITBANG_SCK_GPIOx) = SPI_BITBANG_SCK_GPIO_PINx;
 
         if ((GPIO_ISTAT(SPI_BITBANG_MISO_GPIOx) & SPI_BITBANG_MISO_GPIO_PINx) == SPI_BITBANG_MISO_GPIO_PINx) {
-            r |= (mask);
+            r |= static_cast<char>(mask);
         }
 
         __ISB();

@@ -127,9 +127,9 @@ void AdjustLink(emac::phy::Status phy_status) {
     }
 
 #if defined(GD32H7XX)
-    const auto kEnetInitStatus = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
+    const auto kEnetInitStatus = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
 #else
-    const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_CUSTOM);
+    const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
 #endif
 
     if (kEnetInitStatus != SUCCESS) {

@@ -85,9 +85,9 @@ T4 - local receive timestamp of the previous response (t4)
 
 namespace net::globals::ptp {
 extern uint32_t timestamp[2];
-} // namespace net::globals
+} // namespace net::globals::ptp
 
-#define _NTPFRAC_(x) (4294U * static_cast<uint32_t>(x) + ((1981U * static_cast<uint32_t>(x)) >> 11) + ((2911U * static_cast<uint32_t>(x)) >> 28))
+#define _NTPFRAC_(x) (4294U * (x) + ((1981U * (x)) >> 11) + ((2911U * (x)) >> 28))
 #define NTPFRAC(x) _NTPFRAC_(x / 1000)
 // The reverse of the above, needed if we want to set our microsecond
 // clock (via clock_settime) based on the incoming time in NTP format.
@@ -279,11 +279,11 @@ static void UpdatePtpTime() {
     int32_t diff_seconds2, diff_nano_seconds2;
     Difference(s_ntp_client.t4, s_ntp_client.t3, diff_seconds2, diff_nano_seconds2);
 
-    auto offset_seconds = static_cast<int64_t>(diff_seconds1) + static_cast<int64_t>(diff_seconds2);
-    auto offset_nano_seconds = static_cast<int64_t>(diff_nano_seconds1) + static_cast<int64_t>(diff_nano_seconds2);
+    const auto kOffsetSeconds = static_cast<int64_t>(diff_seconds1) + static_cast<int64_t>(diff_seconds2);
+    const auto kOffsetNanoSeconds = static_cast<int64_t>(diff_nano_seconds1) + static_cast<int64_t>(diff_nano_seconds2);
 
-    const int32_t kOffsetSecondsAverage = offset_seconds / 2;
-    const int32_t kOffsetNanosverage = offset_nano_seconds / 2;
+    const auto kOffsetSecondsAverage = static_cast<int32_t>(kOffsetSeconds / 2U);
+    const auto kOffsetNanosverage = static_cast<int32_t>(kOffsetNanoSeconds / 2U);
 
     gd32::ptp::time_t ptp_offset = {.tv_sec = kOffsetSecondsAverage, .tv_nsec = kOffsetNanosverage};
     gd32::NormalizeTime(&ptp_offset);

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 #include "timing.h"
 
 void Gd32AdcInit() {
@@ -86,20 +86,20 @@ void Gd32AdcInit() {
 }
 
 float G32AdcGetTemp() {
-    const float kTemperature = (1.43f - ADC_IDATA0(ADC0) * 3.3f / 4096U) * 1000U / 4.3f + 25U;
+    const float kTemperature = (1.43f - static_cast<float>(ADC_IDATA0(ADC0)) * 3.3f / 4096U) * 1000U / 4.3f + 25U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kTemperature;
 }
 
 float Gd32AdcGetVref() {
-    const float kVrefValue = (ADC_IDATA1(ADC0) * 3.3f / 4096U);
+    const float kVrefValue = static_cast<float>(ADC_IDATA1(ADC0)) * 3.3f / 4096U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kVrefValue;
 }
 
 #if defined(GD32F4XX)
 float Gd32AdcGetVbat() {
-    const float kVrefValue = (ADC_IDATA2(ADC0) * 3.3f / 4096U) * 4U;
+    const float kVrefValue = (static_cast<float>(ADC_IDATA2(ADC0)) * 3.3f / 4096U) * 4U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kVrefValue;
 }

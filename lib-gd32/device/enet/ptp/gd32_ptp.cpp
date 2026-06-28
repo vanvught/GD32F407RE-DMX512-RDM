@@ -168,8 +168,8 @@ void Gd32PtpUpdateTime(const gd32::ptp::time_t* time) {
 }
 
 bool Gd32AdjFrequency(uint32_t adjust_ppb) {
-    const uint64_t kAdjust = static_cast<uint64_t>(gd32::ptp::kAdjFreqBaseAddend) * adjust_ppb;
-    const uint32_t kAddend = gd32::ptp::kAdjFreqBaseAddend + (kAdjust / 1000000000ULL);
+    const auto kAdjust = static_cast<uint64_t>(gd32::ptp::kAdjFreqBaseAddend) * adjust_ppb;
+    const auto kAddend = gd32::ptp::kAdjFreqBaseAddend + static_cast<uint32_t>(kAdjust / 1000000000ULL);
 
     enet_ptp_timestamp_addend_config(kAddend);
 

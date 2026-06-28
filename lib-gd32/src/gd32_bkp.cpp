@@ -44,10 +44,10 @@ void bkp_data_write(bkp_data_register_enum register_number, uint16_t data) {
 uint16_t bkp_data_read(bkp_data_register_enum register_number) {
     switch (register_number) {
         case BKP_DATA_0:
-            return RTC_BKP0;
+            return static_cast<uint16_t>(RTC_BKP0);
             break;
         case BKP_DATA_1:
-            return RTC_BKP1;
+            return static_cast<uint16_t>(RTC_BKP1);
             break;
         default:
             assert(false && "Invalid register_number");

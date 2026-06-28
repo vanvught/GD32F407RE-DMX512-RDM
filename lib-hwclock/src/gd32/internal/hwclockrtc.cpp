@@ -47,12 +47,12 @@
 #include "gd32.h"
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-static int BCD2DEC(int val) {
-    return (((val) & 0x0f) + (val >> 4) * 10);
+static uint8_t BCD2DEC(int val) {
+    return static_cast<uint8_t>(((val) & 0x0f) + static_cast<uint8_t>(val >> 4) * 10U);
 }
 
-static int DEC2BCD(int val) {
-    return ((((val) / 10) << 4) + val % 10);
+static uint8_t DEC2BCD(int val) {
+    return static_cast<uint8_t>(((static_cast<uint8_t>(val) / 10U) << 4) + (static_cast<uint8_t>(val) % 10U));
 }
 #define RTC_CLOCK_SOURCE_LXTAL
 static rtc_parameter_struct rtc_initpara;
