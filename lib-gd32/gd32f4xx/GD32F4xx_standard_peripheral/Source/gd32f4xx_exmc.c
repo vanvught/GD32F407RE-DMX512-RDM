@@ -2,11 +2,11 @@
     \file    gd32f4xx_exmc.c
     \brief   EXMC driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -1027,6 +1027,7 @@ uint32_t exmc_sqpipsram_high_id_get(void)
 */
 FlagStatus exmc_sqpipsram_send_command_state_get(uint32_t send_command_flag)
 {
+    FlagStatus status;
     uint32_t flag = 0x00000000U;
 
     if(EXMC_SEND_COMMAND_FLAG_RDID == send_command_flag) {
@@ -1037,12 +1038,11 @@ FlagStatus exmc_sqpipsram_send_command_state_get(uint32_t send_command_flag)
     }
 
     if(flag & send_command_flag) {
-        /* flag is set */
-        return SET;
+        status = SET;
     } else {
-        /* flag is reset */
-        return RESET;
+        status = RESET;
     }
+    return status;
 }
 
 /*!
@@ -1125,6 +1125,7 @@ void exmc_interrupt_disable(uint32_t exmc_bank, uint32_t interrupt)
 */
 FlagStatus exmc_flag_get(uint32_t exmc_bank, uint32_t flag)
 {
+    FlagStatus reval;
     uint32_t status = 0x00000000U;
 
     if((EXMC_BANK1_NAND == exmc_bank) || (EXMC_BANK2_NAND == exmc_bank) || (EXMC_BANK3_PCCARD == exmc_bank)) {
@@ -1136,12 +1137,11 @@ FlagStatus exmc_flag_get(uint32_t exmc_bank, uint32_t flag)
     }
 
     if((status & flag) != (uint32_t)flag) {
-        /* flag is reset */
-        return RESET;
+        reval = RESET;
     } else {
-        /* flag is set */
-        return SET;
+        reval = SET;
     }
+    return reval;
 }
 
 /*!
@@ -1195,6 +1195,7 @@ void exmc_flag_clear(uint32_t exmc_bank, uint32_t flag)
 */
 FlagStatus exmc_interrupt_flag_get(uint32_t exmc_bank, uint32_t interrupt)
 {
+    FlagStatus reval;
     uint32_t status = 0x00000000U, interrupt_enable = 0x00000000U, interrupt_state = 0x00000000U;
 
     if((EXMC_BANK1_NAND == exmc_bank) || (EXMC_BANK2_NAND == exmc_bank) || (EXMC_BANK3_PCCARD == exmc_bank)) {
@@ -1211,11 +1212,12 @@ FlagStatus exmc_interrupt_flag_get(uint32_t exmc_bank, uint32_t interrupt)
 
     if((interrupt_enable) && (interrupt_state)) {
         /* interrupt flag is set */
-        return SET;
+        reval = SET;
     } else {
         /* interrupt flag is reset */
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!

@@ -2,11 +2,11 @@
     \file    gd32f4xx_can.h
     \brief   definitions for the CAN
     
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -99,7 +99,7 @@ OF SUCH DAMAGE.
 #define CAN_F20DATA0(canx)                 REG32((canx) + 0x000002E0U)        /*!< CAN filter 20 data 0 register */
 #define CAN_F21DATA0(canx)                 REG32((canx) + 0x000002E8U)        /*!< CAN filter 21 data 0 register */
 #define CAN_F22DATA0(canx)                 REG32((canx) + 0x000002F0U)        /*!< CAN filter 22 data 0 register */
-#define CAN_F23DATA0(canx)                 REG32((canx) + 0x000003F8U)        /*!< CAN filter 23 data 0 register */
+#define CAN_F23DATA0(canx)                 REG32((canx) + 0x000002F8U)        /*!< CAN filter 23 data 0 register */
 #define CAN_F24DATA0(canx)                 REG32((canx) + 0x00000300U)        /*!< CAN filter 24 data 0 register */
 #define CAN_F25DATA0(canx)                 REG32((canx) + 0x00000308U)        /*!< CAN filter 25 data 0 register */
 #define CAN_F26DATA0(canx)                 REG32((canx) + 0x00000310U)        /*!< CAN filter 26 data 0 register */
@@ -121,7 +121,7 @@ OF SUCH DAMAGE.
 #define CAN_F14DATA1(canx)                 REG32((canx) + 0x000002B4U)        /*!< CAN filter 14 data 1 register */
 #define CAN_F15DATA1(canx)                 REG32((canx) + 0x000002BCU)        /*!< CAN filter 15 data 1 register */
 #define CAN_F16DATA1(canx)                 REG32((canx) + 0x000002C4U)        /*!< CAN filter 16 data 1 register */
-#define CAN_F17DATA1(canx)                 REG32((canx) + 0x0000024CU)        /*!< CAN filter 17 data 1 register */
+#define CAN_F17DATA1(canx)                 REG32((canx) + 0x000002CCU)        /*!< CAN filter 17 data 1 register */
 #define CAN_F18DATA1(canx)                 REG32((canx) + 0x000002D4U)        /*!< CAN filter 18 data 1 register */
 #define CAN_F19DATA1(canx)                 REG32((canx) + 0x000002DCU)        /*!< CAN filter 19 data 1 register */
 #define CAN_F20DATA1(canx)                 REG32((canx) + 0x000002E4U)        /*!< CAN filter 20 data 1 register */
@@ -393,7 +393,7 @@ typedef enum {
     CAN_INT_FLAG_WERR  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 0U, 8U),       /*!< warning error interrupt flag */
 } can_interrupt_flag_enum;
 
-/* CAN initiliaze parameters structure */
+/* CAN initialize parameters structure */
 typedef struct {
     uint8_t working_mode;                                               /*!< CAN working mode */
     uint8_t resync_jump_width;                                          /*!< CAN resynchronization jump width */
@@ -416,7 +416,7 @@ typedef struct {
     uint8_t tx_ft;                                                      /*!< type of frame, data or remote */
     uint8_t tx_dlen;                                                    /*!< data length */
     uint8_t tx_data[8];                                                 /*!< transmit data */
-} can_trasnmit_message_struct;
+} can_transmit_message_struct;
 
 /* CAN receive message structure */
 typedef struct {
@@ -446,12 +446,12 @@ typedef struct {
 typedef enum {
     CAN_ERROR_NONE = 0,                                                 /*!< no error */
     CAN_ERROR_FILL,                                                     /*!< fill error */
-    CAN_ERROR_FORMATE,                                                  /*!< format error */
+    CAN_ERROR_FORMAT,                                                   /*!< format error */
     CAN_ERROR_ACK,                                                      /*!< ACK error */
     CAN_ERROR_BITRECESSIVE,                                             /*!< bit recessive error */
-    CAN_ERROR_BITDOMINANTER,                                            /*!< bit dominant error */
+    CAN_ERROR_BITDOMINANT,                                              /*!< bit dominant error */
     CAN_ERROR_CRC,                                                      /*!< CRC error */
-    CAN_ERROR_SOFTWARECFG,                                              /*!< software configure */
+    CAN_ERROR_SOFTWARECFG,                                              /*!< software configuration */
 } can_error_enum;
 
 /* transmit states */
@@ -463,7 +463,7 @@ typedef enum {
 } can_transmit_state_enum;
 
 typedef enum {
-    CAN_INIT_STRUCT = 0,                                                /* CAN initiliaze parameters struct */
+    CAN_INIT_STRUCT = 0U,                                                /* CAN initialize parameters struct */
     CAN_FILTER_STRUCT,                                                  /* CAN filter parameters struct */
     CAN_TX_MESSAGE_STRUCT,                                              /* CAN transmit message struct */
     CAN_RX_MESSAGE_STRUCT,                                              /* CAN receive message struct */
@@ -587,7 +587,7 @@ typedef enum {
 #define CAN_SILENT_MODE                    ((uint8_t)0x02U)             /*!< silent communication mode */
 #define CAN_SILENT_LOOPBACK_MODE           ((uint8_t)0x03U)             /*!< loopback and silent communication mode */
 
-/* CAN resynchronisation jump width */
+/* CAN resynchronization jump width */
 #define CAN_BT_SJW_1TQ                     ((uint8_t)0x00U)             /*!< 1 time quanta */
 #define CAN_BT_SJW_2TQ                     ((uint8_t)0x01U)             /*!< 2 time quanta */
 #define CAN_BT_SJW_3TQ                     ((uint8_t)0x02U)             /*!< 3 time quanta */
@@ -664,6 +664,9 @@ typedef enum {
 /* CAN timeout */
 #define CAN_TIMEOUT                        ((uint32_t)0x0000FFFFU)      /*!< timeout value */
 
+/* CAN mailbox empty status mask */
+#define CAN_ALL_MAILBOX_EMPTY              ((uint32_t)0x1C000000U)      /*!< CAN mailbox empty status mask */
+
 /* interrupt enable bits */
 #define CAN_INT_TME                        CAN_INTEN_TMEIE              /*!< transmit mailbox empty interrupt enable */
 #define CAN_INT_RFNE0                      CAN_INTEN_RFNEIE0            /*!< receive FIFO0 not empty interrupt enable */
@@ -706,11 +709,11 @@ void can_time_trigger_mode_disable(uint32_t can_periph);
 
 /* transmit functions */
 /* transmit CAN message */
-uint8_t can_message_transmit(uint32_t can_periph, can_trasnmit_message_struct *transmit_message);
+uint8_t can_message_transmit(uint32_t can_periph, can_transmit_message_struct *transmit_message);
 /* get CAN transmit state */
 can_transmit_state_enum can_transmit_states(uint32_t can_periph, uint8_t mailbox_number);
 /* stop CAN transmission */
-void can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number);
+ErrStatus can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number);
 /* CAN receive message */
 void can_message_receive(uint32_t can_periph, uint8_t fifo_number, can_receive_message_struct *receive_message);
 /* CAN release FIFO */

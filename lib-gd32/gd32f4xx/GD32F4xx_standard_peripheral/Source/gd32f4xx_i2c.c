@@ -2,11 +2,11 @@
     \file    gd32f4xx_i2c.c
     \brief   I2C driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -674,11 +674,15 @@ void i2c_sam_timeout_disable(uint32_t i2c_periph)
 */
 FlagStatus i2c_flag_get(uint32_t i2c_periph, i2c_flag_enum flag)
 {
+    FlagStatus status;
+    
     if(RESET != (I2C_REG_VAL(i2c_periph, flag) & BIT(I2C_BIT_POS(flag)))) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+    
+    return status;
 }
 
 /*!
@@ -781,6 +785,7 @@ void i2c_interrupt_disable(uint32_t i2c_periph, i2c_interrupt_enum interrupt)
 FlagStatus i2c_interrupt_flag_get(uint32_t i2c_periph, i2c_interrupt_flag_enum int_flag)
 {
     uint32_t intenable = 0U, flagstatus = 0U, bufie;
+    FlagStatus status;
 
     /* check BUFIE */
     bufie = I2C_CTL1(i2c_periph)&I2C_CTL1_BUFIE;
@@ -797,11 +802,14 @@ FlagStatus i2c_interrupt_flag_get(uint32_t i2c_periph, i2c_interrupt_flag_enum i
             intenable = 0U;
         }
     }
+    
     if((0U != flagstatus) && (0U != intenable)) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+    
+    return status;
 }
 
 /*!

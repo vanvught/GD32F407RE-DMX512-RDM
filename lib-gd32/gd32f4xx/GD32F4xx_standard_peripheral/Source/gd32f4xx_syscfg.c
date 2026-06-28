@@ -2,11 +2,11 @@
     \file    gd32f4xx_syscfg.c
     \brief   SYSCFG driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -194,9 +194,13 @@ void syscfg_compensation_config(uint32_t syscfg_compensation)
   */
 FlagStatus syscfg_flag_get(void)
 {
+    FlagStatus reval = RESET;
+
     if(((uint32_t)RESET) != (SYSCFG_CPSCTL & SYSCFG_CPSCTL_CPS_RDY)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+
+    return reval;
 }

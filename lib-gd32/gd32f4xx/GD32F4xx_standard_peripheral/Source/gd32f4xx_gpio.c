@@ -2,11 +2,11 @@
     \file    gd32f4xx_gpio.c
     \brief   GPIO driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -267,11 +267,13 @@ void gpio_port_write(uint32_t gpio_periph, uint16_t data)
 */
 FlagStatus gpio_input_bit_get(uint32_t gpio_periph, uint32_t pin)
 {
+    FlagStatus flag_status = RESET;
     if((uint32_t)RESET != (GPIO_ISTAT(gpio_periph) & (pin))) {
-        return SET;
+        flag_status = SET;
     } else {
-        return RESET;
+        flag_status = RESET;
     }
+    return flag_status;
 }
 
 /*!
@@ -300,11 +302,13 @@ uint16_t gpio_input_port_get(uint32_t gpio_periph)
 */
 FlagStatus gpio_output_bit_get(uint32_t gpio_periph, uint32_t pin)
 {
+    FlagStatus flag_status = RESET;
     if((uint32_t)RESET != (GPIO_OCTL(gpio_periph) & (pin))) {
-        return SET;
+        flag_status = SET;
     } else {
-        return RESET;
+        flag_status = RESET;
     }
+    return flag_status;
 }
 
 /*!

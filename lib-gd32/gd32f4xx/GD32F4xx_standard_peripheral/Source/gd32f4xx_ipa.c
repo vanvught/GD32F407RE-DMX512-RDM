@@ -2,11 +2,11 @@
     \file    gd32f4xx_ipa.c
     \brief   IPA driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -534,11 +534,15 @@ void ipa_interval_clock_num_config(uint8_t clk_num)
 */
 FlagStatus ipa_flag_get(uint32_t flag)
 {
+    FlagStatus reval = RESET;
+
     if(RESET != (IPA_INTF & flag)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+
+    return reval;
 }
 
 /*!
@@ -610,11 +614,15 @@ void ipa_interrupt_disable(uint32_t int_flag)
 */
 FlagStatus ipa_interrupt_flag_get(uint32_t int_flag)
 {
+    FlagStatus reval = RESET;
+
     if(0U != (IPA_INTF & int_flag)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+
+    return reval;
 }
 
 /*!

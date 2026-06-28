@@ -2,11 +2,11 @@
     \file    gd32f4xx_pmu.c
     \brief   PMU driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -210,6 +210,8 @@ void pmu_to_sleepmode(uint8_t sleepmodecmd)
     if(WFI_CMD == sleepmodecmd) {
         __WFI();
     } else {
+        __SEV();
+        __WFE();
         __WFE();
     }
 }
@@ -295,9 +297,10 @@ void pmu_to_standbymode(void)
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 
     REG32(0xE000E010U) &= 0x00010004U;
-    REG32(0xE000E180U)  = 0XFFFFFFF7U;
+    REG32(0xE000E180U)  = 0XFFFFFFF3U;
     REG32(0xE000E184U)  = 0XFFFFFDFFU;
     REG32(0xE000E188U)  = 0xFFFFFFFFU;
+    REG32(0xE000E18CU)  = 0xFFFFFFFFU;
 
     /* select WFI command to enter standby mode */
     __WFI();
@@ -377,11 +380,13 @@ void pmu_backup_write_disable(void)
 */
 FlagStatus pmu_flag_get(uint32_t flag)
 {
+    FlagStatus status;
     if(PMU_CS & flag) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+    return status;
 }
 
 /*!

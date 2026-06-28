@@ -2,11 +2,11 @@
     \file    gd32f4xx_tli.c
     \brief   TLI driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -536,16 +536,17 @@ void tli_interrupt_disable(uint32_t int_flag)
 */
 FlagStatus tli_interrupt_flag_get(uint32_t int_flag)
 {
+    FlagStatus status = RESET;
     uint32_t state;
     state = TLI_INTF;
     if(state & int_flag) {
         state = TLI_INTEN;
         /* check whether the corresponding bit in TLI_INTEN is set or not */
         if(state & int_flag) {
-            return SET;
+            status = SET;
         }
     }
-    return RESET;
+    return status;
 }
 
 /*!
@@ -581,6 +582,7 @@ void tli_interrupt_flag_clear(uint32_t int_flag)
 */
 FlagStatus tli_flag_get(uint32_t flag)
 {
+    FlagStatus status;
     uint32_t stat;
     /* choose which register to get flag or state */
     if(flag >> 31U) {
@@ -589,8 +591,9 @@ FlagStatus tli_flag_get(uint32_t flag)
         stat = TLI_STAT;
     }
     if(flag & stat) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+    return status;
 }

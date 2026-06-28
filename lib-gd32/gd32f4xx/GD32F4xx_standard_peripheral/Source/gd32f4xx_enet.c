@@ -2,11 +2,11 @@
     \file    gd32f4xx_enet.c
     \brief   ENET driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
@@ -339,20 +339,22 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
     uint16_t phy_value = 0U;
     ErrStatus phy_state = ERROR, enet_state = ERROR;
 
+#if 0 // AvV    
     /* PHY interface configuration, configure SMI clock and reset PHY chip */
-/** AvV **/
-//  if(ERROR == enet_phy_config()) {
-//      _ENET_DELAY_(PHY_RESETDELAY);
-//      if(ERROR == enet_phy_config()) {
-//          return enet_state;
-//      }
-//  }
-/** AvV **/
+    if(ERROR == enet_phy_config()) {
+        _ENET_DELAY_(PHY_RESETDELAY);
+        if(ERROR == enet_phy_config()) {
+            return enet_state;
+        }
+    }
+#endif  
     /* initialize ENET peripheral with generally concerned parameters */
     enet_default_init();
 
     /* 1st, configure mediamode */
     media_temp = (uint32_t)mediamode;
+    
+#if 0 // AvV 
     /* if is PHY auto negotiation */
     if((uint32_t)ENET_AUTO_NEGOTIATION == media_temp) {
         /* wait for PHY_LINKED_STATUS bit be set */
@@ -391,34 +393,46 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
 
         /* read the result of the auto-negotiation */
         enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_SR, &phy_value);
+
+#if(PHY_TYPE == SR8201F || PHY_TYPE == YT8512)
         /* configure the duplex mode of MAC following the auto-negotiation result */
         if((uint16_t)RESET != (phy_value & PHY_DUPLEX_STATUS)) {
             media_temp = ENET_MODE_FULLDUPLEX;
         } else {
             media_temp = ENET_MODE_HALFDUPLEX;
         }
-        
         /* configure the communication speed of MAC following the auto-negotiation result */
-#if(PHY_TYPE == RTL8201F)	/** AvV **/
-		if ((uint16_t) RESET == (phy_value & PHY_SPEED_STATUS)) {
-#else
-        if ((uint16_t) RESET != (phy_value & PHY_SPEED_STATUS)) {
-#endif
+        if((uint16_t)RESET !=(phy_value & PHY_SPEED_STATUS)){
+            media_temp |= ENET_SPEEDMODE_100M;
+        }else{
             media_temp |= ENET_SPEEDMODE_10M;
+        }
+#elif (PHY_TYPE == DP83848 || PHY_TYPE == LAN8700)
+        /* configure the duplex mode of MAC following the auto-negotiation result */
+        if((uint16_t)RESET != (phy_value & PHY_DUPLEX_STATUS)) {
+            media_temp = ENET_MODE_FULLDUPLEX;
         } else {
+            media_temp = ENET_MODE_HALFDUPLEX;
+        }
+        /* configure the communication speed of MAC following the auto-negotiation result */
+        if((uint16_t)RESET !=(phy_value & PHY_SPEED_STATUS)){
+            media_temp |= ENET_SPEEDMODE_10M;
+        }else{
             media_temp |= ENET_SPEEDMODE_100M;
         }
+#endif /* PHY_TYPE == SR8201F || PHY_TYPE == YT8512 */
     } else {
-//      phy_value = (uint16_t)((media_temp & ENET_MAC_CFG_DPM) >> 3);
-//      phy_value |= (uint16_t)((media_temp & ENET_MAC_CFG_SPD) >> 1);
-//      phy_state = enet_phy_write_read(ENET_PHY_WRITE, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
-//      if(!phy_state) {
-//          /* return ERROR due to write timeout */
-//          return enet_state;
-//      }
-//      /* PHY configuration need some time */
-//      _ENET_DELAY_(PHY_CONFIGDELAY);
+        phy_value = (uint16_t)((media_temp & ENET_MAC_CFG_DPM) >> 3);
+        phy_value |= (uint16_t)((media_temp & ENET_MAC_CFG_SPD) >> 1);
+        phy_state = enet_phy_write_read(ENET_PHY_WRITE, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
+        if(!phy_state) {
+            /* return ERROR due to write timeout */
+            return enet_state;
+        }
+        /* PHY configuration need some time */
+        _ENET_DELAY_(PHY_CONFIGDELAY);
     }
+#endif    
     /* after configuring the PHY, use mediamode to configure registers */
     reg_value = ENET_MAC_CFG;
     /* configure ENET_MAC_CFG register */
@@ -3447,7 +3461,7 @@ static void enet_default_init(void)
     reg_value &= MAC_CFG_MASK;
     reg_value |= ENET_WATCHDOG_ENABLE | ENET_JABBER_ENABLE | ENET_INTERFRAMEGAP_96BIT \
                  | ENET_SPEEDMODE_10M | ENET_MODE_HALFDUPLEX | ENET_LOOPBACKMODE_DISABLE \
-                 | ENET_CARRIERSENSE_ENABLE | ENET_RECEIVEOWN_ENABLE \
+                 | ENET_CARRIERSENSE_DISABLE | ENET_RECEIVEOWN_ENABLE \
                  | ENET_RETRYTRANSMISSION_ENABLE | ENET_BACKOFFLIMIT_10 \
                  | ENET_DEFERRALCHECK_DISABLE \
                  | ENET_TYPEFRAME_CRC_DROP_DISABLE \
@@ -3476,6 +3490,18 @@ static void enet_default_init(void)
 
     /* configure ENET_MAC_VLT register */
     ENET_MAC_VLT = ENET_VLANTAGCOMPARISON_16BIT | MAC_VLT_VLTI(0);
+
+    /* disable MAC interrupt */
+    ENET_MAC_INTMSK |= ENET_MAC_INTMSK_TMSTIM | ENET_MAC_INTMSK_WUMIM;
+
+    /* MSC */
+    /* disable MSC Rx interrupt */
+    ENET_MSC_RINTMSK |= ENET_MSC_RINTMSK_RFAEIM | ENET_MSC_RINTMSK_RFCEIM \
+                        | ENET_MSC_RINTMSK_RGUFIM;
+
+    /* disable MSC Tx interrupt */
+    ENET_MSC_TINTMSK |= ENET_MSC_TINTMSK_TGFIM | ENET_MSC_TINTMSK_TGFMSCIM \
+                        | ENET_MSC_TINTMSK_TGFSCIM;
 
     /* DMA */
     /* configure ENET_DMA_CTL register */

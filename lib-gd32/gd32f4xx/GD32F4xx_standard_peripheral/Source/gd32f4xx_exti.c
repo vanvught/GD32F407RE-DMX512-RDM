@@ -1,11 +1,11 @@
 /*!
     \file    gd32f4xx_exti.c
     \brief   EXTI driver
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -199,11 +199,15 @@ void exti_software_interrupt_disable(exti_line_enum linex)
 */
 FlagStatus exti_flag_get(exti_line_enum linex)
 {
+    FlagStatus status;
+
     if(RESET != (EXTI_PD & (uint32_t)linex)) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+
+    return status;
 }
 
 /*!
@@ -229,11 +233,15 @@ void exti_flag_clear(exti_line_enum linex)
 */
 FlagStatus exti_interrupt_flag_get(exti_line_enum linex)
 {
+    FlagStatus status;
+
     if(RESET != (EXTI_PD & (uint32_t)linex)) {
-        return SET;
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+
+    return status;
 }
 
 /*!

@@ -2,11 +2,11 @@
     \file    gd32f4xx_trng.c
     \brief   TRNG driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -113,11 +113,15 @@ void trng_interrupt_disable(void)
 */
 FlagStatus trng_flag_get(trng_flag_enum flag)
 {
+    FlagStatus retval = RESET;
+    
     if(RESET != (TRNG_STAT & flag)) {
-        return SET;
+        retval = SET;
     } else {
-        return RESET;
+        retval = RESET;
     }
+    
+    return retval;
 }
 
 /*!
@@ -131,11 +135,15 @@ FlagStatus trng_flag_get(trng_flag_enum flag)
 */
 FlagStatus trng_interrupt_flag_get(trng_int_flag_enum int_flag)
 {
+    FlagStatus retval = RESET;
+    
     if(RESET != (TRNG_STAT & int_flag)) {
-        return SET;
+        retval = SET;
     } else {
-        return RESET;
+        retval = RESET;
     }
+    
+    return retval;
 }
 
 /*!

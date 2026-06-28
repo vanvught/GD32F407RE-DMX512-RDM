@@ -2,11 +2,11 @@
     \file    gd32f4xx_spi.c
     \brief   SPI driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -621,11 +621,14 @@ void spi_crc_next(uint32_t spi_periph)
 */
 uint16_t spi_crc_get(uint32_t spi_periph, uint8_t spi_crc)
 {
+    uint16_t ret = 0U;
+
     if(SPI_CRC_TX == spi_crc) {
-        return ((uint16_t)(SPI_TCRC(spi_periph)));
+        ret = ((uint16_t)(SPI_TCRC(spi_periph)));
     } else {
-        return ((uint16_t)(SPI_RCRC(spi_periph)));
+        ret = ((uint16_t)(SPI_RCRC(spi_periph)));
     }
+    return ret;
 }
 
 /*!
@@ -706,28 +709,6 @@ void spi_quad_read_enable(uint32_t spi_periph)
 }
 
 /*!
-    \brief      enable SPI_IO2 and SPI_IO3 pin output
-    \param[in]  spi_periph: SPIx(only x=5)
-    \param[out] none
-    \retval     none
-*/
-void spi_quad_io23_output_enable(uint32_t spi_periph)
-{
-    SPI_QCTL(spi_periph) |= (uint32_t)SPI_QCTL_IO23_DRV;
-}
-
-/*!
-   \brief      disable SPI_IO2 and SPI_IO3 pin output
-   \param[in]  spi_periph: SPIx(only x=5)
-   \param[out] none
-   \retval     none
-*/
-void spi_quad_io23_output_disable(uint32_t spi_periph)
-{
-    SPI_QCTL(spi_periph) &= (uint32_t)(~SPI_QCTL_IO23_DRV);
-}
-
-/*!
     \brief      get SPI and I2S flag status
     \param[in]  spi_periph: SPIx(x=0,1,2,3,4,5)
     \param[in]  spi_i2s_flag: SPI/I2S flag status
@@ -751,11 +732,14 @@ void spi_quad_io23_output_disable(uint32_t spi_periph)
 */
 FlagStatus spi_i2s_flag_get(uint32_t spi_periph, uint32_t flag)
 {
+    FlagStatus ret = RESET;
+
     if(SPI_STAT(spi_periph) & flag) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
@@ -839,6 +823,7 @@ void spi_i2s_interrupt_disable(uint32_t spi_periph, uint8_t interrupt)
 */
 FlagStatus spi_i2s_interrupt_flag_get(uint32_t spi_periph, uint8_t interrupt)
 {
+    FlagStatus ret = RESET;
     uint32_t reg1 = SPI_STAT(spi_periph);
     uint32_t reg2 = SPI_CTL1(spi_periph);
 
@@ -883,8 +868,9 @@ FlagStatus spi_i2s_interrupt_flag_get(uint32_t spi_periph, uint8_t interrupt)
     }
     /*get SPI/I2S interrupt flag status */
     if(reg1 && reg2) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }

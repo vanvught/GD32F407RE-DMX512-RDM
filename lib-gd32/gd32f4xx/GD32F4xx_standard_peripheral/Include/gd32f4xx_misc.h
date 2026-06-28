@@ -1,11 +1,11 @@
 /*!
     \file    gd32f4xx_misc.h
     \brief   definitions for the MISC
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -72,9 +72,9 @@ OF SUCH DAMAGE.
 void nvic_priority_group_set(uint32_t nvic_prigroup);
 
 /* enable NVIC request */
-void nvic_irq_enable(uint8_t nvic_irq, uint8_t nvic_irq_pre_priority, uint8_t nvic_irq_sub_priority);
+void nvic_irq_enable(IRQn_Type nvic_irq, uint8_t nvic_irq_pre_priority, uint8_t nvic_irq_sub_priority);
 /* disable NVIC request */
-void nvic_irq_disable(uint8_t nvic_irq);
+void nvic_irq_disable(IRQn_Type nvic_irq);
 
 /* set the NVIC vector table base address */
 void nvic_vector_table_set(uint32_t nvic_vict_tab, uint32_t offset);

@@ -2,11 +2,11 @@
     \file    gd32f4xx_usart.c
     \brief   USART driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -849,11 +849,14 @@ void usart_dma_transmit_config(uint32_t usart_periph, uint32_t dmacmd)
 */
 FlagStatus usart_flag_get(uint32_t usart_periph, usart_flag_enum flag)
 {
+    FlagStatus ret = RESET;
+
     if(RESET != (USART_REG_VAL(usart_periph, flag) & BIT(USART_BIT_POS(flag)))) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
@@ -873,8 +876,12 @@ FlagStatus usart_flag_get(uint32_t usart_periph, usart_flag_enum flag)
 */
 void usart_flag_clear(uint32_t usart_periph, usart_flag_enum flag)
 {
-    USART_REG_VAL(usart_periph, flag) &= ~BIT(USART_BIT_POS(flag));
-}
+    if (USART_FLAG_EPERR == flag) {
+        USART_REG_VAL(usart_periph, flag) &= ~BIT(USART_BIT_POS(flag));
+    } else {
+        USART_REG_VAL(usart_periph, flag) = ~BIT(USART_BIT_POS(flag));
+    }
+} 
 
 /*!
     \brief    enable USART interrupt
@@ -945,17 +952,20 @@ void usart_interrupt_disable(uint32_t usart_periph, usart_interrupt_enum interru
 */
 FlagStatus usart_interrupt_flag_get(uint32_t usart_periph, usart_interrupt_flag_enum int_flag)
 {
+    FlagStatus ret = RESET;
     uint32_t intenable = 0U, flagstatus = 0U;
+
     /* get the interrupt enable bit status */
     intenable = (USART_REG_VAL(usart_periph, int_flag) & BIT(USART_BIT_POS(int_flag)));
     /* get the corresponding flag bit status */
     flagstatus = (USART_REG_VAL2(usart_periph, int_flag) & BIT(USART_BIT_POS2(int_flag)));
 
     if((0U != flagstatus) && (0U != intenable)) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!

@@ -2,11 +2,11 @@
     \file    gd32f4xx_rcu.c
     \brief   RCU driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -517,6 +517,7 @@ void rcu_ckout1_config(uint32_t ckout1_src, uint32_t ckout1_div)
 */
 ErrStatus rcu_pll_config(uint32_t pll_src, uint32_t pll_psc, uint32_t pll_n, uint32_t pll_p, uint32_t pll_q)
 {
+    ErrStatus rcu_flag = SUCCESS;
     uint32_t ss_modulation_inc;
     uint32_t ss_modulation_reg;
 
@@ -538,12 +539,11 @@ ErrStatus rcu_pll_config(uint32_t pll_src, uint32_t pll_psc, uint32_t pll_n, uin
         RCU_PLL = pll_psc | (pll_n << 6) | (((pll_p >> 1) - 1U) << 16) |
                   (pll_src) | (pll_q << 24);
     } else {
-        /* return status */
-        return ERROR;
+        rcu_flag = ERROR;
     }
 
     /* return status */
-    return SUCCESS;
+    return rcu_flag;
 }
 
 /*!
@@ -557,16 +557,17 @@ ErrStatus rcu_pll_config(uint32_t pll_src, uint32_t pll_psc, uint32_t pll_n, uin
 */
 ErrStatus rcu_plli2s_config(uint32_t plli2s_n, uint32_t plli2s_r)
 {
+    ErrStatus rcu_flag = SUCCESS;
+
     /* check the function parameter */
     if(CHECK_PLLI2S_N_VALID(plli2s_n) && CHECK_PLLI2S_R_VALID(plli2s_r)) {
         RCU_PLLI2S = (plli2s_n << 6) | (plli2s_r << 28);
     } else {
-        /* return status */
-        return ERROR;
+        rcu_flag = ERROR;
     }
 
     /* return status */
-    return SUCCESS;
+    return rcu_flag;
 }
 
 /*!
@@ -582,16 +583,17 @@ ErrStatus rcu_plli2s_config(uint32_t plli2s_n, uint32_t plli2s_r)
 */
 ErrStatus rcu_pllsai_config(uint32_t pllsai_n, uint32_t pllsai_p, uint32_t pllsai_r)
 {
+    ErrStatus rcu_flag = SUCCESS;
+ 
     /* check the function parameter */
     if(CHECK_PLLSAI_N_VALID(pllsai_n) && CHECK_PLLSAI_P_VALID(pllsai_p) && CHECK_PLLSAI_R_VALID(pllsai_r)) {
         RCU_PLLSAI = (pllsai_n << 6U) | (((pllsai_p >> 1U) - 1U) << 16U) | (pllsai_r << 28U);
     } else {
-        /* return status */
-        return ERROR;
+        rcu_flag = ERROR;
     }
 
     /* return status */
-    return SUCCESS;
+    return rcu_flag;
 }
 
 /*!
@@ -1221,12 +1223,16 @@ uint32_t rcu_clock_freq_get(rcu_clock_freq_enum clock)
 */
 FlagStatus rcu_flag_get(rcu_flag_enum flag)
 {
+    FlagStatus rcu_flag = RESET;
+
     /* get the rcu flag */
     if(RESET != (RCU_REG_VAL(flag) & BIT(RCU_BIT_POS(flag)))) {
-        return SET;
+        rcu_flag = SET;
     } else {
-        return RESET;
+        rcu_flag = RESET;
     }
+
+    return rcu_flag;
 }
 
 /*!
@@ -1258,12 +1264,16 @@ void rcu_all_reset_flag_clear(void)
 */
 FlagStatus rcu_interrupt_flag_get(rcu_int_flag_enum int_flag)
 {
+    FlagStatus rcu_flag = RESET;
+
     /* get the rcu interrupt flag */
     if(RESET != (RCU_REG_VAL(int_flag) & BIT(RCU_BIT_POS(int_flag)))) {
-        return SET;
+        rcu_flag = SET;
     } else {
-        return RESET;
+        rcu_flag = RESET;
     }
+
+    return rcu_flag;
 }
 
 /*!
