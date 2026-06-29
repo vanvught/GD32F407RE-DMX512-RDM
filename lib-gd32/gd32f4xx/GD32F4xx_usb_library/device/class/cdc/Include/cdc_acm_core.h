@@ -2,11 +2,11 @@
     \file    cdc_acm_core.h
     \brief   the header file of cdc acm driver
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -32,23 +32,23 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#ifndef __CDC_ACM_CORE_H
-#define __CDC_ACM_CORE_H
+#ifndef CDC_ACM_CORE_H
+#define CDC_ACM_CORE_H
 
 #include "usbd_enum.h"
 #include "usb_cdc.h"
 
-#define USB_CDC_RX_LEN      USB_CDC_DATA_PACKET_SIZE
+#define USB_CDC_RX_LEN      USB_CDC_DATA_PACKET_SIZE                         /*< CDC data packet size */
 
 typedef struct {
-    uint8_t data[USB_CDC_RX_LEN];
-    uint8_t cmd[USB_CDC_CMD_PACKET_SIZE];
+    uint8_t data[USB_CDC_RX_LEN];                                            /*< CDC data transfer buff */
+    uint8_t cmd[USB_CDC_CMD_PACKET_SIZE];                                    /*< CDC cmd packet buff */
 
-    uint8_t packet_sent;
-    uint8_t packet_receive;
-    uint32_t receive_length;
+    uint8_t packet_sent;                                                     /*< CDC data packet start send flag */
+    uint8_t packet_receive;                                                  /*< CDC data packet start receive flag */
+    uint32_t receive_length;                                                 /*< CDC data receive length */
 
-    acm_line line_coding;
+    acm_line line_coding;                                                    /*< CDC line coding structure */
 } usb_cdc_handler;
 
 extern usb_desc cdc_desc;
@@ -62,4 +62,4 @@ void cdc_acm_data_send(usb_dev *udev);
 /* receive CDC ACM data */
 void cdc_acm_data_receive(usb_dev *udev);
 
-#endif /* __CDC_ACM_CORE_H */
+#endif /* CDC_ACM_CORE_H */

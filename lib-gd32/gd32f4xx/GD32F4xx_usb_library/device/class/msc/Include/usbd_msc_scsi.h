@@ -2,11 +2,11 @@
     \file    usbd_msc_scsi.h
     \brief   the header file of the usbd_msc_scsi.c file
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -32,27 +32,22 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#ifndef __USBD_MSC_SCSI_H
-#define __USBD_MSC_SCSI_H
+#ifndef USBD_MSC_SCSI_H
+#define USBD_MSC_SCSI_H
 
-#include "usbd_msc_bbb.h"
-#include "msc_scsi.h"
+#include "usbd_core.h"
 
-#define SENSE_LIST_DEEPTH                           4U
+#define SENSE_LIST_DEEPTH                           4U                   /*!< sense list deepth */
 
-#define MODE_SENSE6_LENGTH                          8U
-#define MODE_SENSE10_LENGTH                         8U
-#define INQUIRY_PAGE00_LENGTH                       96U
-#define FORMAT_CAPACITIES_LENGTH                    20U
-
-extern const uint8_t msc_page00_inquiry_data[];
-extern const uint8_t msc_mode_sense6_data[];
-extern const uint8_t msc_mode_sense10_data[];
+#define MODE_SENSE6_LENGTH                          8U                   /*!< sense6 mode length */
+#define MODE_SENSE10_LENGTH                         8U                   /*!< sense10 mode length */
+#define INQUIRY_PAGE00_LENGTH                       96U                  /*!< sense page 0 inquiry length */
+#define FORMAT_CAPACITIES_LENGTH                    20U                  /*!< format capacities length */
 
 /* function declarations */
 /* process SCSI commands */
-int8_t scsi_process_cmd (usb_core_driver *udev, uint8_t lun, uint8_t *cmd);
+int8_t scsi_process_cmd(usb_core_driver *udev, uint8_t lun, uint8_t *cmd);
 /* load the last error code in the error list */
-void scsi_sense_code (usb_core_driver *udev, uint8_t lun, uint8_t skey, uint8_t asc);
+void scsi_sense_code(usb_core_driver *udev, uint8_t lun, uint8_t skey, uint8_t asc);
 
-#endif /* __USBD_MSC_SCSI_H */
+#endif /* USBD_MSC_SCSI_H */

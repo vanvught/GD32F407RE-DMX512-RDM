@@ -2,11 +2,11 @@
     \file    drv_usbd_int.h
     \brief   USB device mode interrupt header file
 
-    \version 2023-06-25, V3.1.0, firmware for GD32F4xx
+    \version 2026-02-05, V3.3.3, firmware for GD32F4xx
 */
 
 /*
-    Copyright (c) 2023, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -32,21 +32,19 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#ifndef __DRV_USBD_INT_H
-#define __DRV_USBD_INT_H
+#ifndef DRV_USBD_INT_H
+#define DRV_USBD_INT_H
 
-#include "drv_usb_core.h"
 #include "drv_usb_dev.h"
 
 /* function declarations */
 /* USB device-mode interrupts global service routine handler */
-void usbd_isr (usb_core_driver *udev);
-
+void usbd_isr(usb_core_driver *udev);
 #ifdef USB_HS_DEDICATED_EP1_ENABLED
 /* USB dedicated IN endpoint 1 interrupt service routine handler */
-uint32_t usbd_int_dedicated_ep1in (usb_core_driver *udev);
+uint32_t usbd_int_dedicated_ep1in(usb_core_driver *udev);
 /* USB dedicated OUT endpoint 1 interrupt service routine handler */
-uint32_t usbd_int_dedicated_ep1out (usb_core_driver *udev);
+uint32_t usbd_int_dedicated_ep1out(usb_core_driver *udev);
 #endif /* USB_HS_DEDICATED_EP1_ENABLED */
 
-#endif /* __DRV_USBD_INT_H */
+#endif /* DRV_USBD_INT_H */

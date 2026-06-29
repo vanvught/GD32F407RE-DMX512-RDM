@@ -347,7 +347,7 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
             return enet_state;
         }
     }
-#endif  
+#endif // AvV  
     /* initialize ENET peripheral with generally concerned parameters */
     enet_default_init();
 
@@ -432,7 +432,7 @@ ErrStatus enet_init(enet_mediamode_enum mediamode, enet_chksumconf_enum checksum
         /* PHY configuration need some time */
         _ENET_DELAY_(PHY_CONFIGDELAY);
     }
-#endif    
+#endif // AvV    
     /* after configuring the PHY, use mediamode to configure registers */
     reg_value = ENET_MAC_CFG;
     /* configure ENET_MAC_CFG register */
