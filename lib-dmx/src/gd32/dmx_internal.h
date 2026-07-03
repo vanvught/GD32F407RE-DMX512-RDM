@@ -53,7 +53,7 @@
 #define SECTION_DMA_BUFFER
 #endif
 
-inline constexpr uint32_t DmxPortToUart(uint32_t port) {
+constexpr uint32_t DmxPortToUart(uint32_t port) {
     switch (port) {
 #if defined(DMX_USE_USART0)
         case dmx::config::kUsart0Port:
@@ -105,7 +105,7 @@ inline constexpr uint32_t DmxPortToUart(uint32_t port) {
 }
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-inline constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
+constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
     switch (usart_periph) {
 #if defined(DMX_USE_USART0)
         case USART0:

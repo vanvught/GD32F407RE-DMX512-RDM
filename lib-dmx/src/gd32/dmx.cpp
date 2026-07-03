@@ -60,6 +60,9 @@ static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 extern struct HwTimersSeconds gv_seconds;
 
 namespace dmx {
+static constexpr uint32_t kDmxSlotsCompleteFlag = 0x8000;
+static constexpr uint32_t kRdmSlotsCompleteFlag = 0x4000;
+
 enum class TxRxState { 
   kIdle, 
   kDmxBreak, 
@@ -207,13 +210,13 @@ void IrqHandlerDmxRdmInput() {
 
         if (rx_buffer.state == dmx::TxRxState::kDmxData) {
             rx_buffer.state = dmx::TxRxState::kIdle;
-            rx_buffer.dmx.current.slots_in_packet |= 0x8000;
+            rx_buffer.dmx.current.slots_in_packet |= dmx::kDmxSlotsCompleteFlag;
             return;
         }
 
         if (rx_buffer.state == dmx::TxRxState::kRdmdisc) {
             rx_buffer.state = dmx::TxRxState::kIdle;
-            rx_buffer.rdm.index |= 0x4000;
+            rx_buffer.rdm.index |= dmx::kRdmSlotsCompleteFlag;
             return;
         }
 
@@ -275,7 +278,7 @@ void IrqHandlerDmxRdmInput() {
             rx_buffer.dmx.current.slots_in_packet = index;
 
             if (index > dmx::kChannelsMax) {
-                index |= 0x8000;
+                index |= dmx::kDmxSlotsCompleteFlag;
                 rx_buffer.dmx.current.slots_in_packet = index;
                 rx_buffer.state = dmx::TxRxState::kIdle;
                 break;
@@ -308,7 +311,7 @@ void IrqHandlerDmxRdmInput() {
         case dmx::TxRxState::kRdmChecksuml: {
             auto index = rx_buffer.rdm.index;
             rx_buffer.rdm.data[index] = kData;
-            index |= 0x4000;
+            index |= dmx::kRdmSlotsCompleteFlag;
             rx_buffer.rdm.index = index;
             rx_buffer.state = dmx::TxRxState::kIdle;
             gsv_rdm_data_receive_end[port_index] = DWT->CYCCNT;
@@ -1479,9 +1482,9 @@ void Dmx::DataDisable(uint32_t port_index) {
 void Dmx::ClearData(uint32_t port_index) {
     assert(port_index < dmx::config::max::kPorts);
 
-    auto* p = &s_DmxTxBuffer[port_index].dmx.data[0];
-    p->length = 513; // Including START Code
-    __builtin_memset(p->data, 0, dmx::buffer::kSize);
+    auto* data = &s_DmxTxBuffer[port_index].dmx.data[0];
+    data->length = 513; // Including START Code
+    __builtin_memset(data->data, 0, dmx::buffer::kSize);
 }
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
@@ -1512,15 +1515,15 @@ void Dmx::FullOn() {
         if (port_direction_[port_index] == dmx::Direction::kOutput) {
             DataDisable(port_index);
 
-            auto* __restrict__ p = &s_DmxTxBuffer[port_index].dmx.data[0];
-            auto* __restrict__ p32 = reinterpret_cast<uint32_t*>(p->data);
+            auto* __restrict__ data = &s_DmxTxBuffer[port_index].dmx.data[0];
+            auto* __restrict__ p32 = reinterpret_cast<uint32_t*>(data->data);
 
             for (auto i = 0; i < dmx::buffer::kSize / 4; i++) {
                 *p32++ = UINT32_MAX;
             }
 
-            p->data[0] = dmx::kStartCode;
-            p->length = 513;
+            data->data[0] = dmx::kStartCode;
+            data->length = 513;
 
             DataEnable(port_index);
         }
@@ -1991,11 +1994,11 @@ const uint8_t* Dmx::GetDmxAvailable([[maybe_unused]] uint32_t port_index) {
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
     auto slots_in_packet = sv_rx_buffer[port_index].dmx.current.slots_in_packet;
 
-    if ((slots_in_packet & 0x8000) != 0x8000) {
+    if ((slots_in_packet & dmx::kDmxSlotsCompleteFlag) != dmx::kDmxSlotsCompleteFlag) {
         return nullptr;
     }
 
-    slots_in_packet &= static_cast<uint32_t>(~0x8000);
+    slots_in_packet &= ~dmx::kDmxSlotsCompleteFlag;
     slots_in_packet--; // Remove SC from length
     sv_rx_buffer[port_index].dmx.current.slots_in_packet = slots_in_packet;
 
@@ -2059,47 +2062,47 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t*
 const uint8_t* Dmx::RdmReceive(uint32_t port_index) {
     DMX_CHECK_PORT_INDEX_PTR(port_index);
 
-    if ((sv_rx_buffer[port_index].rdm.index & 0x4000) != 0x4000) {
+    if ((sv_rx_buffer[port_index].rdm.index & dmx::kRdmSlotsCompleteFlag) != dmx::kRdmSlotsCompleteFlag) {
         return nullptr;
     }
 
     sv_rx_buffer[port_index].rdm.index = 0;
 
-    const auto* p = const_cast<const uint8_t*>(sv_rx_buffer[port_index].rdm.data);
+    const auto* data = const_cast<const uint8_t*>(sv_rx_buffer[port_index].rdm.data);
 
-    if (p[0] == E120_SC_RDM) {
-        const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(p);
+    if (data[0] == E120_SC_RDM) {
+        const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(data);
 
         uint32_t i;
         uint16_t checksum = 0;
 
         for (i = 0; i < 24; i++) {
-            checksum = static_cast<uint16_t>(checksum + p[i]);
+            checksum = static_cast<uint16_t>(checksum + data[i]);
         }
 
         for (; i < rdm_command->message_length; i++) {
-            checksum = static_cast<uint16_t>(checksum + p[i]);
+            checksum = static_cast<uint16_t>(checksum + data[i]);
         }
 
-        if (p[i++] == static_cast<uint8_t>(checksum >> 8)) {
-            if (p[i] == static_cast<uint8_t>(checksum)) {
+        if (data[i++] == static_cast<uint8_t>(checksum >> 8)) {
+            if (data[i] == static_cast<uint8_t>(checksum)) {
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
                 sv_total_statistics[port_index].rdm.received.good = sv_total_statistics[port_index].rdm.received.good + 1;
 #endif
-                return p;
+                return data;
             }
         }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
         sv_total_statistics[port_index].rdm.received.bad = sv_total_statistics[port_index].rdm.received.bad + 1;
 #endif
         return nullptr;
-    } else {
-#if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        sv_total_statistics[port_index].rdm.received.discovery_response = sv_total_statistics[port_index].rdm.received.discovery_response + 1;
-#endif
     }
 
-    return p;
+#if !defined(CONFIG_DMX_DISABLE_STATISTICS)
+    sv_total_statistics[port_index].rdm.received.discovery_response = sv_total_statistics[port_index].rdm.received.discovery_response + 1;
+#endif
+
+    return data;
 }
 
 // RDM Receive with timeout
