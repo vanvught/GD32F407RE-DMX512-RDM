@@ -101,7 +101,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/GD32F4xx_standard_peripheral/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-display/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-hal/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-network/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/include}&quot;"/>
 								</option>
@@ -119,7 +118,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/GD32F4xx_standard_peripheral/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-display/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-hal/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-network/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/include}&quot;"/>
 								</option>
@@ -142,7 +140,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/gd32f4xx/GD32F4xx_standard_peripheral/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-gd32/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-display/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-hal/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib-network/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/include}&quot;"/>
 								</option>
