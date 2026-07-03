@@ -64,12 +64,12 @@ OF SUCH DAMAGE.
 //#define USE_DELAY
 
 #ifndef _PHY_H_
-#define DP83848                          0
-#define LAN8700                          1
-#define SR8201F                          2
-#define RTL8201F                         2
-#define YT8512                           3
-#define PHY_TYPE                         DP83848
+#define DP83848 0
+#define LAN8700 1
+#define RTL8201F 2       // AvV
+#ifndef PHY_TYPE         // AvV
+#define PHY_TYPE DP83848 // AvV
+#endif                   // AvV
 
 #define PHY_ADDRESS                      ((uint16_t)1U)                         /*!< phy address determined by the hardware */
 
