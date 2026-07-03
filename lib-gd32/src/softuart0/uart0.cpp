@@ -22,61 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
+
 #include <cstdint>
 
 #include "gd32.h"
 
-#if defined(GD32H7XX)
-#define TIMERx            TIMER15
-#define RCU_TIMERx        RCU_TIMER15
+#if defined(GD32H7XX) // GD32H7XX
+#define TIMERx TIMER15
+#define RCU_TIMERx RCU_TIMER15
 #define TIMERx_IRQHandler TIMER15_IRQHandler
-#define TIMERx_IRQn       TIMER15_IRQn
-#elif defined(GD32F30X)
-#define TIMERx            TIMER7
-#define RCU_TIMERx        RCU_TIMER7
-#if defined (GD32F30X_XD)
+#define TIMERx_IRQn TIMER15_IRQn
+#elif defined(GD32F30X) // GD32F30X
+#define TIMERx TIMER7
+#define RCU_TIMERx RCU_TIMER7
+#if defined(GD32F30X_XD) // GD32F30X_XD
 #define TIMERx_IRQHandler TIMER7_UP_TIMER12_IRQHandler
-#define TIMERx_IRQn       TIMER7_UP_TIMER12_IRQn
+#define TIMERx_IRQn TIMER7_UP_TIMER12_IRQn
 #else
 #define TIMERx_IRQHandler TIMER7_UP_IRQHandler
-#define TIMERx_IRQn       TIMER7_UP_IRQn
+#define TIMERx_IRQn TIMER7_UP_IRQn
 #endif
 #else
-#define TIMERx            TIMER9
-#define RCU_TIMERx        RCU_TIMER9
+#define TIMERx TIMER9
+#define RCU_TIMERx RCU_TIMER9
 #define TIMERx_IRQHandler TIMER0_UP_TIMER9_IRQHandler
-#define TIMERx_IRQn       TIMER0_UP_TIMER9_IRQn
+#define TIMERx_IRQn TIMER0_UP_TIMER9_IRQn
 #endif
 
 #if defined(GD32H7XX)
-#define TIMER_CLOCK_FREQ  (AHB_CLOCK_FREQ)
+#define TIMER_CLOCK_FREQ (AHB_CLOCK_FREQ)
 #elif defined(GD32F4XX)
-#define TIMER_CLOCK_FREQ  (APB2_CLOCK_FREQ * 2)
+#define TIMER_CLOCK_FREQ (APB2_CLOCK_FREQ * 2)
 #else
-#define TIMER_CLOCK_FREQ  (APB2_CLOCK_FREQ)
+#define TIMER_CLOCK_FREQ (APB2_CLOCK_FREQ)
 #endif
 
 #if !defined(SOFTUART_TX_PINx)
-#define SOFTUART_TX_PINx          GPIO_PIN_9
-#define SOFTUART_TX_GPIOx         GPIOA
-#define SOFTUART_TX_RCU_GPIOx     RCU_GPIOA
+#define SOFTUART_TX_PINx GPIO_PIN_9
+#define SOFTUART_TX_GPIOx GPIOA
+#define SOFTUART_TX_RCU_GPIOx RCU_GPIOA
 #endif
 
 #if defined(SOFTUART0_ENABLE_RX)
 #if !defined(SOFTUART_RX_PINx)
-#define SOFTUART_RX_PINx          GPIO_PIN_10
-#define SOFTUART_RX_GPIOx         GPIOA
-#define SOFTUART_RX_RCU_GPIOx     RCU_GPIOA
+#define SOFTUART_RX_PINx GPIO_PIN_10
+#define SOFTUART_RX_GPIOx GPIOA
+#define SOFTUART_RX_RCU_GPIOx RCU_GPIOA
 #if defined(GD32H7XX)
 #error
 #else
-#define SOFTUART_RX_TIMERx                  TIMER0
-#define SOFTUART_RX_RCU_TIMERx              RCU_TIMER0
-#define SOFTUART_RX_EXTIx_IRQHandler        EXTI10_15_IRQHandler
-#define SOFTUART_RX_EXTIx_IRQn              EXTI10_15_IRQn
-#define SOFTUART_RX_GPIO_PORT_SOURCE_GPIOx  GPIO_PORT_SOURCE_GPIOB
-#define SOFTUART_RX_GPIO_PIN_SOURCE_x       GPIO_PIN_SOURCE_14
+#define SOFTUART_RX_TIMERx TIMER11
+#define SOFTUART_RX_RCU_TIMERx RCU_TIMER11
+#define SOFTUART_RX_EXTIx_IRQHandler EXTI10_15_IRQHandler
+#define SOFTUART_RX_EXTIx_IRQn EXTI10_15_IRQn
+#define SOFTUART_RX_GPIO_PORT_SOURCE_GPIOx GPIO_PORT_SOURCE_GPIOB
+#define SOFTUART_RX_GPIO_PIN_SOURCE_x GPIO_PIN_SOURCE_14
 #endif
 #endif // !defined(SOFTUART_RX_PINx)
 static_assert(TIMERx != SOFTUART_RX_TIMERx);
@@ -92,7 +92,7 @@ static constexpr uint32_t kTimerPeriod = ((TIMER_CLOCK_FREQ / kBaudRate) - 1U);
 static constexpr uint32_t kBufferSize = 128U;
 
 enum class TxState { kIdle, kStartBit, kData, kStopBit };
-enum class RxState { kIdle, kVerifyStart, kData, kStopBit };
+enum class RxState { kIdle, kStart, kData, kStop };
 
 struct CircularBuffer {
     uint8_t buffer[kBufferSize];
@@ -108,6 +108,8 @@ static volatile uint8_t s_tx_shift;
 #if defined(SOFTUART0_ENABLE_RX)
 static volatile CircularBuffer s_rx_buffer __attribute__((aligned(4)));
 static volatile RxState s_rx_state;
+static volatile uint8_t s_rx_data;
+static volatile uint8_t s_rx_shift;
 #endif // defined(SOFTUART0_ENABLE_RX)
 
 extern "C" {
@@ -156,6 +158,35 @@ void TIMERx_IRQHandler() {
 }
 #if defined(SOFTUART0_ENABLE_RX)
 void SOFTUART_RX_EXTIx_IRQHandler() {
+    if (RESET == exti_interrupt_flag_get(EXTI_14)) {
+        return;
+    }
+
+    exti_interrupt_flag_clear(EXTI_14);
+
+    if (s_rx_state != RxState::kIdle) {
+        return;
+    }
+
+    if ((GPIO_ISTAT(SOFTUART_RX_GPIOx) & SOFTUART_RX_PINx) != 0U) {
+        return;
+    }
+
+    s_rx_state = RxState::kStart;
+    s_rx_data = 0;
+    s_rx_shift = 0;
+
+    exti_interrupt_disable(EXTI_14);
+
+    timer_disable(SOFTUART_RX_TIMERx);
+    timer_counter_value_config(SOFTUART_RX_TIMERx, 0);
+
+    // First sample = middle of first data bit
+    // = 1.5 bit times after falling edge.
+    timer_channel_output_pulse_value_config(SOFTUART_RX_TIMERx, TIMER_CH_0, (kTimerPeriod * 3U) / 2U);
+
+    timer_interrupt_flag_clear(SOFTUART_RX_TIMERx, TIMER_INT_FLAG_CH0);
+    timer_enable(SOFTUART_RX_TIMERx);
 }
 #endif
 }

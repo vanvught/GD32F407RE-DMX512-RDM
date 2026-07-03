@@ -23,41 +23,19 @@
  * THE SOFTWARE.
  */
 
-#if !defined(__clang__)
-#pragma GCC push_options
-#pragma GCC optimize("O2")
-#pragma GCC optimize("no-tree-loop-distribute-patterns")
-#pragma GCC optimize("-funroll-loops")
-#endif
-
 #include <cstdint>
 #include <cstring>
 #include <uuid/uuid.h>
 
-#include "gd32.h" // IWYU pragma: keep
-
-typedef union pcast32 {
-    uuid_t uuid;
-    uint32_t u32[4];
-} _pcast32;
+#include "gd32_unique_id.h"
 
 void UuidCopy(uuid_t out) {
-    _pcast32 cast;
+    uint32_t words[4];
 
-#if defined(GD32H7XX)
-    cast.u32[0] = REG32(0x1FF0F7E8);
-    cast.u32[1] = REG32(0x1FF0F7EC);
-    cast.u32[2] = REG32(0x1FF0F7F0);
-#elif defined(GD32F4XX)
-    cast.u32[0] = REG32(0x1FFF7A10);
-    cast.u32[1] = REG32(0x1FFF7A14);
-    cast.u32[2] = REG32(0x1FFF7A18);
-#else
-    cast.u32[0] = REG32(0x1FFFF7E8);
-    cast.u32[1] = REG32(0x1FFFF7EC);
-    cast.u32[2] = REG32(0x1FFFF7F0);
-#endif
-    cast.u32[3] = cast.u32[0] + cast.u32[1] + cast.u32[2];
+    words[0] = gd32::uid::Word0();
+    words[1] = gd32::uid::Word1();
+    words[2] = gd32::uid::Word2();
+    words[3] = words[0] + words[1] + words[2];
 
-    memcpy(out, cast.uuid, sizeof(uuid_t));
+    memcpy(out, words, sizeof(uuid_t));
 }

@@ -30,25 +30,18 @@
 #include <cstdint>
 
 #include "firmware/debug/debug_debug.h"
+#include "gd32_unique_id.h"
 
 void MacAddress(uint8_t paddr[]) {
-#if defined(GD32H7XX)
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7E8);
-    const auto kMacAddressLow = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7EC);
-#elif defined(GD32F4XX)
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FFF7A10);
-    const auto kMacAddressLow = *reinterpret_cast<volatile uint32_t*>(0x1FFF7A14);
-#else
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FFFF7E8);
-    const auto kMacAddressLow = *reinterpret_cast<volatile uint32_t*>(0x1FFFF7EC);
-#endif
+    const auto kId0 = gd32::uid::Word0();
+    const auto kId1 = gd32::uid::Word1();
 
     paddr[0] = 2;
-    paddr[1] = static_cast<uint8_t>((kMacAddressLow >> 0) & 0xFF);
-    paddr[2] = static_cast<uint8_t>((kMacaddressHigh >> 24) & 0xFF);
-    paddr[3] = static_cast<uint8_t>((kMacaddressHigh >> 16) & 0xFF);
-    paddr[4] = static_cast<uint8_t>((kMacaddressHigh >> 8) & 0xFF);
-    paddr[5] = static_cast<uint8_t>((kMacaddressHigh >> 0) & 0xFF);
+    paddr[1] = static_cast<uint8_t>((kId1 >> 0) & 0xFF);
+    paddr[2] = static_cast<uint8_t>((kId0 >> 24) & 0xFF);
+    paddr[3] = static_cast<uint8_t>((kId0 >> 16) & 0xFF);
+    paddr[4] = static_cast<uint8_t>((kId0 >> 8) & 0xFF);
+    paddr[5] = static_cast<uint8_t>((kId0 >> 0) & 0xFF);
 
     DEBUG_PRINTF("%02x:%02x:%02x:%02x:%02x:%02x", paddr[0], paddr[1], paddr[2], paddr[3], paddr[4], paddr[5]);
 }

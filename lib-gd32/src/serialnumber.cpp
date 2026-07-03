@@ -26,18 +26,13 @@
 #include <cstdint>
 
 #include "serialnumber.h"
+#include "gd32_unique_id.h"
 
 void SerialNumber(uint8_t sn[kSnSize]) {
-#if defined(GD32H7XX)
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FF0F7E8);
-#elif defined(GD32F4XX)
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FFF7A10);
-#else
-    const auto kMacaddressHigh = *reinterpret_cast<volatile uint32_t*>(0x1FFFF7E8);
-#endif
+    const auto kId0 = gd32::uid::Word0();
 
-    sn[0] = static_cast<uint8_t>((kMacaddressHigh >> 0) & 0xFF);
-    sn[1] = static_cast<uint8_t>((kMacaddressHigh >> 8) & 0xFF);
-    sn[2] = static_cast<uint8_t>((kMacaddressHigh >> 16) & 0xFF);
-    sn[3] = static_cast<uint8_t>((kMacaddressHigh >> 24) & 0xFF);
+    sn[0] = static_cast<uint8_t>((kId0 >> 0) & 0xFF);
+    sn[1] = static_cast<uint8_t>((kId0 >> 8) & 0xFF);
+    sn[2] = static_cast<uint8_t>((kId0 >> 16) & 0xFF);
+    sn[3] = static_cast<uint8_t>((kId0 >> 24) & 0xFF);
 }
