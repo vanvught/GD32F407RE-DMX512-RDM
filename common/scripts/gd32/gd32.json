@@ -1,0 +1,31 @@
+{
+	"0414": {
+		"series": "GD32F303",
+		"uid_base" : "",
+		"flash": {
+			"256": "GD32F303XCXX"
+		}
+	},
+	"0418": {
+		"series": "GD32F207",
+		"flash": {
+			"1024": "GD32F207XRXX"
+		}
+	},
+	"0x0419": {
+		"series": "GD32F407/GD32F450",
+		"probes": {
+			"tli_apb2en_bit26": {
+				"address": "0x40021024",
+				"bit": 26,
+				"set": "GD32F450",
+				"clear": "GD32F407"
+			}
+		},
+		"flash": {
+			"GD32F407": {
+				"512": "GD32F407XEXX"
+			}
+		}
+	}
+}
