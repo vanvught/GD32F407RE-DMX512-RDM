@@ -33,7 +33,7 @@
 #include <cstdint>
 #include <cassert>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
 static constexpr auto kTicksPerUs = (MCU_CLOCK_FREQ / 1000000U);
 
@@ -46,6 +46,7 @@ void UdelayInit() {
 }
 
 namespace timing {
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void DelayUs(uint32_t micros, uint32_t offset_micros) {
     const auto kTicks = micros * kTicksPerUs;
 
@@ -58,7 +59,7 @@ void DelayUs(uint32_t micros, uint32_t offset_micros) {
         ticks_previous = offset_micros;
     }
 
-    while (1) {
+    while (true) {
         const auto kTicksNow = DWT->CYCCNT;
 
         if (kTicksNow != ticks_previous) {

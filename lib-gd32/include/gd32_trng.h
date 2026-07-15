@@ -1,5 +1,5 @@
 /**
- * @file board.cpp
+ * @file gd32_trng.h
  *
  */
 /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,42 +23,18 @@
  * THE SOFTWARE.
  */
 
-#include "gd32_board.h"
+#ifndef GD32_TRNG_H_
+#define GD32_TRNG_H_
 
-namespace board {
-static constexpr float kCoreTemperatureMin = -40.0;
-static constexpr float kCoreTemperatureMax = +85.0;
-static constexpr const char kWebsite[] = "https://gd32-dmx.org";
-static constexpr char kSysName[] = "Embedded";
+#if defined(GD32F10X) || defined(GD32F30X)
+#errror MCU is not supported
+#endif
 
-const char* Website() {
-    return kWebsite;
-}
+#include <cstdint>
 
-float CoreTemperatureMin() {
-    return kCoreTemperatureMin;
-}
-float CoreTemperatureMax() {
-    return kCoreTemperatureMax;
-}
+namespace gd32::trng {
+bool Init();
+bool Get(uint32_t& out);
+} // namespace gd32::trng
 
-const char* BoardName(uint8_t& length) {
-    length = sizeof(GD32_BOARD_NAME) - 1U;
-    return GD32_BOARD_NAME;
-}
-
-const char* SocName(uint8_t& length) {
-    length = 4;
-    return "GD32";
-}
-
-const char* CpuName(uint8_t& length) {
-    length = sizeof(GD32_MCU_NAME) - 1U;
-    return GD32_MCU_NAME;
-}
-
-const char* SysName(uint8_t& length) {
-    length = sizeof(kSysName) - 1U;
-    return kSysName;
-}
-} // namespace board
+#endif // GD32_TRNG_H_
