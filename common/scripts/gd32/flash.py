@@ -177,11 +177,6 @@ class GD32Flasher:
     def _send_command(self, cmd):
         command = bytes([cmd, cmd ^ 0xFF])
 
-        print(
-            f"  Command TX: "
-            f"0x{command[0]:02X} 0x{command[1]:02X}"
-        )
-
         self.port.write(command)
         self.port.flush()
 
@@ -190,8 +185,6 @@ class GD32Flasher:
         if not response:
             print(f"  Command 0x{cmd:02X}: timeout")
             return False
-
-        print(f"  Command RX: 0x{response[0]:02X}")
 
         if response[0] == self.ACK:
             return True
