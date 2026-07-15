@@ -1,31 +1,56 @@
 {
-	"0414": {
-		"series": "GD32F303",
-		"uid_base" : "",
-		"flash": {
-			"256": "GD32F303XCXX"
-		}
-	},
-	"0418": {
-		"series": "GD32F207",
-		"flash": {
-			"1024": "GD32F207XRXX"
-		}
-	},
-	"0x0419": {
-		"series": "GD32F407/GD32F450",
-		"probes": {
-			"tli_apb2en_bit26": {
-				"address": "0x40021024",
-				"bit": 26,
-				"set": "GD32F450",
-				"clear": "GD32F407"
-			}
-		},
-		"flash": {
-			"GD32F407": {
-				"512": "GD32F407XEXX"
-			}
-		}
-	}
+  "0414": {
+    "identifiers": {
+      "3RCF": {
+        "series": "GD32F303",
+        "flash": {
+          "256": "GD32F303RCXX"
+        }
+      },
+      "3RCB": {
+        "series": "GD32F103",
+        "flash": {
+          "256": "GD32F103RCXX"
+        }
+      }
+    }
+  },
+  "0418": {
+    "identifiers": {
+      "7RCB": {
+        "series": "GD32F107",
+        "flash": {
+          "256": "GD32F107RCXX"
+        }
+      },
+      "7RGC": {
+        "series": "GD32F207",
+        "flash": {
+          "1024": "GD32F207RGXX"
+        }
+      }
+    }
+  },
+  "0419": {
+    "identifiers": {
+      "7REE": {
+        "series": "GD32F407",
+        "flash": {
+          "512": "GD32F407REXX"
+        }
+      },
+      "9VIE": {
+        "series": "GD32F450",
+        "flash": {
+          "2048": "GD32F450VIXX"
+        }
+      },
+      "0VGN": {
+        "series": "GD32F470",
+        "flash": {
+          "1024": "GD32F470VGXX"
+        }
+      }
+    }
+  }
 }

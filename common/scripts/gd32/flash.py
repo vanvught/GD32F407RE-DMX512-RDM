@@ -41,73 +41,33 @@ def db_get_family(db, chip_id):
 
     return None
 
-def lookup_part_number(family, series, flash_size_kb):
-    flash = family.get("flash", {})
-    size_key = str(flash_size_kb)
-
-    # Simple format:
-    # "flash": { "512": "GD32F207XEXX" }
-    part_number = flash.get(size_key)
-    if isinstance(part_number, str):
-        return part_number
-
-    # Nested format with exact resolved series:
-    # "flash": { "GD32F407": { "512": "GD32F407XEXX" } }
-    # This is used after a probe has changed the generic family series
-    # "GD32F407/GD32F450" into the concrete series "GD32F407".
-    series_flash = flash.get(series)
-    if isinstance(series_flash, dict):
-        part_number = series_flash.get(size_key)
-        if isinstance(part_number, str):
-            return part_number
-
-    # Fallback for generic or unresolved series names, for example when
-    # series is still "GD32F407/GD32F450" or when probing was not available.
-    # Search all nested flash maps and return the part when the flash size is
-    # unambiguous.
-    matches = []
-    for value in flash.values():
-        if not isinstance(value, dict):
-            continue
-        part_number = value.get(size_key)
-        if isinstance(part_number, str):
-            matches.append(part_number)
-
-    if len(matches) == 1:
-        return matches[0]
-
-    return "Unknown"
-
 def lookup_device(db, chip_id, flash_size_kb, flasher=None):
     family = db_get_family(db, chip_id)
     if family is None:
         return {
+            "identifier": "Unknown",
             "series": "Unknown",
-            "part_number": "Unknown"
+            "part_number": "Unknown",
         }
 
-    series = family.get("series", "Unknown")
+    identifier = None
+    device = family
 
-    probes = family.get("probes", {})
+    if flasher is not None:
+        identifier = flasher.get_identifier()
 
-    if "tli_apb2en_bit26" in probes and flasher is not None:
-        probe = probes["tli_apb2en_bit26"]
+    identifiers = family.get("identifiers", {})
+    if identifier is not None and isinstance(identifiers, dict):
+        device = identifiers.get(identifier, family)
 
-        detected = flasher.probe_register_bit(
-            int(probe["address"], 0),
-            int(probe["bit"])
-        )
-
-        if detected is True:
-            series = probe.get("set", series)
-        elif detected is False:
-            series = probe.get("clear", series)
-
-    part_number = lookup_part_number(family, series, flash_size_kb)
+    series = device.get("series", family.get("series", "Unknown"))
+    flash = device.get("flash", family.get("flash", {}))
+    part_number = flash.get(str(flash_size_kb), "Unknown")
 
     return {
+        "identifier": identifier or "Unknown",
         "series": series,
-        "part_number": part_number
+        "part_number": part_number,
     }
 
 
@@ -118,6 +78,7 @@ class GD32Flasher:
     CMD_GET = 0x00
     CMD_GET_VERSION = 0x01
     CMD_GET_ID = 0x02
+    CMD_GET_IDENTIFIER = 0x06
     CMD_READ_MEMORY = 0x11
     CMD_GO = 0x21
     CMD_WRITE_MEMORY = 0x31
@@ -171,18 +132,78 @@ class GD32Flasher:
         return False
 
     def _try_sync(self, attempts=3):
-        for _ in range(attempts):
-            self.port.write(bytes([0x7F]))
-            time.sleep(0.1)
-            resp = self.port.read(1)
-            if resp and resp[0] == self.ACK:
-                return True
-        return False
+        original_timeout = self.port.timeout
+
+        try:
+            for attempt in range(1, attempts + 1):
+                self.port.reset_input_buffer()
+
+                print(f"  Synchronization attempt {attempt}")
+                self.port.write(b"\x7F")
+                self.port.flush()
+
+                deadline = time.monotonic() + 1.0
+
+                while time.monotonic() < deadline:
+                    self.port.timeout = max(
+                        deadline - time.monotonic(),
+                        0.01
+                    )
+
+                    response = self.port.read(1)
+                    if not response:
+                        break
+
+                    value = response[0]
+                    print(f"  Synchronization RX: 0x{value:02X}")
+
+                    if value == self.ACK:
+                        return True
+
+                    if value == self.NACK:
+                        break
+
+                    if value == 0x7F:
+                        # Possible local echo.
+                        continue
+
+                time.sleep(0.05)
+
+            return False
+
+        finally:
+            self.port.timeout = original_timeout
 
     def _send_command(self, cmd):
-        self.port.write(bytes([cmd, cmd ^ 0xFF]))
-        resp = self.port.read(1)
-        return resp and resp[0] == self.ACK
+        command = bytes([cmd, cmd ^ 0xFF])
+
+        print(
+            f"  Command TX: "
+            f"0x{command[0]:02X} 0x{command[1]:02X}"
+        )
+
+        self.port.write(command)
+        self.port.flush()
+
+        response = self.port.read(1)
+
+        if not response:
+            print(f"  Command 0x{cmd:02X}: timeout")
+            return False
+
+        print(f"  Command RX: 0x{response[0]:02X}")
+
+        if response[0] == self.ACK:
+            return True
+
+        if response[0] == self.NACK:
+            print(f"  Command 0x{cmd:02X}: NACK")
+        else:
+            print(
+                f"  Command 0x{cmd:02X}: unexpected response"
+            )
+
+        return False
 
     def _wait_ack(self):
         resp = self.port.read(1)
@@ -216,6 +237,57 @@ class GD32Flasher:
 
         self._wait_ack()
         return chip_id.hex()
+
+    def get_identifier(self):
+        """Return the four-character GD32 device identifier.
+
+        Command 0x06 may return more than four payload bytes on newer
+        devices. The first four bytes contain the printable identifier;
+        any remaining bytes are vendor-specific extension data.
+        """
+        if not self._send_command(self.CMD_GET_IDENTIFIER):
+            return None
+
+        length_data = self.port.read(1)
+        if len(length_data) != 1:
+            print("  Identifier: timeout while reading payload length")
+            return None
+
+        length = length_data[0]
+        if length < 4 or length > 32:
+            print(f"  Identifier: invalid payload length {length}")
+            return None
+
+        payload = self.port.read(length)
+        if len(payload) != length:
+            print(
+                f"  Identifier: expected {length} payload bytes, "
+                f"received {len(payload)}"
+            )
+            return None
+
+        if not self._wait_ack():
+            print("  Identifier: missing final ACK")
+            return None
+
+        identifier_data = payload[:4]
+        if not all(0x20 <= value <= 0x7E for value in identifier_data):
+            print(
+                "  Identifier: first four bytes are not printable ASCII: "
+                + identifier_data.hex(" ").upper()
+            )
+            return None
+
+        identifier = identifier_data.decode("ascii")
+
+        if length > 4:
+            extension = payload[4:]
+            print(
+                f"  Identifier payload: {payload.hex(' ').upper()} "
+                f"(extension: {extension.hex(' ').upper()})"
+            )
+
+        return identifier
 
     def read_memory(self, address, length):
         if not 1 <= length <= 256:
@@ -404,6 +476,7 @@ def print_device_info(flasher, gd32_db):
     device = lookup_device(gd32_db, chip_id, size_kb, flasher)
 
     print(f"Chip ID     : {chip_id}")
+    print(f"Identifier  : {device['identifier']}")
 
     if device:
         print(f"Series      : {device['series']}")
@@ -482,6 +555,7 @@ def main():
     parser.add_argument("--monitor", action="store_true", help="Start UART monitor")
     parser.add_argument("--get-version", action="store_true", help="Read bootloader version")
     parser.add_argument("--get-id", action="store_true", help="Read chip ID")
+    parser.add_argument("--get-identifier", action="store_true", help="Read device identifier")
     parser.add_argument("--get-uid", action="store_true", help="Read chip UID")
     parser.add_argument("--get-size", action="store_true", help="Read flash size, series and part number")
     parser.add_argument("--db", default="gd32.json", help="GD32 JSON database file")
@@ -513,6 +587,7 @@ def main():
     needs_bootloader = any([
         args.get_version,
         args.get_id,
+        args.get_identifier,
         args.get_uid,
         args.get_size,
         args.mass_erase,
@@ -549,6 +624,13 @@ def main():
                 return 1
             print(f"Chip ID: {chip_id}")
             chip_id_already_printed = True
+
+        if args.get_identifier and not args.get_size:
+            identifier = flasher.get_identifier()
+            if identifier is None:
+                print("Failed to read device identifier")
+                return 1
+            print(f"Identifier: {identifier}")
 
         if args.get_size:
             if not print_device_info(flasher, gd32_db):
