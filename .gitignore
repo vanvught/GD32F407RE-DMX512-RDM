@@ -63,3 +63,4 @@ compile_commands.json
 software_version_id.h
 lib-remoteconfig/http/content/generate_content
 /lib-network/include/noemac
+lib-remoteconfig/http/content/light/pixeltype.json
