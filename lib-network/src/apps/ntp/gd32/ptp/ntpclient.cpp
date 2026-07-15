@@ -87,7 +87,7 @@ namespace net::globals::ptp {
 extern uint32_t timestamp[2];
 } // namespace net::globals::ptp
 
-#define _NTPFRAC_(x) (4294U * (x) + ((1981U * (x)) >> 11) + ((2911U * (x)) >> 28))
+#define _NTPFRAC_(x) ((4294U * (x)) + ((1981U * (x)) >> 11) + ((2911U * (x)) >> 28))
 #define NTPFRAC(x) _NTPFRAC_(x / 1000)
 // The reverse of the above, needed if we want to set our microsecond
 // clock (via clock_settime) based on the incoming time in NTP format.
@@ -130,7 +130,15 @@ static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const stru
 #ifndef NDEBUG
     const auto kSeconds = static_cast<time_t>(timestamp->seconds - ntp::kJan1970);
     const auto* local_time = localtime(&kSeconds);
-    printf("%s %02d:%02d:%02d.%06d %04d [%u][0x%.8x]\n", text, local_time->tm_hour, local_time->tm_min, local_time->tm_sec, USEC(timestamp->fraction), local_time->tm_year + 1900, timestamp->seconds, timestamp->fraction);
+    printf("%s %02d:%02d:%02d.%06d %04d [%u][0x%.8x]\n", 
+      text, 
+      static_cast<int>(local_time->tm_hour), 
+      static_cast<int>(local_time->tm_min), 
+      static_cast<int>(local_time->tm_sec), 
+      static_cast<int>(USEC(timestamp->fraction)), 
+      local_time->tm_year + 1900, 
+      static_cast<int>(timestamp->seconds), 
+      static_cast<unsigned>(timestamp->fraction));
 #endif
 }
 
@@ -237,9 +245,13 @@ static void Send() {
     network::udp::SendWithTimestamp(s_ntp_client.handle, reinterpret_cast<const uint8_t*>(&s_ntp_client.request), kRequestSize, s_ntp_client.server_ip, network::iana::Ports::kPortNtp);
 
 #ifndef NDEBUG
-    printf("Request:  org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n", __builtin_bswap32(s_ntp_client.request.origin_timestamp_s), __builtin_bswap32(s_ntp_client.request.origin_timestamp_f),
-           __builtin_bswap32(s_ntp_client.request.receive_timestamp_s), __builtin_bswap32(s_ntp_client.request.receive_timestamp_f), __builtin_bswap32(s_ntp_client.request.transmit_timestamp_s),
-           __builtin_bswap32(s_ntp_client.request.transmit_timestamp_f));
+    printf("Request:  org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n",
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.origin_timestamp_s)),    // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.origin_timestamp_f)),    // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_s)),   // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_f)),   // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_s)),  // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_f))); // NOLINT
 #endif
 
     if (s_ntp_client.state.x > 0) {
@@ -273,10 +285,12 @@ static inline int32_t AbsInt32(int32_t x) {
 }
 
 static void UpdatePtpTime() {
-    int32_t diff_seconds1, diff_nano_seconds1;
+    int32_t diff_seconds1;
+    int32_t diff_nano_seconds1;
     Difference(s_ntp_client.t1, s_ntp_client.t2, diff_seconds1, diff_nano_seconds1);
 
-    int32_t diff_seconds2, diff_nano_seconds2;
+    int32_t diff_seconds2;
+    int32_t diff_nano_seconds2;
     Difference(s_ntp_client.t4, s_ntp_client.t3, diff_seconds2, diff_nano_seconds2);
 
     const auto kOffsetSeconds = static_cast<int64_t>(diff_seconds1) + static_cast<int64_t>(diff_seconds2);
@@ -292,7 +306,7 @@ static void UpdatePtpTime() {
     gd32::ptp::ptptime ptp_get;
     Gd32PtpGetTime(&ptp_get);
 
-    s_ntp_client.request.reference_timestamp_s = __builtin_bswap32(static_cast<uint32_t>(ptp_get.tv_sec) + ntp::kJan1970);
+    s_ntp_client.request.reference_timestamp_s = __builtin_bswap32(ptp_get.tv_sec + ntp::kJan1970);
     s_ntp_client.request.reference_timestamp_f = __builtin_bswap32(NTPFRAC(ptp_get.tv_nsec));
 
     if ((ptp_offset.tv_sec == 0) && (ptp_offset.tv_nsec > -999999) && (ptp_offset.tv_nsec < 999999)) {
@@ -350,7 +364,13 @@ static void UpdatePtpTime() {
         sign = '-';
     }
 
-    printf(" %s : offset=%c%d.%09d delay=%d.%09d\n", s_ntp_client.state.mode == ntp::Modes::kBasic ? "Basic" : "Interleaved", sign, ptp_offset.tv_sec, ptp_offset.tv_nsec, ptp_delay.tv_sec, ptp_delay.tv_nsec);
+    printf(" %s : offset=%c%d.%09d delay=%d.%09d\n", 
+      s_ntp_client.state.mode == ntp::Modes::kBasic ? "Basic" : "Interleaved", 
+      sign, 
+      static_cast<int>(ptp_offset.tv_sec), 
+      static_cast<int>(ptp_offset.tv_nsec), 
+      static_cast<int>(ptp_delay.tv_sec), 
+      static_cast<int>(ptp_delay.tv_nsec));
 #endif
 }
 
@@ -369,8 +389,13 @@ static void UpdatePtpTime() {
 static void Process() {
     const auto* const kReply = s_ntp_client.reply;
 #ifndef NDEBUG
-    printf("Response: org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n", __builtin_bswap32(kReply->origin_timestamp_s), __builtin_bswap32(kReply->origin_timestamp_f), __builtin_bswap32(kReply->receive_timestamp_s),
-           __builtin_bswap32(kReply->receive_timestamp_f), __builtin_bswap32(kReply->transmit_timestamp_s), __builtin_bswap32(kReply->transmit_timestamp_f));
+    printf("Response: org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n",
+           static_cast<unsigned>(__builtin_bswap32(kReply->origin_timestamp_s)),    // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(kReply->origin_timestamp_f)),    // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_s)),   // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_f)),   // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_s)),  // NOLINT
+           static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_f))); // NOLINT
 #endif
     // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
     if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {

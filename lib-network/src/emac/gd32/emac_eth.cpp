@@ -359,7 +359,7 @@ void Send(uint32_t length) {
 
 // Transmits an Ethernet frame with data copying.
 void Send(void* buffer, uint32_t length) {
-    DEBUG_PRINTF("%p -> %u", buffer, length);
+    DEBUG_PRINTF("%p -> %u", buffer, static_cast<unsigned>(length));
 
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);

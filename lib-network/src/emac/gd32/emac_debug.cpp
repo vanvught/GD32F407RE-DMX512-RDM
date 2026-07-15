@@ -39,6 +39,6 @@ void emac_debug_run() {
 #endif
 
     if ((rxfifo_drop != 0) || (rxdma_drop != 0)) {
-        printf("%u: RxFIFO: %u RxDMA: %u\n", ++s_counter, rxfifo_drop, rxdma_drop);
+        printf("%u: RxFIFO: %u RxDMA: %u\n", static_cast<unsigned>(++s_counter), static_cast<unsigned>(rxfifo_drop), static_cast<unsigned>(rxdma_drop));
     }
 }

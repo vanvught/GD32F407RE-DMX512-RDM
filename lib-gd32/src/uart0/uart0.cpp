@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstdarg>
 
 #include "gd32_uart.h"
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)

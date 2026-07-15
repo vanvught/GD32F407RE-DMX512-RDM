@@ -66,7 +66,7 @@ bool Config(uint16_t address) {
 
     const auto kAhbClk = rcu_clock_freq_get(CK_AHB);
 
-    DEBUG_PRINTF("kAhbClk=%u", kAhbClk);
+    DEBUG_PRINTF("kAhbClk=%u", static_cast<unsigned>(kAhbClk));
 
 #if defined GD32F10X_CL
     if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
@@ -163,7 +163,7 @@ bool Config(uint16_t address) {
         }
 
         if (!(value & emac::mmi::BMCR_RESET)) {
-            DEBUG_PRINTF("%u", millis() - kMillis);
+            DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
             DEBUG_EXIT();
             return true;
         }
@@ -175,7 +175,7 @@ bool Config(uint16_t address) {
         return false;
     }
 
-    DEBUG_PRINTF("%u", millis() - kMillis);
+    DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
     DEBUG_EXIT();
     return true;
 }
