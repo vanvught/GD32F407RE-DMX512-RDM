@@ -47,12 +47,10 @@ class Dmx {
 
     void SetPortDirection(uint32_t port_index, dmx::Direction port_direction, bool enable_data = false);
 
-    template <uint32_t port_index, dmx::Direction port_direction, bool enable_data>
+    template <uint32_t port_index, dmx::Direction port_direction, bool enable_data> 
     void SetPortDirection();
 
-    dmx::Direction PortDirection(uint32_t port_index) const { 
-      return port_direction_[port_index]; 
-    }
+    [[nodiscard]] dmx::Direction PortDirection(uint32_t port_index) const { return port_direction_[port_index]; }
 
     void ClearData(uint32_t port_index);
 
@@ -60,16 +58,16 @@ class Dmx {
 
     // DMX Transmit
     void SetTransmitBreakTime(uint32_t break_time);
-    uint32_t TransmitBreakTime() const;
+    [[nodiscard]] uint32_t TransmitBreakTime() const;
 
     void SetTransmitMabTime(uint32_t mab_time);
-    uint32_t TransmitMabTime() const;
+    [[nodiscard]] uint32_t TransmitMabTime() const;
 
     void SetTransmitPeriodTime(uint32_t period_time);
-    uint32_t TransmitPeriodTime() const { return transmit_period_; }
+    [[nodiscard]] uint32_t TransmitPeriodTime() const { return transmit_period_; }
 
     void SetTransmitSlots(uint16_t slots = dmx::kChannelsMax);
-    uint16_t TransmitSlots() const { return transmit_slots_; }
+    [[nodiscard]] uint16_t TransmitSlots() const { return transmit_slots_; }
 
     template <dmx::SendStyle dmxSendStyle> 
     void SetTransmitDataWithSC(uint32_t port_index, const uint8_t* data, uint32_t length);
@@ -80,7 +78,7 @@ class Dmx {
     void Sync();
 
     void SetOutputStyle(uint32_t port_index, dmx::OutputStyle output_style);
-    dmx::OutputStyle GetOutputStyle(uint32_t port_index) const;
+    [[nodiscard]] dmx::OutputStyle GetOutputStyle(uint32_t port_index) const;
 
     void Blackout();
     void FullOn();
@@ -98,7 +96,7 @@ class Dmx {
 
     // RDM Receive
     const uint8_t* RdmReceive(uint32_t port_index);
-    const uint8_t* RdmReceiveTimeOut(uint32_t port_index, uint16_t time_out);
+    const uint8_t* RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms);
 
     static Dmx* Get() { return s_this; }
 
@@ -117,7 +115,6 @@ class Dmx {
 
     void StartRdmOutput(uint32_t port_index);
 
-   private:
     uint32_t transmit_period_{dmx::transmit::kPeriodDefault};
     uint32_t transmit_period_requested_{dmx::transmit::kPeriodDefault};
     uint32_t transmit_length_[dmx::config::max::kPorts];
@@ -132,8 +129,7 @@ class Dmx {
     case i:                                \
         return SetSendDataInternal<i, SC, STYLE>(pData, length)
 
-template <dmx::SendStyle dmxSendStyle> 
-void Dmx::SetTransmitDataWithSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
+template <dmx::SendStyle dmxSendStyle> void Dmx::SetTransmitDataWithSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
     switch (port_index) {
         DMX_HANDLE_SEND_CASE(0, true, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2

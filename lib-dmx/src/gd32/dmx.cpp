@@ -157,27 +157,27 @@ struct DirGpio {
 } // namespace dmx
 
 static constexpr dmx::DirGpio kDirGpio[DMX_MAX_PORTS] = {
-    {dmx::config::kDirPort0GpioPort, dmx::config::kDirPort0GpioPin},
+    {.port = dmx::config::kDirPort0GpioPort, .pin = dmx::config::kDirPort0GpioPin},
 #if DMX_MAX_PORTS >= 2
-    {dmx::config::kDirPort1GpioPort, dmx::config::kDirPort1GpioPin},
+    {.port = dmx::config::kDirPort1GpioPort, .pin = dmx::config::kDirPort1GpioPin},
 #endif
 #if DMX_MAX_PORTS >= 3
-    {dmx::config::kDirPort2GpioPort, dmx::config::kDirPort2GpioPin},
+    {.port = dmx::config::kDirPort2GpioPort, .pin = dmx::config::kDirPort2GpioPin},
 #endif
 #if DMX_MAX_PORTS >= 4
-    {dmx::config::kDirPort3GpioPort, dmx::config::kDirPort3GpioPin},
+    {.port = dmx::config::kDirPort3GpioPort, .pin = dmx::config::kDirPort3GpioPin},
 #endif
 #if DMX_MAX_PORTS >= 5
-    {dmx::config::kDirPort4GpioPort, dmx::config::kDirPort4GpioPin},
+    {.port = dmx::config::kDirPort4GpioPort, .pin = dmx::config::kDirPort4GpioPin},
 #endif
 #if DMX_MAX_PORTS >= 6
-    {dmx::config::kDirPort5GpioPort, dmx::config::kDirPort5GpioPin},
+    {.port = dmx::config::kDirPort5GpioPort, .pin = dmx::config::kDirPort5GpioPin},
 #endif
 #if DMX_MAX_PORTS >= 7
-    {dmx::config::kDirPort6GpioPort, dmx::config::kDirPort6GpioPin},
+    {.port = dmx::config::kDirPort6GpioPort, .pin = dmx::config::kDirPort6GpioPin},
 #endif
 #if DMX_MAX_PORTS == 8
-    {dmx::config::kDirPort7GpioPort, dmx::config::kDirPort7GpioPin},
+    {.port = dmx::config::kDirPort7GpioPort, .pin = dmx::config::kDirPort7GpioPin},
 #endif
 };
 
@@ -291,9 +291,9 @@ void IrqHandlerDmxRdmInput() {
             index++;
             rx_buffer.rdm.index = index;
 
-            const auto* p = reinterpret_cast<volatile struct TRdmMessage*>(&rx_buffer.rdm.data[0]);
+            const auto* data = reinterpret_cast<volatile struct TRdmMessage*>(&rx_buffer.rdm.data[0]);
 
-            if ((index >= 24) && (index <= sizeof(struct TRdmMessage)) && (index == p->message_length)) {
+            if ((index >= 24) && (index <= sizeof(struct TRdmMessage)) && (index == data->message_length)) {
                 rx_buffer.state = dmx::TxRxState::kRdmChecksumh;
             } else if (index > sizeof(struct TRdmMessage)) {
                 rx_buffer.state = dmx::TxRxState::kIdle;
@@ -1483,7 +1483,7 @@ void Dmx::ClearData(uint32_t port_index) {
     assert(port_index < dmx::config::max::kPorts);
 
     auto* data = &s_DmxTxBuffer[port_index].dmx.data[0];
-    data->length = 513; // Including START Code
+    data->length = dmx::kSlotsMax; // Including START Code
     __builtin_memset(data->data, 0, dmx::buffer::kSize);
 }
 
@@ -1523,7 +1523,7 @@ void Dmx::FullOn() {
             }
 
             data->data[0] = dmx::kStartCode;
-            data->length = 513;
+            data->length = dmx::kSlotsMax;
 
             DataEnable(port_index);
         }
@@ -1952,9 +1952,9 @@ void Dmx::Sync() {
 // DMX Receive
 const uint8_t* Dmx::GetDmxChanged([[maybe_unused]] uint32_t port_index) {
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
-    const auto* __restrict__ p = GetDmxAvailable(port_index);
+    const auto* __restrict__ available = GetDmxAvailable(port_index);
 
-    if (p == nullptr) {
+    if (available == nullptr) {
         return nullptr;
     }
 
@@ -1968,7 +1968,7 @@ const uint8_t* Dmx::GetDmxChanged([[maybe_unused]] uint32_t port_index) {
             dst32[i] = src32[i];
         }
 
-        return p;
+        return available;
     }
 
     bool is_changed = false;
@@ -1983,7 +1983,7 @@ const uint8_t* Dmx::GetDmxChanged([[maybe_unused]] uint32_t port_index) {
         }
     }
 
-    return (is_changed ? p : nullptr);
+    return (is_changed ? available : nullptr);
 #else
     return nullptr;
 #endif
@@ -2073,19 +2073,19 @@ const uint8_t* Dmx::RdmReceive(uint32_t port_index) {
     if (data[0] == E120_SC_RDM) {
         const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(data);
 
-        uint32_t i;
+        uint32_t index;
         uint16_t checksum = 0;
 
-        for (i = 0; i < 24; i++) {
-            checksum = static_cast<uint16_t>(checksum + data[i]);
+        for (index = 0; index < 24; index++) {
+            checksum = static_cast<uint16_t>(checksum + data[index]);
         }
 
-        for (; i < rdm_command->message_length; i++) {
-            checksum = static_cast<uint16_t>(checksum + data[i]);
+        for (; index < rdm_command->message_length; index++) {
+            checksum = static_cast<uint16_t>(checksum + data[index]);
         }
 
-        if (data[i++] == static_cast<uint8_t>(checksum >> 8)) {
-            if (data[i] == static_cast<uint8_t>(checksum)) {
+        if (data[index++] == static_cast<uint8_t>(checksum >> 8)) {
+            if (data[index] == static_cast<uint8_t>(checksum)) {
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
                 sv_total_statistics[port_index].rdm.received.good = sv_total_statistics[port_index].rdm.received.good + 1;
 #endif
@@ -2106,17 +2106,19 @@ const uint8_t* Dmx::RdmReceive(uint32_t port_index) {
 }
 
 // RDM Receive with timeout
-const uint8_t* Dmx::RdmReceiveTimeOut(uint32_t port_index, uint16_t time_out) {
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+const uint8_t* Dmx::RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms) {
     DMX_CHECK_PORT_INDEX_PTR(port_index);
 
-    uint8_t* p = nullptr;
+    uint8_t* data_available = nullptr;
     TIMER_CNT(TIMER5) = 0;
 
     do {
-        if ((p = const_cast<uint8_t*>(RdmReceive(port_index))) != nullptr) {
-            return p;
+      data_available = const_cast<uint8_t*>(RdmReceive(port_index));
+        if (data_available != nullptr) {
+            return data_available;
         }
-    } while (TIMER_CNT(TIMER5) < time_out);
+    } while (TIMER_CNT(TIMER5) < timeout_ms);
 
     return nullptr;
 }
@@ -2223,26 +2225,26 @@ void Dmx::SetTransmitPeriodTime(uint32_t period) {
         }
     }
 
-    auto package_length_micro_seconds = s_dmx_transmit.break_time + s_dmx_transmit.mab_time + (length_max * 44U);
+    auto package_length_micro_seconds = s_dmx_transmit.break_time + s_dmx_transmit.mab_time + (length_max * dmx::kSlotTime);
 
     // The GD32F4xx/GD32H7XX Timer 1 has a 32-bit counter
 #if defined(GD32F4XX) || defined(GD32H7XX)
 #else
-    if (package_length_micro_seconds > (static_cast<uint16_t>(~0) - 44U)) {
+    if (package_length_micro_seconds > (UINT16_MAX - dmx::kSlotTime)) {
         s_dmx_transmit.break_time = std::min(dmx::transmit::kBreakTimeTypical, s_dmx_transmit.break_time);
         s_dmx_transmit.mab_time = dmx::transmit::kMabTimeMin;
-        package_length_micro_seconds = s_dmx_transmit.break_time + s_dmx_transmit.mab_time + (length_max * 44U);
+        package_length_micro_seconds = s_dmx_transmit.break_time + s_dmx_transmit.mab_time + (length_max * dmx::kSlotTime);
     }
 #endif
 
     if (period != 0) {
         if (period < package_length_micro_seconds) {
-            transmit_period_ = std::max(dmx::transmit::kBreakToBreakTimeMin, package_length_micro_seconds + 44U);
+            transmit_period_ = std::max(dmx::transmit::kBreakToBreakTimeMin, package_length_micro_seconds + dmx::kSlotTime);
         } else {
             transmit_period_ = period;
         }
     } else {
-        transmit_period_ = std::max(dmx::transmit::kBreakToBreakTimeMin, package_length_micro_seconds + 44U);
+        transmit_period_ = std::max(dmx::transmit::kBreakToBreakTimeMin, package_length_micro_seconds + dmx::kSlotTime);
     }
 
     s_dmx_transmit.inter_time = transmit_period_ - package_length_micro_seconds;
@@ -2308,7 +2310,7 @@ dmx::OutputStyle Dmx::GetOutputStyle(uint32_t port_index) const {
 
 // Setup
 static void UartDmxConfig(uint32_t usart_periph) {
-    Gd32UartBegin(usart_periph, 250000U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop2Bits);
+    Gd32UartBegin(usart_periph, dmx::kBaudRate, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop2Bits);
 }
 
 static void UsartDmaConfig() {
@@ -2710,7 +2712,7 @@ Dmx::Dmx() {
 
     s_dmx_transmit.break_time = dmx::transmit::kBreakTimeTypical;
     s_dmx_transmit.mab_time = dmx::transmit::kMabTimeMin;
-    s_dmx_transmit.inter_time = dmx::transmit::kPeriodDefault - s_dmx_transmit.break_time - s_dmx_transmit.mab_time - (dmx::kChannelsMax * 44) - 44;
+    s_dmx_transmit.inter_time = dmx::transmit::kPeriodDefault - s_dmx_transmit.break_time - s_dmx_transmit.mab_time - (dmx::kChannelsMax * dmx::kSlotTime) - dmx::kSlotTime;
 
     for (uint32_t port_index = 0; port_index < DMX_MAX_PORTS; port_index++) {
         Gd32GpioFsel(kDirGpio[port_index].port, kDirGpio[port_index].pin, GPIO_FSEL_OUTPUT);
@@ -2735,42 +2737,42 @@ Dmx::Dmx() {
     Timer4Config(); // DMX Transmit -> UART4, USART5, UART6, UART7
 #endif
 
-#if defined(DMX_USE_USART0)
+#if defined(DMX_USE_USART0) || defined(DMX_USE_USART0_RX)
     UartDmxConfig(USART0);
     NVIC_SetPriority(USART0_IRQn, 0);
     NVIC_EnableIRQ(USART0_IRQn);
 #endif
-#if defined(DMX_USE_USART1)
+#if defined(DMX_USE_USART1) || defined(DMX_USE_USART1_RX)
     UartDmxConfig(USART1);
     NVIC_SetPriority(USART1_IRQn, 0);
     NVIC_EnableIRQ(USART1_IRQn);
 #endif
-#if defined(DMX_USE_USART2)
+#if defined(DMX_USE_USART2) || defined(DMX_USE_USART2_RX)
     UartDmxConfig(USART2);
     NVIC_SetPriority(USART2_IRQn, 0);
     NVIC_EnableIRQ(USART2_IRQn);
 #endif
-#if defined(DMX_USE_UART3)
+#if defined(DMX_USE_UART3) || defined(DMX_USE_UART3_RX)
     UartDmxConfig(UART3);
     NVIC_SetPriority(UART3_IRQn, 0);
     NVIC_EnableIRQ(UART3_IRQn);
 #endif
-#if defined(DMX_USE_UART4)
+#if defined(DMX_USE_UART4) || defined(DMX_USE_UART4_RX)
     UartDmxConfig(UART4);
     NVIC_SetPriority(UART4_IRQn, 0);
     NVIC_EnableIRQ(UART4_IRQn);
 #endif
-#if defined(DMX_USE_USART5)
+#if defined(DMX_USE_USART5) || defined(DMX_USE_USART5_RX)
     UartDmxConfig(USART5);
     NVIC_SetPriority(USART5_IRQn, 0);
     NVIC_EnableIRQ(USART5_IRQn);
 #endif
-#if defined(DMX_USE_UART6)
+#if defined(DMX_USE_UART6) || defined(DMX_USE_UART6_RX)
     UartDmxConfig(UART6);
     NVIC_SetPriority(UART6_IRQn, 0);
     NVIC_EnableIRQ(UART6_IRQn);
 #endif
-#if defined(DMX_USE_UART7)
+#if defined(DMX_USE_UART7) || defined(DMX_USE_UART7_RX)
     UartDmxConfig(UART7);
     NVIC_SetPriority(UART7_IRQn, 0);
     NVIC_EnableIRQ(UART7_IRQn);
