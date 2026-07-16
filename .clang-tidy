@@ -1,14 +1,15 @@
 Checks: >
   google-*,
-  readability-identifier-naming,
-  modernize-redundant-void-arg,
-  modernize-concat-nested-namespaces,
-  modernize-use-nullptr,
-  modernize-use-default-member-init,
-  modernize-use-override,
-  -google-runtime-references,
-  -clang-analyzer-*,
-  -misc-unused-include
+  bugprone-*,
+  clang-analyzer-*,
+  portability-*,
+  modernize-*,
+  readability-*,
+  -readability-convert-member-functions-to-static,
+  -modernize-avoid-c-arrays,
+  -modernize-loop-convert,
+  -modernize-use-trailing-return-type,
+  misc-unused-include
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
