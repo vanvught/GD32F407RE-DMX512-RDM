@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
+
 #if defined(CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER)
 #error
 #endif
@@ -35,11 +35,13 @@
 #include <cstddef>
 #include <cstring>
 #include <algorithm>
+#include <utility>
 #include <cassert>
 
 #include "gd32/dmx.h" // IWYU pragma: keep
 #include "dmx/dmx_config.h"
 #include "gd32/dmx_assert.h"
+#include "gd32/dmx_port.h"
 #include "dmxconst.h"
 #include "e120.h"
 #include "rdmconst.h"
@@ -57,37 +59,13 @@
 
 static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 
-extern struct HwTimersSeconds gv_seconds;
-
 namespace dmx {
 static constexpr uint32_t kDmxSlotsCompleteFlag = 0x8000;
 static constexpr uint32_t kRdmSlotsCompleteFlag = 0x4000;
 
-enum class TxRxState { 
-  kIdle, 
-  kDmxBreak, 
-  kDmxMab, 
-  kDmxData, 
-  kDmxInter,
-  kRdmData, 
-  kRdmChecksumh, 
-  kRdmChecksuml, 
-  kRdmdisc 
-};
-
-enum class RdmTxState { 
-  kIdle, 
-  kBreak,
-  kMab,
-  kData,
-  kDirection
-};
-
-enum class PortState { 
-  kIdle, 
-  kTx, 
-  kRx 
-};
+enum class TxRxState { kIdle, kDmxBreak, kDmxMab, kDmxData, kDmxInter, kRdmData, kRdmChecksumh, kRdmChecksuml, kRdmdisc };
+enum class RdmTxState { kIdle, kBreak, kMab, kData, kDirection };
+enum class PortState { kIdle, kTx, kRx };
 
 struct DmxTxDataPacket {
     uint8_t data[dmx::buffer::kSize];
@@ -149,37 +127,56 @@ struct RxData {
     } rdm ALIGNED;
     volatile TxRxState state;
 } ALIGNED;
-
-struct DirGpio {
-    uint32_t port;
-    uint32_t pin;
-};
 } // namespace dmx
 
-static constexpr dmx::DirGpio kDirGpio[DMX_MAX_PORTS] = {
-    {.port = dmx::config::kDirPort0GpioPort, .pin = dmx::config::kDirPort0GpioPin},
+static constexpr dmx::port::Info kDirGpio[dmx::config::max::kPorts] = {
+    {dmx::config::kPort0},
 #if DMX_MAX_PORTS >= 2
-    {.port = dmx::config::kDirPort1GpioPort, .pin = dmx::config::kDirPort1GpioPin},
+    {dmx::config::kPort1},
 #endif
 #if DMX_MAX_PORTS >= 3
-    {.port = dmx::config::kDirPort2GpioPort, .pin = dmx::config::kDirPort2GpioPin},
+    {dmx::config::kPort2},
 #endif
 #if DMX_MAX_PORTS >= 4
-    {.port = dmx::config::kDirPort3GpioPort, .pin = dmx::config::kDirPort3GpioPin},
+    {dmx::config::kPort3},
 #endif
 #if DMX_MAX_PORTS >= 5
-    {.port = dmx::config::kDirPort4GpioPort, .pin = dmx::config::kDirPort4GpioPin},
+    {dmx::config::kPort4},
 #endif
 #if DMX_MAX_PORTS >= 6
-    {.port = dmx::config::kDirPort5GpioPort, .pin = dmx::config::kDirPort5GpioPin},
+    {dmx::config::kPort5},
 #endif
 #if DMX_MAX_PORTS >= 7
-    {.port = dmx::config::kDirPort6GpioPort, .pin = dmx::config::kDirPort6GpioPin},
+    {dmx::config::kPort6},
 #endif
 #if DMX_MAX_PORTS == 8
-    {.port = dmx::config::kDirPort7GpioPort, .pin = dmx::config::kDirPort7GpioPin},
+    {dmx::config::kPort7},
 #endif
 };
+
+consteval bool AreUartsUnique() {
+    for (uint32_t i = 0; i < dmx::config::max::kPorts; ++i) {
+        for (uint32_t j = i + 1; j < dmx::config::max::kPorts; ++j) {
+            if (kDirGpio[i].uart == kDirGpio[j].uart) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+static_assert(AreUartsUnique(), "DMX port UARTs must be unique");
+
+consteval uint32_t GetPortByUart(uint32_t uart) {
+    for (uint32_t port = 0; port < dmx::config::max::kPorts; ++port) {
+        if (std::to_underlying(kDirGpio[port].uart) == uart) {
+            return port;
+        }
+    }
+
+    return dmx::config::max::kPorts;
+}
 
 static volatile dmx::PortState sv_port_state[dmx::config::max::kPorts] ALIGNED;
 
@@ -199,14 +196,14 @@ static dmx::DmxTransmit s_dmx_transmit;
 // RDM TX
 static dmx::RdmTxData s_RdmTxBuffer[dmx::config::max::kPorts] ALIGNED SECTION_DMA_BUFFER;
 
-template <uint32_t uart, uint32_t port_index>
-void IrqHandlerDmxRdmInput() {
-    auto& rx_buffer = sv_rx_buffer[port_index];
-    const auto kIsFlagIdleFrame = (USART_REG_VAL(uart, USART_FLAG_IDLE) & BIT(USART_BIT_POS(USART_FLAG_IDLE))) == BIT(USART_BIT_POS(USART_FLAG_IDLE));
+template <uint32_t kUsartPeripheral> void IrqHandlerDmxRdmInput() {
+    constexpr auto kPortIndex = GetPortByUart(kUsartPeripheral);
+    auto& rx_buffer = sv_rx_buffer[kPortIndex];
+    const auto kIsFlagIdleFrame = (USART_REG_VAL(kUsartPeripheral, USART_FLAG_IDLE) & BIT(USART_BIT_POS(USART_FLAG_IDLE))) == BIT(USART_BIT_POS(USART_FLAG_IDLE));
 
     // Software can clear this bit by reading the USART_STAT and USART_DATA registers one by one.
     if (kIsFlagIdleFrame) {
-        static_cast<void>(GET_BITS(USART_RDATA(uart), 0U, 8U));
+        static_cast<void>(GET_BITS(USART_RDATA(kUsartPeripheral), 0U, 8U));
 
         if (rx_buffer.state == dmx::TxRxState::kDmxData) {
             rx_buffer.state = dmx::TxRxState::kIdle;
@@ -224,11 +221,11 @@ void IrqHandlerDmxRdmInput() {
         return;
     }
 
-    const auto kIsFlagFrameError = (USART_REG_VAL(uart, USART_FLAG_FERR) & BIT(USART_BIT_POS(USART_FLAG_FERR))) == BIT(USART_BIT_POS(USART_FLAG_FERR));
+    const auto kIsFlagFrameError = (USART_REG_VAL(kUsartPeripheral, USART_FLAG_FERR) & BIT(USART_BIT_POS(USART_FLAG_FERR))) == BIT(USART_BIT_POS(USART_FLAG_FERR));
 
     // Software can clear this bit by reading the USART_STAT and USART_DATA registers one by one.
     if (kIsFlagFrameError) {
-        static_cast<void>(GET_BITS(USART_RDATA(uart), 0U, 8U));
+        static_cast<void>(GET_BITS(USART_RDATA(kUsartPeripheral), 0U, 8U));
 
         if (rx_buffer.state == dmx::TxRxState::kIdle) {
             rx_buffer.state = dmx::TxRxState::kDmxBreak;
@@ -237,7 +234,7 @@ void IrqHandlerDmxRdmInput() {
         return;
     }
 
-    const auto kData = static_cast<uint8_t>(GET_BITS(USART_RDATA(uart), 0U, 8U));
+    const auto kData = static_cast<uint8_t>(GET_BITS(USART_RDATA(kUsartPeripheral), 0U, 8U));
 
     switch (rx_buffer.state) {
         case dmx::TxRxState::kIdle:
@@ -251,7 +248,7 @@ void IrqHandlerDmxRdmInput() {
                 case dmx::kStartCode: {
                     rx_buffer.dmx.current.data[0] = dmx::kStartCode;
                     rx_buffer.dmx.current.slots_in_packet = 1;
-                    sv_rx_dmx_packets[port_index].count = sv_rx_dmx_packets[port_index].count + 1;
+                    sv_rx_dmx_packets[kPortIndex].count = sv_rx_dmx_packets[kPortIndex].count + 1;
                     rx_buffer.state = dmx::TxRxState::kDmxData;
                 } break;
 
@@ -293,7 +290,7 @@ void IrqHandlerDmxRdmInput() {
 
             const auto* data = reinterpret_cast<volatile struct TRdmMessage*>(&rx_buffer.rdm.data[0]);
 
-            if ((index >= 24) && (index <= sizeof(struct TRdmMessage)) && (index == data->message_length)) {
+            if ((index >= e120::kMessageLengthMin) && (index <= sizeof(struct TRdmMessage)) && (index == data->message_length)) {
                 rx_buffer.state = dmx::TxRxState::kRdmChecksumh;
             } else if (index > sizeof(struct TRdmMessage)) {
                 rx_buffer.state = dmx::TxRxState::kIdle;
@@ -314,7 +311,7 @@ void IrqHandlerDmxRdmInput() {
             index |= dmx::kRdmSlotsCompleteFlag;
             rx_buffer.rdm.index = index;
             rx_buffer.state = dmx::TxRxState::kIdle;
-            gsv_rdm_data_receive_end[port_index] = DWT->CYCCNT;
+            gsv_rdm_data_receive_end[kPortIndex] = DWT->CYCCNT;
         } break;
 
         case dmx::TxRxState::kRdmdisc: {
@@ -337,26 +334,24 @@ void IrqHandlerDmxRdmInput() {
     }
 }
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel>
-void DmaStartTx(const uint8_t* data, uint32_t length) {
-    auto dma_chctl = DMA_CHCTL(DmaController, DmaChannel);
+template <uint32_t kUsartPeripheral, uint32_t kDmaController, dma_channel_enum kDmaChannel> void DmaStartTx(const uint8_t* data, uint32_t length) {
+    auto dma_chctl = DMA_CHCTL(kDmaController, kDmaChannel);
     // Disable channel
     dma_chctl &= ~DMA_CHXCTL_CHEN;
-    DMA_CHCTL(DmaController, DmaChannel) = dma_chctl;
+    DMA_CHCTL(kDmaController, kDmaChannel) = dma_chctl;
     // Clear transfer complete interrupt
-    Gd32DmaInterruptFlagClear<DmaController, DmaChannel, DMA_INTF_FTFIF>();
+    Gd32DmaInterruptFlagClear<kDmaController, kDmaChannel, DMA_INTF_FTFIF>();
     // Configure transfer
-    DMA_CHMADDR(DmaController, DmaChannel) = reinterpret_cast<uint32_t>(data);
-    DMA_CHCNT(DmaController, DmaChannel) = length & DMA_CHXCNT_CNT;
+    DMA_CHMADDR(kDmaController, kDmaChannel) = reinterpret_cast<uint32_t>(data);
+    DMA_CHCNT(kDmaController, kDmaChannel) = length & DMA_CHXCNT_CNT;
     // Re-enable channel and interrupt
     dma_chctl |= DMA_CHXCTL_CHEN | DMA_INTERRUPT_ENABLE;
-    DMA_CHCTL(DmaController, DmaChannel) = dma_chctl;
+    DMA_CHCTL(kDmaController, kDmaChannel) = dma_chctl;
     // Enable USART DMA transmission
-    USART_CTL2(UsartPeripheral) |= USART_TRANSMIT_DMA_ENABLE;
+    USART_CTL2(kUsartPeripheral) |= USART_TRANSMIT_DMA_ENABLE;
 }
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType>
-void DmaRestartDmxTx(TxBufferType& tx_buffer) {
+template <uint32_t kUsartPeripheral, uint32_t kDmaController, dma_channel_enum kDmaChannel, typename TxBufferType> void DmaRestartDmxTx(TxBufferType& tx_buffer) {
     auto& dmx = tx_buffer.dmx;
 
     if (dmx.read_index != dmx.write_index) {
@@ -365,69 +360,66 @@ void DmaRestartDmxTx(TxBufferType& tx_buffer) {
 
     const auto& packet = dmx.data[dmx.read_index];
 
-    DmaStartTx<UsartPeripheral, DmaController, DmaChannel>(packet.data, packet.length);
+    DmaStartTx<kUsartPeripheral, kDmaController, kDmaChannel>(packet.data, packet.length);
 }
 
-#define DMA_RESTART_DMX_TX(PORT_INDEX, USARTx, DMAx, CHx) \
-    DmaRestartDmxTx<USARTx, DMAx, CHx>(s_DmxTxBuffer[PORT_INDEX])
+#define DMA_RESTART_DMX_TX(PORT_INDEX, USARTx, DMAx, CHx) DmaRestartDmxTx<USARTx, DMAx, CHx>(s_DmxTxBuffer[PORT_INDEX])
 
-template <uint32_t UsartPeripheral, uint32_t DmaController, dma_channel_enum DmaChannel, typename TxBufferType>
-void DmaStartRdmTx(TxBufferType& tx_buffer) {
+template <uint32_t kUsartPeripheral, uint32_t kDmaController, dma_channel_enum kDmaChannel, typename TxBufferType> void DmaStartRdmTx(TxBufferType& tx_buffer) {
     const auto& packet = tx_buffer.rdm.data;
 
-    DmaStartTx<UsartPeripheral, DmaController, DmaChannel>(packet.data, packet.length);
+    DmaStartTx<kUsartPeripheral, kDmaController, kDmaChannel>(packet.data, packet.length);
 }
 
-#define DMA_START_RDM_TX(PORT_INDEX, USARTx, DMAx, CHx) \
-    DmaStartRdmTx<USARTx, DMAx, CHx>(s_RdmTxBuffer[PORT_INDEX])
+#define DMA_START_RDM_TX(PORT_INDEX, USARTx, DMAx, CHx) DmaStartRdmTx<USARTx, DMAx, CHx>(s_RdmTxBuffer[PORT_INDEX])
 
 extern "C" {
 #if !defined(CONFIG_DMX_TRANSMIT_ONLY)
 #if defined(DMX_USE_USART0)
 void USART0_IRQHandler() {
-    IrqHandlerDmxRdmInput<USART0, dmx::config::kUsart0Port>();
+    IrqHandlerDmxRdmInput<USART0>();
 }
 #endif // defined(DMX_USE_USART0)
 
 #if defined(DMX_USE_USART1)
 void USART1_IRQHandler() {
-    IrqHandlerDmxRdmInput<USART1, dmx::config::kUsart1Port>();
+    IrqHandlerDmxRdmInput<USART1>();
 }
 #endif // defined(DMX_USE_USART1)
 
 #if defined(DMX_USE_USART2)
 void USART2_IRQHandler() {
-    IrqHandlerDmxRdmInput<USART2, dmx::config::kUsart2Port>();
+    IrqHandlerDmxRdmInput<USART2>();
 }
 #endif // defined(DMX_USE_USART2)
 
 #if defined(DMX_USE_UART3)
 void UART3_IRQHandler() {
-    IrqHandlerDmxRdmInput<UART3, dmx::config::kUart3Port>();
+    IrqHandlerDmxRdmInput<UART3>();
 }
 #endif // defined(DMX_USE_UART3)
 
 #if defined(DMX_USE_UART4)
 void UART4_IRQHandler() {
-    IrqHandlerDmxRdmInput<UART4, dmx::config::kUart4Port>();
+    IrqHandlerDmxRdmInput<UART4>();
 }
 #endif // defined(DMX_USE_UART4)
 
 #if defined(DMX_USE_USART5)
 void USART5_IRQHandler() {
-    IrqHandlerDmxRdmInput<USART5, dmx::config::kUsart5Port>();
+    IrqHandlerDmxRdmInput<USART5>();
 }
 #endif // defined(DMX_USE_USART5)
 
 #if defined(DMX_USE_UART6)
 void UART6_IRQHandler() {
-    IrqHandlerDmxRdmInput<UART6, dmx::config::kUart6Port>();
+    IrqHandlerDmxRdmInput<UART6>();
 }
 #endif // defined(DMX_USE_UART6)
 
 #if defined(DMX_USE_UART7)
 void UART7_IRQHandler() {
-    IrqHandlerDmxRdmInput<UART7, dmx::config::kUart7Port>();
+    IrqHandlerDmxRdmInput<UART7>();
 }
 #endif // defined(DMX_USE_UART7)
 #endif // !defined(CONFIG_DMX_TRANSMIT_ONLY)
@@ -436,13 +428,15 @@ void TIMER1_IRQHandler() {
 // USART 0
 #if defined(DMX_USE_USART0)
     if ((TIMER_INTF(TIMER1) & TIMER_INT_FLAG_CH0) == TIMER_INT_FLAG_CH0) {
-        if (s_DmxTxBuffer[dmx::config::kUsart0Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUsart0Port].state) {
+      constexpr auto kPortIndex = GetPortByUart(USART0);
+      
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<USART0_GPIOx, USART0_TX_GPIO_PINx>();
                         GPIO_BC(USART0_GPIOx) = USART0_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
                     }
                     break;
@@ -450,44 +444,44 @@ void TIMER1_IRQHandler() {
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART0_GPIOx, USART0_TX_GPIO_PINx, USART0>();
-                        s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.mab_time;
                     }
                     break;
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUsart0Port, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
                     }
                     break;
 
                 default:
                     [[unlikely]] break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUsart0Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUsart0Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART0_GPIOx, USART0_TX_GPIO_PINx, USART0>();
-                        s_RdmTxBuffer[dmx::config::kUsart0Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUsart0Port, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[dmx::config::kUsart0Port].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[dmx::config::kUsart0Port] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<dmx::config::kUsart0Port, dmx::Direction::kInput, true>();
+                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                    const auto kSent = sv_total_statistics[dmx::config::kUsart0Port].rdm.sent.classes + 1;
-                    sv_total_statistics[dmx::config::kUsart0Port].rdm.sent.classes = kSent;
+                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif //! defined(CONFIG_DMX_DISABLE_STATISTICS)
                 } break;
 
@@ -503,13 +497,14 @@ void TIMER1_IRQHandler() {
 // USART 1
 #if defined(DMX_USE_USART1)
     if ((TIMER_INTF(TIMER1) & TIMER_INT_FLAG_CH1) == TIMER_INT_FLAG_CH1) {
-        if (s_DmxTxBuffer[dmx::config::kUsart1Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUsart1Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(USART1);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<USART1_GPIOx, USART1_TX_GPIO_PINx>();
                         GPIO_BC(USART1_GPIOx) = USART1_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
                     }
                     break;
@@ -517,44 +512,44 @@ void TIMER1_IRQHandler() {
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART1_GPIOx, USART1_TX_GPIO_PINx, USART1>();
-                        s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.mab_time;
                     }
                     break;
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUsart1Port, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
                     }
 
                     break;
                 default:
                     [[unlikely]] break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUsart1Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUsart1Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART1_GPIOx, USART1_TX_GPIO_PINx, USART1>();
-                        s_RdmTxBuffer[dmx::config::kUsart1Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUsart1Port, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[dmx::config::kUsart1Port].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[dmx::config::kUsart1Port] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<dmx::config::kUsart1Port, dmx::Direction::kInput, true>();
+                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                    const auto kSent = sv_total_statistics[dmx::config::kUsart1Port].rdm.sent.classes + 1;
-                    sv_total_statistics[dmx::config::kUsart1Port].rdm.sent.classes = kSent;
+                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                 } break;
 
@@ -570,13 +565,15 @@ void TIMER1_IRQHandler() {
 // USART 2
 #if defined(DMX_USE_USART2)
     if ((TIMER_INTF(TIMER1) & TIMER_INT_FLAG_CH2) == TIMER_INT_FLAG_CH2) {
-        if (s_DmxTxBuffer[dmx::config::kUsart2Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUsart2Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(USART2);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<USART2_GPIOx, USART2_TX_GPIO_PINx>();
                         GPIO_BC(USART2_GPIOx) = USART2_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
                     }
                     break;
@@ -584,14 +581,14 @@ void TIMER1_IRQHandler() {
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART2_GPIOx, USART2_TX_GPIO_PINx, USART2>();
-                        s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.mab_time;
                     }
                     break;
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUsart2Port, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
                     }
                     break;
 
@@ -599,30 +596,30 @@ void TIMER1_IRQHandler() {
                     [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUsart2Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUsart2Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART2_GPIOx, USART2_TX_GPIO_PINx, USART2>();
-                        s_RdmTxBuffer[dmx::config::kUsart2Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUsart2Port, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[dmx::config::kUsart2Port].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[dmx::config::kUsart2Port] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<dmx::config::kUsart2Port, dmx::Direction::kInput, true>();
+                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                    const auto kSent = sv_total_statistics[dmx::config::kUsart2Port].rdm.sent.classes + 1;
-                    sv_total_statistics[dmx::config::kUsart2Port].rdm.sent.classes = kSent;
+                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                 } break;
 
@@ -638,56 +635,57 @@ void TIMER1_IRQHandler() {
 // UART 3
 #if defined(DMX_USE_UART3)
     if ((TIMER_INTF(TIMER1) & TIMER_INT_FLAG_CH3) == TIMER_INT_FLAG_CH3) {
-        if (s_DmxTxBuffer[dmx::config::kUart3Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUart3Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(UART3);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<UART3_GPIOx, UART3_TX_GPIO_PINx>();
                         GPIO_BC(UART3_GPIOx) = UART3_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
                     }
                     break;
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART3_GPIOx, UART3_TX_GPIO_PINx, UART3>();
-                        s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.mab_time;
                     }
                     break;
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUart3Port, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
                     }
                     break;
                 default:
                     [[unlikely]] break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUart3Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUart3Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART3_GPIOx, UART3_TX_GPIO_PINx, UART3>();
-                        s_RdmTxBuffer[dmx::config::kUart3Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUart3Port, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[dmx::config::kUart3Port].state = dmx::RdmTxState::kIdle;
-                        sv_port_state[dmx::config::kUart3Port] = dmx::PortState::kIdle;
-                        Dmx::Get()->SetPortDirection<dmx::config::kUart3Port, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                        const auto kSent = sv_total_statistics[dmx::config::kUart3Port].rdm.sent.classes + 1;
-                        sv_total_statistics[dmx::config::kUart3Port].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                     }
                     break;
@@ -709,13 +707,14 @@ void TIMER4_IRQHandler() {
 // UART 4
 #if defined(DMX_USE_UART4)
     if ((TIMER_INTF(TIMER4) & TIMER_INT_FLAG_CH0) == TIMER_INT_FLAG_CH0) [[likely]] {
-        if (s_DmxTxBuffer[dmx::config::kUart4Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUart4Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(UART4);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<UART4_TX_GPIOx, UART4_TX_GPIO_PINx>();
                         GPIO_BC(UART4_TX_GPIOx) = UART4_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
                     }
                     break;
@@ -723,14 +722,14 @@ void TIMER4_IRQHandler() {
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART4_TX_GPIOx, UART4_TX_GPIO_PINx, UART4>();
-                        s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.mab_time;
                     }
                     break;
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUart4Port, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
                     }
                     break;
 
@@ -738,31 +737,31 @@ void TIMER4_IRQHandler() {
                     [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUart4Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUart4Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART4_TX_GPIOx, UART4_TX_GPIO_PINx, UART4>();
-                        s_RdmTxBuffer[dmx::config::kUart4Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUart4Port, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[dmx::config::kUart4Port].state = dmx::RdmTxState::kIdle;
-                        sv_port_state[dmx::config::kUart4Port] = dmx::PortState::kIdle;
-                        Dmx::Get()->SetPortDirection<dmx::config::kUart4Port, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                        const auto kSent = sv_total_statistics[dmx::config::kUart4Port].rdm.sent.classes + 1;
-                        sv_total_statistics[dmx::config::kUart4Port].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                     }
                     break;
@@ -779,13 +778,14 @@ void TIMER4_IRQHandler() {
 // USART 5
 #if defined(DMX_USE_USART5)
     if ((TIMER_INTF(TIMER4) & TIMER_INT_FLAG_CH1) == TIMER_INT_FLAG_CH1) {
-        if (s_DmxTxBuffer[dmx::config::kUsart5Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUsart5Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(USART5);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     [[likely]] {
                         Gd32GpioModeOutput<USART5_GPIOx, USART5_TX_GPIO_PINx>();
                         GPIO_BC(USART5_GPIOx) = USART5_TX_GPIO_PINx;
-                        s_DmxTxBuffer[dmx::config::kUsart5Port].state = dmx::TxRxState::kDmxBreak;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                         TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
                     }
                     break;
@@ -793,14 +793,14 @@ void TIMER4_IRQHandler() {
                 case dmx::TxRxState::kDmxBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART5_GPIOx, USART5_TX_GPIO_PINx, USART5>();
-                        s_DmxTxBuffer[dmx::config::kUsart5Port].state = dmx::TxRxState::kDmxMab;
+                        s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                         TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.mab_time;
                     }
                     break;
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
-                        DMA_RESTART_DMX_TX(dmx::config::kUsart5Port, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
+                        DMA_RESTART_DMX_TX(kPortIndex, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
                     }
                     break;
 
@@ -808,30 +808,30 @@ void TIMER4_IRQHandler() {
                     [[unlikely]] assert(false && "switch");
                     break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUsart5Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUsart5Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<USART5_GPIOx, USART5_TX_GPIO_PINx, USART5>();
-                        s_RdmTxBuffer[dmx::config::kUsart5Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUsart5Port, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[dmx::config::kUsart5Port].state = dmx::RdmTxState::kIdle;
-                        sv_port_state[dmx::config::kUsart5Port] = dmx::PortState::kIdle;
-                        Dmx::Get()->SetPortDirection<dmx::config::kUsart5Port, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                        const auto kSent = sv_total_statistics[dmx::config::kUsart5Port].rdm.sent.classes + 1;
-                        sv_total_statistics[dmx::config::kUsart5Port].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                     }
                     break;
@@ -848,49 +848,50 @@ void TIMER4_IRQHandler() {
 // UART 6
 #if defined(DMX_USE_UART6)
     if ((TIMER_INTF(TIMER4) & TIMER_INT_FLAG_CH2) == TIMER_INT_FLAG_CH2) {
-        if (s_DmxTxBuffer[dmx::config::kUart6Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUart6Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(UART6);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     Gd32GpioModeOutput<UART6_GPIOx, UART6_TX_GPIO_PINx>();
                     GPIO_BC(UART6_GPIOx) = UART6_TX_GPIO_PINx;
-                    s_DmxTxBuffer[dmx::config::kUart6Port].state = dmx::TxRxState::kDmxBreak;
+                    s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                     TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
                     break;
                 case dmx::TxRxState::kDmxBreak:
                     Gd32GpioModeAf<UART6_GPIOx, UART6_TX_GPIO_PINx, UART6>();
-                    s_DmxTxBuffer[dmx::config::kUart6Port].state = dmx::TxRxState::kDmxMab;
+                    s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                     TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.mab_time;
                     break;
                 case dmx::TxRxState::kDmxMab: {
-                    DMA_RESTART_DMX_TX(dmx::config::kUart6Port, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
+                    DMA_RESTART_DMX_TX(kPortIndex, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
                 } break;
                 default:
                     break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUart6Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUart6Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART4_TX_GPIOx, UART4_TX_GPIO_PINx, UART4>();
-                        s_RdmTxBuffer[dmx::config::kUart6Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUart6Port, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[dmx::config::kUart6Port].state = dmx::RdmTxState::kIdle;
-                        sv_port_state[dmx::config::kUart6Port] = dmx::PortState::kIdle;
-                        Dmx::Get()->SetPortDirection<dmx::config::kUart6Port, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                        const auto kSent = sv_total_statistics[dmx::config::kUart6Port].rdm.sent.classes + 1;
-                        sv_total_statistics[dmx::config::kUart6Port].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                     }
                     break;
@@ -907,49 +908,50 @@ void TIMER4_IRQHandler() {
 // UART 7
 #if defined(DMX_USE_UART7)
     if ((TIMER_INTF(TIMER4) & TIMER_INT_FLAG_CH3) == TIMER_INT_FLAG_CH3) {
-        if (s_DmxTxBuffer[dmx::config::kUart7Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            switch (s_DmxTxBuffer[dmx::config::kUart7Port].state) {
+        constexpr auto kPortIndex = GetPortByUart(UART7);
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            switch (s_DmxTxBuffer[kPortIndex].state) {
                 case dmx::TxRxState::kDmxInter:
                     Gd32GpioModeOutput<UART7_GPIOx, UART7_TX_GPIO_PINx>();
                     GPIO_BC(UART7_GPIOx) = UART7_TX_GPIO_PINx;
-                    s_DmxTxBuffer[dmx::config::kUart7Port].state = dmx::TxRxState::kDmxBreak;
+                    s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
                     TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
                     break;
                 case dmx::TxRxState::kDmxBreak:
                     Gd32GpioModeAf<UART7_GPIOx, UART7_TX_GPIO_PINx, UART7>();
-                    s_DmxTxBuffer[dmx::config::kUart7Port].state = dmx::TxRxState::kDmxMab;
+                    s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxMab;
                     TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.mab_time;
                     break;
                 case dmx::TxRxState::kDmxMab: {
-                    DMA_RESTART_DMX_TX(dmx::config::kUart7Port, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
+                    DMA_RESTART_DMX_TX(kPortIndex, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
                 } break;
                 default:
                     break;
             }
-        } else if (s_RdmTxBuffer[dmx::config::kUart7Port].state != dmx::RdmTxState::kIdle) {
-            switch (s_RdmTxBuffer[dmx::config::kUart7Port].state) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
+            switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
                         Gd32GpioModeAf<UART7_GPIOx, UART7_TX_GPIO_PINx, UART7>();
-                        s_RdmTxBuffer[dmx::config::kUart7Port].state = dmx::RdmTxState::kMab;
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kMabTimeTypical;
                     }
                     break;
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
-                        DMA_START_RDM_TX(dmx::config::kUart7Port, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
+                        DMA_START_RDM_TX(kPortIndex, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
                     }
                     break;
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[dmx::config::kUart7Port].state = dmx::RdmTxState::kIdle;
-                        sv_port_state[dmx::config::kUart7Port] = dmx::PortState::kIdle;
-                        Dmx::Get()->SetPortDirection<dmx::config::kUart7Port, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-                        const auto kSent = sv_total_statistics[dmx::config::kUart7Port].rdm.sent.classes + 1;
-                        sv_total_statistics[dmx::config::kUart7Port].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
                     }
                     break;
@@ -991,21 +993,23 @@ void TIMER6_IRQHandler() {
 void DMA1_Channel7_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH7, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH7, DMA_INTERRUPT_DISABLE>();
+        
+        constexpr auto kPortIndex = GetPortByUart(USART0);
 
-        if (s_DmxTxBuffer[dmx::config::kUsart0Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart0Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kIdle;
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart0Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart0Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart0Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart0Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1015,21 +1019,23 @@ void DMA1_Channel7_IRQHandler() {
 void DMA0_Channel3_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE>();
+        
+        constexpr auto kPortIndex = GetPortByUart(USART0);
 
-        if (s_DmxTxBuffer[dmx::config::kUsart0Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart0Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kIdle;
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart0Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart0Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart0Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart0Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
 
         Gd32DmaInterruptFlagClear<DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_CLEAR>();
@@ -1043,20 +1049,22 @@ void DMA0_Channel6_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH6, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH6, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUsart1Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart1Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(USART1);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart1Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart1Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart1Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart1Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1070,20 +1078,22 @@ void DMA0_Channel3_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH3, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH3, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUsart2Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart2Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(USART2);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart2Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart2Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart2Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart2Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1094,20 +1104,22 @@ void DMA0_Channel1_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH1, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUsart2Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart2Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(USART2);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart2Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart2Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart2Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart2Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1122,20 +1134,22 @@ void DMA0_Channel4_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH4, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH4, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUart3Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart3Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(UART3);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart3Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart3Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart3Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart3Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1145,21 +1159,23 @@ void DMA0_Channel4_IRQHandler() {
 void DMA1_Channel4_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE>();
+        
+        constexpr auto kPortIndex = GetPortByUart(UART3);
 
-        if (s_DmxTxBuffer[dmx::config::kUart3Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart3Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kIdle;
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart3Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart3Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart3Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart3Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1173,21 +1189,23 @@ void DMA1_Channel4_IRQHandler() {
 void DMA1_Channel3_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH3, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH3, DMA_INTERRUPT_DISABLE>();
+        
+        constexpr auto kPortIndex = GetPortByUart(UART4);
 
-        if (s_DmxTxBuffer[dmx::config::kUart4Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart4Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kIdle;
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart4Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart4Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart4Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart4Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1199,20 +1217,22 @@ void DMA0_Channel7_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH7, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH7, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUart4Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart4Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(UART4);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart4Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart4Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart4Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart4Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1229,20 +1249,22 @@ void DMA1_Channel6_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH6, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH6, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUsart5Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUsart5Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUsart5Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(USART5);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUsart5Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUsart5Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUsart5Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUsart5Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUsart5Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1282,20 +1304,22 @@ void DMA0_Channel1_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH1, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH1, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUart6Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart6Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart6Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(UART6);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart6Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart6Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart6Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart6Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart6Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1334,20 +1358,22 @@ void DMA0_Channel0_IRQHandler() {
     if (Gd32DmaInterruptFlagGet<DMA0, DMA_CH0, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA0, DMA_CH0, DMA_INTERRUPT_DISABLE>();
 
-        if (s_DmxTxBuffer[dmx::config::kUart7Port].state != dmx::TxRxState::kIdle) [[likely]] {
-            if (s_DmxTxBuffer[dmx::config::kUart7Port].output_style == dmx::OutputStyle::kDelta) {
-                s_DmxTxBuffer[dmx::config::kUart7Port].state = dmx::TxRxState::kIdle;
+        constexpr auto kPortIndex = GetPortByUart(UART7);
+
+        if (s_DmxTxBuffer[kPortIndex].state != dmx::TxRxState::kIdle) [[likely]] {
+            if (s_DmxTxBuffer[kPortIndex].output_style == dmx::OutputStyle::kDelta) {
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kIdle;
             } else {
                 TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.inter_time;
-                s_DmxTxBuffer[dmx::config::kUart7Port].state = dmx::TxRxState::kDmxInter;
+                s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxInter;
             }
 #if !defined(CONFIG_DMX_DISABLE_STATISTICS)
-            const auto kSent = sv_total_statistics[dmx::config::kUart7Port].dmx.sent + 1;
-            sv_total_statistics[dmx::config::kUart7Port].dmx.sent = kSent;
+            const auto kSent = sv_total_statistics[kPortIndex].dmx.sent + 1;
+            sv_total_statistics[kPortIndex].dmx.sent = kSent;
 #endif // !defined(CONFIG_DMX_DISABLE_STATISTICS)
-        } else if (s_RdmTxBuffer[dmx::config::kUart7Port].state != dmx::RdmTxState::kIdle) {
+        } else if (s_RdmTxBuffer[kPortIndex].state != dmx::RdmTxState::kIdle) {
             TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kDirectionTime;
-            s_RdmTxBuffer[dmx::config::kUart7Port].state = dmx::RdmTxState::kDirection;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
         }
     }
 
@@ -1385,28 +1411,33 @@ void Dmx::SetPortDirection(uint32_t port_index, dmx::Direction port_direction, b
     }
 }
 
-template <uint32_t port_index, dmx::Direction port_direction, bool enable_data>
-void Dmx::SetPortDirection() {
-    DMX_CHECK_PORT_INDEX_VOID(port_index);
+template <uint32_t kPortIndex, dmx::Direction kPortDirection, bool kEnableData> void Dmx::SetPortDirection() {
+    static_assert(kPortIndex < dmx::config::max::kPorts);
 
-    if (port_direction_[port_index] != port_direction) {
-        port_direction_[port_index] = port_direction;
-
-        DataDisable(port_index);
-
-        if constexpr (port_direction == dmx::Direction::kOutput) {
-            GPIO_BOP(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
-        } else if constexpr (port_direction == dmx::Direction::kInput) {
-            GPIO_BC(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
-        } else {
-            static_assert(false, "Invalid direction");
-        }
-    } else if constexpr (!enable_data) {
-        DataDisable(port_index);
+    if constexpr ((kDirGpio[kPortIndex].port == 0) && (kDirGpio[kPortIndex].pin == 0)) {
+        return;
     }
 
-    if constexpr (enable_data) {
-        DataEnable(port_index);
+    if constexpr (kDirGpio[kPortIndex].usage == dmx::port::Usage::kTxRx) {
+        if (port_direction_[kPortIndex] != kPortDirection) {
+            port_direction_[kPortIndex] = kPortDirection;
+
+            DataDisable(kPortIndex);
+
+            if constexpr (kPortDirection == dmx::Direction::kOutput) {
+                GPIO_BOP(kDirGpio[kPortIndex].port) = kDirGpio[kPortIndex].pin;
+            } else if constexpr (kPortDirection == dmx::Direction::kInput) {
+                GPIO_BC(kDirGpio[kPortIndex].port) = kDirGpio[kPortIndex].pin;
+            } else {
+                static_assert(false, "Invalid direction");
+            }
+        } else if constexpr (!kEnableData) {
+            DataDisable(kPortIndex);
+        }
+
+        if constexpr (kEnableData) {
+            DataEnable(kPortIndex);
+        }
     }
 }
 
@@ -1425,16 +1456,16 @@ void Dmx::DataEnable(uint32_t port_index) {
     if (port_direction_[port_index] == dmx::Direction::kInput) {
         sv_rx_buffer[port_index].state = dmx::TxRxState::kIdle;
 
-        const auto kUart = DmxPortToUart(port_index);
+        const auto kUart = std::to_underlying(kDirGpio[port_index].uart);
 
         do {
             __DMB();
-        } while (!Gd32UsartFlagGet<USART_FLAG_TBE>(kUart));
+        } while (!gd32::UartFlagGet<USART_FLAG_TBE>(kUart));
 
-        Gd32UsartInterruptFlagClear<USART_INT_FLAG_RBNE>(kUart);
-        Gd32UsartInterruptFlagClear<USART_INT_FLAG_IDLE>(kUart);
-        Gd32UsartInterruptEnable<USART_INT_RBNE>(kUart);
-        Gd32UsartInterruptEnable<USART_INT_FLAG_IDLE>(kUart);
+        gd32::UartInterruptFlagClear<USART_INT_FLAG_RBNE>(kUart);
+        gd32::UartInterruptFlagClear<USART_INT_FLAG_IDLE>(kUart);
+        gd32::UartInterruptEnable<USART_INT_RBNE>(kUart);
+        gd32::UartInterruptEnable<USART_INT_FLAG_IDLE>(kUart);
 
         sv_port_state[port_index] = dmx::PortState::kRx;
         return;
@@ -1452,15 +1483,15 @@ void Dmx::DataDisable(uint32_t port_index) {
 
     sv_port_state[port_index] = dmx::PortState::kIdle;
 
-    const auto kUart = DmxPortToUart(port_index);
+    const auto kUart = std::to_underlying(kDirGpio[port_index].uart);
 
     if (port_direction_[port_index] == dmx::Direction::kOutput) {
         do {
             if (s_DmxTxBuffer[port_index].state == dmx::TxRxState::kDmxInter) {
-                Gd32UsartFlagClear<USART_FLAG_TC>(kUart);
+                gd32::UartFlagClear<USART_FLAG_TC>(kUart);
                 do {
                     __DMB();
-                } while (!Gd32UsartFlagGet<USART_FLAG_TC>(kUart));
+                } while (!gd32::UartFlagGet<USART_FLAG_TC>(kUart));
 
                 s_DmxTxBuffer[port_index].state = dmx::TxRxState::kIdle;
             }
@@ -1470,8 +1501,8 @@ void Dmx::DataDisable(uint32_t port_index) {
     }
 
     if (port_direction_[port_index] == dmx::Direction::kInput) {
-        Gd32UsartInterruptDisable<USART_INT_RBNE>(kUart);
-        Gd32UsartInterruptDisable<USART_INT_FLAG_IDLE>(kUart);
+        gd32::UartInterruptDisable<USART_INT_RBNE>(kUart);
+        gd32::UartInterruptDisable<USART_INT_FLAG_IDLE>(kUart);
         sv_rx_buffer[port_index].state = dmx::TxRxState::kIdle;
         return;
     }
@@ -1533,11 +1564,14 @@ void Dmx::FullOn() {
 }
 
 // DMX Send
-template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle>
-void Dmx::SetSendDataInternal(const uint8_t* data, uint32_t length) {
-    DMX_CHECK_PORT_INDEX_VOID(portIndex);
+template <uint32_t kPortIndex, bool kHasStartCode, dmx::SendStyle kSendStyle> void Dmx::SetSendDataInternal(const uint8_t* data, uint32_t length) {
+    static_assert(kPortIndex < dmx::config::max::kPorts);
 
-    auto& tx_buffer = s_DmxTxBuffer[portIndex];
+    if constexpr (kDirGpio[kPortIndex].usage == dmx::port::Usage::kRxOnly) {
+        return;
+    }
+
+    auto& tx_buffer = s_DmxTxBuffer[kPortIndex];
     const auto kHasDataPending = tx_buffer.dmx.read_index != tx_buffer.dmx.write_index;
 
     if (!kHasDataPending) {
@@ -1554,20 +1588,20 @@ void Dmx::SetSendDataInternal(const uint8_t* data, uint32_t length) {
 
     tx_buffer.dmx.data_pending = true;
 
-    if constexpr (hasStartCode) {
+    if constexpr (kHasStartCode) {
         memcpy(dst_data, data, kCappedLength);
     } else {
         dst_data[0] = dmx::kStartCode;
         memcpy(&dst_data[1], data, kCappedLength);
     }
 
-    if (kCappedLength != transmit_length_[portIndex]) {
-        transmit_length_[portIndex] = kCappedLength;
+    if (kCappedLength != transmit_length_[kPortIndex]) {
+        transmit_length_[kPortIndex] = kCappedLength;
         SetTransmitPeriodTime(transmit_period_requested_);
     }
 
-    if constexpr (dmxSendStyle == dmx::SendStyle::kDirect) {
-        StartSendStyleDirect(portIndex);
+    if constexpr (kSendStyle == dmx::SendStyle::kDirect) {
+        StartSendStyleDirect(kPortIndex);
     }
 }
 
@@ -1579,21 +1613,27 @@ void Dmx::StartSendStyleDirect(uint32_t port_index) {
     }
 }
 
-template <uint32_t port_index, uint32_t nUart>
-void StartDmxOutputBreak() {
+template <uint32_t kPortIndex> void StartDmxOutputBreak() {
+    if constexpr ((kDirGpio[kPortIndex].port == 0) && (kDirGpio[kPortIndex].pin == 0)) {
+        return;
+    }
+
+    constexpr auto kUsartPeripheral = std::to_underlying(kDirGpio[kPortIndex].uart);
+
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
-    while (SET != usart_flag_get(nUart, USART_FLAG_TC));
+    while (SET != usart_flag_get(kUsartPeripheral, USART_FLAG_TC)) {
+    }
 
-    switch (nUart) {
+    switch (kUsartPeripheral) {
 // TIMER 1
 #if defined(DMX_USE_USART0)
         case USART0:
             Gd32GpioModeOutput<USART0_GPIOx, USART0_TX_GPIO_PINx>();
             GPIO_BC(USART0_GPIOx) = USART0_TX_GPIO_PINx;
             TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUsart0Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_USART0)
@@ -1602,7 +1642,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<USART1_GPIOx, USART1_TX_GPIO_PINx>();
             GPIO_BC(USART1_GPIOx) = USART1_TX_GPIO_PINx;
             TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUsart1Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_USART1)
@@ -1611,7 +1651,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<USART2_GPIOx, USART2_TX_GPIO_PINx>();
             GPIO_BC(USART2_GPIOx) = USART2_TX_GPIO_PINx;
             TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUsart2Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_USART2)
@@ -1620,7 +1660,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<UART3_GPIOx, UART3_TX_GPIO_PINx>();
             GPIO_BC(UART3_GPIOx) = UART3_TX_GPIO_PINx;
             TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUart3Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_UART3)
@@ -1630,7 +1670,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<UART4_TX_GPIOx, UART4_TX_GPIO_PINx>();
             GPIO_BC(UART4_TX_GPIOx) = UART4_TX_GPIO_PINx;
             TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUart4Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_UART4)
@@ -1639,7 +1679,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<USART5_GPIOx, USART5_TX_GPIO_PINx>();
             GPIO_BC(USART5_GPIOx) = USART5_TX_GPIO_PINx;
             TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUsart5Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif
@@ -1648,7 +1688,7 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<UART6_GPIOx, UART6_TX_GPIO_PINx>();
             GPIO_BC(UART6_GPIOx) = UART6_TX_GPIO_PINx;
             TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUart6Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_UART6)
@@ -1657,23 +1697,23 @@ void StartDmxOutputBreak() {
             Gd32GpioModeOutput<UART7_GPIOx, UART7_TX_GPIO_PINx>();
             GPIO_BC(UART7_GPIOx) = UART7_TX_GPIO_PINx;
             TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + s_dmx_transmit.break_time;
-            s_DmxTxBuffer[dmx::config::kUart7Port].state = dmx::TxRxState::kDmxBreak;
+            s_DmxTxBuffer[kPortIndex].state = dmx::TxRxState::kDmxBreak;
             return;
             break;
 #endif // defined(DMX_USE_UART7)
         default:
             [[unlikely]] assert(false && "switch");
-
             break;
     }
 
     assert(false && "Not reachable");
 }
 
-template <uint32_t portIndex>
-void StartDmxOutputPort() {
-    if constexpr (portIndex < dmx::config::max::kPorts) {
-        StartDmxOutputBreak<portIndex, DmxPortToUart(portIndex)>();
+template <uint32_t kPortIndex> void StartDmxOutputPort() {
+    if constexpr (kPortIndex < dmx::config::max::kPorts) {
+        if constexpr (kDirGpio[kPortIndex].usage != dmx::port::Usage::kRxOnly) {
+            StartDmxOutputBreak<kPortIndex>();
+        }
     }
 }
 
@@ -1759,15 +1799,19 @@ void Dmx::RdmTransmit(uint32_t port_index, const uint8_t* data, uint32_t length)
     }
 }
 
-template <uint32_t portIndex>
-void Dmx::RdmSendDataInternal(const uint8_t* data, uint32_t length) {
-    DMX_CHECK_PORT_INDEX_VOID(portIndex);
+template <uint32_t kPortIndex> void Dmx::RdmSendDataInternal(const uint8_t* data, uint32_t length) {
+    static_assert(kPortIndex < dmx::config::max::kPorts);
+
+    if constexpr (kDirGpio[kPortIndex].usage == dmx::port::Usage::kRxOnly) {
+        return;
+    }
+
     assert(data != nullptr);
     assert(length <= sizeof(TRdmMessage));
 
-    SetPortDirection<portIndex, dmx::Direction::kOutput, false>();
+    SetPortDirection<kPortIndex, dmx::Direction::kOutput, false>();
 
-    auto& tx_buffer = s_RdmTxBuffer[portIndex];
+    auto& tx_buffer = s_RdmTxBuffer[kPortIndex];
 
     auto* dst_data = tx_buffer.rdm.data.data;
     auto& dst_length = tx_buffer.rdm.data.length;
@@ -1775,25 +1819,33 @@ void Dmx::RdmSendDataInternal(const uint8_t* data, uint32_t length) {
 
     memcpy(dst_data, data, length);
 
-    StartRdmOutput(portIndex);
+    StartRdmOutput(kPortIndex);
 }
 
-template <uint32_t port_index, uint32_t uart>
-void StartRdmOutput() {
-    DEBUG_PRINTF("port_index=%u, uart=%p", port_index, reinterpret_cast<void*>(uart));
+template <uint32_t kPortIndex> void StartRdmOutput() {
+    static_assert(kPortIndex < dmx::config::max::kPorts);
+
+    if constexpr (kDirGpio[kPortIndex].usage == dmx::port::Usage::kRxOnly) {
+        return;
+    }
+
+    constexpr auto kUsartPeripheral = std::to_underlying(kDirGpio[kPortIndex].uart);
+
+    DEBUG_PRINTF("port_index=%u, uart=%p", kPortIndex, reinterpret_cast<void*>(kUsartPeripheral));
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
-    while (SET != usart_flag_get(uart, USART_FLAG_TC));
+    while (SET != usart_flag_get(kUsartPeripheral, USART_FLAG_TC)) {
+    }
 
-    switch (uart) {
+    switch (kUsartPeripheral) {
         // TIMER 1
 #if defined(DMX_USE_USART0)
         case USART0: {
             Gd32GpioModeOutput<USART0_GPIOx, USART0_TX_GPIO_PINx>();
             GPIO_BC(USART0_GPIOx) = USART0_TX_GPIO_PINx;
             TIMER_CH0CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUsart0Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_USART0)
@@ -1803,7 +1855,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<USART1_GPIOx, USART1_TX_GPIO_PINx>();
             GPIO_BC(USART1_GPIOx) = USART1_TX_GPIO_PINx;
             TIMER_CH1CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUsart1Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_USART1)
@@ -1813,7 +1865,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<USART2_GPIOx, USART2_TX_GPIO_PINx>();
             GPIO_BC(USART2_GPIOx) = USART2_TX_GPIO_PINx;
             TIMER_CH2CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUsart2Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_USART2)
@@ -1823,7 +1875,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<UART3_GPIOx, UART3_TX_GPIO_PINx>();
             GPIO_BC(UART3_GPIOx) = UART3_TX_GPIO_PINx;
             TIMER_CH3CV(TIMER1) = TIMER_CNT(TIMER1) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUart3Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_UART3)
@@ -1833,7 +1885,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<UART4_TX_GPIOx, UART4_TX_GPIO_PINx>();
             GPIO_BC(UART4_TX_GPIOx) = UART4_TX_GPIO_PINx;
             TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUart4Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif //  defined(DMX_USE_UART4)
@@ -1843,7 +1895,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<USART5_GPIOx, USART5_TX_GPIO_PINx>();
             GPIO_BC(USART5_GPIOx) = USART5_TX_GPIO_PINx;
             TIMER_CH1CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUsart5Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_USART5)
@@ -1853,7 +1905,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<UART6_GPIOx, UART6_TX_GPIO_PINx>();
             GPIO_BC(UART6_GPIOx) = UART6_TX_GPIO_PINx;
             TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUart6Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_UART6)
@@ -1863,7 +1915,7 @@ void StartRdmOutput() {
             Gd32GpioModeOutput<UART7_GPIOx, UART7_TX_GPIO_PINx>();
             GPIO_BC(UART7_GPIOx) = UART7_TX_GPIO_PINx;
             TIMER_CH3CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kBreakTimeTypical;
-            s_RdmTxBuffer[dmx::config::kUart7Port].state = dmx::RdmTxState::kBreak;
+            s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kBreak;
             return;
         } break;
 #endif // defined(DMX_USE_UART7)
@@ -1876,10 +1928,11 @@ void StartRdmOutput() {
     assert(false && "Not reachable");
 }
 
-template <uint32_t portIndex>
-void StartRdmOutputPort() {
-    if constexpr (portIndex < dmx::config::max::kPorts) {
-        StartRdmOutput<portIndex, DmxPortToUart(portIndex)>();
+template <uint32_t kPortIndex> void StartRdmOutputPort() {
+    if constexpr (kPortIndex < dmx::config::max::kPorts) {
+        if constexpr (kDirGpio[kPortIndex].usage != dmx::port::Usage::kRxOnly) {
+            StartRdmOutput<kPortIndex>();
+        }
     }
 }
 
@@ -2032,17 +2085,17 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t*
 
     SetPortDirection(port_index, dmx::Direction::kOutput, false);
 
-    const auto kUart = DmxPortToUart(port_index);
+    const auto kUart = std::to_underlying(kDirGpio[port_index].uart);
 
     for (uint32_t i = 0; i < length; i++) {
         do {
             __DMB();
-        } while (!Gd32UsartFlagGet<USART_FLAG_TBE>(kUart));
+        } while (!gd32::UartFlagGet<USART_FLAG_TBE>(kUart));
 
         USART_TDATA(kUart) = USART_TDATA_TDATA & data[i];
     }
 
-    while (!Gd32UsartFlagGet<USART_FLAG_TC>(kUart)) {
+    while (!gd32::UartFlagGet<USART_FLAG_TC>(kUart)) {
         static_cast<void>(GET_BITS(USART_RDATA(kUart), 0U, 8U));
     }
 
@@ -2076,7 +2129,7 @@ const uint8_t* Dmx::RdmReceive(uint32_t port_index) {
         uint32_t index;
         uint16_t checksum = 0;
 
-        for (index = 0; index < 24; index++) {
+        for (index = 0; index < e120::kMessageLengthMin; index++) {
             checksum = static_cast<uint16_t>(checksum + data[index]);
         }
 
@@ -2114,7 +2167,7 @@ const uint8_t* Dmx::RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms) 
     TIMER_CNT(TIMER5) = 0;
 
     do {
-      data_available = const_cast<uint8_t*>(RdmReceive(port_index));
+        data_available = const_cast<uint8_t*>(RdmReceive(port_index));
         if (data_available != nullptr) {
             return data_available;
         }
@@ -2272,8 +2325,8 @@ void Dmx::SetOutputStyle(uint32_t port_index, dmx::OutputStyle output_style) {
     s_DmxTxBuffer[port_index].output_style = output_style;
 
     if (output_style == dmx::OutputStyle::kConstant) {
-        if (!has_continuos_output_) {
-            has_continuos_output_ = true;
+        if (!has_continuous_output_) {
+            has_continuous_output_ = true;
             if (port_direction_[port_index] == dmx::Direction::kOutput) {
                 StartDmxOutput(port_index);
             }
@@ -2292,10 +2345,10 @@ void Dmx::SetOutputStyle(uint32_t port_index, dmx::OutputStyle output_style) {
             }
         }
     } else {
-        has_continuos_output_ = false;
+        has_continuous_output_ = false;
         for (uint32_t index = 0; index < dmx::config::max::kPorts; index++) {
             if (s_DmxTxBuffer[index].output_style == dmx::OutputStyle::kConstant) {
-                has_continuos_output_ = true;
+                has_continuous_output_ = true;
                 return;
             }
         }
@@ -2310,7 +2363,7 @@ dmx::OutputStyle Dmx::GetOutputStyle(uint32_t port_index) const {
 
 // Setup
 static void UartDmxConfig(uint32_t usart_periph) {
-    Gd32UartBegin(usart_periph, dmx::kBaudRate, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop2Bits);
+    gd32::UartBegin(usart_periph, dmx::kBaudRate, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop2Bits);
 }
 
 static void UsartDmaConfig() {
@@ -2714,12 +2767,16 @@ Dmx::Dmx() {
     s_dmx_transmit.mab_time = dmx::transmit::kMabTimeMin;
     s_dmx_transmit.inter_time = dmx::transmit::kPeriodDefault - s_dmx_transmit.break_time - s_dmx_transmit.mab_time - (dmx::kChannelsMax * dmx::kSlotTime) - dmx::kSlotTime;
 
-    for (uint32_t port_index = 0; port_index < DMX_MAX_PORTS; port_index++) {
-        Gd32GpioFsel(kDirGpio[port_index].port, kDirGpio[port_index].pin, GPIO_FSEL_OUTPUT);
+    for (uint32_t port_index = 0; port_index < dmx::config::max::kPorts; port_index++) {
         transmit_length_[port_index] = dmx::kChannelsMax;
         sv_rx_buffer[port_index].state = dmx::TxRxState::kIdle;
         s_DmxTxBuffer[port_index].state = dmx::TxRxState::kIdle;
-        SetPortDirection(port_index, dmx::Direction::kInput, false);
+
+        if ((kDirGpio[port_index].port != 0) && (kDirGpio[port_index].pin != 0)) {
+            Gd32GpioFsel(kDirGpio[port_index].port, kDirGpio[port_index].pin, GPIO_FSEL_OUTPUT);
+            SetPortDirection(port_index, dmx::Direction::kInput, false);
+        }
+
         SetOutputStyle(port_index, dmx::OutputStyle::kDelta);
         ClearData(port_index);
     }

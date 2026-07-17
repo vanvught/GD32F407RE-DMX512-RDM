@@ -29,38 +29,38 @@
 #include "gd32_uart.h"
 
 namespace uart {
-  inline constexpr auto BITS_8 = gd32::kUartBits8;
-  inline constexpr auto BITS_9 = gd32::kUartBits9;
+inline constexpr auto BITS_8 = gd32::kUartBits8;
+inline constexpr auto BITS_9 = gd32::kUartBits9;
 
-  inline constexpr auto PARITY_NONE = gd32::kUartParityNone;
-  inline constexpr auto PARITY_ODD = gd32::kUartParityOdd;
-  inline constexpr auto PARITY_EVEN = gd32::kUartParityEven;
+inline constexpr auto PARITY_NONE = gd32::kUartParityNone;
+inline constexpr auto PARITY_ODD = gd32::kUartParityOdd;
+inline constexpr auto PARITY_EVEN = gd32::kUartParityEven;
 
-  inline constexpr auto STOP_1BIT = gd32::kUartStop1Bit;
-  inline constexpr auto STOP_2BITS = gd32::kUartStop2Bits;
+inline constexpr auto STOP_1BIT = gd32::kUartStop1Bit;
+inline constexpr auto STOP_2BITS = gd32::kUartStop2Bits;
 
 inline void Begin(uint32_t uart_base, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits) {
-    Gd32UartBegin(uart_base, baudrate, bits, parity, stop_bits);
+    gd32::UartBegin(uart_base, baudrate, bits, parity, stop_bits);
 }
 
 inline void SetBaudrate(uint32_t uart_base, uint32_t baudrate) {
-    Gd32UartSetBaudrate(uart_base, baudrate);
+    gd32::UartSetBaudrate(uart_base, baudrate);
 }
 
 inline void Transmit(uint32_t uart_base, const uint8_t* data, uint32_t length) {
-    Gd32UartTransmit(uart_base, data, length);
+    gd32::UartTransmit(uart_base, data, length);
 }
 
 inline void TransmitString(uint32_t uart_base, const char* data) {
-    Gd32UartTransmitString(uart_base, data);
+    gd32::UartTransmitString(uart_base, data);
 }
 
 inline uint32_t GetRxFifoLevel(uint32_t uart_base) {
-    return Gd32UartGetRxFifoLevel(uart_base);
+    return gd32::UartGetRxFifoLevel(uart_base);
 }
 
 inline uint8_t GetRxData(uint32_t uart_base) {
-    return Gd32UartGetRxData(uart_base);
+    return gd32::UartGetRxData(uart_base);
 }
 } // namespace uart
 

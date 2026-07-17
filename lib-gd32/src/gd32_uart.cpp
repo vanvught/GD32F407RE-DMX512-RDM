@@ -258,7 +258,8 @@ static void GpioConfig(uint32_t usart_periph) {
 }
 #endif
 
-void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits) {
+namespace gd32 {
+void UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits) {
     RcuConfig(usart_periph);
     GpioConfig(usart_periph);
 
@@ -291,7 +292,7 @@ void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint
     USART_CTL0(usart_periph) |= USART_CTL0_UEN;
 }
 
-void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate) {
+void UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate) {
     assert(baudrate != 0);
 
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
@@ -301,7 +302,7 @@ void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate) {
     USART_CTL0(usart_periph) |= USART_CTL0_UEN;
 }
 
-void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length) {
+void UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length) {
     if (data == nullptr) [[unlikely]] {
         return;
     }
@@ -316,7 +317,7 @@ void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t lengt
     }
 }
 
-void Gd32UartTransmitString(uint32_t usart_periph, const char* data) {
+void UartTransmitString(uint32_t usart_periph, const char* data) {
     if (data == nullptr) [[unlikely]] {
         return;
     }
@@ -330,3 +331,4 @@ void Gd32UartTransmitString(uint32_t usart_periph, const char* data) {
 #endif
     }
 }
+} // namespace gd32

@@ -53,57 +53,6 @@
 #define SECTION_DMA_BUFFER
 #endif
 
-constexpr uint32_t DmxPortToUart(uint32_t port) {
-    switch (port) {
-#if defined(DMX_USE_USART0)
-        case dmx::config::kUsart0Port:
-            return USART0;
-            break;
-#endif
-#if defined(DMX_USE_USART1)
-        case dmx::config::kUsart1Port:
-            return USART1;
-            break;
-#endif
-#if defined(DMX_USE_USART2)
-        case dmx::config::kUsart2Port:
-            return USART2;
-            break;
-#endif
-#if defined(DMX_USE_UART3)
-        case dmx::config::kUart3Port:
-            return UART3;
-            break;
-#endif
-#if defined(DMX_USE_UART4)
-        case dmx::config::kUart4Port:
-            return UART4;
-            break;
-#endif
-#if defined(DMX_USE_USART5)
-        case dmx::config::kUsart5Port:
-            return USART5;
-            break;
-#endif
-#if defined(DMX_USE_UART6)
-        case dmx::config::kUart6Port:
-            return UART6;
-            break;
-#endif
-#if defined(DMX_USE_UART7)
-        case dmx::config::kUart7Port:
-            return UART7;
-            break;
-#endif
-        default:
-            [[unlikely]] assert(0);
-            return 0;
-    }
-
-    assert(0);
-    return 0;
-}
-
 #if defined(GD32F4XX) || defined(GD32H7XX)
 constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
     switch (usart_periph) {
@@ -148,19 +97,19 @@ constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
     return 0;
 }
 
-template <uint32_t gpio_periph, uint32_t pin>
+template <uint32_t kGpioPeriph, uint32_t kPin>
 inline void Gd32GpioModeOutput() {
-    Gd32GpioModeSet<gpio_periph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, pin>();
+    Gd32GpioModeSet<kGpioPeriph, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, kPin>();
 }
 
-template <uint32_t gpio_periph, uint32_t pin, uint32_t usart_periph>
+template <uint32_t kGpioPeriph, uint32_t kPin, uint32_t kUsartPeriph>
 inline void Gd32GpioModeAf() {
-    Gd32GpioModeSet<gpio_periph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, pin>();
+    Gd32GpioModeSet<kGpioPeriph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, kPin>();
 
-    constexpr uint32_t kAf = GetUsartAf(usart_periph);
+    constexpr uint32_t kAf = GetUsartAf(kUsartPeriph);
     static_assert(kAf != 0, "Invalid USART peripheral");
 
-    Gd32GpioAfSet<gpio_periph, kAf, pin>();
+    Gd32GpioAfSet<kGpioPeriph, kAf, kPin>();
 }
 #else
 template <uint32_t gpio_periph, uint32_t pin>

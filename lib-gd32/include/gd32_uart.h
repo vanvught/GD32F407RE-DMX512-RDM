@@ -31,8 +31,8 @@
 #include "gd32.h" // IWYU pragma: keep
 
 #if !defined(GD32H7XX)
-#define USART_TDATA       USART_DATA
-#define USART_RDATA       USART_DATA
+#define USART_TDATA USART_DATA
+#define USART_RDATA USART_DATA
 #define USART_TDATA_TDATA USART_DATA_DATA
 #define USART_RDATA_TDATA USART_DATA_DATA
 #endif
@@ -45,70 +45,87 @@ inline constexpr uint32_t kUartParityOdd = 1;
 inline constexpr uint32_t kUartParityEven = 2;
 inline constexpr uint32_t kUartStop1Bit = 1;
 inline constexpr uint32_t kUartStop2Bits = 2;
-} // namespace gd32
 
-void Gd32UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits);
-void Gd32UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate);
+enum class Uart : uint32_t {
+    kUart0 = USART0,
+    kUart1 = USART1,
+    kUart2 = USART2,
+    kUart3 = UART3,
+    kUart4 = UART4,
+#if defined(USART5)
+    kUart5 = USART5,
+#endif
+#if defined(UART6)
+    kUart6 = UART6,
+#endif
+#if defined(UART7)
+    kUart7 = UART7
+#endif
+};
 
-void Gd32UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length);
-void Gd32UartTransmitString(uint32_t usart_periph, const char* data);
+void UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits);
+void UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate);
 
-inline uint32_t Gd32UartGetRxFifoLevel(__attribute__((unused)) uint32_t usart_periph) {
+void UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length);
+void UartTransmitString(uint32_t usart_periph, const char* data);
+
+inline uint32_t UartGetRxFifoLevel(__attribute__((unused)) uint32_t usart_periph) {
     return 1;
 }
 
-inline uint8_t Gd32UartGetRxData(uint32_t usart_periph) {
+inline uint8_t UartGetRxData(uint32_t usart_periph) {
     return static_cast<uint8_t>(GET_BITS(USART_RDATA(usart_periph), 0U, 8U));
 }
 
-template <usart_flag_enum flag> bool Gd32UsartFlagGet(uint32_t usart_periph) {
-    return (0 != (USART_REG_VAL(usart_periph, flag) & BIT(USART_BIT_POS(flag))));
+template <usart_flag_enum kFlag> bool UartFlagGet(uint32_t usart_periph) {
+    return (0 != (USART_REG_VAL(usart_periph, kFlag) & BIT(USART_BIT_POS(kFlag))));
 }
 
-template <usart_flag_enum flag> void Gd32UsartFlagClear(uint32_t usart_periph) {
+template <usart_flag_enum kFlag> void UartFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
-    USART_REG_VAL(usart_periph, flag) = ~BIT(USART_BIT_POS(flag));
+    USART_REG_VAL(usart_periph, kFlag) = ~BIT(USART_BIT_POS(kFlag));
 #elif defined(GD32F4XX)
-    USART_REG_VAL(usart_periph, flag) &= ~BIT(USART_BIT_POS(flag));
+    USART_REG_VAL(usart_periph, kFlag) &= ~BIT(USART_BIT_POS(kFlag));
 #elif defined(GD32H7XX)
-    if constexpr (USART_FLAG_AM1 == flag) {
+    if constexpr (USART_FLAG_AM1 == kFlag) {
         USART_INTC(usart_periph) |= USART_INTC_AMC1;
-    } else if constexpr (USART_FLAG_EPERR == flag) {
+    } else if constexpr (USART_FLAG_EPERR == kFlag) {
         USART_CHC(usart_periph) &= (uint32_t)(~USART_CHC_EPERR);
-    } else if constexpr (USART_FLAG_TFE == flag) {
+    } else if constexpr (USART_FLAG_TFE == kFlag) {
         USART_FCS(usart_periph) |= USART_FCS_TFEC;
     } else {
-        USART_INTC(usart_periph) |= BIT(USART_BIT_POS(flag));
+        USART_INTC(usart_periph) |= BIT(USART_BIT_POS(kFlag));
     }
 #else
 #error
 #endif
 }
 
-template <uint32_t interrupt> void Gd32UsartInterruptEnable(uint32_t usart_periph) {
-    USART_REG_VAL(usart_periph, interrupt) |= BIT(USART_BIT_POS(interrupt));
+template <uint32_t kInterrupt> void UartInterruptEnable(uint32_t usart_periph) {
+    USART_REG_VAL(usart_periph, kInterrupt) |= BIT(USART_BIT_POS(kInterrupt));
 }
 
-template <uint32_t interrupt> void Gd32UsartInterruptDisable(uint32_t usart_periph) {
-    USART_REG_VAL(usart_periph, interrupt) &= ~BIT(USART_BIT_POS(interrupt));
+template <uint32_t kInterrupt> void UartInterruptDisable(uint32_t usart_periph) {
+    USART_REG_VAL(usart_periph, kInterrupt) &= ~BIT(USART_BIT_POS(kInterrupt));
 }
 
-template <usart_interrupt_flag_enum flag> void Gd32UsartInterruptFlagClear(uint32_t usart_periph) {
+template <usart_interrupt_flag_enum kFlag> void UartInterruptFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
-    USART_REG_VAL2(usart_periph, flag) = ~BIT(USART_BIT_POS2(flag));
+    USART_REG_VAL2(usart_periph, kFlag) = ~BIT(USART_BIT_POS2(kFlag));
 #elif defined(GD32F4XX)
-    USART_REG_VAL2(usart_periph, flag) &= ~BIT(USART_BIT_POS2(flag));
+    USART_REG_VAL2(usart_periph, kFlag) &= ~BIT(USART_BIT_POS2(kFlag));
 #elif defined(GD32H7XX)
-    if constexpr (USART_INT_FLAG_TFE == flag) {
+    if constexpr (USART_INT_FLAG_TFE == kFlag) {
         USART_FCS(usart_periph) |= USART_FCS_TFEC;
-    } else if constexpr (USART_INT_FLAG_RFF == flag) {
+    } else if constexpr (USART_INT_FLAG_RFF == kFlag) {
         USART_FCS(usart_periph) &= (~USART_FCS_RFFIF);
     } else {
-        USART_INTC(usart_periph) |= BIT(USART_BIT_POS2(flag));
+        USART_INTC(usart_periph) |= BIT(USART_BIT_POS2(kFlag));
     }
 #else
 #error
 #endif
 }
+} // namespace gd32
 
 #endif // GD32_UART_H_

@@ -120,7 +120,7 @@ class Dmx {
     uint32_t transmit_length_[dmx::config::max::kPorts];
     uint16_t transmit_slots_{dmx::kChannelsMax};
     dmx::Direction port_direction_[dmx::config::max::kPorts];
-    bool has_continuos_output_{false};
+    bool has_continuous_output_{false};
 
     inline static Dmx* s_this;
 };

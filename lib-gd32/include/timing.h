@@ -28,6 +28,8 @@
 
 #include <cstdint>
 
+extern struct HwTimersSeconds gv_seconds;
+
 #if defined(CONFIG_HAL_USE_SYSTICK)
 extern volatile uint32_t gv_nSysTickMillis;
 #elif defined(USE_FREE_RTOS)

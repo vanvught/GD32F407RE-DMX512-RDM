@@ -72,7 +72,7 @@ extern "C" void USART0_IRQHandler() {
 #endif
 
 void Init() {
-    Gd32UartBegin(USART0, 115200U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop1Bit);
+    gd32::UartBegin(USART0, 115200U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop1Bit);
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
     // DMA
 #if defined(GD32H7XX)
@@ -160,7 +160,7 @@ void WriteDma(const void* data, uint32_t size) {
     assert(data != nullptr);
     assert(size <= DMA_CHXCNT_CNT);
 
-    while (!Gd32UsartFlagGet<USART_FLAG_TBE>(USART0));
+    while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
 
     auto dma_chctl = DMA_CHCTL(USART0_DMAx, USART0_TX_DMA_CHx);
     dma_chctl &= ~DMA_CHXCTL_CHEN;
@@ -175,11 +175,11 @@ void WriteDma(const void* data, uint32_t size) {
 
 void PutChar(int c) {
     if (c == '\n') {
-        while (!Gd32UsartFlagGet<USART_FLAG_TBE>(USART0));
+        while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
         USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>('\r'));
     }
 
-    while (!Gd32UsartFlagGet<USART_FLAG_TBE>(USART0));
+    while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
     USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>(c));
 }
 
@@ -230,7 +230,7 @@ int GetChar() {
 }
 #else
 int GetChar() {
-    if (__builtin_expect((!Gd32UsartFlagGet<USART_FLAG_RBNE>(USART0)), 1)) {
+    if (__builtin_expect((!gd32::UartFlagGet<USART_FLAG_RBNE>(USART0)), 1)) {
         return EOF;
     }
 
