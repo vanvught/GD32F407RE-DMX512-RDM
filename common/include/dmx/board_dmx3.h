@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "gd32.h" // IWYU pragma: keep
+#include "gd32/dmx_port.h"
 
 #define DMX_MAX_PORTS 3
 
@@ -41,17 +42,8 @@ inline constexpr uint32_t kPorts = DMX_MAX_PORTS;
 #define DMX_USE_UART4
 #define DMX_USE_USART5
 
-inline constexpr auto kUsart2Port = 0;
-inline constexpr auto kUart4Port = 1;
-inline constexpr auto kUsart5Port = 2;
-
-inline constexpr auto kDirPort0GpioPort = GPIOB;
-inline constexpr auto kDirPort0GpioPin = GPIO_PIN_10;
-
-inline constexpr auto kDirPort1GpioPort = GPIOA;
-inline constexpr auto kDirPort1GpioPin = GPIO_PIN_5;
-
-inline constexpr auto kDirPort2GpioPort = GPIOB;
-inline constexpr auto kDirPort2GpioPin = GPIO_PIN_14;
+inline constexpr port::Info kPort0 = {.uart = gd32::Uart::kUart2, .port = GPIOB, .pin = GPIO_PIN_10, .usage = port::Usage::kTxRx};
+inline constexpr port::Info kPort1 = {.uart = gd32::Uart::kUart4, .port = GPIOA, .pin = GPIO_PIN_5, .usage = port::Usage::kTxRx};
+inline constexpr port::Info kPort2 = {.uart = gd32::Uart::kUart5, .port = GPIOB, .pin = GPIO_PIN_14, .usage = port::Usage::kTxRx};
 } // namespace dmx::config
 #endif // DMX_BOARD_DMX3_H_
