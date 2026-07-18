@@ -14,9 +14,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install arm-none-eabi
-      run: sudo apt install gcc-arm-none-eabi
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install arm-none-eabi v15
+      run: |
+        set -e
+        TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-eabi.tar.xz"
+        TOOLCHAIN_DIR="/opt/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-eabi"
+        sudo mkdir -p /opt
+        wget -qO /tmp/arm-toolchain.tar.xz "$TOOLCHAIN_URL"
+        sudo tar -xJf /tmp/arm-toolchain.tar.xz -C /opt
+        echo "$TOOLCHAIN_DIR/bin" >> "$GITHUB_PATH"
     - name: make gd32_emac_artnet_dmx_multi
       run: |
         cd gd32_emac_artnet_dmx_multi
