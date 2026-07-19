@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 
+#include <concepts>
 #if defined(DEBUG_HAL)
 #undef NDEBUG
 #endif
@@ -43,10 +44,12 @@ enum class ModeToFrequency { kOffOff = 0, kNormal = 1, kData = 3, kFast = 5, kRe
 #if !defined(CONFIG_HAL_USE_MINIMUM)
 
 void __attribute__((weak)) Event([[maybe_unused]] Mode mode) {
-    DEBUG_PRINTF("mode=%u", static_cast<uint32_t>(mode));
+    DEBUG_PRINTF("mode=%u", static_cast<unsigned>(mode));
 }
 
 void SetModeWithLock(Mode mode, bool do_lock) {
+	DEBUG_PRINTF("mode=%u, do_lock=%c", static_cast<unsigned>(mode), do_lock ? 'Y' : 'N');
+	
     s_do_lock = false;
     SetMode(mode);
     s_do_lock = do_lock;
@@ -56,6 +59,8 @@ void SetMode(board::statusled::Mode mode) {
     if (s_do_lock || (global::g_status_led_mode == mode)) {
         return;
     }
+	
+	DEBUG_PRINTF("mode=%u", static_cast<unsigned>(mode));
 
     global::g_status_led_mode = mode;
 
@@ -85,7 +90,7 @@ void SetMode(board::statusled::Mode mode) {
 
     board::statusled::Event(global::g_status_led_mode);
 
-    DEBUG_PRINTF("global::g_status_led_mode=%u", static_cast<uint32_t>(global::g_status_led_mode));
+    DEBUG_PRINTF("global::g_status_led_mode=%u", static_cast<unsigned>(global::g_status_led_mode));
 }
 #endif
 } // namespace board::statusled
