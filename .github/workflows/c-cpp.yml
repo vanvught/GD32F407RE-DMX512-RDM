@@ -29,15 +29,9 @@ jobs:
         wget -qO /tmp/arm-toolchain.tar.xz "$TOOLCHAIN_URL"
         sudo tar -xJf /tmp/arm-toolchain.tar.xz -C /opt
         echo "$TOOLCHAIN_DIR/bin" >> "$GITHUB_PATH"
-    - name: make gd32_emac_artnet_dmx_multi
+    - name: version
+      run: arm-none-eabi-g++ --version
+    - name: build all
       run: |
-        cd gd32_emac_artnet_dmx_multi
-        make -f Makefile.GD32 clean
-        make -f Makefile.GD32
-        cd -
-    - name: make gd32_emac_e131_dmx_multi
-      run: |
-        cd gd32_emac_e131_dmx_multi
-        make -f Makefile.GD32 clean
-        make -f Makefile.GD32
-        cd -
+        cd scripts
+        ./build_all.sh
