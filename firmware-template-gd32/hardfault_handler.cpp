@@ -12,8 +12,8 @@
 
 #include "gd32xxxx.h" // IWYU pragma: keep
 
-extern "C" void HardFault_Handler()
-{
+extern "C" {
+void HardFault_Handler() {
     __asm volatile(
         "TST LR, #4\n"
         "ITE EQ\n"
@@ -23,8 +23,7 @@ extern "C" void HardFault_Handler()
         "B HardfaultHandler\n");
 }
 
-extern "C" void HardfaultHandler(uint32_t* hardfault_args, uint32_t lr_value)
-{
+__attribute__((used, externally_visible, noinline)) void HardfaultHandler(uint32_t* hardfault_args, uint32_t lr_value) {
     uint32_t cfsr;
     uint32_t bus_fault_address;
     uint32_t memmanage_fault_address;
@@ -57,16 +56,16 @@ extern "C" void HardfaultHandler(uint32_t* hardfault_args, uint32_t lr_value)
     printf(" HFSR = %x\n", (unsigned int)SCB->HFSR);
     printf(" DFSR = %x\n", (unsigned int)SCB->DFSR);
     printf(" AFSR = %x\n", (unsigned int)SCB->AFSR);
-    if (cfsr & 0x0080)
-    {
+    if (cfsr & 0x0080) {
         printf(" MMFAR = %x\n", (unsigned int)memmanage_fault_address);
     }
-    if (cfsr & 0x8000)
-    {
+    if (cfsr & 0x8000) {
         printf(" BFAR = %x\n", (unsigned int)bus_fault_address);
     }
     printf("- Misc\n");
-    printf(" LR/EXC_RETURN= %x\n", lr_value);
+    printf(" LR/EXC_RETURN= %x\n", (unsigned int)lr_value);
 
-    while (1);
+    while (true) {
+    }
+}
 }

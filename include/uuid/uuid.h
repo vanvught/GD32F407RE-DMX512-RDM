@@ -2,7 +2,7 @@
  * @file uuid.h
  *
  */
-/* Copyright (C) 2016 by Arjan van Vught mailto:info@orangepi-dmx.nl
+/* Copyright (C) 2016-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@
  * THE SOFTWARE.
  */
 
-#ifndef UUID_H_
-#define UUID_H_
+#ifndef UUID_UUID_H_
+#define UUID_UUID_H_
 
 typedef unsigned char uuid_t[16];
 
-#define UUID_TYPE_DCE_TIME   1
+#define UUID_TYPE_DCE_TIME 1
 #define UUID_TYPE_DCE_RANDOM 4
 
 #ifdef __cplusplus
@@ -36,13 +36,13 @@ extern "C" {
 #endif
 
 extern void uuid_generate_random(uuid_t);
-extern int uuid_parse(const char *, uuid_t);
-extern void uuid_unparse(const uuid_t, char *);
-extern void uuid_unparse_lower(const uuid_t, char *);
-extern void uuid_unparse_upper(const uuid_t, char *);
+extern int uuid_parse(const char*, uuid_t);
+extern void uuid_unparse(const uuid_t, char*);
+extern void uuid_unparse_lower(const uuid_t, char*);
+extern void uuid_unparse_upper(const uuid_t, char*);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* UUID_H_ */
+#endif /* UUID_UUID_H_ */
