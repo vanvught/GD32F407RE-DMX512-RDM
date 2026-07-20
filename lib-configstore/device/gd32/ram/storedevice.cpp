@@ -42,37 +42,31 @@
 static constexpr uint32_t kFlashSectorSize = 4096U;
 static constexpr uint32_t kBsramSize = 4096U;
 
-StoreDevice::StoreDevice()
-{
+StoreDevice::StoreDevice() {
     DEBUG_ENTRY();
 
     detected_ = true;
 
-    printf("StoreDevice: BSRAM with total %d bytes [%d kB]\n", GetSize(), GetSize() / 1024U);
+    printf("StoreDevice: BSRAM with total %d bytes [%d kB]\n", static_cast<unsigned>(GetSize()), static_cast<unsigned>(GetSize() / 1024U));
     DEBUG_EXIT();
 }
 
-StoreDevice::~StoreDevice()
-{
+StoreDevice::~StoreDevice() {
     DEBUG_ENTRY();
 
     DEBUG_EXIT();
 }
 
-uint32_t StoreDevice::GetSize() const
-{
+uint32_t StoreDevice::GetSize() const {
     return kBsramSize;
 }
 
-uint32_t StoreDevice::GetSectorSize() const
-{
+uint32_t StoreDevice::GetSectorSize() const {
     return kFlashSectorSize;
 }
 
-bool StoreDevice::Read(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) uint8_t* buffer, storedevice::Result& result)
-{
+bool StoreDevice::Read(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) uint8_t* buffer, storedevice::Result& result) {
     DEBUG_ENTRY();
-    DEBUG_PRINTF("offset=%p[%d], len=%u[%d], data=%p[%d]", offset, (((uint32_t)(offset) & 0x3) == 0), length, (((uint32_t)(length) & 0x3) == 0), buffer, (((uint32_t)(buffer) & 0x3) == 0));
     assert((offset + length) <= BSRAM_SIZE);
 
     result = storedevice::Result::kOk;
@@ -81,20 +75,18 @@ bool StoreDevice::Read(__attribute__((unused)) uint32_t offset, __attribute__((u
     return true;
 }
 
-bool StoreDevice::Erase(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, storedevice::Result& result)
-{
+bool StoreDevice::Erase(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, storedevice::Result& result) {
     DEBUG_ENTRY();
 
     result = storedevice::Result::kOk;
+    
 
     DEBUG_EXIT();
     return true;
 }
 
-bool StoreDevice::Write(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) const uint8_t* buffer, storedevice::Result& result)
-{
+bool StoreDevice::Write(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) const uint8_t* buffer, storedevice::Result& result) {
     DEBUG_ENTRY();
-    DEBUG_PRINTF("offset=%p[%d], len=%u[%d], data=%p[%d]", offset, (((uint32_t)(offset) & 0x3) == 0), length, (((uint32_t)(length) & 0x3) == 0), buffer, (((uint32_t)(buffer) & 0x3) == 0));
     assert((offset + length) <= BSRAM_SIZE);
 
     result = storedevice::Result::kOk;
