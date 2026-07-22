@@ -130,6 +130,18 @@ SECTIONS
   PROVIDE ( end = _ebss );
   PROVIDE ( _end = _ebss );
   
+  .http (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _shttp = .;
+    KEEP(*(.http))
+    KEEP(*(.http.*))
+    KEEP(*(.httpd))
+    KEEP(*(.httpd.*))
+    . = ALIGN(4);
+    _ehttp = .;
+  } > RAM
+  
   .sram1 :
   {
   	. = ALIGN(4);
@@ -141,11 +153,17 @@ SECTIONS
 	. = ALIGN(4);
     _edmx = .;
 	. = ALIGN(4);
-	_spixel = .;
-    *(.pixel)
-	. = ALIGN(4);
-	_epixel = .;
   } >RAM1 
+  
+  .pixel (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _spixel = .;
+    KEEP(*(.pixel))
+    KEEP(*(.pixel.*))
+    . = ALIGN(4);
+    _epixel = .;
+  } > RAM1
   
   .sram2 :
   {
