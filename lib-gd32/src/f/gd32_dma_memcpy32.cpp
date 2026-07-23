@@ -57,6 +57,7 @@ void Init() {
     dma_deinit(DMA1, DMA_CH0);
 
     dma_multi_data_parameter_struct dma_init_parameter;
+    dma_multi_data_para_struct_init(&dma_init_parameter);
 
     dma_init_parameter.periph_width = DMA_PERIPH_WIDTH_32BIT;
     dma_init_parameter.periph_inc = DMA_PERIPH_INCREASE_ENABLE;
