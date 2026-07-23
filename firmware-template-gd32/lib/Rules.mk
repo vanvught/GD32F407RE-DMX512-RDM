@@ -3,11 +3,13 @@ $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
 PREFIX ?= arm-none-eabi-
 
-CC	= $(PREFIX)gcc
-CPP	= $(PREFIX)g++
-AS	= $(CC)
-LD	= $(PREFIX)ld
-AR	= $(PREFIX)ar
+CC      = $(PREFIX)gcc
+CPP     = $(PREFIX)g++
+AS      = $(CC)
+LD      = $(PREFIX)gcc
+AR      = $(PREFIX)gcc-ar
+RANLIB  = $(PREFIX)gcc-ranlib
+NM      = $(PREFIX)gcc-nm
 
 BOARD?=BOARD_GD32F407RE
 ENET_PHY?=DP83848
@@ -40,6 +42,7 @@ COPS+=-Wall -Werror -Wpedantic -Wextra -Wunused -Wsign-conversion -Wduplicated-c
 ifndef FREE_RTOS_PORTABLE
 COPS+=-Wconversion
 endif
+COPS+=-flto=auto
 
 include ../common/make/CppOps.mk
 include ../common/make/gd32/Gd32FirmwareOps.mk
