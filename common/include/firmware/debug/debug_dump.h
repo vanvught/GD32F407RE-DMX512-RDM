@@ -28,7 +28,7 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <ctype.h>
+#include <cctype>
 
 #include "firmware/debug/debug_config.h"
 
