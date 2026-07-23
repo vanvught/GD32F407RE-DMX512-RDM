@@ -23,16 +23,12 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_DISPLAY)
-#undef NDEBUG
-#endif
-
-#include "firmware/debug/debug_debug.h"
+#include "display_debug.h"
 
 #if defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)
 namespace display::timeout {
 void irq_init() {
-    DEBUG_PUTS("Display timeout with IRQ disabled.");
+    DISPLAY_DEBUG_PUTS("Display timeout with IRQ disabled.");
 }
 } // namespace display::timeout
 #else // defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)
@@ -47,7 +43,7 @@ void DISPLAYTIMEOUT_IRQ_HANDLE() {
     if (RESET != exti_interrupt_flag_get(DISPLAYTIMEOUT_EXTI_LINE)) {
         exti_interrupt_flag_clear(DISPLAYTIMEOUT_EXTI_LINE);
         Display::Get()->SetSleep(false);
-        DEBUG_PUTS("Key pressed.");
+        DISPLAY_DEBUG_PUTS("Key pressed.");
     }
 }
 }
@@ -56,7 +52,7 @@ void DISPLAYTIMEOUT_IRQ_HANDLE() {
 namespace display::timeout {
 void irq_init() {
 #if defined(DISPLAYTIMEOUT_CONFIG_IRQ) && !defined(CONFIG_USE_EXTI10_15_IRQHandler)
-    DEBUG_ENTRY();
+    DISPLAY_DEBUG_ENTRY();
 
     rcu_periph_clock_enable(DISPLAYTIMEOUT_GPIO_CLK);
     DISPLAYTIMEOUT_GPIO_CONFIG;
@@ -71,7 +67,7 @@ void irq_init() {
     exti_init(DISPLAYTIMEOUT_EXTI_LINE, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
     exti_interrupt_flag_clear(DISPLAYTIMEOUT_EXTI_LINE);
 
-    DEBUG_EXIT();
+    DISPLAY_DEBUG_EXIT();
 #endif
 }
 } // namespace display::timeout

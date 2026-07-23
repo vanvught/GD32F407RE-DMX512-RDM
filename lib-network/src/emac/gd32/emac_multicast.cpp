@@ -23,15 +23,11 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_EMAC_IGMP)
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <cstddef>
 
 #include "gd32_enet.h"
-#include "firmware/debug/debug_debug.h"
+#include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
 namespace network {
@@ -41,40 +37,40 @@ uint32_t Crc(const uint8_t* data, size_t length);
 namespace emac::multicast {
 
 void EnableHashFilter() {
-    DEBUG_ENTRY();
+    EMAC_IGMP_DEBUG_ENTRY();
 
     gd32::enet::ResetHash();
     gd32::enet::FilterFeatureDisable<ENET_MULTICAST_FILTER_PASS>();
     gd32::enet::FilterFeatureEnable<ENET_MULTICAST_FILTER_HASH_MODE>();
 
-    DEBUG_EXIT();
+    EMAC_IGMP_DEBUG_EXIT();
 }
 void DisableHashFilter() {
-    DEBUG_ENTRY();
+    EMAC_IGMP_DEBUG_ENTRY();
 
     gd32::enet::FilterFeatureDisable<ENET_MULTICAST_FILTER_HASH_MODE>();
     gd32::enet::FilterFeatureEnable<ENET_MULTICAST_FILTER_PASS>();
 
-    DEBUG_EXIT();
+    EMAC_IGMP_DEBUG_EXIT();
 }
 
 void SetHash(const uint8_t* mac_addr) {
-    DEBUG_ENTRY();
+    EMAC_IGMP_DEBUG_ENTRY();
 
     const auto kCrc = network::Crc(mac_addr, 6);
     const auto kHash = (kCrc >> 26) & 0x3F;
 
     gd32::enet::FilterSetHash(kHash);
 
-    DEBUG_PRINTF("MAC: " MACSTR " -> CRC32: 0x%08X -> Hash Index: %d", MAC2STR(mac_addr), kCrc, kHash);
-    DEBUG_EXIT();
+    EMAC_IGMP_DEBUG_PRINTF("MAC: " MACSTR " -> CRC32: 0x%08X -> Hash Index: %u", MAC2STR(mac_addr), static_cast<unsigned>(kCrc), static_cast<unsigned>(kHash));
+    EMAC_IGMP_DEBUG_EXIT();
 }
 
 void ResetHash() {
-    DEBUG_ENTRY();
+    EMAC_IGMP_DEBUG_ENTRY();
 
     gd32::enet::ResetHash();
 
-    DEBUG_EXIT();
+    EMAC_IGMP_DEBUG_EXIT();
 }
 } // namespace emac::multicast

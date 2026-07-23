@@ -23,10 +23,6 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_HAL)
-#undef NDEBUG
-#endif
-
 #include <cstdio>
 
 #include "board.h"

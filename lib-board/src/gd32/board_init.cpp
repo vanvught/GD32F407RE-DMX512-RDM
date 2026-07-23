@@ -35,10 +35,6 @@
 #define _TIME_STAMP_YEAR_ (2026 - 1900)
 #endif
 
-#if defined(DEBUG_HAL)
-#undef NDEBUG
-#endif
-
 #if (defined(GD32F4XX) || defined(GD32H7XX)) && defined(GPIO_INIT)
 #error
 #endif
@@ -120,7 +116,7 @@ void Init() {
     uart0::Init();
 #endif
     // From here we console output
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
     putchar('\n');
 #endif
 
@@ -132,7 +128,7 @@ void Init() {
         // Clear section .dmx
         const auto kSize = static_cast<size_t>(&_edmx - &_sdmx);
         memset(&_sdmx, 0, kSize);
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
         printf("Cleared .dmx at %p, size %u\n", &_sdmx, kSize);
 #endif
     }
@@ -142,7 +138,7 @@ void Init() {
         // Clear section .lightset
         const auto kSize = static_cast<size_t>(&_elightset - &_slightset);
         memset(&_slightset, 0, kSize);
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
         printf("Cleared .lightset at %p, size %u\n", &_slightset, kSize);
 #endif
     }
@@ -151,7 +147,7 @@ void Init() {
         // Clear section .network
         const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
 #endif
     }
@@ -160,7 +156,7 @@ void Init() {
         // Clear section .pixel
         const auto kSize = static_cast<size_t>(&_epixel - &_spixel);
         memset(&_spixel, 0, kSize);
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
         printf("Cleared .pixel at %p, size %u\n", &_spixel, kSize);
 #endif
     }
@@ -172,14 +168,14 @@ void Init() {
         // clear section .network
         const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
 #endif
     }
 #endif
 #endif
 
-#ifndef NDEBUG
+#if defined (BOARD_DEBUG)
     // Show the AHB and APBx busses frequency
     const auto kSys = rcu_clock_freq_get(CK_SYS);
     const auto kAhb = rcu_clock_freq_get(CK_AHB);

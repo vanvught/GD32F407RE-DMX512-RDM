@@ -57,10 +57,6 @@ T4 - local receive timestamp of the previous response (t4)
 #error
 #endif
 
-#if defined(DEBUG_PTP_NTP_CLIENT)
-#undef NDEBUG
-#endif
-
 #pragma GCC push_options
 #pragma GCC optimize("O3")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
@@ -68,11 +64,9 @@ T4 - local receive timestamp of the previous response (t4)
 #include <cstdint>
 #include <cstring>
 #include <sys/time.h>
-#ifndef NDEBUG
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
-#endif
 
 #include "configstore.h"
 #include "network_udp.h"
@@ -81,7 +75,26 @@ T4 - local receive timestamp of the previous response (t4)
 #include "apps/ntpclient.h"
 #include "gd32_ptp.h"
 #include "softwaretimers.h"
-#include "firmware/debug/debug_debug.h"
+
+#if defined DEBUG_PTP_NTP_CLIENT
+#define NTP_CLIENT_DEBUG_ENTRY() DEBUG_ENTRY()
+#define NTP_CLIENT_DEBUG_EXIT() DEBUG_EXIT()
+#define NTP_CLIENT_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
+#define NTP_CLIENT_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
+#else
+#define NTP_CLIENT_DEBUG_ENTRY() \
+    do {                         \
+    } while (false)
+#define NTP_CLIENT_DEBUG_EXIT() \
+    do {                        \
+    } while (false)
+#define NTP_CLIENT_DEBUG_PRINTF(...) \
+    do {                             \
+    } while (false)
+#define NTP_CLIENT_DEBUG_PUTS(...) \
+    do {                           \
+    } while (false)
+#endif
 
 namespace net::globals::ptp {
 extern uint32_t timestamp[2];
@@ -116,7 +129,7 @@ struct NtpClient {
         ntp::TimeStamp sent_b;
         int32_t x; // interleave switch
         uint32_t missed_responses;
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
         ntp::Modes mode;
 #endif
     } state;
@@ -127,7 +140,7 @@ static uint16_t s_id;
 static constexpr uint16_t kRequestSize = sizeof s_ntp_client.request;
 
 static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const struct ntp::TimeStamp* timestamp) {
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
     const auto kSeconds = static_cast<time_t>(timestamp->seconds - ntp::kJan1970);
     const auto* local_time = localtime(&kSeconds);
     printf("%s %02d:%02d:%02d.%06d %04d [%u][0x%.8x]\n", 
@@ -145,23 +158,23 @@ static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const stru
 static void Process();
 
 static void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
-    DEBUG_ENTRY();
+    NTP_CLIENT_DEBUG_ENTRY();
 
     // Invalid packet size
     if (__builtin_expect((size != sizeof(struct ntp::Packet)), 1)) {
-        DEBUG_EXIT();
+        NTP_CLIENT_DEBUG_EXIT();
         return;
     }
 
     // Not for us
     if (__builtin_expect((from_ip != s_ntp_client.server_ip), 0)) {
-        DEBUG_EXIT();
+        NTP_CLIENT_DEBUG_EXIT();
         return;
     }
 
     // Ignore duplicates
     if (s_ntp_client.state.missed_responses == 0) {
-        DEBUG_EXIT();
+        NTP_CLIENT_DEBUG_EXIT();
         return;
     }
 
@@ -169,7 +182,7 @@ static void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[mayb
 
     Process();
 
-    DEBUG_EXIT();
+    NTP_CLIENT_DEBUG_EXIT();
 }
 
 static void Send();
@@ -244,7 +257,7 @@ static void Send() {
 
     network::udp::SendWithTimestamp(s_ntp_client.handle, reinterpret_cast<const uint8_t*>(&s_ntp_client.request), kRequestSize, s_ntp_client.server_ip, network::iana::Ports::kPortNtp);
 
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
     printf("Request:  org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n",
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.origin_timestamp_s)),    // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.origin_timestamp_f)),    // NOLINT
@@ -322,7 +335,7 @@ static void UpdatePtpTime() {
         s_ntp_client.locked_count = 0;
     }
 
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
     /**
      * Network delay calculation
      */
@@ -388,7 +401,7 @@ static void UpdatePtpTime() {
 
 static void Process() {
     const auto* const kReply = s_ntp_client.reply;
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
     printf("Response: org=%.8x%.8x rx=%.8x%.8x tx=%.8x%.8x\n",
            static_cast<unsigned>(__builtin_bswap32(kReply->origin_timestamp_s)),    // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->origin_timestamp_f)),    // NOLINT
@@ -409,7 +422,7 @@ static void Process() {
 
         s_ntp_client.t4.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
         s_ntp_client.t4.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
         s_ntp_client.state.mode = ntp::Modes::kBasic;
 #endif
     } else
@@ -425,11 +438,11 @@ static void Process() {
 
             s_ntp_client.t4.seconds = s_ntp_client.state.previous_receive.seconds;
             s_ntp_client.t4.fraction = s_ntp_client.state.previous_receive.fraction;
-#ifndef NDEBUG
+#ifdef DEBUG_PTP_NTP_CLIENT
             s_ntp_client.state.mode = ntp::Modes::kInterleaved;
 #endif
         } else {
-            DEBUG_PUTS("INVALID RESPONSE");
+            NTP_CLIENT_DEBUG_PUTS("INVALID RESPONSE");
             return;
         }
 
@@ -477,7 +490,7 @@ namespace network::apps::ntpclient::ptp {
  * @note This function must be called before starting the NTP client.
  */
 void Init() {
-    DEBUG_ENTRY();
+    NTP_CLIENT_DEBUG_ENTRY();
 
     memset(&s_ntp_client, 0, sizeof(struct NtpClient));
 
@@ -500,7 +513,7 @@ void Init() {
 
     s_ntp_client.server_ip = ConfigStore::Instance().NetworkGet(&common::store::Network::ntp_server_ip);
 
-    DEBUG_EXIT();
+    NTP_CLIENT_DEBUG_EXIT();
 }
 
 /**
@@ -513,17 +526,17 @@ void Init() {
  *       IP address is not configured.
  */
 void Start() {
-    DEBUG_ENTRY();
+    NTP_CLIENT_DEBUG_ENTRY();
 
     if (s_ntp_client.status == ntp::Status::kDisabled) {
-        DEBUG_EXIT();
+        NTP_CLIENT_DEBUG_EXIT();
         return;
     }
 
     if (s_ntp_client.server_ip == 0) {
         s_ntp_client.status = ntp::Status::kStopped;
         network::apps::ntpclient::DisplayStatus(ntp::Status::kStopped);
-        DEBUG_EXIT();
+        NTP_CLIENT_DEBUG_EXIT();
         return;
     }
 
@@ -537,7 +550,7 @@ void Start() {
 
     Send();
 
-    DEBUG_EXIT();
+    NTP_CLIENT_DEBUG_EXIT();
 }
 
 /**
@@ -549,7 +562,7 @@ void Start() {
  * @param[in] doDisable Set to `true` to disable the client after stopping.
  */
 void Stop(bool do_disable) {
-    DEBUG_ENTRY();
+    NTP_CLIENT_DEBUG_ENTRY();
 
     if (do_disable) {
         s_ntp_client.status = ntp::Status::kDisabled;
@@ -570,7 +583,7 @@ void Stop(bool do_disable) {
         network::apps::ntpclient::DisplayStatus(ntp::Status::kStopped);
     }
 
-    DEBUG_EXIT();
+    NTP_CLIENT_DEBUG_EXIT();
 }
 
 /**

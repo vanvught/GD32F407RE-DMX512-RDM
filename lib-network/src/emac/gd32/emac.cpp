@@ -23,10 +23,6 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_EMAC)
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -38,7 +34,7 @@
 #include "hwclock.h"
 #endif
 #endif
-#include "firmware/debug/debug_debug.h"
+#include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 #include "../src/core/network_private.h"
 
@@ -62,7 +58,7 @@ extern uint32_t received;
  */
 namespace emac {
 void __attribute__((cold)) Config() {
-    DEBUG_ENTRY();
+    EMAC_DEBUG_ENTRY();
 #if (PHY_TYPE == LAN8700)
     puts("LAN8700");
 #elif (PHY_TYPE == DP83848)
@@ -86,15 +82,15 @@ void __attribute__((cold)) Config() {
         network::Error(__func__, "emac::phy::Config(PHY_ADDRESS)");
     }
 
-    DEBUG_EXIT();
+    EMAC_DEBUG_EXIT();
 }
 
 void AdjustLink(emac::phy::Status phy_status) {
-    DEBUG_ENTRY();
+    EMAC_DEBUG_ENTRY();
 
     printf("Link %s, %d, %s\n", phy_status.link == emac::phy::Link::kStateUp ? "Up" : "Down", phy_status.speed == emac::phy::Speed::kSpeed10 ? 10 : 100, phy_status.duplex == emac::phy::Duplex::kDuplexHalf ? "HALF" : "FULL");
 
-#ifndef NDEBUG
+#ifdef DEBUG_EMAC
     {
         uint16_t phy_value;
 #if defined(GD32H7XX)
@@ -135,9 +131,9 @@ void AdjustLink(emac::phy::Status phy_status) {
     if (kEnetInitStatus != SUCCESS) {
     }
 
-    DEBUG_PRINTF("kEnetInitStatus=%s", kEnetInitStatus == SUCCESS ? "SUCCES" : "ERROR");
+    EMAC_DEBUG_PRINTF("kEnetInitStatus=%s", kEnetInitStatus == SUCCESS ? "SUCCES" : "ERROR");
 
-#ifndef NDEBUG
+#ifdef DEBUG_EMAC
     {
         uint16_t phy_value;
 #if defined(GD32H7XX)
@@ -156,12 +152,12 @@ void AdjustLink(emac::phy::Status phy_status) {
         printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR");
     }
 #endif
-    DEBUG_EXIT();
+    EMAC_DEBUG_EXIT();
 }
 
 void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("ENET_RXBUF_NUM=%u, ENET_TXBUF_NUM=%u", ENET_RXBUF_NUM, ENET_TXBUF_NUM);
+    EMAC_DEBUG_ENTRY();
+    EMAC_DEBUG_PRINTF("ENET_RXBUF_NUM=%u, ENET_TXBUF_NUM=%u", ENET_RXBUF_NUM, ENET_TXBUF_NUM);
 
     emac::phy::Status phy_status;
     emac::phy::Start(PHY_ADDRESS, phy_status);
@@ -208,6 +204,6 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
     
     memset(&emac::eth::globals::counter, 0, sizeof(emac::eth::globals::Counters));
     
-    DEBUG_EXIT();
+    EMAC_DEBUG_EXIT();
 }
 } // namespace emac

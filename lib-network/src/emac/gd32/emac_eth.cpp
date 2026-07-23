@@ -27,10 +27,6 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_EMAC)
-#undef NDEBUG
-#endif
-
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
 #pragma GCC push_options
 #pragma GCC optimize("O2")
@@ -44,7 +40,7 @@
 #include "../src/core/network_memcpy.h"
 #include "emac_counters.h"
 #include "firmware/debug/debug_dump.h"
-#include "firmware/debug/debug_debug.h"
+#include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
 #if defined(CONFIG_NET_ENABLE_PTP)
@@ -188,7 +184,7 @@ template <bool T> static void PtpFrameTransmit(uint32_t length) {
             timeout++;
         } while ((0 == tdes0_ttmss_flag) && (timeout < UINT32_MAX));
 
-        DEBUG_PRINTF("timeout=%x %d", timeout, (dma_current_txdesc->status & ENET_TDES0_TTMSS));
+        EMAC_DEBUG_PRINTF("timeout=%x %d", timeout, (dma_current_txdesc->status & ENET_TDES0_TTMSS));
 
         dma_current_txdesc->status &= ~ENET_TDES0_TTMSS; ///< Clear timestamp flag
 
@@ -359,7 +355,7 @@ void Send(uint32_t length) {
 
 // Transmits an Ethernet frame with data copying.
 void Send(void* buffer, uint32_t length) {
-    DEBUG_PRINTF("%p -> %u", buffer, static_cast<unsigned>(length));
+    EMAC_DEBUG_PRINTF("%p -> %u", buffer, static_cast<unsigned>(length));
 
     assert(nullptr != buffer);
     assert(length <= ENET_MAX_FRAME_SIZE);

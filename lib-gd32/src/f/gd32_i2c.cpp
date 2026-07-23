@@ -65,30 +65,30 @@ template <uint32_t PERIPH> static int32_t SendStart() {
     return GD32_I2C_OK;
 }
 
-template <uint32_t PERIPH> inline uint8_t GetAddress() {
-    if constexpr (PERIPH == I2C1) {
+template <uint32_t kPeriph> inline uint8_t GetAddress() {
+    if constexpr (kPeriph == I2C1) {
         return s_address1;
     } else {
         return s_address;
     }
 }
 
-template <uint32_t PERIPH> static int32_t SendAddress() {
-    i2c_master_addressing(PERIPH, GetAddress<PERIPH>(), I2C_TRANSMITTER);
+template <uint32_t kPeriph> static int32_t SendAddress() {
+    i2c_master_addressing(kPeriph, GetAddress<kPeriph>(), I2C_TRANSMITTER);
 
     auto timeout = kTimeout;
 
-    while (!i2c_flag_get(PERIPH, I2C_FLAG_ADDSEND)) {
+    while (!i2c_flag_get(kPeriph, I2C_FLAG_ADDSEND)) {
         if (--timeout <= 0) {
             return -GD32_I2C_NOK_TOUT;
         }
     }
 
-    i2c_flag_clear(PERIPH, I2C_FLAG_ADDSEND);
+    i2c_flag_clear(kPeriph, I2C_FLAG_ADDSEND);
 
     timeout = kTimeout;
 
-    while (SET != i2c_flag_get(PERIPH, I2C_FLAG_TBE)) {
+    while (SET != i2c_flag_get(kPeriph, I2C_FLAG_TBE)) {
         if (--timeout <= 0) {
             return -GD32_I2C_NOK_TOUT;
         }
@@ -98,13 +98,13 @@ template <uint32_t PERIPH> static int32_t SendAddress() {
 }
 
 // send a stop condition to I2C bus
-template <uint32_t PERIPH> static int32_t SendStop() {
+template <uint32_t kPeriph> static int32_t SendStop() {
     auto timeout = kTimeout;
 
-    i2c_stop_on_bus(PERIPH);
+    i2c_stop_on_bus(kPeriph);
 
     // wait until the stop condition is finished
-    while (I2C_CTL0(PERIPH) & I2C_CTL0_STOP) {
+    while (I2C_CTL0(kPeriph) & I2C_CTL0_STOP) {
         if (--timeout <= 0) {
             return -GD32_I2C_NOK_TOUT;
         }

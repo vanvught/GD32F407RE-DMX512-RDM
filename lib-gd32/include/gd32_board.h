@@ -100,9 +100,9 @@ extern usbh_host usb_host;
 }
 #endif // defined(ENABLE_USB_HOST)
 
-#if defined(DEBUG_STACK)
+#if defined(CONFIG_DEBUG_STACK)
 #include "firmware/debug/debug_stack.h"
-#endif // defined(DEBUG_STACK)
+#endif // defined(CONFIG_DEBUG_STACK)
 
 #if defined(DEBUG_EMAC)
 void emac_debug_run();
@@ -125,9 +125,9 @@ inline void Run() {
     SoftwareTimerRun();
 #endif // !defined(USE_FREE_RTOS)
     panelled::Run();
-#if defined(DEBUG_STACK)
+#if defined(CONFIG_DEBUG_STACK)
     debug::stack::Run();
-#endif // defined(DEBUG_STACK)
+#endif // defined(CONFIG_DEBUG_STACK)
 #if defined(DEBUG_EMAC)
     emac_debug_run();
 #endif // defined(DEBUG_EMAC)

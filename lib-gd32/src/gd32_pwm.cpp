@@ -57,7 +57,6 @@
 
 #include "gd32_pwm.h"
 #include "gd32.h"
-
 #include "firmware/debug/debug_debug.h"
 
 namespace pwm {
@@ -268,7 +267,7 @@ void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle) {
 
     const uint32_t kPulse = (duty_cycle > 100U ? 100U : duty_cycle) * (pwm::kTimerPeriod / 100U);
 
-    DEBUG_PRINTF("Channel=%u, nDutyCycle=%u, nPulse=%u", static_cast<unsigned>(channel), duty_cycle, static_cast<unsigned>(nPulse));
+    DEBUG_PRINTF("channel=%u, duty_cycle=%u, kPulse=%u", static_cast<unsigned>(channel), duty_cycle, static_cast<unsigned>(kPulse));
 
     switch (channel) {
 #if defined(PWM_CH0_RCU_GPIOx)

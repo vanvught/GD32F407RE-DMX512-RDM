@@ -23,16 +23,12 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_NET_PHY)
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 
 #include "emac/emac_phy.h"
 #include "emac/mmi.h"
 #include "gd32_millis.h"
-#include "firmware/debug/debug_debug.h"
+#include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
 namespace emac::phy {
@@ -55,7 +51,7 @@ bool Write(uint16_t address, uint16_t reg, uint16_t value) {
 }
 
 bool Config(uint16_t address) {
-    DEBUG_ENTRY();
+    EMAC_PHY_DEBUG_ENTRY();
 
 #if defined(GD32H7XX)
     auto reg = ENET_MAC_PHY_CTL(ENETx);
@@ -66,7 +62,7 @@ bool Config(uint16_t address) {
 
     const auto kAhbClk = rcu_clock_freq_get(CK_AHB);
 
-    DEBUG_PRINTF("kAhbClk=%u", static_cast<unsigned>(kAhbClk));
+    EMAC_PHY_DEBUG_PRINTF("kAhbClk=%u", static_cast<unsigned>(kAhbClk));
 
 #if defined GD32F10X_CL
     if (ENET_RANGE(kAhbClk, 20000000U, 35000000U)) {
@@ -78,7 +74,7 @@ bool Config(uint16_t address) {
     } else if ((ENET_RANGE(kAhbClk, 90000000U, 108000000U)) || (108000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV62;
     } else {
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 #elif defined GD32F20X
@@ -91,7 +87,7 @@ bool Config(uint16_t address) {
     } else if ((ENET_RANGE(kAhbClk, 100000000U, 120000000U)) || (120000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV62;
     } else {
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 #elif defined GD32F4XX
@@ -106,7 +102,7 @@ bool Config(uint16_t address) {
     } else if ((ENET_RANGE(kAhbClk, 150000000U, 240000000U)) || (240000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV102;
     } else {
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 #elif defined GD32H7XX
@@ -127,7 +123,7 @@ bool Config(uint16_t address) {
     } else if ((ENET_RANGE(kAhbClk, 350000000U, 400000000U)) || (400000000U == kAhbClk)) {
         reg |= ENET_MDC_HCLK_DIV162;
     } else {
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 #else
@@ -142,7 +138,7 @@ bool Config(uint16_t address) {
 
     if (!phy::Write(address, emac::mmi::REG_BMCR, emac::mmi::BMCR_RESET)) {
         DEBUG_PUTS("PHY reset failed");
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 
@@ -158,25 +154,25 @@ bool Config(uint16_t address) {
     while (millis() - kMillis < 500U) {
         if (!phy::Read(address, emac::mmi::REG_BMCR, value)) {
             DEBUG_PUTS("PHY status read failed");
-            DEBUG_EXIT();
+            EMAC_PHY_DEBUG_EXIT();
             return false;
         }
 
         if (!(value & emac::mmi::BMCR_RESET)) {
-            DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
-            DEBUG_EXIT();
+            EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
+            EMAC_PHY_DEBUG_EXIT();
             return true;
         }
     }
 
     if (value & emac::mmi::BMCR_RESET) {
         DEBUG_PUTS("PHY reset timed out");
-        DEBUG_EXIT();
+        EMAC_PHY_DEBUG_EXIT();
         return false;
     }
 
-    DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
-    DEBUG_EXIT();
+    EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
+    EMAC_PHY_DEBUG_EXIT();
     return true;
 }
 } // namespace emac::phy

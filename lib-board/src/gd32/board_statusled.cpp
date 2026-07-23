@@ -23,15 +23,11 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_HAL)
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 
 #include "board_statusled.h"
 #include "softwaretimers.h"
-#include "firmware/debug/debug_debug.h"
+#include "board_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
 static TimerHandle_t s_timer_id = kTimerIdNone;
@@ -64,12 +60,12 @@ static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
 
 namespace board::statusled {
 void SetFrequency(uint32_t frequency_hz) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", s_timer_id, frequency_hz);
+    BOARD_DEBUG_ENTRY();
+    BOARD_DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", static_cast<int>(s_timer_id), static_cast<unsigned>(frequency_hz));
 
     if (s_timer_id == kTimerIdNone) {
         s_timer_id = SoftwareTimerAdd((1000U / frequency_hz), Ledblink);
-        DEBUG_EXIT();
+        BOARD_DEBUG_EXIT();
         return;
     }
 
@@ -109,6 +105,6 @@ void SetFrequency(uint32_t frequency_hz) {
             break;
     }
 
-    DEBUG_EXIT();
+    BOARD_DEBUG_EXIT();
 }
 } // namespace board::statusled

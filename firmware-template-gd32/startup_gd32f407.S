@@ -65,8 +65,8 @@ ZeroBSSLoop:
   subs r3, r3, #4           /* Subtract 4 bytes from the remaining byte count */
   bgt ZeroBSSLoop           /* If there are still bytes left, continue looping */
 /* Call stack_debug_init function if in debug mode */
-#if defined (DEBUG_STACK)
-  bl stack_debug_init       /* Branch to stack_debug_init if DEBUG_STACK is defined */
+#if defined (CONFIG_DEBUG_STACK)
+  bl stack_debug_init       /* Branch to stack_debug_init if CONFIG_DEBUG_STACK is defined */
 #endif
 /* Call SystemInit function to perform system-specific initialization */
   bl  SystemInit
