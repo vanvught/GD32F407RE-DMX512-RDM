@@ -189,8 +189,6 @@ volatile dmx::TotalStatistics sv_total_statistics[dmx::config::max::kPorts] ALIG
 
 // DMX RX
 volatile dmx::RxDmxPackets sv_rx_dmx_packets[dmx::config::max::kPorts] ALIGNED;
-// RDM RX
-volatile uint32_t gsv_rdm_data_receive_end[dmx::config::max::kPorts];
 // DMX RDM RX
 volatile dmx::RxData sv_rx_buffer[dmx::config::max::kPorts] ALIGNED;
 // DMX TX
@@ -199,6 +197,9 @@ dmx::DmxTransmit s_dmx_transmit;
 // RDM TX
 dmx::RdmTxData s_RdmTxBuffer[dmx::config::max::kPorts] ALIGNED SECTION_DMA_BUFFER;
 } // namespace
+
+// RDM RX
+volatile uint32_t gsv_rdm_data_receive_end[dmx::config::max::kPorts];
 
 template <uint32_t kUsartPeripheral>
 void IrqHandlerDmxRdmInput() {
