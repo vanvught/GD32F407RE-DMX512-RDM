@@ -1,5 +1,5 @@
 /**
- * @file ARTNET_debug.h
+ * @file artnet_debug.h
  *
  */
 /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org

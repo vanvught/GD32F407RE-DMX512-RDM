@@ -1,6 +1,6 @@
 #if defined(GD32F20X) || defined(GD32F4XX)
 /**
- * @file gd32_trng.h
+ * @file gd32_trng.cpp
  *
  */
 /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
