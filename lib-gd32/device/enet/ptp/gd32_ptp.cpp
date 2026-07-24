@@ -93,7 +93,7 @@ void Gd32PtpStart() {
     DEBUG_ENTRY();
     DEBUG_PRINTF("PTP_TICK=%u", gd32::ptp::kPtpTick);
     DEBUG_PRINTF("ADJ_FREQ_BASE_INCREMENT=%u", gd32::ptp::kAdjFreqBaseIncrement);
-    DEBUG_PRINTF("ADJ_FREQ_BASE_ADDEND=x%X", gd32::ptp::kAdjFreqBaseAddend);
+    DEBUG_PRINTF("ADJ_FREQ_BASE_ADDEND=x%X", static_cast<unsigned>(gd32::ptp::kAdjFreqBaseAddend));
 
     struct tm tmbuf;
     memset(&tmbuf, 0, sizeof(struct tm));

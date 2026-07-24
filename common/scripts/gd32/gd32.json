@@ -51,6 +51,12 @@
           "512": "GD32F407XEXX"
         }
       },
+      "9VEE": {
+        "series": "GD32F450",
+        "flash": {
+          "512": "GD32F450VEXX"
+        }
+      },
       "9VIE": {
         "series": "GD32F450",
         "flash": {
