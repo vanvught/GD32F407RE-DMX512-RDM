@@ -26,4 +26,4 @@ IncludeBlocks: Preserve
 Cpp11BracedListStyle: true
 
 AlwaysBreakAfterReturnType: None
-AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: Yes
