@@ -29,38 +29,40 @@
 #include "gd32.h" // IWYU pragma: keep
 #include "gd32_uart.h"
 
-static void RcuConfig(uint32_t usart_periph) {
+namespace gd32 {
+namespace {
+void RcuConfig(uint32_t usart_periph) {
 #ifndef NDEBUG
     bool is_set = false;
-#endif
+#endif // NDEBUG
     switch (usart_periph) {
         case USART0:
             rcu_periph_clock_enable(USART0_RCU_USART0);
             rcu_periph_clock_enable(USART0_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
         case USART1:
             rcu_periph_clock_enable(USART1_RCU_USART1);
             rcu_periph_clock_enable(USART1_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
         case USART2:
             rcu_periph_clock_enable(USART2_RCU_USART2);
             rcu_periph_clock_enable(USART2_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
         case UART3:
             rcu_periph_clock_enable(UART3_RCU_UART3);
             rcu_periph_clock_enable(UART3_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
         case UART4:
             rcu_periph_clock_enable(UART4_RCU_UART4);
@@ -68,7 +70,7 @@ static void RcuConfig(uint32_t usart_periph) {
             rcu_periph_clock_enable(UART4_RX_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
 #if defined(USART5)
         case USART5:
@@ -76,27 +78,27 @@ static void RcuConfig(uint32_t usart_periph) {
             rcu_periph_clock_enable(USART5_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
-#endif
+#endif // USART5
 #if defined(UART6)
         case UART6:
             rcu_periph_clock_enable(UART6_RCU_UART6);
             rcu_periph_clock_enable(UART6_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
-#endif
+#endif // UART6
 #if defined(UART7)
         case UART7:
             rcu_periph_clock_enable(UART7_RCU_UART7);
             rcu_periph_clock_enable(UART7_RCU_GPIOx);
 #ifndef NDEBUG
             is_set = true;
-#endif
+#endif // NDEBUG
             break;
-#endif
+#endif // UART7
         default:
             assert(false && "Invalid usart_periph");
             __builtin_unreachable();
@@ -107,7 +109,7 @@ static void RcuConfig(uint32_t usart_periph) {
 }
 
 #if !(defined(GD32F4XX) || defined(GD32H7XX))
-static void GpioConfig(uint32_t usart_periph) {
+void GpioConfig(uint32_t usart_periph) {
     rcu_periph_clock_enable(RCU_AF);
 
     switch (usart_periph) {
@@ -116,14 +118,14 @@ static void GpioConfig(uint32_t usart_periph) {
             gpio_init(USART0_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART0_RX_GPIO_PINx);
 #if defined(USART0_REMAP)
             gpio_pin_remap_config(GPIO_USART0_REMAP, ENABLE);
-#endif
+#endif // USART0_REMAP
             break;
         case USART1:
             gpio_init(USART1_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART1_TX_GPIO_PINx);
             gpio_init(USART1_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART1_RX_GPIO_PINx);
 #if defined(USART1_REMAP)
             gpio_pin_remap_config(GPIO_USART1_REMAP, ENABLE);
-#endif
+#endif // USART1_REMAP
             break;
         case USART2:
             gpio_init(USART2_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART2_TX_GPIO_PINx);
@@ -132,14 +134,14 @@ static void GpioConfig(uint32_t usart_periph) {
             gpio_pin_remap_config(GPIO_USART2_FULL_REMAP, ENABLE);
 #elif defined(USART2_PARTIAL_REMAP)
             gpio_pin_remap_config(GPIO_USART2_PARTIAL_REMAP, ENABLE);
-#endif
+#endif // USART2_FULL_REMAP
             break;
         case UART3:
             gpio_init(UART3_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART3_TX_GPIO_PINx);
             gpio_init(UART3_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART3_RX_GPIO_PINx);
 #if defined(UART3_REMAP)
             gpio_pin_remap_config(GPIO_PCF5_UART3_REMAP, ENABLE);
-#endif
+#endif // UART3_REMAP
             break;
         case UART4:
             gpio_init(UART4_TX_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART4_TX_GPIO_PINx);
@@ -152,24 +154,24 @@ static void GpioConfig(uint32_t usart_periph) {
 #if defined(USART5_REMAP)
             gpio_pin_remap_config(GPIO_PCF5_USART5_TX_PG14_REMAP, ENABLE);
             gpio_pin_remap_config(GPIO_PCF5_USART5_RX_PG9_REMAP, ENABLE);
-#endif
+#endif // USART5_REMAP
             break;
-#endif
+#endif // USART5
 #if defined(UART6)
         case UART6:
             gpio_init(UART6_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART6_TX_GPIO_PINx);
             gpio_init(UART6_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART6_RX_GPIO_PINx);
 #if defined(UART6_REMAP)
             gpio_pin_remap_config(GPIO_PCF5_UART6_REMAP, ENABLE);
-#endif
+#endif // UART6_REMAP
             break;
-#endif
+#endif // UART6
 #if defined(UART7)
         case UART7:
             gpio_init(UART7_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART7_TX_GPIO_PINx);
             gpio_init(UART7_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART7_RX_GPIO_PINx);
             break;
-#endif
+#endif // UART7
         default:
             assert(false && "Invalid usart_periph");
             __builtin_unreachable();
@@ -177,7 +179,7 @@ static void GpioConfig(uint32_t usart_periph) {
     }
 }
 #else
-static void GpioConfig(uint32_t usart_periph) {
+void GpioConfig(uint32_t usart_periph) {
     switch (usart_periph) {
         case USART0:
             gpio_af_set(USART0_GPIOx, USART0_GPIO_AFx, USART0_TX_GPIO_PINx);
@@ -229,7 +231,7 @@ static void GpioConfig(uint32_t usart_periph) {
             gpio_output_options_set(USART5_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, USART5_RX_GPIO_PINx);
 
             break;
-#endif
+#endif // USART5
 #if defined(UART6)
         case UART6:
             gpio_af_set(UART6_GPIOx, UART6_GPIO_AFx, UART6_TX_GPIO_PINx);
@@ -239,7 +241,7 @@ static void GpioConfig(uint32_t usart_periph) {
             gpio_mode_set(UART6_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, UART6_RX_GPIO_PINx);
             gpio_output_options_set(UART6_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, UART6_RX_GPIO_PINx);
             break;
-#endif
+#endif // UART6
 #if defined(UART7)
         case UART7:
             gpio_af_set(UART7_GPIOx, UART7_GPIO_AFx, UART7_TX_GPIO_PINx);
@@ -249,16 +251,15 @@ static void GpioConfig(uint32_t usart_periph) {
             gpio_mode_set(UART7_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, UART7_RX_GPIO_PINx);
             gpio_output_options_set(UART7_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, UART7_RX_GPIO_PINx);
             break;
-#endif
+#endif // UART7
         default:
             assert(false && "Invalid usart_periph");
             __builtin_unreachable();
             break;
     }
 }
-#endif
-
-namespace gd32 {
+#endif // !(defined(GD32F4XX) || defined(GD32H7XX))
+} // namespace
 void UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits) {
     RcuConfig(usart_periph);
     GpioConfig(usart_periph);
@@ -308,12 +309,13 @@ void UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length) {
     }
 
     while (length-- != 0) {
-        while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE));
+        while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE)) {
+        }
 #if defined(GD32H7XX)
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & *data++;
 #else
         USART_DATA(usart_periph) = (USART_DATA_DATA & *data++);
-#endif
+#endif // GD32H7XX
     }
 }
 
@@ -323,12 +325,13 @@ void UartTransmitString(uint32_t usart_periph, const char* data) {
     }
 
     while (*data != '\0') {
-        while (RESET == usart_flag_get(USART0, USART_FLAG_TBE));
+        while (RESET == usart_flag_get(USART0, USART_FLAG_TBE)) {
+        }
 #if defined(GD32H7XX)
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & *data++;
 #else
         USART_DATA(usart_periph) = (USART_DATA_DATA & *data++);
-#endif
+#endif // GD32H7XX
     }
 }
 } // namespace gd32

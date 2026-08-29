@@ -39,6 +39,6 @@
 #include "gd32h7xx.h" // IWYU pragma: keep
 #else
 #error MCU is not supported
-#endif
+#endif // defined(GD32F10X_HD) || defined(GD32F10X_CL)
 
-#endif // GD32FXXX_H_ */
+#endif // GD32FXXX_H_

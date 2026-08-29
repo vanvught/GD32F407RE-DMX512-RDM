@@ -30,6 +30,6 @@ float G32AdcGetTemp();
 float Gd32AdcGetVref();
 #if defined(GD32F4XX)
 float Gd32AdcGetVbat();
-#endif
+#endif // GD32F4XX
 
 #endif // GD32_ADC_H_

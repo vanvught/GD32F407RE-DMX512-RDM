@@ -1,6 +1,7 @@
 /**
  * @file gpio.h
  * @brief GD32
+ *
  */
 /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
@@ -29,26 +30,25 @@
 #include <cstdint>
 
 #include "gd32_gpio.h"
-#include "gd32_board.h" // IWYU pragma: keep
 
 namespace gpio {
 enum class Select { 
   kInput = GPIO_FSEL_INPUT, 
-  kOutput = GPIO_FSEL_OUTPUT 
+  kOutput = GPIO_FSEL_OUTPUT
 };
 
-enum class Pull { 
+enum class Pull {
   kDisable = GPIO_PULL_DISABLE, 
   kUp = GPIO_PULL_UP, 
-  kDown = GPIO_PULL_DOWN 
+  kDown = GPIO_PULL_DOWN
 };
 
 enum class IntConfig {
-//  kPosEdge = 
-//  kNegEdge = 
-  kHighLev = GPIO_INT_CFG_NEG_EDGE,
-//  kLowLev = GPIO_INT_CFG_LOW_LEV,
-  kDoubleEdge = EXTI_TRIG_BOTH  
+    //  kPosEdge =
+    //  kNegEdge =
+    kHighLev = GPIO_INT_CFG_NEG_EDGE,
+    //  kLowLev = GPIO_INT_CFG_LOW_LEV,
+    kDoubleEdge = EXTI_TRIG_BOTH
 };
 
 inline void Fsel(uint32_t gpio, Select fsel) {
@@ -79,7 +79,7 @@ inline void Write(uint32_t pin, uint32_t value) {
     }
 }
 
-inline uint8_t Lev(uint32_t pin) {
+[[nodiscard]] inline uint8_t Lev(uint32_t pin) {
     return Gd32GpioLev(pin);
 }
 } // namespace gpio

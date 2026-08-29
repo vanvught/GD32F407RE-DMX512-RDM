@@ -25,7 +25,7 @@
 
 #if defined(DEBUG_ENET)
 #undef NDEBUG
-#endif
+#endif // DEBUG_ENET
 
 #include "gd32.h" // IWYU pragma: keep
 #include "firmware/debug/debug_debug.h"
@@ -33,7 +33,7 @@
 // Needed for older GD32F firmware
 #if !defined(GPIO_OSPEED_MAX)
 #define GPIO_OSPEED_MAX GPIO_OSPEED_200MHZ
-#endif
+#endif // GPIO_OSPEED_MAX
 
 void EnetGpioConfig() {
     DEBUG_ENTRY();
@@ -53,7 +53,7 @@ void EnetGpioConfig() {
     rcu_ckout0_config(RCU_CKOUT0SRC_CKPLL2);
 #else
     rcu_ckout0_config(RCU_CKOUT0SRC_CKPLL2, RCU_CKOUT0_DIV1);
-#endif
+#endif // GD32F10X_CL
     gpio_ethernet_phy_select(GPIO_ENET_PHY_RMII);
 
     /* PA1: ETH_RMII_REF_CLK */
@@ -137,6 +137,6 @@ void EnetGpioConfig() {
     gpio_af_set(GPIOC, GPIO_AF_11, GPIO_PIN_1);
     gpio_af_set(GPIOC, GPIO_AF_11, GPIO_PIN_4);
     gpio_af_set(GPIOC, GPIO_AF_11, GPIO_PIN_5);
-#endif
+#endif // defined(GD32F10X) || defined(GD32F20X)
     DEBUG_EXIT();
 }

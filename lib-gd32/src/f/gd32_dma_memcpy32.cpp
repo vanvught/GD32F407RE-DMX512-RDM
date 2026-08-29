@@ -51,7 +51,7 @@ void Init() {
 
     NVIC_SetPriority(DMA0_Channel3_IRQn, 0);
     NVIC_EnableIRQ(DMA0_Channel3_IRQn);
-#endif
+#endif // DMA_MEMCPY32_DISABLE_IRQ
 #else
     rcu_periph_clock_enable(RCU_DMA1);
     dma_deinit(DMA1, DMA_CH0);
@@ -78,7 +78,7 @@ void Init() {
 
     NVIC_SetPriority(DMA1_Channel0_IRQn, 0);
     NVIC_EnableIRQ(DMA1_Channel0_IRQn);
-#endif
-#endif
+#endif // DMA_MEMCPY32_DISABLE_IRQ
+#endif // GD32F4XX
 }
 } // namespace dma::memcpy32

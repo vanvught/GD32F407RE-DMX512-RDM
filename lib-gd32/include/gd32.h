@@ -26,69 +26,28 @@
 #ifndef GD32_H_
 #define GD32_H_
 
-#include <stdint.h>
-
-struct HwTimersSeconds {
-#if !defined(CONFIG_NET_ENABLE_PTP)
-    volatile uint32_t timeval;
-#endif
-    volatile uint32_t uptime;
-};
-
 #include "gd32xxxx.h" // IWYU pragma: keep
 
 #if defined(GD32F30X)
 #define bkp_data_write bkp_write_data
 #define bkp_data_read bkp_read_data
-#endif
+#endif // GD32F30X
 
 #if (defined(GD32F4XX) || defined(GD32H7XX)) && defined(__cplusplus)
 typedef enum { BKP_DATA_0, BKP_DATA_1 } bkp_data_register_enum;
 void bkp_data_write(bkp_data_register_enum register_number, uint16_t data);
 uint16_t bkp_data_read(bkp_data_register_enum register_number);
-#endif
+#endif // (defined(GD32F4XX) || defined(GD32H7XX)) && defined(__cplusplus)
 
 #if !(defined(GD32F4XX) || defined(GD32H7XX))
 #define GPIO_INIT
-#endif
+#endif // !(defined(GD32F4XX) || defined(GD32H7XX))
 
 #if defined(GD32H7XX)
 #define GPIO_OSPEED GPIO_OSPEED_60MHZ
 #else
 #define GPIO_OSPEED GPIO_OSPEED_50MHZ
-#endif
-
-#ifdef __cplusplus
-constexpr uint32_t Gd32PortToGpio(uint32_t port, uint32_t pin) {
-    return (port * 16U) + pin;
-}
-
-constexpr uint8_t Gd32GpioToPort(uint32_t gpio) {
-    return static_cast<uint8_t>(gpio / 16U);
-}
-
-constexpr uint8_t Gd32GpioToNumber(uint32_t gpio) {
-    return static_cast<uint8_t>(gpio % 16U);
-}
-
-#define GD32_PORT_TO_GPIO(p, n) Gd32PortToGpio((p), (n))
-#define GD32_GPIO_TO_PORT(g)    Gd32GpioToPort((g))
-#define GD32_GPIO_TO_NUMBER(g)  Gd32GpioToNumber((g))
-#endif
-
-typedef enum T_GD32_Port { 
-  GD32_GPIO_PORTA = 0, 
-  GD32_GPIO_PORTB, 
-  GD32_GPIO_PORTC, 
-  GD32_GPIO_PORTD, 
-  GD32_GPIO_PORTE, 
-  GD32_GPIO_PORTF, 
-  GD32_GPIO_PORTG, 
-  GD32_GPIO_PORTH, 
-  GD32_GPIO_PORTI, 
-  GD32_GPIO_PORTJ, 
-  GD32_GPIO_PORTK 
-} GD32_Port_TypeDef;
+#endif // GD32H7XX
 
 #include "gd32_board.h" // IWYU pragma: keep
 

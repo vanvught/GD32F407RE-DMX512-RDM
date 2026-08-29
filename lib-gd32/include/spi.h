@@ -32,8 +32,8 @@
 #pragma GCC optimize("O2")
 #else
 #pragma GCC optimize("O3")
-#endif
-#endif
+#endif // CONFIG_SPIOPTIMIZE_O2
+#endif // defined(CONFIG_SPI_OPTIMIZE_O2) || defined(CONFIG_SPI_OPTIMIZE_O3)
 
 #include <cstdint>
 
@@ -127,6 +127,6 @@ class Spi {
 
 #if defined(CONFIG_SPI_OPTIMIZE_O2) || defined(CONFIG_SPI_OPTIMIZE_O3)
 #pragma GCC pop_options
-#endif
+#endif // defined(CONFIG_SPI_OPTIMIZE_O2) || defined(CONFIG_SPI_OPTIMIZE_O3)
 
 #endif // SPI_H_

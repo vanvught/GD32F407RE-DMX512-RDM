@@ -28,18 +28,18 @@
 
 #include <cstdint>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
 namespace gd32 {
 namespace ptp {
 #if !defined(MCU_CLOCK_FREQ)
 #error MCU_CLOCK_FREQ is not defined
-#endif
+#endif // MCU_CLOCK_FREQ
 #if !defined(PTP_ACCARACY_NS)
 inline constexpr uint8_t kPtpTick = 20;
 #else
 inline constexpr uint8_t kPtpTick = PTP_ACCARACY_NS;
-#endif
+#endif // PTP_ACCARACY_NS
 inline constexpr uint8_t kAdjFreqBaseIncrement = static_cast<uint8_t>((kPtpTick * static_cast<uint64_t>(1ULL << 31) / 1E9) + 0.5f);
 inline constexpr uint32_t kAdjFreqBaseAddend = (static_cast<uint64_t>(1ULL << 63) / AHB_CLOCK_FREQ) / kAdjFreqBaseIncrement;
 inline constexpr int32_t kAdjFreqMax = 5120000;
@@ -95,4 +95,4 @@ void Gd32PtpSetTime(const gd32::ptp::ptptime* ptp_time);
 void Gd32PtpUpdateTime(const gd32::ptp::time_t* ptp_time);
 bool Gd32AdjFrequency(int32_t adjust_pbb);
 
-#endif /* GD32_PTP_H_ */
+#endif // GD32_PTP_H_

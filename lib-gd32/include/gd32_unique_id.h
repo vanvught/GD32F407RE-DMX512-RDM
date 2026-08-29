@@ -35,7 +35,7 @@ static constexpr uintptr_t kBase = 0x1FF0F7E8;
 static constexpr uintptr_t kBase = 0x1FFF7A10;
 #else
 static constexpr uintptr_t kBase = 0x1FFFF7E8;
-#endif
+#endif // GD32H7XX
 
 static inline uint32_t Word(uint32_t index) {
     return *reinterpret_cast<volatile const uint32_t*>(kBase + (index * sizeof(uint32_t)));

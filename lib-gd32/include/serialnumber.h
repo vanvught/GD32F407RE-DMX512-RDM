@@ -29,6 +29,6 @@
 #include <cstdint>
 
 inline constexpr uint32_t kSnSize = 4;
-void SerialNumber(uint8_t sn[kSnSize]);
+void SerialNumber(uint8_t serial_number[kSnSize]);
 
 #endif // GD32_SERIALNUMBER_H_

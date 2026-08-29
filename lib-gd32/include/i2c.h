@@ -32,8 +32,8 @@
 #pragma GCC optimize("O2")
 #else
 #pragma GCC optimize("O3")
-#endif
-#endif
+#endif // CONFIG_I2C_OPTIMIZE_O2
+#endif // defined(CONFIG_I2C_OPTIMIZE_O2) || defined(CONFIG_I2C_OPTIMIZE_O3)
 
 #include <cstdint>
 
@@ -217,6 +217,6 @@ class I2c {
 
 #if defined(CONFIG_I2C_OPTIMIZE_O2) || defined(CONFIG_I2C_OPTIMIZE_O3)
 #pragma GCC pop_options
-#endif
+#endif // defined(CONFIG_I2C_OPTIMIZE_O2) || defined(CONFIG_I2C_OPTIMIZE_O3)
 
 #endif // I2C_H_

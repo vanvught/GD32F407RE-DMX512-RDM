@@ -28,15 +28,15 @@
 
 #if !defined(BOARD_BW_OPIDMX4)
 # error This file should not be included
-#endif
+#endif // BOARD_BW_OPIDMX4
 
 #if defined (MCU_GD32F20X_MCU_H_) || defined (MCU_GD32F407_MCU_H_)
 # error This file should be included later
-#endif
+#endif // defined (MCU_GD32F20X_MCU_H_) || defined (MCU_GD32F407_MCU_H_)
 
 #if !(defined(CONSOLE_I2C) || defined(CONFIG_CLIB_USE_NULL) || defined(CONFIG_USE_SOFTUART0))
 # error USART0 is used for console
-#endif
+#endif // !(defined(CONSOLE_I2C) || defined(CONFIG_CLIB_USE_NULL) || defined(CONFIG_USE_SOFTUART0))
 
 #include <stdint.h>
 
@@ -133,7 +133,7 @@ inline constexpr uint32_t kTcnet = 0;
 static constexpr uint32_t kPortARx = 0;
 static constexpr uint32_t kPortATx = 0;
 } // namespace panelled
-#endif
+#endif // __cplusplus
 
 /**
  * SPI flash
@@ -165,7 +165,7 @@ static constexpr uint32_t kPortATx = 0;
 # define LINK_CHECK_EXTI_PIN_SOURCE		EXTI_SOURCE_PIN0
 # define LINK_CHECK_EXTI_SOURCE_CONFIG	syscfg_exti_line_config
 # define LINK_CHECK_GPIO_CONFIG			gpio_mode_set(LINK_CHECK_GPIO_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, LINK_CHECK_GPIO_PIN);
-#endif
+#endif // !defined (GD32F4XX)
 
 /**
  * MCU and BOARD name
@@ -179,7 +179,7 @@ static constexpr uint32_t kPortATx = 0;
 # define GD32_MCU_NAME	"GD32F407RE"
 #else
 # error MCU is not supported
-#endif
+#endif // defined (GD32F20X_CL)
 
 #define GD32_BOARD_NAME			"BW_OPIDMX4"
 
@@ -215,7 +215,7 @@ static constexpr uint32_t kPortATx = 0;
 # define DISPLAYTIMEOUT_EXTI_PIN_SOURCE		EXTI_SOURCE_PIN14
 # define DISPLAYTIMEOUT_EXTI_SOURCE_CONFIG	syscfg_exti_line_config
 # define DISPLAYTIMEOUT_GPIO_CONFIG			gpio_mode_set(DISPLAYTIMEOUT_GPIO_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, DISPLAYTIMEOUT_GPIO_PIN);
-#endif
+#endif // !defined (GD32F4XX)
 
 /**
  * SPI LCD
@@ -226,8 +226,8 @@ static constexpr uint32_t kPortATx = 0;
 #define SPI_LCD_BL_GPIO			GPIO_EXT_22
 #if defined(SPI_LCD_HAVE_CS_GPIO)
 # define SPI_LCD_CS_GPIO		GPIO_EXT_24
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
 
 #include "gpio_header.h"
 
-#endif /* BOARD_BW_OPIDMX4_H_ */
+#endif // BOARD_BW_OPIDMX4_H_

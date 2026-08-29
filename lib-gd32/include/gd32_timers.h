@@ -1,5 +1,5 @@
 /**
- * @file timing.h
+ * @file gd32_timers.h
  *
  */
 /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
@@ -23,47 +23,79 @@
  * THE SOFTWARE.
  */
 
-#ifndef GD32_TIMING_H_
-#define GD32_TIMING_H_
+#ifndef GD32_TIMERS_H_
+#define GD32_TIMERS_H_
+
+#if defined(USE_FREE_RTOS) && defined(CONFIG_TIME_USE_SYSTICK)
+#error
+#endif
 
 #include <cstdint>
 
-#include "gd32_timers.h"
+#if defined(USE_FREE_RTOS)
+#include "FreeRTOS.h"
+#include "task.h"
+#endif // USE_FREE_RTOS
 
 #if defined(CONFIG_TIME_USE_SYSTICK)
 extern volatile uint32_t gv_systick_millis;
-#elif defined(USE_FREE_RTOS)
-#include "FreeRTOS.h"
-#include "task.h"
 #endif // CONFIG_TIME_USE_SYSTICK
 
-namespace timing {
-// Use for:
-// microsecond delays
-// profiling
-// short protocol timing
-// busy waits
+struct HwTimersSeconds {
+#if !defined(CONFIG_NET_ENABLE_PTP)
+    volatile uint32_t timeval;
+#endif // CONFIG_NET_ENABLE_PTP
+    volatile uint32_t uptime;
+};
+
+extern struct HwTimersSeconds gv_seconds;
+
+namespace gd32 {
+namespace timers {
+void Start();
+namespace dwt {
+void Start();
+void DelayUs(uint32_t micros, uint32_t offset_micros = 0);
+[[nodiscard]] uint32_t Micros();
+} // namespace dwt
+namespace systick {
+void Start();
+} // namespace systick
+namespace timer5 {
+void Start();
+void Stop();
+void Delay1ms();
+} // namespace timer5
+namespace timer6 {
+void Start();
+[[nodiscard]] uint32_t Millis();
+} // namespace timer6
+namespace timer_time {
+void Start();
+} // namespace timer_time
+} // namespace timers
+
 [[nodiscard]] inline uint32_t Micros() {
-    return gd32::Micros();
+    return gd32::timers::dwt::Micros();
 }
 
 inline void DelayUs(uint32_t micros, uint32_t offset_micros = 0) {
-    gd32::DelayUs(micros, offset_micros);
+    gd32::timers::dwt::DelayUs(micros, offset_micros);
 }
 
-// Use for:
-// timeouts
-// periodic scheduling
-// millisecond-level elapsed time
-// network polling
-// UI timers
 [[nodiscard]] inline uint32_t Millis() {
-    return gd32::Millis();
+#if defined(CONFIG_TIME_USE_SYSTICK)
+    return gv_systick_millis;
+#elif defined(USE_FREE_RTOS)
+    return xTaskGetTickCount();
+#else
+    return gd32::timers::timer6::Millis();
+#endif // CONFIG_TIME_USE_SYSTICK
 }
 
 [[nodiscard]] inline uint32_t UpTime() {
-  return gd32::UpTime();
+    return gv_seconds.uptime;
 }
-} // namespace timing
+} // namespace gd32
 
-#endif // GD32_TIMING_H_
+#endif // GD32_TIMERS_H_

@@ -28,7 +28,7 @@
 
 #if !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
 # error This file should not be included
-#endif
+#endif // !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
 
 #include <stdint.h>
 
@@ -55,7 +55,7 @@
 # define USART0_GPIOx			GPIOA
 # define USART0_TX_GPIO_PINx	GPIO_PIN_9
 # define USART0_RX_GPIO_PINx	GPIO_PIN_10
-#endif
+#endif // defined (USART0_REMAP)
 
 #define USART1_RCU_USART1		RCU_USART1
 #if defined (USART1_REMAP)
@@ -70,7 +70,7 @@
 # define USART1_GPIOx			GPIOA
 # define USART1_TX_GPIO_PINx	GPIO_PIN_2
 # define USART1_RX_GPIO_PINx	GPIO_PIN_3
-#endif
+#endif // defined (USART1_REMAP)
 
 #define USART2_RCU_USART2		RCU_USART2
 #if defined (USART2_FULL_REMAP)
@@ -91,7 +91,7 @@
 # define USART2_GPIOx			GPIOB
 # define USART2_TX_GPIO_PINx	GPIO_PIN_10
 # define USART2_RX_GPIO_PINx	GPIO_PIN_11
-#endif
+#endif // defined (USART2_FULL_REMAP)
 
 #define UART3_RCU_UART3			RCU_UART3
 #if defined (UART3_REMAP)
@@ -106,7 +106,7 @@
 # define UART3_GPIOx			GPIOC
 # define UART3_TX_GPIO_PINx		GPIO_PIN_10
 # define UART3_RX_GPIO_PINx		GPIO_PIN_11
-#endif
+#endif // defined (UART3_REMAP)
 
 #define UART4_RCU_UART4			RCU_UART4
 #define UART4_GPIO_AFx			GPIO_AF_8
@@ -130,7 +130,7 @@
 # define USART5_GPIOx			GPIOC
 # define USART5_TX_GPIO_PINx	GPIO_PIN_6
 # define USART5_RX_GPIO_PINx	GPIO_PIN_7
-#endif
+#endif // defined (USART5_REMAP)
 
 #define UART6_RCU_UART6			RCU_UART6
 #if defined (UART6_REMAP)
@@ -145,7 +145,7 @@
 # define UART6_GPIOx			GPIOE
 # define UART6_TX_GPIO_PINx		GPIO_PIN_8
 # define UART6_RX_GPIO_PINx		GPIO_PIN_7
-#endif
+#endif // defined (UART6_REMAP)
 
 #define UART7_RCU_UART7			RCU_UART7
 #define UART7_GPIO_AFx			GPIO_AF_8
@@ -173,7 +173,7 @@
 #else
 # define I2C0_SCL_GPIO_PINx		GPIO_PIN_6
 # define I2C0_SDA_GPIO_PINx		GPIO_PIN_7
-#endif
+#endif // defined (I2C0_REMAP)
 
 #define I2C1_PERIPH				I2C1
 #define I2C1_RCU_I2C1			RCU_I2C1
@@ -201,7 +201,7 @@
 # define I2C1_SDA_RCU_GPIOx		RCU_GPIOB
 # define I2C1_SDA_GPIOx			GPIOB
 # define I2C1_SDA_GPIO_PINx		GPIO_PIN_11
-#endif
+#endif // defined (I2C1_REMAP10)
 
 #define I2C2_PERIPH				I2C2
 #define I2C2_RCU_I2C2			RCU_I2C2
@@ -222,7 +222,7 @@
 # define I2C2_SDA_RCU_GPIOx		RCU_GPIOC
 # define I2C2_SDA_GPIOx			GPIOC
 # define I2C2_SDA_GPIO_PINx		GPIO_PIN_9
-#endif
+#endif // defined (I2C2_REMAP)
 
 /**
  * SPI
@@ -250,7 +250,7 @@
 # define SPI0_NSS_RCU_GPIOx		RCU_GPIOA
 # define SPI0_NSS_GPIOx			GPIOA
 # define SPI0_NSS_GPIO_PINx		GPIO_PIN_4
-#endif
+#endif // defined (SPI0_REMAP)
 
 #define SPI1_PERIPH				SPI1
 #define SPI1_GPIO_AFx			GPIO_AF_5
@@ -287,7 +287,7 @@
 # define SPI2_NSS_RCU_GPIOx		RCU_GPIOA
 # define SPI2_NSS_GPIOx			GPIOA
 # define SPI2_NSS_GPIO_PINx		GPIO_PIN_15
-#endif
+#endif // defined (SPI2_REMAP)
 
 #define SPI5_PERIPH				SPI5
 #define SPI5_RCU_SPI5			RCU_SPI5
@@ -363,7 +363,7 @@
 # define TIMER2_CH3_RCU_GPIOx	RCU_GPIOB
 # define TIMER2_CH3_GPIOx		GPIOB
 # define TIMER2_CH3_GPIO_PINx	GPIO_PIN_1
-#endif
+#endif // TIMER2_FULL_REMAP
 
 /**
  * DMA
@@ -473,4 +473,4 @@
 #define UART7_RX_DMA_CHx		DMA_CH6
 #define UART7_RX_DMA_SUBPERIx   DMA_SUBPERI5
 
-#endif /* MCU_GD32F4XX_MCU_H_ */
+#endif // MCU_GD32F4XX_MCU_H_

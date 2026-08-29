@@ -25,7 +25,7 @@
 
 #if defined(DEBUG_ENET)
 #undef NDEBUG
-#endif
+#endif // DEBUG_ENET
 
 #include "gd32.h" // IWYU pragma: keep
 #include "firmware/debug/debug_debug.h"
@@ -55,14 +55,14 @@ void EnetGpioConfig() {
 #ifdef PHY_CLOCK_MCO
     /* output HXTAL clock (25MHz) on CKOUT0 pin(PA8) to clock the PHY */
     rcu_ckout0_config(RCU_CKOUT0SRC_HXTAL, RCU_CKOUT0_DIV1);
-#endif /* PHY_CLOCK_MCO */
+#endif // PHY_CLOCK_MCO
 
 #ifdef USE_ENET0
     syscfg_enet_phy_interface_config(ENET0, SYSCFG_ENET_PHY_MII);
-#endif /* USE_ENET0 */
+#endif // USE_ENET0
 #ifdef USE_ENET1
     syscfg_enet_phy_interface_config(ENET1, SYSCFG_ENET_PHY_MII);
-#endif /* USE_ENET1 */
+#endif // USE_ENET1
 
 #elif defined RMII_MODE
     /* choose DIV12 to get 50MHz from 600MHz on CKOUT0 pin (PA8) to clock the PHY */
@@ -70,12 +70,12 @@ void EnetGpioConfig() {
 
 #ifdef USE_ENET0
     syscfg_enet_phy_interface_config(ENET0, SYSCFG_ENET_PHY_RMII);
-#endif /* USE_ENET0 */
+#endif // USE_ENET0
 #ifdef USE_ENET1
     syscfg_enet_phy_interface_config(ENET1, SYSCFG_ENET_PHY_RMII);
-#endif /* USE_ENET1 */
+#endif // USE_ENET1
 
-#endif /* MII_MODE */
+#endif // MII_MODE
 
 #ifdef USE_ENET0
 #ifdef MII_MODE
@@ -223,8 +223,8 @@ void EnetGpioConfig() {
     gpio_af_set(GPIOC, GPIO_AF_11, GPIO_PIN_4);
     gpio_af_set(GPIOC, GPIO_AF_11, GPIO_PIN_5);
 
-#endif /* MII_MODE */
-#endif /* USE_ENET0 */
+#endif // MII_MODE
+#endif // USE_ENET0
 
 #ifdef USE_ENET1
 #ifdef MII_MODE
@@ -368,7 +368,7 @@ void EnetGpioConfig() {
     gpio_af_set(GPIOG, GPIO_AF_6, GPIO_PIN_13);
     gpio_af_set(GPIOG, GPIO_AF_6, GPIO_PIN_14);
 
-#endif /* MII_MODE */
-#endif /* USE_ENET1 */
+#endif // MII_MODE
+#endif // USE_ENET1
     DEBUG_EXIT();
 }

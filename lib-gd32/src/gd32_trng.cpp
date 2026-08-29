@@ -24,21 +24,19 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_GD32_TRNG)
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <cstdio>
 
 #include "gd32_trng.h"
 #include "gd32.h" // IWYU pragma: keep
-#include "firmware/debug/debug_debug.h"
+#include "gd32_debug.h"
 
 namespace gd32::trng {
-static constexpr uint32_t kTimeout = 0xFFFF;
+namespace {
+constexpr uint32_t kTimeout = 0xFFFF;
+uint32_t out_last = 0;
 
-static bool ReadyCheck() {
+bool ReadyCheck() {
     uint32_t timeout = 0;
     FlagStatus trng_flag = RESET;
 
@@ -60,9 +58,10 @@ static bool ReadyCheck() {
 
     return true;
 }
+} // namespace
 
 bool Init() {
-    DEBUG_ENTRY();
+    GD32_TRNG_DEBUG_ENTRY();
 
     // TRNG module clock enable
     rcu_periph_clock_enable(RCU_TRNG);
@@ -70,14 +69,12 @@ bool Init() {
     trng_deinit();
     trng_enable();
     // check TRNG work status
-    const auto kReturn= ReadyCheck();
+    const auto kReturn = ReadyCheck();
 
-    DEBUG_PRINTF("%s", kReturn ? "Success" : "Error");
-    DEBUG_EXIT();
+    GD32_TRNG_DEBUG_PRINTF("%s", kReturn ? "Success" : "Error");
+    GD32_TRNG_DEBUG_EXIT();
     return kReturn;
 }
-
-static uint32_t out_last = 0;
 
 bool Get(uint32_t& out) {
     if (ReadyCheck()) {
@@ -94,4 +91,4 @@ bool Get(uint32_t& out) {
 }
 } // namespace gd32::trng
 
-#endif
+#endif // defined(GD32F20X) || defined(GD32F4XX)

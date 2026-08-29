@@ -30,7 +30,7 @@
 
 #if defined(PANELLED_595_COUNT)
 #include "gd32.h"
-#endif
+#endif // PANELLED_595_COUNT
 
 namespace panelled {
 namespace global {
@@ -49,7 +49,7 @@ inline void LedSpi([[maybe_unused]] uint32_t data) {
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE));
 
     static_cast<void>(SPI_DATA(SPI_PERIPH));
-#endif
+#endif // (PANELLED_595_COUNT >= 1)
 #if (PANELLED_595_COUNT >= 2)
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE));
 
@@ -58,7 +58,7 @@ inline void LedSpi([[maybe_unused]] uint32_t data) {
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE));
 
     static_cast<void>(SPI_DATA(SPI_PERIPH));
-#endif
+#endif // (PANELLED_595_COUNT >= 2)
 #if (PANELLED_595_COUNT >= 3)
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE));
 
@@ -67,7 +67,7 @@ inline void LedSpi([[maybe_unused]] uint32_t data) {
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE));
 
     static_cast<void>(SPI_DATA(SPI_PERIPH));
-#endif
+#endif // (PANELLED_595_COUNT >= 3)
 #if (PANELLED_595_COUNT == 4)
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE));
 
@@ -76,16 +76,16 @@ inline void LedSpi([[maybe_unused]] uint32_t data) {
     while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE));
 
     static_cast<void>(SPI_DATA(SPI_PERIPH));
-#endif
+#endif // (PANELLED_595_COUNT == 4)
 
     GPIO_BOP(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
-#endif
+#endif // PANELLED_595_COUNT
 }
 
 inline void Init() {
 #if defined(PANELLED_595_COUNT)
 
-#endif
+#endif // PANELLED_595_COUNT
 }
 
 inline void On([[maybe_unused]] uint32_t on) {
@@ -97,7 +97,7 @@ inline void On([[maybe_unused]] uint32_t on) {
     global::data |= on;
 
     LedSpi(global::data);
-#endif
+#endif // PANELLED_595_COUNT
 }
 
 inline void Off([[maybe_unused]] uint32_t off) {
@@ -109,13 +109,13 @@ inline void Off([[maybe_unused]] uint32_t off) {
     global::data &= ~off;
 
     LedSpi(global::data);
-#endif
+#endif // PANELLED_595_COUNT
 }
 
 inline void Run() {
 #if defined(PANELLED_595_COUNT)
 
-#endif
+#endif // PANELLED_595_COUNT
 }
 } // namespace panelled
 

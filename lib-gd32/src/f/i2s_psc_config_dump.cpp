@@ -25,7 +25,7 @@
 
 #include <cstdint>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
 #ifndef NDEBUG
 #include <cstdio>
@@ -45,7 +45,8 @@
 #define RCU_CFG1_PLL2MF_OFFSET 12U                       /* PLL2MF offset in RCU_CFG1 */
 
 void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout) {
-    uint32_t i2sdiv = 2U, i2sof = 0U;
+    uint32_t i2sdiv = 2U;
+    uint32_t i2sof = 0U;
     uint32_t clks = 0U;
     uint32_t i2sclock = 0U;
 
@@ -78,7 +79,7 @@ void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample
         /* calculate I2S clock based on PLL2 and PREDV1 */
         i2sclock = static_cast<uint32_t>((HXTAL_VALUE / i2sclock) * clks * 2U);
     } else
-#endif
+#endif // defined(GD32F10X_CL) || defined(GD32F20X_CL)
     {
         /* get system clock */
         i2sclock = rcu_clock_freq_get(CK_SYS);
@@ -109,4 +110,4 @@ void I2sPscConfigDump([[maybe_unused]] uint32_t spi_periph, uint32_t audiosample
 
     printf("clks=%u, i2sclock=%u, i2sof=%u, i2sdiv=%u\n", clks, i2sclock, i2sof, i2sdiv);
 }
-#endif
+#endif // NDEBUG

@@ -56,4 +56,4 @@ uint16_t bkp_data_read(bkp_data_register_enum register_number) {
 
     return 0;
 }
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)

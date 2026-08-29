@@ -28,7 +28,7 @@
 
 #if defined(GD32F10X) || defined(GD32F30X)
 #errror MCU is not supported
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X)
 
 #include <cstdint>
 

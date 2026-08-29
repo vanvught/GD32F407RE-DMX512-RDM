@@ -1,8 +1,8 @@
 /**
- * @file  systick.cpp
+ * @file gd32_gpio_macros.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,31 +23,43 @@
  * THE SOFTWARE.
  */
 
+#ifndef GD32_GPIO_MACROS_H_
+#define GD32_GPIO_MACROS_H_
+
+using GD32_Port_TypeDef = enum T_GD32_Port { 
+  GD32_GPIO_PORTA = 0, 
+  GD32_GPIO_PORTB, 
+  GD32_GPIO_PORTC, 
+  GD32_GPIO_PORTD, 
+  GD32_GPIO_PORTE, 
+  GD32_GPIO_PORTF, 
+  GD32_GPIO_PORTG, 
+  GD32_GPIO_PORTH, 
+  GD32_GPIO_PORTI, 
+  GD32_GPIO_PORTJ, 
+  GD32_GPIO_PORTK 
+};
+
+#ifdef __cplusplus
 #include <cstdint>
-
-#include "gd32.h"
-
-volatile uint32_t gv_nSysTickMillis;
-
-void SystickConfig()
-{
-    // Setup systick timer for 1000Hz interrupts
-    if (SysTick_Config(SystemCoreClock / 1000U))
-    {
-        while (1)
-        {
-        }
-    }
-
-    gv_nSysTickMillis = 0;
-
-    NVIC_SetPriority(SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); // Lowest priority
+namespace gd32 {
+constexpr uint32_t kGPioPins = 16;
+constexpr uint32_t PortToGpio(uint32_t port, uint32_t pin) {
+    return (port * kGPioPins) + pin;
 }
 
-extern "C"
-{
-    void SysTick_Handler()
-    {
-        gv_nSysTickMillis = gv_nSysTickMillis + 1;
-    }
+constexpr uint8_t GpioToPort(uint32_t gpio) {
+    return static_cast<uint8_t>(gpio / kGPioPins);
 }
+
+constexpr uint8_t GpioToNumber(uint32_t gpio) {
+    return static_cast<uint8_t>(gpio % kGPioPins);
+}
+} // namespace gd32
+
+#define GD32_PORT_TO_GPIO(p, n) gd32::PortToGpio((p), (n))
+#define GD32_GPIO_TO_PORT(g) gd32::GpioToPort((g))
+#define GD32_GPIO_TO_NUMBER(g) gd32::GpioToNumber((g))
+#endif // __cplusplus
+
+#endif // GD32_GPIO_MACROS_H_

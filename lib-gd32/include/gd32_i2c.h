@@ -28,20 +28,12 @@
 
 #include <cstdint>
 
-namespace gd32
-{
+namespace gd32 {
 inline constexpr uint32_t kI2CNormalSpeed = 100000;
 inline constexpr uint32_t kI2CFullSpeed = 400000;
 } // namespace gd32
 
-typedef enum GD32_I2C_RC
-{
-    GD32_I2C_OK = 0,
-    GD32_I2C_NOK,
-    GD32_I2C_NACK,
-    GD32_I2C_NOK_LA,
-    GD32_I2C_NOK_TOUT
-} gd32_i2c_rc_t;
+typedef enum GD32_I2C_RC { GD32_I2C_OK = 0, GD32_I2C_NOK, GD32_I2C_NACK, GD32_I2C_NOK_LA, GD32_I2C_NOK_TOUT } gd32_i2c_rc_t;
 
 void Gd32I2cBegin();
 void Gd32I2cSetBaudrate(uint32_t baudrate);
@@ -70,6 +62,6 @@ bool Gd32I2c1IsConnected(uint8_t address, uint32_t baudrate = gd32::kI2CNormalSp
 void Gd32I2c1WriteReg(uint8_t reg, uint8_t value);
 void Gd32I2c1WriteReg(uint8_t address, uint8_t reg, uint8_t value);
 void Gd32I2c1ReadReg(uint8_t reg, uint8_t& value);
-#endif
+#endif // CONFIG_ENABLE_I2C1
 
-#endif  // GD32_I2C_H_
+#endif // GD32_I2C_H_

@@ -28,18 +28,11 @@
 
 #include <cstdint>
 
-namespace pwm
-{
-enum class Channel
-{
-    PWM_CHANNEL_0,
-    PWM_CHANNEL_1,
-    PWM_CHANNEL_2,
-    PWM_CHANNEL_3
-};
+namespace pwm {
+enum class Channel { PWM_CHANNEL_0, PWM_CHANNEL_1, PWM_CHANNEL_2, PWM_CHANNEL_3 };
 } // namespace pwm
 
 void gd32_pwm_begin();
 void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle);
 
-#endif /* GD32_PWM_H_ */
+#endif // GD32_PWM_H_

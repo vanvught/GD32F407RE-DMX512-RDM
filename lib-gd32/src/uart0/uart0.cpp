@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-//#define CONFIG_USART0_ENABLE_RX_DMA
-//#define CONFIG_USART0_ENABLE_TX_DMA
+// #define CONFIG_USART0_ENABLE_RX_DMA
+// #define CONFIG_USART0_ENABLE_TX_DMA
 
 #include <cstdint>
 #include <cstdio>
@@ -33,7 +33,7 @@
 #include "gd32_uart.h"
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32_dma.h"
-#endif
+#endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32.h" // IWYU pragma: keep
 
 namespace uart0 {
@@ -42,7 +42,7 @@ static char s_printf_buffer[128];
 #if defined(CONFIG_USART0_ENABLE_TX_DMA)
 // static char s_tx_buffer[128];
 // static constexpr uint32_t kSizeTxBuffer = sizeof(s_tx_buffer);
-#endif
+#endif // CONFIG_USART0_ENABLE_TX_DMA
 
 #if defined(CONFIG_USART0_ENABLE_RX_DMA)
 static char s_rx_buffer[128];
@@ -69,7 +69,7 @@ extern "C" void USART0_IRQHandler() {
         DMA_CHCTL(USART0_DMAx, USART0_RX_DMA_CHx) = chtl;
     }
 }
-#endif
+#endif // CONFIG_USART0_ENABLE_RX_DMA
 
 void Init() {
     gd32::UartBegin(USART0, 115200U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop1Bit);
@@ -77,7 +77,7 @@ void Init() {
     // DMA
 #if defined(GD32H7XX)
     rcu_periph_clock_enable(RCU_DMAMUX);
-#endif // defined(GD32H7XX)
+#endif // GD32H7XX
 
     rcu_periph_clock_enable(USART0_RCU_DMAx);
 
@@ -87,7 +87,7 @@ void Init() {
     dma_struct_para_init(&dma_init_struct);
 #if defined(GD32H7XX)
     dma_init_struct.request = DMA_REQUEST_USART0_TX;
-#endif
+#endif // GD32H7XX
     dma_deinit(USART0_DMAx, USART0_TX_DMA_CHx);
     dma_struct_para_init(&dma_init_struct);
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
@@ -95,41 +95,41 @@ void Init() {
 #if defined(GD32F4XX) || defined(GD32H7XX)
 #else
     dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.periph_addr = reinterpret_cast<uint32_t>(&USART_DATA(USART0));
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
 #if defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #else
     dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.priority = DMA_PRIORITY_LOW;
     dma_init(USART0_DMAx, USART0_TX_DMA_CHx, &dma_init_struct);
     dma_circulation_disable(USART0_DMAx, USART0_TX_DMA_CHx);
 #if defined(GD32F4XX)
     dma_channel_subperipheral_select(USART0_DMAx, USART0_TX_DMA_CHx, USART0_TX_DMA_SUBPERIx);
-#endif
+#endif // GD32F4XX
     // USART
     usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
-#endif // defined(CONFIG_USART0_ENABLE_TX_DMA)
+#endif // CONFIG_USART0_ENABLE_TX_DMA
 
 #if defined(CONFIG_USART0_ENABLE_RX_DMA)
     dma_deinit(USART0_DMAx, USART0_RX_DMA_CHx);
     dma_struct_para_init(&dma_init_struct);
 #if defined(GD32H7XX)
     dma_init_struct.request = DMA_REQUEST_USART0_RX;
-#endif
+#endif // GD32H7XX
     dma_init_struct.direction = DMA_PERIPHERAL_TO_MEMORY;
 #if defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.memory0_addr = reinterpret_cast<uint32_t>(s_rx_buffer);
 #else
     dma_init_struct.memory_addr = reinterpret_cast<uint32_t>(s_rx_buffer);
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
 #if defined(GD32F4XX) || defined(GD32H7XX)
 #else
     dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.number = kSizeRxBuffer;
     dma_init_struct.periph_addr = reinterpret_cast<uint32_t>(&USART_DATA(USART0));
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
@@ -137,13 +137,13 @@ void Init() {
     dma_init_struct.periph_memory_width = DMA_PERIPHERAL_WIDTH_8BIT;
 #else
     dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     dma_init_struct.priority = DMA_PRIORITY_LOW;
     dma_init(USART0_DMAx, USART0_RX_DMA_CHx, &dma_init_struct);
     dma_circulation_disable(USART0_DMAx, USART0_RX_DMA_CHx);
 #if defined(GD32F4XX)
     dma_channel_subperipheral_select(USART0_DMAx, USART0_RX_DMA_CHx, USART0_RX_DMA_SUBPERIx);
-#endif
+#endif // GD32F4XX
     dma_channel_enable(USART0_DMAx, USART0_RX_DMA_CHx);
     // USART
     usart_dma_receive_config(USART0, USART_RECEIVE_DMA_ENABLE);
@@ -151,7 +151,7 @@ void Init() {
     NVIC_SetPriority(USART0_IRQn, 3);
     NVIC_EnableIRQ(USART0_IRQn);
     usart_interrupt_enable(USART0, USART_INT_IDLE);
-#endif // defined(CONFIG_USART0_ENABLE_RX_DMA)
+#endif // CONFIG_USART0_ENABLE_RX_DMA
 #endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 }
 
@@ -171,16 +171,18 @@ void WriteDma(const void* data, uint32_t size) {
     dma_chctl |= DMA_CHXCTL_CHEN;
     DMA_CHCTL(USART0_DMAx, USART0_TX_DMA_CHx) = dma_chctl;
 }
-#endif
+#endif // CONFIG_USART0_ENABLE_TX_DMA
 
-void PutChar(int c) {
-    if (c == '\n') {
-        while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
+void PutChar(int character) {
+    if (character == '\n') {
+        while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0)) {
+        }
         USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>('\r'));
     }
 
-    while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
-    USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>(c));
+    while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0)) {
+    }
+    USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>(character));
 }
 
 int Printf(const char* fmt, ...) {
@@ -188,23 +190,23 @@ int Printf(const char* fmt, ...) {
 
     va_start(arp, fmt);
 
-    int i = vsnprintf(s_printf_buffer, sizeof(s_printf_buffer), fmt, arp);
+    const auto kSize = vsnprintf(s_printf_buffer, sizeof(s_printf_buffer), fmt, arp);
     s_printf_buffer[sizeof(s_printf_buffer) - 1] = '\0';
 
     va_end(arp);
 
-    char* s = s_printf_buffer;
+    char* string_buffer = s_printf_buffer;
 
-    while (*s != '\0') {
-        PutChar(*s++);
+    while (*string_buffer != '\0') {
+        PutChar(*string_buffer++);
     }
 
-    return i;
+    return kSize;
 }
 
-void Puts(const char* s) {
-    while (*s != '\0') {
-        PutChar(*s++);
+void Puts(const char* string) {
+    while (*string != '\0') {
+        PutChar(*string++);
     }
 
     PutChar('\n');
@@ -234,13 +236,13 @@ int GetChar() {
         return EOF;
     }
 
-    const auto kC = static_cast<int>(USART_RDATA(USART0));
+    const auto kChar = static_cast<int>(USART_RDATA(USART0));
 
 #if defined(UART0_ECHO)
-    PutChar(c);
-#endif
+    PutChar(kChar);
+#endif // UART0_ECHO
 
-    return kC;
+    return kChar;
 }
-#endif
+#endif // CONFIG_USART0_ENABLE_RX_DMA
 } // namespace uart0

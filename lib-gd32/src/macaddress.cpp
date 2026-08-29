@@ -25,7 +25,7 @@
 
 #if defined(DEBUG_MACADDRESS)
 #undef NDEBUG
-#endif
+#endif // DEBUG_MACADDRESS
 
 #include <cstdint>
 

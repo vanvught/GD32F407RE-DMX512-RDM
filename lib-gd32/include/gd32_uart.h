@@ -35,7 +35,7 @@
 #define USART_RDATA USART_DATA
 #define USART_TDATA_TDATA USART_DATA_DATA
 #define USART_RDATA_TDATA USART_DATA_DATA
-#endif
+#endif // GD32H7XX
 
 namespace gd32 {
 inline constexpr uint32_t kUartBits8 = 8;
@@ -54,13 +54,13 @@ enum class Uart : uint32_t {
     kUart4 = UART4,
 #if defined(USART5)
     kUart5 = USART5,
-#endif
+#endif // USART5
 #if defined(UART6)
     kUart6 = UART6,
-#endif
+#endif // UART6
 #if defined(UART7)
     kUart7 = UART7
-#endif
+#endif // UART7
 };
 
 void UartBegin(uint32_t usart_periph, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop_bits);
@@ -98,7 +98,7 @@ template <usart_flag_enum kFlag> void UartFlagClear(uint32_t usart_periph) {
     }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
 }
 
 template <uint32_t kInterrupt> void UartInterruptEnable(uint32_t usart_periph) {
@@ -124,7 +124,7 @@ template <usart_interrupt_flag_enum kFlag> void UartInterruptFlagClear(uint32_t 
     }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
 }
 } // namespace gd32
 

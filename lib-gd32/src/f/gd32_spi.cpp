@@ -30,41 +30,44 @@
 #include "gd32_gpio.h"
 #include "gd32.h"
 
-static uint8_t s_cs = GD32_SPI_CS0;
+namespace {
+uint8_t s_cs = GD32_SPI_CS0;
 
-static void SetCsHigh() {
+void SetCsHigh() {
     if (s_cs == GD32_SPI_CS0) {
         GPIO_BOP(SPI_NSS_GPIOx) = SPI_NSS_GPIO_PINx;
     }
 }
 
-static void SetCsLow() {
+void SetCsLow() {
     if (s_cs == GD32_SPI_CS0) {
         GPIO_BC(SPI_NSS_GPIOx) = SPI_NSS_GPIO_PINx;
     }
 }
 
-static uint8_t SpiWriteRead(uint8_t byte) {
-    while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE));
+uint8_t SpiWriteRead(uint8_t byte) {
+    while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_TBE)) {
+    }
 
     SPI_DATA(SPI_PERIPH) = static_cast<uint32_t>(byte);
 
-    while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE));
+    while (RESET == (SPI_STAT(SPI_PERIPH) & SPI_FLAG_RBNE)) {
+    }
 
     return static_cast<uint8_t>(SPI_DATA(SPI_PERIPH));
 }
 
-static void RcuConfig() {
+void RcuConfig() {
     rcu_periph_clock_enable(SPI_RCU_SPIx);
     rcu_periph_clock_enable(SPI_RCU_GPIOx);
     rcu_periph_clock_enable(SPI_NSS_RCU_GPIOx);
 
 #if defined(GPIO_INIT)
     rcu_periph_clock_enable(RCU_AF);
-#endif
+#endif // GPIO_INIT
 }
 
-static void GpioConfig() {
+void GpioConfig() {
 #if defined(GPIO_INIT)
 #if defined(SPI_REMAP_GPIO)
     gpio_pin_remap_config(SPI_REMAP_GPIO, ENABLE);
@@ -75,7 +78,7 @@ static void GpioConfig() {
     if constexpr (SPI_PERIPH == SPI2) {
         gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
     }
-#endif
+#endif // SPI_REMAP_GPIO
     gpio_init(SPI_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, SPI_SCK_GPIO_PINx | SPI_MOSI_GPIO_PINx);
     gpio_init(SPI_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SPI_MISO_GPIO_PINx);
     gpio_init(SPI_NSS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
@@ -86,12 +89,12 @@ static void GpioConfig() {
 
     gpio_mode_set(SPI_NSS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, SPI_NSS_GPIO_PINx);
     gpio_output_options_set(SPI_NSS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, SPI_NSS_GPIO_PINx);
-#endif
+#endif // GPIO_INIT
 
     SetCsHigh();
 }
 
-static void SpiConfig() {
+void SpiConfig() {
     spi_disable(SPI_PERIPH);
     spi_i2s_deinit(SPI_PERIPH);
 
@@ -107,6 +110,7 @@ static void SpiConfig() {
 
     spi_enable(SPI_PERIPH);
 }
+} // namespace
 
 /*
  * Public API's
@@ -126,7 +130,7 @@ void Gd32SpiEnd() {
 #else
     gpio_mode_set(SPI_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_NONE, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
     gpio_mode_set(SPI_NSS_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_NONE, SPI_NSS_GPIO_PINx);
-#endif
+#endif // GPIO_INIT
 }
 
 void Gd32SpiSetSpeedHz(uint32_t speed_hz) {
@@ -251,11 +255,11 @@ static inline void BitbangSpiWrite(char c) {
     }
 }
 
-static inline char BitbangSpiWriteRead(char c) {
+static inline char BitbangSpiWriteRead(char character) {
     char r = 0;
 
     for (uint32_t mask = (1U << 7); mask != 0; mask = (mask >> 1U)) {
-        if (c & mask) {
+        if (character & mask) {
             GPIO_BOP(SPI_BITBANG_MOSI_GPIOx) = SPI_BITBANG_MOSI_GPIO_PINx;
         } else {
             GPIO_BC(SPI_BITBANG_MOSI_GPIOx) = SPI_BITBANG_MOSI_GPIO_PINx;
@@ -295,4 +299,4 @@ void Gd32BitbangSpiTransfernb(const char* tx_buffer, char* rx_buffer, uint32_t d
         tx_buffer++;
     }
 }
-#endif
+#endif // SPI_BITBANG_SCK_GPIO_PINx

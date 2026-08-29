@@ -27,7 +27,7 @@
 
 #include "emac/emac_phy.h"
 #include "emac/mmi.h"
-#include "gd32_millis.h"
+#include "gd32_timers.h"
 #include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
@@ -148,10 +148,10 @@ bool Config(uint16_t address) {
      * IEEE spec.
      */
 
-    const auto kMillis = millis();
+    const auto kMillis = gd32::Millis();
     uint16_t value;
 
-    while (millis() - kMillis < 500U) {
+    while (gd32::Millis() - kMillis < 500U) {
         if (!phy::Read(address, emac::mmi::REG_BMCR, value)) {
             DEBUG_PUTS("PHY status read failed");
             EMAC_PHY_DEBUG_EXIT();

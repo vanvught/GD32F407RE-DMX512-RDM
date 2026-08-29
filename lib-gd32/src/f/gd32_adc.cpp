@@ -75,7 +75,7 @@ void Gd32AdcInit() {
     adc_channel_16_to_18(ADC_VBAT_CHANNEL_SWITCH, ENABLE);
     /* ADC temperature and Vref enable */
     adc_channel_16_to_18(ADC_TEMP_VREF_CHANNEL_SWITCH, ENABLE);
-#endif
+#endif // GD32F4XX
     /* enable ADC interface */
     adc_enable(ADC0);
     timing::DelayUs(1000);
@@ -103,7 +103,7 @@ float Gd32AdcGetVbat() {
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
     return kVrefValue;
 }
-#endif
+#endif // GD32F4XX
 
 namespace board {
 float CoreTemperatureCurrent() {

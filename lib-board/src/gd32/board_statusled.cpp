@@ -2,7 +2,7 @@
  * @file board_statusled.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,37 +26,32 @@
 #include <cstdint>
 
 #include "board_statusled.h"
+#include "common/utils/utils_units.h"
 #include "softwaretimers.h"
 #include "board_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
-static TimerHandle_t s_timer_id = kTimerIdNone;
+namespace {
+TimerHandle_t s_timer_id = kTimerIdNone;
 
-#if !defined(HAL_HAVE_PORT_BIT_TOGGLE)
-static int32_t s_toggle_led = 1;
+#if !defined(MCU_HAVE_GPIO_TG)
+int32_t s_toggle_led = 1;
 #endif
 
-static void Ledblink([[maybe_unused]] TimerHandle_t handle) {
-#if defined(HAL_HAVE_PORT_BIT_TOGGLE)
+void Ledblink([[maybe_unused]] TimerHandle_t handle) {
+#if defined(MCU_HAVE_GPIO_TG)
     GPIO_TG(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #else
     s_toggle_led = -s_toggle_led;
 
     if (s_toggle_led > 0) {
-#if defined(CONFIG_LEDBLINK_USE_PANELLED)
-        hal::PanelLedOn(panelled::ACTIVITY);
-#else
         GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
     } else {
-#if defined(CONFIG_LEDBLINK_USE_PANELLED)
-        hal::PanelLedOff(panelled::ACTIVITY);
-#else
         GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
     }
 #endif
 }
+} // namespace
 
 namespace board::statusled {
 void SetFrequency(uint32_t frequency_hz) {
@@ -64,7 +59,7 @@ void SetFrequency(uint32_t frequency_hz) {
     BOARD_DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", static_cast<int>(s_timer_id), static_cast<unsigned>(frequency_hz));
 
     if (s_timer_id == kTimerIdNone) {
-        s_timer_id = SoftwareTimerAdd((1000U / frequency_hz), Ledblink);
+        s_timer_id = SoftwareTimerAdd((common::units::kMsPerSecond / frequency_hz), Ledblink);
         BOARD_DEBUG_EXIT();
         return;
     }
@@ -72,36 +67,29 @@ void SetFrequency(uint32_t frequency_hz) {
     switch (frequency_hz) {
         case 0:
             SoftwareTimerDelete(s_timer_id);
-#if defined(CONFIG_LEDBLINK_USE_PANELLED)
-            hal::PanelLedOff(panelled::ACTIVITY);
-#else
+
             GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
             break;
 #if !defined(CONFIG_HAL_USE_MINIMUM)
         case 1:
-            SoftwareTimerChange(s_timer_id, (1000U / 1));
+            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 1));
             break;
         case 3:
-            SoftwareTimerChange(s_timer_id, (1000U / 3));
+            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 3));
             break;
         case 5:
-            SoftwareTimerChange(s_timer_id, (1000U / 5));
+            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 5));
             break;
         case 8:
-            SoftwareTimerChange(s_timer_id, (1000U / 8));
+            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 8));
             break;
 #endif
         case 255:
             SoftwareTimerDelete(s_timer_id);
-#if defined(CONFIG_LEDBLINK_USE_PANELLED)
-            hal::PanelLedOn(panelled::ACTIVITY);
-#else
             GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
             break;
         default:
-            SoftwareTimerChange(s_timer_id, (1000U / frequency_hz));
+            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / frequency_hz));
             break;
     }
 

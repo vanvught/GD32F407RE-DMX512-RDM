@@ -61,7 +61,7 @@ static FlagStatus EnetPtpflagstatusGet(uint32_t flag) {
 
     return bitstatus;
 }
-#endif
+#endif // GD32H7XX
 
 static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] uint32_t carry_cfg, uint32_t accuracy_cfg) {
     DEBUG_ENTRY();
@@ -72,7 +72,7 @@ static void PtpStart(uint32_t init_sec, uint32_t init_subsec, [[maybe_unused]] u
     enet_ptp_feature_enable(ENET_ALL_RX_TIMESTAMP | ENET_RXTX_TIMESTAMP);
 #else
     enet_ptp_feature_enable(ENET_RXTX_TIMESTAMP);
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     enet_ptp_subsecond_increment_config(accuracy_cfg);
 
     enet_ptp_timestamp_addend_config(carry_cfg);
@@ -109,7 +109,7 @@ void Gd32PtpStart() {
     auto* tm = localtime(&tv.tv_sec);
 
     DEBUG_PRINTF("%.2d-%.2d-%.4d %.2d:%.2d:%.2d.%.6d", tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900, tm->tm_hour, tm->tm_min, tm->tm_sec, static_cast<int>(tv.tv_usec));
-#endif
+#endif // NDEBUG
     DEBUG_EXIT();
 }
 
@@ -123,7 +123,7 @@ void Gd32PtpGetTime(gd32::ptp::ptptime* ptp_time) {
     ptp_time->tv_nsec = systime.nanosecond;
 #else
     ptp_time->tv_nsec = gd32::PtpSubsecond2Nanosecond(systime.subsecond);
-#endif
+#endif // GD32F4XX
 }
 
 void Gd32PtpSetTime(const gd32::ptp::ptptime* ptp_time) {
@@ -157,7 +157,7 @@ void Gd32PtpUpdateTime(const gd32::ptp::time_t* time) {
     const auto kAddend = ENET_PTP_TSADDEND(ENETx);
 #else
     const auto kAddend = ENET_PTP_TSADDEND;
-#endif
+#endif // GD32H7XX
 
     enet_ptp_timestamp_update_config(sign, second, kSubSecond);
     enet_ptp_timestamp_function_config(ENET_PTP_SYSTIME_UPDATE);

@@ -29,14 +29,12 @@
 #include <cstdint>
 #include <cassert>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
 
-namespace dma::memcpy32
-{
+namespace dma::memcpy32 {
 void Init();
 
-inline void StartDma(const void* destination, const void* source, uint32_t length)
-{
+inline void StartDma(const void* destination, const void* source, uint32_t length) {
 #if !defined(GD32F4XX)
     assert((reinterpret_cast<uint32_t>(source) & 0x3) == 0);
     assert((reinterpret_cast<uint32_t>(destination) & 0x3) == 0);
@@ -67,16 +65,15 @@ inline void StartDma(const void* destination, const void* source, uint32_t lengt
 
     dma_chctl |= (DMA_CHXCTL_CHEN | DMA_CHXCTL_FTFIE);
     DMA_CHCTL(DMA1, DMA_CH0) = dma_chctl;
-#endif
+#endif // GD32F4XX
 }
 
-inline bool IsActive()
-{
+inline bool IsActive() {
 #if !defined(GD32F4XX)
     return DMA_CHCNT(DMA0, DMA_CH3) != 0;
 #else
     return DMA_CHCNT(DMA1, DMA_CH0) != 0;
-#endif
+#endif // GD32F4XX
 }
 } // namespace dma::memcpy32
 

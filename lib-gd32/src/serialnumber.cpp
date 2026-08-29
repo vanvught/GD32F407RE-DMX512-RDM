@@ -28,11 +28,11 @@
 #include "serialnumber.h"
 #include "gd32_unique_id.h"
 
-void SerialNumber(uint8_t sn[kSnSize]) {
+void SerialNumber(uint8_t serial_number[kSnSize]) {
     const auto kId0 = gd32::uid::Word0();
 
-    sn[0] = static_cast<uint8_t>((kId0 >> 0) & 0xFF);
-    sn[1] = static_cast<uint8_t>((kId0 >> 8) & 0xFF);
-    sn[2] = static_cast<uint8_t>((kId0 >> 16) & 0xFF);
-    sn[3] = static_cast<uint8_t>((kId0 >> 24) & 0xFF);
+    serial_number[0] = static_cast<uint8_t>((kId0 >> 0) & 0xFF);
+    serial_number[1] = static_cast<uint8_t>((kId0 >> 8) & 0xFF);
+    serial_number[2] = static_cast<uint8_t>((kId0 >> 16) & 0xFF);
+    serial_number[3] = static_cast<uint8_t>((kId0 >> 24) & 0xFF);
 }

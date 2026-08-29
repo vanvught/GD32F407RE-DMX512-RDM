@@ -28,11 +28,11 @@
 
 #if !defined(BOARD_GD32F407RE)
 # error This file should not be included
-#endif
+#endif // BOARD_GD32F407RE
 
 #if defined (MCU_GD32F407_MCU_H_)
 # error This file should be included later
-#endif
+#endif // defined (MCU_GD32F407_MCU_H_)
 
 #include <stdint.h>
 
@@ -111,7 +111,7 @@
 # define SPI0_REMAP
 # if defined (SPI0_REMAP)
 #  define SPI_REMAP_GPIO	SPI0_REMAP_GPIO
-# endif
+#endif // defined (SPI0_REMAP)
 # define SPI_PERIPH			SPI0_PERIPH
 # define SPI_GPIO_AFx		SPI0_GPIO_AFx
 # define SPI_RCU_SPIx		SPI0_RCU_SPI0
@@ -126,7 +126,7 @@
 # define SPI_DMAx			SPI0_DMAx
 # define SPI_DMA_CHx		SPI0_TX_DMA_CHx
 # define SPI_DMA_SUBPERIx	SPI0_TX_DMA_SUBPERIx
-#endif
+#endif // defined (CONFIG_SPI_USE_SPI2)
 
 /**
  * I2S
@@ -135,7 +135,7 @@
 #define SPI2_REMAP
 #if defined (SPI2_REMAP)
 # define I2S_REMAP_GPIO		SPI2_REMAP_GPIO
-#endif
+#endif // defined (SPI2_REMAP)
 #define I2S_GPIO_AFx		SPI2_GPIO_AFx
 #define I2S_PERIPH			SPI2_PERIPH
 #define I2S_RCU_SPIx		SPI2_RCU_SPI2
@@ -178,7 +178,7 @@ inline constexpr uint32_t kTcnet = 0;
 static constexpr uint32_t kPortARx = 0;
 static constexpr uint32_t kPortATx = 0;
 } // namespace panelled
-#endif
+#endif // __cplusplus
 
 /**
  * SPI flash
@@ -212,7 +212,7 @@ static constexpr uint32_t kPortATx = 0;
 #define GD32_MCU_NAME   "GD32F407RE"
 #if !defined(GD32_BOARD_NAME)
 #define GD32_BOARD_NAME "GD32F407RE"
-#endif
+#endif // GD32_BOARD_NAME
 
 #include "mcu/gd32f407_mcu.h"
 #include "gd32_gpio.h"
@@ -243,8 +243,8 @@ static constexpr uint32_t kPortATx = 0;
 #define SPI_LCD_BL_GPIO		GPIO_EXT_22
 #if defined(SPI_LCD_HAVE_CS_GPIO)
 # define SPI_LCD_CS_GPIO	GPIO_EXT_24
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
 
 #include "gpio_header.h"
 
-#endif /* BOARD_GD32F407RE_H_ */
+#endif // BOARD_GD32F407RE_H_

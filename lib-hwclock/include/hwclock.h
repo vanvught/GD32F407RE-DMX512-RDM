@@ -33,9 +33,8 @@
 #include <cassert>
 #endif
 
-#include "firmware/debug/debug_debug.h"
-
 #ifdef DEBUG_HWCLOCK
+#include "firmware/debug/debug_debug.h"
 #define HWCLOCK_DEBUG_ENTRY() DEBUG_ENTRY()
 #define HWCLOCK_DEBUG_EXIT() DEBUG_EXIT()
 #define HWCLOCK_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)

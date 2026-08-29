@@ -23,8 +23,6 @@
  * THE SOFTWARE.
  */
 
-#include <cstddef>
-
 #if !defined(_TIME_STAMP_DAY_)
 #define _TIME_STAMP_DAY_ 0
 #endif
@@ -39,6 +37,11 @@
 #error
 #endif
 
+#if (defined(GD32F4XX) || defined(GD32H7XX)) && !defined(MCU_HAVE_GPIO_TG)
+#error
+#endif
+
+#include <cstddef>
 #include <cstring>
 #include <cstdio>
 #include <cassert>
@@ -65,29 +68,13 @@
 #include "board_statusled.h"
 #include "panelled.h"
 #include "logic_analyzer.h"
+#include "gd32_timers.h"
 
-#if defined(CONFIG_HAL_USE_SYSTICK)
-void SystickConfig();
-#endif
-
-void UdelayInit();
 void Gd32AdcInit();
 
 #if defined(GD32H7XX)
 void CacheEnable();
 void MpuConfig();
-#endif
-
-void Timer5Config();
-void Timer6Config();
-#if !defined(CONFIG_NET_ENABLE_PTP)
-#if defined(CONFIG_TIME_USE_TIMER)
-#if defined(GD32H7XX)
-void Timer16Config();
-#else
-void Timer7Config();
-#endif
-#endif
 #endif
 
 #if !defined(DISABLE_RTC)
@@ -116,7 +103,7 @@ void Init() {
     uart0::Init();
 #endif
     // From here we console output
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
     putchar('\n');
 #endif
 
@@ -128,7 +115,7 @@ void Init() {
         // Clear section .dmx
         const auto kSize = static_cast<size_t>(&_edmx - &_sdmx);
         memset(&_sdmx, 0, kSize);
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
         printf("Cleared .dmx at %p, size %u\n", &_sdmx, kSize);
 #endif
     }
@@ -138,7 +125,7 @@ void Init() {
         // Clear section .lightset
         const auto kSize = static_cast<size_t>(&_elightset - &_slightset);
         memset(&_slightset, 0, kSize);
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
         printf("Cleared .lightset at %p, size %u\n", &_slightset, kSize);
 #endif
     }
@@ -147,7 +134,7 @@ void Init() {
         // Clear section .network
         const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
 #endif
     }
@@ -156,7 +143,7 @@ void Init() {
         // Clear section .pixel
         const auto kSize = static_cast<size_t>(&_epixel - &_spixel);
         memset(&_spixel, 0, kSize);
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
         printf("Cleared .pixel at %p, size %u\n", &_spixel, kSize);
 #endif
     }
@@ -168,20 +155,20 @@ void Init() {
         // clear section .network
         const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
 #endif
     }
 #endif
 #endif
 
-#if defined (BOARD_DEBUG)
+#if defined(BOARD_DEBUG)
     // Show the AHB and APBx busses frequency
     const auto kSys = rcu_clock_freq_get(CK_SYS);
     const auto kAhb = rcu_clock_freq_get(CK_AHB);
     const auto kApb1 = rcu_clock_freq_get(CK_APB1);
     const auto kApb2 = rcu_clock_freq_get(CK_APB2);
-    printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", kSys, kAhb, kApb1, kApb2);
+    printf("CK_SYS=%u\nCK_AHB=%u\nCK_APB1=%u\nCK_APB2=%u\n", static_cast<unsigned>(kSys), static_cast<unsigned>(kAhb), static_cast<unsigned>(kApb1), static_cast<unsigned>(kApb2));
     assert(kSys == MCU_CLOCK_FREQ);
     assert(kAhb == AHB_CLOCK_FREQ);
     assert(kApb1 == APB1_CLOCK_FREQ);
@@ -189,55 +176,14 @@ void Init() {
 #if defined(GD32H7XX)
     const auto kApb3 = rcu_clock_freq_get(CK_APB3);
     const auto kApb4 = rcu_clock_freq_get(CK_APB4);
-    printf("nCK_APB3=%u\nCK_APB4=%u\n", nAPB3, nAPB4);
+    printf("nCK_APB3=%u\nCK_APB4=%u\n", static_cast<unsigned>(nAPB3), static_cast<unsigned>(nAPB4));
     assert(kApb3 == APB3_CLOCK_FREQ);
     assert(kApb4 == APB4_CLOCK_FREQ);
 #endif
 #endif
 
-    /*
-     * Setup the TIMERx
-     */
+    gd32::timers::Start();
 
-#if defined(GD32H7XX)
-#elif defined(GD32F4XX)
-    /*
-     * AHB = SYSCLK = 240 MHz (GD32F470), others = 200 MHz
-     * APB1 = AHB / 4 =   50 MHz => APB1PSC = 0b101
-     * APB2 = AHB / 2  = 100 MHz => APB2PSC = 0b100
-     */
-
-    rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
-
-    /*
-     * If APB1PSC/APB2PSC in RCU_CFG0 register is 0b0xx(CK_APBx = CK_AHB),
-     * 0b100(CK_APBx = CK_AHB/2), or 0b101(CK_APBx = CK_AHB/4), the TIMER
-     * clock is equal to CK_AHB(CK_TIMERx = CK_AHB).
-     */
-
-    /*
-     * TIMER in APB1 domain: CK_TIMERx = AHB = 200 MHz => 240 MHz (GD32F470).
-     * TIMER in APB2 domain: CK_TIMERx = AHB = 200 MHz => 240 MHz (GD32F470).
-     */
-#else
-#endif
-
-    Timer5Config();
-    Timer6Config();
-#if defined(CONFIG_HAL_USE_SYSTICK)
-    SystickConfig();
-#endif
-#if !defined(CONFIG_NET_ENABLE_PTP)
-#if defined(CONFIG_TIME_USE_TIMER)
-#if defined(GD32H7XX)
-    Timer16Config();
-#else
-    Timer7Config();
-#endif
-#endif
-#endif
-
-    UdelayInit();
     Gd32AdcInit();
     Gd32I2cBegin();
 #if defined(CONFIG_ENABLE_I2C1)
@@ -261,16 +207,7 @@ void Init() {
 #endif
     bkp_data_write(BKP_DATA_1, 0x0);
 
-#if defined(CONFIG_HAVE_CRC32_HW)
-    rcu_periph_clock_enable(RCU_CRC);
-    crc_data_register_reset();
-#endif
-
-    /*
-     * Initialize status led, 74hc595 and panel led
-     */
-
-#if !defined(CONFIG_LEDBLINK_USE_PANELLED)
+    // Initialize status led
     rcu_periph_clock_enable(LED_BLINK_GPIO_CLK);
 #if defined(GPIO_INIT)
     gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
@@ -279,7 +216,6 @@ void Init() {
     gpio_output_options_set(LED_BLINK_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED, LED_BLINK_PIN);
 #endif
     GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-#endif
 
 #if defined(PANELLED_595_CS_GPIOx)
     rcu_periph_clock_enable(PANELLED_595_CS_RCU_GPIOx);
@@ -301,6 +237,7 @@ void Init() {
     logic_analyzer::Init();
 
 #if !defined(CONFIG_NET_ENABLE_PTP)
+#if defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_TIME_USE_SYSTICK)
     struct tm tmbuf;
     memset(&tmbuf, 0, sizeof(struct tm));
     tmbuf.tm_mday = _TIME_STAMP_DAY_;         // The day of the month, in the range 1 to 31.
@@ -308,9 +245,10 @@ void Init() {
     tmbuf.tm_year = _TIME_STAMP_YEAR_ - 1900; // The number of years since 1900.
 
     const auto kSeconds = mktime(&tmbuf);
-    const struct timeval kTv = {kSeconds, 0};
+    const struct timeval kTv = {.tv_sec = kSeconds, .tv_usec = 0};
 
     settimeofday(&kTv, nullptr);
+#endif
 #endif
 
 #if !defined(DISABLE_RTC)

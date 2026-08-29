@@ -32,28 +32,29 @@
 #include "gd32.h" // IWYU pragma: keep
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
-#define DMA_PARAMETER_STRUCT        dma_single_data_parameter_struct
-#define DMA_CHMADDR                 DMA_CHM0ADDR
-#define DMA_MEMORY_TO_PERIPHERAL    DMA_MEMORY_TO_PERIPH
-#define DMA_PERIPHERAL_TO_MEMORY    DMA_PERIPH_TO_MEMORY
-#define DMA_PERIPHERAL_WIDTH_8BIT   DMA_PERIPH_WIDTH_8BIT
-#define dma_init                    dma_single_data_mode_init
-#define dma_struct_para_init        dma_single_data_para_struct_init
+#define DMA_PARAMETER_STRUCT dma_single_data_parameter_struct
+#define DMA_CHMADDR DMA_CHM0ADDR
+#define DMA_MEMORY_TO_PERIPHERAL DMA_MEMORY_TO_PERIPH
+#define DMA_PERIPHERAL_TO_MEMORY DMA_PERIPH_TO_MEMORY
+#define DMA_PERIPHERAL_WIDTH_8BIT DMA_PERIPH_WIDTH_8BIT
+#define dma_init dma_single_data_mode_init
+#define dma_struct_para_init dma_single_data_para_struct_init
 #define dma_memory_to_memory_disable(x, y)
-#define DMA_INTERRUPT_ENABLE        (DMA_CHXCTL_FTFIE)
-#define DMA_INTERRUPT_DISABLE       (DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
-#define DMA_INTERRUPT_FLAG_GET      (DMA_INT_FLAG_FTF)
-#define DMA_INTERRUPT_FLAG_CLEAR    (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
+#define DMA_INTERRUPT_ENABLE (DMA_CHXCTL_FTFIE)
+#define DMA_INTERRUPT_DISABLE (DMA_CHXCTL_FTFIE | DMA_CHXCTL_HTFIE | DMA_CHXFCTL_FEEIE)
+#define DMA_INTERRUPT_FLAG_GET (DMA_INT_FLAG_FTF)
+#define DMA_INTERRUPT_FLAG_CLEAR (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)
 #else
-#define DMA_PARAMETER_STRUCT        dma_parameter_struct
-#define DMA_INTERRUPT_ENABLE        (DMA_INT_FTF)
-#define DMA_INTERRUPT_DISABLE       (DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
-#define DMA_INTERRUPT_FLAG_GET      (DMA_INT_FLAG_FTF)
-#define DMA_INTERRUPT_FLAG_CLEAR    (DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
-#endif
+#define DMA_PARAMETER_STRUCT dma_parameter_struct
+#define DMA_INTERRUPT_ENABLE (DMA_INT_FTF)
+#define DMA_INTERRUPT_DISABLE (DMA_INT_FTF | DMA_INT_HTF | DMA_INT_ERR)
+#define DMA_INTERRUPT_FLAG_GET (DMA_INT_FLAG_FTF)
+#define DMA_INTERRUPT_FLAG_CLEAR (DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
 #if defined(GD32F10X) || defined(GD32F30X)
-template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline bool Gd32DmaInterruptFlagGet() {
+template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag>
+inline bool Gd32DmaInterruptFlagGet() {
     uint32_t interrupt_enable = 0, interrupt_flag = 0;
 
     switch (flag) {
@@ -76,9 +77,12 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
     return interrupt_flag && interrupt_enable;
 }
 #elif defined(GD32F20X)
-template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline bool Gd32DmaInterruptFlagGet() {
-    uint32_t interrupt_enable = 0U, interrupt_flag = 0U;
-    uint32_t gif_check = 0x0FU, gif_enable = 0x0EU;
+template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag>
+inline bool Gd32DmaInterruptFlagGet() {
+    uint32_t interrupt_enable = 0U;
+    uint32_t interrupt_flag = 0U;
+    uint32_t gif_check = 0x0FU;
+    uint32_t gif_enable = 0x0EU;
 
     switch (flag) {
         case DMA_INT_FLAG_FTF:
@@ -108,7 +112,8 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
     return (interrupt_flag && interrupt_enable);
 }
 #elif defined(GD32F4XX) || defined(GD32H7XX)
-template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline bool Gd32DmaInterruptFlagGet() {
+template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag>
+inline bool Gd32DmaInterruptFlagGet() {
     uint32_t interrupt_enable = 0U, interrupt_flag = 0U;
 
     if constexpr (channelx < DMA_CH4) {
@@ -172,14 +177,16 @@ template <uint32_t dma_periph, dma_channel_enum channelx, uint32_t flag> inline 
 }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X)
 
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nFlag> void Gd32DmaInterruptFlagClear() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nFlag>
+void Gd32DmaInterruptFlagClear() {
     DMA_INTC(peripheral) |= DMA_FLAG_ADD(nFlag, channel);
 }
 #elif defined(GD32F4XX) || defined(GD32H7XX)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nFlag> inline void Gd32DmaInterruptFlagClear() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nFlag>
+inline void Gd32DmaInterruptFlagClear() {
     if constexpr (channel < DMA_CH4) {
         DMA_INTC0(peripheral) |= DMA_FLAG_ADD(nFlag, channel);
     } else {
@@ -188,10 +195,11 @@ template <uint32_t peripheral, dma_channel_enum channel, uint32_t nFlag> inline 
 }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
 
 #if defined(GD32F10X) || defined(GD32F30X)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inline void Gd32DmaInterruptDisable() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource>
+inline void Gd32DmaInterruptDisable() {
     if constexpr (DMA1 == peripheral) {
         static_assert(channel <= DMA_CH4, "for DMA1, the channel is from DMA_CH0 to DMA_CH4");
     }
@@ -199,11 +207,13 @@ template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inlin
     DMA_CHCTL(peripheral, channel) &= static_cast<uint32_t>(~nSource);
 }
 #elif defined(GD32F20X)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inline void Gd32DmaInterruptDisable() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource>
+inline void Gd32DmaInterruptDisable() {
     DMA_CHCTL(peripheral, channel) &= static_cast<uint32_t>(~nSource);
 }
 #elif defined(GD32F4XX)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inline void Gd32DmaInterruptDisable() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource>
+inline void Gd32DmaInterruptDisable() {
     if constexpr (DMA_CHXFCTL_FEEIE != nSource) {
         DMA_CHCTL(peripheral, channel) &= static_cast<uint32_t>(~nSource);
     } else {
@@ -211,7 +221,8 @@ template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inlin
     }
 }
 #elif defined(GD32H7XX)
-template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inline void Gd32DmaInterruptDisable() {
+template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource>
+inline void Gd32DmaInterruptDisable() {
     if constexpr (DMA_CHXFCTL_FEEIE != (DMA_CHXFCTL_FEEIE & nSource)) {
         DMA_CHCTL(peripheral, channel) &= static_cast<uint32_t>(~nSource);
     } else {
@@ -221,6 +232,6 @@ template <uint32_t peripheral, dma_channel_enum channel, uint32_t nSource> inlin
 }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F30X)
 
 #endif // GD32_DMA_H_

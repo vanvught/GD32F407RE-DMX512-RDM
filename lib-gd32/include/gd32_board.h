@@ -66,13 +66,13 @@
 #include "board/dmx4.h"
 #else
 #error Board is unknown / not defined
-#endif
+#endif // BOARD_GD32F103RC
 
 #include "board/logic_analyzer.h" // IWYU pragma: keep
 
 #if defined(USART0_REMAP) && !defined(I2C0_REMAP)
 #error Configuration error
-#endif
+#endif // defined(USART0_REMAP) && !defined(I2C0_REMAP)
 
 #if defined(GD32H7XX)
 #ifdef USE_ENET0
@@ -87,10 +87,10 @@
 #define RCU_ENETRX RCU_ENET1RX
 #else
 #error
-#endif
+#endif // USE_ENET0
 #else
 #define ENETx
-#endif
+#endif // GD32H7XX
 
 #ifdef __cplusplus
 #if defined(ENABLE_USB_HOST)
@@ -98,20 +98,20 @@ extern "C" {
 #include "usbh_core.h"
 extern usbh_host usb_host;
 }
-#endif // defined(ENABLE_USB_HOST)
+#endif // ENABLE_USB_HOST
 
 #if defined(CONFIG_DEBUG_STACK)
 #include "firmware/debug/debug_stack.h"
-#endif // defined(CONFIG_DEBUG_STACK)
+#endif // CONFIG_DEBUG_STACK
 
 #if defined(DEBUG_EMAC)
 void emac_debug_run();
-#endif // defined(DEBUG_EMAC)
+#endif // DEBUG_EMAC
 
 #if defined(USE_FREE_RTOS)
 #include "FreeRTOS.h"
 #include "task.h"
-#endif // defined(USE_FREE_RTOS)
+#endif // USE_FREE_RTOS
 
 #include "softwaretimers.h" // IWYU pragma: keep
 #include "panelled.h"
@@ -120,17 +120,17 @@ namespace board {
 inline void Run() {
 #if defined(ENABLE_USB_HOST)
     usbh_core_task(&usb_host);
-#endif // defined(ENABLE_USB_HOST)
+#endif // ENABLE_USB_HOST
 #if !defined(USE_FREE_RTOS)
     SoftwareTimerRun();
-#endif // !defined(USE_FREE_RTOS)
+#endif // USE_FREE_RTOS
     panelled::Run();
 #if defined(CONFIG_DEBUG_STACK)
     debug::stack::Run();
-#endif // defined(CONFIG_DEBUG_STACK)
+#endif // CONFIG_DEBUG_STACK
 #if defined(DEBUG_EMAC)
     emac_debug_run();
-#endif // defined(DEBUG_EMAC)
+#endif // DEBUG_EMAC
 }
 } // namespace board
 #endif // __cplusplus

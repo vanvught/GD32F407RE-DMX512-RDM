@@ -51,7 +51,8 @@ namespace gd32::enet {
  * - **GD32H7XX**: Similar to GD32F4XX but considers the Ethernet peripheral base address.
  */
 #if defined(GD32F10X) || defined(GD32F20X)
-template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
+template <enet_descstate_enum info_get>
+uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
     uint32_t reval = 0xFFFFFFFFU;
 
     switch (info_get) {
@@ -84,7 +85,8 @@ template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_d
     return reval;
 }
 #elif defined(GD32F4XX)
-template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
+template <enet_descstate_enum info_get>
+uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
     uint32_t reval = 0xFFFFFFFFU;
 
     switch (info_get) {
@@ -121,7 +123,8 @@ template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_d
     return reval;
 }
 #elif defined(GD32H7XX)
-template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
+template <enet_descstate_enum info_get>
+uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
     uint32_t reval = 0xFFFFFFFFU;
 
     switch (info_get) {
@@ -159,7 +162,7 @@ template <enet_descstate_enum info_get> uint32_t DescInformationGet(const enet_d
 }
 #else
 #error
-#endif
+#endif // defined(GD32F10X) || defined(GD32F20X)
 
 /**
  * @brief Clears DMA TX transmission flags and resumes DMA TX operation.
@@ -188,7 +191,7 @@ inline void ClearDmaTxFlagsAndResume() {
         ENET_DMA_TPEN = 0;                          ///< Resume DMA transmission
     }
 }
-#endif
+#endif // GD32H7XX
 
 /**
  * @brief Handles the Rx buffer unavailable (RBU) condition.
@@ -215,7 +218,7 @@ inline void HandleRxBufferUnavailable() {
         ENET_DMA_RPEN = 0;                 ///< Resume DMA reception
     }
 }
-#endif
+#endif // GD32H7XX
 
 #if defined(GD32H7XX)
 inline void ResetHash() {
@@ -227,35 +230,39 @@ inline void ResetHash() {
     ENET_MAC_HLH = 0;
     ENET_MAC_HLL = 0;
 }
-#endif
+#endif // GD32H7XX
 
 #if defined(GD32H7XX)
-template <uint32_t feature> inline void FilterFeatureDisable() {
+template <uint32_t feature>
+inline void FilterFeatureDisable() {
     auto value = ENET_MAC_FRMF(ENETx);
     value &= ~feature;
     ENET_MAC_FRMF(ENETx) = value;
 }
 #else
-template <uint32_t feature> inline void FilterFeatureDisable() {
+template <uint32_t feature>
+inline void FilterFeatureDisable() {
     auto value = ENET_MAC_FRMF;
     value &= ~feature;
     ENET_MAC_FRMF = value;
 }
-#endif
+#endif // GD32H7XX
 
 #if defined(GD32H7XX)
-template <uint32_t feature> inline void FilterFeatureEnable() {
+template <uint32_t feature>
+inline void FilterFeatureEnable() {
     auto value = ENET_MAC_FRMF(ENETx);
     value |= feature;
     ENET_MAC_FRMF(ENETx) = value;
 }
 #else
-template <uint32_t feature> inline void FilterFeatureEnable() {
+template <uint32_t feature>
+inline void FilterFeatureEnable() {
     auto value = ENET_MAC_FRMF;
     value |= feature;
     ENET_MAC_FRMF = value;
 }
-#endif
+#endif // GD32H7XX
 
 #if defined(GD32H7XX)
 inline void FilterSetHash(uint32_t hash) {
@@ -273,6 +280,6 @@ inline void FilterSetHash(uint32_t hash) {
         ENET_MAC_HLL |= (1U << hash);
     }
 }
-#endif
+#endif // GD32H7XX
 } // namespace gd32::enet
 #endif // GD32_ENET_H_
