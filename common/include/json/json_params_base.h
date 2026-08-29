@@ -50,11 +50,11 @@ class JsonParamsBase {
             }
 #ifdef DEBUG_JSON
             static_cast<Derived*>(this)->Dump();
-#endif
+#endif // DEBUG_JSON
         } else {
             JSON_DEBUG_PRINTF("Failed to open file: %s", file_name);
         }
-#endif
+#endif // DISABLE_FS
     }
 
    protected:

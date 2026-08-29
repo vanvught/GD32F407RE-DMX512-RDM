@@ -44,6 +44,6 @@
 #define JSON_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_JSON
 
 #endif // JSON_JSON_DEBUG_H_
