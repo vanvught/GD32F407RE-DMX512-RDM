@@ -4,7 +4,7 @@
       "3RCB": {
         "series": "GD32F103",
         "flash": {
-          "256": "GD32F103RCXX"
+          "256": "GD32F103XCXX"
         }
       },
       "3RCF": {
@@ -35,6 +35,12 @@
           "256": "GD32F107XCXX"
         }
       },
+      "7VCC": {
+        "series": "GD32F207",
+        "flash": {
+          "256": "GD32F207XCXX"
+        }
+      },
       "7RGC": {
         "series": "GD32F207",
         "flash": {
@@ -54,13 +60,19 @@
       "9VEE": {
         "series": "GD32F450",
         "flash": {
-          "512": "GD32F450VEXX"
+          "512": "GD32F450XEXX"
+        }
+      },
+      "9VGE": {
+        "series": "GD32F450",
+        "flash": {
+          "1024": "GD32F450XGXX"
         }
       },
       "9VIE": {
         "series": "GD32F450",
         "flash": {
-          "2048": "GD32F450VIXX"
+          "2048": "GD32F450XIXX"
         }
       },
       "0VGN": {
