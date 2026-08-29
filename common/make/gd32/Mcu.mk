@@ -42,13 +42,6 @@ ifeq ($(strip $(MCU)),GD32F207RG)
 	LINE=gd32f20x_cl
 endif
 
-ifeq ($(strip $(MCU)),GD32F303CB)
-	LINKER=$(FIRMWARE_DIR)gd32f303cb_flash.ld
-	FAMILY=gd32f30x
-	LINE=gd32f30x_hd
-	TARGET=gd32f303cb.bin
-endif
-
 ifeq ($(strip $(MCU)),GD32F303RC)
 	LINKER=$(FIRMWARE_DIR)gd32f303rc_flash.ld
 	FAMILY=gd32f30x
@@ -60,12 +53,6 @@ ifeq ($(strip $(MCU)),GD32F407RE)
   LINKER=$(FIRMWARE_DIR)gd32f407re_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f407
-endif
-
-ifeq ($(strip $(MCU)),GD32F450VE) 
-  LINKER=$(FIRMWARE_DIR)gd32f450ve_flash.ld
-  FAMILY=gd32f4xx
-  LINE=gd32f450
 endif
 
 ifeq ($(strip $(MCU)),GD32F450VI) 
@@ -84,12 +71,6 @@ ifeq ($(strip $(MCU)),GD32F470ZK)
   LINKER=$(FIRMWARE_DIR)gd32f470zk_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f470
-endif
-
-ifeq ($(strip $(MCU)),GD32H757ZM) 
-  LINKER=$(FIRMWARE_DIR)gd32h7xx_xM_flash.ld
-  FAMILY=gd32h7xx
-  LINE=gd32h757
 endif
 
 ifeq ($(strip $(MCU)),GD32H759IM) 
@@ -121,6 +102,9 @@ CMSISOPS=-D__Vendor_SysTickConfig=0
 
 ifeq ($(FAMILY),gd32f10x)
 	ARMOPS=$(ARMOPS_CM3)
+	DEFINES+=-DMCU_HAVE_TRNG
+	DEFINES+=-DMCU_HAVE_CAU
+	DEFINES+=-DMCU_HAVE_HAU
 endif
 
 ifeq ($(FAMILY),gd32f20x)
@@ -137,12 +121,15 @@ ifeq ($(FAMILY),gd32f4xx)
 	ARMOPS=$(ARMOPS_CM4)
 	CMSISOPS+=$(CMSISOPS_FPU_PRESENT)
 	TARGET=gd32f4xx.bin
+	DEFINES+=-DMCU_HAVE_TRNG
+	DEFINES+=-DMCU_HAVE_GPIO_TG
 endif
 
 ifeq ($(FAMILY),gd32h7xx)
 	ARMOPS=$(ARMOPS_CM7)
 	CMSISOPS+=-D__FPU_PRESENT=1 -DARM_MATH_CM7
 	TARGET=gd32h7xx.bin
+	DEFINES+=-DMCU_HAVE_GPIO_TG
 endif
 
 FAMILY_UC=$(shell echo $(FAMILY) | tr a-w A-W)
