@@ -133,7 +133,7 @@ const uint8_t* GetFileContent(const char* file_name, uint32_t& size, http::Conte
 
     const auto kHash = Fnv1a32Runtime(file_name, strlen(file_name));
 
-    HTTPD_DEBUG_PRINTF("%s:%u", file_name, static_cast<unsigned>(kHash));
+    HTTPD_DEBUG_PRINTF("%s:%x", file_name, static_cast<unsigned>(kHash));
 
     for (const auto& content : kHttpContent) {
         if (kHash == content.hash) {

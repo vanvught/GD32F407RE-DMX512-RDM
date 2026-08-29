@@ -178,7 +178,9 @@ constexpr Info kFileInfos[] = {
     ENTRY(GetList, nullptr, nullptr, "list", nullptr, nullptr), 
 	ENTRY(GetVersion, nullptr, nullptr, "version", nullptr, nullptr), 
 	ENTRY(GetUptime, nullptr, nullptr, "uptime", nullptr, nullptr), 
+#if HAVE_TIMEOFDAY
 	ENTRY(GetTimeofday, SetTimeofday, nullptr, "timedate", nullptr, nullptr),
+#endif  
 #if !defined(CONFIG_HTTP_HTML_INDEX_ONLY)
     // Status
 	ENTRY(status::Directory, nullptr, nullptr, "status/directory", nullptr, nullptr),

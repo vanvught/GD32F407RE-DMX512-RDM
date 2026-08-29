@@ -27,9 +27,6 @@
 #include <cstdint>
 #include <cassert>
 #include <dirent.h>
-#ifndef NDEBUG
-#include <errno.h>
-#endif
 
 namespace json::storage {
 static bool Filter(const char* name) {
@@ -40,31 +37,28 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
     const auto kBufferSize = out_buffer_size - 2U;
 #if defined(__linux__) || defined(__APPLE__)
     auto* dirp = opendir("storage");
-#elif defined(CONFIG_USB_HOST_MSC)
-    auto* dirp = opendir("0:/");
 #else
     auto* dirp = opendir(".");
 #endif
-#ifndef NDEBUG
     perror("opendir");
-#endif
 
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, "{\"label\":\"%s\",\"files\":[", (dirp != nullptr) ? "storage" : "No storage"));
+    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, R"({"label":"%s","files":[)", (dirp != nullptr) ? "storage" : "No storage"));
 
     if (dirp != nullptr) {
-        struct dirent* dp;
+        struct dirent* read_dir{};
         do {
-            if ((dp = readdir(dirp)) != nullptr) {
-                if (dp->d_type == DT_DIR) {
+            read_dir = readdir(dirp);
+            if (read_dir != nullptr) {
+                if (read_dir->d_type == DT_DIR) {
                     continue;
                 }
 
-                if (Filter(dp->d_name)) {
+                if (Filter(read_dir->d_name)) {
                     continue;
                 }
 
                 const auto kSize = kBufferSize - length;
-                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, "\"%s\",", dp->d_name));
+                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, "\"%s\",", read_dir->d_name));
 
                 if (kCharacters > kSize) {
                     break;
@@ -76,7 +70,7 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
                     break;
                 }
             }
-        } while (dp != nullptr);
+        } while (read_dir != nullptr);
 
         closedir(dirp);
 

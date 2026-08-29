@@ -75,6 +75,9 @@
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 #include "config_dmxsend.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
+#if !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
+#include "pixeltype.json.h"
+#endif // !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 #include "upload_index.html.h"
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
@@ -164,6 +167,9 @@ inline constexpr struct FilesContent kHttpContent[] = {
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 	{ 381868932,"config_dmxsend.js", config_dmxsend_js_gz, 662, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
+#if !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
+	{ 2632765249,"pixeltype.json", pixeltype_json_gz, 277, static_cast<http::ContentTypes>(3), true },
+#endif // !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 	{ 137651886,"upload_index.html", upload_index_html_gz, 563, static_cast<http::ContentTypes>(0), true },
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)

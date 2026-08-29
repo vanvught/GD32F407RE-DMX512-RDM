@@ -24,7 +24,7 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 #include <cassert>
 
@@ -38,45 +38,8 @@
 #include "firmware/debug/debug_debug.h"
 
 namespace json {
-uint32_t GetTimeofday(char* out_buffer, uint32_t out_buffer_size) {
-    DEBUG_ENTRY();
-
-    struct timeval tv;
-    if (gettimeofday(&tv, nullptr) >= 0) {
-        auto* tm = localtime(&tv.tv_sec);
-
-        int32_t hours;
-        uint32_t minutes;
-        global::GetUtcOffset(hours, minutes);
-
-        if ((hours == 0) && (minutes == 0)) {
-            const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"date\":\"%d-%.2d-%.2dT%.2d:%.2d:%.2dZ\"}\n", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec));
-
-            DEBUG_EXIT();
-            return kLength;
-        } 
-            const auto kLength = static_cast<uint32_t>(
-                snprintf(out_buffer, out_buffer_size, "{\"date\":\"%d-%.2d-%.2dT%.2d:%.2d:%.2d%s%.2d:%.2u\"}\n", 
-                  1900 + tm->tm_year, 
-                  1 + tm->tm_mon, 
-                  tm->tm_mday, 
-                  tm->tm_hour, 
-                  tm->tm_min, 
-                  tm->tm_sec, 
-                  hours > 0 ? "+" : "", 
-                  static_cast<int>(hours), 
-                  static_cast<unsigned int>(minutes)));
-
-            DEBUG_EXIT();
-            return kLength;
-        
-    }
-
-    DEBUG_EXIT();
-    return 0;
-}
-
-static void SetDate(const char* date, uint32_t date_length) {
+namespace {
+void SetDate(const char* date, uint32_t date_length) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("%.*s [%u]", static_cast<int>(date_length), date, static_cast<unsigned>(date_length));
 
@@ -114,13 +77,7 @@ static void SetDate(const char* date, uint32_t date_length) {
 
         settimeofday(&tv, nullptr);
 
-        DEBUG_PRINTF("%.4d-%.2d-%.2dT%.2d:%.2d:%.2d", 
-			(1900 + tm.tm_year), 
-			(1 + tm.tm_mon), 
-			static_cast<int>(tm.tm_mday), 
-			static_cast<int>(tm.tm_hour), 
-			static_cast<int>(tm.tm_min), 
-			static_cast<int>(tm.tm_sec));
+        DEBUG_PRINTF("%.4d-%.2d-%.2dT%.2d:%.2d:%.2d", (1900 + tm.tm_year), (1 + tm.tm_mon), static_cast<int>(tm.tm_mday), static_cast<int>(tm.tm_hour), static_cast<int>(tm.tm_min), static_cast<int>(tm.tm_sec));
         DEBUG_EXIT();
         return;
     }
@@ -128,9 +85,54 @@ static void SetDate(const char* date, uint32_t date_length) {
     DEBUG_EXIT();
 }
 
-static constexpr auto kDate = json::MakeSimpleKey("date");
+constexpr auto kDate = json::MakeSimpleKey("date");
 
-static constexpr json::Key kActionKeys[] = {json::MakeKey(SetDate, kDate)};
+constexpr json::Key kActionKeys[] = {json::MakeKey(SetDate, kDate)};
+} // namespace
+uint32_t GetTimeofday(char* out_buffer, uint32_t out_buffer_size) {
+    DEBUG_ENTRY();
+
+    struct timeval time_val;
+    if (gettimeofday(&time_val, nullptr) >= 0) {
+        auto* local_time = localtime(&time_val.tv_sec);
+
+        int32_t hours;
+        uint32_t minutes;
+        global::GetUtcOffset(hours, minutes);
+
+        if ((hours == 0) && (minutes == 0)) {
+            const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
+              "{\"date\":\"%d-%.2d-%.2dT%.2d:%.2d:%.2dZ\"}\n", 
+              1900 + local_time->tm_year, 
+              1 + local_time->tm_mon, 
+              local_time->tm_mday, 
+              local_time->tm_hour, 
+              local_time->tm_min, 
+              local_time->tm_sec));
+
+            DEBUG_EXIT();
+            return kLength;
+        }
+
+        const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
+          "{\"date\":\"%d-%.2d-%.2dT%.2d:%.2d:%.2d%s%.2d:%.2u\"}\n", 
+          1900 + local_time->tm_year, 
+          1 + local_time->tm_mon, 
+          local_time->tm_mday, 
+          local_time->tm_hour, 
+          local_time->tm_min, 
+          local_time->tm_sec,                      
+          hours > 0 ? "+" : "", 
+          static_cast<int>(hours), 
+          static_cast<unsigned int>(minutes)));
+
+        DEBUG_EXIT();
+        return kLength;
+    }
+
+    DEBUG_EXIT();
+    return 0;
+}
 
 void SetTimeofday(const char* buffer, uint32_t buffer_size) {
     DEBUG_ENTRY();
