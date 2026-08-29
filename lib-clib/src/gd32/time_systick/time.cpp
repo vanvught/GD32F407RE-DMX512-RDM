@@ -23,6 +23,10 @@
  * THE SOFTWARE.
  */
 
+#if defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_NET_ENABLE_PTP)
+#error
+#endif
+
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 
@@ -30,7 +34,7 @@
 #include <cstdint>
 #include <cassert>
 
-extern volatile uint32_t gv_nSysTickMillis;
+extern volatile uint32_t gv_systick_millis;
 
 static uint32_t previous_systick_millis;
 static struct timeval s_tv;
@@ -44,7 +48,7 @@ extern "C" {
 int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz) {
     assert(tv != 0);
 
-    const auto kCurrentSysTickMillis = gv_nSysTickMillis;
+    const auto kCurrentSysTickMillis = gv_systick_millis;
 
     uint32_t millis_elapsed;
 
@@ -79,7 +83,7 @@ int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct 
     struct timeval g;
     gettimeofday(&g, nullptr);
 
-    previous_systick_millis = gv_nSysTickMillis;
+    previous_systick_millis = gv_systick_millis;
 
     s_tv.tv_sec = tv->tv_sec;
     s_tv.tv_usec = tv->tv_usec;

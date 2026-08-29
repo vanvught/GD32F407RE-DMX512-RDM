@@ -11,15 +11,12 @@ ifneq ($(MAKE_FLAGS),)
   	ifeq ($(findstring CONFIG_TIME_USE_TIMER,$(MAKE_FLAGS)), CONFIG_TIME_USE_TIMER)
   		EXTRA_SRCDIR+=src/gd32/time_timer
   	else
-  		EXTRA_SRCDIR+=src/gd32/time_systick
+  		ifeq ($(findstring CONFIG_TIME_USE_SYSTICK,$(MAKE_FLAGS)), CONFIG_TIME_USE_SYSTICK)
+  			EXTRA_SRCDIR+=src/gd32/time_systick
+  		endif
   	endif
   endif
-	ifeq ($(findstring CONFIG_HAVE_CRC32_HW,$(MAKE_FLAGS)), CONFIG_HAVE_CRC32_HW)
-		EXTRA_SRCDIR+=src/gd32/crc32
-	endif
 else
-  EXTRA_SRCDIR+=src/gd32/time_systick
-  
 	EXTRA_SRCDIR+=src/gd32/time_timer
 	DEFINES+=CONFIG_TIME_USE_TIMER
 endif

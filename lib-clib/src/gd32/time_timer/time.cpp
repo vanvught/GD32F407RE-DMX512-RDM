@@ -23,15 +23,21 @@
  * THE SOFTWARE.
  */
 
-#include <ctime>
+#if !defined(CONFIG_TIME_USE_TIMER)
+#error
+#endif
+
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 
+#include <ctime>
 #include <sys/time.h>
 #include <cstdint>
 #include <cassert>
 
-#include "gd32.h"
+#include "gd32.h" // IWYU pragma: keep
+#include "gd32_timers.h"
+#include "gd32_debug.h"
 
 #if defined(GD32H7XX)
 #define TIMERx TIMER16
@@ -41,17 +47,14 @@
 #define TIMERx TIMER7
 #define RCU_TIMERx RCU_TIMER7
 #if defined(GD32F10X) || defined(GD32F30X)
-#define TIMERx_IRQn TIMER7_IRQn
+#define TIMERx_IRQn TIMER7_UP_IRQn
 #else
 #define TIMERx_IRQn TIMER7_UP_TIMER12_IRQn
 #endif
 #endif
 
-extern struct HwTimersSeconds gv_seconds;
-
 extern "C" {
-#if !defined(CONFIG_NET_ENABLE_PTP)
-#if defined(CONFIG_TIME_USE_TIMER)
+#if defined(CONFIG_TIME_USE_TIMER) // Include IRQ handler when used only
 #if defined(GD32H7XX)
 void TIMER16_IRQHandler() {
 #elif defined(GD32F10X) || defined(GD32F30X)
@@ -62,20 +65,18 @@ void TIMER7_UP_TIMER12_IRQHandler() {
     const auto nIntFlag = TIMER_INTF(TIMERx);
 
     if ((nIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) {
-        gv_seconds.timeval++;
+        gv_seconds.timeval = gv_seconds.timeval + 1;
     }
 
-    TIMER_INTF(TIMERx) = static_cast<uint32_t>(~nIntFlag);
+    TIMER_INTF(TIMERx) = ~nIntFlag;
 }
-#endif
 #endif
 }
 
-#if defined(GD32H7XX)
-void Timer16Config() {
-#else
-void Timer7Config() {
-#endif
+namespace gd32::timers::timer_time {
+void Start() {
+    GD32_TIMERS_DEBUG_ENTRY();
+
     gv_seconds.timeval = 0;
 
     rcu_periph_clock_enable(RCU_TIMERx);
@@ -98,7 +99,10 @@ void Timer7Config() {
     NVIC_EnableIRQ(TIMERx_IRQn);
 
     timer_enable(TIMERx);
+
+    GD32_TIMERS_DEBUG_EXIT();
 }
+} // namespace gd32::timers::timer_time
 
 extern "C" {
 /*
@@ -127,8 +131,8 @@ int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct 
     assert(tv != nullptr);
 
     // Disable the timer interrupt to prevent it from triggering while we adjust the counter
-    TIMER_DMAINTEN(TIMERx) &= static_cast<uint32_t>(~TIMER_INT_UP);
-    TIMER_CTL0(TIMERx) &= static_cast<uint32_t>(~TIMER_CTL0_CEN);
+    TIMER_DMAINTEN(TIMERx) &= (~TIMER_INT_UP);
+    TIMER_CTL0(TIMERx) &= (~TIMER_CTL0_CEN);
 
     gv_seconds.timeval = static_cast<uint32_t>(tv->tv_sec);
     TIMER_CNT(TIMERx) = (static_cast<uint32_t>(tv->tv_usec) / 100U) % 10000U;

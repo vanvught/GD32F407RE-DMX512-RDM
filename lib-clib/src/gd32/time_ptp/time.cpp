@@ -23,10 +23,14 @@
  * THE SOFTWARE.
  */
 
-#include <cstdint>
+#if !defined(CONFIG_NET_ENABLE_PTP)
+#error
+#endif
+
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 
+#include <cstdint>
 #include <time.h>
 #include <sys/time.h>
 #include <cassert>
@@ -65,10 +69,10 @@ int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
 }
 
 int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
-    assert(tv != 0);
+    assert(tv != nullptr);
 
     const uint32_t kSign = ENET_PTP_ADD_TO_TIME;
-    const uint32_t kSecond = static_cast<uint32_t>(tv->tv_sec);
+    const auto kSecond = static_cast<uint32_t>(tv->tv_sec);
     const uint32_t kNanoSecond = static_cast<uint32_t>(tv->tv_usec) * 1000U;
     const auto kSubSecond = gd32::PtpNanosecond2Subsecond(kNanoSecond);
 
