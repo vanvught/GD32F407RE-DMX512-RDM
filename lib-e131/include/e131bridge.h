@@ -163,19 +163,19 @@ class E131Bridge
     bool GetEnableDataIndicator() const;
 
     void SetDisableSynchronize(bool disable_synchronize);
-    bool GetDisableSynchronize() const;
+    [[nodiscard]] bool GetDisableSynchronize() const;
 
     void SetE131Sync(E131SyncCallbackFunctionPtr e131_sync) { sync_callback_function_pointer_ = e131_sync; }
 
     void SetInputDisabled(uint32_t port_index, bool disable);
-    bool GetInputDisabled(uint32_t port_index) const;
+    [[nodiscard]] bool GetInputDisabled(uint32_t port_index) const;
 
     void Clear(uint32_t port_index);
 
 #if defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
     void SetSourceName(const char* source_name);
-    const char* GetSourceName() const;
-    const uint8_t* GetCid() const;
+    [[nodiscard]] const char* GetSourceName() const;
+    [[nodiscard]] const uint8_t* GetCid() const;
 #endif
 
 #if defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
@@ -200,7 +200,7 @@ class E131Bridge
     void SetSynchronizationAddress(bool source_a, bool source_b, uint16_t synchronization_address);
 
     void CheckMergeTimeouts(uint32_t port_index);
-    bool IsPriorityTimeOut(uint32_t port_index) const;
+    [[nodiscard]] bool IsPriorityTimeOut(uint32_t port_index) const;
     bool IsIpCidMatch(const e131bridge::Source* const kSource) const;
     void UpdateMergeStatus(uint32_t port_index);
 
@@ -220,7 +220,6 @@ class E131Bridge
 
     void static StaticCallbackFunctionSendDiscoveryPacket([[maybe_unused]] TimerHandle_t timer_handle) { s_this->SendDiscoveryPacket(); }
 
-   private:
     int32_t handle_{-1};
     uint8_t* receive_buffer_{nullptr};
     uint32_t packet_millis_{0};

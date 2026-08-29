@@ -32,8 +32,8 @@
 #include "dmxnode_outputtype.h"
 #include "dmxnode_data.h"
 #include "timing.h"
-#include "board_statusled.h"
 #include "network_config.h"
+#include "board_statusled.h"
 
 inline void E131Bridge::SetOutput(DmxNodeOutputType* dmx_node_output_type) {
     dmxnode_output_type_ = dmx_node_output_type;

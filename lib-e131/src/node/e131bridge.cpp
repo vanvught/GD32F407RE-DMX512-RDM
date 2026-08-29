@@ -31,6 +31,7 @@
 
 #include "e131.h"
 #include "e131bridge.h"
+#include "e131bridge_debug.h"
 #include "e131const.h"
 #include "e117.h"
 #if defined(E131_HAVE_DMXIN)
@@ -44,16 +45,13 @@
 #include "network_udp.h"
 #include "network_iface.h"
 #include "network_igmp.h"
-#include "core/ip4/igmp.h"
 #include "softwaretimers.h"
 #include "timing.h"
 #include "panelled.h"
 #include "board_statusled.h"
-#include "board.h"
-#include "firmware/debug/debug_debug.h"
 
 E131Bridge::E131Bridge() {
-    DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_ENTRY();
 
     assert(s_this == nullptr);
     s_this = this;
@@ -71,7 +69,7 @@ E131Bridge::E131Bridge() {
     for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
         memset(&output_port_[i], 0, sizeof(e131bridge::OutputPort));
         memset(&input_port_[i], 0, sizeof(e131bridge::InputPort));
-        input_port_[i].priority = 100;
+        input_port_[i].priority = e131::priority::kDefault;
     }
 
 #if defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
@@ -88,23 +86,19 @@ E131Bridge::E131Bridge() {
 
     SetLongName(nullptr); // Set default long name
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::GetLongNameDefault(char* long_name) {
 #if !defined(E131_LONG_NAME)
     uint8_t boardname_length;
     const auto* const kBoardName = board::BoardName(boardname_length);
-    snprintf(long_name, dmxnode::kNodeNameLength - 1, "%s sACN E1.31 %s", kBoardName, board::Website());
+    snprintf(long_name, dmxnode::kNodeNameLength, "%s sACN E1.31 %s", kBoardName, board::Website());
 #else
-    uint32_t i;
+    uint32_t i = 0;
 
-    for (i = 0; i < (sizeof(E131_LONG_NAME) - 1) && i < (dmxnode::kNodeNameLength - 1); i++) {
-        if (E131_LONG_NAME[i] == '_') {
-            long_name[i] = ' ';
-        } else {
-            long_name[i] = E131_LONG_NAME[i];
-        }
+    for (; i < sizeof(E131_LONG_NAME) - 1 && i < dmxnode::kNodeNameLength - 1; ++i) {
+        long_name[i] = E131_LONG_NAME[i] == '_' ? ' ' : E131_LONG_NAME[i];
     }
 
     long_name[i] = '\0';
@@ -170,8 +164,8 @@ void E131Bridge::Stop() {
 }
 
 void E131Bridge::SetSynchronizationAddress(bool source_a, bool source_b, uint16_t synchronization_address) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("source_a=%d, source_b=%d, synchronization_address=%d", static_cast<unsigned>(source_a), static_cast<unsigned>(source_b), static_cast<unsigned>(synchronization_address));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("source_a=%d, source_b=%d, synchronization_address=%d", static_cast<unsigned>(source_a), static_cast<unsigned>(source_b), static_cast<unsigned>(synchronization_address));
 
     assert(synchronization_address != 0);
 
@@ -182,81 +176,81 @@ void E131Bridge::SetSynchronizationAddress(bool source_a, bool source_b, uint16_
     } else if (source_b) {
         synchronization_address_source = &state_.synchronization_address_source_b;
     } else {
-        DEBUG_EXIT();
+        E131BRIDGE_DEBUG_EXIT();
         return; // Just make the compiler happy
     }
 
     if (*synchronization_address_source == 0) {
         *synchronization_address_source = synchronization_address;
-        DEBUG_PUTS("synchronization_address_source == 0");
+        E131BRIDGE_DEBUG_PUTS("synchronization_address_source == 0");
     } else if (*synchronization_address_source != synchronization_address) {
         // dmxnode::kMaxPorts forces to check all ports
         LeaveUniverse(dmxnode::kMaxPorts, *synchronization_address_source);
         *synchronization_address_source = synchronization_address;
-        DEBUG_PUTS("synchronization_address_source != synchronization_address");
+        E131BRIDGE_DEBUG_PUTS("synchronization_address_source != synchronization_address");
     } else {
-        DEBUG_PUTS("Already received synchronization_address");
-        DEBUG_EXIT();
+        E131BRIDGE_DEBUG_PUTS("Already received synchronization_address");
+        E131BRIDGE_DEBUG_EXIT();
         return;
     }
 
     network::igmp::JoinGroup(handle_, e131::UniverseToMulticastIp(synchronization_address));
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::JoinUniverse(uint32_t port_index, uint16_t universe) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("port_index=%d, universe=%d", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("port_index=%d, universe=%d", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
 
     for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
-        DEBUG_PRINTF("\toutput_Port[%d].universe=%d", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
+        E131BRIDGE_DEBUG_PRINTF("\toutput_Port[%d].universe=%d", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
 
         if (i == port_index) // Check for other ports only
         {
-            DEBUG_PUTS("continue");
+            E131BRIDGE_DEBUG_PUTS("continue");
             continue;
         }
 
         if (bridge_.port[i].universe == universe) {
-            DEBUG_EXIT();
+            E131BRIDGE_DEBUG_EXIT();
             return;
         }
     }
 
-    DEBUG_PUTS("Join");
+    E131BRIDGE_DEBUG_PUTS("Join");
     network::igmp::JoinGroup(handle_, e131::UniverseToMulticastIp(universe));
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::LeaveUniverse(uint32_t port_index, uint16_t universe) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
 
     for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
-        DEBUG_PRINTF("\toutput_Port[%u].universe=%u", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
+        E131BRIDGE_DEBUG_PRINTF("\toutput_Port[%u].universe=%u", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
 
         if (i == port_index) // Check for other ports only
         {
-            DEBUG_PUTS("continue");
+            E131BRIDGE_DEBUG_PUTS("continue");
             continue;
         }
 
         if (bridge_.port[i].universe == universe) {
-            DEBUG_EXIT();
+            E131BRIDGE_DEBUG_EXIT();
             return;
         }
     }
 
-    DEBUG_PUTS("Leave");
+    E131BRIDGE_DEBUG_PUTS("Leave");
     network::igmp::LeaveGroup(handle_, e131::UniverseToMulticastIp(universe));
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::SetLocalMerging() {
-    DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_ENTRY();
 
     for (uint32_t input_port_index = 0; input_port_index < dmxnode::kMaxPorts; input_port_index++) {
         if ((bridge_.port[input_port_index].direction == dmxnode::Direction::kOutput) || (bridge_.port[input_port_index].universe == 0)) {
@@ -270,18 +264,19 @@ void E131Bridge::SetLocalMerging() {
                 continue;
             }
 
-            DEBUG_PRINTF("input_port_index=%u %u, output_port_index=%u %u", static_cast<unsigned>(input_port_index), static_cast<unsigned>(bridge_.port[input_port_index].universe), static_cast<unsigned>(output_port_index), static_cast<unsigned>(bridge_.port[output_port_index].universe));
+            E131BRIDGE_DEBUG_PRINTF("input_port_index=%u %u, output_port_index=%u %u", static_cast<unsigned>(input_port_index), static_cast<unsigned>(bridge_.port[input_port_index].universe), static_cast<unsigned>(output_port_index),
+                         static_cast<unsigned>(bridge_.port[output_port_index].universe));
 
             if (bridge_.port[input_port_index].universe == bridge_.port[output_port_index].universe) {
                 if (!bridge_.port[output_port_index].local_merge) {
                     output_port_[output_port_index].source_a.ip = network::kIpaddrLoopback;
-                    DEBUG_PUTS("Local merge Source A");
+                    E131BRIDGE_DEBUG_PUTS("Local merge Source A");
                 } else {
                     output_port_[output_port_index].source_b.ip = network::kIpaddrLoopback;
-                    DEBUG_PUTS("Local merge Source B");
+                    E131BRIDGE_DEBUG_PUTS("Local merge Source B");
                 }
 
-                DEBUG_PUTS("");
+                E131BRIDGE_DEBUG_PUTS("");
                 bridge_.port[input_port_index].local_merge = true;
                 bridge_.port[output_port_index].local_merge = true;
             }
@@ -289,21 +284,21 @@ void E131Bridge::SetLocalMerging() {
     }
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
-        DEBUG_PRINTF("port_index=%u, local_merge=%c", static_cast<unsigned>(port_index), bridge_.port[port_index].local_merge ? 'Y' : 'N');
+        E131BRIDGE_DEBUG_PRINTF("port_index=%u, local_merge=%c", static_cast<unsigned>(port_index), bridge_.port[port_index].local_merge ? 'Y' : 'N');
     }
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::SetUniverse(uint32_t port_index, uint16_t universe) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
 
     assert(port_index < dmxnode::kMaxPorts);
     assert((universe >= e131::universe::kDefault) && (universe <= e131::universe::kMax));
 
     if (bridge_.port[port_index].universe == universe) {
-        DEBUG_EXIT();
+        E131BRIDGE_DEBUG_EXIT();
         return;
     }
 
@@ -321,18 +316,18 @@ void E131Bridge::SetUniverse(uint32_t port_index, uint16_t universe) {
     }
 #endif
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 void E131Bridge::SetDirection(uint32_t port_index, dmxnode::Direction port_direction) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("port_index=%u, port_direction=%s", static_cast<unsigned>(port_index), dmxnode::PortDirection(port_direction));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("port_index=%u, port_direction=%s", static_cast<unsigned>(port_index), dmxnode::PortDirection(port_direction));
 
     assert(port_index < dmxnode::kMaxPorts);
     assert(port_direction <= dmxnode::Direction::kDisable);
 
     if (bridge_.port[port_index].direction == port_direction) {
-        DEBUG_EXIT();
+        E131BRIDGE_DEBUG_EXIT();
         return;
     }
 
@@ -496,7 +491,7 @@ void E131Bridge::HandleSynchronization() {
 
     if ((kSynchronizationAddress != state_.synchronization_address_source_a) && (kSynchronizationAddress != state_.synchronization_address_source_b)) {
         board::statusled::SetMode(board::statusled::Mode::kNormal);
-        DEBUG_PUTS("");
+        E131BRIDGE_DEBUG_PUTS("");
         return;
     }
 
@@ -558,7 +553,7 @@ void E131Bridge::InputUdp(const uint8_t* buffer, [[maybe_unused]] uint32_t size,
                 HandleSynchronization();
             }
         } else {
-            DEBUG_PRINTF("Not supported Root vector : 0x%x", static_cast<unsigned>(kRootVector));
+            E131BRIDGE_DEBUG_PRINTF("Not supported Root vector : 0x%x", static_cast<unsigned>(kRootVector));
         }
     }
 
@@ -612,12 +607,10 @@ bool E131Bridge::IsPriorityTimeOut(uint32_t port_index) const {
     const auto kTimeOutB = current_millis_ - output_port_[port_index].source_b.millis;
 
     if ((output_port_[port_index].source_a.ip != 0) && (output_port_[port_index].source_b.ip != 0)) {
-        if ((kTimeOutA < (e131::kPriorityTimeoutSeconds * 1000U)) || (kTimeOutB < (e131::kPriorityTimeoutSeconds * 1000U))) {
-            return false;
-        } else {
-            return true;
-        }
-    } else if ((output_port_[port_index].source_a.ip != 0) && (output_port_[port_index].source_b.ip == 0)) {
+        return (kTimeOutA >= (e131::kPriorityTimeoutSeconds * 1000U)) && (kTimeOutB >= (e131::kPriorityTimeoutSeconds * 1000U));
+    }
+
+    if ((output_port_[port_index].source_a.ip != 0) && (output_port_[port_index].source_b.ip == 0)) {
         if (kTimeOutA > (e131::kPriorityTimeoutSeconds * 1000U)) {
             return true;
         }
@@ -646,189 +639,190 @@ void E131Bridge::HandleDmx() {
     const auto kDmxSlots = __builtin_bswap16(data.dmp_layer.property_value_count) - 1U;
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
-        if (bridge_.port[port_index].direction == dmxnode::Direction::kOutput) {
-            // Frame layer
-            // 8.2 Association of Multicast Addresses and Universe
-            // Note: The identity of the universe shall be determined by the universe number in the
-            // packet and not assumed from the multicast address.
-            if (data.frame_layer.universe != __builtin_bswap16(bridge_.port[port_index].universe)) {
-                continue;
-            }
-
-            auto& source_a = output_port_[port_index].source_a;
-            auto& source_b = output_port_[port_index].source_b;
-
-            const auto kIpA = source_a.ip;
-            const auto kIpB = source_b.ip;
-
-            const auto kIsSourceA = IsIpCidMatch(&source_a);
-            const auto kIsSourceB = IsIpCidMatch(&source_b);
-
-            // 6.9.2 Sequence Numbering
-            // Having first received a packet with sequence number A, a second packet with sequence number B
-            // arrives. If, using signed 8-bit binary arithmetic, B – A is less than or equal to 0, but greater than -20 then
-            // the packet containing sequence number B shall be deemed out of sequence and discarded
-            if (kIsSourceA) {
-                const auto kDiff = static_cast<int8_t>(data.frame_layer.sequence_number - source_a.sequence_number_data);
-                source_a.sequence_number_data = data.frame_layer.sequence_number;
-                if ((kDiff <= 0) && (kDiff > -20)) {
-                    continue;
-                }
-            } else if (kIsSourceB) {
-                const auto kDiff = static_cast<int8_t>(data.frame_layer.sequence_number - source_b.sequence_number_data);
-                source_b.sequence_number_data = data.frame_layer.sequence_number;
-                if ((kDiff <= 0) && (kDiff > -20)) {
-                    continue;
-                }
-            }
-
-            // This bit, when set to 1, indicates that the data in this packet is intended for use in visualization or media
-            // server preview applications and shall not be used to generate live output.
-            if (e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kPreviewData)) {
-                continue;
-            }
-
-            // Upon receipt of a packet containing this bit set to a value of 1, receiver shall enter network data loss condition.
-            // Any property values in these packets shall be ignored.
-            if (e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kStreamTerminated)) {
-                if (kIsSourceA || kIsSourceB) {
-                    SetNetworkDataLossCondition(kIsSourceA, kIsSourceB);
-                }
-                continue;
-            }
-
-            if (state_.is_merge_mode) {
-                if (__builtin_expect((!state_.disable_merge_timeout), 1)) {
-                    CheckMergeTimeouts(port_index);
-                }
-            }
-
-            if (data.frame_layer.priority < state_.priority) {
-                if (!IsPriorityTimeOut(port_index)) {
-                    continue;
-                }
-                state_.priority = data.frame_layer.priority;
-            } else if (data.frame_layer.priority > state_.priority) {
-                output_port_[port_index].source_a.ip = 0;
-                output_port_[port_index].source_b.ip = 0;
-                state_.is_merge_mode = false;
-                state_.priority = data.frame_layer.priority;
-            }
-
-            if ((kIpA == 0) && (kIpB == 0)) {
-                // printf("1. First package from Source\n");
-                source_a.ip = ip_address_from_;
-                source_a.sequence_number_data = data.frame_layer.sequence_number;
-                memcpy(source_a.cid, data.root_layer.cid, 16);
-                source_a.millis = packet_millis_;
-                dmxnode::Data::SetSourceA(port_index, kDmxData, kDmxSlots);
-            } else if (kIsSourceA && (kIpB == 0)) {
-                // printf("2. Continue package from SourceA\n");
-                source_a.sequence_number_data = data.frame_layer.sequence_number;
-                source_a.millis = packet_millis_;
-                dmxnode::Data::SetSourceA(port_index, kDmxData, kDmxSlots);
-            } else if ((kIpA == 0) && kIsSourceB) {
-                // printf("3. Continue package from source_b\n");
-                source_b.sequence_number_data = data.frame_layer.sequence_number;
-                source_b.millis = packet_millis_;
-                dmxnode::Data::SetSourceB(port_index, kDmxData, kDmxSlots);
-            } else if (!kIsSourceA && (kIpB == 0)) {
-                // printf("4. New ip, start merging\n");
-                source_b.ip = ip_address_from_;
-                source_b.sequence_number_data = data.frame_layer.sequence_number;
-                memcpy(source_b.cid, data.root_layer.cid, 16);
-                source_b.millis = packet_millis_;
-                UpdateMergeStatus(port_index);
-                dmxnode::Data::MergeSourceB(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
-            } else if ((kIpA == 0) && !kIsSourceB) {
-                // printf("5. New ip, start merging\n");
-                source_a.ip = ip_address_from_;
-                source_a.sequence_number_data = data.frame_layer.sequence_number;
-                memcpy(source_a.cid, data.root_layer.cid, 16);
-                source_a.millis = packet_millis_;
-                UpdateMergeStatus(port_index);
-                dmxnode::Data::MergeSourceA(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
-            } else if (kIsSourceA && !kIsSourceB) {
-                // printf("6. Continue merging\n");
-                source_a.sequence_number_data = data.frame_layer.sequence_number;
-                source_a.millis = packet_millis_;
-                UpdateMergeStatus(port_index);
-                dmxnode::Data::MergeSourceA(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
-            } else if (!kIsSourceA && kIsSourceB) {
-                // printf("7. Continue merging\n");
-                source_b.sequence_number_data = data.frame_layer.sequence_number;
-                source_b.millis = packet_millis_;
-                UpdateMergeStatus(port_index);
-                dmxnode::Data::MergeSourceB(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
-            }
-#ifndef NDEBUG
-            else if (kIsSourceA && kIsSourceB) {
-                puts("WARN: 8. Source matches both ip, discarding data");
-                return;
-            } else if (!kIsSourceA && !kIsSourceB) {
-                puts("WARN: 9. More than two sources, discarding data");
-                return;
-            } else {
-                puts("ERROR: 0. No cases matched, this shouldn't happen!");
-                return;
-            }
-#endif
-            // This bit indicates whether to lock or revert to an unsynchronized state when synchronization is lost
-            // (See Section 11 on Universe Synchronization and 11.1 for discussion on synchronization states).
-            // When set to 0, components that had been operating in a synchronized state shall not update with any
-            // new packets until synchronization resumes. When set to 1, once synchronization has been lost,
-            // components that had been operating in a synchronized state need not wait for a new
-            // E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
-
-            // If the FORCE_SYNCHRONIZATION bit is 0, the receiver MUST wait for synchronization packets.
-            // If it is 1, the receiver MAY update without waiting for synchronization packets.
-            if (!e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kForceSynchronization)) {
-                // 6.3.3.1 Synchronization Address Usage in an E1.31 Synchronization Packet
-                // An E1.31 Synchronization Packet is sent to synchronize the E1.31 data on a specific universe number.
-                // A Synchronization Address of 0 is thus meaningless, and shall not be transmitted.
-                // Receivers shall ignore E1.31 Synchronization Packets containing a Synchronization Address of 0.
-
-                // Synchronization is required: enter synchronized state (until sync is lost or overridden)
-                if (data.frame_layer.synchronization_address != 0) {
-                    if (!state_.is_forced_synchronized) {
-                        // Decide which source triggered the sync request
-                        if (!(kIsSourceA || kIsSourceB)) {
-                            SetSynchronizationAddress((source_a.ip != 0), (source_b.ip != 0), __builtin_bswap16(data.frame_layer.synchronization_address));
-                        } else {
-                            SetSynchronizationAddress(kIsSourceA, kIsSourceB, __builtin_bswap16(data.frame_layer.synchronization_address));
-                        }
-                        state_.is_forced_synchronized = true;
-                        state_.is_synchronized = true;
-                    }
-                }
-            } else {
-                // Synchronization not required — allow unsynchronized updates
-                state_.is_forced_synchronized = false;
-            }
-
-            const auto kDoUpdate = ((!state_.is_synchronized) || (state_.disable_synchronize));
-
-            if (kDoUpdate) {
-                dmxnode::DataOutput(dmxnode_output_type_, port_index);
-
-                if (!output_port_[port_index].is_transmitting) {
-                    dmxnode_output_type_->Start(port_index);
-                    output_port_[port_index].is_transmitting = true;
-                    state_.is_changed = true;
-                }
-            } else {
-                dmxnode::DataSet(dmxnode_output_type_, port_index);
-                output_port_[port_index].is_data_pending = true;
-            }
-
-            state_.receiving_dmx |= (1U << static_cast<uint8_t>(dmxnode::Direction::kOutput));
+        if (bridge_.port[port_index].direction != dmxnode::Direction::kOutput) {
+            continue;
         }
+        // Frame layer
+        // 8.2 Association of Multicast Addresses and Universe
+        // Note: The identity of the universe shall be determined by the universe number in the
+        // packet and not assumed from the multicast address.
+        if (data.frame_layer.universe != __builtin_bswap16(bridge_.port[port_index].universe)) {
+            continue;
+        }
+
+        auto& source_a = output_port_[port_index].source_a;
+        auto& source_b = output_port_[port_index].source_b;
+
+        const auto kIpA = source_a.ip;
+        const auto kIpB = source_b.ip;
+
+        const auto kIsSourceA = IsIpCidMatch(&source_a);
+        const auto kIsSourceB = IsIpCidMatch(&source_b);
+
+        // 6.9.2 Sequence Numbering
+        // Having first received a packet with sequence number A, a second packet with sequence number B
+        // arrives. If, using signed 8-bit binary arithmetic, B – A is less than or equal to 0, but greater than -20 then
+        // the packet containing sequence number B shall be deemed out of sequence and discarded
+        if (kIsSourceA) {
+            const auto kDiff = static_cast<int8_t>(data.frame_layer.sequence_number - source_a.sequence_number_data);
+            source_a.sequence_number_data = data.frame_layer.sequence_number;
+            if ((kDiff <= 0) && (kDiff > -20)) {
+                continue;
+            }
+        } else if (kIsSourceB) {
+            const auto kDiff = static_cast<int8_t>(data.frame_layer.sequence_number - source_b.sequence_number_data);
+            source_b.sequence_number_data = data.frame_layer.sequence_number;
+            if ((kDiff <= 0) && (kDiff > -20)) {
+                continue;
+            }
+        }
+
+        // This bit, when set to 1, indicates that the data in this packet is intended for use in visualization or media
+        // server preview applications and shall not be used to generate live output.
+        if (e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kPreviewData)) {
+            continue;
+        }
+
+        // Upon receipt of a packet containing this bit set to a value of 1, receiver shall enter network data loss condition.
+        // Any property values in these packets shall be ignored.
+        if (e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kStreamTerminated)) {
+            if (kIsSourceA || kIsSourceB) {
+                SetNetworkDataLossCondition(kIsSourceA, kIsSourceB);
+            }
+            continue;
+        }
+
+        if (state_.is_merge_mode) {
+            if (__builtin_expect((!state_.disable_merge_timeout), 1)) {
+                CheckMergeTimeouts(port_index);
+            }
+        }
+
+        if (data.frame_layer.priority < state_.priority) {
+            if (!IsPriorityTimeOut(port_index)) {
+                continue;
+            }
+            state_.priority = data.frame_layer.priority;
+        } else if (data.frame_layer.priority > state_.priority) {
+            output_port_[port_index].source_a.ip = 0;
+            output_port_[port_index].source_b.ip = 0;
+            state_.is_merge_mode = false;
+            state_.priority = data.frame_layer.priority;
+        }
+
+        if ((kIpA == 0) && (kIpB == 0)) {
+            // printf("1. First package from Source\n");
+            source_a.ip = ip_address_from_;
+            source_a.sequence_number_data = data.frame_layer.sequence_number;
+            memcpy(source_a.cid, data.root_layer.cid, 16);
+            source_a.millis = packet_millis_;
+            dmxnode::Data::SetSourceA(port_index, kDmxData, kDmxSlots);
+        } else if (kIsSourceA && (kIpB == 0)) {
+            // printf("2. Continue package from SourceA\n");
+            source_a.sequence_number_data = data.frame_layer.sequence_number;
+            source_a.millis = packet_millis_;
+            dmxnode::Data::SetSourceA(port_index, kDmxData, kDmxSlots);
+        } else if ((kIpA == 0) && kIsSourceB) {
+            // printf("3. Continue package from source_b\n");
+            source_b.sequence_number_data = data.frame_layer.sequence_number;
+            source_b.millis = packet_millis_;
+            dmxnode::Data::SetSourceB(port_index, kDmxData, kDmxSlots);
+        } else if (!kIsSourceA && (kIpB == 0)) {
+            // printf("4. New ip, start merging\n");
+            source_b.ip = ip_address_from_;
+            source_b.sequence_number_data = data.frame_layer.sequence_number;
+            memcpy(source_b.cid, data.root_layer.cid, 16);
+            source_b.millis = packet_millis_;
+            UpdateMergeStatus(port_index);
+            dmxnode::Data::MergeSourceB(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
+        } else if ((kIpA == 0) && !kIsSourceB) {
+            // printf("5. New ip, start merging\n");
+            source_a.ip = ip_address_from_;
+            source_a.sequence_number_data = data.frame_layer.sequence_number;
+            memcpy(source_a.cid, data.root_layer.cid, 16);
+            source_a.millis = packet_millis_;
+            UpdateMergeStatus(port_index);
+            dmxnode::Data::MergeSourceA(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
+        } else if (kIsSourceA && !kIsSourceB) {
+            // printf("6. Continue merging\n");
+            source_a.sequence_number_data = data.frame_layer.sequence_number;
+            source_a.millis = packet_millis_;
+            UpdateMergeStatus(port_index);
+            dmxnode::Data::MergeSourceA(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
+        } else if (!kIsSourceA && kIsSourceB) {
+            // printf("7. Continue merging\n");
+            source_b.sequence_number_data = data.frame_layer.sequence_number;
+            source_b.millis = packet_millis_;
+            UpdateMergeStatus(port_index);
+            dmxnode::Data::MergeSourceB(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
+        }
+#ifndef NDEBUG
+        else if (kIsSourceA && kIsSourceB) {
+            puts("WARN: 8. Source matches both ip, discarding data");
+            return;
+        } else if (!kIsSourceA && !kIsSourceB) {
+            puts("WARN: 9. More than two sources, discarding data");
+            return;
+        } else {
+            puts("ERROR: 0. No cases matched, this shouldn't happen!");
+            return;
+        }
+#endif
+        // This bit indicates whether to lock or revert to an unsynchronized state when synchronization is lost
+        // (See Section 11 on Universe Synchronization and 11.1 for discussion on synchronization states).
+        // When set to 0, components that had been operating in a synchronized state shall not update with any
+        // new packets until synchronization resumes. When set to 1, once synchronization has been lost,
+        // components that had been operating in a synchronized state need not wait for a new
+        // E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
+
+        // If the FORCE_SYNCHRONIZATION bit is 0, the receiver MUST wait for synchronization packets.
+        // If it is 1, the receiver MAY update without waiting for synchronization packets.
+        if (!e131::OptionsMask::Has(data.frame_layer.options, e131::OptionsMask::Mask::kForceSynchronization)) {
+            // 6.3.3.1 Synchronization Address Usage in an E1.31 Synchronization Packet
+            // An E1.31 Synchronization Packet is sent to synchronize the E1.31 data on a specific universe number.
+            // A Synchronization Address of 0 is thus meaningless, and shall not be transmitted.
+            // Receivers shall ignore E1.31 Synchronization Packets containing a Synchronization Address of 0.
+
+            // Synchronization is required: enter synchronized state (until sync is lost or overridden)
+            if (data.frame_layer.synchronization_address != 0) {
+                if (!state_.is_forced_synchronized) {
+                    // Decide which source triggered the sync request
+                    if (!(kIsSourceA || kIsSourceB)) {
+                        SetSynchronizationAddress((source_a.ip != 0), (source_b.ip != 0), __builtin_bswap16(data.frame_layer.synchronization_address));
+                    } else {
+                        SetSynchronizationAddress(kIsSourceA, kIsSourceB, __builtin_bswap16(data.frame_layer.synchronization_address));
+                    }
+                    state_.is_forced_synchronized = true;
+                    state_.is_synchronized = true;
+                }
+            }
+        } else {
+            // Synchronization not required — allow unsynchronized updates
+            state_.is_forced_synchronized = false;
+        }
+
+        const auto kDoUpdate = ((!state_.is_synchronized) || (state_.disable_synchronize));
+
+        if (kDoUpdate) {
+            dmxnode::DataOutput(dmxnode_output_type_, port_index);
+
+            if (!output_port_[port_index].is_transmitting) {
+                dmxnode_output_type_->Start(port_index);
+                output_port_[port_index].is_transmitting = true;
+                state_.is_changed = true;
+            }
+        } else {
+            dmxnode::DataSet(dmxnode_output_type_, port_index);
+            output_port_[port_index].is_data_pending = true;
+        }
+
+        state_.receiving_dmx |= (1U << static_cast<uint8_t>(dmxnode::Direction::kOutput));
     }
 }
 
 void E131Bridge::SetNetworkDataLossCondition(bool source_a, bool source_b) {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("%u %u", static_cast<unsigned>(source_a), static_cast<unsigned>(source_b));
+    E131BRIDGE_DEBUG_ENTRY();
+    E131BRIDGE_DEBUG_PRINTF("%u %u", static_cast<unsigned>(source_a), static_cast<unsigned>(source_b));
 
     state_.is_changed = true;
     auto do_failsafe = false;
@@ -887,7 +881,7 @@ void E131Bridge::SetNetworkDataLossCondition(bool source_a, bool source_b) {
                 dmxnode_output_type_->FullOn();
                 break;
             default:
-                DEBUG_PRINTF("state_.failsafe=%u", static_cast<unsigned>(state_.failsafe));
+                E131BRIDGE_DEBUG_PRINTF("state_.failsafe=%u", static_cast<unsigned>(state_.failsafe));
                 assert(false && "Invalid state_.failsafe");
                 break;
         }
@@ -906,7 +900,7 @@ void E131Bridge::SetNetworkDataLossCondition(bool source_a, bool source_b) {
     SetLocalMerging();
 #endif
 
-    DEBUG_EXIT();
+    E131BRIDGE_DEBUG_EXIT();
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
