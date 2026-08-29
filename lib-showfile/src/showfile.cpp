@@ -216,11 +216,7 @@ bool ShowFile::AddShow(int32_t show_file_number) {
 void ShowFile::LoadShows() {
     SHOWFILE_DEBUG_ENTRY();
 
-#if defined(CONFIG_USB_HOST_MSC)
-    auto* dirp = opendir("0:/");
-#else
     auto* dirp = opendir(".");
-#endif
 
     if (dirp == nullptr) {
         perror("opendir");
@@ -234,16 +230,17 @@ void ShowFile::LoadShows() {
 
     shows_ = 0;
 
-    struct dirent* dp;
+    struct dirent* read_dir{};
 
     do {
-        if ((dp = readdir(dirp)) != nullptr) {
-            if (dp->d_type == DT_DIR) {
+        read_dir = readdir(dirp);
+        if (read_dir != nullptr) {
+            if (read_dir->d_type == DT_DIR) {
                 continue;
             }
 
             int32_t show_file_number;
-            if (!showfile::FilenameCheck(dp->d_name, show_file_number)) {
+            if (!showfile::FilenameCheck(read_dir->d_name, show_file_number)) {
                 continue;
             }
 
@@ -253,7 +250,7 @@ void ShowFile::LoadShows() {
                 break;
             }
         }
-    } while (dp != nullptr);
+    } while (read_dir != nullptr);
 
     closedir(dirp);
 

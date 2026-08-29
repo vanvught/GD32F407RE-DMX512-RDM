@@ -21,23 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
+
 #include <cstdint>
 
 #include "showfile.h"
 #include "json/showfileparamsconst.h"
 
 namespace json::status {
-uint32_t ShowFile(char* out_buffer, uint32_t out_buffer_size)
-{
+uint32_t ShowFile(char* out_buffer, uint32_t out_buffer_size) {
     const auto kStatus = ShowFile::Instance().GetStatus();
     assert(kStatus != ::showfile::Status::kUndefined);
 
-    const auto kLength =
-        static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"mode\":\"%s\",\"%s\":\"%u\",\"status\":\"%s\",\"%s\":\"%s\"}",
-        ShowFile::Instance().GetMode() == ::showfile::Mode::kRecorder ? "Recorder" : "Player", ShowFileParamsConst::kShow.name,
-        static_cast<unsigned int>(ShowFile::Instance().GetShowFileCurrent()), ::showfile::kStatus[static_cast<int>(kStatus)],
+    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
+		R"({"mode":"%s","%s":"%u","status":"%s","%s":"%s"})", 
+		ShowFile::Instance().GetMode() == ::showfile::Mode::kRecorder ? "Recorder" : "Player",                                                      
+		ShowFileParamsConst::kShow.name, 
+		static_cast<unsigned int>(ShowFile::Instance().GetShowFileCurrent()),
+		 ::showfile::kStatus[static_cast<int>(kStatus)],
         ShowFileParamsConst::kOptionLoop.name, ShowFile::Instance().GetDoLoop() ? "1" : "0"));
     return kLength;
 }
-}  // namespace json::status
+} // namespace json::status

@@ -1,7 +1,7 @@
 /**
  * @file showfileparams.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
- #include <cstdint>
+
+#include <cstdint>
 
 #include "showfile.h"
 #include "json/oscparamsconst.h"
@@ -36,46 +36,47 @@
 
 using common::store::showfile::Flags;
 
-namespace json
-{
-ShowFileParams::ShowFileParams()
-{
+namespace json {
+ShowFileParams::ShowFileParams() {
     ConfigStore::Instance().Copy(&store_showfile, &ConfigurationStore::show_file);
 }
 
-void ShowFileParams::SetShow(const char* val, uint32_t len)
-{
-    if (len < 3) store_showfile.show = ParseValue<uint8_t>(val, len);
+void ShowFileParams::SetShow(const char* val, uint32_t len) {
+    if (len < 3) {
+        store_showfile.show = ParseValue<uint8_t>(val, len);
+    }
 }
 
-void ShowFileParams::SetOptionAutoPlay(const char* val, uint32_t len)
-{
-    if (len == 1) store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, val[0] != '0');
+void ShowFileParams::SetOptionAutoPlay(const char* val, uint32_t len) {
+    if (len == 1) {
+        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, val[0] != '0');
+    }
 }
 
-void ShowFileParams::SetOptionLoop(const char* val, uint32_t len)
-{
-    if (len == 1) store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, val[0] != '0');
+void ShowFileParams::SetOptionLoop(const char* val, uint32_t len) {
+    if (len == 1) {
+        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, val[0] != '0');
+    }
 }
 
-void ShowFileParams::SetIncomingPort(const char* val, uint32_t len)
-{
-    if (len > 3) store_showfile.osc_port_incoming = ParseValue<uint16_t>(val, len);
+void ShowFileParams::SetIncomingPort(const char* val, uint32_t len) {
+    if (len > 3) {
+        store_showfile.osc_port_incoming = ParseValue<uint16_t>(val, len);
+    }
 }
 
-void ShowFileParams::SetOutgoingPort(const char* val, uint32_t len)
-{
-    if (len > 3) store_showfile.osc_port_outgoing = ParseValue<uint16_t>(val, len);
+void ShowFileParams::SetOutgoingPort(const char* val, uint32_t len) {
+    if (len > 3) {
+        store_showfile.osc_port_outgoing = ParseValue<uint16_t>(val, len);
+    }
 }
 
-void ShowFileParams::Store(const char* buffer, uint32_t buffer_size)
-{
+void ShowFileParams::Store(const char* buffer, uint32_t buffer_size) {
     ParseJsonWithTable(buffer, buffer_size, kShowFileKeys);
     ConfigStore::Instance().Store(&store_showfile, &ConfigurationStore::show_file);
 }
 
-void ShowFileParams::Set()
-{
+void ShowFileParams::Set() {
     auto& showfile = ShowFile::Instance();
 
     showfile.SetPlayerShowFileCurrent(store_showfile.show);
@@ -87,8 +88,7 @@ void ShowFileParams::Set()
     showfile.SetOscPortOutgoing(store_showfile.osc_port_outgoing);
 #endif
 
-    if (showfile.IsAutoStart())
-    {
+    if (showfile.IsAutoStart()) {
         showfile.Play();
     }
 
@@ -97,8 +97,7 @@ void ShowFileParams::Set()
 #endif
 }
 
-void ShowFileParams::Dump()
-{
+void ShowFileParams::Dump() {
     printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::ShowFileParamsConst::kFileName);
     printf(" %s=%u\n", json::ShowFileParamsConst::kShow.name, store_showfile.show);
     printf(" %s=%u\n", json::ShowFileParamsConst::kOptionAutoPlay.name, common::IsFlagSet(store_showfile.flags, Flags::Flag::kOptionAutoPlay));

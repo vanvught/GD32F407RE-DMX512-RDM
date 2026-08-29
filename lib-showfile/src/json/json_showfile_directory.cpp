@@ -41,7 +41,7 @@ uint32_t ShowFileDirectory(char* out_buffer, uint32_t out_buffer_size) {
             if (ShowFile::Instance().GetShowFileSize(kShow, file_size)) {
                 const auto kSize = kBufferSize - length;
                 const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, 
-					"{\"show\":%d,\"size\":%u},", 
+					R"({"show":%d,"size":%u},)", 
 					static_cast<unsigned>(kShow), 
 					static_cast<unsigned>(file_size))
 				);
