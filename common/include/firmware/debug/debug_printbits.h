@@ -26,21 +26,30 @@
 #ifndef COMMON_DEBUG_DEBUG_PRINTBITS_H_
 #define COMMON_DEBUG_DEBUG_PRINTBITS_H_
 
-#include <cstdint>
+#include <concepts>
 #include <cstdio>
+#include <climits>
 
 #include "firmware/debug/debug_config.h"
 
 namespace debug {
-inline void PrintBits([[maybe_unused]] uint32_t value) {
-    if constexpr (!config::kTraceEnabled) {
+template <typename T>
+    requires std::unsigned_integral<T>
+inline void PrintBits(T value) {
+    if constexpr (!config::kDumpEnabled) {
         return;
     }
 
-    printf("%.8x ", static_cast<unsigned>(value));
+    constexpr int kTotalBits = sizeof(T) * CHAR_BIT;
+    constexpr int kMaxBitIndex = kTotalBits - 1;
+    constexpr int kHexDigits = kTotalBits / 4; // 4 bits per hex character
 
-    for (int bit_number = 31; bit_number >= 0; --bit_number) {
-        const auto kMask = uint32_t{1} << bit_number;
+    static_assert(sizeof(T) <= sizeof(unsigned));
+
+    printf("%.*x ", kHexDigits, static_cast<unsigned>(value));
+
+    for (int bit_number = kMaxBitIndex; bit_number >= 0; --bit_number) {
+        const auto kMask = static_cast<T>(1) << bit_number;
 
         if ((value & kMask) != 0U) {
             printf("%d ", bit_number);

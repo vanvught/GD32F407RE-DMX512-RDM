@@ -79,14 +79,8 @@ inline void Print() {
         }
 
         if constexpr (!config::kAssertionsEnabled) {
-            printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", 
-				static_cast<unsigned>(kSizeBytes / 1024U), 
-				reinterpret_cast<const void*>(start_address), 
-				reinterpret_cast<const void*>(ptr),
-                reinterpret_cast<const void*>(end_address), 
-				static_cast<unsigned>(kUsedBytes),
-				 static_cast<unsigned>(kFreeBytes), 
-				 static_cast<unsigned>(kFreePct));
+            printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", static_cast<unsigned>(kSizeBytes / 1024U), reinterpret_cast<const void*>(start_address), reinterpret_cast<const void*>(ptr),
+                   reinterpret_cast<const void*>(end_address), static_cast<unsigned>(kUsedBytes), static_cast<unsigned>(kFreeBytes), static_cast<unsigned>(kFreePct));
         } else {
             printf("Stack: Size %uKB, Used: %u, Free: %u", static_cast<unsigned>(kSizeBytes / 1024U), static_cast<unsigned>(kUsedBytes), static_cast<unsigned>(kFreeBytes));
         }

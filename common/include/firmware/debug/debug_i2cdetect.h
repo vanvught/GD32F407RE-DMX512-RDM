@@ -30,30 +30,37 @@
 #include <cstdio>
 
 #include "i2c.h"
+#include "firmware/debug/debug_config.h"
 
 namespace debug::i2c {
-#ifndef DEBUG_I2C
-void Detect() {}
-#else
 inline constexpr uint32_t kFirst = 0x03;
 inline constexpr uint32_t kLast = 0x77;
+inline constexpr uint32_t kTotalI2cAddresses = 128;
+inline constexpr uint32_t kAddressesPerPage = 16;
+
 void Detect() {
+    if constexpr (!config::kI2cDetectEnabled) {
+        return;
+    }
+
     ::i2c::Begin();
     ::i2c::SetBaudrate(::i2c::kNormalSpeed);
 
     puts("\n     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
 
-    for (uint32_t i = 0; i < 128; i = (i + 16)) {
+    for (uint32_t i = 0; i < kTotalI2cAddresses; i = (i + kAddressesPerPage)) {
         printf("%02x: ", static_cast<unsigned>(i));
-        for (uint32_t j = 0; j < 16; j++) {
+        for (uint32_t j = 0; j < kAddressesPerPage; j++) {
+            uint32_t current_address = i + j;
+
             // Skip unwanted addresses
-            if ((i + j < kFirst) || (i + j > kLast)) {
+            if ((current_address < kFirst) || (current_address > kLast)) {
                 printf("   ");
                 continue;
             }
 
-            if (::i2c::IsConnected(static_cast<uint8_t>(i + j))) {
-                printf("%02x ", static_cast<unsigned>(i + j));
+            if (::i2c::IsConnected(static_cast<uint8_t>(current_address))) {
+                printf("%02x ", static_cast<unsigned>(current_address));
             } else {
                 printf("-- ");
             }
@@ -64,7 +71,6 @@ void Detect() {
 
     ::i2c::Begin();
 }
-#endif
 } // namespace debug::i2c
 
 #endif // FIRMWARE_DEBUG_DEBUG_I2CDETECT_H_

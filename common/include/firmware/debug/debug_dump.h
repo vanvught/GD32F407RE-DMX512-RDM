@@ -34,7 +34,7 @@
 
 namespace debug {
 inline void Dump([[maybe_unused]] const void* data, [[maybe_unused]] uint32_t size) {
-    if constexpr (!config::kDumpnabled) {
+    if constexpr (!config::kDumpEnabled) {
         return;
     }
 
