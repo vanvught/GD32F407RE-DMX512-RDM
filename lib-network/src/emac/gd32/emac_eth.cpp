@@ -184,7 +184,7 @@ template <bool T> static void PtpFrameTransmit(uint32_t length) {
             timeout++;
         } while ((0 == tdes0_ttmss_flag) && (timeout < UINT32_MAX));
 
-        EMAC_DEBUG_PRINTF("timeout=%x %d", timeout, (dma_current_txdesc->status & ENET_TDES0_TTMSS));
+        EMAC_DEBUG_PRINTF("timeout=%x %u", static_cast<unsigned>(timeout), static_cast<unsigned>(dma_current_txdesc->status & ENET_TDES0_TTMSS));
 
         dma_current_txdesc->status &= ~ENET_TDES0_TTMSS; ///< Clear timestamp flag
 

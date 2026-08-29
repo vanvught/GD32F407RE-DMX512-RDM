@@ -66,7 +66,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
             if ((kEther->dst[0] == network::ethernet::kIP4MulticastAddr0) && (kEther->dst[1] == network::ethernet::kIP4MulticastAddr1) && (kEther->dst[2] == network::ethernet::kIP4MulticastAddr2)) {
                 if (!network::igmp::LookupGroup(network::MemcpyIp(kIp4->ip4.dst))) {
                     emac::eth::FreePkt();
-                    DEBUG_PUTS("IGMP not for us");
+                    NETWORK_IFACE_DEBUG_PUTS("IGMP not for us");
                     return;
                 }
             }
