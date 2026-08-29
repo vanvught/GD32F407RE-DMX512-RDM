@@ -56,13 +56,13 @@
 #if defined(ARTNET_HAVE_TIMECODE)
 #include "network_udp.h"
 #endif
+#include "network_config.h"
 #if (ARTNET_VERSION >= 4)
 #include "e131bridge.h"
 #endif
 #include "dmxnode.h"
 #include "dmxnode_outputtype.h"
 #include "artnet_debug.h"
-#include "ip4/ip4_address.h"
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
@@ -183,7 +183,7 @@ class ArtNetNode {
     void SetDisableMergeTimeout(bool disable);
     [[nodiscard]] bool GetDisableMergeTimeout() const;
 
-    void SetFailSafe(dmxnode::FailSafe failsafe);
+    void SetFailSafe(dmxnode::FailSafe fail_safe);
     dmxnode::FailSafe GetFailSafe();
 
     void SetUniverse(uint32_t port_index, uint16_t universe);
@@ -295,17 +295,17 @@ class ArtNetNode {
 
    public:
     void SetPortProtocol4(uint32_t port_index, artnet::PortProtocol port_protocol);
-    artnet::PortProtocol GetPortProtocol4(uint32_t port_index) const;
+    [[nodiscard]] artnet::PortProtocol GetPortProtocol4(uint32_t port_index) const;
 
     void SetMapUniverse0(bool map_universe0 = false) { node_.map_universe0 = map_universe0; }
-    bool IsMapUniverse0() const { return node_.map_universe0; }
+    [[nodiscard]] bool IsMapUniverse0() const { return node_.map_universe0; }
 
     void SetPriority4(uint32_t priority);
     void SetPriority4(uint32_t port_index, uint8_t priority);
-    uint8_t GetPriority4(uint32_t port_index) const;
+    [[nodiscard]] uint8_t GetPriority4(uint32_t port_index) const;
 
-    uint32_t GetActiveOutputPorts4() const { return E131Bridge::GetActiveOutputPorts(); }
-    uint32_t GetActiveInputPorts4() const { return E131Bridge::GetActiveInputPorts(); }
+    [[nodiscard]] uint32_t GetActiveOutputPorts4() const { return E131Bridge::GetActiveOutputPorts(); }
+    [[nodiscard]] uint32_t GetActiveInputPorts4() const { return E131Bridge::GetActiveInputPorts(); }
 #endif
 
    private:
