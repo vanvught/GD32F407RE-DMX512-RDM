@@ -37,11 +37,14 @@
 StoreDevice::StoreDevice() {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    if (!spi_flash_probe()) {
+    if (!spi::flash::Probe()) {
         puts("StoreDevice: No SPI flash chip.");
     } else {
-        printf("StoreDevice: %s sector size %u total %u bytes [%u kB]\n", spi_flash_get_name(), static_cast<unsigned int>(spi_flash_get_sector_size()), static_cast<unsigned int>(spi_flash_get_size()),
-               static_cast<unsigned int>(spi_flash_get_size() / 1024U));
+        printf("StoreDevice: SPI flash %s sector size %u total %u bytes [%u kB]\n", 
+          spi::flash::Name(), 
+          static_cast<unsigned int>(spi::flash::SectorSize()), 
+          static_cast<unsigned int>(spi::flash::Size()),
+          static_cast<unsigned int>(spi::flash::Size() / 1024U));
         detected_ = true;
     }
 
@@ -54,17 +57,17 @@ StoreDevice::~StoreDevice() {
 }
 
 uint32_t StoreDevice::GetSize() const {
-    return spi_flash_get_size();
+    return spi::flash::Size();
 }
 
 uint32_t StoreDevice::GetSectorSize() const {
-    return spi_flash_get_sector_size();
+    return spi::flash::SectorSize();
 }
 
 bool StoreDevice::Read(uint32_t offset, uint32_t length, uint8_t* buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    result = spi_flash_cmd_read_fast(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
+    result = spi::flash::cmd::Read(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
 
     CONFIGSTORE_DEBUG_PRINTF("result=%d", static_cast<int>(result));
     CONFIGSTORE_DEBUG_EXIT();
@@ -74,7 +77,7 @@ bool StoreDevice::Read(uint32_t offset, uint32_t length, uint8_t* buffer, stored
 bool StoreDevice::Erase(uint32_t offset, uint32_t length, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    result = spi_flash_cmd_erase(offset, length) ? storedevice::Result::kOk : storedevice::Result::kError;
+    result = spi::flash::cmd::Erase(offset, length) ? storedevice::Result::kOk : storedevice::Result::kError;
 
     CONFIGSTORE_DEBUG_PRINTF("result=%d", static_cast<int>(result));
     CONFIGSTORE_DEBUG_EXIT();
@@ -84,7 +87,7 @@ bool StoreDevice::Erase(uint32_t offset, uint32_t length, storedevice::Result& r
 bool StoreDevice::Write(uint32_t offset, uint32_t length, const uint8_t* buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    result = spi_flash_cmd_write_multi(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
+    result = spi::flash::cmd::Write(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
 
     CONFIGSTORE_DEBUG_PRINTF("result=%d", static_cast<int>(result));
     CONFIGSTORE_DEBUG_EXIT();

@@ -10,7 +10,7 @@
 /*
  * Original code : https://github.com/martinezjavier/u-boot/blob/master/drivers/mtd/spi/winbond.c
  */
-/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,11 +31,12 @@
  * THE SOFTWARE.
  */
 
+#include <cstddef>
 #include <cstdint>
 
+#include "common/utils/utils_array.h"
 #include "spi/spi_flash.h"
 #include "spi_flash_internal.h"
- #include "firmware/debug/debug_debug.h"
 
 struct WinbondSpiFlashParams
 {
@@ -45,86 +46,89 @@ struct WinbondSpiFlashParams
 };
 
 static constexpr struct WinbondSpiFlashParams kWinbondSpiFlashTable[] = {
-	{
-		0x3013,
-		8,
-		"W25X40",
-	},
-	{
-		0x3015,
-		32,
-		"W25X16",
-	},
-	{
-		0x3016,
-		64,
-		"W25X32",
-	},
-	{
-		0x3017,
-		128,
-		"W25X64",
-	},
-	{
-		0x4014,
-		16,
-		"W25Q80BL",
-	},
-	{
-		0x4015,
-		32,
-		"W25Q16CL",
-	},
-	{
-		0x4016,
-		64,
-		"W25Q32BV",
-	},
-	{
-		0x4017,
-		128,
-		"W25Q64CV",
-	},
-	{
-		0x4018,
-		256,
-		"W25Q128BV",
-	},
-	{
-		0x4019,
-		512,
-		"W25Q256",
-	},
-	{
-		0x5014,
-		16,
-		"W25Q80BW",
-	},
-	{
-		0x6015,
-		32,
-		"W25Q16DW",
-	}
-};
+  {
+         .kId = 0x3013,
+         .kNrBlocks = 8,
+         .kName = "W25X40",
+     },
+     {
+         .kId = 0x3015,
+         .kNrBlocks = 32,
+         .kName = "W25X16",
+     },
+     {
+         .kId = 0x3016,
+         .kNrBlocks = 64,
+         .kName = "W25X32",
+     },
+     {
+         .kId = 0x3017,
+         .kNrBlocks = 128,
+         .kName = "W25X64",
+     },
+     {
+         .kId = 0x4014,
+         .kNrBlocks = 16,
+         .kName = "W25Q80BL",
+     },
+     {
+         .kId = 0x4015,
+         .kNrBlocks = 32,
+         .kName = "W25Q16CL",
+     },
+     {
+         .kId = 0x4016,
+         .kNrBlocks = 64,
+         .kName = "W25Q32BV",
+     },
+     {
+         .kId = 0x4017,
+         .kNrBlocks = 128,
+         .kName = "W25Q64CV",
+     },
+     {
+         .kId = 0x4018,
+         .kNrBlocks = 256,
+         .kName = "W25Q128BV",
+     },
+     {
+         .kId = 0x4019,
+         .kNrBlocks = 512,
+         .kName = "W25Q256",
+     },
+     {
+         .kId = 0x5014,
+         .kNrBlocks = 16,
+         .kName = "W25Q80BW",
+     },
+     {
+         .kId = 0x6015,
+         .kNrBlocks = 32,
+         .kName = "W25Q16DW",
+     }};
 
-bool SpiFlashProbeWinbond(struct SpiFlashInfo *flash, uint8_t *idcode) {
-	const struct WinbondSpiFlashParams *params;
-	unsigned int i;
+bool SpiFlashProbeWinbond(struct SpiFlashInfo* flash, const uint8_t* idcode) {
+    SPI_FLASH_DEBUG_ENTRY();
 
-	for (i = 0; i < ARRAY_SIZE(kWinbondSpiFlashTable); i++) {
-		params = &kWinbondSpiFlashTable[i];
-		if (params->kId == ((idcode[1] << 8) | idcode[2])) {
-			break;
-		}
-	}
+    const struct WinbondSpiFlashParams* params;
+    size_t index;
 
-	if (i == ARRAY_SIZE(kWinbondSpiFlashTable)) {
-		DEBUG_PRINTF("Unsupported Winbond ID %02x%02x", idcode[1], idcode[2]);
-		return false;
-	}
+    for (index = 0; index < common::ArraySize(kWinbondSpiFlashTable); index++) {
+        params = &kWinbondSpiFlashTable[index];
+        if (params->kId == ((idcode[1] << 8) | idcode[2])) {
+            break;
+        }
+    }
 
-	flash->name = params->kName;
-	flash->size = 16U * spi::flash::SECTOR_SIZE * params->kNrBlocks;
+    if (index == common::ArraySize(kWinbondSpiFlashTable)) {
+        SPI_FLASH_DEBUG_PRINTF("Unsupported Winbond ID %02x%02x", idcode[1], idcode[2]);
+        SPI_FLASH_DEBUG_EXIT();
+        return false;
+    }
 
-	return true;
+    flash->name = params->kName;
+    flash->size = 16U * spi::flash::kSectorSize * params->kNrBlocks;
+
+    SPI_FLASH_DEBUG_EXIT();
+    return true;
 }

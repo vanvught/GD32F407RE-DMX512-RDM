@@ -39,20 +39,20 @@ static bool CheckHaveFlash() {
     DMXNODE_DEBUG_PRINTF("s_hasFlash=%d", s_has_flash);
 
     if (!s_has_flash) {
-        if (!spi_flash_probe()) {
+        if (!spi::flash::Probe()) {
             DMXNODE_DEBUG_EXIT();
             return false;
         }
 
-        const auto kEraseSize = spi_flash_get_sector_size();
+        const auto kEraseSize = spi::flash::SectorSize();
         assert(kEraseSize <= dmxnode::scenes::kBytesNeeded);
         const auto kPages = 1 + (dmxnode::scenes::kBytesNeeded / kEraseSize);
 
         DMXNODE_DEBUG_PRINTF("Bytes needed=%u, nEraseSize=%u, nPages=%u", dmxnode::scenes::kBytesNeeded, kEraseSize, kPages);
 
-        assert(((kPages + 1) * kEraseSize) <= spi_flash_get_size());
+        assert(((kPages + 1) * kEraseSize) <= spi::flash::get_size());
 
-        s_offset_base = spi_flash_get_size() - ((kPages + 1) * kEraseSize);
+        s_offset_base = spi::flash::Size() - ((kPages + 1) * kEraseSize);
 
         DMXNODE_DEBUG_PRINTF("nOffsetBase=%p", s_offset_base);
     }
@@ -70,7 +70,7 @@ void WriteStart() {
         return;
     }
 
-    s_has_flash = spi_flash_cmd_erase(s_offset_base, spi_flash_get_sector_size());
+    s_has_flash = spi::flash::cmd::Erase(s_offset_base, spi::flash::SectorSize());
 
     DMXNODE_DEBUG_PRINTF("s_hasFlash=%d", s_has_flash);
     DMXNODE_DEBUG_EXIT();
@@ -90,7 +90,7 @@ void Write(uint32_t port_index, const uint8_t* data) {
 
     DMXNODE_DEBUG_PRINTF("s_offset_base=%p, kOffset=%p", s_offset_base, kOffset);
 
-    spi_flash_cmd_write_multi(kOffset, dmxnode::kUniverseSize, data);
+    spi::flash::cmd::Write(kOffset, dmxnode::kUniverseSize, data);
 
     DMXNODE_DEBUG_EXIT();
 }
@@ -131,7 +131,7 @@ void Read(uint32_t port_index, uint8_t* data) {
 
     DMXNODE_DEBUG_PRINTF("s_offset_base=%p, kOffset=%u", reinterpret_cast<void*>(s_offset_base), static_cast<unsigned>(kOffset));
 
-    spi_flash_cmd_read_fast(kOffset, dmxnode::kUniverseSize, data);
+    spi::flash::cmd::Read(kOffset, dmxnode::kUniverseSize, data);
 
     DMXNODE_DEBUG_EXIT();
 }

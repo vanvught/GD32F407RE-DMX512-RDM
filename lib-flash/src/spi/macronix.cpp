@@ -19,7 +19,7 @@
 /*
  * Original code : https://github.com/martinezjavier/u-boot/blob/master/drivers/mtd/spi/macronix.c
  */
-/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,76 +44,79 @@
 
 #include "spi/spi_flash.h"
 #include "spi_flash_internal.h"
- #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_array.h"
 
-struct MacronixSpiFlashParams
-{
+struct MacronixSpiFlashParams {
     const uint16_t kIdcode;
     const uint16_t kNrBlocks;
     const char* const kName;
 };
 
 static constexpr struct MacronixSpiFlashParams kMacronixSpiFlashTable[] = {
-	{
-		0x2013,
-		8,
-		"MX25L4005",
-	},
-	{
-		0x2014,
-		16,
-		"MX25L8005",
-	},
-	{
-		0x2015,
-		32,
-		"MX25L1605D",
-	},
-	{
-		0x2016,
-		64,
-		"MX25L3205D",
-	},
-	{
-		0x2017,
-		128,
-		"MX25L6405D",
-	},
-	{
-		0x2018,
-		256,
-		"MX25L12805D",
-	},
-	{
-		0x2618,
-		256,
-		"MX25L12855E",
-	},
+    {
+        .kIdcode = 0x2013,
+        .kNrBlocks = 8,
+        .kName = "MX25L4005",
+    },
+    {
+        .kIdcode = 0x2014,
+        .kNrBlocks = 16,
+        .kName = "MX25L8005",
+    },
+    {
+        .kIdcode = 0x2015,
+        .kNrBlocks = 32,
+        .kName = "MX25L1605D",
+    },
+    {
+        .kIdcode = 0x2016,
+        .kNrBlocks = 64,
+        .kName = "MX25L3205D",
+    },
+    {
+        .kIdcode = 0x2017,
+        .kNrBlocks = 128,
+        .kName = "MX25L6405D",
+    },
+    {
+        .kIdcode = 0x2018,
+        .kNrBlocks = 256,
+        .kName = "MX25L12805D",
+    },
+    {
+        .kIdcode = 0x2618,
+        .kNrBlocks = 256,
+        .kName = "MX25L12855E",
+    },
 };
 
-bool SpiFlashProbeMacronix(struct SpiFlashInfo *flash, uint8_t *idcode) {
-	const struct MacronixSpiFlashParams *params;
-	unsigned int i;
-	uint32_t id = idcode[2] | static_cast<uint32_t>(idcode[1] << 8);
+bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, const uint8_t* idcode) {
+    SPI_FLASH_DEBUG_ENTRY();
 
-	for (i = 0; i < ARRAY_SIZE(kMacronixSpiFlashTable); i++) {
-		params = &kMacronixSpiFlashTable[i];
+    const struct MacronixSpiFlashParams* params;
+    size_t index;
+    uint32_t id_code = idcode[2] | static_cast<uint32_t>(idcode[1] << 8);
 
-		if (params->kIdcode == id) {
-			break;
-		}
-	}
+    for (index = 0; index < common::ArraySize(kMacronixSpiFlashTable); index++) {
+        params = &kMacronixSpiFlashTable[index];
 
-	if (i == ARRAY_SIZE(kMacronixSpiFlashTable)) {
-		DEBUG_PRINTF("Unsupported Macronix ID %04x\n", static_cast<unsigned>(id));
-		return false;
-	}
+        if (params->kIdcode == id_code) {
+            break;
+        }
+    }
 
-	flash->name = params->kName;
-	flash->size = 16U * spi::flash::SECTOR_SIZE * params->kNrBlocks;
+    if (index == common::ArraySize(kMacronixSpiFlashTable)) {
+        SPI_FLASH_DEBUG_PRINTF("Unsupported Macronix ID %04x\n", static_cast<unsigned>(id_code));
+        SPI_FLASH_DEBUG_EXIT();
+        return false;
+    }
 
-	/* Clear BP# bits for read-only flash */
-	spi_flash_cmd_write_status(0);
+    flash->name = params->kName;
+    flash->size = 16U * spi::flash::kSectorSize * params->kNrBlocks;
 
-	return true;
+    // Clear BP# bits for read-only flash
+    spi::flash::cmd::WriteStatus(0);
+
+    SPI_FLASH_DEBUG_EXIT();
+    return true;
 }

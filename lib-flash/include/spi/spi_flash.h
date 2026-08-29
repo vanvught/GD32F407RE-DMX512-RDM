@@ -2,7 +2,7 @@
  * @file spi_flash.h
  *
  */
-/* Copyright (C) 2018-2024 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,25 +28,47 @@
 
 #include <cstdint>
 
-namespace spi::flash
-{
-inline constexpr uint32_t PAGE_SIZE = 256;
-inline constexpr uint32_t SECTOR_SIZE = 4096;
-} // namespace spi::flash
+#ifdef DEBUG_SPI_FLASH
+#include "firmware/debug/debug_debug.h"
 
-bool spi_flash_probe();
+#define SPI_FLASH_DEBUG_ENTRY() DEBUG_ENTRY()
+#define SPI_FLASH_DEBUG_EXIT() DEBUG_EXIT()
+#define SPI_FLASH_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
+#define SPI_FLASH_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
+#else
+#define SPI_FLASH_DEBUG_ENTRY() \
+    do {                        \
+    } while (false)
+#define SPI_FLASH_DEBUG_EXIT() \
+    do {                       \
+    } while (false)
+#define SPI_FLASH_DEBUG_PRINTF(...) \
+    do {                            \
+    } while (false)
+#define SPI_FLASH_DEBUG_PUTS(...) \
+    do {                          \
+    } while (false)
+#endif
 
-const char* spi_flash_get_name();
-uint32_t spi_flash_get_size();
+namespace spi::flash {
+inline constexpr uint32_t kPageSize = 256;
+inline constexpr uint32_t kSectorSize = 4096;
 
-inline uint32_t spi_flash_get_sector_size()
-{
-    return spi::flash::SECTOR_SIZE;
+bool Probe();
+
+const char* Name();
+uint32_t Size();
+
+inline uint32_t SectorSize() {
+    return spi::flash::kSectorSize;
 }
 
-bool spi_flash_cmd_read_fast(uint32_t offset, uint32_t length, uint8_t* data);
-bool spi_flash_cmd_write_multi(uint32_t offset, uint32_t length, const uint8_t* buffer);
-bool spi_flash_cmd_erase(uint32_t offset, uint32_t length);
-bool spi_flash_cmd_write_status(uint8_t sr);
+namespace cmd {
+bool Read(uint32_t offset, uint32_t length, uint8_t* data);
+bool Write(uint32_t offset, uint32_t length, const uint8_t* buffer);
+bool Erase(uint32_t offset, uint32_t length);
+bool WriteStatus(uint8_t status);
+} // namespace cmd
+} // namespace spi::flash
 
-#endif  // SPI_SPI_FLASH_H_
+#endif // SPI_SPI_FLASH_H_

@@ -2,7 +2,7 @@
  * @file spi_flash_internal.h
  *
  */
-/* Copyright (C) 2019-2024 by Arjan van Vught mailto:info@g32-dmx.org
+/* Copyright (C) 2019-2026 by Arjan van Vught mailto:info@g32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,18 @@
 
 #include <cstdint>
 
-struct SpiFlashInfo
-{
+struct SpiFlashInfo {
     const char* name;
     uint32_t size;
-    /* Poll cmd - for flash erase/program */
+    // Poll cmd - for flash erase/program
     uint8_t poll_cmd;
 };
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define SPI_FLASH_PROG_TIMEOUT (2 * 1000)
+#define SPI_FLASH_PAGE_ERASE_TIMEOUT (5 * 1000)
+#define SPI_FLASH_SECTOR_ERASE_TIMEOUT (10 * 1000)
 
-#define SPI_FLASH_PROG_TIMEOUT (2)
-#define SPI_FLASH_PAGE_ERASE_TIMEOUT (5)
-#define SPI_FLASH_SECTOR_ERASE_TIMEOUT (10)
-
-/* Common commands */
+// Common commands
 #define CMD_READ_ID 0x9f
 
 #define CMD_READ_ARRAY_SLOW 0x03
@@ -59,7 +56,7 @@ struct SpiFlashInfo
 #define CMD_ERASE_64K 0xd8
 #define CMD_ERASE_CHIP 0xc7
 
-/* Common status */
+// Common status
 #define STATUS_WIP 0x01
 #define STATUS_PEC 0x80
 
@@ -71,16 +68,16 @@ struct SpiFlashInfo
 #define SPI_XFER_SPEED_HZ 6000000 ///< 6MHz
 
 void SpiInit();
-void SpiXfer(uint32_t length, const uint8_t*out, uint8_t* in, uint32_t flags);
+void SpiXfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags);
 
 #if defined(H3)
 #define CONFIG_SPI_FLASH_MACRONIX
-bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, uint8_t* idcode);
+bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, const uint8_t* idcode);
 #define CONFIG_SPI_FLASH_GIGADEVICE
-bool SpiFlashProbeGigadevice(struct SpiFlashInfo* spi, uint8_t* idcode);
+bool SpiFlashProbeGigadevice(struct SpiFlashInfo* spi, const uint8_t* idcode);
 #endif
 
 #define CONFIG_SPI_FLASH_WINBOND
-bool SpiFlashProbeWinbond(struct SpiFlashInfo* spi, uint8_t* idcode);
+bool SpiFlashProbeWinbond(struct SpiFlashInfo* spi, const uint8_t* idcode);
 
-#endif  // SPI_SPI_FLASH_INTERNAL_H_
+#endif // SPI_SPI_FLASH_INTERNAL_H_
