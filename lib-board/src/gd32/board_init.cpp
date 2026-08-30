@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include "firmware/debug/debug_stack.h"
 #if !defined(_TIME_STAMP_DAY_)
 #define _TIME_STAMP_DAY_ 0
 #endif
@@ -62,9 +63,7 @@
 #if defined(ENABLE_USB_HOST)
 #include "device/usb.h"
 #endif
-#if defined(DEBUG_I2C)
 #include "firmware/debug/debug_i2cdetect.h"
-#endif
 #include "board_statusled.h"
 #include "panelled.h"
 #include "logic_analyzer.h"
@@ -260,12 +259,12 @@ void Init() {
 #endif
 #endif
 
-#if defined(DEBUG_I2C)
     debug::i2c::Detect();
-#endif
 
 #if !defined(USE_FREE_RTOS)
     board::statusled::SetFrequency(1);
 #endif
+
+    debug::stack::Print();
 }
 } // namespace board

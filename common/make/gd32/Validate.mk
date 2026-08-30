@@ -12,9 +12,14 @@ ifneq ($(findstring _TIME_STAMP_YEAR_,$(FLAGS)),_TIME_STAMP_YEAR_)
 endif
 
 ifneq (,$(findstring OUTPUT_DMX_SEND,$(FLAGS))$(findstring CONFIG_RDM,$(FLAGS))$(findstring RDM_CONTROLLER,$(FLAGS))$(findstring LTC,$(FLAGS)))
+	TIMER6_HAVE_IRQ_HANDLER=1
 	ifneq (,$(findstring CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER,$(MAKE_FLAGS)))
 		$(error CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER is set)
 	endif
+endif
+
+ifndef TIMER6_HAVE_IRQ_HANDLER
+	DEFINES+=-DCONFIG_TIMER6_HAVE_NO_IRQ_HANDLER
 endif
 
 ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)

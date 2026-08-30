@@ -166,12 +166,17 @@ static bool UpdateLink(uint16_t address, Status& phy_status) {
         puts("Waiting for PHY auto negotiation to complete");
 
         const auto kMillis = timing::Millis();
+
         while (!(bmsr & mmi::BMSR_AUTONEGO_COMPLETE)) {
             if ((timing::Millis() - kMillis) > 5000) {
                 EMAC_PHY_DEBUG_EXIT();
                 return false;
             }
-            phy::Read(address, mmi::REG_BMSR, bmsr);
+
+            if (!phy::Read(address, mmi::REG_BMSR, bmsr)) {
+                EMAC_PHY_DEBUG_EXIT();
+                return false;
+            }
         }
 
         phy_status.link = Link::kStateUp;

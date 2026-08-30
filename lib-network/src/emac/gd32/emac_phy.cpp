@@ -159,7 +159,7 @@ bool Config(uint16_t address) {
         }
 
         if (!(value & emac::mmi::BMCR_RESET)) {
-            EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
+            EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(gd32::Millis() - kMillis));
             EMAC_PHY_DEBUG_EXIT();
             return true;
         }
@@ -171,7 +171,7 @@ bool Config(uint16_t address) {
         return false;
     }
 
-    EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(millis() - kMillis));
+    EMAC_PHY_DEBUG_PRINTF("%u", static_cast<unsigned>(gd32::Millis() - kMillis));
     EMAC_PHY_DEBUG_EXIT();
     return true;
 }
