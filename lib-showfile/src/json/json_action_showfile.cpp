@@ -1,7 +1,7 @@
 /**
  * @file json_action_showfile.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,11 @@
 
 #include "json/json_key.h"
 #include "json/json_parser.h"
-#include "json/json_parsehelper.h"
+#include "common/utils/utils_string.h"
 #include "showfile.h"
 
-static void SetPlayer(const char* val, uint32_t len) {
+namespace {
+void SetPlayer(const char* val, uint32_t len) {
     if (memcmp(val, "play", len) == 0) {
         ShowFile::Instance().Play();
         return;
@@ -45,7 +46,7 @@ static void SetPlayer(const char* val, uint32_t len) {
         return;
     }
 
-#if !defined(CONFIG_SHOWFILE_DISABLE_RECORD)
+#ifndef CONFIG_SHOWFILE_DISABLE_RECORD
     if (memcmp(val, "record", len) == 0) {
         ShowFile::Instance().Record();
         return;
@@ -53,27 +54,28 @@ static void SetPlayer(const char* val, uint32_t len) {
 #endif
 }
 
-static void SetLoop(const char* val, uint32_t len) {
-    if (len != 1) return;
+void SetLoop(const char* val, uint32_t len) {
+    if (len != 1) {
+        return;
+    }
 
     ShowFile::Instance().DoLoop(val[0] != '0');
 }
 
-static void SetShow(const char* val, uint32_t len) {
-    if (len > 2) return;
+void SetShow(const char* val, uint32_t len) {
+    if (len > 2) {
+        return;
+    }
 
-    ShowFile::Instance().SetPlayerShowFileCurrent(json::Atoi(val, len));
+    ShowFile::Instance().SetPlayerShowFileCurrent(common::Atoi(val, len));
 }
 
-static constexpr auto kPlayer = json::MakeSimpleKey("player");
-static constexpr auto kLoop = json::MakeSimpleKey("loop");
-static constexpr auto kShow = json::MakeSimpleKey("show");
+constexpr auto kPlayer = json::MakeSimpleKey("player");
+constexpr auto kLoop = json::MakeSimpleKey("loop");
+constexpr auto kShow = json::MakeSimpleKey("show");
 
-static constexpr json::Key kActionKeys[] = {
-	json::MakeKey(SetPlayer, kPlayer), 
-	json::MakeKey(SetLoop, kLoop), 
-	json::MakeKey(SetShow, kShow)
-};
+constexpr json::Key kActionKeys[] = {json::MakeKey(SetPlayer, kPlayer), json::MakeKey(SetLoop, kLoop), json::MakeKey(SetShow, kShow)};
+} // namespace
 
 namespace json::action {
 void SetShowFile(const char* buffer, uint32_t buffer_size) {
