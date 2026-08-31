@@ -29,103 +29,41 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "common/utils/utils_string.h"
+
 namespace json {
-inline int32_t Atoi(const char* buffer, uint32_t size) {
-    const char* p = buffer;
-    int32_t sign = 1;
-    int32_t res = 0;
-
-    if (size == 0) {
-        return 0;
-    }
-
-    if (*p == '-') {
-        sign = -1;
-        p++;
-        size--;
-    } else if (*p == '+') {
-        p++;
-        size--;
-    }
-
-    for (; (size > 0) && (*p >= '0' && *p <= '9'); size--, p++) {
-        res = res * 10 + (*p - '0');
-    }
-
-    return sign * res;
-}
-
-inline float Atof(const char* buffer, uint32_t size) {
-    const char* p = buffer;
-    float sign = 1.0f;
-    float result = 0.0f;
-
-    if (size == 0) {
-        return 0.0f;
-    }
-
-    if (*p == '-') {
-        sign = -1.0f;
-        ++p;
-        --size;
-    } else if (*p == '+') {
-        ++p;
-        --size;
-    }
-
-    // Parse integer part
-    while (size > 0 && *p >= '0' && *p <= '9') {
-        result = result * 10.0f + static_cast<float>(*p - '0');
-        ++p;
-        --size;
-    }
-
-    // Parse fractional part
-    if (size > 0 && *p == '.') {
-        ++p;
-        --size;
-
-        float divisor = 10.0f;
-        while (size > 0 && *p >= '0' && *p <= '9') {
-            result += static_cast<float>(*p - '0') / divisor;
-            divisor *= 10.0f;
-            ++p;
-            --size;
-        }
-    }
-
-    return sign * result;
-}
-
-template <typename T> T ParseValue(const char* val, uint32_t len) {
-    int32_t v = Atoi(val, len);
+template <typename T>
+T ParseValue(const char* val, uint32_t len) {
+    int32_t value = common::Atoi(val, len);
     if constexpr (std::is_unsigned_v<T>) {
-        if (v < 0) {
+        if (value < 0) {
             return 0; // or handle error
         }
     }
-    return static_cast<T>(v);
+    return static_cast<T>(value);
 }
 
-template <typename T> bool ParseInRange(const char* val, uint32_t len, T min, T max, T* out) {
-    const auto kV = ParseValue<T>(val, len);
+template <typename T>
+bool ParseInRange(const char* val, uint32_t len, T min, T max, T* out) {
+    const auto kValue = ParseValue<T>(val, len);
 
-    if ((kV < min) || (kV > max)) {
+    if ((kValue < min) || (kValue > max)) {
         return false;
     }
 
-    *out = kV;
+    *out = kValue;
     return true;
 }
 
-template <typename ParseT, typename StoreT> bool ParseInRange(const char* val, uint32_t len, ParseT min, ParseT max, StoreT* out) {
-    const auto kV = ParseValue<ParseT>(val, len);
+template <typename ParseT, typename StoreT>
+bool ParseInRange(const char* val, uint32_t len, ParseT min, ParseT max, StoreT* out) {
+    const auto kValue = ParseValue<ParseT>(val, len);
 
-    if ((kV < min) || (kV > max)) {
+    if ((kValue < min) || (kValue > max)) {
         return false;
     }
 
-    *out = static_cast<StoreT>(kV);
+    *out = static_cast<StoreT>(kValue);
     return true;
 }
 } // namespace json

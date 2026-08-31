@@ -36,6 +36,71 @@ constexpr uint32_t ConstStrLen(const char* str) {
     }
     return len;
 }
+
+inline int32_t Atoi(const char* buffer, uint32_t size) {
+    const char* p = buffer;
+    int32_t sign = 1;
+    int32_t result = 0;
+
+    if (size == 0) {
+        return 0;
+    }
+
+    if (*p == '-') {
+        sign = -1;
+        p++;
+        size--;
+    } else if (*p == '+') {
+        p++;
+        size--;
+    }
+
+    for (; (size > 0) && (*p >= '0' && *p <= '9'); size--, p++) {
+        result = (result * 10) + (*p - '0');
+    }
+
+    return sign * result;
+}
+
+inline float Atof(const char* buffer, uint32_t size) {
+    const char* p = buffer;
+    float sign = 1.0F;
+    float result = 0.0F;
+
+    if (size == 0) {
+        return 0.0F;
+    }
+
+    if (*p == '-') {
+        sign = -1.0F;
+        ++p;
+        --size;
+    } else if (*p == '+') {
+        ++p;
+        --size;
+    }
+
+    while (size > 0 && *p >= '0' && *p <= '9') {
+        result = result * 10.0F + static_cast<float>(*p - '0');
+        ++p;
+        --size;
+    }
+
+    if (size > 0 && *p == '.') {
+        ++p;
+        --size;
+
+        float divisor = 10.0F;
+        while (size > 0 && *p >= '0' && *p <= '9') {
+            result += static_cast<float>(*p - '0') / divisor;
+            divisor *= 10.0F;
+            ++p;
+            --size;
+        }
+    }
+
+    return sign * result;
+}
 } // namespace common
 
 #endif // COMMON_UTILS_UTILS_STRING_H_

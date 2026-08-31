@@ -45,7 +45,7 @@ uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
 
     display_name[common::store::remoteconfig::kDisplayNameLength - 1U] = '\0';
 
-#if defined(DMXNODE_NODETYPE_DEFINED)
+#ifdef DMXNODE_NODETYPE_DEFINED
     if (display_name[0] == '\0') {
         const char* const long_name = DmxNodeNodeType::Get()->GetLongName();
 
@@ -55,13 +55,13 @@ uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
             display_name[common::store::remoteconfig::kDisplayNameLength - 1U] = '\0';
         }
     }
-#endif
+#endif // DMXNODE_NODETYPE_DEFINED
 
-#if defined(DMXNODE_PORTS)
+#ifdef DMXNODE_PORTS
     constexpr uint32_t kPortCount = DMXNODE_PORTS;
 #else
     constexpr uint32_t kPortCount = 0U;
-#endif
+#endif // DMXNODE_PORTS
 
     const char* node_type = dmxnode::GetNodeType(dmxnode::kNodeType);
     const char* output_type = dmxnode::GetOutputType(dmxnode::kOutputType);

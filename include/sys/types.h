@@ -1,8 +1,8 @@
 /**
- * @file timerfd.h
+ * @file types.h
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,33 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#ifndef SYS_TIMERFD_H_
-#define SYS_TIMERFD_H_
-
-#include <time.h>
-
-/* Bits to be set in the FLAGS parameter of `timerfd_settime'.  */
-enum {
-	TFD_TIMER_ABSTIME = (1U << 0)
-#define TFD_TIMER_ABSTIME TFD_TIMER_ABSTIME
-};
-
-struct itimerspec {
-	struct timespec it_interval;	/* Interval for periodic timer */
-	struct timespec it_value;		/* Initial expiration */
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int timerfd_create(int clockid, int flags);
-int timerfd_settime(int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
-int timerfd_gettime(int fd, struct itimerspec *curr_value);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* SYS_TIMERFD_H_ */
+ 
+ #ifndef SYS_TYPES_H_
+ #define SYS_TYPES_H_
+ 
+ #include <stdint.h>
+ 
+ typedef uint32_t mode_t;
+ typedef uint32_t off_t;
+ 
+ #endif // TYPES_H_

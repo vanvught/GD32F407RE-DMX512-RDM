@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/styles.css" />
+<title>Storage</title>
+</head>
+<body>
+	<div id="appNav"></div>
+	<div id="appHeader"></div>
+
+	<div class="card">
+		<h2>Storage</h2>
+		<div class="row"><label>Label</label><span id="storageLabel"></span></div>
+		<div class="row"><label>Capacity</label><span id="storageCapacity"></span></div>
+		<div class="row"><label>Free</label><span id="storageFree"></span></div>
+		<div class="row"><button onclick="loadStorage()">Refresh</button></div>
+	</div>
+
+	<div class="card">
+		<h2>Files</h2>
+		<table class="net-table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Size</th>
+					<th>Date</th>
+				</tr>
+			</thead>
+			<tbody id="storageFiles"></tbody>
+		</table>
+	</div>
+
+	<div class="card">
+		<h2>Upload</h2>
+		<div class="upload-drop">
+			<input type="file" id="storageFile">
+		</div>
+		<div class="row"><label>Status</label><span id="uploadStatus">Idle</span></div>
+		<div class="upload-actions">
+			<button id="uploadButton" onclick="uploadStorageFile()">Upload</button>
+		</div>
+	</div>
+
+	<div id="appFooter"></div>
+	<div id="appActions"></div>
+	<script src="/common.js" type="text/javascript"></script>
+	<script src="/layout.js" type="text/javascript"></script>
+	<script src="/storage/index.js" type="text/javascript"></script>
+	<script>bootPage('storage'); list(); version(); loadStorage();</script>
+</body>
+</html>

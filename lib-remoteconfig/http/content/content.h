@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "httpd/httpd.h"
+#include "storage_index.js.h"
 #if defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
 #include "config_artnet.js.h"
 #endif // defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
@@ -72,6 +73,7 @@
 #if defined (NODE_SHOWFILE)
 #include "config_showfile.js.h"
 #endif // (NODE_SHOWFILE)
+#include "storage_index.html.h"
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 #include "config_dmxsend.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
@@ -95,6 +97,7 @@ struct FilesContent {
 };
 
 inline constexpr struct FilesContent kHttpContent[] = {
+	{ 3991234706,"storage_index.js", storage_index_js_gz, 899, static_cast<http::ContentTypes>(2), true },
 #if defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
 	{ 2110753961,"config_artnet.js", config_artnet_js_gz, 1034, static_cast<http::ContentTypes>(2), true },
 #endif // defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
@@ -164,6 +167,7 @@ inline constexpr struct FilesContent kHttpContent[] = {
 #if defined (NODE_SHOWFILE)
 	{ 1821390800,"config_showfile.js", config_showfile_js_gz, 535, static_cast<http::ContentTypes>(2), true },
 #endif // (NODE_SHOWFILE)
+	{ 2148610488,"storage_index.html", storage_index_html_gz, 513, static_cast<http::ContentTypes>(0), true },
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 	{ 381868932,"config_dmxsend.js", config_dmxsend_js_gz, 662, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))

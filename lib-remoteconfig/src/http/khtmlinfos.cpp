@@ -27,34 +27,36 @@
 #include "common/utils/utils_hash.h"
 #include "http/html_infos.h"
 
-namespace html
-{
+namespace html {
 #define ENTRY(filename_literal, label) MakeHtmlInfo(filename_literal, Fnv1a32(filename_literal, static_cast<uint8_t>(sizeof(filename_literal) - 1)), label)
 
 constexpr Info kHtmlInfos[] = {
-	ENTRY("/", "index.html"),
-	ENTRY("/config", "index.html"),
-#if !defined(CONFIG_HTTP_HTML_INDEX_ONLY)
-ENTRY("/status", "status/index.html"),
-#if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
- 	ENTRY("/dmx", "dmx/index.html"),
-#endif	
-#if !defined (CONFIG_HTTP_HTML_NO_RDM) && defined (RDM_CONTROLLER)
-	ENTRY("/rdm", "rdm/index.html"),
-#endif
-#if !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
-	ENTRY("/rtc", "rtc/index.html"),
-#endif
-#if defined(NODE_SHOWFILE)
-	ENTRY("/showfile", "showfile/index.html"),
-#endif
-#if !defined (CONFIG_HTTP_HTML_NO_TIME)
-	ENTRY("/time", "time/index.html"),
-#endif	
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
-	ENTRY("/upload", "upload/index.html")
-#endif
-#endif
+  ENTRY("/", "index.html"),                        
+  ENTRY("/config", "index.html"),
+#ifndef CONFIG_HTTP_HTML_INDEX_ONLY                               
+  ENTRY("/status", "status/index.html"),
+#if !defined(CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))                            
+  ENTRY("/dmx", "dmx/index.html"),
+#endif // !defined(CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
+#if !defined(CONFIG_HTTP_HTML_NO_RDM) && defined(RDM_CONTROLLER)                            
+  ENTRY("/rdm", "rdm/index.html"),
+#endif // !defined(CONFIG_HTTP_HTML_NO_RDM) && defined(RDM_CONTROLLER)
+#if !defined(CONFIG_HTTP_HTML_NO_RTC) && !defined(DISABLE_RTC)                        
+  ENTRY("/rtc", "rtc/index.html"),
+#endif // !defined(CONFIG_HTTP_HTML_NO_RTC) && !defined(DISABLE_RTC)
+#ifndef DISABLE_FS
+  ENTRY("/storage", "storage/index.html"),
+#endif // DISABLE_FS
+#ifdef NODE_SHOWFILE                           
+  ENTRY("/showfile", "showfile/index.html"),
+#endif // NODE_SHOWFILE
+#ifndef CONFIG_HTTP_HTML_NO_TIME                             
+  ENTRY("/time", "time/index.html"),
+#endif // CONFIG_HTTP_HTML_NO_TIME
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD                        
+  ENTRY("/upload", "upload/index.html")
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
+#endif // CONFIG_HTTP_HTML_INDEX_ONLY
 };
 
 constexpr size_t kHtmlInfosSize = sizeof(kHtmlInfos) / sizeof(kHtmlInfos[0]);

@@ -1,3 +1,4 @@
+#include "storage_index.js.h"
 #if defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
 #include "config_artnet.js.h"
 #endif // defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
@@ -67,6 +68,7 @@
 #if defined (NODE_SHOWFILE)
 #include "config_showfile.js.h"
 #endif // (NODE_SHOWFILE)
+#include "storage_index.html.h"
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 #include "config_dmxsend.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
