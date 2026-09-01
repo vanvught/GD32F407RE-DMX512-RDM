@@ -23,13 +23,10 @@
  * THE SOFTWARE.
  */
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
+#include <span>
 #include <unistd.h>
 
 #include "dmxnode.h"
@@ -76,10 +73,10 @@ void WriteStart() {
     DEBUG_EXIT();
 }
 
-void Write(uint32_t port_index, const uint8_t* data) {
+void Write(uint32_t port_index, std::span<const uint8_t> data) {
     DEBUG_ENTRY();
     assert(port_index < dmxnode::kMaxPorts);
-    assert(data != nullptr);
+    assert(data.size() >= dmxnode::kUniverseSize);
 
     if (fseek(s_file, static_cast<long int>(port_index * dmxnode::kUniverseSize), SEEK_SET) != 0) {
         perror("fseek");
@@ -87,7 +84,9 @@ void Write(uint32_t port_index, const uint8_t* data) {
         return;
     }
 
-    if (fwrite(data, 1, dmxnode::kUniverseSize, s_file) != dmxnode::kUniverseSize) {
+    const auto scene = data.first(dmxnode::kUniverseSize);
+
+    if (fwrite(scene.data(), 1, scene.size(), s_file) != scene.size()) {
         perror("fwrite");
         DEBUG_EXIT();
         return;
@@ -120,10 +119,10 @@ void ReadStart() {
     DEBUG_EXIT();
 }
 
-void Read(uint32_t port_index, uint8_t* data) {
+void Read(uint32_t port_index, std::span<uint8_t> data) {
     DEBUG_ENTRY();
     assert(port_index < dmxnode::kMaxPorts);
-    assert(data != nullptr);
+    assert(data.size() >= dmxnode::kUniverseSize);
 
     if (s_file == nullptr) {
         DEBUG_EXIT();
@@ -136,7 +135,9 @@ void Read(uint32_t port_index, uint8_t* data) {
         return;
     }
 
-    if (fread(data, 1, dmxnode::kUniverseSize, s_file) != dmxnode::kUniverseSize) {
+    auto scene = data.first(dmxnode::kUniverseSize);
+
+    if (fread(scene.data(), 1, scene.size(), s_file) != scene.size()) {
         perror("fread");
         DEBUG_EXIT();
         return;

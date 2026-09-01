@@ -69,7 +69,7 @@ void UartSetBaudrate(uint32_t usart_periph, uint32_t baudrate);
 void UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length);
 void UartTransmitString(uint32_t usart_periph, const char* data);
 
-inline uint32_t UartGetRxFifoLevel(__attribute__((unused)) uint32_t usart_periph) {
+inline uint32_t UartGetRxFifoLevel([[maybe_unused]] uint32_t usart_periph) {
     return 1;
 }
 

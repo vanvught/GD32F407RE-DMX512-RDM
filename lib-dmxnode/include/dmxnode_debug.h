@@ -46,6 +46,6 @@
 #define DMXNODE_DEBUG_PUTS(...) \
     do {                        \
     } while (false)
-#endif
+#endif // DEBUG_DMXNODE
 
-#endif // _DMXNODE_DEBUG_H_
+#endif // DMXNODE_DEBUG_H_

@@ -33,9 +33,7 @@
 #include "displayudf.h"
 #include "common/utils/utils_array.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
-#include "dmx.h"
-#endif
+#include "dmxnode_nodetype.h"
 
 static_assert(common::ArraySize(json::DisplayUdfParamsConst::kLabels) == static_cast<size_t>(displayudf::Labels::kUnknown), "Mismatch between enum and kArray");
 
@@ -80,14 +78,14 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
 #if defined (DMX_MAX_PORTS)
 #if (DMX_MAX_PORTS == 1)	
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
-#if defined(NODE_ARTNET) || defined (NODE_ARTNET_MULTI)			
+#ifdef DMXNODE_TYPE_ARTNET		
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
 #endif		
 #endif		
 #if (DMX_MAX_PORTS == 2)		
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
-#if defined(NODE_ARTNET) || defined (NODE_ARTNET_MULTI)		
+#ifdef DMXNODE_TYPE_ARTNET		
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
 #endif			
@@ -96,7 +94,7 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
-#if defined(NODE_ARTNET) || defined (NODE_ARTNET_MULTI)		
+#ifdef DMXNODE_TYPE_ARTNET		
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]),  
@@ -107,7 +105,7 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
-#if defined(NODE_ARTNET) || defined (NODE_ARTNET_MULTI)		
+#ifdef DMXNODE_TYPE_ARTNET		
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]),  
        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[15]),  	

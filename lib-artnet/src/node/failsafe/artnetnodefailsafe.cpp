@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <span>
 
 #include "artnetnode.h"
 #include "dmxnode.h"
@@ -38,7 +39,7 @@ void ArtNetNode::FailSafeRecord() {
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
-            dmxnode::scenes::Write(port_index, dmxnode::Data::Backup(port_index));
+            dmxnode::scenes::Write(port_index, std::span<const uint8_t>{dmxnode::Data::Backup(port_index), dmxnode::kUniverseSize});
         }
     }
 
@@ -54,7 +55,7 @@ void ArtNetNode::FailSafePlayback() {
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
-            dmxnode::scenes::Read(port_index, const_cast<uint8_t*>(dmxnode::Data::Backup(port_index)));
+            dmxnode::scenes::Read(port_index, std::span<uint8_t>{const_cast<uint8_t*>(dmxnode::Data::Backup(port_index)), dmxnode::kUniverseSize});
             dmxnode::DataOutput(dmxnode_output_type_, port_index);
 
             if (!output_port_[port_index].is_transmitting) {

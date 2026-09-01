@@ -37,7 +37,7 @@ void DmxNode::SceneStore() {
         auto& port = port_[port_index];
 
         if (port.port_direction == dmxnode::Direction::kOutput) {
-            dmxnode::scenes::Write(port_index, dmxnode::Data::Backup(port_index));
+            dmxnode::scenes::Write(port_index, std::span<const uint8_t>{dmxnode::Data::Backup(port_index), dmxnode::kUniverseSize});
         }
     }
 
@@ -47,14 +47,14 @@ void DmxNode::SceneStore() {
 void DmxNode::ScenePlayback() {
     dmxnode::scenes::ReadStart();
 
-    auto *dmxnode_output_type = DmxNodeNodeType::Get()->GetOutput();
+    auto* dmxnode_output_type = DmxNodeNodeType::Get()->GetOutput();
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         assert(port_index < dmxnode::kMaxPorts);
         auto& port = port_[port_index];
 
         if (port.port_direction == dmxnode::Direction::kOutput) {
-            dmxnode::scenes::Read(port_index, const_cast<uint8_t*>(dmxnode::Data::Backup(port_index)));
+            dmxnode::scenes::Read(port_index, std::span<uint8_t>{const_cast<uint8_t*>(dmxnode::Data::Backup(port_index)), dmxnode::kUniverseSize});
             dmxnode::DataOutput(dmxnode_output_type, port_index);
 
             if (!port.is_transmitting) {

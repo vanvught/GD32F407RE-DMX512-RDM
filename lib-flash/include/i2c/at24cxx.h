@@ -30,6 +30,7 @@
 #define I2C_AT24CXX_H_
 
 #include <cstdint>
+#include <span>
 #include <cstring>
 
 #include "i2c.h"
@@ -70,18 +71,11 @@ struct ATTypes {
  *
  * @tparam type Size of the EEPROM in bytes.
  */
-template <uint32_t type> class AT24Cxx {
+template <uint32_t kType>
+class AT24Cxx {
     static constexpr bool IsValidType() {
-        return	type == at24cxx::ATTypes::kAT24LC512 || 
-				type == at24cxx::ATTypes::kAT24LC256 || 
-				type == at24cxx::ATTypes::kAT24LC128 || 
-				type == at24cxx::ATTypes::kAT24LC64 || 
-				type == at24cxx::ATTypes::kAT24LC32 ||
-		        type == at24cxx::ATTypes::kAT24LC16 || 
-				type == at24cxx::ATTypes::kAT24LC08 || 
-				type == at24cxx::ATTypes::kAT24LC04 || 
-				type == at24cxx::ATTypes::kAT24LC02 || 
-				type == at24cxx::ATTypes::kAT24LC01;
+        return kType == at24cxx::ATTypes::kAT24LC512 || kType == at24cxx::ATTypes::kAT24LC256 || kType == at24cxx::ATTypes::kAT24LC128 || kType == at24cxx::ATTypes::kAT24LC64 || kType == at24cxx::ATTypes::kAT24LC32 ||
+               kType == at24cxx::ATTypes::kAT24LC16 || kType == at24cxx::ATTypes::kAT24LC08 || kType == at24cxx::ATTypes::kAT24LC04 || kType == at24cxx::ATTypes::kAT24LC02 || kType == at24cxx::ATTypes::kAT24LC01;
     }
 
    public:
@@ -96,33 +90,30 @@ template <uint32_t type> class AT24Cxx {
     }
 
     /** @brief Checks if the EEPROM device is connected. */
-    bool IsConnected() const { return connected_; }
+    [[nodiscard]] bool IsConnected() const { return connected_; }
 
     /** @brief Returns the I2C address of the EEPROM device. */
-    uint8_t GetAddress() const { return address_; }
+    [[nodiscard]] uint8_t GetAddress() const { return address_; }
 
     /** @brief Returns the size of the EEPROM device. */
-    constexpr uint32_t GetSize() { return type; }
+    constexpr uint32_t GetSize() { return kType; }
 
-    /**
-     * @brief Returns the page size of the EEPROM device.
-     *
-     * Page size varies depending on the EEPROM type.
-     */
     constexpr uint32_t GetPageSize() {
-        if constexpr (type <= at24cxx::ATTypes::kAT24LC02) return 8;
-        if constexpr (type <= at24cxx::ATTypes::kAT24LC16) return 16;
-        if constexpr (type <= at24cxx::ATTypes::kAT24LC64) return 32;
-        if constexpr (type <= at24cxx::ATTypes::kAT24LC256) return 64;
+        if constexpr (kType <= at24cxx::ATTypes::kAT24LC02) {
+            return 8;
+        }
+        if constexpr (kType <= at24cxx::ATTypes::kAT24LC16) {
+            return 16;
+        }
+        if constexpr (kType <= at24cxx::ATTypes::kAT24LC64) {
+            return 32;
+        }
+        if constexpr (kType <= at24cxx::ATTypes::kAT24LC256) {
+            return 64;
+        }
         return 128;
     }
 
-    /**
-     * @brief Writes a single byte to a specific memory address.
-     *
-     * @param nMemoryAddress Address in EEPROM memory.
-     * @param nData Byte to be written.
-     */
     void Write(uint32_t memory_address, uint8_t data) {
         if (!connected_) {
             return;
@@ -142,57 +133,44 @@ template <uint32_t type> class AT24Cxx {
         }
     }
 
-    /**
-     * @brief Writes multiple bytes starting from a specific memory address.
-     *
-     * @param nMemoryAddress Starting address in EEPROM memory.
-     * @param pData Pointer to the data buffer.
-     * @param nLength Number of bytes to write.
-     */
-    void Write(uint32_t memory_address, const uint8_t* data, uint32_t length) {
+    void Write(uint32_t memory_address, std::span<const uint8_t> data) {
         if (!connected_) {
             return;
         }
 
         char buffer[128];
-        uint32_t index = 0;
 
         i2c::SetAddress(address_);
 
-        while (length > 0) {
+        while (!data.empty()) {
             while (!AckRead());
 
             const auto kOffsetPage = memory_address % GetPageSize();
             uint32_t count;
 
             if constexpr (kIsAddressSizeTwoWords) {
-                count = common::Min(common::Min(length, GetPageSize() - 2), GetPageSize() - kOffsetPage);
+                count = common::Min(common::Min(static_cast<uint32_t>(data.size()), GetPageSize() - 2), GetPageSize() - kOffsetPage);
+
                 buffer[0] = static_cast<char>(memory_address >> 8);
                 buffer[1] = static_cast<char>(memory_address & 0xFF);
 
-                memcpy(&buffer[2], &data[index], count);
+                memcpy(&buffer[2], data.data(), count);
                 i2c::Write(buffer, 2 + count);
             } else {
-                count = common::Min(common::Min(length, GetPageSize() - 1), GetPageSize() - kOffsetPage);
+                count = common::Min(common::Min(static_cast<uint32_t>(data.size()), GetPageSize() - 1), GetPageSize() - kOffsetPage);
+
                 buffer[0] = static_cast<char>(memory_address & 0xFF);
-                memcpy(&buffer[1], &data[index], count);
+                memcpy(&buffer[1], data.data(), count);
 
                 i2c::SetAddress(address_ | ((memory_address >> 8) & 0x7));
                 i2c::Write(buffer, 1 + count);
             }
 
-            length -= count;
             memory_address += count;
-            index += count;
+            data = data.subspan(count);
         }
     }
 
-    /**
-     * @brief Reads a single byte from a specific memory address.
-     *
-     * @param nMemoryAddress Address in EEPROM memory.
-     * @return The byte read from memory.
-     */
     uint8_t Read(uint32_t memory_address) {
         if (!connected_) {
             return 0;
@@ -216,15 +194,7 @@ template <uint32_t type> class AT24Cxx {
         return static_cast<uint8_t>(c);
     }
 
-    /**
-     * @brief Reads multiple bytes starting from a specific memory address.
-     *
-     * @param nMemoryAddress Starting address in EEPROM memory.
-     * @param pData Pointer to the buffer to store data.
-     * @param nLength Number of bytes to read.
-     * @return Status of the operation (0 for success, 1 for failure).
-     */
-    uint8_t Read(uint32_t memory_address, uint8_t* data, uint32_t length) {
+    uint8_t Read(uint32_t memory_address, std::span<uint8_t> data) {
         if (!connected_) {
             return 1;
         }
@@ -236,14 +206,15 @@ template <uint32_t type> class AT24Cxx {
         if constexpr (kIsAddressSizeTwoWords) {
             const char kBuffer[] = {static_cast<char>(memory_address >> 8), static_cast<char>(memory_address & 0xFF)};
 
-            i2c::Write(kBuffer, sizeof(kBuffer) / sizeof(kBuffer[0]));
+            i2c::Write(kBuffer, sizeof(kBuffer));
         } else {
             const char kBuffer[] = {static_cast<char>(memory_address & 0xFF)};
+
             i2c::SetAddress(address_ | ((memory_address >> 8) & 0x7));
-            i2c::Write(kBuffer, sizeof(kBuffer) / sizeof(kBuffer[0]));
+            i2c::Write(kBuffer, sizeof(kBuffer));
         }
 
-        return i2c::Read(reinterpret_cast<char*>(data), length);
+        return i2c::Read(reinterpret_cast<char*>(data.data()), static_cast<uint32_t>(data.size()));
     }
 
    private:
@@ -254,9 +225,8 @@ template <uint32_t type> class AT24Cxx {
     }
 
     /** @brief Determines if the memory address size is 2 bytes. */
-    static constexpr bool kIsAddressSizeTwoWords = type > at24cxx::ATTypes::kAT24LC16;
+    static constexpr bool kIsAddressSizeTwoWords = kType > at24cxx::ATTypes::kAT24LC16;
 
-   private:
     uint8_t address_;
     bool connected_{false};
 };
@@ -284,4 +254,4 @@ class AT24C32 : public AT24Cxx<at24cxx::ATTypes::kAT24LC32> {
     explicit AT24C32(uint8_t index) : AT24Cxx(at24cxx::kI2CAddress + (index & 0x7)) {}
 };
 
-#endif /* I2C_AT24CXX_H_ */
+#endif // I2C_AT24CXX_H_

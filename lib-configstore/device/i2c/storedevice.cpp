@@ -72,11 +72,12 @@ uint32_t StoreDevice::GetSectorSize() const {
     return storedevice::kFlashSectorSize;
 }
 
-bool StoreDevice::Read(uint32_t offset, uint32_t length, uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Read(uint32_t offset, std::span<uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
-    assert((offset + length) <= storedevice::ROM_SIZE);
 
-    AT24C32::Read(offset, buffer, length);
+    assert((offset + buffer.size()) <= storedevice::kRomSize);
+
+    AT24C32::Read(offset, buffer);
 
     result = storedevice::Result::kOk;
 
@@ -93,11 +94,12 @@ bool StoreDevice::Erase([[maybe_unused]] uint32_t offset, [[maybe_unused]] uint3
     return true;
 }
 
-bool StoreDevice::Write(uint32_t offset, uint32_t length, const uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Write(uint32_t offset, std::span<const uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
-    assert((offset + length) <= ROM_SIZE);
 
-    AT24C32::Write(offset, buffer, length);
+    assert((offset + buffer.size()) <= storedevice::kRomSize);
+
+    AT24C32::Write(offset, buffer);
 
     result = storedevice::Result::kOk;
 

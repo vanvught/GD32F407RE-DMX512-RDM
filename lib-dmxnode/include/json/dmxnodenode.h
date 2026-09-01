@@ -30,10 +30,10 @@
 #include "json/dmxnodeparams.h"
 #if defined(DMXNODE_TYPE_ARTNET)
 #include "json/artnetparams.h"
-#endif
+#endif // DMXNODE_TYPE_ARTNET
 #if defined(DMXNODE_TYPE_E131) || (defined(DMXNODE_TYPE_ARTNET) && (ARTNET_VERSION >= 4))
 #include "json/e131params.h"
-#endif
+#endif // defined(DMXNODE_TYPE_E131) || (defined(DMXNODE_TYPE_ARTNET) && (ARTNET_VERSION >= 4))
 
 class DmxNodeNode final : public DmxNodeNodeType {
    public:
@@ -49,14 +49,14 @@ class DmxNodeNode final : public DmxNodeNodeType {
             artnet_params.Load();
             artnet_params.Set();
         }
-#endif
+#endif // DMXNODE_TYPE_ARTNET
 #if defined(DMXNODE_TYPE_E131) || (defined(DMXNODE_TYPE_ARTNET) && (ARTNET_VERSION >= 4))
         {
             json::E131Params e131_params;
             e131_params.Load();
             e131_params.Set();
         }
-#endif
+#endif // defined(DMXNODE_TYPE_E131) || (defined(DMXNODE_TYPE_ARTNET) && (ARTNET_VERSION >= 4))
     }
 
     DmxNodeNode(const DmxNodeNode&) = delete;

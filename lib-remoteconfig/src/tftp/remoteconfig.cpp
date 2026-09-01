@@ -25,6 +25,7 @@
  */
 
 #include <cstdint>
+#include <span>
 #include <cassert>
 
 #include "remoteconfig.h"
@@ -50,7 +51,7 @@ void RemoteConfig::PlatformHandleTftpSet() {
         auto succes = true;
 
         if (tftp_file_server_->IsDone()) {
-            succes = FlashCodeInstall::Get()->WriteFirmware(s_tftp_buffer, kFileSize);
+            succes = FlashCodeInstall::Get()->WriteFirmware(std::span{s_tftp_buffer}.first(kFileSize));
 
             if (!succes) {
                 Display::Get()->TextStatus("Error: TFTP", ansi::Colours::Colour::kRed);

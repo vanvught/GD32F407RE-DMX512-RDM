@@ -2,9 +2,13 @@ $(info $$MAKE_FLAGS [${MAKE_FLAGS}])
 
 EXTRA_INCLUDES+=../lib-board/include
 EXTRA_INCLUDES+=../lib-network/include ../lib-display/include 
+
 EXTRA_SRCDIR+=src/json
 
 ifneq ($(MAKE_FLAGS),)
+	ifneq (,$(findstring RDM_RESPONDER,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-rdm/include
+	endif
 	ifneq (,$(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)))
 		EXTRA_INCLUDES+=../lib-rdm/include
 	endif

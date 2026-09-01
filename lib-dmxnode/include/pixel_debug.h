@@ -46,6 +46,6 @@
 #define PIXEL_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_PIXEL
 
-#endif // _PIXEL_DEBUG_H_
+#endif // PIXEL_DEBUG_H_

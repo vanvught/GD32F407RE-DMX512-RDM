@@ -35,7 +35,7 @@
 #include "dmxnode_outputtype.h"
 #if defined(DMXNODE_OUTPUT_DMX)
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json {
 class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
@@ -84,22 +84,22 @@ class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
         MakeKey(SetDirectionPort, DmxNodeParamsConst::kDirectionPort[1]),
         MakeKey(SetMergeModePort, DmxNodeParamsConst::kMergeModePort[1]),
         MakeKey(SetOutputStylePort, DmxNodeParamsConst::kOutputStylePort[1]),
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         MakeKey(SetLabelPort, DmxNodeParamsConst::kLabelPort[2]),
         MakeKey(SetUniversePort, DmxNodeParamsConst::kUniversePort[2]),
         MakeKey(SetDirectionPort, DmxNodeParamsConst::kDirectionPort[2]),
         MakeKey(SetMergeModePort, DmxNodeParamsConst::kMergeModePort[2]),
         MakeKey(SetOutputStylePort, DmxNodeParamsConst::kOutputStylePort[2]),
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         MakeKey(SetLabelPort, DmxNodeParamsConst::kLabelPort[3]),
         MakeKey(SetUniversePort, DmxNodeParamsConst::kUniversePort[3]),
         MakeKey(SetDirectionPort, DmxNodeParamsConst::kDirectionPort[3]),
         MakeKey(SetMergeModePort, DmxNodeParamsConst::kMergeModePort[3]),
         MakeKey(SetOutputStylePort, DmxNodeParamsConst::kOutputStylePort[3]),
-#endif
-#endif
+#endif // (DMX_MAX_PORTS == 4)
+#endif // DMX_MAX_PORTS
     };
 
     inline static common::store::DmxNode store_dmxnode;

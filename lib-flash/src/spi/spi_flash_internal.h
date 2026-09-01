@@ -28,35 +28,26 @@
 
 #include <cstdint>
 
-struct SpiFlashInfo {
+namespace spi::flash {
+struct Info {
     const char* name;
     uint32_t size;
     // Poll cmd - for flash erase/program
     uint8_t poll_cmd;
 };
+void Init();
+void Transfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags);
 
-#define SPI_FLASH_PROG_TIMEOUT (2 * 1000)
-#define SPI_FLASH_PAGE_ERASE_TIMEOUT (5 * 1000)
-#define SPI_FLASH_SECTOR_ERASE_TIMEOUT (10 * 1000)
+#ifdef H3
+#define CONFIG_SPI_FLASH_MACRONIX
+bool ProbeMacronix(struct spi::flash::Info* flash, const uint8_t* idcode);
+#define CONFIG_SPI_FLASH_GIGADEVICE
+bool ProbeGigadevice(struct spi::flash::Info* flash, const uint8_t* idcode);
+#endif
+#define CONFIG_SPI_FLASH_WINBOND
+bool ProbeWinbond(struct spi::flash::Info* flash, const uint8_t* idcode);
+} // namespace spi::flash
 
-// Common commands
-#define CMD_READ_ID 0x9f
-
-#define CMD_READ_ARRAY_SLOW 0x03
-#define CMD_READ_ARRAY_FAST 0x0b
-
-#define CMD_WRITE_STATUS 0x01
-#define CMD_PAGE_PROGRAM 0x02
-#define CMD_WRITE_DISABLE 0x04
-#define CMD_READ_STATUS 0x05
-#define CMD_FLAG_STATUS 0x70
-#define CMD_WRITE_ENABLE 0x06
-#define CMD_ERASE_4K 0x20
-#define CMD_ERASE_32K 0x52
-#define CMD_ERASE_64K 0xd8
-#define CMD_ERASE_CHIP 0xc7
-
-// Common status
 #define STATUS_WIP 0x01
 #define STATUS_PEC 0x80
 
@@ -66,18 +57,5 @@ struct SpiFlashInfo {
 #define SPI_XFER_END 0x02   ///< Deassert CS after transfer
 
 #define SPI_XFER_SPEED_HZ 6000000 ///< 6MHz
-
-void SpiInit();
-void SpiXfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags);
-
-#if defined(H3)
-#define CONFIG_SPI_FLASH_MACRONIX
-bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, const uint8_t* idcode);
-#define CONFIG_SPI_FLASH_GIGADEVICE
-bool SpiFlashProbeGigadevice(struct SpiFlashInfo* spi, const uint8_t* idcode);
-#endif
-
-#define CONFIG_SPI_FLASH_WINBOND
-bool SpiFlashProbeWinbond(struct SpiFlashInfo* spi, const uint8_t* idcode);
 
 #endif // SPI_SPI_FLASH_INTERNAL_H_

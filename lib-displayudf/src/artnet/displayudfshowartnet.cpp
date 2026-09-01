@@ -32,9 +32,6 @@
 #include "ip4/ip4_address.h"
 #include "displayudf_debug.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
-#include "dmx.h"
-#endif
 
 void DisplayUdf::ShowArtNetNode() {
     DISPLAYUDF_DEBUG_ENTRY();

@@ -34,33 +34,48 @@
 #include "firmware/debug/debug_dump.h"
 #include "timing.h"
 #include "common/utils/utils_math.h"
-
-static struct SpiFlashInfo s_flash = {.name = "", .size = 0, .poll_cmd = CMD_READ_STATUS};
-
-#define IDCODE_PART_LEN 5
+#include "watchdog.h"
 
 namespace {
+constexpr uint32_t kProgramTimeoutMillis = 200;                     // Maximum wait after PAGE PROGRAM.
+constexpr uint32_t kSectorEraseTimeoutMillis = 400;                 // Maximum wait after SECTOR ERASE.
+constexpr uint32_t kReadyTimeoutMillis = kSectorEraseTimeoutMillis; // Conservative wait when the preceding operation is unknown.
+
+constexpr uint32_t kIdCodePartLength = 5;
+
+constexpr uint8_t kCmdWriteStatus = 0x01;
+constexpr uint8_t kCmdPageProgram = 0x02;
+constexpr uint8_t kCmdWriteDisable = 0x04;
+constexpr uint8_t kCmdReadStatus = 0x05;
+constexpr uint8_t kCmdFlagStatus = 0x70;
+constexpr uint8_t kCmdWriteEnable = 0x06;
+constexpr uint8_t kCmdReadArrayFast = 0x0b;
+constexpr uint8_t kCmdErase4K = 0x20;
+constexpr uint8_t kCmdReadId = 0x9f;
+
+struct spi::flash::Info s_flash = {.name = "", .size = 0, .poll_cmd = kCmdReadStatus};
+
 constexpr struct {
     const uint8_t kIdcode;
-    bool (*probe)(struct SpiFlashInfo* flash, const uint8_t* idcode);
+    bool (*probe)(struct spi::flash::Info* flash, const uint8_t* idcode);
 } kFlashes[] = {
 // Keep it sorted by define name
 #ifdef CONFIG_SPI_FLASH_GIGADEVICE
     {
         .kIdcode = 0xc8,
-        .probe = SpiFlashProbeGigadevice,
+        .probe = spi::flash::ProbeGigadevice,
     },
 #endif
 #ifdef CONFIG_SPI_FLASH_MACRONIX
     {
         .kIdcode = 0xc2,
-        .probe = SpiFlashProbeMacronix,
+        .probe = spi::flash::ProbeMacronix,
     },
 #endif
 #ifdef CONFIG_SPI_FLASH_WINBOND
     {
         .kIdcode = 0xef,
-        .probe = SpiFlashProbeWinbond,
+        .probe = spi::flash::ProbeWinbond,
     },
 #endif
 };
@@ -89,10 +104,10 @@ void SpiFlashReadWrite(const uint8_t* command, uint32_t command_length, const ui
         flags |= SPI_XFER_END;
     }
 
-    SpiXfer(command_length, command, nullptr, flags);
+    spi::flash::Transfer(command_length, command, nullptr, flags);
 
     if (data_length != 0) {
-        SpiXfer(data_length, data_out, data_in, SPI_XFER_END);
+        spi::flash::Transfer(data_length, data_out, data_in, SPI_XFER_END);
     }
 }
 
@@ -109,19 +124,19 @@ inline void SpiFlashCmdWrite(const uint8_t* command, uint32_t command_length, co
 }
 
 inline void SpiFlashCmdWriteEnable() {
-    SpiFlashCmd(CMD_WRITE_ENABLE, nullptr, 0);
+    SpiFlashCmd(kCmdWriteEnable, nullptr, 0);
 }
 
 bool SpiFlashCmdWaitReady(uint32_t timeout) {
-    uint8_t cmd = CMD_READ_STATUS;
+    uint8_t cmd = kCmdReadStatus;
 
-    SpiXfer(1, &cmd, nullptr, SPI_XFER_BEGIN);
+    spi::flash::Transfer(1, &cmd, nullptr, SPI_XFER_BEGIN);
 
     const auto kTimebase = GetTimer(0);
     uint8_t status;
 
     do {
-        SpiXfer(1, nullptr, &status, 0);
+        spi::flash::Transfer(1, nullptr, &status, 0);
 
         if ((status & STATUS_WIP) == 0) {
             break;
@@ -129,7 +144,7 @@ bool SpiFlashCmdWaitReady(uint32_t timeout) {
 
     } while (GetTimer(kTimebase) < timeout);
 
-    SpiXfer(0, nullptr, nullptr, SPI_XFER_END);
+    spi::flash::Transfer(0, nullptr, nullptr, SPI_XFER_END);
 
     if ((status & STATUS_WIP) == 0) {
         SPI_FLASH_DEBUG_PRINTF("get_timer(kTimebase)=%u", static_cast<unsigned>(GetTimer(kTimebase)));
@@ -143,22 +158,16 @@ bool SpiFlashCmdWaitReady(uint32_t timeout) {
 }
 
 bool SpiFlashWriteCommon(const uint8_t* command, uint32_t command_length, const uint8_t* data, uint32_t data_length, bool wait_ready) {
-    uint32_t timeout;
-
-    if (data == nullptr) {
-        timeout = SPI_FLASH_PAGE_ERASE_TIMEOUT;
-    } else {
-        timeout = SPI_FLASH_PROG_TIMEOUT;
-    }
+    const auto kTimeout = data == nullptr ? kSectorEraseTimeoutMillis : kProgramTimeoutMillis;
 
     SpiFlashCmdWriteEnable();
     SpiFlashCmdWrite(command, command_length, data, data_length);
 
     if (wait_ready) {
-        const auto kRet = SpiFlashCmdWaitReady(timeout);
+        const auto kRet = SpiFlashCmdWaitReady(kTimeout);
 
         if (!kRet) {
-            SPI_FLASH_DEBUG_PRINTF("write %s timed out", timeout == SPI_FLASH_PROG_TIMEOUT ? "program" : "page erase");
+            SPI_FLASH_DEBUG_PRINTF("write %s timed out", data == nullptr ? "sector erase" : "program");
             return false;
         }
     }
@@ -173,10 +182,10 @@ void SpiFlashReadCommon(const uint8_t* command, uint32_t command_length, uint8_t
 
 namespace spi::flash {
 bool Probe() {
-    SpiInit();
+    spi::flash::Init();
 
-    uint8_t idcode[IDCODE_LEN];
-    SpiFlashCmd(CMD_READ_ID, idcode, sizeof(idcode));
+    uint8_t idcode[kIdCodePartLength];
+    SpiFlashCmd(kCmdReadId, idcode, sizeof(idcode));
 
     debug::Dump(idcode, sizeof(idcode));
 
@@ -209,70 +218,64 @@ const char* Name() {
 }
 
 namespace cmd {
-bool Read(uint32_t offset, uint32_t length, uint8_t* data) {
+bool Read(uint32_t offset, std::span<uint8_t> data) {
     SPI_FLASH_DEBUG_ENTRY();
 
-    if (!SpiFlashCmdWaitReady(SPI_FLASH_PROG_TIMEOUT)) {
+    if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
         return false;
     }
 
     uint8_t cmd[5];
-    cmd[0] = CMD_READ_ARRAY_FAST;
+    cmd[0] = kCmdReadArrayFast;
     cmd[4] = 0x00;
 
-    while (length != 0) {
-        const auto kRemainLength = SPI_FLASH_16MB_BOUN - offset;
-        uint32_t read_length;
+    while (!data.empty()) {
+        watchdog::Feed();
 
-        if (length < kRemainLength) {
-            read_length = length;
-        } else {
-            read_length = kRemainLength;
-        }
+        const auto kRemainLength = SPI_FLASH_16MB_BOUN - offset;
+        const auto kReadLength = common::Min(static_cast<uint32_t>(data.size()), kRemainLength);
 
         SpiFlashAddr(offset, cmd);
-        SpiFlashReadCommon(cmd, sizeof(cmd), data, read_length);
+        SpiFlashReadCommon(cmd, sizeof(cmd), data.data(), kReadLength);
 
-        offset += read_length;
-        length -= read_length;
-        data += read_length;
+        offset += kReadLength;
+        data = data.subspan(kReadLength);
     }
 
     SPI_FLASH_DEBUG_EXIT();
     return true;
 }
 
-bool Write(uint32_t offset, uint32_t length, const uint8_t* data) {
+bool Write(uint32_t offset, std::span<const uint8_t> data) {
     SPI_FLASH_DEBUG_ENTRY();
 
-    if (!SpiFlashCmdWaitReady(SPI_FLASH_SECTOR_ERASE_TIMEOUT)) {
+    if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
         return false;
     }
 
-    uint32_t chunk_length;
     uint8_t cmd[4];
-    cmd[0] = CMD_PAGE_PROGRAM;
+    cmd[0] = kCmdPageProgram;
 
-    for (uint32_t actual_length = 0; actual_length < length; actual_length += chunk_length) {
+    while (!data.empty()) {
+        watchdog::Feed();
+
         const auto kByteAddress = offset % spi::flash::kPageSize;
-        chunk_length = common::Min((length - actual_length), (spi::flash::kPageSize - kByteAddress));
+        const auto kChunkLength = common::Min(static_cast<uint32_t>(data.size()), spi::flash::kPageSize - kByteAddress);
 
         SpiFlashAddr(offset, cmd);
 
-        SPI_FLASH_DEBUG_PRINTF("0x%p => cmd = { 0x%02x 0x%02x%02x%02x } actual_length=%d, chunk_length=%d", data + actual_length, cmd[0], cmd[1], cmd[2], cmd[3], static_cast<int>(actual_length), static_cast<int>(chunk_length));
-
-        const auto kRet = SpiFlashWriteCommon(cmd, sizeof(cmd), data + actual_length, chunk_length, ((actual_length + chunk_length) != length));
+        const auto kRet = SpiFlashWriteCommon(cmd, sizeof(cmd), data.data(), kChunkLength, data.size() != kChunkLength);
 
         if (!kRet) {
             SPI_FLASH_DEBUG_PUTS("write failed");
             SPI_FLASH_DEBUG_EXIT();
             return false;
-            break;
         }
 
-        offset += chunk_length;
+        offset += kChunkLength;
+        data = data.subspan(kChunkLength);
     }
 
     SPI_FLASH_DEBUG_EXIT();
@@ -288,16 +291,17 @@ bool Erase(uint32_t offset, uint32_t length) {
         return false;
     }
 
-    if (!SpiFlashCmdWaitReady(SPI_FLASH_PROG_TIMEOUT)) {
+    if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
         return false;
     }
 
     static_assert(spi::flash::kSectorSize == 4096);
     uint8_t cmd[4];
-    cmd[0] = CMD_ERASE_4K;
+    cmd[0] = kCmdErase4K;
 
     while (length != 0) {
+        watchdog::Feed();
         SpiFlashAddr(offset, cmd);
 
         SPI_FLASH_DEBUG_PRINTF("erase %2x %2x %2x %2x (%x)", cmd[0], cmd[1], cmd[2], cmd[3], static_cast<unsigned>(offset));
@@ -319,7 +323,7 @@ bool Erase(uint32_t offset, uint32_t length) {
 }
 
 bool WriteStatus(uint8_t status) {
-    uint8_t cmd = CMD_WRITE_STATUS;
+    uint8_t cmd = kCmdWriteStatus;
     const auto kRet = SpiFlashWriteCommon(&cmd, 1, &status, 1, false);
 
     if (!kRet) {

@@ -76,10 +76,10 @@ void WriteStart() {
     DMXNODE_DEBUG_EXIT();
 }
 
-void Write(uint32_t port_index, const uint8_t* data) {
+void Write(uint32_t port_index, std::span<const uint8_t> data) {
     DMXNODE_DEBUG_ENTRY();
     assert(port_index < dmxnode::kMaxPorts);
-    assert(data != nullptr);
+    assert(data.size() >= dmxnode::kUniverseSize);
 
     if (!s_has_flash) {
         DMXNODE_DEBUG_EXIT();
@@ -88,9 +88,9 @@ void Write(uint32_t port_index, const uint8_t* data) {
 
     const auto kOffset = s_offset_base + (port_index * dmxnode::kUniverseSize);
 
-    DMXNODE_DEBUG_PRINTF("s_offset_base=%p, kOffset=%p", s_offset_base, kOffset);
+    DMXNODE_DEBUG_PRINTF("s_offset_base=%p, offset=%p", reinterpret_cast<void*>(s_offset_base), reinterpret_cast<void*>(offset));
 
-    spi::flash::cmd::Write(kOffset, dmxnode::kUniverseSize, data);
+    spi::flash::cmd::Write(kOffset, data.first(dmxnode::kUniverseSize));
 
     DMXNODE_DEBUG_EXIT();
 }
@@ -117,10 +117,10 @@ void ReadStart() {
     DMXNODE_DEBUG_EXIT();
 }
 
-void Read(uint32_t port_index, uint8_t* data) {
+void Read(uint32_t port_index, std::span<uint8_t> data) {
     DMXNODE_DEBUG_ENTRY();
     assert(port_index < dmxnode::kMaxPorts);
-    assert(data != nullptr);
+    assert(data.size() >= dmxnode::kUniverseSize);
 
     if (!s_has_flash) {
         DMXNODE_DEBUG_EXIT();
@@ -129,9 +129,9 @@ void Read(uint32_t port_index, uint8_t* data) {
 
     const auto kOffset = s_offset_base + (port_index * dmxnode::kUniverseSize);
 
-    DMXNODE_DEBUG_PRINTF("s_offset_base=%p, kOffset=%u", reinterpret_cast<void*>(s_offset_base), static_cast<unsigned>(kOffset));
+    DMXNODE_DEBUG_PRINTF("s_offset_base=%p, offset=%u", reinterpret_cast<void*>(s_offset_base), static_cast<unsigned>(offset));
 
-    spi::flash::cmd::Read(kOffset, dmxnode::kUniverseSize, data);
+    spi::flash::cmd::Read(kOffset, data.first(dmxnode::kUniverseSize));
 
     DMXNODE_DEBUG_EXIT();
 }

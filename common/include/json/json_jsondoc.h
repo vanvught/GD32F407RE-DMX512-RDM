@@ -95,6 +95,8 @@ class JsonDoc {
     }
 
     void WriteField(const char* key, uint32_t value) {
+		assert(key != nullptr);
+		
         if (!first_) {
             Write(",");
         }
@@ -121,6 +123,8 @@ class JsonDoc {
     }
 
     void Write(const char* string) {
+		assert(string != nullptr);
+		
         if (pos_ >= max_len_) {
             return;
         }

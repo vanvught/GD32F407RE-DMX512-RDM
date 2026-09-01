@@ -38,14 +38,14 @@
 #include "spi/spi_flash.h"
 #include "spi_flash_internal.h"
 
-struct WinbondSpiFlashParams
-{
+namespace {
+struct WinbondSpiFlashParams {
     const uint16_t kId;
     const uint16_t kNrBlocks;
     const char* const kName;
 };
 
-static constexpr struct WinbondSpiFlashParams kWinbondSpiFlashTable[] = {
+constexpr struct WinbondSpiFlashParams kWinbondSpiFlashTable[] = {
   {
          .kId = 0x3013,
          .kNrBlocks = 8,
@@ -106,8 +106,10 @@ static constexpr struct WinbondSpiFlashParams kWinbondSpiFlashTable[] = {
          .kNrBlocks = 32,
          .kName = "W25Q16DW",
      }};
+} // namespace
 
-bool SpiFlashProbeWinbond(struct SpiFlashInfo* flash, const uint8_t* idcode) {
+namespace spi::flash {
+bool ProbeWinbond(struct spi::flash::Info* flash, const uint8_t* idcode) {
     SPI_FLASH_DEBUG_ENTRY();
 
     const struct WinbondSpiFlashParams* params;
@@ -132,3 +134,4 @@ bool SpiFlashProbeWinbond(struct SpiFlashInfo* flash, const uint8_t* idcode) {
     SPI_FLASH_DEBUG_EXIT();
     return true;
 }
+} // namespace spi::flash

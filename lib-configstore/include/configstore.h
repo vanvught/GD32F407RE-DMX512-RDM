@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <cassert>
 
 #include "configstoredevice.h"
@@ -92,7 +93,7 @@ class ConfigStore : StoreDevice {
             CONFIGSTORE_DEBUG_PRINTF("s_start_address=%p", reinterpret_cast<void*>(s_start_address));
 
             storedevice::Result result;
-            while (!StoreDevice::Read(s_start_address, kStoreSize, reinterpret_cast<uint8_t*>(&s_store), result)) {
+            while (!StoreDevice::Read(s_start_address, std::span{s_store}, result)) {
             }
             assert(result == storedevice::Result::kOk);
         }
@@ -593,7 +594,7 @@ class ConfigStore : StoreDevice {
                 break;
             case State::kWriting: {
                 storedevice::Result result;
-                if (StoreDevice::Write(s_start_address, sizeof(ConfigurationStore), reinterpret_cast<uint8_t*>(&s_store), result)) {
+                if (StoreDevice::Write(s_start_address, std::span{s_store}.first<sizeof(ConfigurationStore)>(), result)) {
                     s_state = State::kIdle;
                     return false;
                 }

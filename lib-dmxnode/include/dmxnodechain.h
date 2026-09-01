@@ -114,7 +114,7 @@ class DmxNodeChain {
     }
 
     dmxnode::OutputStyle GetOutputStyle([[maybe_unused]] uint32_t port_index) const { return dmxnode::OutputStyle::kDelta; }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     uint16_t GetDmxFootprint() { return dmx_footprint_; }
 
@@ -224,7 +224,7 @@ class DmxNodeChain {
                static_cast<int>(t->GetDmxFootprint()));
 
         printf("\nkOffset=%d\n", kOffset);
-#endif
+#endif // NDEBUG
 
         if ((t->GetDmxStartAddress() + t->GetDmxFootprint() <= kDmxAddress) || (kOffset < 0)) {
             DEBUG_EXIT();

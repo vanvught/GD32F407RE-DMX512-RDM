@@ -28,38 +28,18 @@
 
 #include <cstdint>
 
-#include "display.h"                  // IWYU pragma: keep
-#include "firmware/firmwareversion.h" // IWYU pragma: keep
 #if !defined(NO_EMAC)
 #include "network_config.h"
 #include "network_iface.h"
 #include "ip4/ip4_address.h"
 #include "core/protocol/dhcp.h"
 #endif
-#if defined(NODE_ARTNET_MULTI)
-#define NODE_ARTNET
-#endif
-#if defined(NODE_E131_MULTI)
-#define NODE_E131
-#endif
-#if defined(NODE_ARTNET)
-#include "artnetnode.h"
-#endif
-#if defined(NODE_E131)
-#include "e131bridge.h"
-#endif
-#if defined(RDM_RESPONDER)
-#include "rdmdeviceresponder.h"
-#endif
-#if defined(RDM_RESPONDER) || defined(OUTPUT_DMX_MONITOR) || defined(OUTPUT_DMX_PCA9685) || defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_TLC59711)
-#define HAVE_DMX_START_ADDRESS
-#endif
-#if defined(RDM_RESPONDER) || defined(OUTPUT_DMX_MONITOR) || defined(OUTPUT_DMX_PCA9685) || defined(OUTPUT_DMX_TLC59711)
+#include "display.h"                  // IWYU pragma: keep
+#include "firmware/firmwareversion.h" // IWYU pragma: keep
+#include "dmxnode_outputtype.h"       // IWYU pragma: keep
+#include "dmxnode_nodetype.h"
+#ifdef RDM_RESPONDER
 #undef DMX_MAX_PORTS
-#endif
-#include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
-#include "dmx.h"
 #endif
 
 namespace displayudf {
@@ -130,17 +110,11 @@ class DisplayUdf final : public Display {
 
     void Show();
 
-    /**
-     * Art-Net
-     */
-
-#if defined(NODE_ARTNET)
+// Art-Net
+#if defined(DMXNODE_TYPE_ARTNET)
     void ShowUniverseArtNetNode();
 #endif
-    /**
-     * RDM Responder
-     */
-
+// RDM Responder
 #if defined(RDM_RESPONDER)
     void ShowDmxStartAddress() {
         const auto dmx_start_address = RDMDeviceResponder::Get()->GetDmxStartAddress();
@@ -149,10 +123,7 @@ class DisplayUdf final : public Display {
     }
 #endif
 
-    /**
-     * Network
-     */
-
+// Network
 #if !defined(NO_EMAC)
     void ShowEmacInit() {
         ClearEndOfLine();
@@ -209,13 +180,13 @@ class DisplayUdf final : public Display {
     static DisplayUdf* Get() { return s_this; }
 
    private:
-    // Art-Net
-#if defined(NODE_ARTNET)
+// Art-Net
+#if defined(DMXNODE_TYPE_ARTNET)
     void ShowArtNetNode();
     void ShowDestinationIpArtNetNode();
 #endif
-    // sACN E1.31
-#if defined(NODE_E131)
+// sACN E1.31
+#if defined(DMXNODE_TYPE_E131)
     void ShowE131Bridge();
 #endif
 

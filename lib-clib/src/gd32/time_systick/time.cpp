@@ -45,7 +45,7 @@ extern "C" {
  *     1970-01-01 00:00:00 +0000 (UTC).
  */
 
-int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz) {
+int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
     assert(tv != 0);
 
     const auto kCurrentSysTickMillis = gv_systick_millis;
@@ -77,7 +77,7 @@ int gettimeofday(struct timeval* tv, __attribute__((unused)) struct timezone* tz
     return 0;
 }
 
-int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz) {
+int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
     assert(tv != 0);
 
     struct timeval g;

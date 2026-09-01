@@ -29,6 +29,7 @@
 #include "displayudf.h"
 #include "board.h"
 #include "displayudf_debug.h"
+#include "dmxnode_nodetype.h"
 
 DisplayUdf::DisplayUdf() {
     assert(s_this == nullptr);
@@ -68,12 +69,10 @@ void DisplayUdf::Set(uint32_t line, displayudf::Labels label) {
 }
 
 void DisplayUdf::Show() {
-#if defined(NODE_ARTNET)
+#if defined(DMXNODE_TYPE_ARTNET)
     ShowArtNetNode();
-#elif defined(NODE_E131)
+#elif defined(DMXNODE_TYPE_E131)
     ShowE131Bridge();
-#elif defined(NODE_NODE)
-    ShowNode();
 #endif
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(displayudf::Labels::kUnknown); i++) {

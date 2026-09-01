@@ -25,7 +25,7 @@
 
 #include <cstdint>
 
-#include "./../../spi/spi_flash_internal.h"
+#include "../spi_flash_internal.h"
 #include "gd32_spi.h"
 #include "gd32_gpio.h"
 #include "gd32.h" // IWYU pragma: keep
@@ -36,7 +36,8 @@ void SpiTransfern(char* buffer, uint32_t length) {
 }
 } // namespace
 
-void SpiInit() {
+namespace spi::flash {
+void Init() {
     Gd32SpiBegin();
     Gd32SpiChipSelect(GD32_SPI_CS_NONE);
     Gd32SpiSetSpeedHz(SPI_XFER_SPEED_HZ);
@@ -45,19 +46,19 @@ void SpiInit() {
     Gd32GpioFsel(SPI_FLASH_CS_GPIOx, SPI_FLASH_CS_GPIO_PINx, GPIO_FSEL_OUTPUT);
     GPIO_BOP(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
 
-#if defined(SPI_FLASH_WP_GPIO_PINx)
+#ifdef SPI_FLASH_WP_GPIO_PINx
     Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_WP_GPIO_PINx, GPIO_FSEL_OUTPUT);
     GPIO_BOP(SPI_GPIOx) = SPI_FLASH_WP_GPIO_PINx;
 #endif
 
-#if defined(SPI_FLASH_HOLD_GPIO_PINx)
+#ifdef SPI_FLASH_HOLD_GPIO_PINx
     Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_HOLD_GPIO_PINx, GPIO_FSEL_OUTPUT);
     GPIO_BOP(SPI_GPIOx) = SPI_FLASH_HOLD_GPIO_PINx;
 #endif
 }
 
-void SpiXfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags) {
-    if (flags & SPI_XFER_BEGIN) {
+void Transfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags) {
+    if ((flags & SPI_XFER_BEGIN) == SPI_XFER_BEGIN) {
         GPIO_BC(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
     }
 
@@ -71,7 +72,8 @@ void SpiXfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_
         }
     }
 
-    if (flags & SPI_XFER_END) {
+    if ((flags & SPI_XFER_END) == SPI_XFER_END) {
         GPIO_BOP(SPI_FLASH_CS_GPIOx) = SPI_FLASH_CS_GPIO_PINx;
     }
 }
+} // namespace spi::flash

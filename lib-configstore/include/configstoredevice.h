@@ -27,6 +27,7 @@
 #define CONFIGSTOREDEVICE_H_
 
 #include <cstdint>
+#include <span>
 
 namespace storedevice {
 enum class Result { kOk, kError };
@@ -49,9 +50,9 @@ class StoreDevice {
     [[nodiscard]] uint32_t GetSectorSize() const;
     [[nodiscard]] uint32_t GetSize() const;
 
-    bool Read(uint32_t offset, uint32_t length, uint8_t* buffer, storedevice::Result& result);
+    bool Read(uint32_t offset, std::span<uint8_t> buffer, storedevice::Result& result);
     bool Erase(uint32_t offset, uint32_t length, storedevice::Result& result);
-    bool Write(uint32_t offset, uint32_t length, const uint8_t* buffer, storedevice::Result& result);
+    bool Write(uint32_t offset, std::span<const uint8_t> buffer, storedevice::Result& result);
 
    private:
     bool detected_{false};

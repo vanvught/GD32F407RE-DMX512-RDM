@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <span>
 #include <cassert>
 
 #include "http/http.h"
@@ -596,7 +597,8 @@ http::Status HttpDeamonHandleRequest::HandlePostUpload() {
 
             uint32_t data_written;
             printf("%u\n", static_cast<unsigned>(request_data_length_));
-            if (!(FlashCodeInstall::Get()->WriteChunk(reinterpret_cast<uint8_t*>(file_data_), request_data_length_, data_written))) {
+
+            if (!(FlashCodeInstall::Get()->WriteChunk(std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(file_data_), request_data_length_}, data_written))) {
                 HTTPD_DEBUG_PRINTF("WriteChunk failed. Data written:%u bytes", static_cast<unsigned>(data_written));
                 HTTPD_DEBUG_EXIT();
                 return http::Status::kInternalServerError;

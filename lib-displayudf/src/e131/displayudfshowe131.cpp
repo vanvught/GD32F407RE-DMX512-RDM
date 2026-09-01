@@ -30,9 +30,6 @@
 #include "dmxnode.h"
 #include "displayudf_debug.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
-#include "dmx.h"
-#endif
 #include "common/utils/utils_math.h"
 
 void DisplayUdf::ShowE131Bridge() {

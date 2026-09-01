@@ -69,53 +69,54 @@ inline const char* GetNodeType(NodeType type) {
 #define DMXNODE_NODETYPE_DEFINED
 #include "artnetnode.h"
 using DmxNodeNodeType = ArtNetNode;
-#endif
+#endif // defined(NODE_ARTNET) || defined(NODE_ARTNET_MULTI)
 
 #if defined(NODE_E131) || defined(NODE_E131_MULTI)
 #define DMXNODE_TYPE_E131
 #define DMXNODE_NODETYPE_DEFINED
 #include "e131bridge.h"
 using DmxNodeNodeType = E131Bridge;
-#endif
+#endif // defined(NODE_E131) || defined(NODE_E131_MULTI)
 
 #if defined(NODE_DDP_DISPLAY)
 #define DMXNODE_TYPE_DDP
 #define DMXNODE_NODETYPE_DEFINED
 #include "ddpdisplay.h"
 using DmxNodeNodeType = DdpDisplay;
-#endif
+#endif // NODE_DDP_DISPLAY
 
 #if defined(NODE_PP)
 #define DMXNODE_TYPE_PP
-#endif
+#endif // NODE_PP
 
 #if defined(NODE_DMX)
 #define DMXNODE_TYPE_DMX
-#endif
+#endif // NODE_DMX
 
 #if defined(NODE_LTC_SMPTE)
 #define DMXNODE_TYPE_LTC
-#endif
+#endif // NODE_LTC_SMPTE
 
 #if defined(NODE_OSC_CLIENT)
 #define DMXNODE_TYPE_OSCCLIENT
-#endif
+#endif // NODE_OSC_CLIENT
 
 #if defined(NODE_OSC_SERVER)
 #define DMXNODE_TYPE_OSCSERVER
-#endif
+#endif // NODE_OSC_SERVER
 
 #if defined(RDM_RESPONDER)
 #define DMXNODE_TYPE_RDM_RESPONDER
-#endif
+#include "rdmdeviceresponder.h"
+#endif // RDM_RESPONDER
 
 #if defined(NODE_RDMNET_LLRP_ONLY)
 #define DMXNODE_TYPE_RDMNET_LLRP_ONLY
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
 #if defined(NODE_SHOWFILE) && !defined(DMXNODE_NODETYPE_DEFINED)
 #define DMXNODE_TYPE_SHOWFILE
-#endif
+#endif // defined(NODE_SHOWFILE) && !defined(DMXNODE_NODETYPE_DEFINED)
 
 namespace dmxnode {
 #if defined(DMXNODE_TYPE_LTC)
@@ -142,7 +143,7 @@ inline constexpr auto kNodeType = NodeType::kRdmNet;
 inline constexpr auto kNodeType = NodeType::kShowfile;
 #else
 inline constexpr auto kNodeType = NodeType::kUndefined;
-#endif
+#endif // DMXNODE_TYPE_LTC
 } // namespace dmxnode
 
 #endif // DMXNODE_NODETYPE_H_

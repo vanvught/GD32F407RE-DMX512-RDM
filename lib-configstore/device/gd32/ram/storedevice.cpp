@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <span>
 #include <cassert>
 
 #include "configstoredevice.h"
@@ -61,9 +62,10 @@ uint32_t StoreDevice::GetSectorSize() const {
     return kFlashSectorSize;
 }
 
-bool StoreDevice::Read(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Read([[maybe_unused]] uint32_t offset, [[maybe_unused]] std::span<uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
-    assert((offset + length) <= BSRAM_SIZE);
+    assert(offset <= BSRAM_SIZE);
+    assert(buffer.size() <= (BSRAM_SIZE - offset));
 
     result = storedevice::Result::kOk;
 
@@ -71,19 +73,19 @@ bool StoreDevice::Read(__attribute__((unused)) uint32_t offset, __attribute__((u
     return true;
 }
 
-bool StoreDevice::Erase(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, storedevice::Result& result) {
+bool StoreDevice::Erase([[maybe_unused]] uint32_t offset, [[maybe_unused]] uint32_t length, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
     result = storedevice::Result::kOk;
-    
 
     CONFIGSTORE_DEBUG_EXIT();
     return true;
 }
 
-bool StoreDevice::Write(__attribute__((unused)) uint32_t offset, __attribute__((unused)) uint32_t length, __attribute__((unused)) const uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Write([[maybe_unused]] uint32_t offset, [[maybe_unused]] std::span<const uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
-    assert((offset + length) <= BSRAM_SIZE);
+    assert(offset <= BSRAM_SIZE);
+    assert(buffer.size() <= (BSRAM_SIZE - offset));
 
     result = storedevice::Result::kOk;
 

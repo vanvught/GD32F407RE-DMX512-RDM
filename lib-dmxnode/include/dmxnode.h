@@ -29,6 +29,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cassert>
+#include <span>
 
 #include "configurationstore.h"
 
@@ -57,13 +58,13 @@ inline constexpr uint8_t kHighest = 200;
 inline constexpr uint32_t kMaxPorts = 1; // ISO C++ forbids zero-size array
 #else
 inline constexpr uint32_t kMaxPorts = DMXNODE_PORTS; // From build config
-#endif
+#endif // !defined(DMXNODE_PORTS) || (DMXNODE_PORTS == 0)
 
 #if !defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
 inline constexpr uint32_t kDmxportOffset = 0; // Default if not overridden
 #else
 inline constexpr uint32_t kDmxportOffset = CONFIG_DMXNODE_DMX_PORT_OFFSET; // From build config
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
 inline constexpr uint32_t kConfigPortCount = ((kMaxPorts - kDmxportOffset) <= common::store::dmxnode::kParamPorts) ? (kMaxPorts - kDmxportOffset) : common::store::dmxnode::kParamPorts;
 
@@ -239,11 +240,11 @@ namespace scenes {
 inline constexpr auto kBytesNeeded = dmxnode::kMaxPorts * dmxnode::kUniverseSize;
 
 void WriteStart();
-void Write(uint32_t port_index, const uint8_t* data);
+void Write(uint32_t port_index, std::span<const uint8_t> data);
 void WriteEnd();
 
 void ReadStart();
-void Read(uint32_t port_index, uint8_t* data);
+void Read(uint32_t port_index, std::span<uint8_t> data);
 void ReadEnd();
 } // namespace scenes
 } // namespace dmxnode

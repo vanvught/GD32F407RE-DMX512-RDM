@@ -28,6 +28,7 @@
 #endif
 
 #include <cstdint>
+#include <span>
 
 #include "configstoredevice.h"
 #include "flashcode.h"
@@ -54,11 +55,11 @@ uint32_t StoreDevice::GetSectorSize() const {
     return FlashCode::GetSectorSize();
 }
 
-bool StoreDevice::Read(uint32_t offset, uint32_t length, uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Read(uint32_t offset, std::span<uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
     flashcode::Result flashrom_result;
-    const auto kState = FlashCode::Read(offset, length, buffer, flashrom_result);
+    const auto kState = FlashCode::Read(offset, buffer, flashrom_result);
 
     result = static_cast<storedevice::Result>(flashrom_result);
 
@@ -78,11 +79,11 @@ bool StoreDevice::Erase(uint32_t offset, uint32_t length, storedevice::Result& r
     return kState;
 }
 
-bool StoreDevice::Write(uint32_t offset, uint32_t length, const uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Write(uint32_t offset, std::span<const uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
     flashcode::Result flashrom_result;
-    const auto kState = FlashCode::Write(offset, length, buffer, flashrom_result);
+    const auto kState = FlashCode::Write(offset, buffer, flashrom_result);
 
     result = static_cast<storedevice::Result>(flashrom_result);
 

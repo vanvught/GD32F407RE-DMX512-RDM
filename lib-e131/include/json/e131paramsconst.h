@@ -25,21 +25,18 @@
 #ifndef JSON_E131PARAMSCONST_H_
 #define JSON_E131PARAMSCONST_H_
 
-#include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
 #include "json/json_key.h"
 #include "common/utils/utils_hash.h"
-#include "dmx.h"
-#endif
+#include "dmxnode_outputtype.h"
 
 namespace json {
 struct E131ParamsConst {
     static constexpr char kFileName[] = "e131.json";
 
 #if defined(DMX_MAX_PORTS)
-    static constexpr json::PortKey kPriorityPortA{"priority_port_a", 15, Fnv1a32("priority_port_a", 15)};
+    static constexpr json::PortKey kPriorityPortA{.name="priority_port_a", .length=15, .hash=Fnv1a32("priority_port_a", 15)};
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kPriorityPortB{"priority_port_b", 15, Fnv1a32("priority_port_b", 15)};
+    static constexpr json::PortKey kPriorityPortB{.name="priority_port_b", .length=15, .hash=Fnv1a32("priority_port_b", 15)};
 #endif
 #if (DMX_MAX_PORTS > 2)
     static constexpr json::PortKey kPriorityPortC{"priority_port_c", 15, Fnv1a32("priority_port_c", 15)};

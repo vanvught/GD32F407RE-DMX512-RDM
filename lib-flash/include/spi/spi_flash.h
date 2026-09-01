@@ -27,6 +27,7 @@
 #define SPI_SPI_FLASH_H_
 
 #include <cstdint>
+#include <span>
 
 #ifdef DEBUG_SPI_FLASH
 #include "firmware/debug/debug_debug.h"
@@ -48,7 +49,7 @@
 #define SPI_FLASH_DEBUG_PUTS(...) \
     do {                          \
     } while (false)
-#endif
+#endif // DEBUG_SPI_FLASH
 
 namespace spi::flash {
 inline constexpr uint32_t kPageSize = 256;
@@ -64,8 +65,8 @@ inline uint32_t SectorSize() {
 }
 
 namespace cmd {
-bool Read(uint32_t offset, uint32_t length, uint8_t* data);
-bool Write(uint32_t offset, uint32_t length, const uint8_t* buffer);
+bool Read(uint32_t offset, std::span<uint8_t> data);
+bool Write(uint32_t offset, std::span<const uint8_t> data);
 bool Erase(uint32_t offset, uint32_t length);
 bool WriteStatus(uint8_t status);
 } // namespace cmd

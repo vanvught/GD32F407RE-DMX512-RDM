@@ -39,13 +39,14 @@
 #include "spi/spi_flash.h"
 #include "spi_flash_internal.h"
 
+namespace {
 struct GigadeviceSpiFlashParams {
     const uint16_t kId;
     const uint16_t kNrBlocks;
     const char* const kName;
 };
 
-static constexpr struct GigadeviceSpiFlashParams kGigadeviceSpiFlashTable[] = {
+constexpr struct GigadeviceSpiFlashParams kGigadeviceSpiFlashTable[] = {
     {
         .kId = 0x6016,
         .kNrBlocks = 64,
@@ -62,8 +63,10 @@ static constexpr struct GigadeviceSpiFlashParams kGigadeviceSpiFlashTable[] = {
         .kName = "GD25Q64B",
     },
 };
+} // namespace
 
-bool SpiFlashProbeGigadevice(struct SpiFlashInfo* flash, const uint8_t* idcode) {
+namespace spi::flash {
+bool ProbeGigadevice(struct spi::flash::Info* flash, const uint8_t* idcode) {
     SPI_FLASH_DEBUG_ENTRY();
 
     const struct GigadeviceSpiFlashParams* params;
@@ -88,3 +91,4 @@ bool SpiFlashProbeGigadevice(struct SpiFlashInfo* flash, const uint8_t* idcode) 
     SPI_FLASH_DEBUG_EXIT();
     return true;
 }
+} // namespace spi::flash

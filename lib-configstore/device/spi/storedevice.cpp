@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <span>
 
 #include "configstoredevice.h"
 #include "spi/spi_flash.h"
@@ -40,11 +41,8 @@ StoreDevice::StoreDevice() {
     if (!spi::flash::Probe()) {
         puts("StoreDevice: No SPI flash chip.");
     } else {
-        printf("StoreDevice: SPI flash %s sector size %u total %u bytes [%u kB]\n", 
-          spi::flash::Name(), 
-          static_cast<unsigned int>(spi::flash::SectorSize()), 
-          static_cast<unsigned int>(spi::flash::Size()),
-          static_cast<unsigned int>(spi::flash::Size() / 1024U));
+        printf("StoreDevice: SPI flash %s sector size %u total %u bytes [%u kB]\n", spi::flash::Name(), static_cast<unsigned int>(spi::flash::SectorSize()), static_cast<unsigned int>(spi::flash::Size()),
+               static_cast<unsigned int>(spi::flash::Size() / 1024U));
         detected_ = true;
     }
 
@@ -64,10 +62,10 @@ uint32_t StoreDevice::GetSectorSize() const {
     return spi::flash::SectorSize();
 }
 
-bool StoreDevice::Read(uint32_t offset, uint32_t length, uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Read(uint32_t offset, std::span<uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    result = spi::flash::cmd::Read(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
+    result = spi::flash::cmd::Read(offset, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
 
     CONFIGSTORE_DEBUG_PRINTF("result=%d", static_cast<int>(result));
     CONFIGSTORE_DEBUG_EXIT();
@@ -84,10 +82,10 @@ bool StoreDevice::Erase(uint32_t offset, uint32_t length, storedevice::Result& r
     return true;
 }
 
-bool StoreDevice::Write(uint32_t offset, uint32_t length, const uint8_t* buffer, storedevice::Result& result) {
+bool StoreDevice::Write(uint32_t offset, std::span<const uint8_t> buffer, storedevice::Result& result) {
     CONFIGSTORE_DEBUG_ENTRY();
 
-    result = spi::flash::cmd::Write(offset, length, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
+    result = spi::flash::cmd::Write(offset, buffer) ? storedevice::Result::kOk : storedevice::Result::kError;
 
     CONFIGSTORE_DEBUG_PRINTF("result=%d", static_cast<int>(result));
     CONFIGSTORE_DEBUG_EXIT();

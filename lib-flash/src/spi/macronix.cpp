@@ -46,13 +46,14 @@
 #include "spi_flash_internal.h"
 #include "common/utils/utils_array.h"
 
+namespace {
 struct MacronixSpiFlashParams {
     const uint16_t kIdcode;
     const uint16_t kNrBlocks;
     const char* const kName;
 };
 
-static constexpr struct MacronixSpiFlashParams kMacronixSpiFlashTable[] = {
+constexpr struct MacronixSpiFlashParams kMacronixSpiFlashTable[] = {
     {
         .kIdcode = 0x2013,
         .kNrBlocks = 8,
@@ -89,8 +90,10 @@ static constexpr struct MacronixSpiFlashParams kMacronixSpiFlashTable[] = {
         .kName = "MX25L12855E",
     },
 };
+} // namespace
 
-bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, const uint8_t* idcode) {
+namespace spi::flash {
+bool ProbeMacronix(struct spi::flash::Info* flash, const uint8_t* idcode) {
     SPI_FLASH_DEBUG_ENTRY();
 
     const struct MacronixSpiFlashParams* params;
@@ -120,3 +123,4 @@ bool SpiFlashProbeMacronix(struct SpiFlashInfo* flash, const uint8_t* idcode) {
     SPI_FLASH_DEBUG_EXIT();
     return true;
 }
+} // namespace spi::flash

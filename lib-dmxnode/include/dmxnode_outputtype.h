@@ -74,64 +74,70 @@ inline const char* GetOutputType(OutputType type) {
 
 #if defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI)
 #define DMXNODE_OUTPUT_DMX
-#endif
+#endif // defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI)
 
 #if defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI)
 #define DMXNODE_OUTPUT_PIXEL
-#endif
+#endif // defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI)
 
 #if defined(DMXNODE_OUTPUT_DMX) && defined(DMXNODE_OUTPUT_PIXEL)
 #define DMXNODE_OUTPUT_PIXEL_DMX
-#endif
+#endif // defined(DMXNODE_OUTPUT_DMX) && defined(DMXNODE_OUTPUT_PIXEL)
 
 #if defined(OUTPUT_DMX_STEPPER) && defined(OUTPUT_DMX_TLC59711)
 #define DMXNODE_OUTPUT_STEPPER_TLC59711
-#endif
+#endif // defined(OUTPUT_DMX_STEPPER) && defined(OUTPUT_DMX_TLC59711)
 
 #if defined(OUTPUT_DMX_PIXEL) && defined(RDM_RESPONDER) && !defined(NODE_ARTNET)
 #define DMXNODE_OUTPUT_RDM_PIXEL
-#endif
+#endif // defined(OUTPUT_DMX_PIXEL) && defined(RDM_RESPONDER) && !defined(NODE_ARTNET)
 
 #if defined(OUTPUT_DMX_MONITOR)
 #include "dmxmonitor.h"
-#endif
+#if defined(DMXNODE_PORTS) && (DMXNODE_PORTS <= 4)
+#define DMX_MAX_PORTS DMXNODE_PORTS
+#else
+#undef DMX_MAX_PORTS
+#endif // defined(DMXNODE_PORTS) && (DMXNODE_PORTS <= 4)
+#endif // OUTPUT_DMX_MONITOR
 
 #if defined(OUTPUT_DMX_ARTNET)
 #include "artnetoutput.h"
-#endif
+#endif // OUTPUT_DMX_ARTNET
 
 #if defined(DMXNODE_OUTPUT_DMX)
 #include "dmxsend.h"
-#endif
+#include "dmx.h"
+#endif // DMXNODE_OUTPUT_DMX
 
 #if defined(OUTPUT_DMX_PIXEL)
 #include "pixeldmx.h"
 using DmxPixelOutputType = PixelDmx;
-#endif
+#endif // OUTPUT_DMX_PIXEL
 
 #if defined(OUTPUT_DMX_PIXEL_MULTI)
 #include "pixeldmxmulti.h"
 using DmxPixelOutputType = PixelDmxMulti;
-#endif
+#endif // OUTPUT_DMX_PIXEL_MULTI
 
 #if defined(OUTPUT_DMX_PCA9685)
 #define DMXNODE_OUTPUT_PCA9685
 #include "pca9685dmxled.h"
 #include "pca9685dmxservo.h"
-#endif
+#endif // OUTPUT_DMX_PCA9685
 
 #if defined(OUTPUT_DMX_SERIAL)
 #define DMXNODE_OUTPUT_SERIAL
 #include "dmxserial.h"
-#endif
+#endif // OUTPUT_DMX_SERIAL
 
 #if defined(OUTPUT_DMX_STEPPER)
 #include "sparkfundmx.h"
-#endif
+#endif // OUTPUT_DMX_STEPPER
 
 #if defined(OUTPUT_DMX_TLC59711)
 #include "tlc59711dmx.h"
-#endif
+#endif // OUTPUT_DMX_TLC59711
 
 #if defined(DMXNODE_OUTPUT_PIXEL_DMX)
 #include "dmxnodewith4.h"
@@ -164,7 +170,7 @@ using DmxNodeOutputType = SparkFunDmx;
 using DmxNodeOutputType = PCA9685DmxSet;
 #elif defined(OUTPUT_DMX_TLC59711)
 using DmxNodeOutputType = TLC59711Dmx;
-#endif
+#endif // DMXNODE_OUTPUT_PIXEL_DMX
 
 namespace dmxnode {
 #if defined(DMXNODE_OUTPUT_DMX) && defined(RDM_CONTROLLER)
@@ -177,7 +183,7 @@ inline constexpr auto kOutputType = OutputType::kPixel;
 inline constexpr auto kOutputType = OutputType::kPixelDmx;
 #else
 inline constexpr auto kOutputType = OutputType::kUndefined;
-#endif
+#endif // defined(DMXNODE_OUTPUT_DMX) && defined(RDM_CONTROLLER)
 } // namespace dmxnode
 
 #endif // DMXNODE_OUTPUTTYPE_H_

@@ -39,10 +39,10 @@
 #define SECTION_LIGHTSET __attribute__((section(".lightset")))
 #else
 #define SECTION_LIGHTSET
-#endif
+#endif // defined(GD32F450VI) || defined(GD32H7XX)
 #else
 #define SECTION_LIGHTSET
-#endif
+#endif // GD32
 
 namespace dmxnode {
 class Data {
@@ -142,13 +142,13 @@ class Data {
 
 #if !defined(DMXNODE_PORTS)
 #define DMXNODE_PORTS 0
-#endif
+#endif // DMXNODE_PORTS
 
 #if (DMXNODE_PORTS == 0)
     static constexpr auto kPorts = 1; // ISO C++ forbids zero-size array
 #else
     static constexpr auto kPorts = DMXNODE_PORTS;
-#endif
+#endif // (DMXNODE_PORTS == 0)
 
     struct Source {
         uint8_t data[dmxnode::kUniverseSize] __attribute__((aligned(4)));

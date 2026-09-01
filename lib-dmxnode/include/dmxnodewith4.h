@@ -134,7 +134,7 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
 
         return dmxnode::OutputStyle::kDelta;
     }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     void Blackout(bool blackout) {
         if (dmx_pixel_output_type_ != nullptr) {
