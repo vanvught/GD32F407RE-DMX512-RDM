@@ -30,7 +30,6 @@
 #endif
 
 #include <cstdint>
-#include <algorithm>
 #include <cassert>
 
 #include "core/protocol/ethernet.h"
@@ -43,6 +42,7 @@
 #include "network_private.h"
 #include "network_memcpy.h"
 #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_math.h"
 
 #if defined(DEBUG_UDP)
 #define UDP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -113,7 +113,7 @@ __attribute__((hot)) void Input(const struct Header* udp) {
             }
 
             const auto kDataLength = __builtin_bswap16(udp->udp.len) - kHeaderSize;
-            const auto kSize = std::min(kDataSize, kDataLength);
+            const auto kSize = common::Min(kDataSize, kDataLength);
 
             std::memcpy(data.data, udp->udp.data, kSize);
             data.from_ip = network::MemcpyIp(udp->ip4.src);
@@ -163,7 +163,7 @@ template <network::arp::EthSend S> static void SendImplementation(int index, con
     out_buffer->udp.len = __builtin_bswap16(static_cast<uint16_t>(size + kHeaderSize));
     out_buffer->udp.checksum = 0;
 
-    size = std::min(kDataSize, size);
+    size = common::Min(kDataSize, size);
 
     std::memcpy(out_buffer->udp.data, data, size);
 

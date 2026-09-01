@@ -1,8 +1,8 @@
 /**
- * @file utils_port.h
+ * @file utils_math.h
  *
  */
-/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,24 +23,31 @@
  * THE SOFTWARE.
  */
 
-#ifndef COMMON_UTILS_UTILS_PORT_H_
-#define COMMON_UTILS_UTILS_PORT_H_
+#ifndef COMMON_UTILS_UTILS_MATH_H_
+#define COMMON_UTILS_UTILS_MATH_H_
 
-#include <cstdint>
+// <algorithm> is not part of freestanding C++23
 
 namespace common {
-template <class S> 
-void PortSet(uint32_t port_index, S s, uint16_t& n) {
-    uint16_t value = n; // Create a local copy
-    value &= static_cast<uint16_t>(~(0x3 << (port_index * 2)));
-    value |= static_cast<uint16_t>((static_cast<uint32_t>(s) & 0x3) << (port_index * 2));
-    n = value; // Write back to the original field
+template <typename T>
+constexpr T Min(T a, T b) {
+    return b < a ? b : a;
 }
 
-template <class S> 
-S PortGet(uint32_t port_index, uint16_t n) {
-    return static_cast<S>((n >> (port_index * 2)) & 0x3);
+template <typename T>
+constexpr T Max(T a, T b) {
+    return a < b ? b : a;
+}
+
+template <class T, class Compare>
+constexpr const T& Clamp(const T& value, const T& low, const T& high, Compare comp) {
+    return comp(value, low) ? low : comp(high, value) ? high : value;
+}
+
+template <class T>
+constexpr const T& Clamp(const T& value, const T& low, const T& high) {
+    return clamp(value, low, high, [](const T& a, const T& b) { return a < b; });
 }
 } // namespace common
 
-#endif // COMMON_UTILS_UTILS_PORT_H_
+#endif // UTILS_UTILS_MATH_H_

@@ -27,7 +27,7 @@
 #include "artnetnode.h"
 #include "json/artnetparams.h"
 #include "json/artnetparamsconst.h"
-#include "common/utils/utils_port.h"
+#include "common/utils/utils_bitfield.h"
 #include "json/json_parser.h"
 #include "ip4/ip4_helpers.h"
 #include "dmxnode.h"
@@ -100,9 +100,9 @@ void ArtNetParams::SetProtocolPort(const char* key, uint32_t key_len, const char
 
     auto protocol = store_dmxnode.protocol;
     if (val_len == 0) {
-        common::PortSet<artnet::PortProtocol>(kIndex, artnet::PortProtocol::kArtnet, protocol);
+        common::Set2BitField<artnet::PortProtocol>(kIndex, artnet::PortProtocol::kArtnet, protocol);
     } else {
-        common::PortSet<artnet::PortProtocol>(kIndex, artnet::GetProtocolMode(val), protocol);
+        common::Set2BitField<artnet::PortProtocol>(kIndex, artnet::GetProtocolMode(val), protocol);
     }
     store_dmxnode.protocol = protocol;
 }
@@ -116,7 +116,7 @@ void ArtNetParams::SetRdmEnablePort(const char* key, uint32_t key_len, const cha
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto rdm = store_dmxnode.rdm;
-    common::PortSet<dmxnode::Rdm>(kIndex, val[0] != '0' ? dmxnode::Rdm::kEnable : dmxnode::Rdm::kDisable, rdm);
+    common::Set2BitField<dmxnode::Rdm>(kIndex, val[0] != '0' ? dmxnode::Rdm::kEnable : dmxnode::Rdm::kDisable, rdm);
     store_dmxnode.rdm = rdm;
 }
 
@@ -146,10 +146,10 @@ void ArtNetParams::Set() {
 
             artnet.SetDestinationIp(kPortIndex, store_dmxnode.destination_ip[config_port_index]);
 #if (ARTNET_VERSION >= 4)
-            artnet.SetPortProtocol4(kPortIndex, common::PortGet<artnet::PortProtocol>(config_port_index, store_dmxnode.protocol));
+            artnet.SetPortProtocol4(kPortIndex, common::Get2BitField<artnet::PortProtocol>(config_port_index, store_dmxnode.protocol));
 #endif
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
-            const auto kRdm = common::PortGet<dmxnode::Rdm>(config_port_index, store_dmxnode.rdm);
+            const auto kRdm = common::Get2BitField<dmxnode::Rdm>(config_port_index, store_dmxnode.rdm);
             artnet.SetRdm(kPortIndex, kRdm == dmxnode::Rdm::kEnable);
 #endif
         }
@@ -175,11 +175,11 @@ void ArtNetParams::Dump() {
     if constexpr (dmxnode::kConfigPortCount != 0) {
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
 #if (ARTNET_VERSION >= 4) && defined(DMX_MAX_PORTS)
-            const auto kProtocol = common::PortGet<artnet::PortProtocol>(port_index, store_dmxnode.protocol);
+            const auto kProtocol = common::Get2BitField<artnet::PortProtocol>(port_index, store_dmxnode.protocol);
             printf(" %s=%s\n", json::ArtNetParamsConst::kProtocolPort[port_index].name, artnet::GetProtocolMode(kProtocol));
 #endif
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
-            const auto kRdm = common::PortGet<dmxnode::Rdm>(port_index, store_dmxnode.rdm);
+            const auto kRdm = common::Get2BitField<dmxnode::Rdm>(port_index, store_dmxnode.rdm);
             printf(" %s=%u\n", json::ArtNetParamsConst::kRdmEnablePort[port_index].name, static_cast<unsigned>(kRdm));
 #endif
 #if defined(ARTNET_HAVE_DMXIN)

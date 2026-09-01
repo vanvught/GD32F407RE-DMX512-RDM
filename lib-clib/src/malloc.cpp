@@ -42,7 +42,7 @@
 #include <cassert>
 
 #include "watchdog.h"
-#include "ansi_colour.h"
+#include "firmware/ansi_colour.h"
 
 static void Error(const char* func, const char* str) {
 	printf("%s%s: %s%s\n", ansi::Colours::Fg::kRed, func, str, ansi::Colours::Fg::kDefault);

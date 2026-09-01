@@ -84,13 +84,14 @@ class DmxSend {
         DEBUG_EXIT();
     }
 
-    template <bool doUpdate> void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
+    template <bool kDoUpdate>
+    void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
         assert(port_index < CHAR_BIT);
         assert(data != nullptr);
         assert(length != 0);
 
-        if constexpr (doUpdate) {
-            Dmx::Get()->SetTransmitDataWithoutSC<doUpdate ? dmx::SendStyle::kDirect : dmx::SendStyle::kSync>(port_index, data, length);
+        if constexpr (kDoUpdate) {
+            Dmx::Get()->SetTransmitDataWithoutSC<kDoUpdate ? dmx::SendStyle::kDirect : dmx::SendStyle::kSync>(port_index, data, length);
             panelled::On(panelled::kPortATx << port_index);
         }
     }
@@ -117,13 +118,9 @@ class DmxSend {
     }
 
 #if defined(OUTPUT_HAVE_STYLESWITCH)
-    void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) { 
-		Dmx::Get()->SetOutputStyle(port_index, output_style == dmxnode::OutputStyle::kConstant ? dmx::OutputStyle::kConstant : dmx::OutputStyle::kDelta);
-	}
+    void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) { Dmx::Get()->SetOutputStyle(port_index, output_style == dmxnode::OutputStyle::kConstant ? dmx::OutputStyle::kConstant : dmx::OutputStyle::kDelta); }
 
-    [[nodiscard]] dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const { 
-		return Dmx::Get()->GetOutputStyle(port_index) == dmx::OutputStyle::kConstant ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta;
-	}
+    [[nodiscard]] dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const { return Dmx::Get()->GetOutputStyle(port_index) == dmx::OutputStyle::kConstant ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta; }
 #endif
 
     void Blackout([[maybe_unused]] bool blackout) { Dmx::Get()->Blackout(); }
@@ -152,7 +149,7 @@ class DmxSend {
     }
 
    private:
-    static constexpr bool IsStarted(uint8_t v, uint32_t p) { return (v & (1U << p)) == (1U << p); }
+    constexpr bool IsStarted(uint8_t started, uint32_t port_index) { return (started & (1U << port_index)) == (1U << port_index); }
 
 #if defined(CONFIG_DMXSEND_ENABLE_CONFIGUDP)
     DmxConfigUdp dmx_config_udp_;

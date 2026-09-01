@@ -31,7 +31,7 @@
 #include "artnet.h"
 #include "artnetnode.h"
 #include "dmxnode.h"
-#include "common/utils/utils_port.h"
+#include "common/utils/utils_bitfield.h"
 #include "configstore.h"
 #include "firmware/debug/debug_debug.h"
 
@@ -137,7 +137,7 @@ inline void SaveDirection(uint32_t port_index, dmxnode::Direction direction) {
 
     auto direction_store = ConfigStore::Instance().DmxNodeGet(&common::store::DmxNode::direction);
 
-    common::PortSet<dmxnode::Direction>(port_index, direction, direction_store);
+    common::Set2BitField<dmxnode::Direction>(port_index, direction, direction_store);
 
     ConfigStore::Instance().DmxNodeUpdate(&common::store::DmxNode::direction, direction_store);
 
@@ -166,7 +166,7 @@ inline void SaveMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode) {
 
     auto merge_mode_store = ConfigStore::Instance().DmxNodeGet(&common::store::DmxNode::merge_mode);
 
-    common::PortSet<dmxnode::MergeMode>(port_index, merge_mode, merge_mode_store);
+    common::Set2BitField<dmxnode::MergeMode>(port_index, merge_mode, merge_mode_store);
 
     ConfigStore::Instance().DmxNodeUpdate(&common::store::DmxNode::merge_mode, merge_mode_store);
 
@@ -195,7 +195,7 @@ inline void SaveProtocol(uint32_t port_index, artnet::PortProtocol port_protocol
 
     uint16_t protocol_store = ConfigStore::Instance().DmxNodeGet(&common::store::DmxNode::protocol);
 
-    common::PortSet<artnet::PortProtocol>(port_index, port_protocol, protocol_store);
+    common::Set2BitField<artnet::PortProtocol>(port_index, port_protocol, protocol_store);
 
     ConfigStore::Instance().DmxNodeUpdate(&common::store::DmxNode::protocol, protocol_store);
 
@@ -257,7 +257,7 @@ inline void SaveRdmEnabled(uint32_t port_index, bool is_enabled) {
 
     auto rdm_store = ConfigStore::Instance().DmxNodeGet(&common::store::DmxNode::rdm);
 
-    common::PortSet<dmxnode::Rdm>(port_index, static_cast<dmxnode::Rdm>(is_enabled), rdm_store);
+    common::Set2BitField<dmxnode::Rdm>(port_index, static_cast<dmxnode::Rdm>(is_enabled), rdm_store);
 
     ConfigStore::Instance().DmxNodeUpdate(&common::store::DmxNode::rdm, rdm_store);
 

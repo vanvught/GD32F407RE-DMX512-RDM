@@ -31,9 +31,9 @@
 
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 
 #include "i2c.h"
+#include "common/utils/utils_math.h"
 
 /**
  * @namespace at24cxx
@@ -166,14 +166,14 @@ template <uint32_t type> class AT24Cxx {
             uint32_t count;
 
             if constexpr (kIsAddressSizeTwoWords) {
-                count = std::min(std::min(length, GetPageSize() - 2), GetPageSize() - kOffsetPage);
+                count = common::Min(common::Min(length, GetPageSize() - 2), GetPageSize() - kOffsetPage);
                 buffer[0] = static_cast<char>(memory_address >> 8);
                 buffer[1] = static_cast<char>(memory_address & 0xFF);
 
                 memcpy(&buffer[2], &data[index], count);
                 i2c::Write(buffer, 2 + count);
             } else {
-                count = std::min(std::min(length, GetPageSize() - 1), GetPageSize() - kOffsetPage);
+                count = common::Min(common::Min(length, GetPageSize() - 1), GetPageSize() - kOffsetPage);
                 buffer[0] = static_cast<char>(memory_address & 0xFF);
                 memcpy(&buffer[1], &data[index], count);
 

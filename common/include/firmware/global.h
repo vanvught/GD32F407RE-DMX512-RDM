@@ -9,12 +9,12 @@
 /* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  */
 
-#ifndef GLOBAL_H_
-#define GLOBAL_H_
+#ifndef FIRMWARE_GLOBAL_H_
+#define FIRMWARE_GLOBAL_H_
 
 #include <cstdint>
 
-#include "utc.h"
+#include "firmware/utc.h"
 
 namespace global {
 
@@ -63,4 +63,4 @@ inline bool SetUtcOffsetIfValid(int32_t hours, uint32_t minutes) {
 }
 } // namespace global
 
-#endif // GLOBAL_H_
+#endif // FIRMWARE_GLOBAL_H_

@@ -922,7 +922,7 @@ void ArtNetNode::HandleDmx() {
             }
         }
 
-        const auto kDmxSlots = std::min(static_cast<uint32_t>(((kArtDmx->length_hi << 8) & 0xff00) | kArtDmx->length), artnet::kDmxLength);
+        const auto kDmxSlots = common::Min(static_cast<uint32_t>(((kArtDmx->length_hi << 8) & 0xff00) | kArtDmx->length), artnet::kDmxLength);
         const auto kIpA = output_port_[port_index].source_a.ip;
         const auto kIpB = output_port_[port_index].source_b.ip;
         const auto kMergeMode = ((output_port_[port_index].good_output & artnet::GoodOutput::kMergeModeLtp) == artnet::GoodOutput::kMergeModeLtp) ? dmxnode::MergeMode::kLtp : dmxnode::MergeMode::kHtp;

@@ -25,7 +25,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 
 #include "rdmdevice.h"
 #include "json/rdmdeviceparams.h"
@@ -34,6 +33,7 @@
 #include "configstore.h"
 #include "configurationstore.h"
 #include "rdm_debug.h"
+#include "common/utils/utils_math.h"
 
 namespace json {
 RdmDeviceParams::RdmDeviceParams() {
@@ -41,7 +41,7 @@ RdmDeviceParams::RdmDeviceParams() {
 }
 
 void RdmDeviceParams::SetLabel(const char* val, uint32_t len) {
-    memcpy(store_rdmdevice.device_root_label, val, std::max(len, static_cast<uint32_t>(rdm::device::kLabelMaxLength)));
+    memcpy(store_rdmdevice.device_root_label, val, common::Max(len, static_cast<uint32_t>(rdm::device::kLabelMaxLength)));
     store_rdmdevice.device_root_label_length = static_cast<uint8_t>(len);
 }
 

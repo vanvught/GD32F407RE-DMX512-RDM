@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef UTC_H_
-#define UTC_H_
+#ifndef FIRMWARE_UTC_H_
+#define FIRMWARE_UTC_H_
 
 #include <cstdint>
 #include <cstring>
@@ -169,4 +169,4 @@ inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hou
 }
 } // namespace utc
 
-#endif // UTC_H_
+#endif // FIRMWARE_UTC_H_

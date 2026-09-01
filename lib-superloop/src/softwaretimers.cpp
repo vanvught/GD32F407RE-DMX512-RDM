@@ -35,7 +35,7 @@
 
 #include "softwaretimers.h"
 #include "timing.h" // IWYU pragma: keep
-#include "ansi_colour.h"
+#include "firmware/ansi_colour.h"
 
 #ifdef DEBUG_HAL_TIMERS
 #define HAL_TIMERS_DEBUG_ENTRY() DEBUG_ENTRY()

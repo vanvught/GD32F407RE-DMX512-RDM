@@ -48,7 +48,7 @@
 #include <cassert>
 
 #include "displayset.h"
-#include "ansi_colour.h"
+#include "firmware/ansi_colour.h"
 #if defined(DISPLAYTIMEOUT_GPIO)
 #include "gpio.h"
 #endif

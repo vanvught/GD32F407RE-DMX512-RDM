@@ -56,7 +56,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 #include <cassert>
 
 #include "core/netif.h"
@@ -72,6 +71,7 @@
 #include "core/protocol/ip4.h"
 #include "network_memory.h"
 #include "network_tcp_datasegmentqueue.h"
+#include "common/utils/utils_math.h"
 
 #if defined(DEBUG_TCP)
 #define TCP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -618,7 +618,7 @@ static void ScanOptions(struct Header* eth_frame, struct Tcb* const kTcb, int32_
                     const auto* p = &options->data;
                     auto mss = (p[0] << 8) + p[1];
                     // RFC 1122 section 4.2.2.6
-                    mss = std::min(static_cast<int32_t>(mss + 20), static_cast<int32_t>(kTcpDataMss)) - kHeaderSize; // - IP_OPTION_SIZE;
+                    mss = common::Min(static_cast<int32_t>(mss + 20), static_cast<int32_t>(kTcpDataMss)) - kHeaderSize; // - IP_OPTION_SIZE;
                     kTcb->SendMSS = static_cast<uint16_t>(mss);
                 }
                 options = reinterpret_cast<struct Options*>(reinterpret_cast<uint8_t*>(options) + options->length);
@@ -726,7 +726,7 @@ __attribute__((hot)) void Run() {
                 continue;
             }
 
-            tcb.rtx_rto = std::min(tcb.rtx_rto * 2U, kTcpRtoMaxMs);
+            tcb.rtx_rto = common::Min(tcb.rtx_rto * 2U, kTcpRtoMaxMs);
             tcb.rtx_deadline = timing::Millis() + tcb.rtx_rto;
         }
     }

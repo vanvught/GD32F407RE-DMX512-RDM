@@ -28,7 +28,7 @@
 
 #include "json/dmxnodeparams.h"
 #include "json/dmxnodeparamsconst.h"
-#include "common/utils/utils_port.h"
+#include "common/utils/utils_bitfield.h"
 #include "json/json_parser.h"
 #include "json/json_parsehelper.h"
 #include "dmxnode.h"
@@ -93,7 +93,7 @@ void DmxNodeParams::SetDirectionPort(const char* key, uint32_t key_len, const ch
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto direction = store_dmxnode.direction;
-    common::PortSet<dmxnode::Direction>(kIndex, dmxnode::PortDirection(val), direction);
+    common::Set2BitField<dmxnode::Direction>(kIndex, dmxnode::PortDirection(val), direction);
     store_dmxnode.direction = direction;
 }
 
@@ -102,7 +102,7 @@ void DmxNodeParams::SetMergeModePort(const char* key, uint32_t key_len, const ch
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto merge_mode = store_dmxnode.merge_mode;
-    common::PortSet<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(val), merge_mode);
+    common::Set2BitField<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(val), merge_mode);
     store_dmxnode.merge_mode = merge_mode;
 }
 
@@ -143,9 +143,9 @@ void DmxNodeParams::Set() {
 
             dmx_node->SetShortName(kPortIndex, reinterpret_cast<char*>(store_dmxnode.port_name[config_port_index]));
             dmx_node->SetUniverse(kPortIndex, store_dmxnode.universe[config_port_index]);
-            const auto kPortDirection = common::PortGet<dmxnode::Direction>(config_port_index, store_dmxnode.direction);
+            const auto kPortDirection = common::Get2BitField<dmxnode::Direction>(config_port_index, store_dmxnode.direction);
             dmx_node->SetDirection(kPortIndex, kPortDirection);
-            const auto kPortMergeMode = common::PortGet<dmxnode::MergeMode>(config_port_index, store_dmxnode.merge_mode);
+            const auto kPortMergeMode = common::Get2BitField<dmxnode::MergeMode>(config_port_index, store_dmxnode.merge_mode);
             dmx_node->SetMergeMode(kPortIndex, kPortMergeMode);
 #if defined(OUTPUT_HAVE_STYLESWITCH)
             const auto kOutputStyle = GetOutputStyleSet(1U << config_port_index);
@@ -171,9 +171,9 @@ void DmxNodeParams::Dump() {
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
             printf(" %s=%s\n", json::DmxNodeParamsConst::kLabelPort[port_index].name, reinterpret_cast<char*>(store_dmxnode.port_name[port_index]));
             printf(" %s=%u\n", json::DmxNodeParamsConst::kUniversePort[port_index].name, store_dmxnode.universe[port_index]);
-            const auto kPortDirection = common::PortGet<dmxnode::Direction>(port_index, store_dmxnode.direction);
+            const auto kPortDirection = common::Get2BitField<dmxnode::Direction>(port_index, store_dmxnode.direction);
             printf(" %s=%s\n", json::DmxNodeParamsConst::kDirectionPort[port_index].name, dmxnode::PortDirection(kPortDirection));
-            const auto kPortMergeMode = common::PortGet<dmxnode::MergeMode>(port_index, store_dmxnode.merge_mode);
+            const auto kPortMergeMode = common::Get2BitField<dmxnode::MergeMode>(port_index, store_dmxnode.merge_mode);
             printf(" %s=%s\n", json::DmxNodeParamsConst::kMergeModePort[port_index].name, dmxnode::GetMergeMode(kPortMergeMode));
             const auto kOutputStyle = GetOutputStyleSet(1U << port_index);
             printf(" %s=%s\n", DmxNodeParamsConst::kOutputStylePort[port_index].name, dmxnode::GetOutputStyle(kOutputStyle));

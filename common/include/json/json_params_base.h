@@ -32,14 +32,16 @@
 #include "json/json_debug.h"
 
 namespace json {
-template <typename Derived> 
+constexpr uint32_t kMaxBufferSize = 512; // Adjust as needed for max config size
+
+template <typename Derived>
 class JsonParamsBase {
    public:
     void Load([[maybe_unused]] const char* file_name) {
 #if !defined(DISABLE_FS)
         FILE* file = fopen(file_name, "r");
         if (file != nullptr) {
-            char buffer[512]; // Adjust as needed for max config size
+            char buffer[kMaxBufferSize];
             size_t size = fread(buffer, 1, sizeof(buffer), file);
             fclose(file);
 

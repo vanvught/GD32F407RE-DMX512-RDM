@@ -27,13 +27,13 @@
  */
 
 #include <cstdint>
-#include <algorithm>
 
 #include "spi/spi_flash.h"
 #include "common/utils/utils_array.h"
 #include "spi_flash_internal.h"
 #include "firmware/debug/debug_dump.h"
 #include "timing.h"
+#include "common/utils/utils_math.h"
 
 static struct SpiFlashInfo s_flash = {.name = "", .size = 0, .poll_cmd = CMD_READ_STATUS};
 
@@ -257,7 +257,7 @@ bool Write(uint32_t offset, uint32_t length, const uint8_t* data) {
 
     for (uint32_t actual_length = 0; actual_length < length; actual_length += chunk_length) {
         const auto kByteAddress = offset % spi::flash::kPageSize;
-        chunk_length = std::min((length - actual_length), (spi::flash::kPageSize - kByteAddress));
+        chunk_length = common::Min((length - actual_length), (spi::flash::kPageSize - kByteAddress));
 
         SpiFlashAddr(offset, cmd);
 

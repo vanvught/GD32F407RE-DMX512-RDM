@@ -25,7 +25,6 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include <algorithm>
 #include <cassert>
 
 #include "apps/mdns.h"
@@ -37,6 +36,7 @@
 #include "core/protocol/dns.h"
 #include "core/protocol/iana.h"
 #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_math.h"
 
 #if defined(DEBUG_NETWORK_APPS_MDNS)
 #define MDNS_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -255,9 +255,9 @@ static void CreateReverseDomain(Domain& domain) {
         const auto kT = d / 10U;
 
         if (kT != 0) {
-            length = std::max(static_cast<uint32_t>(2), length);
+            length = common::Max(static_cast<uint32_t>(2), length);
         } else {
-            length = std::max(static_cast<uint32_t>(1), length);
+            length = common::Max(static_cast<uint32_t>(1), length);
         }
 
         buffer[1] = '0' + static_cast<char>(kT);
@@ -762,7 +762,7 @@ bool ServiceRecordAdd(const char* name, mdns::Services services, const char* tex
     for (auto& record : s_service_records) {
         if (record.services == Services::kLastNotUsed) {
             if (name != nullptr) {
-                const auto kLength = std::min(kLabelMaxlen, strlen(name));
+                const auto kLength = common::Min(kLabelMaxlen, strlen(name));
                 if (kLength == 0) {
                     assert(0);
                     return false;
@@ -784,7 +784,7 @@ bool ServiceRecordAdd(const char* name, mdns::Services services, const char* tex
             }
 
             if (text != nullptr) {
-                const auto kLength = std::min(kTxtMaxlen, strlen(text));
+                const auto kLength = common::Min(kTxtMaxlen, strlen(text));
                 record.text_content = new char[kLength];
 
                 assert(record.text_content != nullptr);

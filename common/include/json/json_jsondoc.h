@@ -63,7 +63,7 @@ class JsonDoc {
 
     void End() { Write("}"); }
 
-    uint32_t Size() const { return pos_; }
+    [[nodiscard]] uint32_t Size() const { return pos_; }
 
    private:
     int CopyString(char* dst, size_t size, const char* src) {
@@ -120,12 +120,12 @@ class JsonDoc {
         first_ = false;
     }
 
-    void Write(const char* s) {
+    void Write(const char* string) {
         if (pos_ >= max_len_) {
             return;
         }
 
-        int ret = CopyString(buf_ + pos_, max_len_ - pos_, s);
+        int ret = CopyString(buf_ + pos_, max_len_ - pos_, string);
 
         // CopyString always null-terminates and returns number of chars copied (excluding null)
         if (ret >= 0 && static_cast<uint32_t>(ret) + pos_ < max_len_) {

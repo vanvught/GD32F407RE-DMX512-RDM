@@ -27,15 +27,13 @@
 
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 #include <cassert>
 
 #include "dmxnode.h"
+#include "common/utils/utils_math.h"
 
 #if defined(GD32)
-/**
- * https://www.gd32-dmx.org/memory.html
- */
+// https://www.gd32-dmx.org/memory.html
 #include "gd32.h"
 #if defined(GD32F450VI) || defined(GD32H7XX)
 #define SECTION_LIGHTSET __attribute__((section(".lightset")))
@@ -83,7 +81,7 @@ class Data {
 
         if (merge_mode == MergeMode::kHtp) {
             for (uint32_t i = 0; i < length; i++) {
-                const auto kData = std::max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
+                const auto kData = common::Max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
                 output_port_[port_index].data[i] = kData;
             }
 
@@ -103,7 +101,7 @@ class Data {
 
         if (merge_mode == MergeMode::kHtp) {
             for (uint32_t i = 0; i < length; i++) {
-                const auto kData = std::max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
+                const auto kData = common::Max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
                 output_port_[port_index].data[i] = kData;
             }
 

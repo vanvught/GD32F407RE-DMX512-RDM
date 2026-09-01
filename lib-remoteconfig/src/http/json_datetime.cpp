@@ -1,7 +1,7 @@
 /**
  * @file json_datetime.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,11 @@
 #include <sys/time.h>
 #include <cassert>
 
-#include "global.h"
+#include "firmware/global.h"
 #include "json/json_key.h"
 #include "json/json_parser.h"
 #include "common/utils/utils_string.h"
-#include "utc.h"
+#include "firmware/utc.h"
 #include "configstore.h"
 #include "firmware/debug/debug_dump.h"
 #include "firmware/debug/debug_debug.h"

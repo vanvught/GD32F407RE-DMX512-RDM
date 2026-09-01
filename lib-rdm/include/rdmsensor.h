@@ -29,10 +29,9 @@
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
-#include <algorithm>
 
 #include "rdm_e120.h"
-
+#include "common/utils/utils_math.h"
 #include "firmware/debug/debug_debug.h"
 
 namespace rdm::sensor {
@@ -106,7 +105,6 @@ class RDMSensor {
 
     virtual ~RDMSensor() = default;
 
-   public:
     void SetType(uint8_t type) { sensor_defintion_.type = type; }
 
     void SetUnit(uint8_t unit) { sensor_defintion_.unit = unit; }
@@ -144,7 +142,7 @@ class RDMSensor {
         printf(" NormalMax %d\n", sensor_defintion_.normal_max);
     }
 
-    uint8_t GetSensor() const { return sensor_; }
+    [[nodiscard]] uint8_t GetSensor() const { return sensor_; }
 
     const struct rdm::sensor::Defintion* GetDefintion() { return &sensor_defintion_; }
 
@@ -153,8 +151,8 @@ class RDMSensor {
         const auto kValue = this->GetValue();
 
         sensor_values_.present = kValue;
-        sensor_values_.lowest_detected = std::min(sensor_values_.lowest_detected, kValue);
-        sensor_values_.highest_detected = std::max(sensor_values_.highest_detected, kValue);
+        sensor_values_.lowest_detected = common::Min(sensor_values_.lowest_detected, kValue);
+        sensor_values_.highest_detected = common::Max(sensor_values_.highest_detected, kValue);
 
         DEBUG_EXIT();
         return &sensor_values_;
@@ -178,8 +176,8 @@ class RDMSensor {
 
         sensor_values_.present = kValue;
         sensor_values_.recorded = kValue;
-        sensor_values_.lowest_detected = std::min(sensor_values_.lowest_detected, kValue);
-        sensor_values_.highest_detected = std::max(sensor_values_.highest_detected, kValue);
+        sensor_values_.lowest_detected = common::Min(sensor_values_.lowest_detected, kValue);
+        sensor_values_.highest_detected = common::Max(sensor_values_.highest_detected, kValue);
 
         DEBUG_EXIT();
     }

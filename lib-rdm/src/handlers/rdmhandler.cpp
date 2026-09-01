@@ -22,10 +22,9 @@
  * THE SOFTWARE.
  */
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <time.h>
+#include <ctime>
 #include <cassert>
 
 #include "rdmhandler.h"
@@ -50,6 +49,7 @@
 #include "board.h"
 #include "display.h"
 #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_math.h"
 
 enum class PowerState : uint8_t {
     kFullOff = 0x00,  ///< Completely disengages power to device. Device can no longer respond.
@@ -926,7 +926,7 @@ void RDMHandler::GetBootSoftwareVersionLabel([[maybe_unused]] uint16_t sub_devic
     uint8_t sys_name_length;
     const auto* sys_name = board::SysName(sys_name_length);
 
-    HandleString(sys_name, std::min(rdm::device::kBootSoftwareVersionLabelMaxLength, sys_name_length));
+    HandleString(sys_name, common::Min(rdm::device::kBootSoftwareVersionLabelMaxLength, sys_name_length));
     RespondMessageAck();
 }
 
@@ -1562,7 +1562,7 @@ void RDMHandler::GetSlotInfo(uint16_t sub_device)
 
     uint32_t j = 0;
 
-    for (uint32_t i = 0; i < std::min(static_cast<uint32_t>(nDmxFootPrint), static_cast<uint32_t>(46)); i++)
+    for (uint32_t i = 0; i < common::Min(static_cast<uint32_t>(nDmxFootPrint), static_cast<uint32_t>(46)); i++)
     {
         if (RDMDeviceResponder::Get()->GetSlotInfo(sub_device, static_cast<uint16_t>(i), slotInfo))
         {

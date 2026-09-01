@@ -1,7 +1,7 @@
 /**
  * @file json_config_global.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,9 @@
 #include "json/globalparamsconst.h"
 #include "json/json_format_helpers.h"
 #include "json/json_helpers.h"
-#include "global.h"
+#include "firmware/global.h"
 
-namespace json::config
-{
+namespace json::config {
 uint32_t GetGlobal(char* buffer, uint32_t length) {
     int32_t hours;
     uint32_t minutes;
@@ -41,8 +40,7 @@ uint32_t GetGlobal(char* buffer, uint32_t length) {
     });
 }
 
-void SetGlobal(const char* buffer, uint32_t buffer_size)
-{
+void SetGlobal(const char* buffer, uint32_t buffer_size) {
     ::json::GlobalParams global_params;
     global_params.Store(buffer, buffer_size);
     global_params.Set();

@@ -26,11 +26,11 @@
 #ifndef RDM_DISCOVERY_STATEMACHINE_H_
 #define RDM_DISCOVERY_STATEMACHINE_H_
 
-#include "rdm_tod.h"
 #include <cstdint>
-#include <algorithm>
 
 #include "rdmmessage.h"
+#include "common/utils/utils_math.h"
+#include "rdm_tod.h"
 
 namespace rdm::discovery {
 inline constexpr uint32_t kReceiveTimeOut = 5800;
@@ -145,7 +145,7 @@ class StateMachine {
                 items[top].lower_bound = lower_bound;
                 items[top].upper_bound = upper_bound;
 
-                debug_stack_top_max = std::max(debug_stack_top_max, top);
+                debug_stack_top_max = common::Max(debug_stack_top_max, top);
                 return true;
             }
 

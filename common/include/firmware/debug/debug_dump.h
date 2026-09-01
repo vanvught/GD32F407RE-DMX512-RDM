@@ -23,12 +23,13 @@
  * THE SOFTWARE.
  */
 
-#ifndef COMMON_DEBUG_DEBUG_DUMP_H_
-#define COMMON_DEBUG_DEBUG_DUMP_H_
+#ifndef FIRMWARE_DEBUG_DEBUG_DUMP_H_
+#define FIRMWARE_DEBUG_DEBUG_DUMP_H_
 
 #include <cstdint>
 #include <cstdio>
 #include <cctype>
+#include <span>
 
 #include "firmware/debug/debug_config.h"
 
@@ -104,6 +105,11 @@ inline void Dump([[maybe_unused]] const void* data, [[maybe_unused]] uint32_t si
 
     } while (chars < size);
 }
+
+template <typename T>
+inline void Dump(std::span<T> data) {
+    Dump(data.data(), static_cast<uint32_t>(data.size_bytes()));
+}
 } // namespace debug
 
-#endif // COMMON_DEBUG_DEBUG_DUMP_H_
+#endif // FIRMWARE_DEBUG_DEBUG_DUMP_H_

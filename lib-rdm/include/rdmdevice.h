@@ -29,7 +29,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
 
 #include "rdm_device_info.h"
 #include "rdm_device_base.h"
@@ -38,6 +37,7 @@
 #include "rdmconst.h"
 #include "rdm_e120.h"
 #include "rdm_debug.h"
+#include "common/utils/utils_math.h"
 
 namespace rdm::device {
 uint16_t DeviceModel();
@@ -106,11 +106,11 @@ class Device {
 
     void GetManufacturerName(struct rdm::device::InfoData* info_data) {
         info_data->data = const_cast<char*>(&rdm::Manufacturer::kName[0]);
-        info_data->length = static_cast<uint8_t>(std::min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
+        info_data->length = static_cast<uint8_t>(common::Min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
     }
 
     void SetLabel(const struct rdm::device::InfoData* info_data) {
-        const auto kLength = std::min(static_cast<uint8_t>(rdm::device::kLabelMaxLength), info_data->length);
+        const auto kLength = common::Min(static_cast<uint8_t>(rdm::device::kLabelMaxLength), info_data->length);
 
         if ((kLength > 1) && info_data->data[0] > ' ') {
             memcpy(root_label_, info_data->data, kLength);

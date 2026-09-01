@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef FIRMWAREVERSION_H_
-#define FIRMWAREVERSION_H_
+#ifndef FIRMWARE_FIRMWAREVERSION_H_
+#define FIRMWARE_FIRMWAREVERSION_H_
 
 #include <cstdint>
 #include <cstring>
@@ -97,4 +97,4 @@ class FirmwareVersion {
     static inline FirmwareVersion* s_this;
 };
 
-#endif // FIRMWAREVERSION_H_
+#endif // FIRMWARE_FIRMWAREVERSION_H_

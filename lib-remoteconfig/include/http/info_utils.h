@@ -32,9 +32,10 @@
 
 #include "common/utils/utils_hash.h"
 
-template <typename InfoT> int32_t GetFileIndexGeneric(const InfoT* infos, size_t size, const char* name) {
-    const uint32_t kLen = static_cast<uint32_t>(std::strlen(name));
-    const uint32_t kHash = Fnv1a32Runtime(name, kLen);
+template <typename InfoT>
+int32_t GetFileIndexGeneric(const InfoT* infos, size_t size, const char* name) {
+    const auto kLen = static_cast<uint32_t>(std::strlen(name));
+    const auto kHash = Fnv1a32Runtime(name, kLen);
 
     for (uint32_t i = 0; i < size; ++i) {
         if (kHash == infos[i].hash) {
@@ -45,7 +46,8 @@ template <typename InfoT> int32_t GetFileIndexGeneric(const InfoT* infos, size_t
     return -1;
 }
 
-template <typename InfoT> void CheckHashCollisionsGeneric(const InfoT* infos, size_t size) {
+template <typename InfoT>
+void CheckHashCollisionsGeneric(const InfoT* infos, size_t size) {
     for (size_t i = 0; i < size; ++i) {
         for (size_t j = i + 1; j < size; ++j) {
             if (infos[i].hash == infos[j].hash) {

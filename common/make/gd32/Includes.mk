@@ -20,7 +20,7 @@ set_if_present = $(eval $(2) := $(if $(filter $(1) -D$(1),$(ALL_FLAGS)),1,))
 
 $(call set_if_present,USE_FREE_RTOS, FREE_RTOS)
 
-$(call set_if_present,CONFIG_FS_FATFS, USE_FATFS)
+$(call set_if_present,CONFIG_FATFS_MKFS, USE_FATFS)
 
 $(call set_if_present,ENABLE_USB_HOST,USB_HOST)
 $(call set_if_present,CONFIG_USB_HOST_MSC,USB_HOST_MSC)

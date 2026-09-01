@@ -27,7 +27,6 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
-#include <algorithm>
 
 #include "remoteconfig.h"
 #include "firmware/firmwareversion.h"
@@ -41,6 +40,7 @@
 #include "common/utils/utils_array.h"
 #include "display.h"
 #include "configstore.h"
+#include "common/utils/utils_math.h"
 
 namespace remoteconfig::udp {
 static constexpr auto kPort = 0x2905;
@@ -295,7 +295,7 @@ void RemoteConfig::HandleList() {
         return;
     }
 
-    const auto kBytesToSend = static_cast<uint32_t>(std::min<size_t>(static_cast<size_t>(list_length), kListResponseBufferLength - 1U));
+    const auto kBytesToSend = static_cast<uint32_t>(common::Min<size_t>(static_cast<size_t>(list_length), kListResponseBufferLength - 1U));
 
     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(list_response), kBytesToSend, ip_from_, remoteconfig::udp::kPort);
 

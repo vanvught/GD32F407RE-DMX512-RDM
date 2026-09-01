@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef FIRMWARE_DEBUG_DEBUG_H_
-#define FIRMWARE_DEBUG_DEBUG_H_
+#ifndef FIRMWARE_DEBUG_DEBUG_DEBUG_H_
+#define FIRMWARE_DEBUG_DEBUG_DEBUG_H_
 
 #include <cstdio>
 #include <source_location>
@@ -69,4 +69,4 @@
         DEBUG_PRINTF("%s", (message));                                         \
     } while (false)
 
-#endif // FIRMWARE_DEBUG_DEBUG_H_
+#endif // FIRMWARE_DEBUG_DEBUG_DEBUG_H_

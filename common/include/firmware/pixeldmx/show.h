@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef COMMON_FIRMWARE_PIXELDMX_SHOW_H_
-#define COMMON_FIRMWARE_PIXELDMX_SHOW_H_
+#ifndef FIRMWARE_PIXELDMX_SHOW_H_
+#define FIRMWARE_PIXELDMX_SHOW_H_
 
 #include <cstdint>
 
@@ -61,4 +61,4 @@ inline void Show(uint32_t line, pixelpatterns::Pattern pattern) {
 }
 } // namespace common::firmware::pixeldmx
 
-#endif // COMMON_FIRMWARE_PIXELDMX_SHOW_H_
+#endif // FIRMWARE_PIXELDMX_SHOW_H_

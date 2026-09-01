@@ -30,7 +30,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 #include <cassert>
 
 #include "artnetnode.h"
@@ -40,6 +39,7 @@
 #include "network_config.h"
 #include "network_iface.h"
 #include "artnet_debug.h"
+#include "common/utils/utils_math.h"
 
 template <uint8_t N> 
 static inline void Uitoa(uint32_t value, uint8_t* out) {
@@ -260,7 +260,7 @@ void ArtNetNode::HandlePoll() {
 
         if (state_.is_multiple_controllers_req_diag) {
             // The lowest minimum value of Priority shall be used. (Ignore ArtPoll->diag_priority).
-            state_.diag_priority = std::min(state_.diag_priority, kArtPoll->diag_priority);
+            state_.diag_priority = common::Min(state_.diag_priority, kArtPoll->diag_priority);
         } else {
             state_.diag_priority = kArtPoll->diag_priority;
         }

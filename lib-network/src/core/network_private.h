@@ -34,7 +34,7 @@
 #include "core/protocol/udp.h"
 #include "core/protocol/tcp.h"
 #include "net_platform.h" // IWYU pragma: keep
-#include "ansi_colour.h"
+#include "firmware/ansi_colour.h"
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))

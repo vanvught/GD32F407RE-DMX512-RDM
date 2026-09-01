@@ -31,15 +31,10 @@
 
 #include "http/info_utils.h"
 
-namespace html
-{
+namespace html {
 
-struct Info
-{
-    constexpr Info(const char* name_in, uint8_t length_in, uint32_t hash_in, const char* label_in) noexcept
-        : name(name_in), length(length_in), hash(hash_in), label(label_in)
-    {
-    }
+struct Info {
+    constexpr Info(const char* name_in, uint8_t length_in, uint32_t hash_in, const char* label_in) noexcept : name(name_in), length(length_in), hash(hash_in), label(label_in) {}
 
     const char* name;
     uint8_t length;
@@ -47,19 +42,15 @@ struct Info
     const char* label;
 };
 
-template <size_t N> constexpr Info MakeHtmlInfo(const char (&str)[N], uint32_t hash, const char* label)
-{
+template <size_t N>
+constexpr Info MakeHtmlInfo(const char (&str)[N], uint32_t hash, const char* label) {
     return Info{str, static_cast<uint8_t>(N - 1), hash, label};
 }
 
-constexpr bool HasUniqueHashes(const Info* entries, size_t count)
-{
-    for (size_t i = 0; i < count; ++i)
-    {
-        for (size_t j = i + 1; j < count; ++j)
-        {
-            if (entries[i].hash == entries[j].hash)
-            {
+constexpr bool HasUniqueHashes(const Info* entries, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        for (size_t j = i + 1; j < count; ++j) {
+            if (entries[i].hash == entries[j].hash) {
                 return false;
             }
         }
@@ -70,13 +61,11 @@ constexpr bool HasUniqueHashes(const Info* entries, size_t count)
 extern const Info kHtmlInfos[];
 extern const size_t kHtmlInfosSize;
 
-inline int32_t GetFileIndex(const char* name)
-{
+inline int32_t GetFileIndex(const char* name) {
     return GetFileIndexGeneric(kHtmlInfos, kHtmlInfosSize, name);
 }
 
-inline void CheckHashCollisions()
-{
+inline void CheckHashCollisions() {
     CheckHashCollisionsGeneric(kHtmlInfos, kHtmlInfosSize);
 }
 } // namespace html

@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef ANSI_COLOUR_H_
-#define ANSI_COLOUR_H_
+#ifndef FIRMWARE_ANSI_COLOUR_H_
+#define FIRMWARE_ANSI_COLOUR_H_
 
 namespace ansi {
 // https://github.com/shiena/ansicolor/blob/master/README.md
@@ -107,4 +107,4 @@ struct Colours {
 };
 } // namespace ansi
 
-#endif // ANSI_COLOUR_H_
+#endif // FIRMWARE_ANSI_COLOUR_H_

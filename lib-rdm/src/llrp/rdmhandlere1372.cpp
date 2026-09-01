@@ -24,7 +24,6 @@
  */
 
 #include <cstring>
-#include <algorithm>
 
 #include "rdmhandler.h"
 #include "e120.h"
@@ -32,6 +31,7 @@
 #include "network_iface.h"
 #include "network_config.h"
 #include "rdm_debug.h"
+#include "common/utils/utils_math.h"
 
 namespace dhcp {
 enum class Mode : uint8_t {
@@ -217,7 +217,7 @@ void RDMHandler::GetInterfaceName([[maybe_unused]] uint16_t subdevice) {
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
 
-    static const auto kLength = std::min(strlen(network::iface::InterfaceName()), static_cast<size_t>(32));
+    static const auto kLength = common::Min(strlen(network::iface::InterfaceName()), static_cast<size_t>(32));
 
     memcpy(reinterpret_cast<char*>(&rdm_data_out->param_data[4]), network::iface::InterfaceName(), kLength);
 

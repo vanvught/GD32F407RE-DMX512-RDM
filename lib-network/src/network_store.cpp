@@ -24,40 +24,34 @@
  */
 
 #include <cstdint>
-#include <algorithm>
 
 #include "common/utils/utils_flags.h"
 #include "configstore.h"
 #include "configurationstore.h"
 #include "network_iface.h"
+#include "common/utils/utils_math.h"
 
 using common::store::network::Flags;
 
-namespace network::store
-{
-__attribute__((weak)) void SaveIp(uint32_t ip)
-{
+namespace network::store {
+__attribute__((weak)) void SaveIp(uint32_t ip) {
     ConfigStore::Instance().NetworkUpdate(&common::store::Network::local_ip, ip);
 }
 
-__attribute__((weak)) void SaveNetmask(uint32_t netmask)
-{
+__attribute__((weak)) void SaveNetmask(uint32_t netmask) {
     ConfigStore::Instance().NetworkUpdate(&common::store::Network::netmask, netmask);
 }
 
-__attribute__((weak)) void SaveGatewayIp(uint32_t gateway_ip)
-{
+__attribute__((weak)) void SaveGatewayIp(uint32_t gateway_ip) {
     ConfigStore::Instance().NetworkUpdate(&common::store::Network::gateway_ip, gateway_ip);
 }
 
-__attribute__((weak)) void SaveHostname(const char* hostname, uint32_t length)
-{
-    length = std::min(length, static_cast<uint32_t>(network::iface::kHostnameSize));
+__attribute__((weak)) void SaveHostname(const char* hostname, uint32_t length) {
+    length = common::Min(length, static_cast<uint32_t>(network::iface::kHostnameSize));
     ConfigStore::Instance().NetworkUpdateArray(&common::store::Network::host_name, hostname, length);
 }
 
-__attribute__((weak)) void SaveDhcp(bool is_dhcp_used)
-{
+__attribute__((weak)) void SaveDhcp(bool is_dhcp_used) {
     const auto kUseStaticIp = !is_dhcp_used;
     auto flags = ConfigStore::Instance().NetworkGet(&common::store::Network::flags);
     flags = common::SetFlagValue(flags, Flags::Flag::kUseStaticIp, kUseStaticIp);

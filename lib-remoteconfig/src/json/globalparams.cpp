@@ -28,8 +28,8 @@
 #include "json/globalparamsconst.h"
 #include "json/json_parser.h"
 #include "configstore.h"
-#include "utc.h"
-#include "global.h"
+#include "firmware/utc.h"
+#include "firmware/global.h"
 #include "remoteconfig.h"
 
 namespace json {

@@ -58,7 +58,10 @@
  *       _ehttp = .;
  *   } > RAM2
  */
+#ifdef LINUX
+#else
 [[gnu::section(".httpd"), gnu::aligned(alignof(HttpDeamonHandleRequest)), gnu::used]]
+#endif
 HttpDaemon::HandlerStorage HttpDaemon::s_handle_request_storage[TCP_MAX_TCBS_ALLOWED];
 
 HttpDaemon::HttpDaemon() {
@@ -69,11 +72,8 @@ HttpDaemon::HttpDaemon() {
     is_listening_ = network::tcp::Listen(httpd::kPort, Data);
     assert(is_listening_);
 
-    /*
-     * Connection handles are global indices into s_Tcbs[].
-     * Therefore the request-handler table must have one entry for every
-     * possible global TCB slot.
-     */
+    // Connection handles are global indices into s_Tcbs[].
+    // Therefore the request-handler table must have one entry for every
     for (uint32_t i = 0; i < TCP_MAX_TCBS_ALLOWED; ++i) {
         // Construct exactly one handler in each raw-storage slot.
         ::new (static_cast<void*>(s_handle_request_storage[i].data)) HttpDeamonHandleRequest(i);
@@ -86,11 +86,8 @@ HttpDaemon::HttpDaemon() {
 
 HttpDeamonHandleRequest& HttpDaemon::GetHandler(uint32_t index) {
     assert(index < TCP_MAX_TCBS_ALLOWED);
-
-    /*
-     * std::launder is appropriate after constructing an object in raw storage
-     * and subsequently obtaining a pointer through the storage address.
-     */
+    // std::launder is appropriate after constructing an object in raw storage
+    // and subsequently obtaining a pointer through the storage address.
     return *std::launder(reinterpret_cast<HttpDeamonHandleRequest*>(s_handle_request_storage[index].data));
 }
 

@@ -1,9 +1,8 @@
-#if !defined(ENABLE_TFTP_SERVER)
 /**
- * @file remoteconfig.cpp
+ * @file utils_bitfield.h
  *
  */
-/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,32 +23,22 @@
  * THE SOFTWARE.
  */
 
-#include "remoteconfig.h"
-#include "display.h"
-#include "gd32.h"
-#include "firmware/ansi_colour.h"
-#include "firmware/debug/debug_debug.h"
+#ifndef COMMON_UTILS_UTILS_BITFIELD_H_
+#define COMMON_UTILS_UTILS_BITFIELD_H_
 
-void RemoteConfig::PlatformHandleTftpSet() {
-    DEBUG_ENTRY();
+#include <cstdint>
 
-    if (enable_tftp_) {
-        bkp_data_write(BKP_DATA_1, 0xA5A5);
-        Display::Get()->TextStatus("TFTP On ", ansi::Colours::Colour::kGreen);
-    } else {
-        bkp_data_write(BKP_DATA_1, 0x0);
-        Display::Get()->TextStatus("TFTP Off", ansi::Colours::Colour::kGreen);
-    }
-
-    DEBUG_EXIT();
+namespace common {
+template <class T>
+void Set2BitField(uint32_t index, T value, uint16_t& packed) {
+    packed &= static_cast<uint16_t>(~(0x3U << (index * 2U)));
+    packed |= static_cast<uint16_t>((static_cast<uint32_t>(value) & 0x3U) << (index * 2U));
 }
 
-void RemoteConfig::PlatformHandleTftpGet() {
-    DEBUG_ENTRY();
-
-    enable_tftp_ = (bkp_data_read(BKP_DATA_1) == 0xA5A5);
-
-    DEBUG_PRINTF("enable_tftp_=%d", enable_tftp_);
-    DEBUG_EXIT();
+template <class T>
+T Get2BitField(uint32_t index, uint16_t packed) {
+    return static_cast<T>((packed >> (index * 2U)) & 0x3U);
 }
-#endif
+} // namespace common
+
+#endif // COMMON_UTILS_UTILS_BITFIELD_H_

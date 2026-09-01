@@ -44,6 +44,18 @@ else
   endif
 endif
 
+ifeq ($(findstring CONFIG_FATFS_USE_RAM,$(FLAGS)),CONFIG_FATFS_USE_RAM)
+	FATFS_MKFS=1
+endif
+
+ifeq ($(findstring CONFIG_FATFS_USE_SPI,$(FLAGS)),CONFIG_FATFS_USE_SPI)
+	FATFS_MKFS=1 	
+endif
+
+ifdef FATFS_MKFS
+	DEFINES+=-DCONFIG_FATFS_MKFS
+endif
+
 $(info $$DEFINES [${DEFINES}])
 
 DEFINES:= $(sort $(DEFINES))

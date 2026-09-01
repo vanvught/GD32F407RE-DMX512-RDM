@@ -23,8 +23,8 @@
 * THE SOFTWARE.
 */
 
-#ifndef COMMON_DEBUG_DEBUG_PRINTBITS_H_
-#define COMMON_DEBUG_DEBUG_PRINTBITS_H_
+#ifndef FIRMWARE_DEBUG_DEBUG_PRINTBITS_H_
+#define FIRMWARE_DEBUG_DEBUG_PRINTBITS_H_
 
 #include <concepts>
 #include <cstdio>
@@ -60,4 +60,4 @@ inline void PrintBits(T value) {
 }
 } // namespace debug
 
-#endif // COMMON_DEBUG_DEBUG_PRINTBITS_H_
+#endif // FIRMWARE_DEBUG_DEBUG_PRINTBITS_H_

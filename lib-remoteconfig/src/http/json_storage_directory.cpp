@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
+#include <ctime>
 #include <cassert>
 #include <dirent.h>
 #include <sys/stat.h>

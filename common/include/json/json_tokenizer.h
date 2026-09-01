@@ -35,38 +35,52 @@ struct JsonTokenizer {
     constexpr JsonTokenizer(const char* buffer, size_t size) : p(buffer), end(buffer + size) {}
 
     constexpr void SkipWhitespace() {
-        while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')) ++p;
+        while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')) {
+            ++p;
+        }
     }
 
     bool NextString(const char*& out, size_t& len) {
         SkipWhitespace();
-        if (p >= end || *p != '"') return false;
+        if (p >= end || *p != '"') {
+            return false;
+        }
         ++p; // skip "
         out = p;
-        while (p < end && *p != '"') ++p;
-        if (p >= end) return false;
+        while (p < end && *p != '"') {
+            ++p;
+        }
+        if (p >= end) {
+            return false;
+        }
         len = static_cast<size_t>(p - out);
         ++p; // skip "
         return true;
     }
 
-    bool Expect(char c) {
+    bool Expect(char character) {
         SkipWhitespace();
-        if (p >= end || *p != c) return false;
+        if (p >= end || *p != character) {
+            return false;
+        }
         ++p;
         return true;
     }
 
     bool NextValue(const char*& out, size_t& len) {
         SkipWhitespace();
-        if (p >= end) return false;
+        if (p >= end) {
+            return false;
+        }
 
         if (*p == '"') {
             return NextString(out, len);
         }
 
         out = p;
-        while (p < end && *p != ',' && *p != '}' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') ++p;
+        while (p < end && *p != ',' && *p != '}' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') {
+            ++p;
+        }
         len = static_cast<size_t>(p - out);
         return len > 0;
     }

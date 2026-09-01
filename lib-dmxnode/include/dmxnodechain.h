@@ -26,13 +26,12 @@
 #define DMXNODECHAIN_H_
 
 #include <cstdint>
-#include <algorithm>
 #include <cassert>
 
 #include "dmxnode.h"
 #include "sparkfundmx.h"
 #include "tlc59711dmx.h"
-
+#include "common/utils/utils_math.h"
 #include "firmware/debug/debug_debug.h"
 
 class DmxNodeChain {
@@ -205,10 +204,10 @@ class DmxNodeChain {
         DEBUG_PRINTF("t->GetDmxStartAddress()=%d, t->GetDmxFootprint()=%d\n", t->GetDmxStartAddress(), t->GetDmxFootprint());
 
         const auto kDmxChannelLastCurrent = static_cast<uint16_t>(dmx_start_address_ + dmx_footprint_);
-        dmx_start_address_ = std::min(dmx_start_address_, t->GetDmxStartAddress());
+        dmx_start_address_ = common::Min(dmx_start_address_, t->GetDmxStartAddress());
 
         const auto kDmxChannelLast = static_cast<uint16_t>(t->GetDmxStartAddress() + t->GetDmxFootprint());
-        dmx_footprint_ = static_cast<uint16_t>(std::max(kDmxChannelLastCurrent, kDmxChannelLast) - dmx_start_address_);
+        dmx_footprint_ = static_cast<uint16_t>(common::Max(kDmxChannelLastCurrent, kDmxChannelLast) - dmx_start_address_);
 
         DEBUG_PRINTF("dmx_start_address_=%d, dmx_footprint_=%d\n", dmx_start_address_, dmx_footprint_);
         DEBUG_EXIT();

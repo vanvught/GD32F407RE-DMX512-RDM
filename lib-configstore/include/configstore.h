@@ -32,7 +32,7 @@
 
 #include "configstoredevice.h"
 #include "configurationstore.h"
-#include "global.h"
+#include "firmware/global.h"
 #include "softwaretimers.h"
 #include "configstore_debug.h"
 
@@ -129,12 +129,14 @@ class ConfigStore : StoreDevice {
 
     bool Commit() { return Flash(); }
 
-    template <typename TMember> void Copy(TMember* dest, const TMember ConfigurationStore::* member) {
+    template <typename TMember>
+    void Copy(TMember* dest, const TMember ConfigurationStore::* member) {
         assert(dest != nullptr);
         memcpy(dest, &(GetStore()->*member), sizeof(TMember));
     }
 
-    template <typename TMember> void Store(const TMember* source, TMember ConfigurationStore::* member) {
+    template <typename TMember>
+    void Store(const TMember* source, TMember ConfigurationStore::* member) {
         assert(source != nullptr);
 
         auto* destination = &(GetStore()->*member);
@@ -145,8 +147,11 @@ class ConfigStore : StoreDevice {
         }
     }
 
-#define DEFINE_STORE_GETTERS_HELPERS(HumanName, StoreName, StoreType) \
-    template <typename TField> TField HumanName##Get(TField common::store::StoreType::* pField) const { return Get(GetStore()->StoreName, pField); }
+#define DEFINE_STORE_GETTERS_HELPERS(HumanName, StoreName, StoreType)        \
+    template <typename TField>                                               \
+    TField HumanName##Get(TField common::store::StoreType::* pField) const { \
+        return Get(GetStore()->StoreName, pField);                           \
+    }
 
     DEFINE_STORE_GETTERS_HELPERS(Global, global, Global)
     DEFINE_STORE_GETTERS_HELPERS(Network, network, Network)
@@ -176,8 +181,11 @@ class ConfigStore : StoreDevice {
 
 #undef DEFINE_STORE_GETTERS_HELPERS
 
-#define DEFINE_STORE_UPDATE_HELPERS(HumanName, StoreName, StoreType) \
-    template <typename TField> void HumanName##Update(TField common::store::StoreType::* pField, const TField& value) { Update(GetStore()->StoreName, pField, value); }
+#define DEFINE_STORE_UPDATE_HELPERS(HumanName, StoreName, StoreType)                         \
+    template <typename TField>                                                               \
+    void HumanName##Update(TField common::store::StoreType::* pField, const TField& value) { \
+        Update(GetStore()->StoreName, pField, value);                                        \
+    }
 
     DEFINE_STORE_UPDATE_HELPERS(Global, global, Global)
     DEFINE_STORE_UPDATE_HELPERS(RemoteConfig, remote_config, RemoteConfig)
@@ -273,26 +281,38 @@ class ConfigStore : StoreDevice {
     [[nodiscard]] bool IsFlagSetRgbPanel(uint32_t flag) const { return IsFlagSetInternal(GetStore()->rgb_panel, &common::store::RgbPanel::set_list, flag); }
     [[nodiscard]] bool IsFlagSetWidget(uint32_t flag) const { return IsFlagSetInternal(GetStore()->widget, &common::store::Widget::set_list, flag); }
 
-    template <std::size_t N> void RemoteConfigUpdateArray(uint8_t (common::store::RemoteConfig::*field)[N], const char* src, uint32_t length) { UpdateArray(GetStore()->remote_config, field, reinterpret_cast<const uint8_t*>(src), length); }
+    template <std::size_t N>
+    void RemoteConfigUpdateArray(uint8_t (common::store::RemoteConfig::*field)[N], const char* src, uint32_t length) {
+        UpdateArray(GetStore()->remote_config, field, reinterpret_cast<const uint8_t*>(src), length);
+    }
 
-    template <std::size_t N> void RemoteConfigCopyArray(uint8_t (&dest)[N], const uint8_t (common::store::RemoteConfig::*field)[N]) const {
+    template <std::size_t N>
+    void RemoteConfigCopyArray(uint8_t (&dest)[N], const uint8_t (common::store::RemoteConfig::*field)[N]) const {
         static_assert(N == common::store::remoteconfig::kDisplayNameLength, "Size mismatch");
         memcpy(dest, (GetStore()->remote_config.*field), N);
     }
 
-    template <std::size_t N> void NetworkUpdateArray(uint8_t (common::store::Network::*field)[N], const char* src, uint32_t length) { UpdateArray(GetStore()->network, field, reinterpret_cast<const uint8_t*>(src), length); }
+    template <std::size_t N>
+    void NetworkUpdateArray(uint8_t (common::store::Network::*field)[N], const char* src, uint32_t length) {
+        UpdateArray(GetStore()->network, field, reinterpret_cast<const uint8_t*>(src), length);
+    }
 
-    template <std::size_t N> void LtcDisplayCopyArray(char (&dest)[N], const char (common::store::LtcDisplay::*field)[N]) const {
+    template <std::size_t N>
+    void LtcDisplayCopyArray(char (&dest)[N], const char (common::store::LtcDisplay::*field)[N]) const {
         static_assert(N == common::store::ltc::display::kMaxInfoMessage, "Size mismatch");
         memcpy(dest, (GetStore()->ltc_display.*field), N);
     }
 
-    template <std::size_t N> void RdmDeviceCopyArray(uint8_t (&dest)[N], const uint8_t (common::store::RdmDevice::*field)[N]) const {
+    template <std::size_t N>
+    void RdmDeviceCopyArray(uint8_t (&dest)[N], const uint8_t (common::store::RdmDevice::*field)[N]) const {
         static_assert(N == common::store::rdmdevice::kLabelMaxLength, "Size mismatch");
         memcpy(dest, (GetStore()->rdm_device.*field), N);
     }
 
-    template <std::size_t N> void RdmDeviceUpdateArray(uint8_t (common::store::RdmDevice::*field)[N], const uint8_t* src, uint32_t length) { UpdateArray(GetStore()->rdm_device, field, src, length); }
+    template <std::size_t N>
+    void RdmDeviceUpdateArray(uint8_t (common::store::RdmDevice::*field)[N], const uint8_t* src, uint32_t length) {
+        UpdateArray(GetStore()->rdm_device, field, src, length);
+    }
 
     [[nodiscard]] uint8_t RdmSensorsIndexedGetType(uint32_t index) const {
         assert(index < common::store::rdm::sensors::kMaxDevices);
@@ -304,7 +324,8 @@ class ConfigStore : StoreDevice {
         return GetStore()->rdm_sensors.entry[index].address;
     }
 
-    template <typename T, std::size_t N> void RdmSensorsUpdateIndexed(T (common::store::RdmSensors::*field)[N], uint32_t index, const T& value) {
+    template <typename T, std::size_t N>
+    void RdmSensorsUpdateIndexed(T (common::store::RdmSensors::*field)[N], uint32_t index, const T& value) {
         static_assert(N == common::store::rdm::sensors::kMaxSensors, "Array size mismatch");
         assert(index < N);
 
@@ -316,9 +337,13 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <std::size_t N> void DmxNodeUpdateArray(uint8_t (common::store::DmxNode::*field)[N], const char* src, uint32_t length) { UpdateArray(GetStore()->dmx_node, field, reinterpret_cast<const uint8_t*>(src), length); }
+    template <std::size_t N>
+    void DmxNodeUpdateArray(uint8_t (common::store::DmxNode::*field)[N], const char* src, uint32_t length) {
+        UpdateArray(GetStore()->dmx_node, field, reinterpret_cast<const uint8_t*>(src), length);
+    }
 
-    template <std::size_t N> void DmxNodeUpdateLabel(uint8_t (common::store::DmxNode::*field)[common::store::dmxnode::kParamPorts][N], uint32_t index, const char* src, uint32_t length) {
+    template <std::size_t N>
+    void DmxNodeUpdateLabel(uint8_t (common::store::DmxNode::*field)[common::store::dmxnode::kParamPorts][N], uint32_t index, const char* src, uint32_t length) {
         static_assert(N == common::store::dmxnode::kPortNameLength, "Label size mismatch");
         assert(index < common::store::dmxnode::kParamPorts);
         assert(src != nullptr);
@@ -336,7 +361,8 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <typename T, std::size_t N> void DmxNodeUpdateIndexed(T (common::store::DmxNode::*field)[N], uint32_t index, const T& value) {
+    template <typename T, std::size_t N>
+    void DmxNodeUpdateIndexed(T (common::store::DmxNode::*field)[N], uint32_t index, const T& value) {
         static_assert(N == common::store::dmxnode::kParamPorts, "Array size mismatch");
         assert(index < N);
 
@@ -348,7 +374,7 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    uint16_t DmxLedIndexedGetStartUniverse(uint32_t index) const {
+    [[nodiscard]] uint16_t DmxLedIndexedGetStartUniverse(uint32_t index) const {
         assert(index < 16);
         return GetStore()->dmx_led.start_universe[index];
     }
@@ -433,12 +459,14 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <typename TField> TField DmxL6470GetModeIndexed(uint32_t index, TField common::store::l6470dmx::Mode::* field) const {
+    template <typename TField>
+    TField DmxL6470GetModeIndexed(uint32_t index, TField common::store::l6470dmx::Mode::* field) const {
         assert(index < common::store::l6470dmx::kMaxMotors);
         return (GetStore()->dmx_l6470.store[index].mode).*field;
     }
 
-    template <typename TField> TField DmxL6470GetMotorIndexed(uint32_t index, TField common::store::l6470dmx::Motor::* field) const {
+    template <typename TField>
+    TField DmxL6470GetMotorIndexed(uint32_t index, TField common::store::l6470dmx::Motor::* field) const {
         assert(index < common::store::l6470dmx::kMaxMotors);
         return (GetStore()->dmx_l6470.store[index].motor).*field;
     }
@@ -449,9 +477,13 @@ class ConfigStore : StoreDevice {
     }
 
    private:
-    template <typename TObject, typename TField> TField Get(const TObject& object, TField TObject::* field) const { return object.*field; }
+    template <typename TObject, typename TField>
+    TField Get(const TObject& object, TField TObject::* field) const {
+        return object.*field;
+    }
 
-    template <typename TObject, typename TField> void Update(TObject& object, TField TObject::* field, const TField& value) {
+    template <typename TObject, typename TField>
+    void Update(TObject& object, TField TObject::* field, const TField& value) {
         assert(field != nullptr);
 
         auto* dest = &(object.*field);
@@ -462,7 +494,8 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <typename TObject, typename TArray, std::size_t N> void UpdateArray(TObject& object, TArray (TObject::*field)[N], const TArray* src, uint32_t length) {
+    template <typename TObject, typename TArray, std::size_t N>
+    void UpdateArray(TObject& object, TArray (TObject::*field)[N], const TArray* src, uint32_t length) {
         assert(src != nullptr);
 
         auto* dest = &(object.*field);
@@ -579,9 +612,10 @@ class ConfigStore : StoreDevice {
     }
 
     ConfigurationStore* GetStore() { return reinterpret_cast<ConfigurationStore*>(s_store); }
-    const ConfigurationStore* GetStore() const { return reinterpret_cast<const ConfigurationStore*>(s_store); }
+    [[nodiscard]] const ConfigurationStore* GetStore() const { return reinterpret_cast<const ConfigurationStore*>(s_store); }
 
-    template <typename TObject> void SetFlagInternal(TObject& object, uint32_t TObject::* field, uint32_t flag) {
+    template <typename TObject>
+    void SetFlagInternal(TObject& object, uint32_t TObject::* field, uint32_t flag) {
         auto& flags = object.*field;
         if ((flags & flag) == 0) {
             flags |= flag;
@@ -589,7 +623,8 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <typename TObject> void ClearFlagInternal(TObject& object, uint32_t TObject::* field, uint32_t flag) {
+    template <typename TObject>
+    void ClearFlagInternal(TObject& object, uint32_t TObject::* field, uint32_t flag) {
         auto& flags = object.*field;
         if ((flags & flag) != 0) {
             flags &= ~flag;
@@ -597,7 +632,8 @@ class ConfigStore : StoreDevice {
         }
     }
 
-    template <typename TObject> bool IsFlagSetInternal(const TObject& object, uint32_t TObject::* field, uint32_t flag) const {
+    template <typename TObject>
+    [[nodiscard]] bool IsFlagSetInternal(const TObject& object, uint32_t TObject::* field, uint32_t flag) const {
         const auto& flags = object.*field;
         return (flags & flag) != 0;
     }

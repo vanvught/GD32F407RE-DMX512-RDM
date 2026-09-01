@@ -29,11 +29,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
 
 #include "rdmconst.h"
 #include "rdm_e120.h"
 #include "serialnumber.h"
+#include "common/utils/utils_math.h"
 
 namespace rdm::device {
 class Base {
@@ -45,7 +45,7 @@ class Base {
 
     void Print() {
         puts("RDM Device Base");
-        const auto kLength = static_cast<int>(std::min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
+        const auto kLength = static_cast<int>(common::Min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
         printf(" Manufacturer Name : %.*s\n", kLength, const_cast<char*>(&rdm::Manufacturer::kName[0]));
         printf(" Manufacturer ID   : %.2X%.2X\n", uid_[0], uid_[1]);
         printf(" Serial Number     : %.2X%.2X%.2X%.2X\n", serial_number_[3], serial_number_[2], serial_number_[1], serial_number_[0]);
