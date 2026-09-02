@@ -4,6 +4,11 @@ ifndef MCU
 	$(error MCU is not set)
 endif
 
+FLAGS:=$(MAKE_FLAGS)
+ifeq ($(FLAGS),)
+	FLAGS:=$(DEFINES)
+endif
+
 $(info $$MCU [${MCU}])
 
 # Extract upper and lower case versions of MCU name
@@ -24,20 +29,32 @@ ifeq ($(strip $(MCU)),GD32F103RC)
 endif
 
 ifeq ($(strip $(MCU)),GD32F107RC)
-	LINKER=$(FIRMWARE_DIR)gd32f107rc_flash.ld
+	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+  	LINKER=$(FIRMWARE_DIR)gd32f107rc-bootloader_flash.ld
+  else
+		LINKER=$(FIRMWARE_DIR)gd32f107rc_flash.ld
+	endif
 	FAMILY=gd32f10x
 	LINE=gd32f10x_cl
 	TARGET=gd32f107.bin
 endif
 
 ifeq ($(strip $(MCU)),GD32F207VC)
-	LINKER=$(FIRMWARE_DIR)gd32f207vc_flash.ld
+	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+  	LINKER=$(FIRMWARE_DIR)gd32f207vc-bootloader_flash.ld
+  else
+		LINKER=$(FIRMWARE_DIR)gd32f207vc_flash.ld
+	endif
 	FAMILY=gd32f20x
 	LINE=gd32f20x_cl
 endif
 	
 ifeq ($(strip $(MCU)),GD32F207RG)
-	LINKER=$(FIRMWARE_DIR)gd32f207rg_flash.ld
+	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+  	LINKER=$(FIRMWARE_DIR)gd32f207rg-bootloader_flash.ld
+  else
+  	LINKER=$(FIRMWARE_DIR)gd32f207rg_flash.ld
+  endif
 	FAMILY=gd32f20x
 	LINE=gd32f20x_cl
 endif
@@ -50,7 +67,11 @@ ifeq ($(strip $(MCU)),GD32F303RC)
 endif
 
 ifeq ($(strip $(MCU)),GD32F407RE) 
-  LINKER=$(FIRMWARE_DIR)gd32f407re_flash.ld
+	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+  	LINKER=$(FIRMWARE_DIR)gd32f407re-bootloader_flash.ld
+  else
+		LINKER=$(FIRMWARE_DIR)gd32f407re_flash.ld
+  endif
   FAMILY=gd32f4xx
   LINE=gd32f407
 endif
