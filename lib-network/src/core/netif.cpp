@@ -48,7 +48,7 @@
 #define NETIF_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_NETIF
 
 namespace network::igmp {
 void ReportGroups();

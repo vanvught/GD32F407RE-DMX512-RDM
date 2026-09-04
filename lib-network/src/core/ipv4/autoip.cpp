@@ -57,7 +57,7 @@
 #define AUTOIP_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_AUTOIP
 
 namespace network::autoip {
 static void Bind() {

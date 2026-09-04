@@ -32,10 +32,10 @@
 
 #if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MIN)
 #define CONFIG_NTP_CLIENT_POLL_POWER_MIN 3
-#endif
+#endif // CONFIG_NTP_CLIENT_POLL_POWER_MIN
 #if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MAX)
 #define CONFIG_NTP_CLIENT_POLL_POWER_MAX 12
-#endif
+#endif // CONFIG_NTP_CLIENT_POLL_POWER_MAX
 
 namespace network::apps::ntpclient {
 inline constexpr uint32_t kTimeoutSeconds = 3;

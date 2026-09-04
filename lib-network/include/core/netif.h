@@ -32,7 +32,7 @@
 
 #ifndef NETIF_MAX_HWADDR_LEN
 #define NETIF_MAX_HWADDR_LEN 6U
-#endif
+#endif // NETIF_MAX_HWADDR_LEN
 
 namespace netif {
 

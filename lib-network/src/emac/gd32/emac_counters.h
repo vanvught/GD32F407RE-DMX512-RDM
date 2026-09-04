@@ -17,4 +17,4 @@ struct Counters {
 extern struct Counters counter;
 } // namespace emac::eth::globals
 
-#endif /* EMAC_COUNTERS_H_ */
+#endif // EMAC_COUNTERS_H_

@@ -28,8 +28,8 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 #include <cstddef>

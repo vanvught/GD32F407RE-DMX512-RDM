@@ -46,7 +46,7 @@
 #define EMAC_DEBUG_PUTS(...) \
     do {                     \
     } while (false)
-#endif
+#endif // DEBUG_EMAC
 
 #if defined(DEBUG_EMAC_PHY)
 #define EMAC_PHY_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -66,7 +66,7 @@
 #define EMAC_PHY_DEBUG_PUTS(...) \
     do {                         \
     } while (false)
-#endif
+#endif // DEBUG_EMAC_PHY
 
 #if defined(DEBUG_EMAC_IGMP)
 #define EMAC_IGMP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -86,6 +86,6 @@
 #define EMAC_IGMP_DEBUG_PUTS(...) \
     do {                          \
     } while (false)
-#endif
+#endif // DEBUG_EMAC_IGMP
 
 #endif // EMAC_EMAC_DEBUG_H_

@@ -41,7 +41,7 @@ static void PollHardwareCounters() {
     enet_missed_frame_counter_get(ENETx, &rxfifo_drop, &rxdma_missed);
 #else
     enet_missed_frame_counter_get(&rxfifo_drop, &rxdma_missed);
-#endif
+#endif // GD32H7XX
 
     // ENET_DMA_MFBOCNT is read-to-clear, so accumulate immediately.
     s_rx_fifo_drop_total += rxfifo_drop;

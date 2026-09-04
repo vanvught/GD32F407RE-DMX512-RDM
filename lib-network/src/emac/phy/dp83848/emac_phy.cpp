@@ -23,18 +23,24 @@
  * THE SOFTWARE.
  */
 
+#ifndef ENET_LINK_CHECK_REG_POLL
+#error Register poll must be enabled
+#endif // ENET_LINK_CHECK_REG_POLL
+
 #include <cstdint>
 
 #include "emac/emac_phy.h"
+#include "emac/mmi.h"
 #include "emac/emac_debug.h"
+
+#define PHY_REG_MICR 0x11U
+#define PHY_REG_MISR 0x12U
+#define PHY_INT_AND_OUTPUT_ENABLE 0x03U
+#define PHY_LINK_INT_ENABLE 0x20U
 
 #if !defined(BIT)
 #define BIT(x) static_cast<uint16_t>(1U << (x))
-#endif
-
-#if !defined(PHY_ADDRESS)
-#define PHY_ADDRESS 1
-#endif
+#endif // BIT
 
 namespace emac::phy {
 void CustomizedLed() {
@@ -49,17 +55,39 @@ void CustomizedTiming() {
     EMAC_PHY_DEBUG_EXIT();
 }
 
-/**
- * PHY Status Register (PHYSTS), address 10h
- * @param phyStatus
- */
+// PHY Status Register (PHYSTS), address 10h
+
 void CustomizedStatus(phy::Status& phy_status) {
     uint16_t value;
-    phy::Read(PHY_ADDRESS, 0x10, value);
+    phy::Read(emac::phy::kAddress, 0x10, value);
 
     phy_status.link = ((value & BIT(0)) == BIT(0)) ? phy::Link::kStateUp : phy::Link::kStateDown;
     phy_status.duplex = ((value & BIT(2)) == BIT(2)) ? phy::Duplex::kDuplexFull : phy::Duplex::kDuplexHalf;
     phy_status.speed = ((value & BIT(1)) == BIT(1)) ? phy::Speed::kSpeed10 : phy::Speed::kSpeed100;
     phy_status.autonegotiation = ((value & BIT(4)) == BIT(4));
 }
+
+namespace link {
+// ENET_LINK_CHECK_USE_INT
+// ENET_LINK_CHECK_USE_PIN_POLL
+void PinEnable() {
+    uint16_t phy_value = PHY_INT_AND_OUTPUT_ENABLE;
+    phy::Write(emac::phy::kAddress, PHY_REG_MICR, phy_value);
+
+    phy::Read(emac::phy::kAddress, PHY_REG_MICR, phy_value);
+
+    if (PHY_INT_AND_OUTPUT_ENABLE != phy_value) {
+        DEBUG_PUTS("PHY_INT_AND_OUTPUT_ENABLE != phy_value");
+    }
+
+    phy_value = PHY_LINK_INT_ENABLE;
+    phy::Write(emac::phy::kAddress, PHY_REG_MISR, phy_value);
+}
+
+void PinRecovery() {
+    uint16_t phy_value;
+    phy::Read(emac::phy::kAddress, PHY_REG_MISR, phy_value);
+    phy::Read(emac::phy::kAddress, mmi::REG_BMSR, phy_value);
+}
+} // namespace link
 } // namespace emac::phy

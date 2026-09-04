@@ -54,7 +54,7 @@
 #define TFTP_DEBUG_PUTS(...) \
     do {                     \
     } while (false)
-#endif
+#endif // DEBUG_NET_APPS_TFTP
 
 static constexpr uint16_t kOpCodeRrq = 1;   ///< Read request (RRQ)
 static constexpr uint16_t kOpCodeWrq = 2;   ///< Write request (WRQ)
@@ -86,7 +86,7 @@ static constexpr uint32_t kErrmsgLen = 128;
 
 #if !defined(PACKED)
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 struct ReqPacket {
     uint16_t op_code;

@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 #define HAVE_NTP_CLIENT
-#endif
+#endif // defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 
 #include <cstdint>
 
@@ -37,7 +37,7 @@
 #include "ip4/ip4_helpers.h"
 #if defined(HAVE_NTP_CLIENT)
 #include "apps/ntpclient.h"
-#endif
+#endif // HAVE_NTP_CLIENT
 
 namespace json::config {
 uint32_t GetNetwork(char* buffer, uint32_t length) {
@@ -45,11 +45,11 @@ uint32_t GetNetwork(char* buffer, uint32_t length) {
     uint32_t ntp_server_ip = 0;
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
     ntp_server_ip = network::apps::ntpclient::GetServerIp();
-#endif
+#endif // CONFIG_NET_ENABLE_NTP_CLIENT
 #if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
     ntp_server_ip = network::apps::ntpclient::ptp::GetServerIp();
-#endif
-#endif
+#endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
+#endif // HAVE_NTP_CLIENT
 
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
         char ip[net::kIpBufferSize];
@@ -62,7 +62,7 @@ uint32_t GetNetwork(char* buffer, uint32_t length) {
         doc[json::NetworkParamsConst::kHostname.name] = network::iface::HostName();
 #if defined(HAVE_NTP_CLIENT)
         doc[json::NetworkParamsConst::kNtpServer.name] = net::FormatIp(ntp_server_ip, ip);
-#endif
+#endif // HAVE_NTP_CLIENT
     });
 }
 

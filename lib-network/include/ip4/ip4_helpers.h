@@ -58,4 +58,4 @@ inline uint32_t ParseIpString(const char* val, uint32_t len) {
 }
 } // namespace net
 
-#endif /* IP4_IP4_HELPERS_H_ */
+#endif // IP4_IP4_HELPERS_H_

@@ -31,7 +31,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 #include <cassert>
@@ -54,7 +54,7 @@ extern enet_descriptors_struct* dma_current_ptp_txdesc;
 namespace net::globals::ptp {
 extern uint32_t timestamp[2];
 } // namespace net::globals::ptp
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 /// Current receive descriptor
 extern enet_descriptors_struct* dma_current_rxdesc;
@@ -75,7 +75,7 @@ uint32_t Recv(uint8_t** packet) {
         *packet = reinterpret_cast<uint8_t*>(dma_current_ptp_rxdesc->buffer1_addr);
 #else
         *packet = reinterpret_cast<uint8_t*>(dma_current_rxdesc->buffer1_addr);
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
         emac::eth::globals::counter.received++;
         return kLength;
     }
@@ -95,7 +95,7 @@ static void PtpFrameReceiveNormalMode() {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     gd32::enet::HandleRxBufferUnavailable();
 
@@ -126,7 +126,7 @@ static void FrameReceive() {
     /// Update Rx descriptor pointer
     dma_current_rxdesc = reinterpret_cast<enet_descriptors_struct*>(dma_current_rxdesc->buffer2_next_desc_addr);
 }
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 /**
  * @brief Frees the current packet from the DMA buffer.
@@ -140,7 +140,7 @@ void FreePkt() {
     PtpFrameReceiveNormalMode();
 #else
     FrameReceive();
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 }
 
 #if defined(CONFIG_NET_ENABLE_PTP)
@@ -170,7 +170,7 @@ template <bool T> static void PtpFrameTransmit(uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     gd32::enet::ClearDmaTxFlagsAndResume(); ///< Handle transmission flags
 
@@ -240,7 +240,7 @@ void Send(uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     PtpFrameTransmit<false>(length);
 }
@@ -265,7 +265,7 @@ void Send(void* buffer, const uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     PtpFrameTransmit<false>(buffer, length);
 }
@@ -284,7 +284,7 @@ void SendTimestamp(uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     PtpFrameTransmit<true>(length);
 }
@@ -309,7 +309,7 @@ void SendTimestamp(void* buffer, uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     PtpFrameTransmit<true>(buffer, length);
 }
@@ -341,7 +341,7 @@ void Send(uint32_t length) {
 
 #if defined(GD32H7XX)
     __DMB();
-#endif
+#endif // GD32H7XX
 
     gd32::enet::ClearDmaTxFlagsAndResume(); ///< Handle transmission flags
 
@@ -365,5 +365,5 @@ void Send(void* buffer, uint32_t length) {
 
     Send(length);
 }
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 } // namespace emac::eth

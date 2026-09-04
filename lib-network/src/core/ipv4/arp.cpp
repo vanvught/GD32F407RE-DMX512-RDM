@@ -33,7 +33,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 #include <cstring>
@@ -69,13 +69,13 @@
 #define ARP_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_ARP
 
 #if !defined ARP_MAX_RECORDS
 static constexpr auto kMaxRecords = 16;
 #else
 static constexpr auto kMaxRecords = ARP_MAX_RECORDS;
-#endif
+#endif // !defined ARP_MAX_RECORDS
 
 namespace network::globals {
 extern uint32_t on_network_mask;
@@ -99,7 +99,7 @@ struct Packet {
     uint32_t size;
 #if defined CONFIG_NET_ENABLE_PTP
     bool isTimestamp;
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 };
 
 struct Record {
@@ -139,7 +139,7 @@ void static CacheDump() {
 #else
 void static CacheRecordDump([[maybe_unused]] network::arp::Record* record) {}
 void static CacheDump() {}
-#endif
+#endif // NDEBUG
 
 static network::arp::Record* FindRecord(uint32_t destination_ip, [[maybe_unused]] arp::Flags flag) {
     ARP_DEBUG_ENTRY();
@@ -220,17 +220,17 @@ static void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag
         udp->ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
         udp->ip4.chksum = Chksum(reinterpret_cast<void*>(&udp->ip4), sizeof(udp->ip4));
-#endif
+#endif // CHECKSUM_BY_HARDWARE
 #if defined CONFIG_NET_ENABLE_PTP
         if (!record->packet.isTimestamp) {
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
             debug::Dump(record->packet.p, record->packet.size);
             emac::eth::Send(record->packet.p, record->packet.size);
 #if defined CONFIG_NET_ENABLE_PTP
         } else {
             emac::eth::SendTimestamp(record->packet.p, record->packet.size);
         }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
         network::memory::Allocator::Instance().Free(record->packet.p);
         record->packet.p = nullptr;
     }
@@ -269,7 +269,7 @@ template <network::arp::EthSend S> static void Query(uint32_t destination_ip, vo
         record_found->packet.size = size;
 #if defined CONFIG_NET_ENABLE_PTP
         record_found->packet.isTimestamp = (S != network::arp::EthSend::kIsNormal);
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
         record_found->state = network::arp::State::kStateProbe;
         record_found->age = 0;
         SendRequest(destination_ip);
@@ -454,7 +454,7 @@ template <network::arp::EthSend S> static void SendImplementation(void* packet, 
     p->ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     p->ip4.chksum = Chksum(reinterpret_cast<void*>(&p->ip4), sizeof(p->ip4));
-#endif
+#endif // CHECKSUM_BY_HARDWARE
 
     auto destination_ip = remote_ip;
 
@@ -481,7 +481,7 @@ template <network::arp::EthSend S> static void SendImplementation(void* packet, 
                 else if constexpr (S == network::arp::EthSend::kIsTimestamp) {
                     emac::eth::SendTimestamp(packet, size);
                 }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
                 ARP_DEBUG_EXIT();
                 return;
             }
@@ -501,7 +501,7 @@ void Send(void* packet, uint32_t size, uint32_t remote_ip) {
 void SendTimestamp(void* packet, uint32_t size, uint32_t remote_ip) {
     SendImplementation<network::arp::EthSend::kIsTimestamp>(packet, size, remote_ip);
 }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 
 //  The Sender IP is set to all zeros,
 //  which means it cannot map to the Sender MAC address.

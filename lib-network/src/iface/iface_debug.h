@@ -26,6 +26,6 @@
 #define NETWORK_IFACE_DEBUG_PUTS(...) \
     do {                              \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_IFACE
 
 #endif // IFACE_DEBUG_H_

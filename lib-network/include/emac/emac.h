@@ -31,32 +31,11 @@
 #include "emac/emac_phy.h"
 
 namespace emac {
-/** \defgroup platform Platform implementation
-  @{
-*/
-/**
- * Configure the PHY interface
- * - Call \ref emac::phy::Config
- */
+// platform Platform implementation
 void Config();
-
 void AdjustLink(emac::phy::Status phy_status);
-
-/**
- *
- * - Soft MAC reset
- * - Set the MAC address
- * - Initialize rx/tx descriptors
- * - PHY Start Up -> \ref emac::phy::Start
- * - Adjust the link with duplex and speed returned from \ref emac::phy::Start
- * - Start RX/TX DMA
- * - Enable RX/TX
- *
- * @param[out] mac_address
- *
- */
 void Start(uint8_t mac_address[], emac::phy::Link& link);
-/** @} */
+
 namespace display {
 void Config();
 void Start();

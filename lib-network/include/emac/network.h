@@ -28,7 +28,7 @@
 
 #if defined(NO_EMAC) || defined(ESP8266)
 #error This file should not be included
-#endif
+#endif // defined(NO_EMAC) || defined(ESP8266)
 
 #include <cstdint>
 
@@ -39,25 +39,16 @@
 #include "network_igmp.h" // IWYU pragma: keep
 #if defined(ENABLE_HTTPD)
 #include "network_tcp.h" // IWYU pragma: keep
-#endif
-#if defined(ENET_LINK_CHECK_USE_PIN_POLL) || defined(ENET_LINK_CHECK_REG_POLL)
-#include "emac/emac_link_check.h"
-#endif
-#include "emac/emac_phy.h"
-
-uint32_t emac::eth::Recv(uint8_t**);
+#endif                   // ENABLE_HTTPD
 
 namespace network {
-namespace global {
-extern emac::phy::Link link_state;
-}
 void Init();
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 namespace ptp {
 void Run();
 }
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 inline void Run() {
     uint8_t* ethernet_buffer;
@@ -69,21 +60,12 @@ inline void Run() {
             length = emac::eth::Recv(&ethernet_buffer);
         } while (length > 0);
     }
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
     network::tcp::Run();
-#endif
-#if defined(CONFIG_NET_ENABLE_PTP)
+#endif // ENABLE_HTTPD
+#ifdef CONFIG_NET_ENABLE_PTP
     network::ptp::Run();
-#endif
-#if defined(ENET_LINK_CHECK_USE_PIN_POLL)
-    emac::link::PinPoll();
-#elif defined(ENET_LINK_CHECK_REG_POLL)
-    const emac::phy::Link link_state = emac::link::StatusRead();
-    if (link_state != global::link_state) {
-        global::link_state = link_state;
-        emac::link::HandleChange(link_state);
-    }
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 }
 } // namespace network
 

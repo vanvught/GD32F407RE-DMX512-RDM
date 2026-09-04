@@ -23,6 +23,10 @@
  * THE SOFTWARE.
  */
 
+#ifndef ENET_LINK_CHECK_REG_POLL
+#error Register poll must be enabled
+#endif // ENET_LINK_CHECK_REG_POLL
+
 #include <cstdint>
 
 #include "emac/emac_phy.h"
@@ -30,14 +34,9 @@
 #include "firmware/debug/debug_printbits.h"
 #include "emac/emac_debug.h"
 
-
 #if !defined(BIT)
 #define BIT(x) static_cast<uint16_t>(1U << (x))
-#endif
-
-#if !defined(PHY_ADDRESS)
-#define PHY_ADDRESS 1
-#endif
+#endif // BIT
 
 namespace emac::phy {
 void CustomizedLed() {
@@ -54,7 +53,7 @@ void CustomizedTiming() {
 
 void CustomizedStatus(emac::phy::Status& phy_status) {
     uint16_t value;
-    emac::phy::Read(PHY_ADDRESS, emac::mmi::REG_BMSR, value);
+    emac::phy::Read(emac::phy::kAddress, emac::mmi::REG_BMSR, value);
 
     debug::PrintBits(value);
 

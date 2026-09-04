@@ -22,20 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+ 
+ #ifndef ENET_LINK_CHECK_REG_POLL
+ #error Register poll must be enabled 
+ #endif // ENET_LINK_CHECK_REG_POLL
+ 
+ #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
+ #error Not supported with the standard external PHY board
+ #endif // defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
 
 #include <cstdint>
 
 #include "emac/emac_phy.h"
-#include "emac/emac_link_check.h"
 #include "emac/emac_debug.h"
 
 #if !defined(BIT)
 #define BIT(x) static_cast<uint16_t>(1U << (x))
-#endif
-
-#if !defined(PHY_ADDRESS)
-#define PHY_ADDRESS 1
-#endif
+#endif // BIT
 
 namespace emac::phy {
 void CustomizedLed() {
@@ -50,15 +53,13 @@ void CustomizedTiming() {
     EMAC_PHY_DEBUG_EXIT();
 }
 
-/**
- * PHY SPECIAL CONTROL/STATUS REGISTER Index (In Decimal): 31
- * @param phyStatus
- */
+// PHY SPECIAL CONTROL/STATUS REGISTER Index (In Decimal): 31
+
 void CustomizedStatus(emac::phy::Status& phy_status) {
-    phy_status.link = link::StatusRead();
+    phy_status.link = emac::phy::GetLink(kAddress);
 
     uint16_t value;
-    phy::Read(PHY_ADDRESS, 0x1f, value);
+    phy::Read(emac::phy::kAddress, 0x1f, value);
 
     phy_status.duplex = ((value & BIT(4)) == BIT(4)) ? phy::Duplex::kDuplexFull : phy::Duplex::kDuplexHalf;
     phy_status.speed = ((value & BIT(2)) == BIT(2)) ? phy::Speed::kSpeed10 : phy::Speed::kSpeed100;

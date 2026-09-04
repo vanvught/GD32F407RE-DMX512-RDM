@@ -33,7 +33,7 @@
 static constexpr uint32_t LINE_IP = 2;
 #else
 static constexpr uint32_t LINE_IP = CONFIG_DISPLAY_LINE_IP;
-#endif
+#endif // CONFIG_DISPLAY_LINE_IP
 
 namespace emac::display
 {
@@ -42,7 +42,7 @@ void __attribute__((weak)) Config()
 #if !defined(NO_EMAC)
     Display::Get()->ClearLine(LINE_IP);
     Display::Get()->PutString("Ethernet config");
-#endif
+#endif // NO_EMAC
 }
 
 void __attribute__((weak)) Start()
@@ -50,7 +50,7 @@ void __attribute__((weak)) Start()
 #if !defined(NO_EMAC)
     Display::Get()->ClearLine(LINE_IP);
     Display::Get()->PutString("Ethernet start");
-#endif
+#endif // NO_EMAC
 }
 
 void __attribute__((weak)) Status([[maybe_unused]] bool isLinkUp)
@@ -66,7 +66,7 @@ void __attribute__((weak)) Status([[maybe_unused]] bool isLinkUp)
     {
         Display::Get()->PutString("DOWN");
     }
-#endif
+#endif // NO_EMAC
 }
 } // namespace net::emac::display
 
@@ -79,7 +79,7 @@ void __attribute__((weak)) EmacShutdown()
 #if !defined(NO_EMAC)
     Display::Get()->ClearLine(LINE_IP);
     Display::Get()->PutString("Ethernet shutdown");
-#endif
+#endif // NO_EMAC
 }
 
 void __attribute__((weak)) DhcpStatus([[maybe_unused]] network::dhcp::State state)
@@ -106,7 +106,7 @@ void __attribute__((weak)) DhcpStatus([[maybe_unused]] network::dhcp::State stat
         default:
             break;
     }
-#endif
+#endif // NO_EMAC
 }
 } // namespace network::display
-#endif
+#endif // DISPLAY_UDF

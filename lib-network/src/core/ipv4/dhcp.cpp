@@ -39,7 +39,7 @@
 #include "core/protocol/iana.h"
 #if defined(CONFIG_NET_DHCP_USE_ACD)
 #include "core/ip4/acd.h"
-#endif
+#endif // CONFIG_NET_DHCP_USE_ACD
 #include "firmware/debug/debug_debug.h"
 
 #ifdef DEBUG_NETWORK_DHCP
@@ -60,7 +60,7 @@
 #define DHCP_DEBUG_PUTS(...) \
     do {                     \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_DHCP
 
 #define REBOOT_TRIES 2
 
@@ -458,7 +458,7 @@ static void Check() {
 
     DHCP_DEBUG_EXIT();
 }
-#endif
+#endif // CONFIG_NET_DHCP_USE_ACD
 
 static void Discover() {
     DHCP_DEBUG_ENTRY();
@@ -469,7 +469,7 @@ static void Discover() {
     if (dhcp->tries >= DHCP_AUTOIP_COOP_TRIES) {
         autoip::Start();
     }
-#endif
+#endif // CONFIG_NET_DHCP_USE_AUTOIP
 
     dhcp->offered.offered_ip_addr.addr = 0;
 
@@ -698,7 +698,7 @@ bool Start() {
 
 #if defined(CONFIG_NET_DHCP_USE_ACD)
     network::acd::Add(&dhcp->acd, ConflictCallback);
-#endif
+#endif // CONFIG_NET_DHCP_USE_ACD
 
     if (!netif::IsLinkUp()) {
         SetState(dhcp, dhcp::State::kInit);
@@ -748,7 +748,7 @@ void ReleaseAndStop() {
 
 #if defined(CONFIG_NET_DHCP_USE_ACD)
     acd::Remove(&dhcp->acd);
-#endif
+#endif // CONFIG_NET_DHCP_USE_ACD
 
     delete reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
     netif::global::netif_default.dhcp = nullptr;
@@ -871,7 +871,7 @@ void Process(const dhcp::Message* const kResponse, uint32_t size) {
             Check();
 #else
             Bind();
-#endif
+#endif // CONFIG_NET_DHCP_USE_ACD
         } else if ((dhcp->state == dhcp::State::kRebinding) || (dhcp->state == dhcp::State::kRenewing)) {
             HandleAck(kResponse);
             Bind();

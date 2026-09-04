@@ -66,7 +66,7 @@
 #define NTP_CLIENT_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_NTP_CLIENT
 
 namespace network::apps::ntpclient {
 /*
@@ -169,7 +169,7 @@ static void PrintNtpTime([[maybe_unused]] const char* text, [[maybe_unused]] con
     const auto kSeconds = static_cast<time_t>(ntp_time->seconds - ntp::kJan1970);
     const auto* local_time = localtime(&kSeconds);
     printf("%s %02d:%02d:%02d.%06d %04d [%u]\n", text, local_time->tm_hour, local_time->tm_min, local_time->tm_sec, static_cast<int>(USEC(ntp_time->fraction)), (local_time->tm_year + 1900), static_cast<unsigned>(ntp_time->seconds));
-#endif
+#endif // NDEBUG
 }
 
 static struct timeval now;
@@ -280,7 +280,7 @@ static void SetTimeOfDay() {
     const auto kTime = time(nullptr);
     const auto* local_time = localtime(&kTime);
     DEBUG_PRINTF("localtime: %.4d/%.2d/%.2d %.2d:%.2d:%.2d", local_time->tm_year + 1900, local_time->tm_mon + 1, local_time->tm_mday, local_time->tm_hour, local_time->tm_min, local_time->tm_sec);
-#endif
+#endif // NDEBUG
     PrintNtpTime("T1: ", &s_ntp_client.t1);
     PrintNtpTime("T2: ", &s_ntp_client.t2);
     PrintNtpTime("T3: ", &s_ntp_client.t3);
@@ -314,7 +314,7 @@ static void SetTimeOfDay() {
 		static_cast<int>(ntp_offset.tv_usec), 
 		static_cast<int>(ntp_delay.tv_sec), 
 		static_cast<int>(ntp_delay.tv_usec));
-#endif
+#endif // NDEBUG
 }
 
 /**

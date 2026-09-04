@@ -31,7 +31,7 @@
 
 #if !defined(PACKED)
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace network::ip4 {
 inline constexpr uint32_t kAddressLength = 4;

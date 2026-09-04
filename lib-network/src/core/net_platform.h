@@ -35,7 +35,7 @@
 #define SECTION_NETWORK __attribute__((section(".network")))
 #else
 #define SECTION_NETWORK
-#endif
+#endif // defined(GD32F207RG) || defined(GD32F4XX) || defined(GD32H7XX)
 #else
 #define SECTION_NETWORK
 #include "../../src/emac/h3/emac.h"
@@ -46,6 +46,6 @@ inline void* GetTxDma() {
     auto data_start = static_cast<uintptr_t>(desc_p->buf_addr);
     return reinterpret_cast<void*>(data_start);
 }
-#endif
+#endif // GD32
 
 #endif // NET_PLATFORM_H_

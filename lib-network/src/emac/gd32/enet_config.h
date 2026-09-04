@@ -28,7 +28,7 @@
 
 #if !defined(GD32_H_)
 #error gd32.h should be included first
-#endif
+#endif // GD32_H_
 
 #if (PHY_TYPE == LAN8700)
 
@@ -47,6 +47,6 @@
 #define PHY_REG_PAGE_SELECT 0x1f
 #else
 #error PHY_TYPE is not set
-#endif
+#endif // (PHY_TYPE == LAN8700)
 
-#endif /* ENET_CONFIG_H_ */
+#endif // ENET_CONFIG_H_

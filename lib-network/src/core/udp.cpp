@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#if !defined(CONFIG_UDP_NO_OPTIMIZE)
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_TCP_NO_OPTIMIZE
 
 #include <cstdint>
 #include <cassert>
@@ -62,7 +62,7 @@
 #define UDP_DEBUG_PUTS(...) \
     do {                    \
     } while (false)
-#endif
+#endif // DEBUG_UDP
 
 namespace network::udp {
 struct PortInfo {
@@ -196,14 +196,14 @@ template <network::arp::EthSend S> static void SendImplementation(int index, con
             else if constexpr (S == network::arp::EthSend::kIsTimestamp) {
                 network::arp::SendTimestamp(out_buffer, size + kUdpPacketHeadersSize, remote_ip);
             }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
             return;
         }
     }
 
 #if !defined(CHECKSUM_BY_HARDWARE)
     out_buffer->ip4.chksum = network::Chksum(reinterpret_cast<void*>(&out_buffer->ip4), sizeof(out_buffer->ip4));
-#endif
+#endif // CHECKSUM_BY_HARDWARE
 
     if constexpr (S == network::arp::EthSend::kIsNormal) {
         emac::eth::Send(size + kUdpPacketHeadersSize);
@@ -212,7 +212,7 @@ template <network::arp::EthSend S> static void SendImplementation(int index, con
     else if constexpr (S == network::arp::EthSend::kIsTimestamp) {
         emac::eth::SendTimestamp(size);
     }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 }
 
 int32_t Begin(uint16_t localport, UdpCallbackFunctionPtr callback) {
@@ -266,7 +266,7 @@ void Send(int32_t index, const uint8_t* data, uint32_t size, uint32_t remote_ip,
 void SendWithTimestamp(int32_t index, const uint8_t* data, uint32_t size, uint32_t remote_ip, uint16_t remote_port) {
     SendImplementation<network::arp::EthSend::kIsTimestamp>(index, data, size, remote_ip, remote_port);
 }
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 
 // Do not use - subject for removal
 uint32_t Recv(int32_t index, const uint8_t** data, uint32_t* from_ip, uint16_t* from_port) {

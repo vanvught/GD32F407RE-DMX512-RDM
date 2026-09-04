@@ -75,4 +75,4 @@ class NetworkParams : public JsonParamsBase<NetworkParams>
 };
 } // namespace json
 
-#endif  // JSON_NETWORKPARAMS_H_
+#endif // JSON_NETWORKPARAMS_H_

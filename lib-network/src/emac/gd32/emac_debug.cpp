@@ -36,7 +36,7 @@ void emac_debug_run() {
     enet_missed_frame_counter_get(ENETx, &rxfifo_drop, &rxdma_drop);
 #else
     enet_missed_frame_counter_get(&rxfifo_drop, &rxdma_drop);
-#endif
+#endif // GD32H7XX
 
     if ((rxfifo_drop != 0) || (rxdma_drop != 0)) {
         printf("%u: RxFIFO: %u RxDMA: %u\n", static_cast<unsigned>(++s_counter), static_cast<unsigned>(rxfifo_drop), static_cast<unsigned>(rxdma_drop));

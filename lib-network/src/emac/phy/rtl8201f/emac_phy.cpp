@@ -26,43 +26,44 @@
 #include <cstdint>
 
 #include "emac/emac_phy.h"
-#include "emac/emac_link_check.h"
 #include "emac/mmi.h"
 #include "emac/emac_debug.h"
 
 #if !defined(BIT)
 #define BIT(x) static_cast<uint16_t>(1U << (x))
-#endif
+#endif // BIT
 
 #define PHY_REG_RMSR 0x10
 #define PHY_REG_PAGE_SELECT 0x1f
 #define PHY_REG_IER 0x13
 #define IER_CUSTOM_LED (1U << 3)
 
-#if !defined(PHY_ADDRESS)
-#define PHY_ADDRESS 1
-#endif
+#define PHY_REG_IER 0x13
+#define IER_INT_ENABLE (1U << 13)
+
+#define PHY_REG_ISR 0x1e
+#define ISR_LINK (1U << 11)
 
 namespace emac::phy {
 void WritePaged(uint16_t phy_page, uint16_t phy_reg, uint16_t phy_value, uint16_t mask = 0x0) {
-    phy::Write(PHY_ADDRESS, PHY_REG_PAGE_SELECT, phy_page);
+    phy::Write(kAddress, PHY_REG_PAGE_SELECT, phy_page);
 
     uint16_t tmp_value;
-    phy::Read(PHY_ADDRESS, phy_reg, tmp_value);
+    phy::Read(kAddress, phy_reg, tmp_value);
     EMAC_PHY_DEBUG_PRINTF("tmp_value=0x%.4x, mask=0x%.4x", tmp_value, mask);
     tmp_value &= static_cast<uint16_t>(~mask);
     tmp_value |= phy_value;
     EMAC_PHY_DEBUG_PRINTF("tmp_value=0x%.4x, phy_value=0x%.4x", tmp_value, phy_value);
 
-    phy::Write(PHY_ADDRESS, phy_reg, tmp_value);
-    phy::Write(PHY_ADDRESS, PHY_REG_PAGE_SELECT, 0);
+    phy::Write(kAddress, phy_reg, tmp_value);
+    phy::Write(kAddress, PHY_REG_PAGE_SELECT, 0);
 }
 
 static void ReadPaged(uint16_t phy_page, uint16_t phy_reg, uint16_t& phy_value, uint16_t mask = 0x0) {
-    phy::Write(PHY_ADDRESS, PHY_REG_PAGE_SELECT, phy_page);
-    phy::Read(PHY_ADDRESS, phy_reg, phy_value);
+    phy::Write(kAddress, PHY_REG_PAGE_SELECT, phy_page);
+    phy::Read(kAddress, phy_reg, phy_value);
     phy_value &= mask;
-    phy::Write(PHY_ADDRESS, PHY_REG_PAGE_SELECT, 0);
+    phy::Write(kAddress, PHY_REG_PAGE_SELECT, 0);
 }
 
 void CustomizedLed() {
@@ -70,12 +71,12 @@ void CustomizedLed() {
 
 #if defined(RTL8201F_LED1_LINK_ALL) || defined(RTL8201F_LED1_LINK_ALL_ACT)
     WritePaged(0x07, PHY_REG_IER, IER_CUSTOM_LED, IER_CUSTOM_LED);
-#if defined(RTL8201F_LED1_LINK_ALL)
+#ifdef RTL8201F_LED1_LINK_ALL
     WritePaged(0x07, 0x11, (1U << 3) | (1U << 4) | (1U << 5));
 #else
     WritePaged(0x07, 0x11, (1U << 3) | (1U << 4) | (1U << 5) | (1U << 7));
-#endif
-#endif
+#endif // RTL8201F_LED1_LINK_ALL
+#endif // defined(RTL8201F_LED1_LINK_ALL) || defined(RTL8201F_LED1_LINK_ALL_ACT)
     EMAC_PHY_DEBUG_EXIT();
 }
 
@@ -139,27 +140,27 @@ void CustomizedLed() {
 
 void CustomizedTiming() {
     EMAC_PHY_DEBUG_ENTRY();
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
 #define RMSR_RX_TIMING_VAL 0x4
 #if defined(GD32F407)
-#define RMSR_TX_TIMING_VAL 0x2
+#define RMSR_TX_TIMING_VAL 0xF
 #elif defined(GD32F470)
 #define RMSR_TX_TIMING_VAL 0x1
 #else
 #define RMSR_TX_TIMING_VAL 0xF
-#endif
+#endif // GD32F407
 
     constexpr uint16_t kPhyValue = (RMSR_RX_TIMING_VAL << RMSR_RX_TIMING_SHIFT) | (RMSR_TX_TIMING_VAL << RMSR_TX_TIMING_SHIFT);
     WritePaged(0x7, PHY_REG_RMSR, kPhyValue, RMSR_RX_TIMING_MASK | RMSR_TX_TIMING_MASK);
-#endif
+#endif // GD32F4XX
     EMAC_PHY_DEBUG_EXIT();
 }
 
 void CustomizedStatus(phy::Status& phy_status) {
-    phy_status.link = link::StatusRead();
+    phy_status.link = emac::phy::GetLink(kAddress);
 
     uint16_t bmcr;
-    phy::Read(PHY_ADDRESS, mmi::REG_BMCR, bmcr);
+    phy::Read(kAddress, mmi::REG_BMCR, bmcr);
 
     phy_status.autonegotiation = (bmcr & mmi::BMCR_AUTONEGOTIATION);
 
@@ -192,4 +193,21 @@ void SetTxtiming(uint32_t tx_timing) {
     WritePaged(0x7, PHY_REG_RMSR, kValue, RMSR_TX_TIMING_MASK);
 }
 } // namespace rtl8201f
+
+namespace link {
+// ENET_LINK_CHECK_USE_INT
+// ENET_LINK_CHECK_USE_PIN_POLL
+void PinEnable() {
+    emac::phy::WritePaged(0x07, PHY_REG_IER, IER_INT_ENABLE, IER_INT_ENABLE);
+    // Clear interrupt
+    uint16_t phy_value;
+    phy::Read(kAddress, PHY_REG_ISR, phy_value);
+}
+
+void PinRecovery() {
+    uint16_t phy_value;
+    phy::Read(kAddress, PHY_REG_ISR, phy_value);
+    phy::Read(kAddress, mmi::REG_BMSR, phy_value);
+}
+} // namespace link
 } // namespace emac::phy

@@ -36,7 +36,7 @@
 #include "common/utils/utils_hex.h"
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
 #include "apps/mdns.h"
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
 #include "network_store.h"
 #include "network_display.h"
 #include "iface_debug.h"
@@ -103,7 +103,7 @@ void SetHostname(const char* hostname) {
 
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
     network::apps::mdns::SendAnnouncement(0);
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
 
     if (hostname == nullptr || hostname[0] == '\0') {
         BuildDefaultHostname();
@@ -137,7 +137,7 @@ void SetHostname(const char* hostname) {
 
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
     network::apps::mdns::SendAnnouncement(network::apps::mdns::kMdnsResponseTtl);
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
     network::display::Hostname();
 
     NETWORK_IFACE_DEBUG_EXIT();

@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 #define HAVE_NTP_CLIENT
-#endif
+#endif // defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 
 #include <cstdio>
 #include <cstdint>
@@ -43,7 +43,7 @@
 #include "ip4/ip4_helpers.h"
 #if defined(HAVE_NTP_CLIENT)
 #include "apps/ntpclient.h"
-#endif
+#endif // HAVE_NTP_CLIENT
 #include "common/utils/utils_flags.h"
 
 using common::store::network::Flags;
@@ -91,7 +91,7 @@ void NetworkParams::Store(const char* buffer, uint32_t buffer_size) {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void NetworkParams::Set() {
@@ -114,14 +114,14 @@ void NetworkParams::Set() {
 
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
     network::apps::ntpclient::SetServerIp(store_network.ntp_server_ip);
-#endif
+#endif // CONFIG_NET_ENABLE_NTP_CLIENT
 #if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
     network::apps::ntpclient::ptp::SetServerIp(store_network.ntp_server_ip);
-#endif
+#endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void NetworkParams::Dump() {
@@ -135,7 +135,7 @@ void NetworkParams::Dump() {
     printf(" %s=%s\n", json::NetworkParamsConst::kHostname.name, store_network.host_name);
 #if defined(HAVE_NTP_CLIENT)
     printf(" %s=" IPSTR "\n", json::NetworkParamsConst::kNtpServer.name, IP2STR(store_network.ntp_server_ip));
-#endif
+#endif // HAVE_NTP_CLIENT
 }
 
 } // namespace json

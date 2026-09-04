@@ -38,7 +38,7 @@ inline constexpr uint32_t kBlocks =
     12;
 #else
     CONFIG_NETWORK_MEMORY_BLOCKS;
-#endif
+#endif // CONFIG_NETWORK_MEMORY_BLOCKS
 
 static_assert(kBlocks >= 1);
 static_assert(kBlocks <= 32);
@@ -48,7 +48,7 @@ inline constexpr uint32_t kBlockSize =
     1460;
 #else
     CONFIG_NETWORK_MEMORY_BLOCKSIZE;
-#endif
+#endif // CONFIG_NETWORK_MEMORY_BLOCKSIZE
 
 static_assert((kBlockSize % 4) == 0);
 
@@ -159,7 +159,7 @@ class Allocator {
         const uint32_t kUsedMask = (~free_mask_) & kAllMask;
         printf("free_mask=0x%08x used_mask=0x%08x free=%u used=%u\n", free_mask_, kUsedMask, __builtin_popcount(free_mask_), __builtin_popcount(kUsedMask));
         printf("IsEmpty=%c IsFull=%c\n", IsEmpty() ? 'Y' : 'N', IsFull() ? 'Y' : 'N');
-#endif
+#endif // defined DEBUG_NETWORK_MEMORY
     }
 
    private:

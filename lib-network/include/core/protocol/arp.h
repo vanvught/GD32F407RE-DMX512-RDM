@@ -33,7 +33,7 @@
 
 #if !defined(PACKED)
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace network::arp {
 inline constexpr uint16_t kHwtypeEthernet = 1;

@@ -65,7 +65,7 @@ template <uint8_t V, size_t L> inline void Memset(void* dest) {
         volatile auto* dst = reinterpret_cast<uint8_t*>(dest);
 #else
         auto* dst = reinterpret_cast<uint8_t*>(dest);
-#endif
+#endif // __ARM_ARCH_7A__
         // For smaller sizes L <= sizeof(uint32_t), write bytes one at a time
         for (size_t i = 0; i < L; i++) {
             *dst++ = V;
@@ -86,7 +86,7 @@ inline void MemcpyIp(uint8_t* pip, uint32_t nip) {
         // Destination pointer is already aligned, perform fast copy
         *reinterpret_cast<uint32_t*>(pip) = nip;
     } else
-#endif
+#endif // __ARM_ARCH_7A__
     { // Destination pointer is not aligned, copy byte by byte
         typedef union pcast32 {
             uint32_t u32;
@@ -101,7 +101,7 @@ inline void MemcpyIp(uint8_t* pip, uint32_t nip) {
 #else
         auto* src = cast.u8;
         auto* dst = pip;
-#endif
+#endif // __ARM_ARCH_7A__
         for (size_t i = 0; i < network::ip4::kAddressLength; i++) {
             *dst++ = *src++;
         }
@@ -121,7 +121,7 @@ inline uint32_t MemcpyIp(const uint8_t* ip) {
         // Source pointer is already aligned, perform fast copy
         return *reinterpret_cast<const uint32_t*>(ip);
     } else
-#endif
+#endif // __ARM_ARCH_7A__
     { // Source pointer is not aligned, copy byte by byte
         typedef union pcast32 {
             uint32_t u32;
@@ -135,7 +135,7 @@ inline uint32_t MemcpyIp(const uint8_t* ip) {
 #else
         const auto* src = ip;
         auto* dst = cast.u8;
-#endif
+#endif // __ARM_ARCH_7A__
         for (size_t i = 0; i < network::ip4::kAddressLength; i++) {
             *dst++ = *src++;
         }
@@ -145,4 +145,4 @@ inline uint32_t MemcpyIp(const uint8_t* ip) {
 }
 } // namespace network
 
-#endif /* NET_MEMCPY_H_ */
+#endif // NET_MEMCPY_H_

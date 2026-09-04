@@ -55,7 +55,7 @@ T4 - local receive timestamp of the previous response (t4)
 
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
 #error
-#endif
+#endif // CONFIG_NET_ENABLE_NTP_CLIENT
 
 #pragma GCC push_options
 #pragma GCC optimize("O3")
@@ -94,7 +94,7 @@ T4 - local receive timestamp of the previous response (t4)
 #define NTP_CLIENT_DEBUG_PUTS(...) \
     do {                           \
     } while (false)
-#endif
+#endif // defined DEBUG_PTP_NTP_CLIENT
 
 namespace net::globals::ptp {
 extern uint32_t timestamp[2];
@@ -131,7 +131,7 @@ struct NtpClient {
         uint32_t missed_responses;
 #ifdef DEBUG_PTP_NTP_CLIENT
         ntp::Modes mode;
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
     } state;
 };
 
@@ -152,7 +152,7 @@ static void Print([[maybe_unused]] const char* text, [[maybe_unused]] const stru
       local_time->tm_year + 1900, 
       static_cast<int>(timestamp->seconds), 
       static_cast<unsigned>(timestamp->fraction));
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
 }
 
 static void Process();
@@ -265,7 +265,7 @@ static void Send() {
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_f))); // NOLINT
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
 
     if (s_ntp_client.state.x > 0) {
         s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
@@ -384,7 +384,7 @@ static void UpdatePtpTime() {
       static_cast<int>(ptp_offset.tv_nsec), 
       static_cast<int>(ptp_delay.tv_sec), 
       static_cast<int>(ptp_delay.tv_nsec));
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
 }
 
 /**
@@ -409,7 +409,7 @@ static void Process() {
            static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_f))); // NOLINT
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
     // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
     if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {
         if (s_ntp_client.state.x < 0) {
@@ -424,7 +424,7 @@ static void Process() {
         s_ntp_client.t4.fraction = NTPFRAC(gd32::PtpSubsecond2Nanosecond(net::globals::ptp::timestamp[0]));
 #ifdef DEBUG_PTP_NTP_CLIENT
         s_ntp_client.state.mode = ntp::Modes::kBasic;
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
     } else
         // If the origin timestamp is equal to the receive timestamp, the response is in the interleaved mode.
         if ((kReply->origin_timestamp_s == s_ntp_client.request.receive_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.receive_timestamp_f)) {
@@ -440,7 +440,7 @@ static void Process() {
             s_ntp_client.t4.fraction = s_ntp_client.state.previous_receive.fraction;
 #ifdef DEBUG_PTP_NTP_CLIENT
             s_ntp_client.state.mode = ntp::Modes::kInterleaved;
-#endif
+#endif // DEBUG_PTP_NTP_CLIENT
         } else {
             NTP_CLIENT_DEBUG_PUTS("INVALID RESPONSE");
             return;

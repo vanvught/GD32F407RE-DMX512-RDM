@@ -47,12 +47,12 @@
 #if (__GNUC__ < 10)
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
+#endif // (__GNUC__ < 10)
 #if !defined(CONFIG_TCP_NO_OPTIMIZE)
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_TCP_NO_OPTIMIZE
 
 #include <cstdint>
 #include <cstring>
@@ -91,7 +91,7 @@
 #define TCP_DEBUG_PUTS(...) \
     do {                    \
     } while (false)
-#endif
+#endif // DEBUG_TCP
 
 namespace network::tcp {
 static constexpr auto kAdvertisedRxWnd = kTcpDataMss;
@@ -235,7 +235,7 @@ static void NEW_STATE(struct Tcb* tcb, uint8_t state) // NOLINT
 }
 #define UNEXPECTED_STATE() ((void)0)
 #define CLIENT_NOT_IMPLEMENTED ((void)0)
-#endif
+#endif // NDEBUG
 
 ///< https://www.rfc-editor.org/rfc/rfc9293.html#name-header-format
 enum Control : uint8_t {
@@ -456,7 +456,7 @@ static void SendSegment(Tcb* tcb, const SendInfo& send_info, bool track_rtx = tr
     s_eth_frame.ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_eth_frame.ip4.chksum = network::Chksum(reinterpret_cast<void*>(&s_eth_frame.ip4), 20);
-#endif
+#endif // CHECKSUM_BY_HARDWARE
     // TCP
     s_eth_frame.tcp.srcpt = tcb->local_port;
     s_eth_frame.tcp.dstpt = tcb->remote_port;
@@ -629,21 +629,21 @@ static void ScanOptions(struct Header* eth_frame, struct Tcb* const kTcb, int32_
                     memcpy(tsval.u8, &options->data, 4);
 #ifndef NDEBUG
                     auto bIgnore = true;
-#endif
+#endif // NDEBUG
                     if (eth_frame->tcp.control & Control::SYN) {
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG
                         bIgnore = false;
-#endif
+#endif // NDEBUG
                     } else if ((__builtin_bswap32(tsval.u32) > __builtin_bswap32(kTcb->TS.recent))) { // TODO(a)
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG
                         bIgnore = false;
-#endif
+#endif // NDEBUG
                     }
 #ifndef NDEBUG
                     printf("TSVal=%u [ignore:%c]\n", static_cast<unsigned>(__builtin_bswap32(tsval.u32)), bIgnore ? 'Y' : 'N');
-#endif
+#endif // NDEBUG
                 }
                 options = reinterpret_cast<struct Options*>(reinterpret_cast<uint8_t*>(options) + options->length);
                 break;
@@ -942,7 +942,7 @@ __attribute__((hot)) void Input(struct Header* eth_frame) {
     printf("%u:[%s] %c%c%c%c%c%c SEQ=%u, ACK=%u, tcplen=%u, data_offset=%u, data_length=%u\n", conn_index, kStateName[tcb->state], eth_frame->tcp.control & Control::URG ? 'U' : '-', eth_frame->tcp.control & Control::ACK ? 'A' : '-',
            eth_frame->tcp.control & Control::PSH ? 'P' : '-', eth_frame->tcp.control & Control::RST ? 'R' : '-', eth_frame->tcp.control & Control::SYN ? 'S' : '-', eth_frame->tcp.control & Control::FIN ? 'F' : '-', SEG_SEQ, SEG_ACK,
            kTcplen, kDataOffset, kDataLength);
-#endif
+#endif // NDEBUG
     ScanOptions(eth_frame, tcb, kDataOffset);
     auto is_acceptable = false;
 

@@ -33,7 +33,7 @@
 
 #if !defined(PACKED)
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace network::icmp {
 struct Type {

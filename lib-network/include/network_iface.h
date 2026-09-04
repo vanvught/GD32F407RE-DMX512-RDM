@@ -51,7 +51,7 @@ const char* DomainName();
 }
 #else
 const char* InterfaceName();
-#endif
+#endif // defined(H3) || defined(GD32)
 
 #if defined(H3) || defined(GD32)
 constexpr uint32_t InterfaceIndex() {
@@ -59,7 +59,7 @@ constexpr uint32_t InterfaceIndex() {
 }
 #else
 uint32_t InterfaceIndex();
-#endif
+#endif // defined(H3) || defined(GD32)
 
 uint32_t NameServer(uint32_t index);
 uint32_t NameServerCount();

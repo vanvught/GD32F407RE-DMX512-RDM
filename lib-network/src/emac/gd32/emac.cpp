@@ -32,8 +32,8 @@
 #if defined(CONFIG_NET_ENABLE_PTP)
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
-#endif
-#endif
+#endif // DISABLE_RTC
+#endif // CONFIG_NET_ENABLE_PTP
 #include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 #include "../src/core/network_private.h"
@@ -46,7 +46,7 @@ extern void MacAddress(uint8_t paddr[]);
 #include "gd32_ptp.h"
 enet_descriptors_struct ptp_rxdesc_tab[ENET_RXBUF_NUM] __attribute__((aligned(4)));
 enet_descriptors_struct ptp_txdesc_tab[ENET_TXBUF_NUM] __attribute__((aligned(4)));
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 namespace emac::eth::globals {
 extern uint32_t sent;
@@ -67,7 +67,7 @@ void __attribute__((cold)) Config() {
     puts("RTL8201F");
 #else
 #error PHY_TYPE is not set
-#endif
+#endif // (PHY_TYPE == LAN8700)
 
     EnetGpioConfig();
 
@@ -97,7 +97,7 @@ void AdjustLink(emac::phy::Status phy_status) {
         ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #else
         ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
-#endif
+#endif // GD32H7XX
         printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR");
 #if defined(GD32H7XX)
         enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
@@ -105,10 +105,10 @@ void AdjustLink(emac::phy::Status phy_status) {
 #else
         enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-#endif
+#endif // GD32H7XX
         printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR");
     }
-#endif
+#endif // DEBUG_EMAC
 
     enet_mediamode_enum mediamode = ENET_10M_HALFDUPLEX;
 
@@ -122,11 +122,11 @@ void AdjustLink(emac::phy::Status phy_status) {
         mediamode = ENET_10M_FULLDUPLEX;
     }
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     const auto kEnetInitStatus = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
 #else
     const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
-#endif
+#endif // GD32H7XX
 
     if (kEnetInitStatus != SUCCESS) {
     }
@@ -140,7 +140,7 @@ void AdjustLink(emac::phy::Status phy_status) {
         ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #else
         ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
-#endif
+#endif // GD32H7XX
         printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR");
 #if defined(GD32H7XX)
         enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
@@ -148,10 +148,10 @@ void AdjustLink(emac::phy::Status phy_status) {
 #else
         enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
-#endif
+#endif // GD32H7XX
         printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR");
     }
-#endif
+#endif // DEBUG_EMAC
     EMAC_DEBUG_EXIT();
 }
 
@@ -164,8 +164,11 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 
     link = phy_status.link;
 
-    AdjustLink(phy_status);
-
+    if ((phy_status.link == emac::phy::Link::kStateUp) &&
+        phy_status.autonegotiation) {
+        AdjustLink(phy_status);
+    }
+    
     MacAddress(mac_address);
 
 #if defined(GD32H7XX)
@@ -176,7 +179,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 #else
     enet_descriptors_chain_init(ENETx, ENET_DMA_TX);
     enet_descriptors_chain_init(ENETx, ENET_DMA_RX);
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 #else
     enet_mac_address_set(ENET_MAC_ADDRESS0, mac_address);
 #if defined(CONFIG_NET_ENABLE_PTP)
@@ -185,8 +188,8 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 #else
     enet_descriptors_chain_init(ENET_DMA_TX);
     enet_descriptors_chain_init(ENET_DMA_RX);
-#endif
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
+#endif // GD32H7XX
 
     for (uint32_t i = 0; i < ENET_TXBUF_NUM; i++) {
         enet_transmit_checksum_config(&txdesc_tab[i], ENET_CHECKSUM_TCPUDPICMP_FULL);
@@ -197,8 +200,8 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 #if !defined(DISABLE_RTC)
     // Set the System Clock from the Hardware Clock
     HwClock::Get()->HcToSys();
-#endif
-#endif
+#endif // DISABLE_RTC
+#endif // CONFIG_NET_ENABLE_PTP
 
     enet_enable(ENETx);
     

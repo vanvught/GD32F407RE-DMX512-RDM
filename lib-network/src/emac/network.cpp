@@ -28,17 +28,16 @@
 #include "emac/emac.h"
 #include "emac/emac_phy.h"
 #include "emac/network.h"
-#include "emac/emac_link_check.h"
 #include "../src/core/network_private.h"
 #include "core/ip4/dhcp.h"
 #include "core/ip4/arp.h"
 #include "core/netif.h"
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 #include "apps/ntpclient.h"
-#endif
+#endif // defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
 #include "apps/mdns.h"
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
 #include "network_event.h"
 #include "common/utils/utils_flags.h"
 #include "configstore.h"
@@ -65,18 +64,18 @@
 #define NETWORK_DEBUG_PUTS(...) \
     do {                        \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK
 
 #if !defined(PHY_ADDRESS)
 #define PHY_ADDRESS 1
-#endif
+#endif // PHY_ADDRESS
 
 using common::store::network::Flags;
 
 namespace net {
 #if defined(CONFIG_NET_ENABLE_PTP)
 __attribute__((weak)) void ptp_init() {}
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 } // namespace net
 
@@ -98,13 +97,13 @@ static void NetifExtCallback(uint16_t reason, [[maybe_unused]] const netif::neti
         network::event::Ipv4AddressChanged();
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
         network::apps::ntpclient::Start();
-#endif
+#endif // CONFIG_NET_ENABLE_NTP_CLIENT
 #if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
         network::apps::ntpclient::ptp::Start();
-#endif
+#endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
 #if !defined(CONFIG_NET_APPS_NO_MDNS)
         network::apps::mdns::Start();
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
     }
 
     if ((reason & netif::NetifReason::kIpv4NetmaskChanged) == netif::NetifReason::kIpv4NetmaskChanged) {
@@ -136,42 +135,41 @@ void Init() {
     NETWORK_DEBUG_ENTRY();
 
     emac::display::Config();
-
     emac::Config();
 
     emac::phy::CustomizedTiming();
     emac::phy::CustomizedLed();
 
     emac::display::Start();
-
     emac::Start(netif::global::netif_default.hwaddr, global::link_state);
+
     printf(MACSTR "\n", MAC2STR(netif::global::netif_default.hwaddr));
 
     emac::display::Status(emac::phy::Link::kStateUp == global::link_state);
 
     network::arp::Init();
-
     network::udp::Init();
     network::igmp::Init();
-#if defined(ENABLE_HTTPD)
+
+#ifdef ENABLE_HTTPD
     network::tcp::Init();
-#endif
+#endif // ENABLE_HTTPD
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
     net::ptp_init();
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
-#if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_NTP_CLIENT
     network::apps::ntpclient::Init();
-#endif
+#endif // CONFIG_NET_ENABLE_NTP_CLIENT
 
-#if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_PTP_NTP_CLIENT
     network::apps::ntpclient::ptp::Init();
-#endif
+#endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
 
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
     network::apps::mdns::Init();
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
 
     netif::Init();
     netif::AddExtCallback(NetifExtCallback);
@@ -193,13 +191,7 @@ void Init() {
 
     network::Set(ipaddr, netmask, gw, !common::IsFlagSet(kFlags, Flags::Flag::kUseStaticIp));
 
-#if defined(ENET_LINK_CHECK_USE_INT)
-    emac::link::InterruptInit();
-#elif defined(ENET_LINK_CHECK_USE_PIN_POLL)
-    emac::link::PinPollInit();
-#elif defined(ENET_LINK_CHECK_REG_POLL)
-    emac::link::StatusRead();
-#endif
+    emac::phy::link::Init();
     NETWORK_DEBUG_EXIT();
 }
 
@@ -262,12 +254,12 @@ void Set(network::ip4_addr_t ipaddr, network::ip4_addr_t netmask, network::ip4_a
     NETWORK_DEBUG_EXIT();
 }
 
-void SetPrimaryIp(uint32_t primary_ip_new) {
+void SetPrimaryIp(uint32_t ip) {
     NETWORK_DEBUG_ENTRY();
 
     auto& netif = netif::global::netif_default;
 
-    if (primary_ip_new == netif.ip.addr) {
+    if (ip == netif.ip.addr) {
         NETWORK_DEBUG_EXIT();
         return;
     }
@@ -278,15 +270,15 @@ void SetPrimaryIp(uint32_t primary_ip_new) {
 
     network::acd::Add(&s_acd, PrimaryIpConflictCallback);
 
-    if (primary_ip_new == 0) {
+    if (ip == 0) {
         network::acd::Start(&s_acd, netif.secondary_ip);
     } else {
         network::ip_addr ipaddr;
-        ipaddr.addr = primary_ip_new;
+        ipaddr.addr = ip;
         network::acd::Start(&s_acd, ipaddr);
     }
 
-    network::store::SaveIp(primary_ip_new);
+    network::store::SaveIp(ip);
 
     NETWORK_DEBUG_EXIT();
 }
@@ -320,34 +312,30 @@ void SetNetmask(uint32_t netmask_new) {
     NETWORK_DEBUG_EXIT();
 }
 
-void SetGatewayIp(uint32_t gw_new) {
+void SetGatewayIp(uint32_t gateway_ip) {
     NETWORK_DEBUG_ENTRY();
 
-    if (gw_new == netif::Gw()) {
+    if (gateway_ip == netif::Gw()) {
         NETWORK_DEBUG_EXIT();
         return;
     }
 
     network::ip4_addr_t gw;
-    gw.addr = gw_new;
+    gw.addr = gateway_ip;
 
     netif::SetGw(gw);
 
-    network::store::SaveGatewayIp(gw_new);
+    network::store::SaveGatewayIp(gateway_ip);
 
     NETWORK_DEBUG_EXIT();
 }
 
-namespace igmp {
-void Shutdown();
-} // namespace igmp
-
 void Shutdown() {
     NETWORK_DEBUG_ENTRY();
 
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
     network::apps::mdns::Stop();
-#endif
+#endif // CONFIG_NET_APPS_NO_MDNS
     network::igmp::Shutdown();
     netif::SetLinkDown();
 

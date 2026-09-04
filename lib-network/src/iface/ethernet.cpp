@@ -26,7 +26,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O3")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 
@@ -45,7 +45,7 @@ namespace ptp {
 #if defined(CONFIG_NET_ENABLE_PTP)
 // Can only be used for PTP level 2 messages
 __attribute__((weak)) void Input([[maybe_unused]] const uint8_t*, [[maybe_unused]] const uint32_t) {}
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 } // namespace ptp
 
 namespace iface {
@@ -57,7 +57,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
         case __builtin_bswap16(network::ethernet::Type::kPtp):
             network::ptp::Input(const_cast<const uint8_t*>(buffer), length);
             break;
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
         case __builtin_bswap16(network::ethernet::Type::kIPv4): {
             const auto* const kIp4 = reinterpret_cast<const struct network::ip4::Header*>(buffer);
 
@@ -87,7 +87,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
                 case ip4::Proto::kTcp:
                     network::tcp::Input(const_cast<struct network::tcp::Header*>(reinterpret_cast<const struct network::tcp::Header*>(kIp4)));
                     break;
-#endif
+#endif // ENABLE_HTTPD
                 default:
                     break;
             }
@@ -107,6 +107,6 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
 
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
 #pragma GCC pop_options
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #undef NETWORK_IFACE_DEBUG_PRINTF

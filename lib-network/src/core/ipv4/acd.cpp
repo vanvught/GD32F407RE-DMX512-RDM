@@ -63,7 +63,7 @@
 #define ACD_DEBUG_PUTS(...) \
     do {                    \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_ACD
 
 namespace network::acd {
 static constexpr uint32_t kAcdTmrInterval = 100;

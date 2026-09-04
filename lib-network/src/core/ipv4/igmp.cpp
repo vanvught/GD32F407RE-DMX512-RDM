@@ -27,7 +27,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 #include <cstring>
@@ -62,7 +62,7 @@
 #define IGMP_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_IGMP
 
 /*
  * https://www.rfc-editor.org/rfc/rfc2236.html
@@ -114,7 +114,7 @@ static void SendReport(uint32_t group_address) {
     s_report.ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_report.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_report.ip4), 24); // TODO(avv)
-#endif
+#endif // CHECKSUM_BY_HARDWARE
     // IGMP
     std::memcpy(s_report.igmp.report.igmp.group_address, multicast_ip.u8, network::ip4::kAddressLength);
     s_report.igmp.report.igmp.checksum = 0;
@@ -207,7 +207,7 @@ void __attribute__((cold)) Init() {
 
 #if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
     emac::multicast::EnableHashFilter();
-#endif
+#endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
 }
 
 static void Leave(uint32_t);
@@ -225,7 +225,7 @@ void __attribute__((cold)) Shutdown() {
 
 #if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
     emac::multicast::DisableHashFilter();
-#endif
+#endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
 
     IGMP_DEBUG_EXIT();
 }
@@ -239,14 +239,14 @@ static void SendLeave(uint32_t group_address) {
     s_leave.ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_leave.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), 24); // TODO(avv):
-#endif
+#endif // CHECKSUM_BY_HARDWARE
     network::MemcpyIp(s_leave.ip4.src, netif::global::netif_default.ip.addr);
     // IGMP
     network::MemcpyIp(s_leave.igmp.report.igmp.group_address, group_address);
     s_leave.igmp.report.igmp.checksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
     s_leave.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), kIPv4IgmpReportHeadersSize);
-#endif
+#endif // CHECKSUM_BY_HARDWARE
 
     emac::eth::Send(reinterpret_cast<void*>(&s_leave), kReportPacketSize);
 
@@ -315,7 +315,7 @@ static void ResetHash() {
         }
     }
 }
-#endif
+#endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
 
 void static Join(uint32_t group_address) {
     IGMP_DEBUG_ENTRY();
@@ -343,7 +343,7 @@ void static Join(uint32_t group_address) {
             const uint8_t kMacAddr[6] = {0x01, 0x00, 0x5E, static_cast<uint8_t>(multicast_ip.u8[1] & 0x7F), multicast_ip.u8[2], multicast_ip.u8[3]};
             IGMP_DEBUG_PRINTF(MACSTR, MAC2STR(kMacAddr));
             emac::multicast::SetHash(kMacAddr);
-#endif
+#endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
             SendReport(group_address);
 
             IGMP_DEBUG_EXIT();
@@ -369,7 +369,7 @@ static void Leave(uint32_t group_address) {
 
 #if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
             ResetHash();
-#endif
+#endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
             IGMP_DEBUG_EXIT();
             return;
         }
@@ -414,4 +414,4 @@ void ReportGroups() {
 
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
 #pragma GCC pop_options
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM

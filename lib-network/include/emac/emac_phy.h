@@ -29,6 +29,13 @@
 #include <cstdint>
 
 namespace emac::phy {
+static constexpr uint16_t kAddress =
+#ifndef PHY_ADDRESS
+    1;
+#else
+    PHY_ADDRESS;
+#endif // PHY_ADDRESS
+
 enum class Link { kStateDown, kStateUp };
 enum class Duplex { kUnknown, kDuplexHalf, kDuplexFull };
 enum class Speed { kUnknown, kSpeed10, kSpeed100, kSpeed1000 };
@@ -46,73 +53,45 @@ struct Identifier {
     uint16_t model_revision; ///< 4-bit Manufacturer’s revision number.
 };
 
-/** \defgroup generic Generic implementation
-  @{
-*/
-
+// Generic implementation
 bool GetId(uint16_t address, Identifier& phy_identifier);
 Link GetLink(uint16_t address);
-
-/**
- *
- * @param address PHY address
- * @return true for success, false for failure
- */
 bool Powerdown(uint16_t address);
-
-/**
- *
- * Called from \ref Start
- *
- * @param address PHY address
- * @return true for success, false for failure
- */
 bool Start(uint16_t address, Status& phy_status);
-/** @} */
-
-/** \defgroup platform Platform implementation
-  @{
-*/
-
-/**
- * Reading a given PHY register
- * @param address PHY address
- * @param reg PHY register number to read
- * @param value Returned value
- * @return
- */
-bool Read(uint16_t address, uint16_t reg, uint16_t& value);
-
-/**
- *
- * @param address PHY address
- * @param reg PHY register number to write
- * @param value Value to write
- * @return true for success, false for failure
- */
-bool Write(uint16_t address, uint16_t reg, uint16_t value);
-
-/**
- * PHY interface configuration (configure SMI and reset PHY)
- * Called from \ref EmacConfig
- * @param address true for success, false for failure
- * @return
- */
-bool Config(uint16_t address);
-/** @} */
-
-/** \defgroup specific PHY specific
-  @{
-*/
-void CustomizedLed();
-void CustomizedTiming();
-void CustomizedStatus(Status& phy_status);
-/** @} */
 
 const char* ToString(Link link);
 const char* ToString(Duplex duplex);
 const char* ToString(Speed speed);
 const char* ToStringAutonegotiation(bool autonegotiation);
+
+// Platform Platform implementation
+bool Read(uint16_t address, uint16_t reg, uint16_t& value);
+bool Write(uint16_t address, uint16_t reg, uint16_t value);
+// PHY interface configuration (configure SMI and reset PHY)
+bool Config(uint16_t address);
+
+void CustomizedLed();
+void CustomizedTiming();
+void CustomizedStatus(Status& phy_status);
+
+namespace link {
+// Generic implementation
+void Init();
+void HandleChange();
+// Platform defined implementations
+// #if defined(ENET_LINK_CHECK_USE_INT) || defined(ENET_LINK_CHECK_USE_PIN_POLL)
+void GpioInit();
+void PinEnable();
+void PinRecovery();
+// #endif
+// #if defined(ENET_LINK_CHECK_USE_INT)
+void ExtiInit();
+void InterruptInit();
+// #elif defined(ENET_LINK_CHECK_USE_PIN_POLL)
+void PinPollInit();
+void PinPoll();
+// #endif
+} // namespace link
 } // namespace emac::phy
 
 #endif // EMAC_PHY_H_

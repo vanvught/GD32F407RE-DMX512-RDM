@@ -101,4 +101,4 @@ inline void SubTime(struct ntp::Time* r, const struct ntp::Time* x, const struct
 }
 } // namespace ntp
 
-#endif /* CORE_PROTOCOL_NTP_H_ */
+#endif // CORE_PROTOCOL_NTP_H_

@@ -48,14 +48,14 @@
 #define MDNS_DEBUG_EXIT() do { } while (false)
 #define MDNS_DEBUG_PRINTF(...) do { } while (false)
 #define MDNS_DEBUG_PUTS(...) do { } while (false)
-#endif
+#endif // DEBUG_NETWORK_APPS_MDNS
 
 namespace network::apps::mdns {
 #if !defined(MDNS_SERVICE_RECORDS_MAX)
 static constexpr auto kServiceRecordsMax = 8;
 #else
 static constexpr uint32_t kServiceRecordsMax = MDNS_SERVICE_RECORDS_MAX;
-#endif
+#endif // MDNS_SERVICE_RECORDS_MAX
 
 static constexpr size_t kDomainMaxlen = 256;
 static constexpr size_t kLabelMaxlen = 63;
@@ -64,7 +64,7 @@ static constexpr size_t kTxtMaxlen = 256;
 static constexpr char kDomainLocal[] = {5, 'l', 'o', 'c', 'a', 'l', 0};
 #if defined(CONFIG_MDNS_DOMAIN_REVERSE)
 static constexpr char kDomainReverse[] = {7, 'i', 'n', '-', 'a', 'd', 'd', 'r', 4, 'a', 'r', 'p', 'a', 0};
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 static constexpr char kDomainUdp[] = {4, '_', 'u', 'd', 'p'};
 static constexpr char kDomainTcp[] = {4, '_', 't', 'c', 'p'};
 static constexpr char kDomainConfig[] = {7, '_', 'c', 'o', 'n', 'f', 'i', 'g'};
@@ -271,7 +271,7 @@ static void CreateReverseDomain(Domain& domain) {
 
     MDNS_DEBUG_EXIT();
 }
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 
 /*
  * https://opensource.apple.com/source/mDNSResponder/mDNSResponder-26.2/mDNSCore/mDNS.c.auto.html
@@ -530,7 +530,7 @@ static uint32_t AddAnswerHostv4Ptr(uint8_t* destination, uint32_t ttl) {
     MDNS_DEBUG_EXIT();
     return static_cast<uint32_t>(dst - destination);
 }
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 
 /*
  * https://opensource.apple.com/source/mDNSResponder/mDNSResponder-26.2/mDNSCore/mDNS.c.auto.html
@@ -660,7 +660,7 @@ static void SendAnswerLocalIpAddress(uint16_t trans_action_id, uint32_t ttl) {
             dst = AddQuestion(dst, domain, network::dns::RRType::kPtr, false);
         }
     }
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 
     if ((HostReply::kA & s_host_replies) == HostReply::kA) {
         answers++;
@@ -671,7 +671,7 @@ static void SendAnswerLocalIpAddress(uint16_t trans_action_id, uint32_t ttl) {
         answers++;
         dst += AddAnswerHostv4Ptr(dst, ttl);
     }
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 
     auto* header = reinterpret_cast<network::dns::Header*>(&s_records_data);
 
@@ -682,7 +682,7 @@ static void SendAnswerLocalIpAddress(uint16_t trans_action_id, uint32_t ttl) {
     header->query_count = __builtin_bswap16(static_cast<uint16_t>(s_is_legacy_query));
 #else
     header->query_count = 0;
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
     header->answer_count = __builtin_bswap16(static_cast<uint16_t>(answers));
     header->authority_count = 0;
     header->additional_count = 0;
@@ -870,7 +870,7 @@ static void HandleQuestions(uint32_t questions) {
 #ifndef NDEBUG
         resource_domain.Print();
         printf(" ==> Type : %d, Class: %d\n", static_cast<int>(kType), static_cast<int>(kClass));
-#endif
+#endif // NDEBUG
 
         if ((kClass != network::dns::RRClass::kInternet) && (kClass != network::dns::RRClass::kAny)) {
             continue;
@@ -900,7 +900,7 @@ static void HandleQuestions(uint32_t questions) {
                 s_host_replies = s_host_replies | HostReply::kPtr;
             }
         }
-#endif
+#endif // CONFIG_MDNS_DOMAIN_REVERSE
 
         for (auto& record : s_service_records) {
             if (record.services < Services::kLastNotUsed) {

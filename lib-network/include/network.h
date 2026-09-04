@@ -31,7 +31,7 @@
 #include "linux/minimum/network.h"
 #else
 #include "linux/network.h"
-#endif
+#endif // CONFIG_NETWORK_USE_MINIMUM
 #else
 #if defined(ESP8266)
 #include "esp8266/network.h"
@@ -39,7 +39,7 @@
 #include "noemac/network.h"
 #else
 #include "emac/network.h"
-#endif
-#endif
+#endif // ESP8266
+#endif // defined(__linux__) || defined(__APPLE__)
 
 #endif // NETWORK_H_

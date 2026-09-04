@@ -27,7 +27,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #include <cstdint>
 #include <cstring>
@@ -56,7 +56,7 @@
 #define ICMP_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_NETWORK_ICMP
 
 namespace network::icmp {
 __attribute__((hot)) void Input(struct Header* p_icmp) {
@@ -81,13 +81,13 @@ __attribute__((hot)) void Input(struct Header* p_icmp) {
             p_icmp->ip4.chksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
             p_icmp->ip4.chksum = Chksum(reinterpret_cast<void*>(&p_icmp->ip4), 20); // TODO(avv)
-#endif
+#endif // CHECKSUM_BY_HARDWARE
             // ICMP
             p_icmp->icmp.type = icmp::Type::kEchoReply;
             p_icmp->icmp.checksum = 0;
 #if !defined(CHECKSUM_BY_HARDWARE)
             p_icmp->icmp.checksum = Chksum(reinterpret_cast<void*>(&p_icmp->ip4), static_cast<uint32_t>(__builtin_bswap16(p_icmp->ip4.len)));
-#endif
+#endif // CHECKSUM_BY_HARDWARE
             emac::eth::Send(reinterpret_cast<void*>(p_icmp), static_cast<uint32_t>(sizeof(struct network::ethernet::Header) + __builtin_bswap16(p_icmp->ip4.len)));
         }
     }
@@ -96,4 +96,4 @@ __attribute__((hot)) void Input(struct Header* p_icmp) {
 
 #if !defined(CONFIG_REMOTECONFIG_MINIMUM)
 #pragma GCC pop_options
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM

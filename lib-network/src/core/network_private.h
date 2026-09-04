@@ -38,7 +38,7 @@
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
-#endif
+#endif // ALIGNED
 
 namespace emac::eth {
 uint8_t* SendGetDmaBuffer();
@@ -47,7 +47,7 @@ void Send(void*, uint32_t);
 #if defined CONFIG_NET_ENABLE_PTP
 void SendTimestamp(uint32_t);
 void SendTimestamp(void*, uint32_t);
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 uint32_t Recv(uint8_t**);
 void FreePkt();
 } // namespace emac::eth
@@ -93,7 +93,7 @@ enum class EthSend {
 #if defined CONFIG_NET_ENABLE_PTP
     ,
     kIsTimestamp
-#endif
+#endif // defined CONFIG_NET_ENABLE_PTP
 };
 } // namespace arp
 
