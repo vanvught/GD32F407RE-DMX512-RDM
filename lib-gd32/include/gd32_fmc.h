@@ -1,8 +1,8 @@
 /**
- * @file asctime.cpp
+ * @file gd32_fmc.h
  *
  */
-/* Copyright (C) 2019-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +23,30 @@
  * THE SOFTWARE.
  */
 
+#ifndef GD32_FMC_H_
+#define GD32_FMC_H_
+
 #include <cstdint>
-#include <cstdio>
-#include <ctime>
+#include <span>
 
-static constexpr uint32_t kMaxAscTime = 50;
+#ifdef GD32F4XX
+#define FMC_SIZE (*reinterpret_cast<uint16_t*>(0x1FFF7A22U))
+#endif
 
-static const char kMonName[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-static const char kWdayName[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+#ifdef GD32H7XX
+#define FMC_SIZE (((REG32(0x1FF0F7E0) >> 16) & 0xFFFF) * 1024U)
+#endif
 
-static char s_buffer[kMaxAscTime + 1];
+namespace gd32::fmc {
+enum class Result { kOk = 0, kError = 1 };
 
-extern "C" char* asctime(const struct tm* p_tm) {
-    if (p_tm == nullptr) {
-        return nullptr;
-    }
+// Blocking API's
+bool Read(uint32_t offset, std::span<uint8_t> buffer);
+bool Erase(uint32_t offset, uint32_t length);
+bool Write(uint32_t offset, std::span<const uint8_t> buffer);
+// State-machine API's
+bool Erase(uint32_t offset, uint32_t length, Result& result);
+bool Write(uint32_t offset, std::span<const uint8_t> buffer, Result& result);
+} // namespace gd32::fmc
 
-    const char* const kWday = (p_tm->tm_wday >= 0 && p_tm->tm_wday <= 6) ? kWdayName[p_tm->tm_wday] : "???";
-    const char* const kMon = (p_tm->tm_mon >= 0 && p_tm->tm_mon <= 11) ? kMonName[p_tm->tm_mon] : "???";
-
-    snprintf(s_buffer, sizeof s_buffer, "%s %s %2d %02d:%02d:%02d %04d", kWday, kMon, p_tm->tm_mday, p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec, p_tm->tm_year + 1900);
-
-    return s_buffer;
-}
+#endif // GD32_FMC_H_

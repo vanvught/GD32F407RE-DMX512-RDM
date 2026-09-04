@@ -24,6 +24,8 @@ endif
 
 ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
 	DEFINES+=-DCONFIG_NET_APPS_NO_MDNS
+	DEFINES+=-DCONFIG_UDP_NO_OPTIMIZE
+	DEFINES+=-DDISABLE_RTC
 else
   ifeq ($(findstring NO_EMAC,$(FLAGS)),NO_EMAC)
   else
@@ -56,8 +58,23 @@ ifdef FATFS_MKFS
 	DEFINES+=-DCONFIG_FATFS_MKFS
 endif
 
+# Hardware Scenario    Flag Condition              Resulting Compiler Definitions (DEFINES)
+# Using RTL8201F       ENET_LINK_CHECK is missing  -DRTL8201F_LED1_LINK_ALL  -DENET_LINK_CHECK_USE_INT (Uses Interrupts)
+# Using RTL8201F       ENET_LINK_CHECK is present  -DRTL8201F_LED1_LINK_ALL
+# Other Hardware       Any                         -DENET_LINK_CHECK_REG_POLL (Uses Polling)
+
+ifneq ($(findstring RTL8201F,$(FLAGS)),)
+	DEFINES+=-DRTL8201F_LED1_LINK_ALL
+	ifeq ($(findstring ENET_LINK_CHECK,$(FLAGS)),)
+		DEFINES+=-DENET_LINK_CHECK_USE_INT
+	endif
+else
+	DEFINES+=-DENET_LINK_CHECK_REG_POLL
+endif
+
 $(info $$DEFINES [${DEFINES}])
 
 DEFINES:= $(sort $(DEFINES))
 
 $(info $$DEFINES [${DEFINES}])
+

@@ -108,4 +108,24 @@
     } while (false)
 #endif // DEBUG_GD32_TRNG
 
+#ifdef DEBUG_GD32_FMC
+#define GD32_FMC_DEBUG_ENTRY() DEBUG_ENTRY()
+#define GD32_FMC_DEBUG_EXIT() DEBUG_EXIT()
+#define GD32_FMC_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
+#define GD32_FMC_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
+#else
+#define GD32_FMC_DEBUG_ENTRY() \
+    do {                  \
+    } while (false)
+#define GD32_FMC_DEBUG_EXIT() \
+    do {                 \
+    } while (false)
+#define GD32_FMC_DEBUG_PRINTF(...) \
+    do {                      \
+    } while (false)
+#define GD32_FMC_DEBUG_PUTS(...) \
+    do {                    \
+    } while (false)
+#endif // DEBUG_COMMON_FMC
+
 #endif // GD32_DEBUG_H_

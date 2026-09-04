@@ -25,6 +25,10 @@ PROJECT=$(notdir $(patsubst %/,%,$(CURDIR)))
 $(info $$PROJECT [${PROJECT}])
 
 DEFINES:=$(addprefix -D,$(DEFINES))
+DEFINES+=-DHTTPD_CONTENT_SIZE=2048
+DEFINES+=-DTCP_MAX_TCBS_ALLOWED=10
+DEFINES+=-DCONFIG_NETWORK_MEMORY_BLOCKS=12
+DEFINES+=-DPHY_TYPE=$(ENET_PHY)
 
 include ../common/make/gd32/Board.mk
 include ../common/make/gd32/Mcu.mk
@@ -36,7 +40,7 @@ include ../common/make/Artnet.mk
 include ../common/make/gd32/mbedtls.mk
 include ../common/make/gd32/Validate.mk
 
-LIBS+=gd32 clib
+LIBS+=clib gd32
 
 # The variable for the libraries include directory
 LIBINCDIRS:=$(addprefix -I../lib-,$(LIBS))
@@ -52,12 +56,7 @@ LDLIBS:=$(addprefix -l,$(LIBS))
 # The variables for the dependency check
 LIBDEP=$(addprefix ../lib-,$(LIBS))
 
-DEFINES+=-DHTTPD_CONTENT_SIZE=2048
-DEFINES+=-DTCP_MAX_TCBS_ALLOWED=10
-DEFINES+=-DCONFIG_NETWORK_MEMORY_BLOCKS=12
-#DEFINES+=-DCONFIG_TCP_NO_OPTIMIZE
-
-COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
+COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) 
 COPS+=$(strip $(DEFINES) $(MAKE_FLAGS) $(INCLUDES) $(LIBINCDIRS))
 COPS+=$(strip $(ARMOPS) $(CMSISOPS))
 COPS+=-Os -nostartfiles -ffreestanding -nostdlib

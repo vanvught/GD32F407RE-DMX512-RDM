@@ -81,7 +81,7 @@ inline float Atof(const char* buffer, uint32_t size) {
     }
 
     while (size > 0 && *p >= '0' && *p <= '9') {
-        result = result * 10.0F + static_cast<float>(*p - '0');
+        result = (result * 10.0F) + static_cast<float>(*p - '0');
         ++p;
         --size;
     }

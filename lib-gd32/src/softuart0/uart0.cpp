@@ -32,6 +32,13 @@
 #define RCU_TIMERx RCU_TIMER15
 #define TIMERx_IRQHandler TIMER15_IRQHandler
 #define TIMERx_IRQn TIMER15_IRQn
+#elif defined(GD32F10X) // GD32F10X
+#define TIMERx TIMER7
+#define RCU_TIMERx RCU_TIMER7
+#if defined(GD32F10X_CL) // GD32F10X_CL
+#define TIMERx_IRQHandler TIMER7_UP_IRQHandler
+#define TIMERx_IRQn TIMER7_UP_IRQn
+#endif
 #elif defined(GD32F30X) // GD32F30X
 #define TIMERx TIMER7
 #define RCU_TIMERx RCU_TIMER7

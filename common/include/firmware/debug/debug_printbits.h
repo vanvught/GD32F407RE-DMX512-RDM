@@ -35,7 +35,7 @@
 namespace debug {
 template <typename T>
     requires std::unsigned_integral<T>
-inline void PrintBits(T value) {
+inline void PrintBits(T value, const char* string = nullptr) {
     if constexpr (!config::kDumpEnabled) {
         return;
     }
@@ -46,7 +46,10 @@ inline void PrintBits(T value) {
 
     static_assert(sizeof(T) <= sizeof(unsigned));
 
-    printf("%.*x ", kHexDigits, static_cast<unsigned>(value));
+    if (string != nullptr) {
+        printf("%s :", string);
+    }
+    printf("0x%.*x ", kHexDigits, static_cast<unsigned>(value));
 
     for (int bit_number = kMaxBitIndex; bit_number >= 0; --bit_number) {
         const auto kMask = static_cast<T>(1) << bit_number;
