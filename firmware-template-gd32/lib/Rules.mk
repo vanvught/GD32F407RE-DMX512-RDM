@@ -21,6 +21,7 @@ $(info $$ENET_PHY [${ENET_PHY}])
 SRCDIR=src src/gd32 $(EXTRA_SRCDIR)
 
 DEFINES:=$(addprefix -D,$(DEFINES))
+DEFINES+=-DPHY_TYPE=$(ENET_PHY)
 
 include ../common/make/gd32/Board.mk
 include ../common/make/gd32/Mcu.mk
@@ -32,7 +33,7 @@ include ../common/make/gd32/Validate.mk
 
 INCLUDES+=-I../lib-configstore/include -I../lib-device/include -I../lib-display/include -I../lib-flash/include -I../lib-flashcode/include -I../lib-board/include -I../lib-network/include
 
-COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD) -DPHY_TYPE=$(ENET_PHY)
+COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD)
 COPS+=$(strip $(DEFINES) $(MAKE_FLAGS) $(VALIDATE_FLAGS) $(INCLUDES))
 COPS+=$(strip $(ARMOPS) $(CMSISOPS))
 COPS+=-Os -nostartfiles -ffreestanding -nostdlib
