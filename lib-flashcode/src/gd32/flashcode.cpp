@@ -25,6 +25,7 @@
 
  #include <cstdint>
  #include <cassert>
+ #include <cstdio>
  #include <span>
 
  #include "flashcode.h"
