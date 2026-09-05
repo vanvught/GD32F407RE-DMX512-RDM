@@ -114,8 +114,8 @@ class I2c {
    public:
     explicit I2c(uint8_t address, uint32_t baud_rate = i2c::kFullSpeed) : address_(address), baudrate_(baud_rate) {}
 
-    uint8_t GetAddress() const { return address_; }
-    uint32_t GetBaudrate() const { return baudrate_; }
+    [[nodiscard]] uint8_t GetAddress() const { return address_; }
+    [[nodiscard]] uint32_t GetBaudrate() const { return baudrate_; }
 
     bool IsConnected() { return Gd32I2cIsConnected(address_, baudrate_); }
 
@@ -133,35 +133,45 @@ class I2c {
     void WriteRegister(uint8_t reg, uint8_t value, bool do_setup) {
         const char kBuffer[] = {static_cast<char>(reg), static_cast<char>(value)};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cWrite(kBuffer, 2);
     }
 
     void WriteRegister(uint8_t reg, uint16_t value, bool do_setup) {
         const char kBuffer[] = {static_cast<char>(reg), static_cast<char>(value >> 8), static_cast<char>(value & 0xFF)};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cWrite(kBuffer, 3);
     }
 
-    uint8_t Read(bool do_setup) {
+    uint8_t Read(bool do_setup) const {
         char buf[1] = {0};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cRead(buf, 1);
 
         return static_cast<uint8_t>(buf[0]);
     }
 
-    uint8_t Read(char* buffer, uint32_t length, bool do_setup) {
-        if (do_setup) Setup();
+    uint8_t Read(char* buffer, uint32_t length, bool do_setup) const {
+        if (do_setup) {
+            Setup();
+        }
         return Gd32I2cRead(buffer, length);
     }
 
     uint16_t Read16(bool do_setup) {
         char buffer[2] = {0};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cRead(buffer, 2);
 
         return static_cast<uint16_t>(static_cast<uint16_t>(buffer[0]) << 8 | static_cast<uint16_t>(buffer[1]));
@@ -170,7 +180,9 @@ class I2c {
     uint8_t ReadRegister(uint8_t reg, bool do_setup) {
         const char kBuffer[] = {static_cast<char>(reg)};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cWrite(&kBuffer[0], 1);
 
         return Read(false);
@@ -179,7 +191,9 @@ class I2c {
     uint16_t ReadRegister16(uint8_t reg, bool do_setup) {
         const char kBuf[] = {static_cast<char>(reg)};
 
-        if (do_setup) Setup();
+        if (do_setup) {
+            Setup();
+        }
         Gd32I2cWrite(&kBuf[0], 1);
 
         return Read16(false);
@@ -205,7 +219,7 @@ class I2c {
         return Gd32I2cRead(&buf, 1) == 0;
     }
 
-    void Setup() {
+    void Setup() const {
         Gd32I2cSetAddress(address_);
         Gd32I2cSetBaudrate(baudrate_);
     }

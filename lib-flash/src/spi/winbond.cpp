@@ -105,7 +105,7 @@ constexpr struct WinbondSpiFlashParams kWinbondSpiFlashTable[] = {
          .kId = 0x6015,
          .kNrBlocks = 32,
          .kName = "W25Q16DW",
-     }};
+     },};
 } // namespace
 
 namespace spi::flash {

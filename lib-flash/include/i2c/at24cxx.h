@@ -2,8 +2,6 @@
  * @file  at24cxx.h
  * @brief I2C interface for AT24Cxx EEPROM devices.
  *
- * This header defines a templated class for interfacing with
- * AT24Cxx EEPROM devices over I2C, supporting multiple EEPROM types.
  */
 /* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
@@ -36,17 +34,9 @@
 #include "i2c.h"
 #include "common/utils/utils_math.h"
 
-/**
- * @namespace at24cxx
- * @brief Contains constants and types for AT24Cxx EEPROM devices.
- */
 namespace at24cxx {
 static constexpr uint8_t kI2CAddress = 0x50;
 
-/**
- * @struct ATTypes
- * @brief Defines the sizes of different AT24Cxx EEPROM devices in bytes.
- */
 struct ATTypes {
     static constexpr uint32_t kAT24LC512 = 65536;
     static constexpr uint32_t kAT24LC256 = 32768;
@@ -61,41 +51,31 @@ struct ATTypes {
 };
 } // namespace at24cxx
 
-/**
- * @class AT24Cxx
- * @brief Template class for interfacing with AT24Cxx EEPROM devices.
- *
- * This class provides methods to read and write to AT24Cxx devices
- * using I2C communication. The `type` parameter defines the EEPROM
- * type and size.
- *
- * @tparam type Size of the EEPROM in bytes.
- */
 template <uint32_t kType>
 class AT24Cxx {
     static constexpr bool IsValidType() {
-        return kType == at24cxx::ATTypes::kAT24LC512 || kType == at24cxx::ATTypes::kAT24LC256 || kType == at24cxx::ATTypes::kAT24LC128 || kType == at24cxx::ATTypes::kAT24LC64 || kType == at24cxx::ATTypes::kAT24LC32 ||
-               kType == at24cxx::ATTypes::kAT24LC16 || kType == at24cxx::ATTypes::kAT24LC08 || kType == at24cxx::ATTypes::kAT24LC04 || kType == at24cxx::ATTypes::kAT24LC02 || kType == at24cxx::ATTypes::kAT24LC01;
+        return kType == at24cxx::ATTypes::kAT24LC512 ||
+               kType == at24cxx::ATTypes::kAT24LC256 ||
+               kType == at24cxx::ATTypes::kAT24LC128 || 
+               kType == at24cxx::ATTypes::kAT24LC64 || 
+               kType == at24cxx::ATTypes::kAT24LC32 || 
+               kType == at24cxx::ATTypes::kAT24LC16 ||
+               kType == at24cxx::ATTypes::kAT24LC08 || 
+               kType == at24cxx::ATTypes::kAT24LC04 || 
+               kType == at24cxx::ATTypes::kAT24LC02 || 
+               kType == at24cxx::ATTypes::kAT24LC01;
     }
 
    public:
-    /**
-     * @brief Constructor for AT24Cxx.
-     *
-     * @param device_address I2C slave address of the EEPROM device.
-     */
     explicit AT24Cxx(uint8_t device_address) : address_(device_address) {
         static_assert(IsValidType(), "Invalid type specified for AT24Cxx.");
         connected_ = i2c::IsConnected(address_, i2c::kFullSpeed);
     }
 
-    /** @brief Checks if the EEPROM device is connected. */
     [[nodiscard]] bool IsConnected() const { return connected_; }
 
-    /** @brief Returns the I2C address of the EEPROM device. */
     [[nodiscard]] uint8_t GetAddress() const { return address_; }
 
-    /** @brief Returns the size of the EEPROM device. */
     constexpr uint32_t GetSize() { return kType; }
 
     constexpr uint32_t GetPageSize() {
@@ -121,7 +101,8 @@ class AT24Cxx {
 
         i2c::SetAddress(address_);
 
-        while (!AckRead());
+        while (!AckRead()) {
+        }
 
         if constexpr (kIsAddressSizeTwoWords) {
             const char kBuffer[] = {static_cast<char>(memory_address >> 8), static_cast<char>(memory_address & 0xFF), static_cast<char>(data)};
@@ -143,7 +124,8 @@ class AT24Cxx {
         i2c::SetAddress(address_);
 
         while (!data.empty()) {
-            while (!AckRead());
+            while (!AckRead()) {
+            }
 
             const auto kOffsetPage = memory_address % GetPageSize();
             uint32_t count;
@@ -189,9 +171,9 @@ class AT24Cxx {
             i2c::Write(kBuffer, sizeof(kBuffer) / sizeof(kBuffer[0]));
         }
 
-        char c;
-        i2c::Read(&c, 1);
-        return static_cast<uint8_t>(c);
+        char character;
+        i2c::Read(&character, 1);
+        return static_cast<uint8_t>(character);
     }
 
     uint8_t Read(uint32_t memory_address, std::span<uint8_t> data) {
@@ -201,7 +183,8 @@ class AT24Cxx {
 
         i2c::SetAddress(address_);
 
-        while (!AckRead());
+        while (!AckRead()) {
+        }
 
         if constexpr (kIsAddressSizeTwoWords) {
             const char kBuffer[] = {static_cast<char>(memory_address >> 8), static_cast<char>(memory_address & 0xFF)};
@@ -218,39 +201,35 @@ class AT24Cxx {
     }
 
    private:
-    /** @brief Performs an ACK read operation. */
     bool AckRead() {
-        char c;
-        return i2c::Read(&c, 1) == 0;
+        char character;
+        return i2c::Read(&character, 1) == 0;
     }
 
-    /** @brief Determines if the memory address size is 2 bytes. */
+    // Determines if the memory address size is 2 bytes.
     static constexpr bool kIsAddressSizeTwoWords = kType > at24cxx::ATTypes::kAT24LC16;
 
     uint8_t address_;
     bool connected_{false};
 };
 
-/**
- * @class AT24C04
- * @brief Specialized class for the AT24C04 EEPROM.
- */
+class AT24C02 : public AT24Cxx<at24cxx::ATTypes::kAT24LC02> {
+   public:
+    AT24C02() : AT24Cxx(at24cxx::kI2CAddress) {}
+};
+
 class AT24C04 : public AT24Cxx<at24cxx::ATTypes::kAT24LC04> {
    public:
     AT24C04() : AT24Cxx(at24cxx::kI2CAddress) {}
 };
 
-/**
- * @class AT24C32
- * @brief Specialized class for the AT24C32 EEPROM.
- */
+class AT24C16 : public AT24Cxx<at24cxx::ATTypes::kAT24LC16> {
+   public:
+    AT24C16() : AT24Cxx(at24cxx::kI2CAddress) {}
+};
+
 class AT24C32 : public AT24Cxx<at24cxx::ATTypes::kAT24LC32> {
    public:
-    /**
-     * @brief Constructor for AT24C32.
-     *
-     * @param nIndex Index to select the appropriate I2C address.
-     */
     explicit AT24C32(uint8_t index) : AT24Cxx(at24cxx::kI2CAddress + (index & 0x7)) {}
 };
 
