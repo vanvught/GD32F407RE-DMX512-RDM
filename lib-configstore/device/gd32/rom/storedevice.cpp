@@ -80,13 +80,9 @@ bool StoreDevice::Erase(uint32_t offset, uint32_t length, storedevice::Result& r
 }
 
 bool StoreDevice::Write(uint32_t offset, std::span<const uint8_t> buffer, storedevice::Result& result) {
-    CONFIGSTORE_DEBUG_ENTRY();
-
     flashcode::Result flashrom_result;
     const auto kState = FlashCode::Write(offset, buffer, flashrom_result);
 
     result = static_cast<storedevice::Result>(flashrom_result);
-
-    CONFIGSTORE_DEBUG_EXIT();
     return kState;
 }

@@ -38,7 +38,7 @@ namespace console {
 void PutChar(int);
 } // namespace console
 using console::PutChar;
-#endif
+#endif // CONFIG_CLIB_USE_UART0
 
 extern "C" int putchar(int c) { // NOLINT
     PutChar(c);

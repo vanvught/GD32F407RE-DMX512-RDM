@@ -25,7 +25,7 @@
 
 #if !defined(CONFIG_NET_ENABLE_PTP)
 #error
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 
 #pragma GCC push_options
 #pragma GCC optimize("O2")
@@ -41,7 +41,7 @@
 #define enet_ptp_timestamp_function_config(x) enet_ptp_timestamp_function_config(ENETx, x)
 #define enet_ptp_timestamp_update_config(x, y, z) enet_ptp_timestamp_update_config(ENETx, x, y, z)
 #define enet_ptp_system_time_get(x) enet_ptp_system_time_get(ENETx, x)
-#endif
+#endif // GD32H7XX
 
 extern "C" {
 /*
@@ -49,31 +49,31 @@ extern "C" {
  *     1970-01-01 00:00:00 +0000 (UTC).
  */
 
-int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
-    assert(tv != 0);
+int gettimeofday(struct timeval* time_val, [[maybe_unused]] struct timezone* time_zone) { // NOLINT
+    assert(time_val != nullptr);
 
     enet_ptp_systime_struct systime;
     enet_ptp_system_time_get(&systime);
 
-    tv->tv_sec = static_cast<time_t>(systime.second);
+    time_val->tv_sec = static_cast<time_t>(systime.second);
 
-#if !defined(GD32F4XX)
+#ifndef GD32F4XX
     const auto kNanoSecond = systime.nanosecond;
 #else
     const auto kNanoSecond = gd32::PtpSubsecond2Nanosecond(systime.subsecond);
-#endif
+#endif // GD32F4XX
 
-    tv->tv_usec = static_cast<time_t>(kNanoSecond / 1000U);
+    time_val->tv_usec = static_cast<time_t>(kNanoSecond / 1000U);
 
     return 0;
 }
 
-int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
-    assert(tv != nullptr);
+int settimeofday(const struct timeval* time_val, [[maybe_unused]] const struct timezone* time_zone) { // NOLINT
+    assert(time_val != nullptr);
 
     const uint32_t kSign = ENET_PTP_ADD_TO_TIME;
-    const auto kSecond = static_cast<uint32_t>(tv->tv_sec);
-    const uint32_t kNanoSecond = static_cast<uint32_t>(tv->tv_usec) * 1000U;
+    const auto kSecond = static_cast<uint32_t>(time_val->tv_sec);
+    const uint32_t kNanoSecond = static_cast<uint32_t>(time_val->tv_usec) * 1000U;
     const auto kSubSecond = gd32::PtpNanosecond2Subsecond(kNanoSecond);
 
     enet_ptp_timestamp_update_config(kSign, kSecond, kSubSecond);
@@ -85,10 +85,8 @@ int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezon
     return -1;
 }
 
-/*
- *  time() returns the time as the number of seconds since the Epoch,
-       1970-01-01 00:00:00 +0000 (UTC).
- */
+// time() returns the time as the number of seconds since the Epoch,
+//     1970-01-01 00:00:00 +0000 (UTC).
 time_t time(time_t* __timer) { // NOLINT
     struct timeval tv;
     gettimeofday(&tv, nullptr);

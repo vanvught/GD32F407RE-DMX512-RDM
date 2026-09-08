@@ -133,7 +133,7 @@ static void make_crc_table() {
 	}
 	crc_table_empty = 0;
 }
-#endif
+#endif // CONFIG_DYNAMIC_CRC_TABLE
 
 #define DO_CRC(x) crc = tab[(crc ^ (x)) & 255] ^ (crc >> 8)
 
@@ -146,7 +146,7 @@ uint32_t crc32(uint32_t crc, const uint8_t *buf, uint32_t len) {
 #ifdef CONFIG_DYNAMIC_CRC_TABLE
     if (crc_table_empty)
       make_crc_table();
-#endif
+#endif // CONFIG_DYNAMIC_CRC_TABLE
 	/* Align it */
 	if (((reinterpret_cast<long>(b)) & 3) && len) {
 		auto *p = reinterpret_cast<const uint8_t *>(b);

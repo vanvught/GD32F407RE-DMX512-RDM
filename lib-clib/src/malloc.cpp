@@ -34,7 +34,7 @@
 
 #ifdef DEBUG_HEAP
 #undef NDEBUG
-#endif
+#endif // DEBUG_HEAP
 
 #include <cstddef>
 #include <cstdint>
@@ -64,7 +64,7 @@ struct BlockBucket {
 #ifdef DEBUG_HEAP
     unsigned int count;
     unsigned int max_count;
-#endif
+#endif // DEBUG_HEAP
     struct BlockHeader* free_list;
 };
 
@@ -82,7 +82,7 @@ static constexpr unsigned int kBlockMagic = 0x424C4D43;
 #include "gd32/malloc.h"
 #else
 #include "rpi/malloc.h"
-#endif
+#endif // H3
 
 static size_t GetAllocated(void* ptr) {
     if (ptr == nullptr) {
@@ -115,7 +115,7 @@ void* malloc(size_t size) { // NOLINT
             if (++bucket->count > bucket->max_count) {
                 bucket->max_count = bucket->count;
             }
-#endif
+#endif // DEBUG_HEAP
             break;
         }
     }
@@ -140,7 +140,7 @@ void* malloc(size_t size) { // NOLINT
             ERROR("Out of memory\n");
 #ifdef DEBUG_HEAP
             DebugHeap();
-#endif
+#endif // DEBUG_HEAP
             return nullptr;
         }
 
@@ -154,7 +154,7 @@ void* malloc(size_t size) { // NOLINT
 #ifdef DEBUG_HEAP
     watchdog::Feed();
     printf("malloc(%u): pBlockHeader=%p, size=%u, data=%p\n", size, reinterpret_cast<void*>(header), header->size, reinterpret_cast<void*>(&header->data));
-#endif
+#endif // DEBUG_HEAP
 
     assert((reinterpret_cast<uintptr_t>(&header->data) & 3U) == 0);
     return reinterpret_cast<void*>(&header->data);
@@ -170,7 +170,7 @@ void free(void* ptr) { // NOLINT
 #ifdef DEBUG_HEAP
     watchdog::Feed();
     printf("free: header= %p, p=%p, size=%u\n", reinterpret_cast<void*>(header), ptr, header->size);
-#endif
+#endif // DEBUG_HEAP
 
     assert(header->magic == kBlockMagic);
     if (header->magic != kBlockMagic) {
@@ -187,7 +187,7 @@ void free(void* ptr) { // NOLINT
             if (bucket->count > 0) {
                 bucket->count--;
             }
-#endif
+#endif // DEBUG_HEAP
             break;
         }
     }
@@ -306,7 +306,7 @@ void DebugHeap() {
             }
         }
     }
-#endif
+#endif // DEBUG_HEAP
 }
 
 #pragma GCC diagnostic pop

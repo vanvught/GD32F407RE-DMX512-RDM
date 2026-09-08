@@ -25,7 +25,7 @@
 
 #ifdef NDEBUG
 #undef NDEBUG
-#endif
+#endif // NDEBUG
 
 #include <cassert>
 

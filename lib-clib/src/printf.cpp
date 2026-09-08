@@ -45,7 +45,7 @@ namespace console {
 void PutChar(int);
 } // namespace console
 using console::PutChar;
-#endif
+#endif // CONFIG_CLIB_USE_UART0
 
 struct Context {
     int flag;
@@ -282,7 +282,7 @@ static void FormatFloat(struct Context* ctx, float f) {
         PutChar(ctx, static_cast<int>(*dest++));
     }
 }
-#endif
+#endif // DISABLE_PRINTF_FLOAT
 
 static void FormatString(struct Context* ctx, const char* s) {
     int j;
@@ -323,7 +323,7 @@ static int Vprintf(int size, const char* fmt, va_list va) {
     struct Context ctx;
 #if !defined(DISABLE_PRINTF_FLOAT)
     float f;
-#endif
+#endif // DISABLE_PRINTF_FLOAT
     int32_t l;
     uint32_t lu;
     const char* s;
@@ -402,7 +402,7 @@ static int Vprintf(int size, const char* fmt, va_list va) {
                 f = static_cast<float>(va_arg(va, double));
                 FormatFloat(&ctx, f);
                 break;
-#endif
+#endif // DISABLE_PRINTF_FLOAT
             case 'p':
                 FormatPointer(&ctx, va_arg(va, unsigned int));
                 break;

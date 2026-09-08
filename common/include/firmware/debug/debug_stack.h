@@ -32,6 +32,7 @@
 
 #include "timing.h"
 #include "firmware/debug/debug_config.h"
+#include "common/utils/utils_units.h"
 
 extern unsigned char stack_low;
 extern unsigned char _sp; // NOLINT
@@ -78,11 +79,11 @@ inline void Print() {
             printf("\x1b[34m");
         }
 
-        if constexpr (!config::kAssertionsEnabled) {
-            printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", static_cast<unsigned>(kSizeBytes / 1024U), reinterpret_cast<const void*>(start_address), reinterpret_cast<const void*>(ptr),
+        if constexpr (config::kAssertionsEnabled) {
+            printf("Stack: Size %uKB, [%p:%p:%p], Used: %u, Free: %u [%u]", static_cast<unsigned>(kSizeBytes / common::units::k1KiB), reinterpret_cast<const void*>(start_address), reinterpret_cast<const void*>(ptr),
                    reinterpret_cast<const void*>(end_address), static_cast<unsigned>(kUsedBytes), static_cast<unsigned>(kFreeBytes), static_cast<unsigned>(kFreePct));
         } else {
-            printf("Stack: Size %uKB, Used: %u, Free: %u", static_cast<unsigned>(kSizeBytes / 1024U), static_cast<unsigned>(kUsedBytes), static_cast<unsigned>(kFreeBytes));
+            printf("Stack: Size %uKB, Used: %u, Free: %u", static_cast<unsigned>(kSizeBytes / common::units::k1KiB), static_cast<unsigned>(kUsedBytes), static_cast<unsigned>(kFreeBytes));
         }
         printf("\x1b[39m\n");
     }
@@ -95,7 +96,7 @@ inline void Run() {
 
     static uint32_t s_millis_previous;
     const auto kMillis = timing::Millis();
-    if (kMillis - s_millis_previous >= 1000U) {
+    if (kMillis - s_millis_previous >= common::units::kMsPerSecond) {
         s_millis_previous = kMillis;
         Print();
     }

@@ -25,7 +25,7 @@
 
 #if !defined(CONFIG_TIME_USE_TIMER)
 #error
-#endif
+#endif // CONFIG_TIME_USE_TIMER
 
 #pragma GCC push_options
 #pragma GCC optimize("O2")
@@ -39,39 +39,40 @@
 #include "gd32_timers.h"
 #include "gd32_debug.h"
 
-#if defined(GD32H7XX)
-#define TIMERx TIMER16
-#define RCU_TIMERx RCU_TIMER16
-#define TIMERx_IRQn TIMER16_IRQn
-#else
-#define TIMERx TIMER7
-#define RCU_TIMERx RCU_TIMER7
-#if defined(GD32F10X) || defined(GD32F30X)
-#define TIMERx_IRQn TIMER7_UP_IRQn
-#else
-#define TIMERx_IRQn TIMER7_UP_TIMER12_IRQn
-#endif
-#endif
+// H7xx  		-> TIMER16
+// F10x/F30x	-> TIMER0
+// other 		-> TIMER7 / TIMER7_UP_TIMER12_IRQn
 
-extern "C" {
+#if defined(GD32H7XX)
+  #define TIMERx          		TIMER16
+  #define RCU_TIMERx      		RCU_TIMER16
+  #define TIMERx_IRQn     		TIMER16_IRQn
+  #define TIMERx_IRQ_HANDLER	TIMER16_IRQHandler
+#else
+  #if defined(GD32F10X) || defined(GD32F30X) // TIMER7 does not exist on GD32F107
+    #define TIMERx        		TIMER0
+    #define RCU_TIMERx    		RCU_TIMER0
+    #define TIMERx_IRQn   		TIMER0_UP_IRQn
+	#define TIMERx_IRQ_HANDLER	TIMER0_UP_IRQHandler
+  #else
+    #define TIMERx        		TIMER7
+    #define RCU_TIMERx    		RCU_TIMER7
+    #define TIMERx_IRQn 		TIMER7_UP_TIMER12_IRQn
+	#define TIMERx_IRQ_HANDLER	TIMER7_UP_TIMER12_IRQHandler
+  #endif // defined(GD32F10X) || defined(GD32F30X)
+#endif // GD32H7XX
+
 #if defined(CONFIG_TIME_USE_TIMER) // Include IRQ handler when used only
-#if defined(GD32H7XX)
-void TIMER16_IRQHandler() {
-#elif defined(GD32F10X) || defined(GD32F30X)
-void TIMER7_IRQHandler() {
-#else
-void TIMER7_UP_TIMER12_IRQHandler() {
-#endif
-    const auto nIntFlag = TIMER_INTF(TIMERx);
+extern "C" void TIMERx_IRQ_HANDLER() {
+    const auto kIntFlag = TIMER_INTF(TIMERx);
 
-    if ((nIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) {
+    if ((kIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) {
         gv_seconds.timeval = gv_seconds.timeval + 1;
     }
 
-    TIMER_INTF(TIMERx) = ~nIntFlag;
+    TIMER_INTF(TIMERx) = ~kIntFlag;
 }
-#endif
-}
+#endif // CONFIG_TIME_USE_TIMER
 
 namespace gd32::timers::timer_time {
 void Start() {
@@ -89,6 +90,8 @@ void Start() {
     timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection = TIMER_COUNTER_UP;
     timer_initpara.period = (10000 - 1); // 1 second
+	timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
+	timer_initpara.repetitioncounter = 0;
     timer_init(TIMERx, &timer_initpara);
 
     timer_interrupt_flag_clear(TIMERx, UINT32_MAX);
@@ -100,42 +103,39 @@ void Start() {
 
     timer_enable(TIMERx);
 
-    GD32_TIMERS_DEBUG_EXIT();
+	GD32_TIMERS_DEBUG_EXIT();
 }
 } // namespace gd32::timers::timer_time
 
 extern "C" {
-/*
- * number of seconds and microseconds since the Epoch,
- *     1970-01-01 00:00:00 +0000 (UTC).
- */
-
-int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
+// number of seconds and microseconds since the Epoch,
+//     1970-01-01 00:00:00 +0000 (UTC).
+int gettimeofday(struct timeval* time_val, [[maybe_unused]] struct timezone* time_zone) { // NOLINT
     assert(tv != nullptr);
 
 #if __CORTEX_M == 7
     __DMB();
-#endif
+#endif // __CORTEX_M == 7
 
-    tv->tv_sec = static_cast<time_t>(gv_seconds.timeval);
-    tv->tv_usec = static_cast<time_t>(TIMER_CNT(TIMERx) * 100U);
+    time_val->tv_sec = static_cast<time_t>(gv_seconds.timeval);
+    time_val->tv_usec = static_cast<time_t>(TIMER_CNT(TIMERx) * 100U);
 
 #if __CORTEX_M == 7
     __ISB();
-#endif
+#endif // __CORTEX_M == 7
 
     return 0;
 }
 
-int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
+int settimeofday(const struct timeval* time_val, [[maybe_unused]] const struct timezone* time_zone) { // NOLINT
     assert(tv != nullptr);
 
     // Disable the timer interrupt to prevent it from triggering while we adjust the counter
     TIMER_DMAINTEN(TIMERx) &= (~TIMER_INT_UP);
     TIMER_CTL0(TIMERx) &= (~TIMER_CTL0_CEN);
 
-    gv_seconds.timeval = static_cast<uint32_t>(tv->tv_sec);
-    TIMER_CNT(TIMERx) = (static_cast<uint32_t>(tv->tv_usec) / 100U) % 10000U;
+    gv_seconds.timeval = static_cast<uint32_t>(time_val->tv_sec);
+    TIMER_CNT(TIMERx) = (static_cast<uint32_t>(time_val->tv_usec) / 100U) % 10000U;
 
     TIMER_INTF(TIMERx) = UINT32_MAX;
     TIMER_DMAINTEN(TIMERx) |= TIMER_INT_UP;
@@ -144,19 +144,16 @@ int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezon
     return 0;
 }
 
-/*
- *  time() returns the time as the number of seconds since the Epoch,
-       1970-01-01 00:00:00 +0000 (UTC).
- */
-time_t time(time_t* __timer) // NOLINT
-{
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
+// time() returns the time as the number of seconds since the Epoch,
+//      1970-01-01 00:00:00 +0000 (UTC).
+time_t time(time_t* __timer) { // NOLINT
+    struct timeval time_val;
+    gettimeofday(&time_val, nullptr);
 
     if (__timer != nullptr) {
-        *__timer = tv.tv_sec;
+        *__timer = time_val.tv_sec;
     }
 
-    return tv.tv_sec;
+    return time_val.tv_sec;
 }
 }

@@ -59,7 +59,7 @@ typedef enum {
 extern "C" {
 #endif
 
-extern time_t time(time_t *t);
+extern time_t time(time_t *timer);
 extern time_t mktime(struct tm *tm);
 extern struct tm *gmtime(const time_t *timep);
 extern struct tm *localtime(const time_t *timep);

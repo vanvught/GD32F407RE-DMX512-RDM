@@ -62,8 +62,13 @@ uint32_t FlashCode::GetSectorSize() const {
 }
 
 bool FlashCode::Read(uint32_t offset, std::span<uint8_t> buffer, flashcode::Result& result) {
+	FLASHCODE_DEBUG_ENTRY();
+	FLASHCODE_DEBUG_PRINTF("offset=%u", static_cast<unsigned>(offset));
+	
     const auto kStatus = gd32::fmc::Read(offset, buffer); // Blocking
     result = kStatus ? flashcode::Result::kOk : flashcode::Result::kError;
+	
+	FLASHCODE_DEBUG_EXIT();
     return true;
 }
 

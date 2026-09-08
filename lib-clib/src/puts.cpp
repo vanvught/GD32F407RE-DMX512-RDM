@@ -38,7 +38,7 @@ namespace console {
 void Puts(const char* s);
 } // namespace console
 using console::Puts;
-#endif
+#endif // CONFIG_CLIB_USE_UART0
 
 extern "C" int puts(const char* s) { // NOLINT
     Puts(s);

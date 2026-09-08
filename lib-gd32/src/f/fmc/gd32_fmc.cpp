@@ -51,7 +51,7 @@ constexpr auto kBanK1FlashPage = 4 * k1KiB;
 constexpr uint32_t kStartAddress = FLASH_BASE;
 constexpr uint32_t kBank0StartAddress = kStartAddress;
 constexpr uint32_t kBank1StartAddress = 0x08080000;
-const uint32_t kEndAddress = (kStartAddress + (FMC_SIZE * k1KiB) - 1);
+const uint32_t kEndAddress = (kStartAddress + (FMC_SIZE * k1KiB));
 
 enum class State { kIdle, kEraseBusy, kEraseProgram, kWriteBusy, kWriteProgram };
 
@@ -124,9 +124,12 @@ bool Read(uint32_t offset, std::span<uint8_t> buffer) {
     GD32_FMC_DEBUG_ENTRY();
 
     const auto kAddress = offset + FLASH_BASE;
+	
+	GD32_FMC_DEBUG_PRINTF("kStartAddress=%p, kAddress=%p, kEndAddress=%p", reinterpret_cast<void*>(kStartAddress), reinterpret_cast<void*>(kAddress), reinterpret_cast<void*>(kEndAddress));
 
     if (buffer.empty() || ((buffer.size() % sizeof(uint32_t)) != 0) || (kAddress < kStartAddress) || (kAddress >= kEndAddress) || (buffer.size() > (kEndAddress - kAddress))) {
-        return false;
+		GD32_FMC_DEBUG_EXIT();
+		return false;
     }
 
     assert((reinterpret_cast<uintptr_t>(buffer.data()) % alignof(uint32_t)) == 0);

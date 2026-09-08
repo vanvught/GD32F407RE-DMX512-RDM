@@ -2,7 +2,7 @@
  * @file time.h
  *
  */
-/* Copyright (C) 2020 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2020-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,31 +27,31 @@
 #define SYS_TIME_H_
 
 #ifndef _TIME_T
-#define	_TIME_T
+#define _TIME_T
 typedef long time_t;
-#endif	/* _TIME_T */
+#endif /* _TIME_T */
 
-#ifndef	_SUSECONDS_T
-#define	_SUSECONDS_T
+#ifndef _SUSECONDS_T
+#define _SUSECONDS_T
 typedef long suseconds_t;
-#endif	/* _SUSECONDS_T */
+#endif /* _SUSECONDS_T */
 
-struct timeval {
-	time_t tv_sec; /* seconds */
-	suseconds_t tv_usec; /* microseconds */
+struct timeval {         // NOLINT
+    time_t tv_sec;       // seconds
+    suseconds_t tv_usec; // microseconds
 };
 
-struct timezone {
-	int tz_minuteswest; /* minutes west of Greenwich */
-	int tz_dsttime; /* type of DST correction */
+struct timezone {       // NOLINT
+    int tz_minuteswest; // minutes west of Greenwich
+    int tz_dsttime;     // type of DST correction
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int gettimeofday(struct timeval *tv, struct timezone *tz);
-extern int settimeofday(const struct timeval *tv, const struct timezone *tz);
+extern int gettimeofday(struct timeval* time_val, struct timezone* time_zone);             // NOLINT
+extern int settimeofday(const struct timeval* time_val, const struct timezone* time_zone); // NOLINT
 
 #ifdef __cplusplus
 }

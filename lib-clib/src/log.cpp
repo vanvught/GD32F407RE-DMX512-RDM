@@ -40,7 +40,7 @@ typedef union {
 /* Natural log of 2 */
 #ifndef _M_LN2
 #define _M_LN2 0.693147180559945309417f
-#endif
+#endif // _M_LN2
 
 /**
  * On success, the function return the base 2 logarithm of x.

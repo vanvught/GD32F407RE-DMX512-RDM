@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_NET_ENABLE_PTP)
 #error
-#endif
+#endif // defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_NET_ENABLE_PTP)
 
 #pragma GCC push_options
 #pragma GCC optimize("O2")
@@ -40,13 +40,10 @@ static uint32_t previous_systick_millis;
 static struct timeval s_tv;
 
 extern "C" {
-/*
- * number of seconds and microseconds since the Epoch,
- *     1970-01-01 00:00:00 +0000 (UTC).
- */
-
-int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
-    assert(tv != 0);
+// number of seconds and microseconds since the Epoch,
+//     1970-01-01 00:00:00 +0000 (UTC).
+int gettimeofday(struct timeval* time_val, [[maybe_unused]] struct timezone* time_zone) { // NOLINT
+    assert(time_val != nullptr);
 
     const auto kCurrentSysTickMillis = gv_systick_millis;
 
@@ -71,38 +68,33 @@ int gettimeofday(struct timeval* tv, [[maybe_unused]] struct timezone* tz) {
         s_tv.tv_usec -= 1000000;
     }
 
-    tv->tv_sec = s_tv.tv_sec;
-    tv->tv_usec = s_tv.tv_usec;
+    time_val->tv_sec = s_tv.tv_sec;
+    time_val->tv_usec = s_tv.tv_usec;
 
     return 0;
 }
 
-int settimeofday(const struct timeval* tv, [[maybe_unused]] const struct timezone* tz) {
-    assert(tv != 0);
-
-    struct timeval g;
-    gettimeofday(&g, nullptr);
+int settimeofday(const struct timeval* time_val, [[maybe_unused]] const struct timezone* time_zone) { // NOLINT
+    assert(time_val != nullptr);
 
     previous_systick_millis = gv_systick_millis;
 
-    s_tv.tv_sec = tv->tv_sec;
-    s_tv.tv_usec = tv->tv_usec;
+    s_tv.tv_sec = time_val->tv_sec;
+    s_tv.tv_usec = time_val->tv_usec;
 
     return 0;
 }
 
-/*
- *  time() returns the time as the number of seconds since the Epoch,
-       1970-01-01 00:00:00 +0000 (UTC).
- */
+//  time() returns the time as the number of seconds since the Epoch,
+//     1970-01-01 00:00:00 +0000 (UTC).
 time_t time(time_t* __timer) { // NOLINT
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
+    struct timeval time_val;
+    gettimeofday(&time_val, nullptr);
 
     if (__timer != nullptr) {
-        *__timer = tv.tv_sec;
+        *__timer = time_val.tv_sec;
     }
 
-    return tv.tv_sec;
+    return time_val.tv_sec;
 }
 }

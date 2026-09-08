@@ -40,7 +40,7 @@ namespace console {
 int GetChar();
 } // namespace console
 using console::GetChar;
-#endif
+#endif // CONFIG_CLIB_USE_UART0
 
 extern "C" int getchar() { // NOLINT
     return GetChar();

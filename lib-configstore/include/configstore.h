@@ -518,16 +518,12 @@ class ConfigStore : StoreDevice {
     }
 
     static void Timer([[maybe_unused]] TimerHandle_t timer_handle) {
-        CONFIGSTORE_DEBUG_ENTRY();
-
         if (!Instance().Commit()) {
             Instance().TimerStop();
 
             CONFIGSTORE_DEBUG_EXIT();
             return;
         }
-
-        CONFIGSTORE_DEBUG_EXIT();
     }
 
     void TimerStart() {
@@ -561,8 +557,6 @@ class ConfigStore : StoreDevice {
     }
 
     bool Flash() {
-        CONFIGSTORE_DEBUG_PUTS(kStateNames[static_cast<unsigned int>(s_state)]);
-
         if (__builtin_expect((s_state == State::kIdle), 1)) {
             return false;
         }
@@ -596,6 +590,7 @@ class ConfigStore : StoreDevice {
                 storedevice::Result result;
                 if (StoreDevice::Write(s_start_address, std::span{s_store}.first<sizeof(ConfigurationStore)>(), result)) {
                     s_state = State::kIdle;
+					CONFIGSTORE_DEBUG_PUTS(kStateNames[static_cast<unsigned int>(s_state)]);
                     return false;
                 }
                 assert(result == storedevice::Result::kOk);

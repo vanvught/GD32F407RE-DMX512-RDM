@@ -36,6 +36,9 @@ inline constexpr uint32_t kUsPerSecond = 1'000'000U;
 inline constexpr uint32_t kNsPerUs = 1'000U;
 inline constexpr uint32_t kNsPerMs = 1'000'000U;
 inline constexpr uint32_t kNsPerSecond = 1'000'000'000U;
+
+inline constexpr uint32_t k1KiB = 1024;
+
 } // namespace common::units
 
 #endif // COMMON_UTILS_UTILS_UNITS_H_

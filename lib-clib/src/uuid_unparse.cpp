@@ -73,7 +73,7 @@ static constexpr char kFmtUpper[]  = "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%0
 #define FMT_DEFAULT kFmtUpper
 #else
 #define FMT_DEFAULT kFmtLower
-#endif
+#endif // UUID_UNPARSE_DEFAULT_UPPER
 
 static void UuidUnpack(const uuid_t in, struct uuid* uu) {
     const uint8_t* ptr = in;
