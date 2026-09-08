@@ -29,13 +29,16 @@
 #include <cstdint>
 
 namespace common::units {
-inline constexpr uint32_t kUsPerMs = 1'000U;
-inline constexpr uint32_t kMsPerSecond = 1'000U;
-inline constexpr uint32_t kUsPerSecond = 1'000'000U;
+inline constexpr int32_t kSecondPerMinute = 60;
 
-inline constexpr uint32_t kNsPerUs = 1'000U;
-inline constexpr uint32_t kNsPerMs = 1'000'000U;
-inline constexpr uint32_t kNsPerSecond = 1'000'000'000U;
+inline constexpr uint32_t kMsPerSecond = 1'000;
+
+inline constexpr uint32_t kUsPerMs = 1'000;
+inline constexpr uint32_t kUsPerSecond = 1'000'000;
+
+inline constexpr uint32_t kNsPerUs = 1'000;
+inline constexpr uint32_t kNsPerMs = 1'000'000;
+inline constexpr uint32_t kNsPerSecond = 1'000'000'000;
 
 inline constexpr uint32_t k1KiB = 1024;
 

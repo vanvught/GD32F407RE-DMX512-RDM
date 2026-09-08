@@ -56,12 +56,13 @@
 #endif
 #include "firmware/debug/debug_dump.h"
 #include "httpd/httpd_debug.h"
+#include "common/utils/utils_string.h"
 
 namespace board {
 void Reboot();
 } // namespace board
 
-#if !defined(_TIME_STAMP_)
+#ifndef _TIME_STAMP_
 #define _TIME_STAMP_ 0
 #endif
 
@@ -83,7 +84,7 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
         // Initial incoming HTTP request (header + maybe body)
         status_ = ParseRequest();
 
-        HTTPD_DEBUG_PRINTF("%s %s", http::kRequestMethod[static_cast<uint32_t>(request_method_)], request_content_type_ < http::ContentTypes::kNotDefined ? http::kContentType[static_cast<uint32_t>(request_content_type_)] : "Unknown");
+        HTTPD_DEBUG_PRINTF("%s %s", http::kRequestMethod[static_cast<uint32_t>(request_method_)], request_content_type_ < http::ContentTypes::kNotDefined ? http::kContentType[static_cast<uint32_t>(request_content_type_)] : common::kUnknown);
 
         if (status_ == http::Status::kOk) {
             // Request is syntactically valid and supported.

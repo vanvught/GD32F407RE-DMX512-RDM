@@ -43,6 +43,7 @@
 #include "core/protocol/igmp.h"
 #include "softwaretimers.h" // IWYU pragma: keep
 #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_print.h"
 
 #ifdef DEBUG_NETWORK_IGMP
 #define IGMP_DEBUG_ENTRY() DEBUG_ENTRY()

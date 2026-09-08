@@ -30,6 +30,7 @@
 #include <cstring>
 #include <cassert>
 
+#include "common/utils/utils_string.h"
 #include "json/rdmsensorsparams.h"
 
 namespace rdm::sensors {
@@ -45,13 +46,13 @@ enum class Types : uint32_t {
 
 static_assert(json::RdmSensorsParams::KeysSize() == static_cast<size_t>(Types::kUndefined));
 
-[[nodiscard]] inline constexpr const char* GetType(Types type) {
+[[nodiscard]] constexpr const char* GetType(Types type) {
     if (type < rdm::sensors::Types::kUndefined) {
         const auto& k = json::RdmSensorsParams::Keys();
         return k[static_cast<uint32_t>(type)].GetName();
     }
 
-    return "Unknown";
+    return common::kUnknown;
 }
 
 inline Types GetType(const char* string) {

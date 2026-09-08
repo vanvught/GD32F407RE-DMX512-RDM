@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include "common/utils/utils_string.h"
 #include "emac_counters.h"
 #include "emac/emac_phy.h"
 #if defined(CONFIG_NET_ENABLE_PTP)
@@ -36,13 +37,13 @@
 #endif // CONFIG_NET_ENABLE_PTP
 #include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
-#include "../src/core/network_private.h"
+#include "common/utils/utils_print.h"
 
 extern void EnetGpioConfig();
 extern enet_descriptors_struct txdesc_tab[ENET_TXBUF_NUM];
 extern void MacAddress(uint8_t paddr[]);
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 #include "gd32_ptp.h"
 enet_descriptors_struct ptp_rxdesc_tab[ENET_RXBUF_NUM] __attribute__((aligned(4)));
 enet_descriptors_struct ptp_txdesc_tab[ENET_TXBUF_NUM] __attribute__((aligned(4)));
@@ -79,7 +80,7 @@ void __attribute__((cold)) Config() {
     enet_software_reset(ENETx);
 
     if (!emac::phy::Config(PHY_ADDRESS)) {
-        network::Error(__func__, "emac::phy::Config(PHY_ADDRESS)");
+        ERROR("emac::phy::Config(PHY_ADDRESS)");
     }
 
     EMAC_DEBUG_EXIT();
@@ -93,20 +94,20 @@ void AdjustLink(emac::phy::Status phy_status) {
 #ifdef DEBUG_EMAC
     {
         uint16_t phy_value;
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #else
         ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #endif // GD32H7XX
-        printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR");
-#if defined(GD32H7XX)
+        printf("BCR: %.4x %s\n", phy_value, common::IsSuccess(phy_state == SUCCESS));
+#ifdef GD32H7XX
         enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 #else
         enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 #endif // GD32H7XX
-        printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR");
+        printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), common::IsSuccess(phy_state == SUCCESS));
     }
 #endif // DEBUG_EMAC
 
@@ -123,33 +124,30 @@ void AdjustLink(emac::phy::Status phy_status) {
     }
 
 #ifdef GD32H7XX
-    const auto kEnetInitStatus = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
+    [[maybe_unused]] const auto kEnetInitStatus = enet_init(ENETx, mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
 #else
-    const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
+    [[maybe_unused]] const auto kEnetInitStatus = enet_init(mediamode, ENET_AUTOCHECKSUM_DROP_FAILFRAMES, ENET_RECEIVEALL);
 #endif // GD32H7XX
 
-    if (kEnetInitStatus != SUCCESS) {
-    }
-
-    EMAC_DEBUG_PRINTF("kEnetInitStatus=%s", kEnetInitStatus == SUCCESS ? "SUCCES" : "ERROR");
+    EMAC_DEBUG_PRINTF("kEnetInitStatus=%s", common::IsSuccess(kEnetInitStatus == SUCCESS));
 
 #ifdef DEBUG_EMAC
     {
         uint16_t phy_value;
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         ErrStatus phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #else
         ErrStatus phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BCR, &phy_value);
 #endif // GD32H7XX
-        printf("BCR: %.4x %s\n", phy_value, phy_state == SUCCESS ? "SUCCES" : "ERROR");
-#if defined(GD32H7XX)
+        printf("BCR: %.4x %s\n", phy_value, common::IsSuccess(phy_state == SUCCESS));
+#ifdef GD32H7XX
         enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENETx, ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 #else
         enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
         phy_state = enet_phy_write_read(ENET_PHY_READ, PHY_ADDRESS, PHY_REG_BSR, &phy_value);
 #endif // GD32H7XX
-        printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), phy_state == SUCCESS ? "SUCCES" : "ERROR");
+        printf("BSR: %.4x %s\n", phy_value & (PHY_AUTONEGO_COMPLETE | PHY_LINKED_STATUS | PHY_JABBER_DETECTION), common::IsSuccess(phy_state == SUCCESS));
     }
 #endif // DEBUG_EMAC
     EMAC_DEBUG_EXIT();
@@ -164,14 +162,13 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 
     link = phy_status.link;
 
-    if ((phy_status.link == emac::phy::Link::kStateUp) &&
-        phy_status.autonegotiation) {
+    if ((phy_status.link == emac::phy::Link::kStateUp) && phy_status.autonegotiation) {
         AdjustLink(phy_status);
     }
-    
+
     MacAddress(mac_address);
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     enet_mac_address_set(ENETx, ENET_MAC_ADDRESS0, mac_address);
 #if defined(CONFIG_NET_ENABLE_PTP)
     enet_ptp_normal_descriptors_chain_init(ENETx, ENET_DMA_TX, ptp_txdesc_tab);
@@ -182,7 +179,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 #endif // CONFIG_NET_ENABLE_PTP
 #else
     enet_mac_address_set(ENET_MAC_ADDRESS0, mac_address);
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
     enet_ptp_normal_descriptors_chain_init(ENET_DMA_TX, ptp_txdesc_tab);
     enet_ptp_normal_descriptors_chain_init(ENET_DMA_RX, ptp_rxdesc_tab);
 #else
@@ -195,7 +192,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
         enet_transmit_checksum_config(&txdesc_tab[i], ENET_CHECKSUM_TCPUDPICMP_FULL);
     }
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
     Gd32PtpStart();
 #if !defined(DISABLE_RTC)
     // Set the System Clock from the Hardware Clock
@@ -204,9 +201,9 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 #endif // CONFIG_NET_ENABLE_PTP
 
     enet_enable(ENETx);
-    
+
     memset(&emac::eth::globals::counter, 0, sizeof(emac::eth::globals::Counters));
-    
+
     EMAC_DEBUG_EXIT();
 }
 } // namespace emac

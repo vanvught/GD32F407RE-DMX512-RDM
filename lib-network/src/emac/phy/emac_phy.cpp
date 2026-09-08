@@ -24,8 +24,9 @@
 
 #include <cstdint>
 #include <cstdio>
-#include "cassert"
+#include <cassert>
 
+#include "common/utils/utils_string.h"
 #include "emac/emac.h"
 #include "emac/emac_phy.h"
 #include "core/netif.h"
@@ -39,7 +40,7 @@ extern emac::phy::Link link_state;
 }
 
 namespace emac::phy {
-constexpr const char* kSpeedNames[] = {"Unknown", "10baseT", "100baseTX", "1000baseT"};
+constexpr const char* kSpeedNames[] = {common::kUnknown, "10baseT", "100baseTX", "1000baseT"};
 
 static_assert(static_cast<size_t>(phy::Speed::kUnknown) == 0, "Enum ordering mismatch");
 static_assert(static_cast<size_t>(phy::Speed::kSpeed1000) < (sizeof(kSpeedNames) / sizeof(kSpeedNames[0])), "Enum range mismatch");

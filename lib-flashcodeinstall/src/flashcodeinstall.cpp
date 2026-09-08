@@ -30,6 +30,7 @@
 #include "firmware.h"
 #include "display.h" // IWYU pragma: keep
 #include "watchdog.h"
+#include "common/utils/utils_print.h"
 
 bool FlashCodeInstall::WriteFirmware(std::span<const uint8_t> firmware) {
     FLASHCODE_INSTALL_DEBUG_ENTRY();
@@ -68,7 +69,7 @@ bool FlashCodeInstall::WriteFirmware(std::span<const uint8_t> firmware) {
     }
 
     if (flashcode::Result::kError == result) {
-        puts("Error: flash erase");
+        ERROR("flash erase");
         return false;
     }
 
@@ -78,7 +79,7 @@ bool FlashCodeInstall::WriteFirmware(std::span<const uint8_t> firmware) {
     }
 
     if (flashcode::Result::kError == result) {
-        puts("Error: flash write");
+        ERROR("flash write");
         return false;
     }
 

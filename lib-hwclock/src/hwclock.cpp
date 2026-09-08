@@ -27,6 +27,8 @@
 #include <sys/time.h>
 
 #include "hwclock.h"
+#include "common/utils/utils_string.h"
+#include "common/utils/utils_units.h"
 #include "watchdog.h"
 #include "timing.h"
 
@@ -41,7 +43,7 @@ void HwClock::Print() {
         return;
     }
 
-    const char* type = "Unknown";
+    const char* type = common::kUnknown;
 
     switch (type_) {
         case rtc::Type::kMcP7941X:
@@ -87,7 +89,7 @@ void HwClock::HcToSys() {
     RtcGet(&rtc_t1);
     gettimeofday(&tv_t1, nullptr);
 
-    const auto kSecondsT1 = rtc_t1.tm_sec + rtc_t1.tm_min * 60;
+    const auto kSecondsT1 = rtc_t1.tm_sec + (rtc_t1.tm_min * common::units::kSecondPerMinute);
     const auto kSeconds = mktime(&rtc_t1);
 
     struct tm rtc_t2;
@@ -96,7 +98,7 @@ void HwClock::HcToSys() {
     while (true) {
         RtcGet(&rtc_t2);
 
-        const auto kSeconds2 = rtc_t2.tm_sec + rtc_t2.tm_min * 60;
+        const auto kSeconds2 = rtc_t2.tm_sec + (rtc_t2.tm_min * common::units::kSecondPerMinute);
 
         if (kSecondsT1 != kSeconds2) {
             gettimeofday(&tv_t2, nullptr);
@@ -104,20 +106,20 @@ void HwClock::HcToSys() {
         }
     }
 
-    struct timeval tv;
-    tv.tv_sec = kSeconds;
+    struct timeval time_val;
+    time_val.tv_sec = kSeconds;
 
     if (tv_t2.tv_sec == tv_t1.tv_sec) {
-        tv.tv_usec = 1000000 - (tv_t2.tv_usec - tv_t1.tv_usec);
+        time_val.tv_usec = 1000000 - (tv_t2.tv_usec - tv_t1.tv_usec);
     } else {
         if (tv_t2.tv_usec - tv_t1.tv_usec >= 0) {
-            tv.tv_usec = tv_t2.tv_usec - tv_t1.tv_usec;
+            time_val.tv_usec = tv_t2.tv_usec - tv_t1.tv_usec;
         } else {
-            tv.tv_usec = tv_t1.tv_usec - tv_t2.tv_usec;
+            time_val.tv_usec = tv_t1.tv_usec - tv_t2.tv_usec;
         }
     }
 
-    settimeofday(&tv, nullptr);
+    settimeofday(&time_val, nullptr);
 
     last_hc_to_sys_millis_ = timing::Millis();
 

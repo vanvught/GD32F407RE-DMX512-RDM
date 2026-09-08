@@ -30,21 +30,24 @@
 #include <cstring>
 #include <cassert>
 
-#include "network_private.h"
+#include "common/utils/utils_print.h"
 
 namespace network::memory {
+inline constexpr uint32_t kBlocksMin = 1;
+inline constexpr uint32_t kBlocksMax = 32;
+
 inline constexpr uint32_t kBlocks =
-#if !defined(CONFIG_NETWORK_MEMORY_BLOCKS)
+#ifndef CONFIG_NETWORK_MEMORY_BLOCKS
     12;
 #else
     CONFIG_NETWORK_MEMORY_BLOCKS;
 #endif // CONFIG_NETWORK_MEMORY_BLOCKS
 
-static_assert(kBlocks >= 1);
-static_assert(kBlocks <= 32);
+static_assert(kBlocks >= kBlocksMin);
+static_assert(kBlocks <= kBlocksMax);
 
 inline constexpr uint32_t kBlockSize =
-#if !defined(CONFIG_NETWORK_MEMORY_BLOCKSIZE)
+#ifndef CONFIG_NETWORK_MEMORY_BLOCKSIZE
     1460;
 #else
     CONFIG_NETWORK_MEMORY_BLOCKSIZE;
@@ -79,16 +82,16 @@ class Allocator {
     Allocator(Allocator&&) = delete;
     Allocator& operator=(Allocator&&) = delete;
 
-    bool IsEmpty() const { return free_mask_ == kAllMask; }
-    bool IsFull() const { return free_mask_ == 0; }
+    [[nodiscard]] bool IsEmpty() const { return free_mask_ == kAllMask; }
+    [[nodiscard]] bool IsFull() const { return free_mask_ == 0; }
 
     uint8_t* Allocate() {
         if (IsFull()) {
-            network::Error(__func__, "Allocate:Full!");
+            ERROR("Allocate:Full!");
             return nullptr;
         }
 
-        const uint32_t kIndex = static_cast<uint32_t>(__builtin_ctz(free_mask_));
+        const auto kIndex = static_cast<uint32_t>(__builtin_ctz(free_mask_));
         free_mask_ &= ~(1U << kIndex);
 
         Status();
@@ -102,11 +105,11 @@ class Allocator {
         assert(size <= kBlockSize);
 
         if (IsFull()) {
-            network::Error(__func__, "Allocate:Full!");
+            ERROR("Allocate:Full!");
             return UINT16_MAX;
         }
 
-        const uint32_t kIndex = static_cast<uint32_t>(__builtin_ctz(free_mask_));
+        const auto kIndex = static_cast<uint32_t>(__builtin_ctz(free_mask_));
         free_mask_ &= ~(1U << kIndex);
 
         size_[kIndex] = size;
@@ -155,7 +158,7 @@ class Allocator {
     }
 
     void Status() const {
-#if defined DEBUG_NETWORK_MEMORY
+#ifdef DEBUG_NETWORK_MEMORY
         const uint32_t kUsedMask = (~free_mask_) & kAllMask;
         printf("free_mask=0x%08x used_mask=0x%08x free=%u used=%u\n", free_mask_, kUsedMask, __builtin_popcount(free_mask_), __builtin_popcount(kUsedMask));
         printf("IsEmpty=%c IsFull=%c\n", IsEmpty() ? 'Y' : 'N', IsFull() ? 'Y' : 'N');
@@ -164,7 +167,7 @@ class Allocator {
 
    private:
     Allocator() = default;
-    static constexpr uint32_t kAllMask = (kBlocks == 32) ? UINT32_MAX : ((1U << kBlocks) - 1U);
+    static constexpr uint32_t kAllMask = (kBlocks == kBlocksMax) ? UINT32_MAX : ((1U << kBlocks) - 1U);
     uint32_t free_mask_{0};
     uint16_t size_[kBlocks]{0};
 };

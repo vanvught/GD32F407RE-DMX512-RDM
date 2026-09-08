@@ -41,6 +41,7 @@
 #include "core/ip4/acd.h"
 #endif // CONFIG_NET_DHCP_USE_ACD
 #include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_print.h"
 
 #ifdef DEBUG_NETWORK_DHCP
 #define DHCP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -68,9 +69,11 @@ static TimerHandle_t s_timer_id;
 
 // https://tools.ietf.org/html/rfc1541
 namespace network::dhcp {
-static Message s_dhcp_message SECTION_NETWORK ALIGNED;
+static constexpr char kNoHandle[] = "No handle";
+namespace {
+Message s_dhcp_message SECTION_NETWORK ALIGNED;
 
-static void MessageInit() {
+void MessageInit() {
     std::memset(&s_dhcp_message, 0, sizeof(dhcp::Message));
 
     s_dhcp_message.op = dhcp::OpCode::kBootrequest;
@@ -87,7 +90,7 @@ static void MessageInit() {
     s_dhcp_message.options[5] = 0x01;
 }
 
-static void UpdateMsg(uint8_t message_type) {
+void UpdateMsg(uint8_t message_type) {
     auto* dhcp = reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
     assert(dhcp != nullptr);
 
@@ -111,7 +114,7 @@ static void UpdateMsg(uint8_t message_type) {
     }
 }
 
-static void SendDiscover() {
+void SendDiscover() {
     DHCP_DEBUG_ENTRY();
     auto* dhcp = reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
     assert(dhcp != nullptr);
@@ -147,7 +150,7 @@ static void SendDiscover() {
     DHCP_DEBUG_EXIT();
 }
 
-static void SendRequest() {
+void SendRequest() {
     DHCP_DEBUG_ENTRY();
     auto* dhcp = reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
     assert(dhcp != nullptr);
@@ -199,7 +202,7 @@ static void SendRequest() {
     DHCP_DEBUG_EXIT();
 }
 
-static void SendRelease(uint32_t destination_ip) {
+void SendRelease(uint32_t destination_ip) {
     DHCP_DEBUG_ENTRY();
     DHCP_DEBUG_PRINTF(IPSTR, IP2STR(destination_ip));
 
@@ -221,6 +224,7 @@ static void SendRelease(uint32_t destination_ip) {
 
     DHCP_DEBUG_EXIT();
 }
+} // namespace
 
 void Input(const uint8_t* buffer, uint32_t size, [[maybe_unused]] uint32_t from_ip, uint16_t from_port) {
     DHCP_DEBUG_ENTRY();
@@ -250,7 +254,7 @@ void Inform() {
 
     const auto kHandle = network::udp::Begin(network::iana::Ports::kPortDhcpClient, nullptr);
     if (kHandle < 0) {
-        ERROR("No handle\n");
+        ERROR(kNoHandle);
         return;
     }
 
@@ -689,14 +693,14 @@ bool Start() {
     dhcp->handle = network::udp::Begin(network::iana::Ports::kPortDhcpClient, dhcp::Input);
 
     if (dhcp->handle < 0) {
-        ERROR("No handle.\n");
+        ERROR(kNoHandle);
         DHCP_DEBUG_EXIT();
         return false;
     }
 
     MessageInit();
 
-#if defined(CONFIG_NET_DHCP_USE_ACD)
+#ifdef CONFIG_NET_DHCP_USE_ACD
     network::acd::Add(&dhcp->acd, ConflictCallback);
 #endif // CONFIG_NET_DHCP_USE_ACD
 

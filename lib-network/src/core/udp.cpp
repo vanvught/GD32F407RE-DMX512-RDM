@@ -43,6 +43,7 @@
 #include "network_memcpy.h"
 #include "firmware/debug/debug_debug.h"
 #include "common/utils/utils_math.h"
+#include "common/utils/utils_print.h"
 
 #if defined(DEBUG_UDP)
 #define UDP_DEBUG_ENTRY() DEBUG_ENTRY()

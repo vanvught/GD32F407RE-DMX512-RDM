@@ -53,12 +53,6 @@ void FreePkt();
 } // namespace emac::eth
 
 namespace network {
-inline void Error(const char* func, const char* string) {
-    printf("%s%s: %s%s\n", ansi::Colours::Fg::kRed, func, string, ansi::Colours::Fg::kDefault);
-}
-
-#define ERROR(s) Error(__func__, (s))
-
 namespace global {
 extern uint32_t broadcast_mask;
 extern uint32_t on_network_mask;

@@ -1,8 +1,8 @@
 /**
- * @file softwaretimers.h
+ * @file utils_print.h
  *
  */
-/* Copyright (C) 2024-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,27 +23,22 @@
  * THE SOFTWARE.
  */
 
-#ifndef SUPERLOOP_SOFTWARETIMERS_H_
-#define SUPERLOOP_SOFTWARETIMERS_H_
+#ifndef COMMON_UTILS_UTILS_PRINT_H_
+#define COMMON_UTILS_UTILS_PRINT_H_
 
-#include <cstdint>
+#include <cstdio>
 
-static constexpr uint32_t kSoftwareTimersMax =
-#if defined(CONFIG_HAL_TIMERS_COUNT)
-    CONFIG_HAL_TIMERS_COUNT;
-#else
-    12;
-#endif
+#include "firmware/ansi_colour.h"
 
-using TimerHandle_t = int32_t;
-using TimerCallbackFunction_t = void (*)(TimerHandle_t);
+namespace common::print {
+inline void Error(const char* func, const char* string) {
+    printf("%s%s: %s%s\n", ansi::Colours::Fg::kRed, func, string, ansi::Colours::Fg::kDefault);
+}
+} // namespace common::print
 
-inline constexpr TimerHandle_t kTimerIdNone = -1;
+#define ERROR(s)                             \
+    do {                                     \
+        common::print::Error(__func__, (s)); \
+    } while (false)
 
-TimerHandle_t SoftwareTimerAdd(uint32_t interval_millis, TimerCallbackFunction_t k_callback_function);
-bool SoftwareTimerDelete(TimerHandle_t& handle);
-bool SoftwareTimerChange(TimerHandle_t handle, uint32_t interval_millis);
-
-void SoftwareTimerRun();
-
-#endif  // SUPERLOOP_SOFTWARETIMERS_H_
+#endif // COMMON_UTILS_UTILS_PRINT_H_

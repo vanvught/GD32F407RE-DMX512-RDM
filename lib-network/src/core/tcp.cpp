@@ -72,6 +72,7 @@
 #include "network_memory.h"
 #include "network_tcp_datasegmentqueue.h"
 #include "common/utils/utils_math.h"
+#include "common/utils/utils_print.h"
 
 #if defined(DEBUG_TCP)
 #define TCP_DEBUG_ENTRY() DEBUG_ENTRY()
