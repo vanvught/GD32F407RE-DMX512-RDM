@@ -38,7 +38,7 @@ inline constexpr uint32_t kNetSwitch = 0;
 inline constexpr uint32_t kSubnetSwitch = 0;
 inline constexpr uint32_t kSwitch = 1;
 } // namespace defaults
-#if !defined(ARTNET_VERSION)
+#ifndef ARTNET_VERSION
 inline constexpr uint32_t kVersion = 4;
 #else
 inline constexpr uint32_t kVersion = ARTNET_VERSION;

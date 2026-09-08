@@ -26,6 +26,7 @@
 #define DMXNODE_NODETYPE_H_
 
 #include <cstdint>
+#include "common/utils/utils_string.h"
 
 namespace dmxnode {
 enum class NodeType { 
@@ -60,7 +61,7 @@ inline const char* GetNodeType(NodeType type) {
         return kNodeTypeNames[static_cast<uint32_t>(type)];
     }
 
-    return "Undefined";
+    return common::kUndefined;
 }
 } // namespace dmxnode
 

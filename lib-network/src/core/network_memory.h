@@ -87,7 +87,7 @@ class Allocator {
 
     uint8_t* Allocate() {
         if (IsFull()) {
-            ERROR("Allocate:Full!");
+            ERROR("Full");
             return nullptr;
         }
 
@@ -105,7 +105,7 @@ class Allocator {
         assert(size <= kBlockSize);
 
         if (IsFull()) {
-            ERROR("Allocate:Full!");
+            ERROR("Full");
             return UINT16_MAX;
         }
 

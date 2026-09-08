@@ -33,6 +33,7 @@ inline constexpr char kWarning[] = "Warning";
 inline constexpr char kError[] = "Error";
 inline constexpr char kSuccess[] = "Success";
 inline constexpr char kUnknown[] = "Unknown"; 
+inline constexpr char kUndefined[] = "Undefined";
 
 constexpr const char* IsSuccess(bool is_success) {
   return is_success ? kSuccess : kError;

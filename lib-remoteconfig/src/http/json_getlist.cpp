@@ -26,6 +26,7 @@
 #include <cstring>
 #include <cstdio>
 
+#include "common/utils/utils_string.h"
 #include "configstore.h"
 #include "configurationstore.h"
 #include "dmxnode_nodetype.h"
@@ -35,9 +36,8 @@
 
 namespace json {
 uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
-    if ((out_buffer == nullptr) || (out_buffer_size == 0U)) {
-        return 0U;
-    }
+    assert(out_buffer != nullptr);
+    assert(out_buffer_size != 0);
 
     uint8_t display_name[common::store::remoteconfig::kDisplayNameLength];
 
@@ -47,10 +47,10 @@ uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
 
 #ifdef DMXNODE_NODETYPE_DEFINED
     if (display_name[0] == '\0') {
-        const char* const long_name = DmxNodeNodeType::Get()->GetLongName();
+        const char* const kLongName = DmxNodeNodeType::Get()->GetLongName();
 
-        if (long_name != nullptr) {
-            strncpy(reinterpret_cast<char*>(display_name), long_name, common::store::remoteconfig::kDisplayNameLength - 1U);
+        if (kLongName != nullptr) {
+            strncpy(reinterpret_cast<char*>(display_name), kLongName, common::store::remoteconfig::kDisplayNameLength - 1U);
 
             display_name[common::store::remoteconfig::kDisplayNameLength - 1U] = '\0';
         }
@@ -67,11 +67,11 @@ uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
     const char* output_type = dmxnode::GetOutputType(dmxnode::kOutputType);
 
     if (node_type == nullptr) {
-        node_type = "Undefined";
+        node_type = common::kUndefined;
     }
 
     if (output_type == nullptr) {
-        output_type = "Undefined";
+        output_type = common::kWarning;
     }
 
     const int kLength = snprintf(out_buffer, out_buffer_size,

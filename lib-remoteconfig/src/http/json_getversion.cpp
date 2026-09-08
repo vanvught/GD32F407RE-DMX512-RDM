@@ -34,7 +34,7 @@ uint32_t GetVersion(char* out_buffer, uint32_t out_buffer_size) {
     uint8_t hw_text_length;
 
     const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"version\":\"%.*s\",\"board\":\"%s\",\"build\":{\"date\":\"%.*s\",\"time\":\"%.*s\"}}", 
+		R"({"version":"%.*s","board":"%s","build":{"date":"%.*s","time":"%.*s"}})", 
 		firmwareversion::length::kSoftwareVersion, 
 		version->software_version, 
 		board::BoardName(hw_text_length), 

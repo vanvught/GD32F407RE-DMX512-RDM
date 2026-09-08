@@ -37,7 +37,9 @@ static void SetDisplay(const char* val, uint32_t len) {
 }
 
 static void SetIdentify(const char* val, uint32_t len) {
-    if (len != 1) return;
+    if (len != 1) {
+        return;
+    }
 
     if (val[0] != '0') {
         board::statusled::SetMode(board::statusled::Mode::kFast);
@@ -48,7 +50,9 @@ static void SetIdentify(const char* val, uint32_t len) {
 
 // TODO (a) Subject for deletion
 static void SetReboot(const char* val, uint32_t len) {
-    if (len != 1) return;
+    if (len != 1) {
+        return;
+    }
     if (val[0] != '0') board::Reboot();
 }
 

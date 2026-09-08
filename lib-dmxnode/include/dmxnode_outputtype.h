@@ -26,24 +26,25 @@
 #define DMXNODE_OUTPUTTYPE_H_
 
 #include <cstdint>
+#include "common/utils/utils_string.h"
 
 namespace dmxnode {
 enum class OutputType {
-    kDmx,      //
-    kDmxRdm,   //
-    kPixel,    //
-    kPixelDmx, //
-    kPwm,      //
-    kRgbPanel, //
-    kSerial,   //
-    kOsc,      //
-    kMonitor,  //
-    kStepper,  //
-    kPlayer,   //
-    kArtNet,   //
-    kTimeCode, //
-    kNone,     //
-    kUndefined //
+    kDmx,       //
+    kDmxRdm,    //
+    kPixel,     //
+    kPixelDmx,  //
+    kPwm,       //
+    kRgbPanel,  //
+    kSerial,    //
+    kOsc,       //
+    kMonitor,   //
+    kStepper,   //
+    kPlayer,    //
+    kArtNet,    //
+    kTimeCode,  //
+    kNone,      //
+    kUndefined, //
 };
 
 inline constexpr const char* kOutputTypeNames[static_cast<uint32_t>(OutputType::kUndefined)] = {
@@ -60,7 +61,7 @@ inline constexpr const char* kOutputTypeNames[static_cast<uint32_t>(OutputType::
     "Player",    //
     "Art-Net",   //
     "Timecode",  //
-    "None"       //
+    "None",      //
 };
 
 inline const char* GetOutputType(OutputType type) {
@@ -68,7 +69,7 @@ inline const char* GetOutputType(OutputType type) {
         return kOutputTypeNames[static_cast<uint32_t>(type)];
     }
 
-    return "Undefined";
+    return common::kUndefined;
 }
 } // namespace dmxnode
 

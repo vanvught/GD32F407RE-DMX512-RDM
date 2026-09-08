@@ -40,7 +40,7 @@ void DisplayUdf::ShowArtNetNode() {
     auto* artnet_node = ArtNetNode::Get();
 
     ShowUniverseArtNetNode();
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     ShowDestinationIpArtNetNode();
 #endif
     Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kAp)], "AP: %d", artnet_node->GetActiveOutputPorts() + artnet_node->GetActiveInputPorts());
@@ -49,7 +49,7 @@ void DisplayUdf::ShowArtNetNode() {
 }
 
 void DisplayUdf::ShowUniverseArtNetNode() {
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
     DISPLAYUDF_DEBUG_ENTRY();
     if constexpr (dmxnode::kConfigPortCount != 0) {
         auto* artnet_node = ArtNetNode::Get();
@@ -68,18 +68,19 @@ void DisplayUdf::ShowUniverseArtNetNode() {
                 if (artnet_node->GetPortAddress(kPortIndex, universe, dmxnode::Direction::kOutput)) {
                     ClearEndOfLine();
                     Printf(labels_[kLabelIndex],
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
                            "%c %d %s %s %c %s",
 #else
                            "%c %d %s %s %s",
 #endif
                            'A' + config_port_index, universe, dmxnode::GetMergeMode(artnet_node->GetMergeMode(kPortIndex), true),
+
 #if (ARTNET_VERSION >= 4)
                            artnet::GetProtocolMode(artnet_node->GetPortProtocol4(kPortIndex), true),
 #else
-                           "Art-Net",
+                           artnet::kNodeId,
 #endif
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
                            artnet_node->GetOutputStyle(kPortIndex) == dmxnode::OutputStyle::kConstant ? 'C' : 'D',
 #endif
                            artnet_node->Rdm(kPortIndex) ? "RDM" : "");

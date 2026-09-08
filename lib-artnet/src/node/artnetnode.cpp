@@ -642,9 +642,9 @@ void ArtNetNode::SetNetworkDataLossCondition() {
 }
 
 void ArtNetNode::Print() {
-    printf("Art-Net %u V%u.%u\n", static_cast<unsigned int>(artnet::kVersion), static_cast<unsigned int>(ArtNetConst::kVersion[0]), static_cast<unsigned int>(ArtNetConst::kVersion[1]));
+    printf("%s %u V%u.%u\n", artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion), static_cast<unsigned int>(ArtNetConst::kVersion[0]), static_cast<unsigned int>(ArtNetConst::kVersion[1]));
     printf(" Long name  : %s\n", reinterpret_cast<char*>(art_poll_reply_.long_name));
-#if defined(ARTNET_HAVE_TIMECODE)
+#ifdef ARTNET_HAVE_TIMECODE
     printf(" TimeCode IP: " IPSTR "\n", IP2STR(node_.ip_timecode));
 #endif
 

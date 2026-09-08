@@ -65,10 +65,7 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
     uint32_t free_bytes{};
     DriveSize(kDirName, total_bytes, free_bytes);
 
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, 
-      R"({"label":"storage","capacity":%u,"free":%u,"files":[)", 
-        static_cast<unsigned>(total_bytes), 
-        static_cast<unsigned>(free_bytes)));
+    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, R"({"label":"storage","capacity":%u,"free":%u,"files":[)", static_cast<unsigned>(total_bytes), static_cast<unsigned>(free_bytes)));
 
     struct dirent* read_dir{};
 
@@ -91,16 +88,8 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
             if (kStat == 0) {
                 time_t epoch_time = buf.st_mtime;
                 auto* local_time = localtime(&epoch_time);
-                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, 
-                  R"({"name":"%s","size":%u,"date":"%d-%.2d-%.2dT%.2d:%.2d:%.2d"},)", 
-                  read_dir->d_name, 
-                  static_cast<unsigned>(buf.st_size),                                          
-                  1900 + local_time->tm_year, 
-                  1 + local_time->tm_mon, 
-                  local_time->tm_mday, 
-                  local_time->tm_hour, 
-                  local_time->tm_min, 
-                  local_time->tm_sec));
+                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, R"({"name":"%s","size":%u,"date":"%d-%.2d-%.2dT%.2d:%.2d:%.2d"},)", read_dir->d_name, static_cast<unsigned>(buf.st_size),
+                                                                        1900 + local_time->tm_year, 1 + local_time->tm_mon, local_time->tm_mday, local_time->tm_hour, local_time->tm_min, local_time->tm_sec));
 
                 if (kCharacters > kSize) {
                     break;

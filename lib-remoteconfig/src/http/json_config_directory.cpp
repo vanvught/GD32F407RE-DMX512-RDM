@@ -25,11 +25,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <cassert>
 
 #include "http/json_infos.h"
 
 namespace json::config {
 uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
+    assert(out_buffer != nullptr);
+    assert(out_buffer_size != 0);
+
     uint32_t total = 0;
 
     total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "{\"files\":{"));
