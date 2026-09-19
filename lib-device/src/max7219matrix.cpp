@@ -45,10 +45,7 @@ static constexpr uint8_t Rotate(uint32_t r, uint32_t x) {
     return byte;
 }
 
-Max7219Matrix::Max7219Matrix() {
-    DEBUG_ENTRY();
-    DEBUG_PRINTF("kFontSize=%u, &s_font=%p:%p", static_cast<unsigned>(kFontSize), reinterpret_cast<void*>(s_font), reinterpret_cast<void*>(s_font + kFontSize));
-
+Max7219Matrix::Max7219Matrix() noexcept {
     auto* dst = s_font;
 
     for (uint32_t i = 0; i < kFontSize; i++) {
@@ -56,23 +53,11 @@ Max7219Matrix::Max7219Matrix() {
             *dst++ = Rotate(i, 7 - j);
         }
     }
-
-    DEBUG_EXIT();
-}
-
-Max7219Matrix::~Max7219Matrix() {
-    DEBUG_ENTRY();
-
-    DEBUG_EXIT();
 }
 
 void Max7219Matrix::Init(uint16_t count, uint8_t intensity) {
-    DEBUG_ENTRY();
-
     constexpr uint16_t kSf = sizeof(spi_data) / 2;
     count_ = common::Min(count, kSf);
-
-    DEBUG_PRINTF("count_=%d", count_);
 
     WriteAll(max7219::reg::kShutdown, max7219::reg::shutdown::kNormalOp);
     WriteAll(max7219::reg::kDisplayTest, 0);
@@ -82,13 +67,9 @@ void Max7219Matrix::Init(uint16_t count, uint8_t intensity) {
     SetIntensity(intensity);
 
     Max7219Matrix::Cls();
-
-    DEBUG_EXIT();
 }
 
 void Max7219Matrix::Write(const char* buffer, uint16_t count) {
-    DEBUG_PRINTF("count=%d", count);
-
     if (count > count_) {
         count = count_;
     }
@@ -142,14 +123,10 @@ void Max7219Matrix::UpdateCharacter(uint32_t c, const uint8_t bytes[8]) {
 }
 
 void Max7219Matrix::WriteAll(uint8_t reg, uint8_t data) {
-    DEBUG_ENTRY();
-
     for (uint32_t i = 0; i < (count_ * 2); i = i + 2) {
         spi_data[i] = reg;
         spi_data[i + 1] = data;
     }
 
     Spi::Write(reinterpret_cast<const char*>(spi_data), static_cast<uint32_t>(count_ * 2), true);
-
-    DEBUG_EXIT();
 }

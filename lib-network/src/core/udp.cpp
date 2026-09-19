@@ -27,7 +27,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif // CONFIG_TCP_NO_OPTIMIZE
+#endif // CONFIG_UDP_NO_OPTIMIZE
 
 #include <cstdint>
 #include <cassert>

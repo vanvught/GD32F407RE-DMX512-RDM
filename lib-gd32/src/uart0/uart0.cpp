@@ -23,9 +23,6 @@
  * THE SOFTWARE.
  */
 
-// #define CONFIG_USART0_ENABLE_RX_DMA
-// #define CONFIG_USART0_ENABLE_TX_DMA
-
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>
@@ -33,18 +30,18 @@
 #include "gd32_uart.h"
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32_dma.h"
-#endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
+#endif            // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32.h" // IWYU pragma: keep
 
 namespace uart0 {
 static char s_printf_buffer[128];
 
-#if defined(CONFIG_USART0_ENABLE_TX_DMA)
+#ifdef CONFIG_USART0_ENABLE_TX_DMA
 // static char s_tx_buffer[128];
 // static constexpr uint32_t kSizeTxBuffer = sizeof(s_tx_buffer);
 #endif // CONFIG_USART0_ENABLE_TX_DMA
 
-#if defined(CONFIG_USART0_ENABLE_RX_DMA)
+#ifdef CONFIG_USART0_ENABLE_RX_DMA
 static char s_rx_buffer[128];
 struct RxCount {
     uint16_t rx;
@@ -155,7 +152,7 @@ void Init() {
 #endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 }
 
-#if defined(CONFIG_USART0_ENABLE_TX_DMA)
+#ifdef CONFIG_USART0_ENABLE_TX_DMA
 void WriteDma(const void* data, uint32_t size) {
     assert(data != nullptr);
     assert(size <= DMA_CHXCNT_CNT);
@@ -212,7 +209,7 @@ void Puts(const char* string) {
     PutChar('\n');
 }
 
-#if defined(CONFIG_USART0_ENABLE_RX_DMA)
+#ifdef CONFIG_USART0_ENABLE_RX_DMA
 int GetChar() {
     if (sv_receive_flag != 1) [[unlikely]] {
         return EOF;
@@ -232,13 +229,13 @@ int GetChar() {
 }
 #else
 int GetChar() {
-    if (__builtin_expect((!gd32::UartFlagGet<USART_FLAG_RBNE>(USART0)), 1)) {
+    if (!gd32::UartFlagGet<USART_FLAG_RBNE>(USART0)) [[likely]] {
         return EOF;
     }
 
     const auto kChar = static_cast<int>(USART_RDATA(USART0));
 
-#if defined(UART0_ECHO)
+#ifdef UART0_ECHO
     PutChar(kChar);
 #endif // UART0_ECHO
 

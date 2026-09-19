@@ -26,9 +26,11 @@
 #ifndef APPS_NTPCLIENT_H_
 #define APPS_NTPCLIENT_H_
 
+#include <sys/time.h>
 #include <cstdint>
 
 #include "core/protocol/ntp.h"
+#include "gd32_ptp.h"
 
 #if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MIN)
 #define CONFIG_NTP_CLIENT_POLL_POWER_MIN 3
@@ -46,7 +48,7 @@ inline constexpr uint32_t kPollSecondsMin = (1U << kPollPowerMin);
 static_assert(kPollSecondsMin >= ntp::kMinpoll);
 inline constexpr uint32_t kPollSecondsMax = (1U << kPollPowerMax);
 
-void DisplayStatus(::ntp::Status status);
+void StatusChanged(::ntp::Status status);
 
 // Main NTP client interface
 void Init();
@@ -55,6 +57,9 @@ void Stop(bool do_disable = false);
 void SetServerIp(uint32_t server_ip);
 uint32_t GetServerIp();
 ntp::Status GetStatus();
+namespace systime {
+void TimeUpdated(const timeval& time_val);
+}
 
 // PTP (GD32 only)
 namespace ptp {
@@ -64,6 +69,9 @@ void Stop(bool do_disable = false);
 void SetServerIp(uint32_t server_ip);
 uint32_t GetServerIp();
 ntp::Status GetStatus();
+namespace systime {
+void TimeUpdated(const gd32::ptp::ptptime& time_val);
+}
 } // namespace ptp
 } // namespace network::apps::ntpclient
 

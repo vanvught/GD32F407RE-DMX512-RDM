@@ -357,7 +357,7 @@ void Init() {
     }
     s_timer_id = SoftwareTimerAdd(1000, LinkPollTimer);
     assert(s_timer_id >= 0);
-#endif
+#endif // defined(ENET_LINK_CHECK_USE_PIN_POLL) || defined(ENET_LINK_CHECK_REG_POLL)
 }
 
 #ifdef ENET_LINK_CHECK_USE_INT

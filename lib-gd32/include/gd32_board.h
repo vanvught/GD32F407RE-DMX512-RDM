@@ -108,11 +108,6 @@ extern usbh_host usb_host;
 void emac_debug_run();
 #endif // DEBUG_EMAC
 
-#if defined(USE_FREE_RTOS)
-#include "FreeRTOS.h"
-#include "task.h"
-#endif // USE_FREE_RTOS
-
 #include "softwaretimers.h" // IWYU pragma: keep
 #include "panelled.h"
 
@@ -121,9 +116,7 @@ inline void Run() {
 #if defined(ENABLE_USB_HOST)
     usbh_core_task(&usb_host);
 #endif // ENABLE_USB_HOST
-#if !defined(USE_FREE_RTOS)
     SoftwareTimerRun();
-#endif // USE_FREE_RTOS
     panelled::Run();
 #if defined(CONFIG_DEBUG_STACK)
     debug::stack::Run();

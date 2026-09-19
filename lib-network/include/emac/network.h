@@ -39,7 +39,7 @@
 #include "network_igmp.h" // IWYU pragma: keep
 #if defined(ENABLE_HTTPD)
 #include "network_tcp.h" // IWYU pragma: keep
-#endif                   // ENABLE_HTTPD
+#endif // ENABLE_HTTPD
 
 namespace network {
 void Init();

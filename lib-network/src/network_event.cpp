@@ -40,18 +40,15 @@ static constexpr uint32_t LINE_IP = 2;
 static constexpr uint32_t LINE_IP = CONFIG_DISPLAY_LINE_IP;
 #endif // CONFIG_DISPLAY_LINE_IP
 
-namespace network::event
-{
-void __attribute__((weak)) Ipv4AddressChanged()
-{
+namespace network::event {
+void __attribute__((weak)) Ipv4AddressChanged() {
 #if !defined(NO_EMAC)
     Display::Get()->ClearLine(LINE_IP);
     Display::Get()->Printf(LINE_IP, "" IPSTR "/%d %c", IP2STR(network::GetPrimaryIp()), network::GetNetmaskCIDR(), network::iface::AddressingMode());
 #endif // NO_EMAC
 }
 
-void __attribute__((weak)) Ipv4NetmaskChanged()
-{
+void __attribute__((weak)) Ipv4NetmaskChanged() {
 #if !defined(NO_EMAC)
     Ipv4AddressChanged();
 #endif // NO_EMAC
@@ -59,15 +56,13 @@ void __attribute__((weak)) Ipv4NetmaskChanged()
 
 void __attribute__((weak)) Ipv4GatewayChanged() {}
 
-void __attribute__((weak)) LinkUp()
-{
+void __attribute__((weak)) LinkUp() {
 #if !defined(NO_EMAC)
     emac::display::Status(true);
 #endif // NO_EMAC
 }
 
-void __attribute__((weak)) LinkDown()
-{
+void __attribute__((weak)) LinkDown() {
 #if !defined(NO_EMAC)
     emac::display::Status(false);
 #endif // NO_EMAC

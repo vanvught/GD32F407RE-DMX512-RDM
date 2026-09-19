@@ -37,24 +37,25 @@
 #include "timing.h" // IWYU pragma: keep
 #include "firmware/ansi_colour.h"
 #include "common/utils/utils_print.h"
+#include "firmware/debug/debug_debug.h"
 
 #ifdef DEBUG_SUPERLOOP_TIMERS
 #define SUPERLOOP_TIMERS_DEBUG_ENTRY() DEBUG_ENTRY()
 #define SUPERLOOP_TIMERS_DEBUG_EXIT() DEBUG_EXIT()
-#define SUPERLOOP_TIMERS_DEBUG_PRINTF(...) SUPERLOOP_TIMERS_DEBUG_PRINTF(__VA_ARGS__)
+#define SUPERLOOP_TIMERS_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define SUPERLOOP_TIMERS_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
 #define SUPERLOOP_TIMERS_DEBUG_ENTRY() \
-    do {                         \
+    do {                               \
     } while (false)
 #define SUPERLOOP_TIMERS_DEBUG_EXIT() \
-    do {                        \
+    do {                              \
     } while (false)
 #define SUPERLOOP_TIMERS_DEBUG_PRINTF(...) \
-    do {                             \
+    do {                                   \
     } while (false)
 #define SUPERLOOP_TIMERS_DEBUG_PUTS(...) \
-    do {                           \
+    do {                                 \
     } while (false)
 #endif
 
@@ -76,17 +77,6 @@ int32_t s_next_id = 0;              ///< Monotonically increasing ID source (may
 uint32_t s_timer_current = 0;       ///< bRound-robin cursor for SoftwareTimerRun().
 } // namespace
 
-/**
- * @brief Create and start a periodic software timer.
- *
- * @param interval_millis  Period in milliseconds.
- * @param kCallbackFunction Callback function. Must be non-null.
- * @return TimerHandle_t    A non-negative handle on success; -1 on failure (pool full or bad args).
- *
- * @warning Callbacks run in the context that calls SoftwareTimerRun(). Keep them short,
- *          non-blocking, and ISR-safe *only if* SoftwareTimerRun() is called from an ISR.
- * @note    The first expiration is scheduled relative to the current @ref Millis().
- */
 TimerHandle_t SoftwareTimerAdd(uint32_t interval_millis, TimerCallbackFunction_t k_callback_function) {
     SUPERLOOP_TIMERS_DEBUG_ENTRY();
     SUPERLOOP_TIMERS_DEBUG_PRINTF("s_timers_count=%u", static_cast<unsigned>(s_timers_count));
@@ -108,23 +98,14 @@ TimerHandle_t SoftwareTimerAdd(uint32_t interval_millis, TimerCallbackFunction_t
 
     s_timers[s_timers_count++] = new_timer;
 
+    SUPERLOOP_TIMERS_DEBUG_PRINTF("handle=%d", static_cast<int>(new_timer.id));
     SUPERLOOP_TIMERS_DEBUG_EXIT();
     return new_timer.id;
 }
 
-/**
- * @brief Delete a timer.
- *
- * @param id [in,out] Handle to delete. Set to -1 on success.
- * @return true  If a timer with the given handle was found and removed.
- * @return false Otherwise.
- *
- * @note Deletion is O(1): the removed slot is replaced with the last active timer.
- *       This changes the order of timers.
- */
 bool SoftwareTimerDelete(TimerHandle_t& handle) {
     SUPERLOOP_TIMERS_DEBUG_ENTRY();
-    SUPERLOOP_TIMERS_DEBUG_PRINTF("s_timers_count=%u", static_cast<unsigned>(s_timers_count));
+    SUPERLOOP_TIMERS_DEBUG_PRINTF("handle=%d, s_timers_count=%u", static_cast<signed>(handle), static_cast<unsigned>(s_timers_count));
 
     for (uint32_t i = 0; i < s_timers_count; ++i) {
         if (s_timers[i].id == handle) {
@@ -138,7 +119,7 @@ bool SoftwareTimerDelete(TimerHandle_t& handle) {
 
             handle = -1;
 
-            SUPERLOOP_TIMERS_DEBUG_ENTRY();
+            SUPERLOOP_TIMERS_DEBUG_EXIT();
             return true;
         }
     }
@@ -149,17 +130,9 @@ bool SoftwareTimerDelete(TimerHandle_t& handle) {
     return false;
 }
 
-/**
- * @brief Change a timer’s period and restart its countdown from now.
- *
- * @param id              Timer handle.
- * @param interval_millis New period in milliseconds (0 => one-shot).
- * @return true  On success.
- * @return false If the handle was not found.
- */
 bool SoftwareTimerChange(TimerHandle_t handle, uint32_t interval_millis) {
     SUPERLOOP_TIMERS_DEBUG_ENTRY();
-    SUPERLOOP_TIMERS_DEBUG_PRINTF("s_timers_count=%u", static_cast<unsigned>(s_timers_count));
+    SUPERLOOP_TIMERS_DEBUG_PRINTF("handle=%d, s_timers_count=%u", static_cast<signed>(handle), static_cast<unsigned>(s_timers_count));
 
     for (uint32_t i = 0; i < s_timers_count; ++i) {
         if (s_timers[i].id == handle) {
@@ -176,16 +149,6 @@ bool SoftwareTimerChange(TimerHandle_t handle, uint32_t interval_millis) {
     return false;
 }
 
-/**
- * @brief Service one timer slot.
- *
- * If the current slot has expired, its callback is invoked exactly once. The
- * timer is then rescheduled if it is periodic.
- *
- * @note This function is intentionally O(1) per invocation.
- * @note If callbacks delete or add timers, this remains safe due to the
- *       swap-delete approach and the post-callback cursor normalization.
- */
 void SoftwareTimerRun() {
     if (s_timers_count == 0) [[unlikely]] {
         return;

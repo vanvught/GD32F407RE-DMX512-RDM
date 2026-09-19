@@ -311,7 +311,7 @@ void UartTransmit(uint32_t usart_periph, const uint8_t* data, uint32_t length) {
     while (length-- != 0) {
         while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE)) {
         }
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & *data++;
 #else
         USART_DATA(usart_periph) = (USART_DATA_DATA & *data++);
@@ -325,9 +325,9 @@ void UartTransmitString(uint32_t usart_periph, const char* data) {
     }
 
     while (*data != '\0') {
-        while (RESET == usart_flag_get(USART0, USART_FLAG_TBE)) {
+        while (RESET == usart_flag_get(usart_periph, USART_FLAG_TBE)) {
         }
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         USART_TDATA(usart_periph) = USART_TDATA_TDATA & *data++;
 #else
         USART_DATA(usart_periph) = (USART_DATA_DATA & *data++);

@@ -39,34 +39,14 @@
 #include <ctime>
 #include <sys/time.h>
 
-#include "network.h"
+#include "network_udp.h"
 #include "configstore.h"
 #include "core/protocol/ntp.h"
 #include "core/protocol/iana.h"
 #include "apps/ntpclient.h"
 #include "softwaretimers.h"
 #include "configurationstore.h"
-#include "firmware/debug/debug_debug.h"
-
-#ifdef DEBUG_NTP_CLIENT
-#define NTP_CLIENT_DEBUG_ENTRY() DEBUG_ENTRY()
-#define NTP_CLIENT_DEBUG_EXIT() DEBUG_EXIT()
-#define NTP_CLIENT_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
-#define NTP_CLIENT_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
-#else
-#define NTP_CLIENT_DEBUG_ENTRY() \
-    do {                    \
-    } while (false)
-#define NTP_CLIENT_DEBUG_EXIT() \
-    do {                    \
-    } while (false)
-#define NTP_CLIENT_DEBUG_PRINTF(...) \
-    do {                         \
-    } while (false)
-#define NTP_CLIENT_DEBUG_PUTS(...) \
-    do {                       \
-    } while (false)
-#endif // DEBUG_NTP_CLIENT
+#include "apps/ntpclient_debug.h"
 
 namespace network::apps::ntpclient {
 /*
@@ -102,10 +82,7 @@ Transmit Timestamp    T3   time reply sent by server
 Destination Timestamp T4   time reply received by client
  */
 
-/**
- * @struct ntpClient
- * @brief Structure representing the state and configuration of the NTP client.
- */
+namespace {
 struct NtpClient {
     uint32_t server_ip;       ///< IP address of the NTP server.
     int32_t handle;           ///< Handle for UDP socket communication.
@@ -123,19 +100,22 @@ struct NtpClient {
 };
 
 // Local instance of the NTP client structure.
-static NtpClient s_ntp_client;
-static constexpr uint32_t kRequestSize = sizeof s_ntp_client.request;
+NtpClient s_ntp_client;
+constexpr uint32_t kRequestSize = sizeof s_ntp_client.request;
 
-static void Send();
+void Send();
 
-/**
- * @brief Timer callback function for handling periodic tasks.
- *
- * This function manages polling intervals and request timeouts.
- *
- * @param handle Timer handle for the callback (unused).
- */
-static void NtpClientTimer([[maybe_unused]] TimerHandle_t handle) {
+void SetStatus(ntp::Status status) {
+    if (s_ntp_client.status == status) {
+        return;
+    }
+
+    s_ntp_client.status = status;
+
+    ntpclient::StatusChanged(status);
+}
+
+void NtpClientTimer([[maybe_unused]] TimerHandle_t handle) {
     assert(s_ntp_client.status != ntp::Status::kStopped);
     assert(s_ntp_client.status != ntp::Status::kDisabled);
 
@@ -146,8 +126,7 @@ static void NtpClientTimer([[maybe_unused]] TimerHandle_t handle) {
         }
 
         if (s_ntp_client.request_timeout == 1) {
-            s_ntp_client.status = ntp::Status::kFailed;
-            ntpclient::DisplayStatus(ntp::Status::kFailed);
+            ntpclient::SetStatus(ntp::Status::kFailed);
             s_ntp_client.poll_seconds = ntpclient::kPollSecondsMin;
             return;
         }
@@ -164,7 +143,7 @@ static void NtpClientTimer([[maybe_unused]] TimerHandle_t handle) {
     }
 }
 
-static void PrintNtpTime([[maybe_unused]] const char* text, [[maybe_unused]] const struct ntp::TimeStamp* ntp_time) {
+void PrintNtpTime([[maybe_unused]] const char* text, [[maybe_unused]] const struct ntp::TimeStamp* ntp_time) {
 #ifndef NDEBUG
     const auto kSeconds = static_cast<time_t>(ntp_time->seconds - ntp::kJan1970);
     const auto* local_time = localtime(&kSeconds);
@@ -172,28 +151,15 @@ static void PrintNtpTime([[maybe_unused]] const char* text, [[maybe_unused]] con
 #endif // NDEBUG
 }
 
-static struct timeval now;
+struct timeval now;
 
-/**
- * @brief Converts the current time to NTP format.
- *
- * This function retrieves the current system time and converts it to the
- * NTP timestamp format, including both seconds and fractional seconds.
- *
- * @param[out] seconds Number of seconds since 01/01/1900.
- * @param[out] fraction Fractional part of a second in NTP format.
- */
-static void GetTimeNtpFormat(uint32_t& seconds, uint32_t& fraction) {
+void GetTimeNtpFormat(uint32_t& seconds, uint32_t& fraction) {
     gettimeofday(&now, nullptr);
     seconds = static_cast<uint32_t>(now.tv_sec) + ntp::kJan1970;
     fraction = NTPFRAC(now.tv_usec);
 }
 
-/**
- * @brief Sends an NTP request to the configured server.
- *
- */
-static void Send() {
+void Send() {
     GetTimeNtpFormat(s_ntp_client.t1.seconds, s_ntp_client.t1.fraction);
 
     s_ntp_client.request.transmit_timestamp_s = __builtin_bswap32(s_ntp_client.t1.seconds);
@@ -202,19 +168,10 @@ static void Send() {
     network::udp::Send(s_ntp_client.handle, reinterpret_cast<const uint8_t*>(&s_ntp_client.request), kRequestSize, s_ntp_client.server_ip, iana::Ports::kPortNtp);
 
     s_ntp_client.request_timeout = ntpclient::kTimeoutSeconds;
-    s_ntp_client.status = ntp::Status::kWaiting;
-    ntpclient::DisplayStatus(ntp::Status::kWaiting);
+    ntpclient::SetStatus(ntp::Status::kWaiting);
 }
 
-/**
- * @brief Computes the time difference between two NTP timestamps.
- *
- * @param Start Start timestamp.
- * @param Stop Stop timestamp.
- * @param[out] nDiffSeconds Difference in seconds.
- * @param[out] nDiffMicroSeconds Difference in microseconds.
- */
-static void Difference(const struct ntp::TimeStamp& start, const struct ntp::TimeStamp& stop, int32_t& diff_seconds, int32_t& diff_micro_seconds) {
+void Difference(const struct ntp::TimeStamp& start, const struct ntp::TimeStamp& stop, int32_t& diff_seconds, int32_t& diff_micro_seconds) {
     ntp::Time r;
     const ntp::Time kX = {.tv_sec = static_cast<int32_t>(stop.seconds), .tv_usec = static_cast<int32_t>(USEC(stop.fraction))};
     const ntp::Time kY = {.tv_sec = static_cast<int32_t>(start.seconds), .tv_usec = static_cast<int32_t>(USEC(start.fraction))};
@@ -224,13 +181,7 @@ static void Difference(const struct ntp::TimeStamp& start, const struct ntp::Tim
     diff_micro_seconds = r.tv_usec;
 }
 
-/**
- * @brief Updates the system time based on NTP timestamps.
- *
- * This function calculates the time offset using NTP timestamps and adjusts
- * the system time accordingly.
- */
-static void SetTimeOfDay() {
+void SetTimeOfDay() {
     int32_t diff_seconds1;
     int32_t diff_seconds2;
     int32_t diff_micro_seconds1;
@@ -248,33 +199,36 @@ static void SetTimeOfDay() {
     ntp::Time ntp_offset = {.tv_sec = kOffsetSecondsAverage, .tv_usec = kOffsetMicrosAverage};
     ntp::NormalizeTime(&ntp_offset);
 
-    struct timeval tv;
+    struct timeval time_val;
 
-    tv.tv_sec = now.tv_sec + kOffsetSecondsAverage;
-    tv.tv_usec = now.tv_usec + kOffsetMicrosAverage;
+    time_val.tv_sec = now.tv_sec + kOffsetSecondsAverage;
+    time_val.tv_usec = now.tv_usec + kOffsetMicrosAverage;
 
-    if (tv.tv_usec >= 1000000) {
-        tv.tv_sec += tv.tv_usec / 1000000; // Add extra seconds
-        tv.tv_usec %= 1000000;             // Keep only the remainder microseconds
-    } else if (tv.tv_usec < 0) {
-        tv.tv_sec -= 1 + (-tv.tv_usec / 1000000);       // Subtract extra seconds
-        tv.tv_usec = 1000000 - (-tv.tv_usec % 1000000); // Adjust microseconds
+    if (time_val.tv_usec >= 1000000) {
+        time_val.tv_sec += time_val.tv_usec / 1000000; // Add extra seconds
+        time_val.tv_usec %= 1000000;                   // Keep only the remainder microseconds
+    } else if (time_val.tv_usec < 0) {
+        time_val.tv_sec -= 1 + (-time_val.tv_usec / 1000000);       // Subtract extra seconds
+        time_val.tv_usec = 1000000 - (-time_val.tv_usec % 1000000); // Adjust microseconds
     }
 
-    settimeofday(&tv, nullptr);
+    settimeofday(&time_val, nullptr);
 
     if ((ntp_offset.tv_sec == 0) && (ntp_offset.tv_usec > -999) && (ntp_offset.tv_usec < 999)) {
-        s_ntp_client.status = ntp::Status::kLocked;
-        ntpclient::DisplayStatus(ntp::Status::kLocked);
+        ntpclient::SetStatus(ntp::Status::kLocked);
+
         if (++s_ntp_client.locked_count == 4) {
             s_ntp_client.poll_seconds = ntpclient::kPollSecondsMax;
         }
     } else {
-        s_ntp_client.status = ntp::Status::kIdle;
-        ntpclient::DisplayStatus(ntp::Status::kIdle);
+        ntpclient::SetStatus(ntp::Status::kIdle);
+
         s_ntp_client.poll_seconds = ntpclient::kPollSecondsMin;
         s_ntp_client.locked_count = 0;
     }
+
+    // At this time we know the status
+    systime::TimeUpdated(time_val);
 
 #ifndef NDEBUG
     const auto kTime = time(nullptr);
@@ -308,31 +262,10 @@ static void SetTimeOfDay() {
         sign = '-';
     }
 
-    printf(" offset=%c%d.%06d delay=%d.%06d\n", 
-		sign, 
-		static_cast<int>(ntp_offset.tv_sec), 
-		static_cast<int>(ntp_offset.tv_usec), 
-		static_cast<int>(ntp_delay.tv_sec), 
-		static_cast<int>(ntp_delay.tv_usec));
+    printf(" offset=%c%d.%06d delay=%d.%06d\n", sign, static_cast<int>(ntp_offset.tv_sec), static_cast<int>(ntp_offset.tv_usec), static_cast<int>(ntp_delay.tv_sec), static_cast<int>(ntp_delay.tv_usec));
 #endif // NDEBUG
 }
 
-/**
- * @brief Processes an incoming NTP response.
- *
- * This function is called when an NTP response packet is received. It validates
- * the response, extracts the timestamps, and updates the system time if the
- * response is valid.
- *
- * @param[in] buffer Pointer to the buffer containing the NTP response packet.
- * @param[in] size Size of the received packet in bytes (unused).
- * @param[in] from_ip IP address of the sender.
- * @param[in] from_port Port number of the sender (unused).
- *
- * @note This function verifies that the response is from the expected server and
- *       that it has a valid mode. If valid, it updates the system time using
- *       the extracted timestamps.
- */
 void Input(const uint8_t* buffer, [[maybe_unused]] uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
     const auto* reply = reinterpret_cast<const ntp::Packet*>(buffer);
 
@@ -352,7 +285,7 @@ void Input(const uint8_t* buffer, [[maybe_unused]] uint32_t size, uint32_t from_
     const uint8_t kMode = (kLiVnMode >> 0) & 0x07;
 
     // Basic sanity: version 3 or 4, and mode "server"
-    if (!((kVn == 3) || (kVn == 4))) [[unlikely]] {
+    if ((kVn != 3) && (kVn != 4)) [[unlikely]] {
         return;
     }
 
@@ -389,36 +322,24 @@ void Input(const uint8_t* buffer, [[maybe_unused]] uint32_t size, uint32_t from_
 
     SetTimeOfDay();
 }
+} // namespace
 
 #pragma GCC pop_options
 #pragma GCC push_options
 #pragma GCC optimize("Os")
 
-/**
- * @brief Initializes the Precision Time Protocol (PTP) NTP client.
- *
- * This function performs the initial setup for the NTP client, including
- * clearing its state, setting default values, and loading network parameters
- * such as the NTP server's IP address.
- *
- * The initialization includes:
- * - Resetting all state variables to their default values.
- * - Configuring the initial NTP request packet parameters.
- * - Setting the client status to `IDLE`.
- * - Initializing the random number generator using the current system time.
- * - Loading network parameters to retrieve the configured NTP server IP address.
- *
- * @note This function must be called before starting the NTP client.
- */
 void Init() {
     NTP_CLIENT_DEBUG_ENTRY();
 
     memset(&s_ntp_client, 0, sizeof(struct NtpClient));
 
+    s_ntp_client.timer_id = kTimerIdNone;
     s_ntp_client.handle = -1;
+
     s_ntp_client.request.li_vn_mode = ntp::kVersion | ntp::kModeClient;
     s_ntp_client.request.poll = ntpclient::kPollPowerMin;
     s_ntp_client.request.reference_id = ('A' << 0) | ('V' << 8) | ('S' << 16);
+
     s_ntp_client.server_ip = ConfigStore::Instance().NetworkGet(&common::store::Network::ntp_server_ip);
 
     if (s_ntp_client.server_ip == 0) {
@@ -428,15 +349,6 @@ void Init() {
     NTP_CLIENT_DEBUG_EXIT();
 }
 
-/**
- * @brief Starts the NTP client.
- *
- * This function initializes the UDP socket for NTP communication, starts a software
- * timer for periodic tasks, and sends the first NTP request to the server.
- *
- * @note The function will not start the client if it is disabled or if the server
- *       IP address is not configured.
- */
 void Start() {
     NTP_CLIENT_DEBUG_ENTRY();
 
@@ -446,8 +358,7 @@ void Start() {
     }
 
     if (s_ntp_client.server_ip == 0) {
-        s_ntp_client.status = ntp::Status::kStopped;
-        ntpclient::DisplayStatus(ntp::Status::kStopped);
+        SetStatus(ntp::Status::kStopped);
         NTP_CLIENT_DEBUG_EXIT();
         return;
     }
@@ -455,30 +366,22 @@ void Start() {
     s_ntp_client.handle = network::udp::Begin(iana::Ports::kPortNtp, Input);
     assert(s_ntp_client.handle != -1);
 
-    s_ntp_client.status = ntp::Status::kIdle;
-    ntpclient::DisplayStatus(ntp::Status::kIdle);
+    SetStatus(ntp::Status::kIdle);
 
-    s_ntp_client.timer_id = SoftwareTimerAdd(1000, NtpClientTimer);
+    if (kTimerIdNone == s_ntp_client.timer_id) {
+        s_ntp_client.timer_id = SoftwareTimerAdd(1000, NtpClientTimer);
+    }
 
     Send();
 
     NTP_CLIENT_DEBUG_EXIT();
 }
 
-/**
- * @brief Stops the NTP client.
- *
- * This function stops the software timer and closes the UDP socket. It optionally
- * disables the client if the `doDisable` parameter is set to `true`.
- *
- * @param[in] do_disable Set to `true` to disable the client after stopping.
- */
 void Stop(bool do_disable) {
     NTP_CLIENT_DEBUG_ENTRY();
 
     if (do_disable) {
-        s_ntp_client.status = ntp::Status::kDisabled;
-        ntpclient::DisplayStatus(ntp::Status::kDisabled);
+        SetStatus(ntp::Status::kDisabled);
     }
 
     if (s_ntp_client.status == ntp::Status::kStopped) {
@@ -491,20 +394,12 @@ void Stop(bool do_disable) {
     s_ntp_client.handle = -1;
 
     if (!do_disable) {
-        s_ntp_client.status = ntp::Status::kStopped;
-        ntpclient::DisplayStatus(ntp::Status::kStopped);
+        SetStatus(ntp::Status::kStopped);
     }
 
     NTP_CLIENT_DEBUG_EXIT();
 }
 
-/**
- * @brief Sets the IP address of the NTP server.
- *
- * This function updates the server IP address used by the NTP client.
- *
- * @param[in] server_ip The IP address of the NTP server.
- */
 void SetServerIp(uint32_t server_ip) {
     Stop();
 
@@ -513,22 +408,10 @@ void SetServerIp(uint32_t server_ip) {
     Start();
 }
 
-/**
- * @brief Retrieves the IP address of the configured NTP server.
- *
- * @return The IP address of the NTP server.
- */
 uint32_t GetServerIp() {
     return s_ntp_client.server_ip;
 }
 
-/**
- * @brief Retrieves the current status of the NTP client.
- *
- * This function returns the current operational status of the NTP client.
- *
- * @return The status of the NTP client as an `ntp::Status` enum.
- */
 ntp::Status GetStatus() {
     return s_ntp_client.status;
 }

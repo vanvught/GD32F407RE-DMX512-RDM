@@ -32,8 +32,7 @@
 
 class Max7219Matrix : public MAX7219 {
    public:
-    Max7219Matrix();
-    ~Max7219Matrix();
+    Max7219Matrix() noexcept;
 
     void SetIntensity(uint8_t intensity) { WriteAll(max7219::reg::kIntensity, intensity & 0x0F); }
 
@@ -57,7 +56,6 @@ class Max7219Matrix : public MAX7219 {
    private:
     void WriteAll(uint8_t reg, uint8_t data);
 
-   private:
     uint16_t count_{4};
 };
 

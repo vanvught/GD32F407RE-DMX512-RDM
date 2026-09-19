@@ -52,13 +52,13 @@ enum class Uart : uint32_t {
     kUart2 = USART2,
     kUart3 = UART3,
     kUart4 = UART4,
-#if defined(USART5)
+#ifdef USART5
     kUart5 = USART5,
 #endif // USART5
-#if defined(UART6)
+#ifdef UART6
     kUart6 = UART6,
 #endif // UART6
-#if defined(UART7)
+#ifdef UART7
     kUart7 = UART7
 #endif // UART7
 };
@@ -84,7 +84,7 @@ template <usart_flag_enum kFlag> bool UartFlagGet(uint32_t usart_periph) {
 template <usart_flag_enum kFlag> void UartFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
     USART_REG_VAL(usart_periph, kFlag) = ~BIT(USART_BIT_POS(kFlag));
-#elif defined(GD32F4XX)
+#elifdef GD32F4XX
     USART_REG_VAL(usart_periph, kFlag) &= ~BIT(USART_BIT_POS(kFlag));
 #elif defined(GD32H7XX)
     if constexpr (USART_FLAG_AM1 == kFlag) {
@@ -112,7 +112,7 @@ template <uint32_t kInterrupt> void UartInterruptDisable(uint32_t usart_periph) 
 template <usart_interrupt_flag_enum kFlag> void UartInterruptFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
     USART_REG_VAL2(usart_periph, kFlag) = ~BIT(USART_BIT_POS2(kFlag));
-#elif defined(GD32F4XX)
+#elifdef GD32F4XX
     USART_REG_VAL2(usart_periph, kFlag) &= ~BIT(USART_BIT_POS2(kFlag));
 #elif defined(GD32H7XX)
     if constexpr (USART_INT_FLAG_TFE == kFlag) {

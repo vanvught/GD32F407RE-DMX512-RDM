@@ -333,7 +333,7 @@ uint8_t* SendGetDmaBuffer() {
 
 // Transmits an Ethernet frame.
 void Send(uint32_t length) {
-    debug::Dump(reinterpret_cast<uint8_t*>(dma_current_txdesc->buffer1_addr), length);
+//  debug::Dump(reinterpret_cast<uint8_t*>(dma_current_txdesc->buffer1_addr), length);
 
     dma_current_txdesc->control_buffer_size = length;              ///< Set the frame length
     dma_current_txdesc->status |= ENET_TDES0_LSG | ENET_TDES0_FSG; ///< Set the segment of frame, frame is transmitted in one descriptor

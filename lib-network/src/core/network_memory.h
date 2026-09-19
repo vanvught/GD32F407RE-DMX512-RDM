@@ -162,7 +162,7 @@ class Allocator {
         const uint32_t kUsedMask = (~free_mask_) & kAllMask;
         printf("free_mask=0x%08x used_mask=0x%08x free=%u used=%u\n", free_mask_, kUsedMask, __builtin_popcount(free_mask_), __builtin_popcount(kUsedMask));
         printf("IsEmpty=%c IsFull=%c\n", IsEmpty() ? 'Y' : 'N', IsFull() ? 'Y' : 'N');
-#endif // defined DEBUG_NETWORK_MEMORY
+#endif // DEBUG_NETWORK_MEMORY
     }
 
    private:

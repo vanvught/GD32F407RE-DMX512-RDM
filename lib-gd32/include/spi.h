@@ -113,13 +113,12 @@ class Spi {
     }
 
    private:
-    void Setup() {
+    void Setup() const {
         Gd32SpiChipSelect(chip_select_);
         Gd32SpiSetDataMode(mode_);
         Gd32SpiSetSpeedHz(speed_hz_);
     }
 
-   private:
     uint32_t speed_hz_;
     uint8_t chip_select_;
     uint8_t mode_;

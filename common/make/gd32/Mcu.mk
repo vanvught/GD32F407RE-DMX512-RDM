@@ -21,6 +21,10 @@ $(info $$MCU_UC [${MCU_UC}])
 
 # Set LINKER, FAMILY, and LINE based on MCU
 
+ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+BL=-bootloader
+endif
+
 ifeq ($(strip $(MCU)),GD32F103RC)
 	LINKER=$(FIRMWARE_DIR)gd32f103rc_flash.ld
 	FAMILY=gd32f10x
@@ -29,32 +33,20 @@ ifeq ($(strip $(MCU)),GD32F103RC)
 endif
 
 ifeq ($(strip $(MCU)),GD32F107RC)
-	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
-  	LINKER=$(FIRMWARE_DIR)gd32f107rc-bootloader_flash.ld
-  else
-		LINKER=$(FIRMWARE_DIR)gd32f107rc_flash.ld
-	endif
+	LINKER=$(FIRMWARE_DIR)gd32f107rc$(BL)_flash.ld
 	FAMILY=gd32f10x
 	LINE=gd32f10x_cl
 	TARGET=gd32f107.bin
 endif
 
 ifeq ($(strip $(MCU)),GD32F207VC)
-	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
-  	LINKER=$(FIRMWARE_DIR)gd32f207vc-bootloader_flash.ld
-  else
-		LINKER=$(FIRMWARE_DIR)gd32f207vc_flash.ld
-	endif
+	LINKER=$(FIRMWARE_DIR)gd32f207vc$(BL)_flash.ld
 	FAMILY=gd32f20x
 	LINE=gd32f20x_cl
 endif
 	
 ifeq ($(strip $(MCU)),GD32F207RG)
-	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
-  	LINKER=$(FIRMWARE_DIR)gd32f207rg-bootloader_flash.ld
-  else
-  	LINKER=$(FIRMWARE_DIR)gd32f207rg_flash.ld
-  endif
+ 	LINKER=$(FIRMWARE_DIR)gd32f207rg$(BL)_flash.ld
 	FAMILY=gd32f20x
 	LINE=gd32f20x_cl
 endif
@@ -67,35 +59,37 @@ ifeq ($(strip $(MCU)),GD32F303RC)
 endif
 
 ifeq ($(strip $(MCU)),GD32F407RE) 
-	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
-  	LINKER=$(FIRMWARE_DIR)gd32f407re-bootloader_flash.ld
-  else
-		LINKER=$(FIRMWARE_DIR)gd32f407re_flash.ld
-  endif
+	LINKER=$(FIRMWARE_DIR)gd32f407re$(BL)_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f407
 endif
 
+ifeq ($(strip $(MCU)),GD32F427RE) 
+	LINKER=$(FIRMWARE_DIR)gd32f427re$(BL)_flash.ld
+  FAMILY=gd32f4xx
+  LINE=gd32f427
+endif
+
 ifeq ($(strip $(MCU)),GD32F450VI) 
-  LINKER=$(FIRMWARE_DIR)gd32f450vi_flash.ld
+ 	LINKER=$(FIRMWARE_DIR)gd32f450vi$(BL)_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f450
 endif
 
 ifeq ($(strip $(MCU)),GD32F470VG) 
-  LINKER=$(FIRMWARE_DIR)gd32f470vg_flash.ld
+ 	LINKER=$(FIRMWARE_DIR)gd32f470vg$(BL)_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f470
 endif
 
-ifeq ($(strip $(MCU)),GD32F470ZK) 
-  LINKER=$(FIRMWARE_DIR)gd32f470zk_flash.ld
+ifeq ($(strip $(MCU)),GD32F470ZK)
+  LINKER=$(FIRMWARE_DIR)gd32f470zk$(BL)_flash.ld
   FAMILY=gd32f4xx
   LINE=gd32f470
 endif
 
 ifeq ($(strip $(MCU)),GD32H759IM) 
-  LINKER=$(FIRMWARE_DIR)gd32h7xx_xM_flash.ld
+  LINKER=$(FIRMWARE_DIR)gd32h7xx_xM_$(BL)flash.ld
   FAMILY=gd32h7xx
   LINE=gd32h759
 endif

@@ -1,8 +1,8 @@
 /**
- * @file max72197segment.h
+ * @file ntpclient_systime_timeupdate.cpp
  *
  */
-/* Copyright (C) 2020-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,36 +23,8 @@
 * THE SOFTWARE.
 */
 
-#ifndef MAX72197SEGMENT_H_
-#define MAX72197SEGMENT_H_
+#include "gd32_ptp.h"
 
-#include "max7219.h"
-
-class Max72197Segment : public MAX7219 {
-   public:
-    Max72197Segment() noexcept = default;
-
-    void Init(uint8_t intensity) {
-        WriteRegister(max7219::reg::kShutdown, max7219::reg::shutdown::kNormalOp, true);
-        WriteRegister(max7219::reg::kDisplayTest, 0, false);
-        WriteRegister(max7219::reg::kDecodeMode, max7219::reg::decode_mode::kCodeb, false);
-        WriteRegister(max7219::reg::kScanLimit, 7, false);
-
-        SetIntensity(intensity);
-        Cls();
-    }
-
-    void SetIntensity(uint8_t intensity) { WriteRegister(max7219::reg::kIntensity, intensity & 0x0F, false); }
-
-    void Cls() {
-        WriteRegister(8, max7219::digit::kBlank, true);
-
-        uint32_t index = 7;
-
-        do {
-            WriteRegister(index, max7219::digit::kBlank, false);
-        } while (--index > 0);
-    }
-};
-
-#endif // MAX72197SEGMENT_H_
+namespace network::apps::ntpclient::ptp::systime {
+void __attribute__((weak)) TimeUpdated([[maybe_unused]] const gd32::ptp::ptptime& ptptime) {}
+} // namespace network::apps::ntpclient::ptp::systime
