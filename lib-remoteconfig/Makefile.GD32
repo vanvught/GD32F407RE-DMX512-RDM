@@ -1,9 +1,15 @@
-DEFINES=DISABLE_FS 
+DEFINES= 
 DEFINES+=NDEBUG
 
 ENET_PHY=RTL8201F
 
 EXTRA_INCLUDES=../lib-dmxnode/include
+
+ifneq ($(MAKE_FLAGS),)
+	ifeq ($(findstring CONFIG_REMOTECONFIG_MINIMUM,$(MAKE_FLAGS)),CONFIG_REMOTECONFIG_MINIMUM)
+		EXTRA_SRCDIR+=src/tftp src/gd32/tftp
+	endif
+endif
 
 include Rules.mk
 include ../firmware-template-gd32/lib/Rules.mk
