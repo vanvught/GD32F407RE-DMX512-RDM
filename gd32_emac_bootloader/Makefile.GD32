@@ -1,0 +1,15 @@
+BOARD=BOARD_GD32F407RE
+
+#
+DEFINES =CONFIG_CLIB_USE_UART0
+
+DEFINES+=NDEBUG
+
+LIBS=
+
+SRCDIR=firmware lib
+
+include Common.mk
+include ../firmware-template-gd32/Rules.mk
+
+prerequisites:

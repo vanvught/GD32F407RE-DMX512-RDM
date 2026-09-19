@@ -1,0 +1,14 @@
+BOARD=BOARD_BW_OPIDMX4
+
+DEFINES =CONFIG_CLIB_USE_NULL
+
+DEFINES+=NDEBUG
+
+LIBS=
+
+SRCDIR=firmware lib
+
+include Common.mk
+include ../firmware-template-gd32/Rules.mk
+
+prerequisites:
