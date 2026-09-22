@@ -60,7 +60,7 @@ void Stop(struct acd::Acd*);
 void ArpReply(const struct network::arp::Header*);
 
 void NetworkChangedLinkDown();
-void NetifIpAddrChanged(ip4_addr_t old_ip_address, ip4_addr_t new_ip_address);
+void NetifIpAddrChanged(ip4_addr_t old_address, ip4_addr_t new_address);
 } // namespace network::acd
 
 #endif // CORE_IP4_ACD_H_

@@ -36,13 +36,11 @@ INCLUDES+=-I../lib-configstore/include -I../lib-device/include -I../lib-display/
 COPS=-DGD32 -D$(FAMILY_UCA) -D$(LINE_UC) -D$(MCU) -D$(BOARD)
 COPS+=$(strip $(DEFINES) $(MAKE_FLAGS) $(VALIDATE_FLAGS) $(INCLUDES))
 COPS+=$(strip $(ARMOPS) $(CMSISOPS))
-COPS+=-Os -nostartfiles -ffreestanding -nostdlib
+COPS+=-Os -nostartfiles -fno-builtin  -D_GNU_SOURCE
 COPS+=-fstack-usage
 COPS+=-ffunction-sections -fdata-sections
 COPS+=-Wall -Werror -Wpedantic -Wextra -Wunused -Wsign-conversion -Wduplicated-cond -Wlogical-op
-ifndef FREE_RTOS_PORTABLE
-COPS+=-Wconversion
-endif
+COPS+=--specs=nano.specs
 COPS+=-flto=auto
 
 include ../common/make/CppOps.mk

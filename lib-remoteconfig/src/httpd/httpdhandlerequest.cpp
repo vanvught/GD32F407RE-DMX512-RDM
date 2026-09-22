@@ -39,8 +39,8 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <span>
 #include <cassert>
+#include <strings.h>
 
 #include "http/http.h"
 #include "httpd/httpdhandlerequest.h"

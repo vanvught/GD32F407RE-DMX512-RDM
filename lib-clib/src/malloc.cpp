@@ -32,10 +32,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
-#ifdef DEBUG_HEAP
-#undef NDEBUG
-#endif // DEBUG_HEAP
-
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -76,9 +72,9 @@ static unsigned char* block_limit = &heap_top;
 
 static constexpr unsigned int kBlockMagic = 0x424C4D43;
 
-#if defined(H3)
+#ifdef H3
 #include "h3/malloc.h"
-#elif defined(GD32)
+#elifdef GD32
 #include "gd32/malloc.h"
 #else
 #include "rpi/malloc.h"
@@ -282,13 +278,15 @@ void DebugHeap() {
     struct BlockBucket* bucket;
 
     for (bucket = s_block_bucket; bucket->size > 0; bucket++) {
-        struct BlockHeader* free_list = bucket->free_list;
-	        printf("malloc(%u): %u blocks (max %u), FreeList %p (next %p)\n", 
-			bucket->size, 
-			bucket->count, 
-			bucket->max_count, 
-			reinterpret_cast<void*>(free_list), 
-			reinterpret_cast<void*>(free_list->next));
+      auto* const free_list = bucket->free_list;
+      auto* const next = free_list != nullptr ? free_list->next : nullptr;
+
+      printf("malloc(%u): %u blocks (max %u), FreeList %p (next %p)\n",
+             bucket->size,
+             bucket->count,
+             bucket->max_count,
+             reinterpret_cast<void*>(free_list),
+             reinterpret_cast<void*>(next));
        
 		 struct BlockHeader* block_header;
 
@@ -307,6 +305,27 @@ void DebugHeap() {
         }
     }
 #endif // DEBUG_HEAP
+}
+
+#include <reent.h>
+
+extern "C" {
+void* _malloc_r(struct _reent*, size_t size) {
+    return malloc(size);
+}
+
+void _free_r(struct _reent*, void* ptr) {
+    free(ptr);
+}
+
+void* _calloc_r(struct _reent*, size_t n, size_t size) {
+    return calloc(n, size);
+}
+
+void* _realloc_r(struct _reent*, void* ptr, size_t size) {
+    return realloc(ptr, size);
+}
+
 }
 
 #pragma GCC diagnostic pop

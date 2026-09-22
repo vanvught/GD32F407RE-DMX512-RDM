@@ -29,7 +29,7 @@
 #include "board_statusled.h"
 #if !defined(DISABLE_RTC)
 #include "hwclock.h"
-#endif
+#endif // DISABLE_RTC
 #include "configstore.h"
 #include "gd32.h" // IWYU pragma: keep
 
@@ -37,22 +37,23 @@
 namespace network {
 void Shutdown();
 } // namespace network
-#endif
+#endif // NO_EMAC
 
 namespace board {
 bool Reboot() {
-    puts("Rebooting ...");
+    board::statusled::SetMode(board::statusled::Mode::kOffOn);
+    puts("Rebooting ...\n");
 
     fwdgt_config(0xFFFF, FWDGT_PSC_DIV64);
 
     ConfigstoreCommit();
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
     HwClock::Get()->SysToHc();
-#endif
+#endif // DISABLE_RTC
     board::RebootHandler();
-#if !defined(NO_EMAC)
+#ifndef NO_EMAC
     network::Shutdown();
-#endif
+#endif // NO_EMAC
     board::statusled::SetMode(board::statusled::Mode::kOffOff);
 
     NVIC_SystemReset();

@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cassert>
 #include <span>
+#include <strings.h>
 
 #include "configurationstore.h"
 
@@ -60,7 +61,7 @@ inline constexpr uint32_t kMaxPorts = 1; // ISO C++ forbids zero-size array
 inline constexpr uint32_t kMaxPorts = DMXNODE_PORTS; // From build config
 #endif // !defined(DMXNODE_PORTS) || (DMXNODE_PORTS == 0)
 
-#if !defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifndef CONFIG_DMXNODE_DMX_PORT_OFFSET
 inline constexpr uint32_t kDmxportOffset = 0; // Default if not overridden
 #else
 inline constexpr uint32_t kDmxportOffset = CONFIG_DMXNODE_DMX_PORT_OFFSET; // From build config
@@ -92,8 +93,8 @@ inline static constexpr const char kRecord[] = "record";
 } // namespace failsafe
 
 enum class OutputStyle {
-    kDelta,   ///< DMX frame is triggered
-    kConstant ///< DMX output is continuous
+    kDelta,    ///< DMX frame is triggered
+    kConstant, ///< DMX output is continuous
 };
 
 enum class Rdm { kDisable, kEnable };

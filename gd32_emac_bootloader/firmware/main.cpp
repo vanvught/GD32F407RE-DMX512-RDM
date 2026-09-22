@@ -119,7 +119,7 @@ int main() {
     board::statusled::SetMode(board::statusled::Mode::kFast);
     watchdog::Init();
 
-    while (1) {
+    while (true) {
         watchdog::Feed();
         network::Run();
         board::Run();

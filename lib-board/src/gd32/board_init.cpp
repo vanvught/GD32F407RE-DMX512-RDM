@@ -23,24 +23,23 @@
  * THE SOFTWARE.
  */
 
-#include "firmware/debug/debug_stack.h"
 #if !defined(_TIME_STAMP_DAY_)
 #define _TIME_STAMP_DAY_ 0
-#endif
+#endif // _TIME_STAMP_DAY_
 #if !defined(_TIME_STAMP_MONTH_)
 #define _TIME_STAMP_MONTH_ 1
-#endif
+#endif // _TIME_STAMP_MONTH_
 #if !defined(_TIME_STAMP_YEAR_)
 #define _TIME_STAMP_YEAR_ (2026 - 1900)
-#endif
+#endif // _TIME_STAMP_YEAR_
 
 #if (defined(GD32F4XX) || defined(GD32H7XX)) && defined(GPIO_INIT)
 #error
-#endif
+#endif // (defined(GD32F4XX) || defined(GD32H7XX)) && defined(GPIO_INIT)
 
 #if (defined(GD32F4XX) || defined(GD32H7XX)) && !defined(MCU_HAVE_GPIO_TG)
 #error
-#endif
+#endif // (defined(GD32F4XX) || defined(GD32H7XX)) && !defined(MCU_HAVE_GPIO_TG)
 
 #include <cstddef>
 #include <cstring>
@@ -56,30 +55,33 @@
 #elif defined(CONFIG_CLIB_USE_NULL)
 #else
 #error
-#endif
+#endif // CONFIG_CLIB_USE_UART0
 #if defined(CONFIG_NET_ENABLE_PTP)
 #include "gd32_ptp.h"
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
 #if defined(ENABLE_USB_HOST)
 #include "device/usb.h"
-#endif
-#include "firmware/debug/debug_i2cdetect.h"
+#endif // ENABLE_USB_HOST
 #include "board_statusled.h"
 #include "panelled.h"
 #include "logic_analyzer.h"
 #include "gd32_timers.h"
+#include "firmware/debug/debug_i2cdetect.h"
+#include "firmware/debug/debug_stack.h"
 
 void Gd32AdcInit();
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 void CacheEnable();
 void MpuConfig();
-#endif
+#endif // GD32H7XX
 
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
 #include "hwclock.h"
-static HwClock hw_clock;
-#endif
+namespace {
+HwClock hw_clock;
+}
+#endif // DISABLE_RTC
 
 extern unsigned char _sdmx;      // NOLINT
 extern unsigned char _edmx;      // NOLINT
@@ -93,32 +95,32 @@ extern unsigned char _epixel;    // NOLINT
 namespace board {
 void Init() {
     // GD32H7xx Cache and Memory Protection Unit
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     CacheEnable();
     MpuConfig();
-#endif
+#endif // GD32H7XX
 
-#if defined(CONFIG_CLIB_USE_UART0)
+#ifdef CONFIG_CLIB_USE_UART0
     uart0::Init();
-#endif
+#endif // CONFIG_CLIB_USE_UART0
     // From here we console output
-#if defined(BOARD_DEBUG)
+#ifdef BOARD_DEBUG
     putchar('\n');
-#endif
+#endif // BOARD_DEBUG
 
     // See https://www.gd32-dmx.org/memory.html
-#if !defined(ENABLE_TFTP_SERVER)
+#ifndef ENABLE_TFTP_SERVER
 #if defined(GD32F207RG) || defined(GD32F4XX) || defined(GD32H7XX)
-#if !defined(GD32H7XX)
+#ifndef GD32H7XX
     {
         // Clear section .dmx
         const auto kSize = static_cast<size_t>(&_edmx - &_sdmx);
         memset(&_sdmx, 0, kSize);
-#if defined(BOARD_DEBUG)
+#ifdef BOARD_DEBUG
         printf("Cleared .dmx at %p, size %u\n", &_sdmx, kSize);
-#endif
+#endif // BOARD_DEBUG
     }
-#endif
+#endif // GD32H7XX
 #if defined(GD32F450VI) || defined(GD32H7XX)
     {
         // Clear section .lightset
@@ -126,28 +128,28 @@ void Init() {
         memset(&_slightset, 0, kSize);
 #if defined(BOARD_DEBUG)
         printf("Cleared .lightset at %p, size %u\n", &_slightset, kSize);
-#endif
+#endif // BOARD_DEBUG
     }
-#endif
+#endif // defined(GD32F450VI) || defined(GD32H7XX)
     {
         // Clear section .network
         const auto kSize = static_cast<size_t>(&_enetwork - &_snetwork);
         memset(&_snetwork, 0, kSize);
-#if defined(BOARD_DEBUG)
+#ifdef BOARD_DEBUG
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
-#endif
+#endif // BOARD_DEBUG
     }
 #if !defined(GD32F450VE) && !defined(GD32H7XX)
     {
         // Clear section .pixel
         const auto kSize = static_cast<size_t>(&_epixel - &_spixel);
         memset(&_spixel, 0, kSize);
-#if defined(BOARD_DEBUG)
+#ifdef BOARD_DEBUG
         printf("Cleared .pixel at %p, size %u\n", &_spixel, kSize);
-#endif
+#endif // BOARD_DEBUG
     }
-#endif
-#endif
+#endif // !defined(GD32F450VE) && !defined(GD32H7XX)
+#endif // defined(GD32F207RG) || defined(GD32F4XX) || defined(GD32H7XX)
 #else
 #if defined(GD32F20X) || defined(GD32F4XX) || defined(GD32H7XX)
     {
@@ -156,12 +158,12 @@ void Init() {
         memset(&_snetwork, 0, kSize);
 #if defined(BOARD_DEBUG)
         printf("Cleared .network at %p, size %u\n", &_snetwork, kSize);
-#endif
+#endif // BOARD_DEBUG
     }
-#endif
-#endif
+#endif // defined(GD32F20X) || defined(GD32F4XX) || defined(GD32H7XX)
+#endif // ENABLE_TFTP_SERVER
 
-#if defined(BOARD_DEBUG)
+#ifdef BOARD_DEBUG
     // Show the AHB and APBx busses frequency
     const auto kSys = rcu_clock_freq_get(CK_SYS);
     const auto kAhb = rcu_clock_freq_get(CK_AHB);
@@ -172,28 +174,25 @@ void Init() {
     assert(kAhb == AHB_CLOCK_FREQ);
     assert(kApb1 == APB1_CLOCK_FREQ);
     assert(kApb2 == APB2_CLOCK_FREQ);
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     const auto kApb3 = rcu_clock_freq_get(CK_APB3);
     const auto kApb4 = rcu_clock_freq_get(CK_APB4);
     printf("nCK_APB3=%u\nCK_APB4=%u\n", static_cast<unsigned>(nAPB3), static_cast<unsigned>(nAPB4));
     assert(kApb3 == APB3_CLOCK_FREQ);
     assert(kApb4 == APB4_CLOCK_FREQ);
-#endif
-#endif
+#endif // GD32H7XX
+#endif // BOARD_DEBUG
 
     gd32::timers::Start();
 
     Gd32AdcInit();
     Gd32I2cBegin();
-#if defined(CONFIG_ENABLE_I2C1)
-    Gd32I2c1Begin();
-#endif
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     rcu_periph_clock_enable(RCU_PMU);
     rcu_periph_clock_enable(RCU_BKPSRAM);
     pmu_backup_write_enable();
-#elif defined(GD32F4XX)
+#elifdef GD32F4XX
     rcu_periph_clock_enable(RCU_RTC);
     rcu_periph_clock_enable(RCU_PMU);
     pmu_backup_ldo_config(PMU_BLDOON_ON);
@@ -203,39 +202,50 @@ void Init() {
     rcu_periph_clock_enable(RCU_BKPI);
     rcu_periph_clock_enable(RCU_PMU);
     pmu_backup_write_enable();
-#endif
+#endif // GD32H7XX
     bkp_data_write(BKP_DATA_1, 0x0);
 
     // Initialize status led
     rcu_periph_clock_enable(LED_BLINK_GPIO_CLK);
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(LED_BLINK_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_BLINK_PIN);
 #else
-    gpio_mode_set(LED_BLINK_GPIO_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_BLINK_PIN);
-    gpio_output_options_set(LED_BLINK_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED, LED_BLINK_PIN);
-#endif
-    GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+    gpio_mode_set(LED1_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED1_GPIO_PINx);
+    gpio_output_options_set(LED1_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, LED1_GPIO_PINx);
 
-#if defined(PANELLED_595_CS_GPIOx)
+    gpio_mode_set(LED2_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED2_GPIO_PINx);
+    gpio_output_options_set(LED2_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, LED2_GPIO_PINx);
+#ifdef LED3_GPIOx
+    gpio_mode_set(LED3_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED3_GPIO_PINx);
+    gpio_output_options_set(LED3_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, LED3_GPIO_PINx);
+#endif // LED3_GPIOx
+#endif // GPIO_INIT
+    GPIO_BOP(LED1_GPIOx) = LED1_GPIO_PINx;
+    GPIO_BOP(LED2_GPIOx) = LED2_GPIO_PINx;
+#ifdef LED3_GPIOx
+    GPIO_BOP(LED3_GPIOx) = LED3_GPIO_PINx;
+#endif // LED3_GPIOx
+
+#ifdef PANELLED_595_CS_GPIOx
     rcu_periph_clock_enable(PANELLED_595_CS_RCU_GPIOx);
 #if defined(GPIO_INIT)
     gpio_init(PANELLED_595_CS_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, PANELLED_595_CS_GPIO_PINx);
 #else
     gpio_mode_set(PANELLED_595_CS_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, PANELLED_595_CS_GPIO_PINx);
     gpio_output_options_set(PANELLED_595_CS_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, PANELLED_595_CS_GPIO_PINx);
-#endif
+#endif // GPIO_INIT
     GPIO_BOP(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
-#endif
+#endif // PANELLED_595_CS_GPIOx
 
     panelled::Init();
 
-#if defined ENABLE_USB_HOST
+#ifdef ENABLE_USB_HOST
     usb::Init();
-#endif
+#endif // ENABLE_USB_HOST
 
     logic_analyzer::Init();
 
-#if !defined(CONFIG_NET_ENABLE_PTP)
+#ifndef CONFIG_NET_ENABLE_PTP
 #if defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_TIME_USE_SYSTICK)
     struct tm tmbuf;
     memset(&tmbuf, 0, sizeof(struct tm));
@@ -247,23 +257,28 @@ void Init() {
     const struct timeval kTv = {.tv_sec = kSeconds, .tv_usec = 0};
 
     settimeofday(&kTv, nullptr);
-#endif
-#endif
+#endif // defined(CONFIG_TIME_USE_TIMER) || defined(CONFIG_TIME_USE_SYSTICK)
+#endif // CONFIG_NET_ENABLE_PTP
 
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
     HwClock::Get()->RtcProbe();
     HwClock::Get()->Print();
-#if !defined(CONFIG_NET_ENABLE_PTP)
+#ifndef CONFIG_NET_ENABLE_PTP
     // Set the System Clock from the Hardware Clock
     HwClock::Get()->HcToSys();
-#endif
-#endif
+#endif // CONFIG_NET_ENABLE_PTP
+#endif // DISABLE_RTC
 
     debug::i2c::Detect();
 
-#if !defined(USE_FREE_RTOS)
+    GPIO_BC(LED1_GPIOx) = LED1_GPIO_PINx;
+    GPIO_BC(LED2_GPIOx) = LED2_GPIO_PINx;
+#ifdef LED3_GPIOx
+    GPIO_BC(LED3_GPIOx) = LED3_GPIO_PINx;
+#endif // LED3_GPIOx
+#ifndef USE_FREE_RTOS
     board::statusled::SetFrequency(1);
-#endif
+#endif // USE_FREE_RTOS
 
     debug::stack::Print();
 }

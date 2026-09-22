@@ -46,6 +46,6 @@
 #define BOARD_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_BOARD
 
 #endif // BOARD_DEBUG_H_

@@ -32,7 +32,7 @@
 #include "watchdog.h"
 #include "timing.h"
 
-HwClock::HwClock() {
+HwClock::HwClock() noexcept {
     assert(s_this == nullptr);
     s_this = this;
 }
@@ -62,9 +62,9 @@ void HwClock::Print() {
             break;
     }
 
-    struct tm tm;
-    RtcGet(&tm);
-    printf("%s %.4d/%.2d/%.2d %.2d:%.2d:%.2d\n", type, 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    struct tm tm_rtc;
+    RtcGet(&tm_rtc);
+    printf("%s %.4d/%.2d/%.2d %.2d:%.2d:%.2d\n", type, 1900 + tm_rtc.tm_year, 1 + tm_rtc.tm_mon, tm_rtc.tm_mday, tm_rtc.tm_hour, tm_rtc.tm_min, tm_rtc.tm_sec);
 }
 
 /*

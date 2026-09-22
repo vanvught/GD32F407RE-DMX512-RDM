@@ -62,14 +62,14 @@ void RcuConfig() {
     rcu_periph_clock_enable(SPI_RCU_GPIOx);
     rcu_periph_clock_enable(SPI_NSS_RCU_GPIOx);
 
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     rcu_periph_clock_enable(RCU_AF);
 #endif // GPIO_INIT
 }
 
 void GpioConfig() {
-#if defined(GPIO_INIT)
-#if defined(SPI_REMAP_GPIO)
+#ifdef GPIO_INIT
+#ifdef SPI_REMAP_GPIO
     gpio_pin_remap_config(SPI_REMAP_GPIO, ENABLE);
     if constexpr (SPI_PERIPH == SPI0) {
         gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
@@ -124,7 +124,7 @@ void Gd32SpiBegin() {
 
 void Gd32SpiEnd() {
     spi_disable(SPI_PERIPH);
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(SPI_GPIOx, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, SPI_SCK_GPIO_PINx | SPI_MISO_GPIO_PINx | SPI_MOSI_GPIO_PINx);
     gpio_init(SPI_NSS_GPIOx, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, SPI_NSS_GPIO_PINx);
 #else
@@ -181,7 +181,7 @@ void Gd32SpiSetDataMode(uint8_t mode) {
 }
 
 void Gd32SpiChipSelect(uint8_t chip_select) {
-    chip_select = chip_select;
+    s_cs = chip_select;
 
     if (chip_select == GD32_SPI_CS0) {
         spi_nss_output_enable(SPI_PERIPH);
@@ -231,16 +231,11 @@ void Gd32SpiWritenb(const char* tx_buffer, uint32_t data_length) {
     SetCsHigh();
 }
 
-#if defined(SPI_BITBANG_SCK_GPIO_PINx)
+#ifdef SPI_BITBANG_SCK_GPIO_PINx
 // bitbang support
 // Note: /CS is handled by the user application
-void __attribute__((cold)) Gd32BitbangSpiBegin() {
-    Gd32GpioFsel(SPI_BITBANG_SCK_GPIOx, SPI_BITBANG_SCK_GPIO_PINx, GPIO_FSEL_OUTPUT);
-    Gd32GpioFsel(SPI_BITBANG_MOSI_GPIOx, SPI_BITBANG_MOSI_GPIO_PINx, GPIO_FSEL_OUTPUT);
-    Gd32GpioFsel(SPI_BITBANG_MISO_GPIOx, SPI_BITBANG_MISO_GPIO_PINx, GPIO_FSEL_INPUT);
-}
-
-static inline void BitbangSpiWrite(char c) {
+namespace {
+void BitbangSpiWrite(char c) {
     for (uint32_t mask = (1U << 7); mask != 0; mask = (mask >> 1U)) {
         if (c & mask) {
             GPIO_BOP(SPI_BITBANG_MOSI_GPIOx) = SPI_BITBANG_MOSI_GPIO_PINx;
@@ -255,7 +250,7 @@ static inline void BitbangSpiWrite(char c) {
     }
 }
 
-static inline char BitbangSpiWriteRead(char character) {
+char BitbangSpiWriteRead(char character) {
     char r = 0;
 
     for (uint32_t mask = (1U << 7); mask != 0; mask = (mask >> 1U)) {
@@ -277,6 +272,13 @@ static inline char BitbangSpiWriteRead(char character) {
     }
 
     return r;
+}
+} // namespace
+
+void __attribute__((cold)) Gd32BitbangSpiBegin() {
+    Gd32GpioFsel(SPI_BITBANG_SCK_GPIOx, SPI_BITBANG_SCK_GPIO_PINx, GPIO_FSEL_OUTPUT);
+    Gd32GpioFsel(SPI_BITBANG_MOSI_GPIOx, SPI_BITBANG_MOSI_GPIO_PINx, GPIO_FSEL_OUTPUT);
+    Gd32GpioFsel(SPI_BITBANG_MISO_GPIOx, SPI_BITBANG_MISO_GPIO_PINx, GPIO_FSEL_INPUT);
 }
 
 void Gd32BitbangSpiWritenb(const char* tx_buffer, uint32_t data_length) {

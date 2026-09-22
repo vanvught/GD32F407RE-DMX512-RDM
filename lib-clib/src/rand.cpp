@@ -1,8 +1,8 @@
 /**
- * @file cctype
+ * @file random.cpp
  *
  */
-/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2020-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,32 +23,28 @@
  * THE SOFTWARE.
  */
 
-#ifndef CCTYPE_
-#define CCTYPE_
+/**
+ * https://en.wikipedia.org/wiki/Linear-feedback_shift_register
+ */
 
-#include <ctype.h>
+namespace {
+long int lfsr = 0xACE1u;
+long int bit;
+} // namespace
 
-// Get rid of those macros defined in <ctype.h> in lieu of real functions.
-#undef isalpha
-#undef isdigit
-#undef islower
-#undef isprint
-#undef isspace
-#undef isupper
-#undef isxdigit
-#undef tolower
-#undef tolower
+extern "C" {
+void srand(unsigned int seed) { // NOLINT
 
-namespace std {
-using ::isalpha;
-using ::isdigit;
-using ::islower;
-using ::isprint;
-using ::isspace;
-using ::isupper;
-using ::isxdigit;
-using ::tolower;
-using ::toupper;
-} // namespace std
+    if (seed != 0) {
+        lfsr = seed & 0xFFFFu;
+    } else {
+        lfsr = 0xACE1u;
+    }
+}
 
-#endif /* CCTYPE_ */
+long int rand() { // NOLINT
+
+    bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1;
+    return lfsr = (lfsr >> 1) | (bit << 15);
+}
+}

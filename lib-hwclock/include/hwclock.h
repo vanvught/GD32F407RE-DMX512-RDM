@@ -27,11 +27,11 @@
 #define HWCLOCK_H_
 
 #include <cstdint>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
 #include <cassert>
-#endif
+#endif // DISABLE_RTC
 
 #ifdef DEBUG_HWCLOCK
 #include "firmware/debug/debug_debug.h"
@@ -52,7 +52,7 @@
 #define HWCLOCK_DEBUG_PUTS(...) \
     do {                        \
     } while (false)
-#endif
+#endif // DEBUG_HWCLOCK
 
 namespace rtc {
 enum class Type : uint8_t { kMcP7941X, kDS3231, kPcF8563, kSocInternal, kUnknown };
@@ -60,7 +60,7 @@ enum class Type : uint8_t { kMcP7941X, kDS3231, kPcF8563, kSocInternal, kUnknown
 
 class HwClock {
    public:
-    HwClock();
+    HwClock() noexcept;
     void RtcProbe();
 
     void HcToSys(); // Set the System Clock from the Hardware Clock
@@ -98,7 +98,7 @@ class HwClock {
     bool RtcGetAlarm(struct tm* time);
     int MCP794xxAlarmWeekday(struct tm* time);
     void PCF8563GetAlarmMode();
-    void PCF8563SetAlarmMode();
+    void PCF8563SetAlarmMode() const;
 
     uint32_t delay_micros_{0};
     uint32_t last_hc_to_sys_millis_{0};
@@ -113,13 +113,13 @@ class HwClock {
 
 namespace rtc {
 inline bool Set([[maybe_unused]] const struct tm* rtc_time) {
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
     assert(HwClock::Get() != nullptr);
     HwClock::Get()->Set(rtc_time);
     return true;
 #else
     return false;
-#endif
+#endif // DISABLE_RTC
 }
 } // namespace rtc
 

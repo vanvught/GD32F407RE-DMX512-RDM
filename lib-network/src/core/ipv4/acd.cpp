@@ -102,7 +102,7 @@ static void Timer([[maybe_unused]] TimerHandle_t handle) {
                     acd->sent_num = 0;
                     acd->ttw = static_cast<uint16_t>(kAnnounceWait * acd::kAcdTicksPerSecond);
                 } else {
-                    acd->ttw = static_cast<uint16_t>(static_cast<uint32_t>(random()) % (((kProbeMax - kProbeMin) * acd::kAcdTicksPerSecond)) + (kProbeMin * acd::kAcdTicksPerSecond));
+                    acd->ttw = static_cast<uint16_t>(static_cast<uint32_t>(rand()) % (((kProbeMax - kProbeMin) * acd::kAcdTicksPerSecond)) + (kProbeMin * acd::kAcdTicksPerSecond));
                 }
             }
             break;
@@ -218,7 +218,7 @@ void Start(struct acd::Acd* acd, ip4_addr_t ipaddr) {
 
     acd->ipaddr.addr = ipaddr.addr;
     acd->state = acd::State::kAcdStateProbeWait;
-    acd->ttw = static_cast<uint16_t>(static_cast<uint32_t>(random()) % (kProbeWait * acd::kAcdTicksPerSecond));
+    acd->ttw = static_cast<uint16_t>(static_cast<uint32_t>(rand()) % (kProbeWait * acd::kAcdTicksPerSecond));
 
     s_timer_id = SoftwareTimerAdd(acd::kAcdTmrInterval, Timer);
     assert(s_timer_id != kTimerIdNone);

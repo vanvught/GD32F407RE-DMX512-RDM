@@ -209,7 +209,7 @@ static void Send() {
     // Only when the client receives a valid response from the server,
     // it will be able to send a request in the interleaved mode
     if (s_ntp_client.state.missed_responses > 4) {
-        s_ntp_client.cookie_basic.seconds = static_cast<uint32_t>(random());
+        s_ntp_client.cookie_basic.seconds = static_cast<uint32_t>(rand());
         s_ntp_client.cookie_basic.fraction = 0;
 
         s_ntp_client.request.origin_timestamp_s = 0;
@@ -249,7 +249,7 @@ static void Send() {
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_f))); // NOLINT
-#endif // DEBUG_PTP_NTP_CLIENT
+#endif                                                                                           // DEBUG_PTP_NTP_CLIENT
 
     if (s_ntp_client.state.x > 0) {
         s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
@@ -319,8 +319,10 @@ static void UpdatePtpTime() {
         s_ntp_client.locked_count = 0;
     }
 
+#ifndef CONFIG_NTP_CLIENT_DISABLE_TIMEUPDATE
     // At this time we know the status
     network::apps::ntpclient::ptp::systime::TimeUpdated(ptp_get);
+#endif
 
 #ifdef DEBUG_PTP_NTP_CLIENT
     /**
@@ -391,7 +393,7 @@ static void Process() {
            static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_f))); // NOLINT
-#endif // DEBUG_PTP_NTP_CLIENT
+#endif                                                                              // DEBUG_PTP_NTP_CLIENT
     // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
     if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {
         if (s_ntp_client.state.x < 0) {
@@ -485,7 +487,7 @@ void Init() {
 
     struct timeval time_val;
     gettimeofday(&time_val, nullptr);
-    srandom(static_cast<unsigned int>(time_val.tv_sec ^ time_val.tv_usec));
+    srand(static_cast<unsigned int>(time_val.tv_sec ^ time_val.tv_usec));
 
     NTP_CLIENT_DEBUG_EXIT();
 }

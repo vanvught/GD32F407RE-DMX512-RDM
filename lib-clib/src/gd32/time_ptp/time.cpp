@@ -31,7 +31,7 @@
 #pragma GCC optimize("O2")
 
 #include <cstdint>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 #include <cassert>
 
@@ -44,18 +44,15 @@
 #endif // GD32H7XX
 
 extern "C" {
-/*
- * number of seconds and microseconds since the Epoch,
- *     1970-01-01 00:00:00 +0000 (UTC).
- */
-
-int gettimeofday(struct timeval* time_val, [[maybe_unused]] struct timezone* time_zone) { // NOLINT
+// number of seconds and microseconds since the Epoch,
+//     1970-01-01 00:00:00 +0000 (UTC).
+int gettimeofday(struct timeval* __restrict __p, [[maybe_unused]] void* __restrict __tz) { // NOLINT
     assert(time_val != nullptr);
 
     enet_ptp_systime_struct systime;
     enet_ptp_system_time_get(&systime);
 
-    time_val->tv_sec = static_cast<time_t>(systime.second);
+    __p->tv_sec = static_cast<time_t>(systime.second);
 
 #ifndef GD32F4XX
     const auto kNanoSecond = systime.nanosecond;
@@ -63,7 +60,7 @@ int gettimeofday(struct timeval* time_val, [[maybe_unused]] struct timezone* tim
     const auto kNanoSecond = gd32::PtpSubsecond2Nanosecond(systime.subsecond);
 #endif // GD32F4XX
 
-    time_val->tv_usec = static_cast<time_t>(kNanoSecond / 1000U);
+    __p->tv_usec = static_cast<suseconds_t>(kNanoSecond / 1000U);
 
     return 0;
 }

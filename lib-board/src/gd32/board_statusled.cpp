@@ -34,12 +34,12 @@
 namespace {
 TimerHandle_t s_timer_id = kTimerIdNone;
 
-#if !defined(MCU_HAVE_GPIO_TG)
-int32_t s_toggle_led = 1;
-#endif
+#ifndef MCU_HAVE_GPIO_TG
+int32_t s_toggle_led{1};
+#endif // MCU_HAVE_GPIO_TG
 
 void Ledblink([[maybe_unused]] TimerHandle_t handle) {
-#if defined(MCU_HAVE_GPIO_TG)
+#ifdef MCU_HAVE_GPIO_TG
     GPIO_TG(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
 #else
     s_toggle_led = -s_toggle_led;
@@ -49,7 +49,7 @@ void Ledblink([[maybe_unused]] TimerHandle_t handle) {
     } else {
         GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
     }
-#endif
+#endif // MCU_HAVE_GPIO_TG
 }
 } // namespace
 
@@ -70,7 +70,7 @@ void SetFrequency(uint32_t frequency_hz) {
 
             GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
             break;
-#if !defined(CONFIG_HAL_USE_MINIMUM)
+#ifndef CONFIG_HAL_USE_MINIMUM
         case 1:
             SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 1));
             break;
@@ -83,7 +83,7 @@ void SetFrequency(uint32_t frequency_hz) {
         case 8:
             SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 8));
             break;
-#endif
+#endif // CONFIG_HAL_USE_MINIMUM
         case 255:
             SoftwareTimerDelete(s_timer_id);
             GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;

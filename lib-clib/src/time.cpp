@@ -24,15 +24,16 @@
  */
 
 #include <cstdint>
-#include <time.h>
+#include <ctime>
 
 namespace global {
 int32_t g_utc_offset = 0;
 } // namespace global
 
-static constexpr int kDaysOfMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+namespace {
+constexpr int kDaysOfMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-static int Isleapyear(int year) {
+bool Isleapyear(int year) {
     if (year % 100 == 0) {
         return year % 400 == 0;
     }
@@ -40,7 +41,7 @@ static int Isleapyear(int year) {
     return year % 4 == 0;
 }
 
-static int Getdaysofmonth(int month, int year) {
+int Getdaysofmonth(int month, int year) {
     if ((month == 1) && Isleapyear(year)) {
         return 29;
     }
@@ -48,121 +49,125 @@ static int Getdaysofmonth(int month, int year) {
     return kDaysOfMonth[month];
 }
 
-static struct tm s_tm;
+struct tm s_tm;
+} // namespace
 
 extern "C" {
-struct tm* localtime(const time_t* t) {
-    if (t == nullptr) {
+struct tm* localtime(const time_t* _timer) { // NOLINT
+    if (_timer == nullptr) {
         return nullptr;
     }
 
-    auto time = *t + global::g_utc_offset;
+    auto time = *_timer + global::g_utc_offset;
     return gmtime(&time);
 }
 
-struct tm* gmtime(const time_t* t) {
-    if (t == nullptr) {
+struct tm* gmtime(const time_t* _timer) { // NOLINT
+    if (_timer == nullptr) {
         return nullptr;
     }
 
-    auto time = *t;
+    if ((*_timer < 0) || (*_timer > UINT32_MAX)) {
+        return nullptr;
+    }
 
-    s_tm.tm_sec = time % 60;
-    time /= 60;
-    s_tm.tm_min = time % 60;
-    time /= 60;
-    s_tm.tm_hour = time % 24;
-    time /= 24;
+    auto time = static_cast<uint32_t>(*_timer);
 
-    s_tm.tm_wday = (time + 4) % 7;
+    s_tm.tm_sec = static_cast<int>(time % 60U);
+    time /= 60U;
+    s_tm.tm_min = static_cast<int>(time % 60U);
+    time /= 60U;
+    s_tm.tm_hour = static_cast<int>(time % 24U);
+    time /= 24U;
+
+    s_tm.tm_wday = static_cast<int>((time + 4U) % 7U);
 
     int year = 1970;
 
-    while (1) {
-        const time_t kDaysOfYear = Isleapyear(year) ? 366 : 365;
-        if (time < kDaysOfYear) {
+    while (true) {
+        const uint32_t days_of_year = Isleapyear(year) ? 366U : 365U;
+        if (time < days_of_year) {
             break;
         }
 
-        time -= kDaysOfYear;
+        time -= days_of_year;
         year++;
     }
 
     s_tm.tm_year = year - 1900;
-    s_tm.tm_yday = time;
+    s_tm.tm_yday = static_cast<int>(time);
 
     int month = 0;
 
-    while (1) {
-        const auto kDaysMonth = Getdaysofmonth(month, year);
-        if (time < kDaysMonth) {
+    while (true) {
+        const auto kDaysOfMonth = static_cast<uint32_t>(Getdaysofmonth(month, year));
+
+        if (time < kDaysOfMonth) {
             break;
         }
 
-        time -= kDaysMonth;
+        time -= kDaysOfMonth;
         month++;
     }
 
     s_tm.tm_mon = month;
-    s_tm.tm_mday = time + 1;
+    s_tm.tm_mday = static_cast<int>(time + 1U);
 
     return &s_tm;
 }
 
-time_t mktime(struct tm* t) {
-    time_t result = 0;
-
-    if (t == nullptr) {
+// Uses malloc/free in Newlib
+time_t mktime(struct tm* _timeptr) { // NOLINT
+    if (_timeptr == nullptr) {
         return -1;
     }
 
-    if (t->tm_year < 70 || t->tm_year > 139) {
+    if ((_timeptr->tm_year < 70) || (_timeptr->tm_year > 139)) {
         return -1;
     }
 
-    int year;
+    const int kTargetYear = 1900 + _timeptr->tm_year;
+    uint32_t result = 0;
 
-    for (year = 1970; year < 1900 + t->tm_year; year++) {
-        result += Isleapyear(year) ? 366 : 365;
+    for (int year = 1970; year < kTargetYear; year++) {
+        result += Isleapyear(year) ? 366U : 365U;
     }
 
-    if (t->tm_mon < 0 || t->tm_mon > 11) {
+    if ((_timeptr->tm_mon < 0) || (_timeptr->tm_mon > 11)) {
         return -1;
     }
 
-    int month;
-
-    for (month = 0; month < t->tm_mon; month++) {
-        result += Getdaysofmonth(month, t->tm_year);
+    for (int month = 0; month < _timeptr->tm_mon; month++) {
+        result += static_cast<uint32_t>(Getdaysofmonth(month, kTargetYear));
     }
 
-    if (t->tm_mday < 1 || t->tm_mday > Getdaysofmonth(t->tm_mon, t->tm_year)) {
+    if ((_timeptr->tm_mday < 1) || (_timeptr->tm_mday > Getdaysofmonth(_timeptr->tm_mon, kTargetYear))) {
         return -1;
     }
 
-    result += t->tm_mday - 1;
-    result *= 24;
+    result += static_cast<uint32_t>(_timeptr->tm_mday - 1);
+    result *= 24U;
 
-    if (t->tm_hour < 0 || t->tm_hour > 23) {
+    if ((_timeptr->tm_hour < 0) || (_timeptr->tm_hour > 23)) {
         return -1;
     }
 
-    result += t->tm_hour;
-    result *= 60;
+    result += static_cast<uint32_t>(_timeptr->tm_hour);
+    result *= 60U;
 
-    if (t->tm_min < 0 || t->tm_min > 59) {
+    if ((_timeptr->tm_min < 0) || (_timeptr->tm_min > 59)) {
         return -1;
     }
 
-    result += t->tm_min;
-    result *= 60;
+    result += static_cast<uint32_t>(_timeptr->tm_min);
+    result *= 60U;
 
-    if (t->tm_sec < 0 || t->tm_sec > 59) {
+    if ((_timeptr->tm_sec < 0) || (_timeptr->tm_sec > 59)) {
         return -1;
     }
 
-    result += t->tm_sec;
+    result += static_cast<uint32_t>(_timeptr->tm_sec);
 
-    return result;
+    return static_cast<time_t>(result);
 }
 }

@@ -51,12 +51,12 @@ float CoreTemperatureCurrent();
 const char* Website();
 } // namespace board
 
-#if defined(GD32)
+#ifdef GD32
 #include "gd32_board.h"
-#elif defined(H3)
+#elifdef H3
 #include "h3_board.h"
 #else
 #include "linux_board.h"
-#endif
+#endif // GD32
 
 #endif // BOARD_H_

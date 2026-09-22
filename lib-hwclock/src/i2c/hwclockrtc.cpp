@@ -42,9 +42,7 @@
 #include "hwclock.h"
 #include "timing.h"
 #include "i2c.h"
-
-#define BCD2DEC(val) (((val) & 0x0f) + ((val) >> 4) * 10)
-#define DEC2BCD(val) static_cast<char>((((val) / 10) << 4) + (val) % 10)
+#include "common/utils/utils_bcd.h"
 
 namespace rtc {
 namespace reg {
@@ -70,7 +68,7 @@ static constexpr uint8_t kAlmxC1 = (1U << 5);
 static constexpr uint8_t kAlmxC2 = (1U << 6);
 #ifndef NDEBUG
 static constexpr uint8_t kAlmxPol = (1U << 7);
-#endif
+#endif // NDEBUG
 static constexpr uint8_t kMskAlmxMatch = (kAlmxC0 | kAlmxC1 | kAlmxC2);
 } // namespace bit
 } // namespace mcp7941x
@@ -112,6 +110,17 @@ static constexpr uint8_t kDS3231 = 0x68;
 } // namespace i2caddress
 } // namespace rtc
 
+namespace {
+void AssertValidTime([[maybe_unused]] const struct tm& time) {
+    assert(time.tm_sec >= 0 && time.tm_sec <= 59);
+    assert(time.tm_min >= 0 && time.tm_min <= 59);
+    assert(time.tm_hour >= 0 && time.tm_hour <= 23);
+    assert(time.tm_wday >= 0 && time.tm_wday <= 6);
+    assert(time.tm_mday >= 1 && time.tm_mday <= 31);
+    assert(time.tm_mon >= 0 && time.tm_mon <= 11);
+}
+} // namespace
+
 void HwClock::RtcProbe() {
     HWCLOCK_DEBUG_ENTRY();
 
@@ -121,7 +130,7 @@ void HwClock::RtcProbe() {
 
     uint8_t value;
 
-#if !defined(CONFIG_RTC_DISABLE_MCP7941X)
+#ifndef CONFIG_RTC_DISABLE_MCP7941X
     i2c::SetAddress(rtc::i2caddress::kMcP7941X);
 
     // The I2C bus is not stable at cold start? These dummy write/read helps.
@@ -155,9 +164,9 @@ void HwClock::RtcProbe() {
         HWCLOCK_DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_RTC_DISABLE_MCP7941X
 
-#if !defined(CONFIG_RTC_DISABLE_DS3231)
+#ifndef CONFIG_RTC_DISABLE_DS3231
     i2c::SetAddress(rtc::i2caddress::kDS3231);
 
     // The I2C bus is not stable at cold start? These dummy write/read helps.
@@ -188,9 +197,9 @@ void HwClock::RtcProbe() {
         HWCLOCK_DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_RTC_DISABLE_DS3231
 
-#if !defined(CONFIG_RTC_DISABLE_PCF8563)
+#ifndef CONFIG_RTC_DISABLE_PCF8563
     i2c::SetAddress(rtc::i2caddress::kPcF8563);
 
     // The I2C bus is not stable at cold start? These dummy write/read helps.
@@ -237,7 +246,7 @@ void HwClock::RtcProbe() {
         HWCLOCK_DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_RTC_DISABLE_PCF8563
 
     HWCLOCK_DEBUG_EXIT();
 }
@@ -253,26 +262,28 @@ bool HwClock::RtcSet(const struct tm* time) {
 
     HWCLOCK_DEBUG_PRINTF("secs=%d, mins=%d, hours=%d, mday=%d, mon=%d, year=%d, wday=%d", time->tm_sec, time->tm_min, time->tm_hour, time->tm_mday, time->tm_mon, time->tm_year, time->tm_wday);
 
+    AssertValidTime(*time);
+
     char data[8];
-    auto registers = &data[1];
+    auto* registers = &data[1];
 
-    registers[rtc::reg::kSeconds] = DEC2BCD(time->tm_sec & 0x7f);
-    registers[rtc::reg::kMinutes] = DEC2BCD(time->tm_min & 0x7f);
-    registers[rtc::reg::kHours] = DEC2BCD(time->tm_hour & 0x1f);
+    registers[rtc::reg::kSeconds] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_sec));
+    registers[rtc::reg::kMinutes] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_min));
+    registers[rtc::reg::kHours] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_hour));
 
-#if !defined(CONFIG_RTC_DISABLE_PCF8563)
+#ifndef CONFIG_RTC_DISABLE_PCF8563
     if (type_ == rtc::Type::kPcF8563) {
-        registers[rtc::pcf8563::reg::kWday - rtc::pcf8563::reg::kSeconds] = DEC2BCD(time->tm_wday & 0x07);
-        registers[rtc::pcf8563::reg::kMday - rtc::pcf8563::reg::kSeconds] = DEC2BCD(time->tm_mday & 0x3f);
+        registers[rtc::pcf8563::reg::kWday - rtc::pcf8563::reg::kSeconds] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_wday));
+        registers[rtc::pcf8563::reg::kMday - rtc::pcf8563::reg::kSeconds] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mday));
     } else
-#endif
+#endif // CONFIG_RTC_DISABLE_PCF8563
     {
-        registers[rtc::reg::kWday] = DEC2BCD(time->tm_wday & 0x07);
-        registers[rtc::reg::kMday] = DEC2BCD(time->tm_mday & 0x3f);
+        registers[rtc::reg::kWday] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_wday));
+        registers[rtc::reg::kMday] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mday));
     }
 
-    registers[rtc::reg::kMonth] = DEC2BCD((time->tm_mon + 1) & 0x1f);
-    registers[rtc::reg::kYear] = DEC2BCD((time->tm_year - 100) & 0xff);
+    registers[rtc::reg::kMonth] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mon + 1));
+    registers[rtc::reg::kYear] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_year - 100));
 
     if (type_ == rtc::Type::kMcP7941X) {
         registers[rtc::reg::kSeconds] |= rtc::mcp7941x::bit::kSt;
@@ -315,23 +326,23 @@ bool HwClock::RtcGet(struct tm* time) {
     i2c::Write(registers, 1);
     i2c::Read(registers, sizeof(registers) / sizeof(registers[0]));
 
-    time->tm_sec = BCD2DEC(registers[rtc::reg::kSeconds] & 0x7f);
-    time->tm_min = BCD2DEC(registers[rtc::reg::kMinutes] & 0x7f);
-    time->tm_hour = BCD2DEC(registers[rtc::reg::kHours] & 0x3f);
+    time->tm_sec = common::bcd::ToDecimal(registers[rtc::reg::kSeconds] & 0x7f);
+    time->tm_min = common::bcd::ToDecimal(registers[rtc::reg::kMinutes] & 0x7f);
+    time->tm_hour = common::bcd::ToDecimal(registers[rtc::reg::kHours] & 0x3f);
 
-#if !defined(CONFIG_RTC_DISABLE_PCF8563)
+#ifndef CONFIG_RTC_DISABLE_PCF8563
     if (type_ == rtc::Type::kPcF8563) {
-        time->tm_wday = BCD2DEC(registers[rtc::pcf8563::reg::kWday - rtc::pcf8563::reg::kSeconds] & 0x07);
-        time->tm_mday = BCD2DEC(registers[rtc::pcf8563::reg::kMday - rtc::pcf8563::reg::kSeconds] & 0x3f);
+        time->tm_wday = common::bcd::ToDecimal(registers[rtc::pcf8563::reg::kWday - rtc::pcf8563::reg::kSeconds] & 0x07);
+        time->tm_mday = common::bcd::ToDecimal(registers[rtc::pcf8563::reg::kMday - rtc::pcf8563::reg::kSeconds] & 0x3f);
     } else
-#endif
+#endif // CONFIG_RTC_DISABLE_PCF8563
     {
-        time->tm_wday = BCD2DEC(registers[rtc::reg::kWday] & 0x07);
-        time->tm_mday = BCD2DEC(registers[rtc::reg::kMday] & 0x3f);
+        time->tm_wday = common::bcd::ToDecimal(registers[rtc::reg::kWday] & 0x07);
+        time->tm_mday = common::bcd::ToDecimal(registers[rtc::reg::kMday] & 0x3f);
     }
 
-    time->tm_mon = BCD2DEC(registers[rtc::reg::kMonth] & 0x1f) - 1;
-    time->tm_year = BCD2DEC(registers[rtc::reg::kYear]) + 100;
+    time->tm_mon = common::bcd::ToDecimal(registers[rtc::reg::kMonth] & 0x1f) - 1;
+    time->tm_year = common::bcd::ToDecimal(registers[rtc::reg::kYear]) + 100;
 
     HWCLOCK_DEBUG_PRINTF("secs=%d, mins=%d, hours=%d, mday=%d, mon=%d, year=%d, wday=%d", time->tm_sec, time->tm_min, time->tm_hour, time->tm_mday, time->tm_mon, time->tm_year, time->tm_wday);
 
@@ -345,8 +356,10 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
 
     HWCLOCK_DEBUG_PRINTF("secs=%d, mins=%d, hours=%d, mday=%d, mon=%d, year=%d, wday=%d", time->tm_sec, time->tm_min, time->tm_hour, time->tm_mday, time->tm_mon, time->tm_year, time->tm_wday);
 
+    AssertValidTime(*time);
+
     switch (type_) {
-#if !defined(CONFIG_RTC_DISABLE_MCP7941X)
+#ifndef CONFIG_RTC_DISABLE_MCP7941X
         case rtc::Type::kMcP7941X: {
             const auto kWday = static_cast<char>(MCP794xxAlarmWeekday(const_cast<struct tm*>(time)));
 
@@ -359,12 +372,12 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
             i2c::Read(data, 10);
 
             // Set alarm 0, using 24-hour and day-of-month modes.
-            data[3] = DEC2BCD(time->tm_sec);
-            data[4] = DEC2BCD(time->tm_min);
-            data[5] = DEC2BCD(time->tm_hour);
+            data[3] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_sec));
+            data[4] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_min));
+            data[5] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_hour));
             data[6] = kWday;
-            data[7] = DEC2BCD(time->tm_mday);
-            data[8] = DEC2BCD(time->tm_mon + 1);
+            data[7] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mday));
+            data[8] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mon + 1));
             // Clear the alarm 0 interrupt flag.
             data[6] &= static_cast<char>(~rtc::mcp7941x::bit::kAlmxIf);
             // Set alarm match: second, minute, hour, day, date, month.
@@ -384,8 +397,8 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
             HWCLOCK_DEBUG_EXIT();
             return true;
         } break;
-#endif
-#if !defined(CONFIG_RTC_DISABLE_DS3231)
+#endif // CONFIG_RTC_DISABLE_MCP7941X
+#ifndef CONFIG_RTC_DISABLE_DS3231
         case rtc::Type::kDS3231: {
             char registers[10];
             auto data = &registers[1];
@@ -400,10 +413,10 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
             const auto kStatus = data[8];
 
             // set ALARM1, using 24 hour and day-of-month modes
-            data[0] = DEC2BCD(time->tm_sec);
-            data[1] = DEC2BCD(time->tm_min);
-            data[2] = DEC2BCD(time->tm_hour);
-            data[3] = DEC2BCD(time->tm_mday);
+            data[0] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_sec));
+            data[1] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_min));
+            data[2] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_hour));
+            data[3] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mday));
             // set ALARM2 to non-garbage
             data[4] = 0;
             data[5] = 0;
@@ -425,15 +438,15 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
             HWCLOCK_DEBUG_EXIT();
             return true;
         } break;
-#endif
-#if !defined(CONFIG_RTC_DISABLE_PCF8563)
+#endif // CONFIG_RTC_DISABLE_DS3231
+#ifndef CONFIG_RTC_DISABLE_PCF8563
         case rtc::Type::kPcF8563: {
             char data[5];
 
             data[0] = rtc::pcf8563::reg::kAlarm;
-            data[1] = DEC2BCD(time->tm_min);
-            data[2] = DEC2BCD(time->tm_hour);
-            data[3] = DEC2BCD(time->tm_mday);
+            data[1] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_min));
+            data[2] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_hour));
+            data[3] = common::bcd::FromDecimal(static_cast<uint8_t>(time->tm_mday));
             data[4] = time->tm_wday & 0x07;
 
             i2c::SetAddress(address_);
@@ -445,7 +458,7 @@ bool HwClock::RtcSetAlarm(const struct tm* time) {
             HWCLOCK_DEBUG_EXIT();
             return true;
         } break;
-#endif
+#endif // CONFIG_RTC_DISABLE_PCF8563
         default:
             break;
     }
@@ -464,7 +477,7 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
     }
 
     switch (type_) {
-#if !defined(CONFIG_RTC_DISABLE_MCP7941X)
+#ifndef CONFIG_RTC_DISABLE_MCP7941X
         case rtc::Type::kMcP7941X: {
             char registers[10];
 
@@ -475,12 +488,12 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
             i2c::Write(registers, 1);
             i2c::Read(registers, sizeof(registers) / sizeof(registers[0]));
 
-            time->tm_sec = BCD2DEC(registers[3] & 0x7f);
-            time->tm_min = BCD2DEC(registers[4] & 0x7f);
-            time->tm_hour = BCD2DEC(registers[5] & 0x3f);
-            time->tm_wday = BCD2DEC(registers[6] & 0x7) - 1;
-            time->tm_mday = BCD2DEC(registers[7] & 0x3f);
-            time->tm_mon = BCD2DEC(registers[8] & 0x1f) - 1;
+            time->tm_sec = common::bcd::ToDecimal(registers[3] & 0x7f);
+            time->tm_min = common::bcd::ToDecimal(registers[4] & 0x7f);
+            time->tm_hour = common::bcd::ToDecimal(registers[5] & 0x3f);
+            time->tm_wday = common::bcd::ToDecimal(registers[6] & 0x7) - 1;
+            time->tm_mday = common::bcd::ToDecimal(registers[7] & 0x3f);
+            time->tm_mon = common::bcd::ToDecimal(registers[8] & 0x1f) - 1;
 
             alarm_enabled_ = registers[0] & rtc::mcp7941x::bit::kAlM0En;
 
@@ -490,8 +503,8 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
             HWCLOCK_DEBUG_EXIT();
             return true;
         } break;
-#endif
-#if !defined(CONFIG_RTC_DISABLE_DS3231)
+#endif // CONFIG_RTC_DISABLE_MCP7941X
+#ifndef CONFIG_RTC_DISABLE_DS3231
         case rtc::Type::kDS3231: {
             char registers[10];
 
@@ -502,10 +515,10 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
             i2c::Write(registers, 1);
             i2c::Read(registers, sizeof(registers) / sizeof(registers[0]));
 
-            time->tm_sec = BCD2DEC(registers[0] & 0x7f);
-            time->tm_min = BCD2DEC(registers[1] & 0x7f);
-            time->tm_hour = BCD2DEC(registers[2] & 0x3f);
-            time->tm_mday = BCD2DEC(registers[3] & 0x3f);
+            time->tm_sec = common::bcd::ToDecimal(registers[0] & 0x7f);
+            time->tm_min = common::bcd::ToDecimal(registers[1] & 0x7f);
+            time->tm_hour = common::bcd::ToDecimal(registers[2] & 0x3f);
+            time->tm_mday = common::bcd::ToDecimal(registers[3] & 0x3f);
 
             alarm_enabled_ = (registers[7] & rtc::ds3231::bit::kA1Ie);
             alarm_pending_ = (registers[8] & rtc::ds3231::bit::kA1F);
@@ -517,8 +530,8 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
         }
 
         break;
-#endif
-#if !defined(CONFIG_RTC_DISABLE_PCF8563)
+#endif // CONFIG_RTC_DISABLE_DS3231
+#ifndef CONFIG_RTC_DISABLE_PCF8563
         case rtc::Type::kPcF8563: {
             char registers[4];
 
@@ -532,10 +545,10 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
             HWCLOCK_DEBUG_PRINTF("raw data is min=%02x, hr=%02x, mday=%02x, wday=%02x", registers[0], registers[1], registers[2], registers[3]);
 
             time->tm_sec = 0;
-            time->tm_min = BCD2DEC(registers[0] & 0x7F);
-            time->tm_hour = BCD2DEC(registers[1] & 0x3F);
-            time->tm_mday = BCD2DEC(registers[2] & 0x3F);
-            time->tm_wday = BCD2DEC(registers[3] & 0x7);
+            time->tm_min = common::bcd::ToDecimal(registers[0] & 0x7F);
+            time->tm_hour = common::bcd::ToDecimal(registers[1] & 0x3F);
+            time->tm_mday = common::bcd::ToDecimal(registers[2] & 0x3F);
+            time->tm_wday = common::bcd::ToDecimal(registers[3] & 0x7);
 
             PCF8563GetAlarmMode();
 
@@ -544,7 +557,7 @@ bool HwClock::RtcGetAlarm(struct tm* time) {
             HWCLOCK_DEBUG_EXIT();
             return true;
         } break;
-#endif
+#endif // CONFIG_RTC_DISABLE_PCF8563
         default:
             break;
     }
@@ -563,10 +576,10 @@ int HwClock::MCP794xxAlarmWeekday(struct tm* time) {
 
     const auto kDaysNow = mktime(&tm_now) / (24 * 60 * 60);
     const auto kDaysAlarm = mktime(time) / (24 * 60 * 60);
-    const auto kI = (tm_now.tm_wday + kDaysAlarm - kDaysNow) % 7 + 1;
+    const auto kReturn = static_cast<int>(((tm_now.tm_wday + kDaysAlarm - kDaysNow) % 7) + 1);
 
     HWCLOCK_DEBUG_EXIT();
-    return kI;
+    return kReturn;
 }
 
 void HwClock::PCF8563GetAlarmMode() {
@@ -576,13 +589,13 @@ void HwClock::PCF8563GetAlarmMode() {
     uint8_t value;
     i2c::ReadReg(rtc::pcf8563::reg::kControlStatuS2, value);
 
-    alarm_enabled_ = value & rtc::pcf8563::bit::kStatus2Aie;
-    alarm_pending_ = value & rtc::pcf8563::bit::kStatus2Af;
+    alarm_enabled_ = (value & rtc::pcf8563::bit::kStatus2Aie) == rtc::pcf8563::bit::kStatus2Aie;
+    alarm_pending_ = (value & rtc::pcf8563::bit::kStatus2Af) == rtc::pcf8563::bit::kStatus2Af;
 
     HWCLOCK_DEBUG_EXIT();
 }
 
-void HwClock::PCF8563SetAlarmMode() {
+void HwClock::PCF8563SetAlarmMode() const {
     HWCLOCK_DEBUG_ENTRY();
     assert(type_ == rtc::Type::kPcF8563);
 

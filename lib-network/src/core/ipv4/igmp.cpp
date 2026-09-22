@@ -127,7 +127,7 @@ static void SendReport(uint32_t group_address) {
 }
 
 static void StartTimer(struct GroupInfo& group, uint32_t max_time) {
-    group.timer = static_cast<uint16_t>((max_time > 2U ? (static_cast<uint32_t>(random()) % max_time) : 1U));
+    group.timer = static_cast<uint16_t>((max_time > 2U ? (static_cast<uint32_t>(rand()) % max_time) : 1U));
 
     if (group.timer == 0) {
         group.timer = 1;

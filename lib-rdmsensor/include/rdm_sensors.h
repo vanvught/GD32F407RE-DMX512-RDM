@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <strings.h>
 #include <cassert>
 
 #include "common/utils/utils_string.h"
@@ -57,12 +58,12 @@ static_assert(json::RdmSensorsParams::KeysSize() == static_cast<size_t>(Types::k
 
 inline Types GetType(const char* string) {
     assert(string != nullptr);
-    const auto& k = json::RdmSensorsParams::Keys();
+    const auto& key = json::RdmSensorsParams::Keys();
 
     for (uint32_t i = 0; i < json::RdmSensorsParams::KeysSize(); i++)
 
     {
-        if (strcasecmp(string, k[i].GetName()) == 0) {
+        if (strcasecmp(string, key[i].GetName()) == 0) {
             return static_cast<Types>(i);
         }
     }

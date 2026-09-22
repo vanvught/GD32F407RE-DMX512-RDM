@@ -27,14 +27,11 @@
 #define RDM_SUBDEVICES_H_
 
 #include <cstdint>
-#include <cstring>
+#include <strings.h>
 #include <cassert>
 
-
-namespace rdm::subdevices
-{
-enum class Types : uint8_t
-{
+namespace rdm::subdevices {
+enum class Types : uint8_t {
     BW7FETS,
     BWDIMMER,
     BWDIO,
@@ -61,20 +58,16 @@ inline constexpr const char kType[static_cast<uint32_t>(rdm::subdevices::Types::
     "mcp4902"   //
 };
 
-[[nodiscard]] inline constexpr const char* GetTypeString(rdm::subdevices::Types type)
-{    
+[[nodiscard]] constexpr const char* GetTypeString(rdm::subdevices::Types type) {
     return type < Types::kUndefined ? kType[static_cast<uint32_t>(type)] : "UNDEFINED";
 }
 
-inline Types GetTypeString(const char* string)
-{
+inline Types GetTypeString(const char* string) {
     assert(string != nullptr);
     uint8_t index = 0;
 
-    for (const char(&type)[kMaxNameLength] : kType)
-    {
-        if (strcasecmp(string, type) == 0)
-        {
+    for (const char (&type)[kMaxNameLength] : kType) {
+        if (strcasecmp(string, type) == 0) {
             return static_cast<Types>(index);
         }
         ++index;
@@ -85,4 +78,4 @@ inline Types GetTypeString(const char* string)
 
 } // namespace rdm::subdevices
 
-#endif  // RDM_SUBDEVICES_H_
+#endif // RDM_SUBDEVICES_H_

@@ -35,7 +35,7 @@ namespace dma::memcpy32 {
 void Init();
 
 inline void StartDma(const void* destination, const void* source, uint32_t length) {
-#if !defined(GD32F4XX)
+#ifndef GD32F4XX
     assert((reinterpret_cast<uint32_t>(source) & 0x3) == 0);
     assert((reinterpret_cast<uint32_t>(destination) & 0x3) == 0);
 

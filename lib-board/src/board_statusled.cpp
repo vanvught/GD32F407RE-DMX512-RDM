@@ -91,5 +91,5 @@ void SetMode(board::statusled::Mode mode) {
 
     BOARD_DEBUG_PRINTF("global::g_status_led_mode=%u", static_cast<unsigned>(global::g_status_led_mode));
 }
-#endif
+#endif // CONFIG_HAL_USE_MINIMUM
 } // namespace board::statusled
