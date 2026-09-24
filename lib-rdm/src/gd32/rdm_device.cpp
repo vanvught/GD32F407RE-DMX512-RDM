@@ -31,11 +31,11 @@
 namespace rdm::device
 {
 static constexpr char kRootLabel[] =
-#if defined(CONFIG_RDM_DEVICE_ROOT_LABEL)
+#ifdef CONFIG_RDM_DEVICE_ROOT_LABEL
     CONFIG_RDM_DEVICE_ROOT_LABEL;
 #else
     GD32_BOARD_NAME " RDM Device";
-#endif
+#endif // CONFIG_RDM_DEVICE_ROOT_LABEL
 
 const char* RootLabel(uint8_t& length)
 {
@@ -45,20 +45,20 @@ const char* RootLabel(uint8_t& length)
 
 uint16_t DeviceModel()
 {
-#if defined(GD32_BOARD_ID)
+#ifdef GD32_BOARD_ID
     return GD32_BOARD_ID;
 #else
     return 0;
-#endif
+#endif // GD32_BOARD_ID
 }
 
 uint32_t BootSoftwareVersionId()
 {
-#if defined(RELEASE_ID)
+#ifdef RELEASE_ID
     return RELEASE_ID;
 #else
     return 0;
-#endif
+#endif // RELEASE_ID
 }
 
 uint32_t SoftwareVersionId()

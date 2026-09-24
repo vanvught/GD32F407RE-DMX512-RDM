@@ -31,7 +31,7 @@
 #include <cassert>
 #ifndef NDEBUG
 #include <cstdio>
-#endif
+#endif // NDEBUG
 
 #include "rdmconst.h"
 #include "firmware/debug/debug_debug.h"
@@ -39,9 +39,9 @@
 namespace rdm {
 class Tod {
    public:
-#if !defined(RDM_DISCOVERY_TOD_TABLE_SIZE)
+#ifndef RDM_DISCOVERY_TOD_TABLE_SIZE
 #define RDM_DISCOVERY_TOD_TABLE_SIZE 200U
-#endif
+#endif // RDM_DISCOVERY_TOD_TABLE_SIZE
     static constexpr uint32_t kTableSize = RDM_DISCOVERY_TOD_TABLE_SIZE;
     static constexpr uint32_t kMutesTableSize = (kTableSize + 32) / 32;
     static constexpr uint32_t kInvalidEntry = UINT32_MAX;
@@ -211,13 +211,13 @@ class Tod {
         for (uint32_t i = 0; i < count; i++) {
             printf("%.2x%.2x:%.2x%.2x%.2x%.2x\n", tod_[i].uid[0], tod_[i].uid[1], tod_[i].uid[2], tod_[i].uid[3], tod_[i].uid[4], tod_[i].uid[5]);
         }
-#endif
+#endif // NDEBUG
     }
 
     void Dump() {
 #ifndef NDEBUG
         Dump(entries_);
-#endif
+#endif // NDEBUG
     }
 
    private:

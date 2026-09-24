@@ -26,21 +26,21 @@
 #ifndef I2C_DISPLAY_H_
 #define I2C_DISPLAY_H_
 
-#if defined(CONFIG_DISPLAY_USE_SPI)
+#ifdef CONFIG_DISPLAY_USE_SPI
 #error
-#endif
+#endif // CONFIG_DISPLAY_USE_SPI
 
 #if defined(__GNUC__) && !defined(__clang__)
 #if defined(CONFIG_I2C_LCD_OPTIMIZE_O2) || defined(CONFIG_I2C_LCD_OPTIMIZE_O3)
 #pragma GCC push_options
-#if defined(CONFIG_I2C_LCD_OPTIMIZE_O2)
+#ifdef CONFIG_I2C_LCD_OPTIMIZE_O2
 #pragma GCC optimize("O2")
 #else
 #pragma GCC optimize("O3")
-#endif
+#endif // CONFIG_I2C_LCD_OPTIMIZE_O2
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
-#endif
+#endif // defined(CONFIG_I2C_LCD_OPTIMIZE_O2) || defined(CONFIG_I2C_LCD_OPTIMIZE_O3)
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdarg>
 #include <cstdint>
@@ -49,9 +49,9 @@
 
 #include "displayset.h"
 #include "firmware/ansi_colour.h"
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
 #include "gpio.h"
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
 
 namespace display {
 enum class Type { kPcf8574T1602, kPcf8574T2004, kSsd1306, kSsd1311, kUnknown };
@@ -296,11 +296,11 @@ class Display {
         }
 
         if (is_sleep_) {
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
             if (__builtin_expect(((gpio::Lev(DISPLAYTIMEOUT_GPIO) == 0)), 0)) {
                 SetSleep(false);
             }
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
         }
     }
 
@@ -327,9 +327,9 @@ class Display {
 };
 
 #if defined(__GNUC__) && !defined(__clang__)
-#if defined(CONFIG_I2C_LCD_OPTIMIZE)
+#ifdef CONFIG_I2C_LCD_OPTIMIZE
 #pragma GCC pop_options
-#endif
-#endif
+#endif // CONFIG_I2C_LCD_OPTIMIZE
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #endif // I2C_DISPLAY_H_

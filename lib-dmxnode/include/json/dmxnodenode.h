@@ -28,7 +28,7 @@
 #include "dmxnode_nodetype.h"
 #include "dmxnode_outputtype.h"
 #include "json/dmxnodeparams.h"
-#if defined(DMXNODE_TYPE_ARTNET)
+#ifdef DMXNODE_TYPE_ARTNET
 #include "json/artnetparams.h"
 #endif // DMXNODE_TYPE_ARTNET
 #if defined(DMXNODE_TYPE_E131) || (defined(DMXNODE_TYPE_ARTNET) && (ARTNET_VERSION >= 4))
@@ -43,7 +43,7 @@ class DmxNodeNode final : public DmxNodeNodeType {
             dmxnode_params.Load();
             dmxnode_params.Set();
         }
-#if defined(DMXNODE_TYPE_ARTNET)
+#ifdef DMXNODE_TYPE_ARTNET
         {
             json::ArtNetParams artnet_params;
             artnet_params.Load();

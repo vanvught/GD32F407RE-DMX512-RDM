@@ -121,7 +121,7 @@ void LLRPDevice::DumpCommon()
         default:
             break;
     }
-#endif
+#endif // NDEBUG
 }
 
 void LLRPDevice::DumpLLRP()

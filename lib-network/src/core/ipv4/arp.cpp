@@ -29,7 +29,7 @@
  * Converting Network Protocol Addresses
  */
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
@@ -51,7 +51,7 @@
 #include "firmware/debug/debug_debug.h"
 #include "firmware/debug/debug_dump.h"
 
-#if defined(DEBUG_NETWORK_ARP)
+#ifdef DEBUG_NETWORK_ARP
 #define ARP_DEBUG_ENTRY() DEBUG_ENTRY()
 #define ARP_DEBUG_EXIT() DEBUG_EXIT()
 #define ARP_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
@@ -71,11 +71,11 @@
     } while (false)
 #endif // DEBUG_NETWORK_ARP
 
-#if !defined ARP_MAX_RECORDS
+#ifndef ARP_MAX_RECORDS
 static constexpr auto kMaxRecords = 16;
 #else
 static constexpr auto kMaxRecords = ARP_MAX_RECORDS;
-#endif // !defined ARP_MAX_RECORDS
+#endif // ARP_MAX_RECORDS
 
 namespace network::globals {
 extern uint32_t on_network_mask;
@@ -97,9 +97,9 @@ enum class State {
 struct Packet {
     uint8_t* p;
     uint32_t size;
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
     bool isTimestamp;
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
 };
 
 struct Record {
@@ -218,19 +218,19 @@ static void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag
         auto* udp = reinterpret_cast<struct network::udp::Header*>(record->packet.p);
         std::memcpy(udp->ether.dst, record->mac_address, network::ethernet::kAddressLength);
         udp->ip4.chksum = 0;
-#if !defined(CHECKSUM_BY_HARDWARE)
+#ifndef CHECKSUM_BY_HARDWARE
         udp->ip4.chksum = Chksum(reinterpret_cast<void*>(&udp->ip4), sizeof(udp->ip4));
 #endif // CHECKSUM_BY_HARDWARE
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
         if (!record->packet.isTimestamp) {
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
             debug::Dump(record->packet.p, record->packet.size);
             emac::eth::Send(record->packet.p, record->packet.size);
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
         } else {
             emac::eth::SendTimestamp(record->packet.p, record->packet.size);
         }
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
         network::memory::Allocator::Instance().Free(record->packet.p);
         record->packet.p = nullptr;
     }
@@ -267,9 +267,9 @@ template <network::arp::EthSend S> static void Query(uint32_t destination_ip, vo
 
         std::memcpy(record_found->packet.p, packet, size);
         record_found->packet.size = size;
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
         record_found->packet.isTimestamp = (S != network::arp::EthSend::kIsNormal);
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
         record_found->state = network::arp::State::kStateProbe;
         record_found->age = 0;
         SendRequest(destination_ip);
@@ -452,7 +452,7 @@ template <network::arp::EthSend S> static void SendImplementation(void* packet, 
 
     network::MemcpyIp(p->ip4.dst, remote_ip);
     p->ip4.chksum = 0;
-#if !defined(CHECKSUM_BY_HARDWARE)
+#ifndef CHECKSUM_BY_HARDWARE
     p->ip4.chksum = Chksum(reinterpret_cast<void*>(&p->ip4), sizeof(p->ip4));
 #endif // CHECKSUM_BY_HARDWARE
 
@@ -477,11 +477,11 @@ template <network::arp::EthSend S> static void SendImplementation(void* packet, 
                 if constexpr (S == network::arp::EthSend::kIsNormal) {
                     emac::eth::Send(packet, size);
                 }
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
                 else if constexpr (S == network::arp::EthSend::kIsTimestamp) {
                     emac::eth::SendTimestamp(packet, size);
                 }
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
                 ARP_DEBUG_EXIT();
                 return;
             }
@@ -497,11 +497,11 @@ void Send(void* packet, uint32_t size, uint32_t remote_ip) {
     SendImplementation<network::arp::EthSend::kIsNormal>(packet, size, remote_ip);
 }
 
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
 void SendTimestamp(void* packet, uint32_t size, uint32_t remote_ip) {
     SendImplementation<network::arp::EthSend::kIsTimestamp>(packet, size, remote_ip);
 }
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
 
 //  The Sender IP is set to all zeros,
 //  which means it cannot map to the Sender MAC address.

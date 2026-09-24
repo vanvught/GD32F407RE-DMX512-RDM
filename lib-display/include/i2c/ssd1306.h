@@ -45,10 +45,10 @@ class Ssd1306 final : public DisplaySet {
     explicit Ssd1306(OledPanel);
     Ssd1306(uint8_t, OledPanel);
     ~Ssd1306() override {
-#if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE)
+#ifdef CONFIG_DISPLAY_ENABLE_CURSOR_MODE
         delete[] shadow_ram_;
         shadow_ram_ = nullptr;
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_CURSOR_MODE
     }
 
     bool Start() override;
@@ -97,13 +97,13 @@ class Ssd1306 final : public DisplaySet {
 #if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE) || defined(CONFIG_DISPLAY_FIX_FLIP_VERTICALLY)
     char* shadow_ram_{nullptr};
     uint32_t shadow_ram_index_{0};
-#endif
-#if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE)
+#endif // defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE) || defined(CONFIG_DISPLAY_FIX_FLIP_VERTICALLY)
+#ifdef CONFIG_DISPLAY_ENABLE_CURSOR_MODE
     uint32_t cursor_mode_{display::cursor::kOff};
     uint8_t cursor_on_char_;
     uint8_t cursor_on_column_;
     uint8_t cursor_on_row_;
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_CURSOR_MODE
 
     static inline Ssd1306* s_this;
 };

@@ -28,7 +28,7 @@
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
 #pragma GCC optimize("-funroll-loops")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstring>

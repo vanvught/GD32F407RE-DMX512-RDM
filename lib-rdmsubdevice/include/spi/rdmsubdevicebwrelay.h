@@ -66,4 +66,4 @@ class RDMSubDeviceBwRelay : public RDMSubDevice
     uint8_t data_{0};
 };
 
-#endif  // SPI_RDMSUBDEVICEBWRELAY_H_
+#endif // SPI_RDMSUBDEVICEBWRELAY_H_

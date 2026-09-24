@@ -196,7 +196,7 @@ void Hd44780::WriteReg(uint8_t reg) {
 }
 
 void Hd44780::SetCursor([[maybe_unused]] uint32_t mode) {
-#if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE)
+#ifdef CONFIG_DISPLAY_ENABLE_CURSOR_MODE
     uint8_t cmd = hd44780::cmd::kDisplay | hd44780::cmd::display::kOn;
 
     if ((mode & display::cursor::kOn) == display::cursor::kOn) {
@@ -208,5 +208,5 @@ void Hd44780::SetCursor([[maybe_unused]] uint32_t mode) {
     }
 
     WriteCmd(cmd);
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_CURSOR_MODE
 }

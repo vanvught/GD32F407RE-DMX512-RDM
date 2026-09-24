@@ -35,7 +35,7 @@
 #include "firmware/debug/debug_debug.h"
 #if defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 #include "panelled.h"
-#endif
+#endif // defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 #include "artnet_debug.h"
 
 namespace rdm::discovery {
@@ -289,7 +289,7 @@ void ArtNetNode::HandleRdm() {
                 constexpr auto kMask = artnet::GoodOutput::kOutputIsMerging | artnet::GoodOutput::kDataIsBeingTransmitted | artnet::GoodOutput::kOutputIsSacn;
                 output_port_[port_index].is_transmitting = (GetGoodOutput4(port_index) & kMask) != 0;
             }
-#endif
+#endif // (ARTNET_VERSION >= 4)
             StopOutputPort(port_index);
 
             output_port_[port_index].rdm_destination_ip = ip_address_from_;
@@ -301,13 +301,13 @@ void ArtNetNode::HandleRdm() {
 
 #ifndef NDEBUG
             rdm::message::Print(reinterpret_cast<const uint8_t*>(message));
-#endif
+#endif // NDEBUG
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
             panelled::On(panelled::kPortARdm << port_index);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
             panelled::On(panelled::kRdm << port_index);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
         } else if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
             const auto* rdm_message = reinterpret_cast<const TRdmMessage*>(&kArtRdm->address);
 
@@ -317,14 +317,14 @@ void ArtNetNode::HandleRdm() {
 
 #ifndef NDEBUG
                 rdm::message::Print(reinterpret_cast<const uint8_t*>(rdm_message));
-#endif
+#endif // NDEBUG
             }
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
             panelled::On(panelled::kPortARdm << port_index);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
             panelled::On(panelled::kRdm << port_index);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
         }
     }
 }

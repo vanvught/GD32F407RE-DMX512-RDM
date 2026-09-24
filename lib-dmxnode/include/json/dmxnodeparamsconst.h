@@ -39,7 +39,7 @@ struct DmxNodeParamsConst {
     static constexpr auto kDmxStartAddress = json::MakeSimpleKey("dmx_start_address");
     static constexpr auto kDmxSlotInfo = json::MakeSimpleKey("dmx_slot_info");
 
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
     static constexpr json::PortKey kLabelPortA{"label_port_a", 12, Fnv1a32("label_port_a", 12)};
 #if (DMX_MAX_PORTS > 1)
     static constexpr json::PortKey kLabelPortB{"label_port_b", 12, Fnv1a32("label_port_b", 12)};

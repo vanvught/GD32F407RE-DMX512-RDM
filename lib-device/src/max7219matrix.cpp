@@ -24,11 +24,10 @@
  */
 
 #include <cstdint>
+#include <algorithm>
 
 #include "max7219matrix.h"
 #include "font_cp437.h"
-#include "firmware/debug/debug_debug.h"
-#include "common/utils/utils_math.h"
 
 static uint8_t spi_data[64] __attribute__((aligned(4)));
 static constexpr auto kFontSize = Cp437FontSize();
@@ -57,7 +56,7 @@ Max7219Matrix::Max7219Matrix() noexcept {
 
 void Max7219Matrix::Init(uint16_t count, uint8_t intensity) {
     constexpr uint16_t kSf = sizeof(spi_data) / 2;
-    count_ = common::Min(count, kSf);
+    count_ =std::min(count, kSf);
 
     WriteAll(max7219::reg::kShutdown, max7219::reg::shutdown::kNormalOp);
     WriteAll(max7219::reg::kDisplayTest, 0);

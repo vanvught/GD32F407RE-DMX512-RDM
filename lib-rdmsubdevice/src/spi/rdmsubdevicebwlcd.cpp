@@ -24,12 +24,11 @@
  */
 
 #include <cstdint>
-#include <cstring>
+#include <algorithm>
 
 #include "spi/rdmsubdevicebwlcd.h"
 #include "bwspilcd.h"
 #include "common/utils/utils_hex.h"
-#include "common/utils/utils_math.h"
 
 static constexpr uint32_t kDmxFootprint = 4;
 static RdmPersonality* rdm_personalities[] = {new RdmPersonality("LCD 4-slots H", kDmxFootprint), new RdmPersonality("LCD 4-slots D", kDmxFootprint), new RdmPersonality("LCD 4-slots %%", kDmxFootprint)};
@@ -82,8 +81,8 @@ void RDMSubDeviceBwLcd::Data(const uint8_t* data, uint32_t length) {
     const auto kDmxStartAddress = GetDmxStartAddress();
     auto is_data_changed = false;
 
-    length = common::Min(length, kDmxFootprint);
-    length = common::Min(length, static_cast<uint32_t>(513U - kDmxStartAddress));
+    length =std::min(length, kDmxFootprint);
+    length =std::min(length, static_cast<uint32_t>(513U - kDmxStartAddress));
 
     const auto* p = &data[kDmxStartAddress - 1];
 

@@ -26,27 +26,27 @@
 #ifndef SPI_DISPLAY_H_
 #define SPI_DISPLAY_H_
 
-#if !defined(CONFIG_DISPLAY_USE_SPI)
+#ifndef CONFIG_DISPLAY_USE_SPI
 #error
-#endif
+#endif // CONFIG_DISPLAY_USE_SPI
 
 #if defined(__GNUC__) && !defined(__clang__)
 #if defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
 #pragma GCC push_options
-#if defined(CONFIG_SPI_LCD_OPTIMIZE_O2)
+#ifdef CONFIG_SPI_LCD_OPTIMIZE_O2
 #pragma GCC optimize("O2")
 #else
 #pragma GCC optimize("O3")
-#endif
+#endif // CONFIG_SPI_LCD_OPTIMIZE_O2
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
-#endif
+#endif // defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdarg>
 #include <cstdint>
 #include <cstdio>
 
-#if defined(CONFIG_USE_ILI9341)
+#ifdef CONFIG_USE_ILI9341
 #include "spi/ili9341.h"
 using LcdDriver = ILI9341;
 #elif defined(CONFIG_USE_ST7735S)
@@ -55,20 +55,20 @@ using LcdDriver = ST7735S;
 #else
 #include "spi/st7789.h"
 using LcdDriver = ST7789;
-#endif
+#endif // CONFIG_USE_ILI9341
 #include "spi/lcd_font.h"
 #include "spi/spilcd.h"
 #include "firmware/ansi_colour.h"
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
 #include "gpio.h"
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
 #include "display_debug.h"
 
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 inline constexpr uint32_t CS_GPIO = SPI_LCD_CS_GPIO;
 #else
 inline constexpr uint32_t CS_GPIO = 0;
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
 
 class Display : public LcdDriver {
    public:
@@ -83,10 +83,10 @@ class Display : public LcdDriver {
 
         cols_ = (GetWidth() / s_pFONT->kWidth);
         rows_ = (GetHeight() / s_pFONT->kHeight);
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
         gpio::Fsel(DISPLAYTIMEOUT_GPIO, gpio::Select::kInput);
         gpio::SetPud(DISPLAYTIMEOUT_GPIO, gpio::Pull::kUp);
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
 
         PrintInfo();
         DISPLAY_DEBUG_EXIT();
@@ -97,13 +97,13 @@ class Display : public LcdDriver {
     bool IsDetected() const { return true; }
 
     void PrintInfo() {
-#if defined(CONFIG_USE_ILI9341)
+#ifdef CONFIG_USE_ILI9341
         printf("ILI9341 ");
 #elif defined(CONFIG_USE_ST7735S)
         printf("ST7735S ");
 #else
         printf("ST7789 ");
-#endif
+#endif // CONFIG_USE_ILI9341
         printf("(%u,%u)\n", static_cast<unsigned>(rows_), static_cast<unsigned>(cols_));
     }
 
@@ -268,11 +268,11 @@ class Display : public LcdDriver {
         }
 
         if (is_sleep_) {
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
             if (__builtin_expect(((gpio::Lev(DISPLAYTIMEOUT_GPIO) == 0)), 0)) {
                 SetSleep(false);
             }
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
         }
     }
 
@@ -295,7 +295,7 @@ class Display : public LcdDriver {
 
     static inline Display* s_this;
 
-#if defined(SPI_LCD_240X320)
+#ifdef SPI_LCD_240X320
     static constexpr sFONT* s_pFONT = &Font16x24;
 #elif defined(SPI_LCD_128X128)
     static constexpr sFONT* s_pFONT = &Font8x8;
@@ -303,7 +303,7 @@ class Display : public LcdDriver {
     static constexpr sFONT* s_pFONT = &Font8x8;
 #else
     static constexpr sFONT* s_pFONT = &Font12x12;
-#endif
+#endif // SPI_LCD_240X320
     static constexpr uint16_t kColorBackground = 0x001F;
     static constexpr uint16_t kColorForeground = 0xFFE0;
 };
@@ -311,7 +311,7 @@ class Display : public LcdDriver {
 #if defined(__GNUC__) && !defined(__clang__)
 #if defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
 #pragma GCC pop_options
-#endif
-#endif
+#endif // defined(CONFIG_SPI_LCD_OPTIMIZE_O2) || defined(CONFIG_SPI_LCD_OPTIMIZE_O3)
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #endif // SPI_DISPLAY_H_

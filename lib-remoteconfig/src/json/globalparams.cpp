@@ -62,7 +62,7 @@ void GlobalParams::Store(const char* buffer, uint32_t buffer_size) {
 
 #ifdef DEBUG_REMOTECONFIG
     Dump();
-#endif
+#endif // DEBUG_REMOTECONFIG
 }
 
 void GlobalParams::Set() {
@@ -74,7 +74,7 @@ void GlobalParams::Set() {
 
 #ifdef DEBUG_REMOTECONFIG
     Dump();
-#endif
+#endif // DEBUG_REMOTECONFIG
 }
 
 void GlobalParams::Dump() {

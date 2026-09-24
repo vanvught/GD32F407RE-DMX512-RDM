@@ -35,11 +35,11 @@
 
 namespace httpd {
 static constexpr uint32_t kBufsize =
-#if !defined(HTTPD_CONTENT_SIZE)
+#ifndef HTTPD_CONTENT_SIZE
     network::tcp::kTcpDataMss;
 #else
     HTTPD_CONTENT_SIZE;
-#endif
+#endif // HTTPD_CONTENT_SIZE
 static constexpr uint32_t kUploadFilenameMaxLength = 32;
 } // namespace httpd
 

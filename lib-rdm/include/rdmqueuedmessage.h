@@ -60,4 +60,4 @@ class RDMQueuedMessage
     struct TRdmQueuedMessage* queued_message_;
 };
 
-#endif  // RDMQUEUEDMESSAGE_H_
+#endif // RDMQUEUEDMESSAGE_H_

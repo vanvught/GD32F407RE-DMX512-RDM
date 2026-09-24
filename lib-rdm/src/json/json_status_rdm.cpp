@@ -1,4 +1,4 @@
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
 /**
  * @file json_status_rdm.cpp
  */
@@ -130,4 +130,4 @@ uint32_t RdmTod(char* out_buffer, uint32_t out_buffer_size, uint32_t port_index)
     return 0;
 }
 } // namespace json::status
-#endif
+#endif // RDM_CONTROLLER

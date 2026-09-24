@@ -8,7 +8,7 @@
 
 #include "firmware/debug/debug_debug.h"
 
-#if defined(DEBUG_NETWORK_IFACE)
+#ifdef DEBUG_NETWORK_IFACE
 #define NETWORK_IFACE_DEBUG_ENTRY() DEBUG_ENTRY()
 #define NETWORK_IFACE_DEBUG_EXIT() DEBUG_EXIT()
 #define NETWORK_IFACE_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)

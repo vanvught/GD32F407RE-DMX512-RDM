@@ -31,7 +31,7 @@
 #include "dmx/dmx_config.h" // IWYU pragma: keep
 
 // For void-returning functions
-#if defined(NDEBUG)
+#ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_VOID(x) ((void)0)
 #else
 #define DMX_CHECK_PORT_INDEX_VOID(x)                     \
@@ -41,10 +41,10 @@
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return;                                      \
     } while (0)
-#endif
+#endif // NDEBUG
 
 // For functions that return a value (e.g., enum, int, etc.)
-#if defined(NDEBUG)
+#ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_RET(x, ret) ((void)0)
 #else
 #define DMX_CHECK_PORT_INDEX_RET(x, ret)                 \
@@ -54,10 +54,10 @@
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return ret;                                  \
     } while (0)
-#endif
+#endif // NDEBUG
 
 // For functions that return pointers
-#if defined(NDEBUG)
+#ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_PTR(x) ((void)0)
 #else
 #define DMX_CHECK_PORT_INDEX_PTR(x)                      \
@@ -67,6 +67,6 @@
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
             return nullptr;                              \
     } while (0)
-#endif
+#endif // NDEBUG
 
-#endif  // GD32_DMX_ASSERT_H_
+#endif // GD32_DMX_ASSERT_H_

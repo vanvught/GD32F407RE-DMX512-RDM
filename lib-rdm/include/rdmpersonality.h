@@ -116,4 +116,4 @@ private:
 	uint32_t description_length_ { 0 };
 };
 
-#endif  // RDMPERSONALITY_H_
+#endif // RDMPERSONALITY_H_

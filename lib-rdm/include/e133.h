@@ -71,4 +71,4 @@
 #define LLRP_COMPONENT_TYPE_BROKER         0x02	///< The LLRP Target is a Broker
 #define LLRP_COMPONENT_TYPE_NON_RDMNET     0xFF	///< The LLRP Target does not implement any RDMnet protocol other than LLRP
 
-#endif  // E133_H_
+#endif // E133_H_

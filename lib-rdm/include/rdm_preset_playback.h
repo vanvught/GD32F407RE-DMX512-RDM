@@ -36,4 +36,4 @@ void Get(uint16_t& mode, uint8_t& level);
 bool Set(uint16_t mode, uint8_t level);
 } // namespace rdm::preset_playback
 
-#endif /* RDM_PRESET_PLAYBACK_H_ */
+#endif // RDM_PRESET_PLAYBACK_H_

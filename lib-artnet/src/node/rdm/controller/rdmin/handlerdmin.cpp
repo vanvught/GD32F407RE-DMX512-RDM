@@ -27,7 +27,7 @@
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
 #pragma GCC optimize("-funroll-loops")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstring>
@@ -39,7 +39,7 @@
 #include "network_udp.h"
 #if defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 #include "panelled.h"
-#endif
+#endif // defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 
 void ArtNetNode::HandleRdmIn() {
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
@@ -66,11 +66,11 @@ void ArtNetNode::HandleRdmIn() {
 
                     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(art_rdm), ((sizeof(struct artnet::ArtRdm)) - 256) + rdm_message->message_length + 1, input_port_[port_index].destination_ip, artnet::kUdpPort);
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
                     panelled::On(panelled::kPortARdm << port_index);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
                     panelled::On(panelled::kRdm << port_index);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
                 }
             }
         } else if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
@@ -92,11 +92,11 @@ void ArtNetNode::HandleRdmIn() {
 
                     output_port_[port_index].rdm_destination_ip = 0;
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
                     panelled::On(panelled::kPortARdm << port_index);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
                     panelled::On(panelled::kRdm << port_index);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
                 }
             }
         }

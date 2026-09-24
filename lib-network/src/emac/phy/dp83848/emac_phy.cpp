@@ -38,7 +38,7 @@
 #define PHY_INT_AND_OUTPUT_ENABLE 0x03U
 #define PHY_LINK_INT_ENABLE 0x20U
 
-#if !defined(BIT)
+#ifndef BIT
 #define BIT(x) static_cast<uint16_t>(1U << (x))
 #endif // BIT
 

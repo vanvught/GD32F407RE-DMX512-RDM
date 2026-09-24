@@ -45,7 +45,7 @@
 #include "softwaretimers.h"
 #include "firmware/debug/debug_debug.h"
 
-#if defined(DEBUG_NETWORK_ACD)
+#ifdef DEBUG_NETWORK_ACD
 #define ACD_DEBUG_ENTRY() DEBUG_ENTRY()
 #define ACD_DEBUG_EXIT() DEBUG_EXIT()
 #define ACD_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)

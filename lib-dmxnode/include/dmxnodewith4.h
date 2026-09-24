@@ -108,7 +108,7 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
         }
     }
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     void SetOutputStyle(uint32_t port_index, const dmxnode::OutputStyle outputStyle) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {

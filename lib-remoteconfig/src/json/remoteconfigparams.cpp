@@ -57,7 +57,7 @@ void RemoteConfigParams::Store(const char* buffer, uint32_t buffer_size)
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void RemoteConfigParams::Set()
@@ -68,7 +68,7 @@ void RemoteConfigParams::Set()
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void RemoteConfigParams::Dump()

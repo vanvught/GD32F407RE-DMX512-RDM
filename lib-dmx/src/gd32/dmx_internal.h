@@ -37,12 +37,12 @@
 #define ALIGNED __attribute__((aligned(4)))
 
 // Needed for older GD32F firmware
-#if !defined(USART_TRANSMIT_DMA_ENABLE)
+#ifndef USART_TRANSMIT_DMA_ENABLE
 #define USART_TRANSMIT_DMA_ENABLE USART_DENT_ENABLE
 #endif // USART_TRANSMIT_DMA_ENABLE
 
 // GD32F10X is different
-#if defined(GD32F10X)
+#ifdef GD32F10X
 #define USART_FLAG_IDLE USART_FLAG_IDLEF
 #endif // GD32F10X
 
@@ -56,35 +56,35 @@
 #if defined(GD32F4XX) || defined(GD32H7XX)
 constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
     switch (usart_periph) {
-#if defined(DMX_USE_USART0)
+#ifdef DMX_USE_USART0
         case USART0:
             return USART0_GPIO_AFx;
 #endif // DMX_USE_USART0
-#if defined(DMX_USE_USART1)
+#ifdef DMX_USE_USART1
         case USART1:
             return USART1_GPIO_AFx;
 #endif // DMX_USE_USART1
-#if defined(DMX_USE_USART2)
+#ifdef DMX_USE_USART2
         case USART2:
             return USART2_GPIO_AFx;
 #endif // DMX_USE_USART2
-#if defined(DMX_USE_UART3)
+#ifdef DMX_USE_UART3
         case UART3:
             return UART3_GPIO_AFx;
 #endif // DMX_USE_UART3
-#if defined(DMX_USE_UART4)
+#ifdef DMX_USE_UART4
         case UART4:
             return UART4_GPIO_AFx;
 #endif // DMX_USE_UART4
-#if defined(DMX_USE_USART5)
+#ifdef DMX_USE_USART5
         case USART5:
             return USART5_GPIO_AFx;
 #endif // DMX_USE_USART5
-#if defined(DMX_USE_UART6)
+#ifdef DMX_USE_UART6
         case UART6:
             return UART6_GPIO_AFx;
 #endif // DMX_USE_UART6
-#if defined(DMX_USE_UART7)
+#ifdef DMX_USE_UART7
         case UART7:
             return UART7_GPIO_AFx;
 #endif // DMX_USE_UART7
@@ -125,42 +125,42 @@ inline void Gd32GpioModeAf() {
 
 inline void DisableTimerIrqUart(uint32_t gpio_periph) {
     switch (gpio_periph) {
-#if defined(DMX_USE_USART0)
+#ifdef DMX_USE_USART0
         case USART0:
             timer_interrupt_disable(TIMER1, TIMER_INT_CH0);
             break;
 #endif // DMX_USE_USART0
-#if defined(DMX_USE_USART1)
+#ifdef DMX_USE_USART1
         case USART1:
             timer_interrupt_disable(TIMER1, TIMER_INT_CH1);
             break;
 #endif // DMX_USE_USART1
-#if defined(DMX_USE_USART2)
+#ifdef DMX_USE_USART2
         case USART2:
             timer_interrupt_disable(TIMER1, TIMER_INT_CH2);
             break;
 #endif // DMX_USE_USART2
-#if defined(DMX_USE_UART3)
+#ifdef DMX_USE_UART3
         case UART3:
             timer_interrupt_disable(TIMER1, TIMER_INT_CH3);
             break;
 #endif // DMX_USE_UART3
-#if defined(DMX_USE_UART4)
+#ifdef DMX_USE_UART4
         case UART4:
             timer_interrupt_disable(TIMER4, TIMER_INT_CH0);
             break;
 #endif // DMX_USE_UART4
-#if defined(DMX_USE_USART5)
+#ifdef DMX_USE_USART5
         case USART5:
             timer_interrupt_disable(TIMER4, TIMER_INT_CH1);
             break;
 #endif // DMX_USE_USART5
-#if defined(DMX_USE_UART6)
+#ifdef DMX_USE_UART6
         case UART6:
             timer_interrupt_disable(TIMER4, TIMER_INT_CH2);
             break;
 #endif // DMX_USE_UART6
-#if defined(DMX_USE_UART7)
+#ifdef DMX_USE_UART7
         case UART7:
             timer_interrupt_disable(TIMER4, TIMER_INT_CH3);
             break;

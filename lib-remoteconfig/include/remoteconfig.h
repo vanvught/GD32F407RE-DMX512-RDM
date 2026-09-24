@@ -28,12 +28,12 @@
 
 #include <cstdint>
 
-#if defined(ENABLE_TFTP_SERVER)
+#ifdef ENABLE_TFTP_SERVER
 #include "tftp/tftpfileserver.h"
-#endif
-#if defined(ENABLE_HTTPD)
+#endif // ENABLE_TFTP_SERVER
+#ifdef ENABLE_HTTPD
 #include "httpd/httpd.h"
-#endif
+#endif // ENABLE_HTTPD
 #include "network.h"
 #include "configstore.h"
 
@@ -55,7 +55,7 @@
 #define REMOTECONFIG_DEBUG_PUTS(...) \
     do {                             \
     } while (false)
-#endif
+#endif // DEBUG_REMOTECONFIG
 
 namespace remoteconfig {
 namespace udp {
@@ -107,9 +107,9 @@ class RemoteConfig {
     void HandleReboot();
     void HandleFactory();
     void HandleList();
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
     void HandleUptime();
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     void HandleVersion();
 
     void HandleDisplaySet();
@@ -146,14 +146,14 @@ class RemoteConfig {
 
     bool is_reboot_{false};
 
-#if defined(ENABLE_TFTP_SERVER)
+#ifdef ENABLE_TFTP_SERVER
     TFTPFileServer* tftp_file_server_{nullptr};
-#endif
+#endif // ENABLE_TFTP_SERVER
     bool enable_tftp_{false};
 
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
     HttpDaemon* http_daemon_{nullptr};
-#endif
+#endif // ENABLE_HTTPD
 
     void static StaticCallbackFunction(const uint8_t* buffer, uint32_t size, uint32_t from_ip, uint16_t from_port) { RemoteConfig::Get()->Input(buffer, size, from_ip, from_port); }
 

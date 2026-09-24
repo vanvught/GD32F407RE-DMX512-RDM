@@ -34,19 +34,19 @@ struct Defaults {
 };
 } // namespace display
 
-#if !defined(CONFIG_DISPLAY_USE_CUSTOM)
-#if defined(CONFIG_DISPLAY_USE_SPI)
+#ifndef CONFIG_DISPLAY_USE_CUSTOM
+#ifdef CONFIG_DISPLAY_USE_SPI
 #include "spi/display.h"
 #else
 #include "i2c/display.h"
-#endif
+#endif // CONFIG_DISPLAY_USE_SPI
 #else
-#if !defined(STR_HELPER)
+#ifndef STR_HELPER
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-#endif
+#endif // STR_HELPER
 #define EXPAND(x) x
 #include STR(EXPAND(DISPLAY_USE_CUSTOM_INCLUDE)/custom/display.h)
-#endif
+#endif // CONFIG_DISPLAY_USE_CUSTOM
 
 #endif // DISPLAY_H_

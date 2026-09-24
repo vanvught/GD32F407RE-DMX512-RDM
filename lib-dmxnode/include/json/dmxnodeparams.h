@@ -33,7 +33,7 @@
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX
 
@@ -72,7 +72,7 @@ class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
         MakeKey(SetNodeName, DmxNodeParamsConst::kNodeName),
         MakeKey(SetFailsafe, DmxNodeParamsConst::kFailsafe),
         MakeKey(SetDisableMergeTimeout, DmxNodeParamsConst::kDisableMergeTimeout),
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
         MakeKey(SetLabelPort, DmxNodeParamsConst::kLabelPort[0]),
         MakeKey(SetUniversePort, DmxNodeParamsConst::kUniversePort[0]),
         MakeKey(SetDirectionPort, DmxNodeParamsConst::kDirectionPort[0]),

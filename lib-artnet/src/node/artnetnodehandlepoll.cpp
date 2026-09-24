@@ -26,7 +26,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstring>
@@ -39,9 +39,8 @@
 #include "network_config.h"
 #include "network_iface.h"
 #include "artnet_debug.h"
-#include "common/utils/utils_math.h"
 
-template <uint8_t N> 
+template <uint8_t N>
 static inline void Uitoa(uint32_t value, uint8_t* out) {
     static_assert(N >= 1);
     auto* o = out + (N - 1);
@@ -139,7 +138,7 @@ void ArtNetNode::ProcessPollReply(uint32_t port_index) {
         return;
 #else
         __builtin_unreachable();
-#endif
+#endif // NDEBUG
     }
 
     if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
@@ -151,14 +150,14 @@ void ArtNetNode::ProcessPollReply(uint32_t port_index) {
             good_output = static_cast<uint8_t>(good_output | (GetGoodOutput4(port_index) & kMask));
             output_port_[port_index].good_output = good_output;
         }
-#endif
-#if defined(RDM_CONTROLLER)
+#endif // (ARTNET_VERSION >= 4)
+#ifdef RDM_CONTROLLER
         if (rdm_controller_.IsRunning(port_index)) {
             GoodOutputBClear(port_index, artnet::GoodOutputB::kDiscoveryNotRunning);
         } else {
             GoodOutputBSet(port_index, artnet::GoodOutputB::kDiscoveryNotRunning);
         }
-#endif
+#endif // RDM_CONTROLLER
         art_poll_reply_.port_types[0] = artnet::PortType::kOutputArtnet;
         art_poll_reply_.good_output[0] = output_port_[port_index].good_output;
         art_poll_reply_.good_output_b[0] = output_port_[port_index].good_output_b;
@@ -169,13 +168,13 @@ void ArtNetNode::ProcessPollReply(uint32_t port_index) {
         return;
     }
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
 #if (ARTNET_VERSION >= 4)
         if (node_.port[port_index].protocol == artnet::PortProtocol::kSacn) {
             input_port_[port_index].good_input |= artnet::GoodInput::kInputIsSacn;
         }
-#endif
+#endif // (ARTNET_VERSION >= 4)
         art_poll_reply_.port_types[0] = artnet::PortType::kInputArtnet;
         art_poll_reply_.good_output[0] = 0;
         art_poll_reply_.good_output_b[0] = 0;
@@ -185,7 +184,7 @@ void ArtNetNode::ProcessPollReply(uint32_t port_index) {
         ARTNET_POLL_DEBUG_EXIT();
         return;
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 }
 
 void ArtNetNode::SendPollReply(uint32_t port_index, uint32_t destination_ip, artnet::ArtPollQueue* queue) {
@@ -199,7 +198,7 @@ void ArtNetNode::SendPollReply(uint32_t port_index, uint32_t destination_ip, art
     memcpy(art_poll_reply_.ip_address, ip_address.u8, sizeof(art_poll_reply_.ip_address));
 #if (ARTNET_VERSION >= 4)
     memcpy(art_poll_reply_.bind_ip, ip_address.u8, sizeof(art_poll_reply_.bind_ip));
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     if (queue != nullptr) {
         if (!((node_.port[port_index].port_address >= queue->art_poll_reply.target_port_address_bottom) && (node_.port[port_index].port_address <= queue->art_poll_reply.target_port_address_top))) {
@@ -216,7 +215,7 @@ void ArtNetNode::SendPollReply(uint32_t port_index, uint32_t destination_ip, art
     const auto* const kPortName = DmxNode::Instance().GetPortName(port_index);
     memcpy(art_poll_reply_.port_name, kPortName, artnet::kPortNameLength);
 
-    if (__builtin_expect((dmxnode_output_type_ != nullptr), 1)) {
+    if (dmxnode_output_type_ != nullptr) [[unlikely]] {
         const auto kRefreshRate = dmxnode_output_type_->GetRefreshRate();
         art_poll_reply_.refresh_rate_lo = static_cast<uint8_t>(kRefreshRate);
         art_poll_reply_.refresh_rate_hi = static_cast<uint8_t>(kRefreshRate >> 8);
@@ -260,7 +259,7 @@ void ArtNetNode::HandlePoll() {
 
         if (state_.is_multiple_controllers_req_diag) {
             // The lowest minimum value of Priority shall be used. (Ignore ArtPoll->diag_priority).
-            state_.diag_priority = common::Min(state_.diag_priority, kArtPoll->diag_priority);
+            state_.diag_priority = std::min(state_.diag_priority, kArtPoll->diag_priority);
         } else {
             state_.diag_priority = kArtPoll->diag_priority;
         }

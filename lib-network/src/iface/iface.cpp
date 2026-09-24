@@ -34,7 +34,7 @@
 #include "net_config.h"
 #include "network_iface.h"
 #include "common/utils/utils_hex.h"
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
 #include "apps/mdns.h"
 #endif // CONFIG_NET_APPS_NO_MDNS
 #include "network_store.h"
@@ -101,7 +101,7 @@ void SetHostnameAuto() {
 void SetHostname(const char* hostname) {
     NETWORK_IFACE_DEBUG_ENTRY();
 
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
     network::apps::mdns::SendAnnouncement(0);
 #endif // CONFIG_NET_APPS_NO_MDNS
 
@@ -135,7 +135,7 @@ void SetHostname(const char* hostname) {
 
     netif::global::netif_default.hostname = s_hostname;
 
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
     network::apps::mdns::SendAnnouncement(network::apps::mdns::kMdnsResponseTtl);
 #endif // CONFIG_NET_APPS_NO_MDNS
     network::display::Hostname();

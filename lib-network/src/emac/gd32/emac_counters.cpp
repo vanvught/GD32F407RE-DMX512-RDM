@@ -37,7 +37,7 @@ static void PollHardwareCounters() {
     uint32_t rxfifo_drop;  ///< The number of frames dropped by RxFIFO
     uint32_t rxdma_missed; ///< The number of frames missed by the RxDMA controller
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     enet_missed_frame_counter_get(ENETx, &rxfifo_drop, &rxdma_missed);
 #else
     enet_missed_frame_counter_get(&rxfifo_drop, &rxdma_missed);

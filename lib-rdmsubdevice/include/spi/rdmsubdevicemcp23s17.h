@@ -62,4 +62,4 @@ class RDMSubDeviceMCP23S17 : public RDMSubDevice
     uint16_t data_ = 0;
 };
 
-#endif  // SPI_RDMSUBDEVICEMCP23S17_H_
+#endif // SPI_RDMSUBDEVICEMCP23S17_H_

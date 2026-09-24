@@ -32,4 +32,4 @@ struct RDMNetConst {
 	static const char MSG_STARTED[];
 };
 
-#endif /* RDMNETCONST_H_ */
+#endif // RDMNETCONST_H_

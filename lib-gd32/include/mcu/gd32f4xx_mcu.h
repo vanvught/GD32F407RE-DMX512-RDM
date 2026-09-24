@@ -26,7 +26,7 @@
 #ifndef MCU_GD32F4XX_MCU_H_
 #define MCU_GD32F4XX_MCU_H_
 
-#if !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
+#if !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F427_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
 # error This file should not be included
 #endif // !(defined(MCU_GD32F407_MCU_H_) || defined(MCU_GD32F450_MCU_H_) || defined(MCU_GD32F470_MCU_H_))
 
@@ -377,6 +377,7 @@
 #define SPI1_TX_DMA_CHx			DMA_CH4
 #define SPI1_TX_DMA_SUBPERIx    DMA_SUBPERI0
 
+#define SPI2_RCU_DMAx			RCU_DMA0
 #define SPI2_DMAx				DMA0
 #define SPI2_TX_DMA_CHx			DMA_CH5
 #define SPI2_TX_DMA_SUBPERIx	DMA_SUBPERI0
@@ -437,6 +438,7 @@
 #define USART1_RX_DMA_CHx		DMA_CH5
 #define USART1_RX_DMA_SUBPERIx	DMA_SUBPERI4
 
+#define USART2_RCU_DMAx         RCU_DMA0
 #define USART2_DMAx				DMA0
 #define USART2_TX_DMA_CHx		DMA_CH3
 #define USART2_TX_DMA_SUBPERIx	DMA_SUBPERI4

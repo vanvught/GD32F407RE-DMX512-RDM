@@ -133,4 +133,4 @@ inline constexpr uint8_t IER_CTSI = (0x80);  /* Enable CTS interrupt            
  */
 inline constexpr uint8_t EFR_ENABLE_ENHANCED_FUNCTIONS = (1u << 4);
 
-#endif  // SC16IS7X0_H_
+#endif // SC16IS7X0_H_

@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 #include <cassert>
 
 #include "remoteconfig.h"
@@ -34,15 +35,14 @@
 #include "firmware/firmwareversion.h"
 #include "timing.h"
 #include "network_udp.h"
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #include "apps/mdns.h"
 #include "dmxnode_nodetype.h"
 #include "json/remoteconfigparams.h"
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 #include "common/utils/utils_array.h"
 #include "display.h"
 #include "configstore.h"
-#include "common/utils/utils_math.h"
 
 namespace remoteconfig::udp {
 static constexpr auto kPort = 0x2905;
@@ -54,7 +54,7 @@ enum class Command {
     kDisplay, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
     kUptime, //
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     kTftp,    //
     kFactory, //
 };
@@ -71,7 +71,7 @@ constexpr struct RemoteConfig::Commands RemoteConfig::kGet[] = {
     {.handler = &RemoteConfig::HandleDisplayGet, .cmd = "display#", .kLength = 8, .kGreaterThan = false}, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
     {.handler = &RemoteConfig::HandleUptime, .cmd = "uptime#", .kLength = 7, .kGreaterThan = false}, //
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     {.handler = &RemoteConfig::HandleTftpGet, .cmd = "tftp#", .kLength = 5, .kGreaterThan = false},    //
     {.handler = &RemoteConfig::HandleFactory, .cmd = "factory##", .kLength = 9, .kGreaterThan = false} //
 };
@@ -103,19 +103,19 @@ RemoteConfig::RemoteConfig(remoteconfig::Output output, uint32_t active_outputs)
 
 #ifdef ENABLE_TFTP_SERVER
     network::apps::mdns::ServiceRecordAdd(nullptr, network::apps::mdns::Services::kTftp);
-#endif
+#endif // ENABLE_TFTP_SERVER
 
 #ifdef ENABLE_HTTPD
     http_daemon_ = new HttpDaemon;
     assert(http_daemon_ != nullptr);
-#endif
-#endif
+#endif // ENABLE_HTTPD
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
     json::RemoteConfigParams params;
     params.Load();
     params.Set();
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     REMOTECONFIG_DEBUG_EXIT();
 }
 
@@ -127,9 +127,9 @@ RemoteConfig::~RemoteConfig() {
 
     delete http_daemon_;
 
-#endif
+#endif // ENABLE_HTTPD
     network::apps::mdns::ServiceRecordDelete(network::apps::mdns::Services::kConfig);
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
     network::udp::End(remoteconfig::udp::kPort);
     handle_ = -1;
@@ -236,7 +236,7 @@ void RemoteConfig::HandleUptime() {
 
     REMOTECONFIG_DEBUG_EXIT();
 }
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
 void RemoteConfig::HandleVersion() {
     REMOTECONFIG_DEBUG_ENTRY();
@@ -271,7 +271,7 @@ void RemoteConfig::HandleList() {
     }
 #else
     constexpr const char* node_type_name = "Bootloader TFTP";
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
 
     const auto kOutputIndex = static_cast<uint32_t>(output_);
     assert(kOutputIndex < common::ArraySize(kOutput));
@@ -297,7 +297,7 @@ void RemoteConfig::HandleList() {
         return;
     }
 
-    const auto kBytesToSend = static_cast<uint32_t>(common::Min<size_t>(static_cast<size_t>(list_length), kListResponseBufferLength - 1U));
+    const auto kBytesToSend = static_cast<uint32_t>(std::min<size_t>(static_cast<size_t>(list_length), kListResponseBufferLength - 1U));
 
     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(list_response), kBytesToSend, ip_from_, remoteconfig::udp::kPort);
 

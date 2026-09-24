@@ -29,7 +29,6 @@
 #include "configstore.h"
 #include "configurationstore.h"
 #include "network_iface.h"
-#include "common/utils/utils_math.h"
 
 using common::store::network::Flags;
 
@@ -47,7 +46,7 @@ __attribute__((weak)) void SaveGatewayIp(uint32_t gateway_ip) {
 }
 
 __attribute__((weak)) void SaveHostname(const char* hostname, uint32_t length) {
-    length = common::Min(length, static_cast<uint32_t>(network::iface::kHostnameSize));
+    length =std::min(length, static_cast<uint32_t>(network::iface::kHostnameSize));
     ConfigStore::Instance().NetworkUpdateArray(&common::store::Network::host_name, hostname, length);
 }
 

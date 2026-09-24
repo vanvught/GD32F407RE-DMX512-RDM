@@ -27,11 +27,11 @@
 #include <cstring>
 #ifndef NDEBUG
 #include <cstdio>
-#endif
+#endif // NDEBUG
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
-#endif
+#endif // ALIGNED
 
 #include "rdmslotinfo.h"
 

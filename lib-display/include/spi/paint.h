@@ -228,11 +228,11 @@ class Paint : public SpiLcd {
     uint32_t height_{config::lcd::kHeight};
     uint32_t rotate_{0};
 
-#if !defined(SPI_LCD_kFrameBufferRows)
+#ifndef SPI_LCD_kFrameBufferRows
     static constexpr uint32_t kFrameBufferRows = 5;
 #else
     static constexpr uint32_t kFrameBufferRows = SPI_LCD_kFrameBufferRows;
-#endif
+#endif // SPI_LCD_kFrameBufferRows
 
     static inline uint16_t s_frame_buffer[config::lcd::kWidth * kFrameBufferRows];
 };

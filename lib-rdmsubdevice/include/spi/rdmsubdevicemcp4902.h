@@ -58,4 +58,4 @@ private:
 	uint8_t m_nDataB = 0;
 };
 
-#endif /* RDMSUBDEVICEMCP4902_H_ */
+#endif // RDMSUBDEVICEMCP4902_H_

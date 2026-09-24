@@ -45,7 +45,7 @@ inline constexpr uint8_t kVdvs = 0xC4;     ///< VDV Set
 inline constexpr uint8_t kFrctrL2 = 0xC6;  ///< Frame Rate Control in Normal Mode
 inline constexpr uint8_t kPwctrL1 = 0xD0;  ///< Power Control 1
 } // namespace cmd
-#if defined(SPI_LCD_240X240)
+#ifdef SPI_LCD_240X240
 inline constexpr uint32_t kRotation0ShiftX = 0;
 inline constexpr uint32_t kRotation0ShiftY = 80;
 inline constexpr uint32_t kRotation1ShiftX = 80;
@@ -63,7 +63,7 @@ inline constexpr uint32_t kRotation2ShiftX = 0;
 inline constexpr uint32_t kRotation2ShiftY = 0;
 inline constexpr uint32_t kRotation3ShiftX = 0;
 inline constexpr uint32_t kRotation3ShiftY = 0;
-#endif
+#endif // SPI_LCD_240X240
 } // namespace st7789
 
 class ST7789 : public ST77XX {
@@ -71,12 +71,12 @@ class ST7789 : public ST77XX {
     explicit ST7789(uint32_t chip_select) : ST77XX(chip_select) {
         DISPLAY_DEBUG_ENTRY();
 
-#if defined(SPI_LCD_RST_GPIO)
+#ifdef SPI_LCD_RST_GPIO
         if (s_instance == 0) {
             HardwareReset();
         }
         s_instance++;
-#endif
+#endif // SPI_LCD_RST_GPIO
 
         WriteCommand(st77xx::cmd::kSwreset);
         timing::DelayUs(1000 * 150);
@@ -177,9 +177,9 @@ class ST7789 : public ST77XX {
     }
 
    private:
-#if defined(SPI_LCD_RST_GPIO)
+#ifdef SPI_LCD_RST_GPIO
     static inline uint32_t s_instance;
-#endif
+#endif // SPI_LCD_RST_GPIO
 };
 
 #endif // SPI_ST7789_H_

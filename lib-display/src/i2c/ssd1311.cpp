@@ -291,7 +291,7 @@ bool Ssd1311::CheckSSD1311() {
 
 #ifndef NDEBUG
     printf("CheckSSD1311 kIsEqual=%d\n", kIsEqual);
-#endif
+#endif // NDEBUG
 
     return kIsEqual;
 }
@@ -301,10 +301,10 @@ bool Ssd1311::CheckSSD1311() {
  */
 
 constexpr auto kDisplayOnOff = (1U << 2);
-#if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE)
+#ifdef CONFIG_DISPLAY_ENABLE_CURSOR_MODE
 constexpr auto kCursorOnOff = (1U << 1);
 constexpr auto kCursorBlinkOnOff = (1U << 0);
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_CURSOR_MODE
 
 void Ssd1311::SetSleep(bool sleep) {
     if (sleep) {
@@ -330,7 +330,7 @@ void Ssd1311::SetContrast(uint8_t contrast) {
 }
 
 void Ssd1311::SetCursor([[maybe_unused]] uint32_t mode) {
-#if defined(CONFIG_DISPLAY_ENABLE_CURSOR_MODE)
+#ifdef CONFIG_DISPLAY_ENABLE_CURSOR_MODE
     switch (static_cast<int>(mode)) {
         case display::cursor::kOff:
             display_control_ &= static_cast<uint8_t>(~kCursorOnOff);
@@ -348,5 +348,5 @@ void Ssd1311::SetCursor([[maybe_unused]] uint32_t mode) {
     }
 
     SendCommand(display_control_);
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_CURSOR_MODE
 }

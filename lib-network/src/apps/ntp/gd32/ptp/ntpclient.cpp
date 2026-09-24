@@ -53,7 +53,7 @@ T3 - remote transmit timestamp from the latest response (t3)
 T4 - local receive timestamp of the previous response (t4)
  */
 
-#if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_NTP_CLIENT
 #error
 #endif // CONFIG_NET_ENABLE_NTP_CLIENT
 
@@ -249,7 +249,7 @@ static void Send() {
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_f))); // NOLINT
-#endif                                                                                           // DEBUG_PTP_NTP_CLIENT
+#endif // DEBUG_PTP_NTP_CLIENT
 
     if (s_ntp_client.state.x > 0) {
         s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
@@ -322,7 +322,7 @@ static void UpdatePtpTime() {
 #ifndef CONFIG_NTP_CLIENT_DISABLE_TIMEUPDATE
     // At this time we know the status
     network::apps::ntpclient::ptp::systime::TimeUpdated(ptp_get);
-#endif
+#endif // CONFIG_NTP_CLIENT_DISABLE_TIMEUPDATE
 
 #ifdef DEBUG_PTP_NTP_CLIENT
     /**
@@ -393,7 +393,7 @@ static void Process() {
            static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_f))); // NOLINT
-#endif                                                                              // DEBUG_PTP_NTP_CLIENT
+#endif // DEBUG_PTP_NTP_CLIENT
     // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
     if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {
         if (s_ntp_client.state.x < 0) {

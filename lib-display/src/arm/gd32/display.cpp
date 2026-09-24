@@ -47,7 +47,7 @@ void DISPLAYTIMEOUT_IRQ_HANDLE() {
     }
 }
 }
-#endif
+#endif // defined(DISPLAYTIMEOUT_CONFIG_IRQ) && !defined(CONFIG_USE_EXTI10_15_IRQHandler)
 
 namespace display::timeout {
 void irq_init() {
@@ -68,7 +68,7 @@ void irq_init() {
     exti_interrupt_flag_clear(DISPLAYTIMEOUT_EXTI_LINE);
 
     DISPLAY_DEBUG_EXIT();
-#endif
+#endif // defined(DISPLAYTIMEOUT_CONFIG_IRQ) && !defined(CONFIG_USE_EXTI10_15_IRQHandler)
 }
 } // namespace display::timeout
 #endif // defined(CONFIG_USE_SOFTUART0) && defined(SOFTUART0_ENABLE_RX)

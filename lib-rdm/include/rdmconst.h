@@ -105,7 +105,7 @@ struct State {
 } // namespace device
 } // namespace rdm
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 #endif // RDMCONST_H_

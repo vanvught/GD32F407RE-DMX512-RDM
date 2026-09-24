@@ -32,7 +32,7 @@
 #include "artnetconst.h"
 #if (ARTNET_VERSION >= 4)
 #include "e131.h"
-#endif
+#endif // (ARTNET_VERSION >= 4)
 #include "board.h"
 #include "timing.h"
 #include "board.h"
@@ -85,7 +85,7 @@ ArtNetController::ArtNetController() {
 #if (ARTNET_VERSION >= 4)
     memcpy(art_poll_reply_.bind_ip, ip.u8, sizeof(art_poll_reply_.bind_ip));
     art_poll_reply_.acn_priority = e131::priority::kDefault;
-#endif
+#endif // (ARTNET_VERSION >= 4)
     /*
      * Status 1
      */
@@ -100,9 +100,9 @@ ArtNetController::ArtNetController() {
     art_poll_reply_.status2 &= static_cast<uint8_t>(~artnet::Status2::kDhcpCapable);
     art_poll_reply_.status2 |= network::iface::IsDhcpCapable() ? artnet::Status2::kDhcpCapable : static_cast<uint8_t>(0);
 
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
     art_poll_reply_.status2 |= artnet::Status2::kWebBrowserSupport;
-#endif
+#endif // ENABLE_HTTPD
 
     art_poll_reply_.port_types[0] = artnet::PortType::kOutputArtnet;
     art_poll_reply_.port_types[1] = artnet::PortType::kInputArtnet;
@@ -147,7 +147,7 @@ ArtNetController::~ArtNetController() {
 }
 
 void ArtNetController::GetShortNameDefault(char* short_name) {
-#if !defined(ARTNET_SHORT_NAME)
+#ifndef ARTNET_SHORT_NAME
     uint8_t nBoardNameLength;
     const auto* const kBoardName = board::BoardName(nBoardNameLength);
     snprintf(short_name, artnet::kPortNameLength - 1, "%s %s %u", kBoardName, artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion));
@@ -164,7 +164,7 @@ void ArtNetController::GetShortNameDefault(char* short_name) {
     }
 
     short_name[i] = '\0';
-#endif
+#endif // ARTNET_SHORT_NAME
 }
 
 void ArtNetController::SetShortName(const char* short_name) {
@@ -183,7 +183,7 @@ void ArtNetController::SetShortName(const char* short_name) {
 }
 
 void ArtNetController::GetLongNameDefault(char* long_name) {
-#if !defined(ARTNET_LONG_NAME)
+#ifndef ARTNET_LONG_NAME
     uint8_t nBoardNameLength;
     const auto* const kBoardName = board::BoardName(nBoardNameLength);
     snprintf(long_name, artnet::kLongNameLength - 1, "%s %s %u %s", kBoardName, artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion), board::Website());
@@ -199,7 +199,7 @@ void ArtNetController::GetLongNameDefault(char* long_name) {
     }
 
     long_name[i] = '\0';
-#endif
+#endif // ARTNET_LONG_NAME
 }
 
 void ArtNetController::SetLongName(const char* long_name) {
@@ -262,11 +262,11 @@ void ArtNetController::HandleDmxOut(uint16_t nUniverse, const uint8_t* pDmxData,
         m_pArtDmx->sequence = 1;
     }
 
-#if defined(CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER)
+#ifdef CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
     if (__builtin_expect((master_ == dmxnode::kDmxMaxValue), 1)) {
-#endif
+#endif // CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
         memcpy(m_pArtDmx->data, pDmxData, nLength);
-#if defined(CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER)
+#ifdef CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
     } else if (master_ == 0) {
         memset(m_pArtDmx->data, 0, nLength);
     } else {
@@ -274,7 +274,7 @@ void ArtNetController::HandleDmxOut(uint16_t nUniverse, const uint8_t* pDmxData,
             m_pArtDmx->data[i] = ((master_ * static_cast<uint32_t>(pDmxData[i])) / dmxnode::kDmxMaxValue) & 0xFF;
         }
     }
-#endif
+#endif // CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
 
     uint32_t count = 0;
     auto IpAddresses = const_cast<struct artnet::PollTableUniverses*>(GetIpAddress(nUniverse));
@@ -386,7 +386,7 @@ void ArtNetController::ProcessPoll() {
 #ifndef NDEBUG
         Dump();
         DumpTableUniverses();
-#endif
+#endif // NDEBUG
     }
 
     if (m_bDoTableCleanup && (__builtin_expect((kCurrentMillis - m_nLastPollMillis > POLL_INTERVAL_MILLIS / 4), 0))) {
@@ -435,7 +435,7 @@ void ArtNetController::Input(const uint8_t* buffer, [[maybe_unused]] uint32_t si
         case artnet::OpCodes::kOpPoll:
             HandlePoll(buffer, from_ip);
             break;
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
         case artnet::OpCodes::kOpTrigger: {
             auto* art_trigger = reinterpret_cast<artnet::ArtTrigger*>(const_cast<uint8_t*>(buffer));
             if ((art_trigger->oem_code_hi == 0xFF && art_trigger->oem_code_lo == 0xFF) || (art_trigger->oem_code_hi == m_ArtNetController.Oem[0] && art_trigger->oem_code_lo == m_ArtNetController.Oem[1])) {
@@ -443,7 +443,7 @@ void ArtNetController::Input(const uint8_t* buffer, [[maybe_unused]] uint32_t si
                 m_ArtTriggerCallbackFunctionPtr(reinterpret_cast<const struct ArtNetTrigger*>(&art_trigger->key));
             }
         } break;
-#endif
+#endif // ARTNET_HAVE_TRIGGER
         default:
             break;
     }

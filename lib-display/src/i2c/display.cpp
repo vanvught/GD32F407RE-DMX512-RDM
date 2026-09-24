@@ -30,12 +30,12 @@
 #include "display_debug.h"
 #include "displayset.h"
 #include "i2c/ssd1306.h"
-#if defined(CONFIG_DISPLAY_ENABLE_SSD1311)
+#ifdef CONFIG_DISPLAY_ENABLE_SSD1311
 #include "i2c/ssd1311.h"
-#endif
-#if defined(CONFIG_DISPLAY_ENABLE_HD44780)
+#endif // CONFIG_DISPLAY_ENABLE_SSD1311
+#ifdef CONFIG_DISPLAY_ENABLE_HD44780
 #include "i2c/hd44780.h"
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_HD44780
 #include "i2c.h"
 #include "gpio.h"
 #include "firmware/debug/debug_debug.h"
@@ -43,11 +43,11 @@
 namespace display::timeout {
 void irq_init();
 static void GpioInit() {
-#if defined(DISPLAYTIMEOUT_GPIO)
+#ifdef DISPLAYTIMEOUT_GPIO
     gpio::Fsel(DISPLAYTIMEOUT_GPIO, gpio::Select::kInput);
     gpio::SetPud(DISPLAYTIMEOUT_GPIO, gpio::Pull::kUp);
     irq_init();
-#endif
+#endif // DISPLAYTIMEOUT_GPIO
 }
 } // namespace display::timeout
 
@@ -56,9 +56,9 @@ Display::Display() {
     assert(s_this == nullptr);
     s_this = this;
 
-#if defined(CONFIG_DISPLAY_ENABLE_SSD1311)
+#ifdef CONFIG_DISPLAY_ENABLE_SSD1311
     Detect(display::Type::kSsd1311);
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_SSD1311
 
     if (lcd_display_ == nullptr) {
         Detect(display::Type::kSsd1306);
@@ -107,7 +107,7 @@ void Display::Detect(display::Type display_type) {
 	DISPLAY_DEBUG_PRINTF("type=%u", static_cast<uint32_t>(display_type));
 	
     switch (display_type) {
-#if defined(CONFIG_DISPLAY_ENABLE_HD44780)
+#ifdef CONFIG_DISPLAY_ENABLE_HD44780
         case display::Type::kPcf8574T1602:
             lcd_display_ = new Hd44780(16, 2);
             assert(lcd_display_ != nullptr);
@@ -116,13 +116,13 @@ void Display::Detect(display::Type display_type) {
             lcd_display_ = new Hd44780(20, 4);
             assert(lcd_display_ != nullptr);
             break;
-#endif
-#if defined(CONFIG_DISPLAY_ENABLE_SSD1311)
+#endif // CONFIG_DISPLAY_ENABLE_HD44780
+#ifdef CONFIG_DISPLAY_ENABLE_SSD1311
         case display::Type::kSsd1311:
             lcd_display_ = new Ssd1311;
             assert(lcd_display_ != nullptr);
             break;
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_SSD1311
         case display::Type::kSsd1306:
             lcd_display_ = new Ssd1306(OledPanel::k128x648Rows);
             assert(lcd_display_ != nullptr);
@@ -154,7 +154,7 @@ void Display::Detect(display::Type display_type) {
 void Display::Detect(uint32_t rows) {
     if (i2c::IsConnected(OLED_I2C_ADDRESS_DEFAULT)) {
         if (rows <= 4) {
-#if defined(CONFIG_DISPLAY_ENABLE_SSD1311)
+#ifdef CONFIG_DISPLAY_ENABLE_SSD1311
             lcd_display_ = new Ssd1311;
             assert(lcd_display_ != nullptr);
 
@@ -162,7 +162,7 @@ void Display::Detect(uint32_t rows) {
                 type_ = display::Type::kSsd1311;
                 Printf(1, "SSD1311");
             } else
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_SSD1311
             {
                 lcd_display_ = new Ssd1306(OledPanel::k128x644Rows);
                 assert(lcd_display_ != nullptr);
@@ -177,7 +177,7 @@ void Display::Detect(uint32_t rows) {
             Printf(1, "SSD1306");
         }
     }
-#if defined(CONFIG_DISPLAY_ENABLE_HD44780)
+#ifdef CONFIG_DISPLAY_ENABLE_HD44780
     else if (i2c::IsConnected(hd44780::pcf8574t::kTC2004Address)) {
         lcd_display_ = new Hd44780(hd44780::pcf8574t::kTC2004Address, 20, 4);
         assert(lcd_display_ != nullptr);
@@ -195,7 +195,7 @@ void Display::Detect(uint32_t rows) {
             Printf(1, "TC1602_PCF8574T");
         }
     }
-#endif
+#endif // CONFIG_DISPLAY_ENABLE_HD44780
 
     if (lcd_display_ == nullptr) {
         sleep_timeout_ = 0;

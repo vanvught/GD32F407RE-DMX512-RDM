@@ -35,7 +35,7 @@
 #include "rdm_e120.h"
 #ifndef NDEBUG
 #include "rdm_message_print.h"
-#endif
+#endif // NDEBUG
 #include "timing.h"
 
 class RdmMessage final : public Rdm {
@@ -86,7 +86,7 @@ class RdmMessage final : public Rdm {
     void Transmit(uint32_t port_index) {
 #ifndef NDEBUG
         rdm::message::Print(reinterpret_cast<const uint8_t*>(&message_));
-#endif
+#endif // NDEBUG
         Rdm::Transmit(port_index, &message_);
         transmit_micros_ = timing::Micros();
     }

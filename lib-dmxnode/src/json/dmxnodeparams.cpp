@@ -38,9 +38,9 @@
 #include "configurationstore.h"
 #include "common/utils/utils_flags.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 using common::store::dmxnode::Flags;
 
@@ -147,16 +147,16 @@ void DmxNodeParams::Set() {
             dmx_node->SetDirection(kPortIndex, kPortDirection);
             const auto kPortMergeMode = common::Get2BitField<dmxnode::MergeMode>(config_port_index, store_dmxnode.merge_mode);
             dmx_node->SetMergeMode(kPortIndex, kPortMergeMode);
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
             const auto kOutputStyle = GetOutputStyleSet(1U << config_port_index);
             dmx_node->SetOutputStyle(kPortIndex, kOutputStyle);
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
         }
     }
 
 #ifdef DEBUG_DMXNODE
     Dump();
-#endif
+#endif // DEBUG_DMXNODE
     DMXNODE_DEBUG_EXIT();
 }
 
@@ -167,7 +167,7 @@ void DmxNodeParams::Dump() {
     printf(" %s=%u\n", json::DmxNodeParamsConst::kDisableMergeTimeout.name, static_cast<unsigned>(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout)));
 
     if constexpr (dmxnode::kConfigPortCount != 0) {
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
             printf(" %s=%s\n", json::DmxNodeParamsConst::kLabelPort[port_index].name, reinterpret_cast<char*>(store_dmxnode.port_name[port_index]));
             printf(" %s=%u\n", json::DmxNodeParamsConst::kUniversePort[port_index].name, store_dmxnode.universe[port_index]);
@@ -178,7 +178,7 @@ void DmxNodeParams::Dump() {
             const auto kOutputStyle = GetOutputStyleSet(1U << port_index);
             printf(" %s=%s\n", DmxNodeParamsConst::kOutputStylePort[port_index].name, dmxnode::GetOutputStyle(kOutputStyle));
         }
-#endif
+#endif // DMX_MAX_PORTS
     }
 
     auto& dmx_node = *DmxNodeNodeType::Get();

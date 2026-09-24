@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <algorithm>
 #include <cstring>
 
 #include "rdm_device_info.h"
@@ -37,7 +38,6 @@
 #include "rdmconst.h"
 #include "rdm_e120.h"
 #include "rdm_debug.h"
-#include "common/utils/utils_math.h"
 
 namespace rdm::device {
 uint16_t DeviceModel();
@@ -49,17 +49,17 @@ void SetFactoryDefaults();
 
 class Device {
     static constexpr auto kProductCategory =
-#if defined(RDM_DEVICE_PRODUCT_CATEGORY)
+#ifdef RDM_DEVICE_PRODUCT_CATEGORY
         RDM_DEVICE_PRODUCT_CATEGORY;
 #else
         E120_PRODUCT_CATEGORY_DATA_DISTRIBUTION;
-#endif
+#endif // RDM_DEVICE_PRODUCT_CATEGORY
     static constexpr auto kProductDetail =
-#if defined(RDM_DEVICE_PRODUCT_DETAIL)
+#ifdef RDM_DEVICE_PRODUCT_DETAIL
         RDM_DEVICE_PRODUCT_DETAIL;
 #else
         E120_PRODUCT_DETAIL_ETHERNET_NODE;
-#endif
+#endif // RDM_DEVICE_PRODUCT_DETAIL
 
    public:
     static Device& Instance() {
@@ -73,14 +73,14 @@ class Device {
         printf(" Root label        : %.*s\n", root_label_length_, root_label_);
         printf(" Product Category  : %.2X%.2X\n", info_.product_category[0], info_.product_category[1]);
         printf(" Product Detail    : %.4X\n", kProductDetail);
-#if defined(RDM_RESPONDER)
+#ifdef RDM_RESPONDER
         puts("RDM Device Responder");
         printf(" DMX Address   : %d\n", (info_.dmx_start_address[0] << 8) + info_.dmx_start_address[1]);
         printf(" DMX Footprint : %d\n", (info_.dmx_footprint[0] << 8) + info_.dmx_footprint[1]);
         printf(" Personality %d of %d\n", info_.current_personality, info_.personality_count);
         printf(" Sub Devices   : %d\n", (info_.sub_device_count[0] << 8) + info_.sub_device_count[1]);
         printf(" Sensors       : %d\n", info_.sensor_count);
-#endif
+#endif // RDM_RESPONDER
     }
 
     void SetFactoryDefaults() {
@@ -106,11 +106,11 @@ class Device {
 
     void GetManufacturerName(struct rdm::device::InfoData* info_data) {
         info_data->data = const_cast<char*>(&rdm::Manufacturer::kName[0]);
-        info_data->length = static_cast<uint8_t>(common::Min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
+        info_data->length = static_cast<uint8_t>(std::min(static_cast<size_t>(rdm::device::kManufacturerLabelMaxLength), strlen(rdm::Manufacturer::kName)));
     }
 
     void SetLabel(const struct rdm::device::InfoData* info_data) {
-        const auto kLength = common::Min(static_cast<uint8_t>(rdm::device::kLabelMaxLength), info_data->length);
+        const auto kLength =std::min(static_cast<uint8_t>(rdm::device::kLabelMaxLength), info_data->length);
 
         if ((kLength > 1) && info_data->data[0] > ' ') {
             memcpy(root_label_, info_data->data, kLength);

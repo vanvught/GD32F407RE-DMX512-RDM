@@ -26,7 +26,7 @@
 #ifndef ENET_CONFIG_H_
 #define ENET_CONFIG_H_
 
-#if !defined(GD32_H_)
+#ifndef GD32_H_
 #error gd32.h should be included first
 #endif // GD32_H_
 

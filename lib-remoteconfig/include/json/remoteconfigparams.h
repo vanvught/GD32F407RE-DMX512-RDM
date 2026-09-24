@@ -64,4 +64,4 @@ class RemoteConfigParams : public JsonParamsBase<RemoteConfigParams>
 };
 } // namespace json
 
-#endif  // JSON_REMOTECONFIGPARAMS_H_
+#endif // JSON_REMOTECONFIGPARAMS_H_

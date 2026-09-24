@@ -29,7 +29,7 @@
 #include "emac/mmi.h"
 #include "emac/emac_debug.h"
 
-#if !defined(BIT)
+#ifndef BIT
 #define BIT(x) static_cast<uint16_t>(1U << (x))
 #endif // BIT
 
@@ -142,7 +142,7 @@ void CustomizedTiming() {
     EMAC_PHY_DEBUG_ENTRY();
 #ifdef GD32F4XX
 #define RMSR_RX_TIMING_VAL 0x4
-#if defined(GD32F407)
+#ifdef GD32F407
 #define RMSR_TX_TIMING_VAL 0xF
 #elif defined(GD32F470)
 #define RMSR_TX_TIMING_VAL 0x1

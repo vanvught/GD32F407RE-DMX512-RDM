@@ -26,4 +26,4 @@
 #ifndef RDMNET_H_
 #define RDMNET_H_
 
-#endif /* RDMNET_H_ */
+#endif // RDMNET_H_

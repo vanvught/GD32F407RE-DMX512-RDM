@@ -44,7 +44,7 @@
 #define RDM_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_RDM
 
 #ifdef DEBUG_RDM_DEVICE_PARAMS
 #define RDM_DEVICE_PARAMS_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -64,7 +64,7 @@
 #define RDM_DEVICE_PARAMS_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_RDM_DEVICE_PARAMS
 
 #ifdef DEBUG_RDM_DISCOVERY
 #define RDM_DISCOVERY_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -84,7 +84,7 @@
 #define RDM_DISCOVERY_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_RDM_DISCOVERY
 
 #ifdef DEBUG_RDMNET
 #define RDMNET_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -104,7 +104,7 @@
 #define RDMNET_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_RDMNET
 
 #ifdef DEBUG_RDM_LLRP
 #define RDM_LLRP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -124,7 +124,7 @@
 #define RDM_LLRP_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_RDM_LLRP
 
 #ifdef DEBUG_LLRP_DEVICE
 #define LLRP_DEVICE_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -144,6 +144,6 @@
 #define LLRP_DEVICE_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_LLRP_DEVICE
 
 #endif // RDM_DEBUG_H_

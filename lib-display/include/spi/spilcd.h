@@ -43,38 +43,38 @@ class SpiLcd {
         spi::SetSpeedHz(20000000);
         spi::SetDataMode(spi::kMode0);
 
-#if defined(SPI_LCD_RST_GPIO)
+#ifdef SPI_LCD_RST_GPIO
         gpio::Fsel(SPI_LCD_RST_GPIO, gpio::Select::kOutput);
-#endif
+#endif // SPI_LCD_RST_GPIO
         gpio::Fsel(SPI_LCD_DC_GPIO, gpio::Select::kOutput);
         gpio::Fsel(SPI_LCD_BL_GPIO, gpio::Select::kOutput);
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
         gpio::Fsel(cs_, gpio::Select::kOutput);
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
 
         DISPLAY_DEBUG_EXIT();
     }
 
     void HardwareReset() {
-#if defined(SPI_LCD_RST_GPIO)
+#ifdef SPI_LCD_RST_GPIO
         timing::DelayUs(1000 * 200);
         gpio::Clr(SPI_LCD_RST_GPIO);
         timing::DelayUs(1000 * 200);
         gpio::Set(SPI_LCD_RST_GPIO);
         timing::DelayUs(1000 * 200);
-#endif
+#endif // SPI_LCD_RST_GPIO
     }
 
     void SetCS() {
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
         gpio::Set(cs_);
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
     }
 
     void ClearCS() {
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
         gpio::Clr(cs_);
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
     }
 
     void SetDC() { gpio::Set(SPI_LCD_DC_GPIO); }

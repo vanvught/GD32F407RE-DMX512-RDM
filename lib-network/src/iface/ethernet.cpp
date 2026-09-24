@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC push_options
 #pragma GCC optimize("O3")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
@@ -42,7 +42,7 @@ namespace igmp {
 bool LookupGroup(uint32_t);
 }
 namespace ptp {
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 // Can only be used for PTP level 2 messages
 __attribute__((weak)) void Input([[maybe_unused]] const uint8_t*, [[maybe_unused]] const uint32_t) {}
 #endif // CONFIG_NET_ENABLE_PTP
@@ -53,7 +53,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
     const auto* const kEther = reinterpret_cast<const struct network::ethernet::Header*>(buffer);
 
     switch (kEther->type) {
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
         case __builtin_bswap16(network::ethernet::Type::kPtp):
             network::ptp::Input(const_cast<const uint8_t*>(buffer), length);
             break;
@@ -83,7 +83,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
                 case ip4::Proto::kIcmp:
                     network::icmp::Input(const_cast<struct network::icmp::Header*>(reinterpret_cast<const struct network::icmp::Header*>(kIp4)));
                     break;
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
                 case ip4::Proto::kTcp:
                     network::tcp::Input(const_cast<struct network::tcp::Header*>(reinterpret_cast<const struct network::tcp::Header*>(kIp4)));
                     break;
@@ -105,7 +105,7 @@ void EthernetInput(const uint8_t* buffer, [[maybe_unused]] uint32_t length) {
 } // namespace iface
 } // namespace network
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC pop_options
 #endif // CONFIG_REMOTECONFIG_MINIMUM
 

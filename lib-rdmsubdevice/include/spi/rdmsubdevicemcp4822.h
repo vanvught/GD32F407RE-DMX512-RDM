@@ -59,4 +59,4 @@ class RDMSubDeviceMCP4822 : public RDMSubDevice
     uint16_t m_nDataB = 0;
 };
 
-#endif  // SPI_RDMSUBDEVICEMCP4822_H_
+#endif // SPI_RDMSUBDEVICEMCP4822_H_

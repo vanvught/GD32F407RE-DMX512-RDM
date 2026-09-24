@@ -28,9 +28,9 @@
 
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 #include "spi.h"
-#include "common/utils/utils_math.h"
 
 /*
  * http://www.bitwizard.nl/wiki/index.php/Default_addresses
@@ -105,7 +105,7 @@ class BwSpi : public Spi {
         spi::Transfern(buffer, sizeof(buffer));
 
         if (string != nullptr) {
-            const auto kLength = common::Min(bw::id_string::kLength, strlen(string));
+            const auto kLength = std::min(bw::id_string::kLength, strlen(string));
             connected_ = (strncmp(&buffer[2], string, kLength) == 0);
         }
     }

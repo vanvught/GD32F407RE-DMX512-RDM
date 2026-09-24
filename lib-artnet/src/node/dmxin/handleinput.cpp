@@ -29,7 +29,7 @@
 #include "artnet.h"
 #if (ARTNET_VERSION >= 4) && defined(E131_HAVE_DMXIN)
 #include "e131bridge.h"
-#endif
+#endif // (ARTNET_VERSION >= 4) && defined(E131_HAVE_DMXIN)
 #include "firmware/debug/debug_debug.h"
 
 // A Controller or monitoring device on the network can
@@ -49,7 +49,7 @@ void ArtNetNode::HandleInput() {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     const auto kPortIndex = static_cast<uint32_t>(kArtInput->bind_index > 0 ? kArtInput->bind_index - 1 : 0);
 
@@ -72,7 +72,7 @@ void ArtNetNode::HandleInput() {
             }
 #if (ARTNET_VERSION >= 4) && defined(E131_HAVE_DMXIN)
             E131Bridge::SetInputDisabled(kPortIndex, kArtInput->input[0] & 0x01);
-#endif
+#endif // (ARTNET_VERSION >= 4) && defined(E131_HAVE_DMXIN)
         }
     }
 

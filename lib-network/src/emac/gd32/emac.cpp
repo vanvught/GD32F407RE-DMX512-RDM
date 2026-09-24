@@ -30,8 +30,8 @@
 #include "common/utils/utils_string.h"
 #include "emac_counters.h"
 #include "emac/emac_phy.h"
-#if defined(CONFIG_NET_ENABLE_PTP)
-#if !defined(DISABLE_RTC)
+#ifdef CONFIG_NET_ENABLE_PTP
+#ifndef DISABLE_RTC
 #include "hwclock.h"
 #endif // DISABLE_RTC
 #endif // CONFIG_NET_ENABLE_PTP
@@ -170,7 +170,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 
 #ifdef GD32H7XX
     enet_mac_address_set(ENETx, ENET_MAC_ADDRESS0, mac_address);
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
     enet_ptp_normal_descriptors_chain_init(ENETx, ENET_DMA_TX, ptp_txdesc_tab);
     enet_ptp_normal_descriptors_chain_init(ENETx, ENET_DMA_RX, ptp_rxdesc_tab);
 #else
@@ -194,7 +194,7 @@ void __attribute__((cold)) Start(uint8_t mac_address[], emac::phy::Link& link) {
 
 #ifdef CONFIG_NET_ENABLE_PTP
     Gd32PtpStart();
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
     // Set the System Clock from the Hardware Clock
     HwClock::Get()->HcToSys();
 #endif // DISABLE_RTC

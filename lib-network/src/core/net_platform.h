@@ -26,7 +26,7 @@
 #ifndef NET_PLATFORM_H_
 #define NET_PLATFORM_H_
 
-#if defined(GD32)
+#ifdef GD32
 /**
  * https://www.gd32-dmx.org/memory.html
  */

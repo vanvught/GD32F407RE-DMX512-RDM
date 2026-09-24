@@ -63,4 +63,4 @@ class RDMSubDeviceBwLcd : public RDMSubDevice
     uint32_t length_ = 0;
 };
 
-#endif  // SPI_RDMSUBDEVICEBWLCD_H_
+#endif // SPI_RDMSUBDEVICEBWLCD_H_

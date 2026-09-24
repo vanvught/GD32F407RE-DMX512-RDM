@@ -32,9 +32,9 @@
 #include "json/json_helpers.h"
 #include "ip4/ip4_helpers.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json::config {
 uint32_t GetArtNet(char* buffer, uint32_t length) {
@@ -44,10 +44,10 @@ uint32_t GetArtNet(char* buffer, uint32_t length) {
     return json::helpers::Serialize(buffer, length, [&]([[maybe_unused]] JsonDoc& doc) {
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         doc[json::ArtNetParamsConst::kEnableRdm.name] = dmx_node->GetRdm();
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
 #if (ARTNET_VERSION >= 4)
         doc[json::ArtNetParamsConst::kMapUniverse0.name] = dmx_node->IsMapUniverse0();
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
         if constexpr (dmxnode::kConfigPortCount != 0) {
             for (uint32_t config_port_index = 0; config_port_index < dmxnode::kConfigPortCount; config_port_index++) {
@@ -59,14 +59,14 @@ uint32_t GetArtNet(char* buffer, uint32_t length) {
 
 #if (ARTNET_VERSION >= 4) && defined(DMX_MAX_PORTS)
                 doc[json::ArtNetParamsConst::kProtocolPort[config_port_index].name] = artnet::GetProtocolMode(dmx_node->GetPortProtocol4(kPortIndex));
-#endif
+#endif // (ARTNET_VERSION >= 4) && defined(DMX_MAX_PORTS)
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
                 doc[json::ArtNetParamsConst::kRdmEnablePort[config_port_index].name] = dmx_node->Rdm(kPortIndex);
-#endif
-#if defined(ARTNET_HAVE_DMXIN)
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
+#ifdef ARTNET_HAVE_DMXIN
                 char ip_address[net::kIpBufferSize];
                 doc[json::ArtNetParamsConst::kDestinationIpPort[config_port_index].name] = net::FormatIp(dmx_node->GetDestinationIp(kPortIndex), ip_address);
-#endif
+#endif // ARTNET_HAVE_DMXIN
             }
         }
     });

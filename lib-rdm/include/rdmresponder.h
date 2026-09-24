@@ -38,9 +38,9 @@
 #include "rdm_message_print.h"
 #include "firmware/debug/debug_debug.h"
 
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #error "Cannot be both RDMNet Device and RDM Responder"
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
 namespace rdm::responder {
 inline constexpr int kNoData = 0;
@@ -71,7 +71,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
     int Run() {
         int16_t length;
 
-#if !defined(CONFIG_RDM_ENABLE_SUBDEVICES)
+#ifndef CONFIG_RDM_ENABLE_SUBDEVICES
         DMXReceiver::Run(length);
 #else
         const auto* dmx_data_in = DMXReceiver::Run(length);
@@ -90,7 +90,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
                 }
             }
         }
-#endif
+#endif // CONFIG_RDM_ENABLE_SUBDEVICES
 
         const auto* rdm_data_in = Rdm::Receive(0);
 
@@ -100,7 +100,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
 
 #ifndef NDEBUG
         rdm::message::Print(rdm_data_in);
-#endif
+#endif // NDEBUG
 
         if (rdm_data_in[0] == E120_SC_RDM) {
             const auto* rdm_in = reinterpret_cast<const struct TRdmMessage*>(rdm_data_in);
@@ -157,7 +157,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
         if (length != rdm::responder::kInvalidResponse) {
             rdm::message::Print(response);
         }
-#endif
+#endif // NDEBUG
 
         configstore::Delay();
         return length;

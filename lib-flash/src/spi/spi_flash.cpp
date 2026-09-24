@@ -27,13 +27,13 @@
  */
 
 #include <cstdint>
+#include <algorithm>
 
 #include "spi/spi_flash.h"
 #include "common/utils/utils_array.h"
 #include "spi_flash_internal.h"
 #include "firmware/debug/debug_dump.h"
 #include "timing.h"
-#include "common/utils/utils_math.h"
 #include "watchdog.h"
 
 namespace {
@@ -234,7 +234,7 @@ bool Read(uint32_t offset, std::span<uint8_t> data) {
         watchdog::Feed();
 
         const auto kRemainLength = SPI_FLASH_16MB_BOUN - offset;
-        const auto kReadLength = common::Min(static_cast<uint32_t>(data.size()), kRemainLength);
+        const auto kReadLength = std::min(static_cast<uint32_t>(data.size()), kRemainLength);
 
         SpiFlashAddr(offset, cmd);
         SpiFlashReadCommon(cmd, sizeof(cmd), data.data(), kReadLength);
@@ -262,7 +262,7 @@ bool Write(uint32_t offset, std::span<const uint8_t> data) {
         watchdog::Feed();
 
         const auto kByteAddress = offset % spi::flash::kPageSize;
-        const auto kChunkLength = common::Min(static_cast<uint32_t>(data.size()), spi::flash::kPageSize - kByteAddress);
+        const auto kChunkLength = std::min(static_cast<uint32_t>(data.size()), spi::flash::kPageSize - kByteAddress);
 
         SpiFlashAddr(offset, cmd);
 

@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+#include <cstdint>
+
 #include "rdmhandler.h"
 #include "rdmidentify.h"
 #include "e120.h"

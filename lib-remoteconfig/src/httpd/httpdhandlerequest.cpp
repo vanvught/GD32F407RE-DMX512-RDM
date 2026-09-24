@@ -26,15 +26,15 @@
 // https://dev.to/andreasbergstrom/understanding-cache-control-and-etag-for-efficient-web-caching-2nf5
 
 #if defined(__GNUC__) && !defined(__clang__)
-#if !defined(CONFIG_HTTPD_OPTIMIZE_NONE)
+#ifndef CONFIG_HTTPD_OPTIMIZE_NONE
 #pragma GCC push_options
-#if defined(CONFIG_HTTPD_OPTIMIZE_O3)
+#ifdef CONFIG_HTTPD_OPTIMIZE_O3
 #pragma GCC optimize("O3")
 #else
 #pragma GCC optimize("O2")
-#endif
-#endif
-#endif
+#endif // CONFIG_HTTPD_OPTIMIZE_O3
+#endif // CONFIG_HTTPD_OPTIMIZE_NONE
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstdio>
@@ -49,11 +49,11 @@
 #include "http/json_infos.h"
 #include "network_tcp.h"
 #include "network_iface.h"
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
 #include "firmware.h"
 #include "flashcodeinstall.h"
 #include "display.h" // IWYU pragma: keep
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
 #include "firmware/debug/debug_dump.h"
 #include "httpd/httpd_debug.h"
 #include "common/utils/utils_string.h"
@@ -64,7 +64,7 @@ void Reboot();
 
 #ifndef _TIME_STAMP_
 #define _TIME_STAMP_ 0
-#endif
+#endif // _TIME_STAMP_
 
 const uint8_t* GetFileContent(const char* file_name, uint32_t& size, http::ContentTypes& content_type, bool& gzip);
 
@@ -124,11 +124,11 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
         file_data_ = dynamic_content_;
         status_ = HandlePost();
     }
-#if defined(ENABLE_METHOD_DELETE)
+#ifdef ENABLE_METHOD_DELETE
     else if ((status_ == http::Status::kOk) && (request_method_ == http::RequestMethod::DELETE)) {
         status_ = HandleDelete();
     }
-#endif
+#endif // ENABLE_METHOD_DELETE
 
     // If request handling failed, generate an error response or abort.
     if (status_ != http::Status::kOk) {
@@ -274,11 +274,11 @@ http::Status HttpDeamonHandleRequest::ParseMethod(char* line) {
     } else if (strcmp(token, "POST") == 0) {
         request_method_ = http::RequestMethod::kPost;
     }
-#if defined(CONFIG_HTTPD_ENABLE_DELETE)
+#ifdef CONFIG_HTTPD_ENABLE_DELETE
     else if (strcmp(token, "DELETE") == 0) {
         request_method_ = http::RequestMethod::DELETE;
     }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_DELETE
     else {
         return http::Status::kMethodNotImplemented;
     }
@@ -346,12 +346,12 @@ http::Status HttpDeamonHandleRequest::ParseHeaderField(char* line) {
                 request_content_type_ = http::ContentTypes::kApplicationJson;
                 return http::Status::kOk;
             }
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
             if (strcmp(&token[12], "octet-stream") == 0) {
                 request_content_type_ = http::ContentTypes::kApplicationOctetStream;
                 return http::Status::kOk;
             }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
         }
     } else if (strcasecmp(token, "Content-Length") == 0) {
         if ((token = strtok(nullptr, " ")) == nullptr) {
@@ -386,7 +386,7 @@ http::Status HttpDeamonHandleRequest::ParseHeaderField(char* line) {
             return http::Status::kOk;
         }
     }
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
     else if (strcasecmp(token, "X-Upload-Size") == 0) {
         if ((token = strtok(nullptr, " ")) == nullptr) {
             return http::Status::kBadRequest;
@@ -407,7 +407,7 @@ http::Status HttpDeamonHandleRequest::ParseHeaderField(char* line) {
 
         return http::Status::kOk;
     }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
     return http::Status::kOk;
 }
 
@@ -439,7 +439,7 @@ http::Status HttpDeamonHandleRequest::HandleGet() {
         const auto* get = &uri_[6];
         HTTPD_DEBUG_PUTS(get);
 
-#if !defined(CONFIG_HTTP_HTML_INDEX_ONLY)
+#ifndef CONFIG_HTTP_HTML_INDEX_ONLY
         // Special handling: status/dmx?N
         if (memcmp(get, "status/dmx?", 11) == 0) {
 #if (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
@@ -448,19 +448,19 @@ http::Status HttpDeamonHandleRequest::HandleGet() {
             if (kPort != 0xFF) {
                 length = json::status::Dmx(dynamic_content_, static_cast<uint32_t>(sizeof(dynamic_content_)), kPort);
             }
-#endif // #if (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
+#endif // (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
         }
         // Special handling: rdm/tod?N
         else if (memcmp(get, "status/rdm/tod?", 15) == 0) {
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
             const auto kPort = ParsePortIndex(&get[15]); // for rdm/tod
 
             if (kPort != 0xFF) {
                 length = json::status::RdmTod(dynamic_content_, static_cast<uint32_t>(sizeof(dynamic_content_)), kPort);
             }
-#endif // #if defined(RDM_CONTROLLER)
+#endif // RDM_CONTROLLER
         } else
-#endif // #if !defined(CONFIG_HTTP_HTML_INDEX_ONLY)
+#endif // CONFIG_HTTP_HTML_INDEX_ONLY
         {
             const auto kIndex = json::GetFileIndex(get);
             HTTPD_DEBUG_PRINTF("kIndex=%d", static_cast<signed>(kIndex));
@@ -508,11 +508,11 @@ http::Status HttpDeamonHandleRequest::HandlePost() {
         return HandlePostJSON();
     }
 
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
     if (memcmp(uri_, "/upload", 7) == 0) {
         return HandlePostUpload();
     }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
 
     if (memcmp(uri_, "/action/command=reboot", 23) == 0) {
         network::tcp::Abort(connection_handle_);
@@ -556,7 +556,7 @@ http::Status HttpDeamonHandleRequest::HandlePostJSON() {
     return http::Status::kNotFound;
 }
 
-#if defined(CONFIG_HTTPD_ENABLE_UPLOAD)
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
 http::Status HttpDeamonHandleRequest::HandlePostUpload() {
     HTTPD_DEBUG_ENTRY();
 
@@ -634,12 +634,12 @@ http::Status HttpDeamonHandleRequest::HandlePostUpload() {
     return http::Status::kBadRequest;
     HTTPD_DEBUG_EXIT();
 }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
 
-#if defined(CONFIG_HTTPD_ENABLE_DELETE)
+#ifdef CONFIG_HTTPD_ENABLE_DELETE
 http::Status HttpDeamonHandleRequest::HandleDelete() {
     HTTPD_DEBUG_PRINTF("bytes_received_=%d, request_data_length_=%u, request_content_length_=%u", bytes_received_, request_data_length_, request_content_length_);
     HTTPD_DEBUG_EXIT();
     return http::Status::kInternalServerError;
 }
-#endif
+#endif // CONFIG_HTTPD_ENABLE_DELETE

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
@@ -113,7 +113,7 @@ static void SendReport(uint32_t group_address) {
     network::MemcpyIp(s_report.ip4.src, netif::global::netif_default.ip.addr);
     std::memcpy(s_report.ip4.dst, multicast_ip.u8, network::ip4::kAddressLength);
     s_report.ip4.chksum = 0;
-#if !defined(CHECKSUM_BY_HARDWARE)
+#ifndef CHECKSUM_BY_HARDWARE
     s_report.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_report.ip4), 24); // TODO(avv)
 #endif // CHECKSUM_BY_HARDWARE
     // IGMP
@@ -206,7 +206,7 @@ void __attribute__((cold)) Init() {
     s_timer_id = SoftwareTimerAdd(kIgmpTmrInterval, Timer);
     assert(s_timer_id >= 0);
 
-#if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
+#ifdef CONFIG_EMAC_HASH_MULTICAST_FILTER
     emac::multicast::EnableHashFilter();
 #endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
 }
@@ -224,7 +224,7 @@ void __attribute__((cold)) Shutdown() {
         }
     }
 
-#if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
+#ifdef CONFIG_EMAC_HASH_MULTICAST_FILTER
     emac::multicast::DisableHashFilter();
 #endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
 
@@ -238,14 +238,14 @@ static void SendLeave(uint32_t group_address) {
     // IPv4
     s_leave.ip4.id = s_id;
     s_leave.ip4.chksum = 0;
-#if !defined(CHECKSUM_BY_HARDWARE)
+#ifndef CHECKSUM_BY_HARDWARE
     s_leave.ip4.chksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), 24); // TODO(avv):
 #endif // CHECKSUM_BY_HARDWARE
     network::MemcpyIp(s_leave.ip4.src, netif::global::netif_default.ip.addr);
     // IGMP
     network::MemcpyIp(s_leave.igmp.report.igmp.group_address, group_address);
     s_leave.igmp.report.igmp.checksum = 0;
-#if !defined(CHECKSUM_BY_HARDWARE)
+#ifndef CHECKSUM_BY_HARDWARE
     s_leave.igmp.report.igmp.checksum = Chksum(reinterpret_cast<void*>(&s_leave.ip4), kIPv4IgmpReportHeadersSize);
 #endif // CHECKSUM_BY_HARDWARE
 
@@ -302,7 +302,7 @@ static void DelayingMember(struct GroupInfo& group, uint32_t maxresp) {
     }
 }
 
-#if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
+#ifdef CONFIG_EMAC_HASH_MULTICAST_FILTER
 static void ResetHash() {
     emac::multicast::ResetHash();
 
@@ -338,7 +338,7 @@ void static Join(uint32_t group_address) {
             s_groups[i].state = kDelayingMember;
             s_groups[i].timer = 2; // TODO(avv):
 
-#if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
+#ifdef CONFIG_EMAC_HASH_MULTICAST_FILTER
             pcast32 multicast_ip;
             multicast_ip.u32 = group_address;
             const uint8_t kMacAddr[6] = {0x01, 0x00, 0x5E, static_cast<uint8_t>(multicast_ip.u8[1] & 0x7F), multicast_ip.u8[2], multicast_ip.u8[3]};
@@ -368,7 +368,7 @@ static void Leave(uint32_t group_address) {
             group.state = kNonMember;
             group.timer = 0;
 
-#if defined(CONFIG_EMAC_HASH_MULTICAST_FILTER)
+#ifdef CONFIG_EMAC_HASH_MULTICAST_FILTER
             ResetHash();
 #endif // CONFIG_EMAC_HASH_MULTICAST_FILTER
             IGMP_DEBUG_EXIT();
@@ -413,6 +413,6 @@ void ReportGroups() {
 // <---
 } // namespace network::igmp
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC pop_options
 #endif // CONFIG_REMOTECONFIG_MINIMUM

@@ -66,4 +66,4 @@ class RdmNetDevice final : public LLRPDevice {
     }
 };
 
-#endif /* RDMNETDEVICE_H_ */
+#endif // RDMNETDEVICE_H_

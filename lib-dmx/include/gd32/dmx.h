@@ -134,25 +134,25 @@ template <dmx::SendStyle dmxSendStyle> void Dmx::SetTransmitDataWithSC(uint32_t 
         DMX_HANDLE_SEND_CASE(0, true, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2
         DMX_HANDLE_SEND_CASE(1, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 2
 #if DMX_MAX_PORTS >= 3
         DMX_HANDLE_SEND_CASE(2, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 3
 #if DMX_MAX_PORTS >= 4
         DMX_HANDLE_SEND_CASE(3, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 4
 #if DMX_MAX_PORTS >= 5
         DMX_HANDLE_SEND_CASE(4, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 5
 #if DMX_MAX_PORTS >= 6
         DMX_HANDLE_SEND_CASE(5, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 6
 #if DMX_MAX_PORTS >= 7
         DMX_HANDLE_SEND_CASE(6, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 7
 #if DMX_MAX_PORTS == 8
         DMX_HANDLE_SEND_CASE(7, true, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS == 8
         default:
             return;
     }
@@ -164,25 +164,25 @@ void Dmx::SetTransmitDataWithoutSC(uint32_t port_index, const uint8_t* pData, ui
         DMX_HANDLE_SEND_CASE(0, false, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2
         DMX_HANDLE_SEND_CASE(1, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 2
 #if DMX_MAX_PORTS >= 3
         DMX_HANDLE_SEND_CASE(2, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 3
 #if DMX_MAX_PORTS >= 4
         DMX_HANDLE_SEND_CASE(3, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 4
 #if DMX_MAX_PORTS >= 5
         DMX_HANDLE_SEND_CASE(4, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 5
 #if DMX_MAX_PORTS >= 6
         DMX_HANDLE_SEND_CASE(5, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 6
 #if DMX_MAX_PORTS >= 7
         DMX_HANDLE_SEND_CASE(6, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS >= 7
 #if DMX_MAX_PORTS == 8
         DMX_HANDLE_SEND_CASE(7, false, dmxSendStyle);
-#endif
+#endif // DMX_MAX_PORTS == 8
         default:
             return;
     }

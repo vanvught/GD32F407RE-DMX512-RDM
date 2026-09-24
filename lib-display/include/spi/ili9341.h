@@ -91,9 +91,9 @@ class ILI9341 : public Paint {
     ILI9341(uint32_t nCS) : Paint(nCS) {
         DISPLAY_DEBUG_ENTRY();
 
-#if defined(SPI_LCD_RST_GPIO)
+#ifdef SPI_LCD_RST_GPIO
         HardwareReset();
-#endif
+#endif // SPI_LCD_RST_GPIO
 
         WriteCommand(0xC0);  // Power control
         WriteDataByte(0x23); // VRH[5:0]

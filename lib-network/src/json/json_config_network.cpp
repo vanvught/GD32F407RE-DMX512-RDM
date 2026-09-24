@@ -35,18 +35,18 @@
 #include "json/networkparams.h"
 #include "json/json_helpers.h"
 #include "ip4/ip4_helpers.h"
-#if defined(HAVE_NTP_CLIENT)
+#ifdef HAVE_NTP_CLIENT
 #include "apps/ntpclient.h"
 #endif // HAVE_NTP_CLIENT
 
 namespace json::config {
 uint32_t GetNetwork(char* buffer, uint32_t length) {
-#if defined(HAVE_NTP_CLIENT)
+#ifdef HAVE_NTP_CLIENT
     uint32_t ntp_server_ip = 0;
-#if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_NTP_CLIENT
     ntp_server_ip = network::apps::ntpclient::GetServerIp();
 #endif // CONFIG_NET_ENABLE_NTP_CLIENT
-#if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_PTP_NTP_CLIENT
     ntp_server_ip = network::apps::ntpclient::ptp::GetServerIp();
 #endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
 #endif // HAVE_NTP_CLIENT
@@ -60,7 +60,7 @@ uint32_t GetNetwork(char* buffer, uint32_t length) {
         doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(network::GetNetmask(), ip);
         doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(network::GetGatewayIp(), ip);
         doc[json::NetworkParamsConst::kHostname.name] = network::iface::HostName();
-#if defined(HAVE_NTP_CLIENT)
+#ifdef HAVE_NTP_CLIENT
         doc[json::NetworkParamsConst::kNtpServer.name] = net::FormatIp(ntp_server_ip, ip);
 #endif // HAVE_NTP_CLIENT
     });

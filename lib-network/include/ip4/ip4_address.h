@@ -41,7 +41,7 @@ typedef struct ip_addr ip4_addr_t;
 #define MAC2STR(mac) static_cast<int>(mac[0]), static_cast<int>(mac[1]), static_cast<int>(mac[2]), static_cast<int>(mac[3]), static_cast<int>(mac[4]), static_cast<int>(mac[5])
 #define MACSTR "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x"
 
-inline constexpr uint32_t ConvertToUint(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+ constexpr uint32_t ConvertToUint(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
     return static_cast<uint32_t>(a) | static_cast<uint32_t>(b) << 8 | static_cast<uint32_t>(c) << 16 | static_cast<uint32_t>(d) << 24;
 }
 

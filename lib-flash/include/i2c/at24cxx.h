@@ -29,10 +29,10 @@
 
 #include <cstdint>
 #include <span>
+#include <algorithm>
 #include <cstring>
 
 #include "i2c.h"
-#include "common/utils/utils_math.h"
 
 namespace at24cxx {
 static constexpr uint8_t kI2CAddress = 0x50;
@@ -54,16 +54,16 @@ struct ATTypes {
 template <uint32_t kType>
 class AT24Cxx {
     static constexpr bool IsValidType() {
-        return kType == at24cxx::ATTypes::kAT24LC512 ||
-               kType == at24cxx::ATTypes::kAT24LC256 ||
-               kType == at24cxx::ATTypes::kAT24LC128 || 
-               kType == at24cxx::ATTypes::kAT24LC64 || 
-               kType == at24cxx::ATTypes::kAT24LC32 || 
-               kType == at24cxx::ATTypes::kAT24LC16 ||
-               kType == at24cxx::ATTypes::kAT24LC08 || 
-               kType == at24cxx::ATTypes::kAT24LC04 || 
-               kType == at24cxx::ATTypes::kAT24LC02 || 
-               kType == at24cxx::ATTypes::kAT24LC01;
+        return kType == at24cxx::ATTypes::kAT24LC512 || //
+               kType == at24cxx::ATTypes::kAT24LC256 || //
+               kType == at24cxx::ATTypes::kAT24LC128 || //
+               kType == at24cxx::ATTypes::kAT24LC64 ||  //
+               kType == at24cxx::ATTypes::kAT24LC32 ||  //
+               kType == at24cxx::ATTypes::kAT24LC16 ||  //
+               kType == at24cxx::ATTypes::kAT24LC08 ||  //
+               kType == at24cxx::ATTypes::kAT24LC04 ||  //
+               kType == at24cxx::ATTypes::kAT24LC02 ||  //
+               kType == at24cxx::ATTypes::kAT24LC01;    //
     }
 
    public:
@@ -131,7 +131,7 @@ class AT24Cxx {
             uint32_t count;
 
             if constexpr (kIsAddressSizeTwoWords) {
-                count = common::Min(common::Min(static_cast<uint32_t>(data.size()), GetPageSize() - 2), GetPageSize() - kOffsetPage);
+                count = std::min(std::min(static_cast<uint32_t>(data.size()), GetPageSize() - 2), GetPageSize() - kOffsetPage);
 
                 buffer[0] = static_cast<char>(memory_address >> 8);
                 buffer[1] = static_cast<char>(memory_address & 0xFF);
@@ -139,7 +139,7 @@ class AT24Cxx {
                 memcpy(&buffer[2], data.data(), count);
                 i2c::Write(buffer, 2 + count);
             } else {
-                count = common::Min(common::Min(static_cast<uint32_t>(data.size()), GetPageSize() - 1), GetPageSize() - kOffsetPage);
+                count = std::min(std::min(static_cast<uint32_t>(data.size()), GetPageSize() - 1), GetPageSize() - kOffsetPage);
 
                 buffer[0] = static_cast<char>(memory_address & 0xFF);
                 memcpy(&buffer[1], data.data(), count);

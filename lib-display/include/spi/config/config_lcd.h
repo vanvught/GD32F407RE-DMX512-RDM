@@ -29,7 +29,7 @@
 #include <cstdint>
 
 namespace config::lcd {
-#if defined(SPI_LCD_240X240)
+#ifdef SPI_LCD_240X240
 inline constexpr uint32_t kWidth = 240;
 inline constexpr uint32_t kHeight = 240;
 #elif defined(SPI_LCD_240X320)
@@ -43,40 +43,40 @@ inline constexpr uint32_t kWidth = 80;
 inline constexpr uint32_t kHeight = 160;
 #else
 #error lib-display spi config
-#endif
+#endif // SPI_LCD_240X240
 } // namespace config::lcd
 
-#if defined(H3)
+#ifdef H3
 #define SPI_LCD_RST_GPIO GPIO_EXT_7 // GPIO6
 #define SPI_LCD_DC_GPIO GPIO_EXT_26 // GPIO10
 #define SPI_LCD_BL_GPIO GPIO_EXT_22 // GPIO2
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 #define SPI_LCD_CS_GPIO GPIO_EXT_24 // GPIO13 / SPI CS0
-#endif                              // defined(SPI_LCD_HAVE_CS_GPIO)
+#endif // SPI_LCD_HAVE_CS_GPIO
 #elif defined(GD32)                 // See board file
 #elif defined(RASPPI)
 #include "gpio_rasppi.h"
 #define SPI_LCD_RST_GPIO GPIO_EXT_7 // GPIO4
 #define SPI_LCD_DC_GPIO GPIO_EXT_31 // GPIO6
 #define SPI_LCD_BL_GPIO GPIO_EXT_29 // GPIO5
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 #define SPI_LCD_CS_GPIO GPIO_EXT_22 // GPIO25
-#endif                              // defined(SPI_LCD_HAVE_CS_GPIO)
+#endif // SPI_LCD_HAVE_CS_GPIO
 #elif defined(ODROID)
 #include "gpio_odroid.h"
 #define SPI_LCD_RST_GPIO GPIO_EXT_7 // GPIO4
 #define SPI_LCD_DC_GPIO GPIO_EXT_31 // GPIO6
 #define SPI_LCD_BL_GPIO GPIO_EXT_29 // GPIO5
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 #define SPI_LCD_CS_GPIO GPIO_EXT_22 // GPIO25
-#endif                              // defined(SPI_LCD_HAVE_CS_GPIO)
+#endif // SPI_LCD_HAVE_CS_GPIO
 #else
 #define SPI_LCD_RST_GPIO 0
 #define SPI_LCD_DC_GPIO 0
 #define SPI_LCD_BL_GPIO 0
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 #define SPI_LCD_CS_GPIO 0
-#endif // defined(SPI_LCD_HAVE_CS_GPIO)
-#endif
+#endif // SPI_LCD_HAVE_CS_GPIO
+#endif // H3
 
 #endif // SPI_CONFIG_H_

@@ -46,6 +46,6 @@
 #define DMX_DEBUG_PUTS(...) \
     do {                         \
     } while (false)
-#endif
+#endif // DEBUG_DMX
 
 #endif // DMX_DEBUG_H_

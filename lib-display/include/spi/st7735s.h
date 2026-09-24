@@ -53,7 +53,7 @@ inline constexpr uint8_t kPwctR5 = 0xC4;  ///< Power Control 5 in partial mode, 
 inline constexpr uint8_t kGmctrP1 = 0xE0; ///< Gamma (‘+’polarity) Correction Characteristics Setting
 inline constexpr uint8_t kGmctrN1 = 0xE1; ///< Gamma ‘-’polarity Correction Characteristics Setting
 } // namespace cmd
-#if defined(SPI_LCD_128X128)
+#ifdef SPI_LCD_128X128
 inline constexpr uint32_t kRotation0ShiftX = 0;
 inline constexpr uint32_t kRotation0ShiftY = 0;
 inline constexpr uint32_t kRotation1ShiftX = 3;
@@ -71,7 +71,7 @@ inline constexpr uint32_t kRotation2ShiftX = 0;
 inline constexpr uint32_t kRotation2ShiftY = 0;
 inline constexpr uint32_t kRotation3ShiftX = 0;
 inline constexpr uint32_t kRotation3ShiftY = 24;
-#endif
+#endif // SPI_LCD_128X128
 } // namespace st7735s
 
 class ST7735S : public ST77XX {

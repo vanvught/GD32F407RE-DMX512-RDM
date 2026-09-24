@@ -41,7 +41,7 @@
 #if defined(__linux__) || defined(__APPLE__)
 #define SHOW_LLRP_MESSAGE
 #define DEBUG_RDM_SHOW_MESSAGE
-#endif
+#endif // defined(__linux__) || defined(__APPLE__)
 
 void LLRPDevice::HandleRequestMessage() {
     LLRP_DEVICE_DEBUG_ENTRY();
@@ -91,17 +91,17 @@ void LLRPDevice::HandleRequestMessage() {
     reply->ProbeReplyPDU.vector = VECTOR_PROBE_REPLY_DATA;
     memcpy(reply->ProbeReplyPDU.UID, rdm::device::Base::Instance().GetUID(), rdm::kUidSize);
     network::iface::CopyMacAddressTo(reply->ProbeReplyPDU.HardwareAddress);
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
     reply->ProbeReplyPDU.ComponentType = LLRP_COMPONENT_TYPE_NON_RDMNET;
 #else
     reply->ProbeReplyPDU.ComponentType = LLRP_COMPONENT_TYPE_RPT_DEVICE;
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
     network::udp::Send(handle_llrp, reinterpret_cast<const uint8_t*>(reply), sizeof(struct TTProbeReplyPDUPacket), llrp::device::kIpV4LlrpResponse, llrp::device::kLlrpPort);
 
 #ifndef NDEBUG
     DumpCommon();
-#endif
+#endif // NDEBUG
     LLRP_DEVICE_DEBUG_EXIT();
 }
 
@@ -113,7 +113,7 @@ void LLRPDevice::HandleRdmCommand() {
 #ifdef DEBUG_RDM_SHOW_MESSAGE
     const auto* rdm_data_in_no_sc = const_cast<uint8_t*>(pdu_packet->RDMCommandPDU.RDMData);
     rdm::message::PrintNoStartcode(rdm_data_in_no_sc);
-#endif
+#endif // DEBUG_RDM_SHOW_MESSAGE
 
     const auto* reply = LLRPHandleRdmCommand(pdu_packet->RDMCommandPDU.RDMData);
 
@@ -144,11 +144,11 @@ void LLRPDevice::HandleRdmCommand() {
 
 #ifdef DEBUG_RDM_SHOW_MESSAGE
     rdm::message::Print(reply);
-#endif
+#endif // DEBUG_RDM_SHOW_MESSAGE
 
 #ifndef NDEBUG
     DumpCommon();
-#endif
+#endif // NDEBUG
 
     LLRP_DEVICE_DEBUG_EXIT();
 }

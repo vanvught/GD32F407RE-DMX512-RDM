@@ -57,7 +57,7 @@ void ArtNetNode::HandleTodRequest() {
         }
     }
 
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
     for (auto& entry : state_.art.tod_request_ip_list) {
         if (entry == ip_address_from_) {
             ARTNET_RDM_DEBUG_EXIT();
@@ -70,7 +70,7 @@ void ArtNetNode::HandleTodRequest() {
             return;
         }
     }
-#endif
+#endif // RDM_CONTROLLER
 
     ARTNET_RDM_DEBUG_EXIT();
 }

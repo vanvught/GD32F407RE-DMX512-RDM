@@ -36,7 +36,7 @@
 #include "core/protocol/iana.h"
 #include "firmware/debug/debug_debug.h"
 
-#if defined(DEBUG_NET_APPS_TFTP)
+#ifdef DEBUG_NET_APPS_TFTP
 #define TFTP_DEBUG_ENTRY() DEBUG_ENTRY()
 #define TFTP_DEBUG_EXIT() DEBUG_EXIT()
 #define TFTP_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
@@ -84,7 +84,7 @@ static constexpr uint32_t kDataLen = 512;
 static constexpr uint32_t kErrmsgLen = 128;
 } // namespace max
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
 #endif // PACKED
 

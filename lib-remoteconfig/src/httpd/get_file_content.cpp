@@ -27,7 +27,7 @@
 #include <cstring>
 #include "httpd/httpd_debug.h"
 
-#if defined(CONFIG_HTTP_CONTENT_FS)
+#ifdef CONFIG_HTTP_CONTENT_FS
 #include <cstdio>
 
 #include "httpd/httpd.h"
@@ -151,4 +151,4 @@ const uint8_t* GetFileContent(const char* file_name, uint32_t& size, http::Conte
     HTTPD_DEBUG_EXIT();
     return nullptr;
 }
-#endif
+#endif // CONFIG_HTTP_CONTENT_FS

@@ -28,10 +28,10 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <algorithm>
 #include <cassert>
 
 #include "rdm_e120.h"
-#include "common/utils/utils_math.h"
 #include "firmware/debug/debug_debug.h"
 
 namespace rdm::sensor {
@@ -66,12 +66,14 @@ inline constexpr int16_t TEMPERATURE_ABS_ZERO = -273;
 inline constexpr uint8_t RECORDED_SUPPORTED = (1U << 0);
 inline constexpr uint8_t LOW_HIGH_DETECT = (1U << 1);
 
-template <class T> constexpr int16_t SafeRangeMax(const T& a) {
+template <class T>
+constexpr int16_t SafeRangeMax(const T& a) {
     static_assert(sizeof(int16_t) <= sizeof(T), "T");
     return (a > static_cast<T>(INT16_MAX)) ? INT16_MAX : static_cast<int16_t>(a);
 }
 
-template <class T> constexpr int16_t SafeRangeMin(const T& a) {
+template <class T>
+constexpr int16_t SafeRangeMin(const T& a) {
     static_assert(sizeof(int16_t) <= sizeof(T), "T");
     return (a < static_cast<T>(INT16_MIN)) ? INT16_MIN : static_cast<int16_t>(a);
 }
@@ -151,8 +153,8 @@ class RDMSensor {
         const auto kValue = this->GetValue();
 
         sensor_values_.present = kValue;
-        sensor_values_.lowest_detected = common::Min(sensor_values_.lowest_detected, kValue);
-        sensor_values_.highest_detected = common::Max(sensor_values_.highest_detected, kValue);
+        sensor_values_.lowest_detected = std::min(sensor_values_.lowest_detected, kValue);
+        sensor_values_.highest_detected = std::max(sensor_values_.highest_detected, kValue);
 
         DEBUG_EXIT();
         return &sensor_values_;
@@ -176,8 +178,8 @@ class RDMSensor {
 
         sensor_values_.present = kValue;
         sensor_values_.recorded = kValue;
-        sensor_values_.lowest_detected = common::Min(sensor_values_.lowest_detected, kValue);
-        sensor_values_.highest_detected = common::Max(sensor_values_.highest_detected, kValue);
+        sensor_values_.lowest_detected = std::min(sensor_values_.lowest_detected, kValue);
+        sensor_values_.highest_detected = std::max(sensor_values_.highest_detected, kValue);
 
         DEBUG_EXIT();
     }

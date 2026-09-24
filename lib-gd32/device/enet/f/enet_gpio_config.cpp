@@ -82,12 +82,15 @@ void EnetGpioConfig() {
     rcu_periph_clock_enable(RCU_GPIOC);
     rcu_periph_clock_enable(RCU_SYSCFG);
 
+#ifndef ENET_DISABLE_PA8
     gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_8);
     gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
     gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_MAX, GPIO_PIN_8);
 
     /* choose DIV4 to get 50MHz from 200MHz on CKOUT0 pin (PA8) to clock the PHY */
     rcu_ckout0_config(RCU_CKOUT0SRC_PLLP, RCU_CKOUT0_DIV4);
+#endif
+
     syscfg_enet_phy_interface_config(SYSCFG_ENET_PHY_RMII);
 
     /* PA1: ETH_RMII_REF_CLK */

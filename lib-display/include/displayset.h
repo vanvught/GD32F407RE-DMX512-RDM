@@ -72,4 +72,4 @@ class DisplaySet
     bool clear_end_of_line_{false};
 };
 
-#endif  // DISPLAYSET_H_
+#endif // DISPLAYSET_H_

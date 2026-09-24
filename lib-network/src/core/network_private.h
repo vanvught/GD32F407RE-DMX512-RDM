@@ -44,10 +44,10 @@ namespace emac::eth {
 uint8_t* SendGetDmaBuffer();
 void Send(uint32_t);
 void Send(void*, uint32_t);
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
 void SendTimestamp(uint32_t);
 void SendTimestamp(void*, uint32_t);
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
 uint32_t Recv(uint8_t**);
 void FreePkt();
 } // namespace emac::eth
@@ -84,10 +84,10 @@ inline uint16_t Chksum(const void* data, uint32_t length) {
 namespace arp {
 enum class EthSend {
     kIsNormal
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
     ,
     kIsTimestamp
-#endif // defined CONFIG_NET_ENABLE_PTP
+#endif // CONFIG_NET_ENABLE_PTP
 };
 } // namespace arp
 

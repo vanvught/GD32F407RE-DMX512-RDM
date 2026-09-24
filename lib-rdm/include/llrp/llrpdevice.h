@@ -82,7 +82,7 @@ class LLRPDevice {
 
 #ifndef DEBUG_LLRP_DEVICE
         DumpCommon();
-#endif
+#endif // DEBUG_LLRP_DEVICE
 
         const auto* common = reinterpret_cast<struct TLLRPCommonPacket*>(llrp);
 
@@ -91,7 +91,7 @@ class LLRPDevice {
 #ifdef SHOW_LLRP_MESSAGE
                 printf("> VECTOR_LLRP_PROBE_REQUEST\n");
                 DumpLLRP();
-#endif
+#endif // SHOW_LLRP_MESSAGE
                 HandleRequestMessage();
                 break;
             case VECTOR_LLRP_PROBE_REPLY:
@@ -102,7 +102,7 @@ class LLRPDevice {
 #ifdef SHOW_LLRP_MESSAGE
                 printf("> VECTOR_LLRP_RDM_CMD\n");
                 DumpLLRP();
-#endif
+#endif // SHOW_LLRP_MESSAGE
                 HandleRdmCommand();
                 break;
             default:

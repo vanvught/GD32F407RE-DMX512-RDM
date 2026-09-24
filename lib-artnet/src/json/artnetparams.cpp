@@ -36,9 +36,9 @@
 #include "network_config.h"
 #include "common/utils/utils_flags.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 #ifdef DEBUG_ARTNET_PARAMS
 #define ARTNET_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -58,7 +58,7 @@
 #define ARTNET_DEBUG_PUTS(...) \
     do {                       \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET_PARAMS
 
 using common::store::dmxnode::Flags;
 
@@ -131,10 +131,10 @@ void ArtNetParams::Set() {
 
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
     artnet.SetRdm(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kEnableRdm));
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
 #if (ARTNET_VERSION >= 4)
     artnet.SetMapUniverse0(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kMapUniverse0));
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     if constexpr (dmxnode::kConfigPortCount != 0) {
         for (uint32_t config_port_index = 0; config_port_index < dmxnode::kConfigPortCount; config_port_index++) {
@@ -147,17 +147,17 @@ void ArtNetParams::Set() {
             artnet.SetDestinationIp(kPortIndex, store_dmxnode.destination_ip[config_port_index]);
 #if (ARTNET_VERSION >= 4)
             artnet.SetPortProtocol4(kPortIndex, common::Get2BitField<artnet::PortProtocol>(config_port_index, store_dmxnode.protocol));
-#endif
+#endif // (ARTNET_VERSION >= 4)
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
             const auto kRdm = common::Get2BitField<dmxnode::Rdm>(config_port_index, store_dmxnode.rdm);
             artnet.SetRdm(kPortIndex, kRdm == dmxnode::Rdm::kEnable);
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         }
     }
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 
     ARTNET_DEBUG_EXIT();
 }
@@ -167,24 +167,24 @@ void ArtNetParams::Dump() {
 
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
     printf(" %s=%u\n", json::ArtNetParamsConst::kEnableRdm.name, static_cast<unsigned>(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kEnableRdm)));
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
 #if (ARTNET_VERSION >= 4)
     printf(" %s=%u\n", json::ArtNetParamsConst::kMapUniverse0.name, static_cast<unsigned>(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kMapUniverse0)));
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     if constexpr (dmxnode::kConfigPortCount != 0) {
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
 #if (ARTNET_VERSION >= 4) && defined(DMX_MAX_PORTS)
             const auto kProtocol = common::Get2BitField<artnet::PortProtocol>(port_index, store_dmxnode.protocol);
             printf(" %s=%s\n", json::ArtNetParamsConst::kProtocolPort[port_index].name, artnet::GetProtocolMode(kProtocol));
-#endif
+#endif // (ARTNET_VERSION >= 4) && defined(DMX_MAX_PORTS)
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
             const auto kRdm = common::Get2BitField<dmxnode::Rdm>(port_index, store_dmxnode.rdm);
             printf(" %s=%u\n", json::ArtNetParamsConst::kRdmEnablePort[port_index].name, static_cast<unsigned>(kRdm));
-#endif
-#if defined(ARTNET_HAVE_DMXIN)
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
+#ifdef ARTNET_HAVE_DMXIN
             printf(" %s=" IPSTR "\n", json::ArtNetParamsConst::kDestinationIpPort[port_index].name, IP2STR(store_dmxnode.destination_ip[port_index]));
-#endif			
+#endif // ARTNET_HAVE_DMXIN
         }
     }
 

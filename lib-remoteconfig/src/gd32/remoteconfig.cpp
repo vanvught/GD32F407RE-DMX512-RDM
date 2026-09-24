@@ -1,4 +1,4 @@
-#if !defined(ENABLE_TFTP_SERVER)
+#ifndef ENABLE_TFTP_SERVER
 /**
  * @file remoteconfig.cpp
  *
@@ -52,4 +52,4 @@ void RemoteConfig::PlatformHandleTftpGet() {
     DEBUG_PRINTF("enable_tftp_=%d", enable_tftp_);
     DEBUG_EXIT();
 }
-#endif
+#endif // ENABLE_TFTP_SERVER

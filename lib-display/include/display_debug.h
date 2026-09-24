@@ -44,7 +44,7 @@
 #define DISPLAY_DEBUG_PUTS(...) \
     do {                        \
     } while (false)
-#endif
+#endif // DEBUG_DISPLAY
 
 #include "firmware/debug/debug_debug.h"
 

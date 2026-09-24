@@ -93,7 +93,7 @@ inline const char* GetOutputType(OutputType type) {
 #define DMXNODE_OUTPUT_RDM_PIXEL
 #endif // defined(OUTPUT_DMX_PIXEL) && defined(RDM_RESPONDER) && !defined(NODE_ARTNET)
 
-#if defined(OUTPUT_DMX_MONITOR)
+#ifdef OUTPUT_DMX_MONITOR
 #include "dmxmonitor.h"
 #if defined(DMXNODE_PORTS) && (DMXNODE_PORTS <= 4)
 #define DMX_MAX_PORTS DMXNODE_PORTS
@@ -102,45 +102,45 @@ inline const char* GetOutputType(OutputType type) {
 #endif // defined(DMXNODE_PORTS) && (DMXNODE_PORTS <= 4)
 #endif // OUTPUT_DMX_MONITOR
 
-#if defined(OUTPUT_DMX_ARTNET)
+#ifdef OUTPUT_DMX_ARTNET
 #include "artnetoutput.h"
 #endif // OUTPUT_DMX_ARTNET
 
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmxsend.h"
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX
 
-#if defined(OUTPUT_DMX_PIXEL)
+#ifdef OUTPUT_DMX_PIXEL
 #include "pixeldmx.h"
 using DmxPixelOutputType = PixelDmx;
 #endif // OUTPUT_DMX_PIXEL
 
-#if defined(OUTPUT_DMX_PIXEL_MULTI)
+#ifdef OUTPUT_DMX_PIXEL_MULTI
 #include "pixeldmxmulti.h"
 using DmxPixelOutputType = PixelDmxMulti;
 #endif // OUTPUT_DMX_PIXEL_MULTI
 
-#if defined(OUTPUT_DMX_PCA9685)
+#ifdef OUTPUT_DMX_PCA9685
 #define DMXNODE_OUTPUT_PCA9685
 #include "pca9685dmxled.h"
 #include "pca9685dmxservo.h"
 #endif // OUTPUT_DMX_PCA9685
 
-#if defined(OUTPUT_DMX_SERIAL)
+#ifdef OUTPUT_DMX_SERIAL
 #define DMXNODE_OUTPUT_SERIAL
 #include "dmxserial.h"
 #endif // OUTPUT_DMX_SERIAL
 
-#if defined(OUTPUT_DMX_STEPPER)
+#ifdef OUTPUT_DMX_STEPPER
 #include "sparkfundmx.h"
 #endif // OUTPUT_DMX_STEPPER
 
-#if defined(OUTPUT_DMX_TLC59711)
+#ifdef OUTPUT_DMX_TLC59711
 #include "tlc59711dmx.h"
 #endif // OUTPUT_DMX_TLC59711
 
-#if defined(DMXNODE_OUTPUT_PIXEL_DMX)
+#ifdef DMXNODE_OUTPUT_PIXEL_DMX
 #include "dmxnodewith4.h"
 using DmxNodeOutputType = DmxNodeWith4<CONFIG_DMXNODE_DMX_PORT_OFFSET>;
 #elif defined(DMXNODE_OUTPUT_DMX)

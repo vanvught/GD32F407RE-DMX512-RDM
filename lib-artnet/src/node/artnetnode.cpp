@@ -27,9 +27,10 @@
 #include <cstdio>
 #include <cstring>
 #include <utility>
-#if !defined(DISABLE_RTC)
+#include <algorithm>
+#ifndef DISABLE_RTC
 #include <ctime>
-#endif
+#endif // DISABLE_RTC
 #include <cassert>
 
 #include "artnetnode.h"
@@ -37,18 +38,18 @@
 #include "artnet.h"
 #include "artnetdisplay.h"
 #include "artnetstore.h"
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
 #include "artnettrigger.h"
-#endif
-#if defined(ARTNET_HAVE_DMXIN)
+#endif // ARTNET_HAVE_TRIGGER
+#ifdef ARTNET_HAVE_DMXIN
 #include "dmx.h"
-#endif
+#endif // ARTNET_HAVE_DMXIN
 #if (ARTNET_VERSION >= 4)
 #include "e131.h"
-#endif
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#endif // (ARTNET_VERSION >= 4)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #include "rdm_device_base.h"
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 #include "dmxnode.h"
 #include "dmxnode_data.h"
 #include "board.h"
@@ -56,20 +57,20 @@
 #include "network_iface.h"
 #include "network_config.h"
 #include "board.h"
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
 #include "hwclock.h"
-#endif
+#endif // DISABLE_RTC
 #include "timing.h"
 #include "board.h"
 #include "board_statusled.h"
 #include "artnet_debug.h"
 
-#if defined(ARTNET_SHOWFILE)
+#ifdef ARTNET_SHOWFILE
 namespace showfile {
 void Record(const struct artnet::ArtDmx* artdmx, uint32_t millis);
 void Record(const struct artnet::ArtSync* artsync, uint32_t millis);
 } // namespace showfile
-#endif
+#endif // ARTNET_SHOWFILE
 
 static constexpr auto kArtnetMinHeaderSize = 12U;
 
@@ -94,10 +95,10 @@ ArtNetNode::ArtNetNode() {
     network::iface::CopyMacAddressTo(art_poll_reply_.mac);
 #if (ARTNET_VERSION >= 4)
     art_poll_reply_.acn_priority = e131::priority::kDefault;
-#endif
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#endif // (ARTNET_VERSION >= 4)
+#ifdef NODE_RDMNET_LLRP_ONLY
     memcpy(art_poll_reply_.default_uid_responder, rdm::device::Base::Instance().GetUID(), sizeof(art_poll_reply_.default_uid_responder));
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
     memset(&state_, 0, sizeof(struct artnetnode::State));
     state_.report_code = artnet::ReportCode::kRcpowerok;
@@ -125,28 +126,28 @@ ArtNetNode::ArtNetNode() {
         memset(&input_port_[port_index], 0, sizeof(struct artnetnode::InputPort));
     }
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     memcpy(art_dmx_.id, artnet::kNodeId, sizeof(art_poll_reply_.id));
     art_dmx_.op_code = static_cast<uint16_t>(artnet::OpCodes::kOpDmx);
     art_dmx_.prot_ver_hi = 0;
     art_dmx_.prot_ver_lo = artnet::kProtocolRevision;
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
-#if defined(ARTNET_HAVE_TIMECODE)
+#ifdef ARTNET_HAVE_TIMECODE
     memcpy(art_time_code_.id, artnet::kNodeId, sizeof(art_poll_reply_.id));
     art_time_code_.op_code = std::to_underlying(artnet::OpCodes::kOpTimecode);
     art_time_code_.prot_ver_hi = 0;
     art_time_code_.prot_ver_lo = artnet::kProtocolRevision;
     art_time_code_.filler1 = 0;
     art_time_code_.filler2 = 0;
-#endif
+#endif // ARTNET_HAVE_TIMECODE
 
-#if defined(ARTNET_ENABLE_SENDDIAG)
+#ifdef ARTNET_ENABLE_SENDDIAG
     memset(&diag_data_, 0, sizeof(struct artnet::ArtDiagData));
     memcpy(diag_data_.id, artnet::kNodeId, sizeof(diag_data_.id));
     diag_data_.op_code = std::to_underlying(artnet::OpCodes::kOpDiagdata);
     diag_data_.prot_ver_lo = artnet::kProtocolRevision;
-#endif
+#endif // ARTNET_ENABLE_SENDDIAG
 
     ARTNET_DEBUG_EXIT();
 }
@@ -154,13 +155,13 @@ ArtNetNode::ArtNetNode() {
 void ArtNetNode::Start() {
     ARTNET_DEBUG_ENTRY();
 
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
     assert(art_trigger_callback_function_ptr_ != nullptr);
-#endif
+#endif // ARTNET_HAVE_TRIGGER
 
-#if defined(ARTNET_HAVE_TIMECODE)
+#ifdef ARTNET_HAVE_TIMECODE
     assert(art_time_code_callback_function_ptr_ != nullptr);
-#endif
+#endif // ARTNET_HAVE_TIMECODE
 
     // Status 1
     art_poll_reply_.status1 |= artnet::Status1::kIndicatorNormalMode | artnet::Status1::kPapNetwork;
@@ -169,31 +170,31 @@ void ArtNetNode::Start() {
     art_poll_reply_.status2 |= artnet::Status2::kPortAddress15Bit | (artnet::kVersion >= 4 ? artnet::Status2::kSacnAbleToSwitch : artnet::Status2::kSacnNoSwitch);
     art_poll_reply_.status2 &= static_cast<uint8_t>(~artnet::Status2::kDhcpCapable);
     art_poll_reply_.status2 |= network::iface::IsDhcpCapable() ? artnet::Status2::kDhcpCapable : static_cast<uint8_t>(0);
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
     art_poll_reply_.status2 |= artnet::Status2::kWebBrowserSupport;
-#endif
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#endif // ENABLE_HTTPD
+#ifdef OUTPUT_HAVE_STYLESWITCH
     art_poll_reply_.status2 |= artnet::Status2::kOutputStyleSwitch;
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
     art_poll_reply_.status2 |= artnet::Status2::kRdmSwitch;
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
     // Status 3
     art_poll_reply_.status3 |= artnet::Status3::kFailsafeControl;
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
     art_poll_reply_.status3 |= artnet::Status3::kSupportsBackgroundDiscovery;
-#endif
-#if defined(ARTNET_HAVE_DMXIN)
+#endif // RDM_CONTROLLER
+#ifdef ARTNET_HAVE_DMXIN
     art_poll_reply_.status3 |= artnet::Status3::kOutputSwitch;
-#endif
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#endif // ARTNET_HAVE_DMXIN
+#ifdef NODE_RDMNET_LLRP_ONLY
     art_poll_reply_.status3 |= artnet::Status3::kSupportsLlrp;
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
     handle_ = network::udp::Begin(artnet::kUdpPort, StaticCallbackFunction);
     assert(handle_ != -1);
 
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
     if (state_.is_rdm_enabled) {
         for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
             if ((node_.port[port_index].direction == dmxnode::Direction::kOutput) && Rdm(port_index)) {
@@ -201,24 +202,24 @@ void ArtNetNode::Start() {
             }
         }
     }
-#endif
+#endif // RDM_CONTROLLER
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
             if (node_.port[port_index].protocol == artnet::PortProtocol::kArtnet) {
                 Dmx::Get()->SetPortDirection(port_index, dmx::Direction::kInput, true);
             }
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
             SendTodRequest(port_index);
-#endif
+#endif // RDM_CONTROLLER
         }
     }
 
     SetLocalMerging();
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     // Make sure that the supported LightSet OutputSyle is correctly set
     if (dmxnode_output_type_ != nullptr) {
         for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
@@ -227,11 +228,11 @@ void ArtNetNode::Start() {
             }
         }
     }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
 #if (ARTNET_VERSION >= 4)
     E131Bridge::Start();
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     state_.status = artnet::Status::kOn;
     board::statusled::SetMode(board::statusled::Mode::kNormal);
@@ -244,7 +245,7 @@ void ArtNetNode::Stop() {
 
 #if (ARTNET_VERSION >= 4)
     E131Bridge::Stop();
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         if (node_.port[port_index].protocol == artnet::PortProtocol::kArtnet) {
@@ -256,13 +257,13 @@ void ArtNetNode::Stop() {
         }
     }
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
         if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
             Dmx::Get()->SetPortDirection(port_index, dmx::Direction::kInput, false);
         }
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
     board::statusled::SetMode(board::statusled::Mode::kOffOff);
     panelled::Off(panelled::kArtnet);
@@ -275,7 +276,7 @@ void ArtNetNode::Stop() {
 
 void ArtNetNode::GetLongNameDefault(char* long_name) {
     ARTNET_DEBUG_ENTRY();
-#if !defined(ARTNET_LONG_NAME)
+#ifndef ARTNET_LONG_NAME
     uint8_t board_name_length;
     const auto* const kBoardName = board::BoardName(board_name_length);
     snprintf(long_name, artnet::kLongNameLength - 1, "%s %s %u %s", kBoardName, artnet::kNodeId, static_cast<unsigned int>(artnet::kVersion), board::Website());
@@ -291,7 +292,7 @@ void ArtNetNode::GetLongNameDefault(char* long_name) {
     }
 
     long_name[i] = '\0';
-#endif
+#endif // ARTNET_LONG_NAME
     ARTNET_DEBUG_EXIT();
 }
 
@@ -349,7 +350,7 @@ void ArtNetNode::SetLocalMerging() {
             }
 
             ARTNET_DEBUG_PRINTF("nInputPortIndex=%u %s %u, nOutputPortIndex=%u %s %u", input_port_index, artnet::GetProtocolMode(node_.port[input_port_index].protocol), node_.port[input_port_index].port_address, output_port_index,
-                         artnet::GetProtocolMode(node_.port[output_port_index].protocol), node_.port[output_port_index].port_address);
+                                artnet::GetProtocolMode(node_.port[output_port_index].protocol), node_.port[output_port_index].port_address);
 
             if ((node_.port[input_port_index].protocol == node_.port[output_port_index].protocol) && (node_.port[input_port_index].port_address == node_.port[output_port_index].port_address)) {
                 if (!node_.port[output_port_index].local_merge) {
@@ -391,13 +392,13 @@ void ArtNetNode::SetUniverse(uint32_t port_index, uint16_t universe) {
 
 #if (ARTNET_VERSION >= 4)
     SetUniverse4(port_index);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     if (state_.status == artnet::Status::kOn) {
         SetLocalMerging();
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
     ARTNET_DEBUG_EXIT();
 }
@@ -419,16 +420,16 @@ void ArtNetNode::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
             assert(state_.enabled_output_ports >= 1);
             state_.enabled_output_ports = static_cast<uint8_t>(state_.enabled_output_ports - 1);
         }
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         else if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
             assert(state_.enabled_input_ports > 1);
             state_.enabled_input_ports = static_cast<uint8_t>(state_.enabled_input_ports - 1);
         }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
         node_.port[port_index].direction = dmxnode::Direction::kDisable;
     }
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     else if (port_direction == dmxnode::Direction::kInput) {
         if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
             assert(state_.enabled_output_ports >= 1);
@@ -441,14 +442,14 @@ void ArtNetNode::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
         input_port_[port_index].good_input = 0;
         node_.port[port_index].direction = dmxnode::Direction::kInput;
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
     else if (port_direction == dmxnode::Direction::kOutput) {
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
             assert(state_.enabled_input_ports >= 1);
             state_.enabled_input_ports = static_cast<uint8_t>(state_.enabled_input_ports - 1);
         }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
         state_.enabled_output_ports = static_cast<uint8_t>(state_.enabled_output_ports + 1);
         assert(state_.enabled_output_ports <= dmxnode::kMaxPorts);
@@ -458,14 +459,14 @@ void ArtNetNode::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
 
     if (state_.status == artnet::Status::kOn) {
         artnet::store::SaveDirection(port_index, port_direction);
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         SetLocalMerging();
-#endif
+#endif // ARTNET_HAVE_DMXIN
     }
 
 #if (ARTNET_VERSION >= 4)
     SetDirection4(port_index);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     ARTNET_DEBUG_EXIT();
 }
@@ -481,7 +482,7 @@ void ArtNetNode::SetMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode
 
 #if (ARTNET_VERSION >= 4)
     E131Bridge::SetMergeMode(port_index, merge_mode);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     if (state_.status == artnet::Status::kOn) {
         artnet::store::SaveMergeMode(port_index, merge_mode);
@@ -492,12 +493,12 @@ void ArtNetNode::SetMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode
 void ArtNetNode::SetFailSafe(artnet::FailSafe fail_safe) {
     ARTNET_DEBUG_PRINTF("fail_safe=%u", static_cast<uint32_t>(fail_safe));
 
-#if defined(ARTNET_HAVE_FAILSAFE_RECORD)
+#ifdef ARTNET_HAVE_FAILSAFE_RECORD
     if ((state_.status == artnet::Status::kOn) && (fail_safe == artnet::FailSafe::kRecord)) {
         FailSafeRecord();
         return;
     }
-#endif
+#endif // ARTNET_HAVE_FAILSAFE_RECORD
 
     art_poll_reply_.status3 &= static_cast<uint8_t>(~artnet::Status3::kNetworklossMask);
 
@@ -515,16 +516,16 @@ void ArtNetNode::SetFailSafe(artnet::FailSafe fail_safe) {
             break;
 
         case artnet::FailSafe::kPlayback:
-#if defined(ARTNET_HAVE_FAILSAFE_RECORD)
+#ifdef ARTNET_HAVE_FAILSAFE_RECORD
             art_poll_reply_.status3 |= artnet::Status3::kNetworklossPlayback;
-#endif
+#endif // ARTNET_HAVE_FAILSAFE_RECORD
             break;
 
         case artnet::FailSafe::kRecord:
-#if defined(ARTNET_HAVE_FAILSAFE_RECORD)
+#ifdef ARTNET_HAVE_FAILSAFE_RECORD
             assert(false && "case artnet::FailSafe::kRecord");
             __builtin_unreachable();
-#endif
+#endif // ARTNET_HAVE_FAILSAFE_RECORD
             break;
 
         default:
@@ -535,7 +536,7 @@ void ArtNetNode::SetFailSafe(artnet::FailSafe fail_safe) {
 
 #if (ARTNET_VERSION >= 4)
     E131Bridge::SetFailSafe(static_cast<dmxnode::FailSafe>(static_cast<uint8_t>(fail_safe) & 0x3));
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     if (state_.status == artnet::Status::kOn) {
         const auto kFailSafe = static_cast<uint8_t>(artnetnode::ConvertFailsafe(fail_safe));
@@ -547,7 +548,7 @@ void ArtNetNode::SetFailSafe(artnet::FailSafe fail_safe) {
     ARTNET_DEBUG_EXIT();
 }
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
 void ArtNetNode::SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) {
     assert(port_index < dmxnode::kMaxPorts);
 
@@ -580,7 +581,7 @@ dmxnode::OutputStyle ArtNetNode::GetOutputStyle(uint32_t port_index) const {
     const auto kIsStyleConstant = (output_port_[port_index].good_output_b & artnet::GoodOutputB::kStyleConstant) == artnet::GoodOutputB::kStyleConstant;
     return kIsStyleConstant ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta;
 }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
 void ArtNetNode::SetNetworkDataLossCondition() {
     state_.is_merge_mode = false;
@@ -589,11 +590,11 @@ void ArtNetNode::SetNetworkDataLossCondition() {
     uint32_t ip_count = 0;
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         if (node_.port[port_index].local_merge) {
             continue;
         }
-#endif
+#endif // ARTNET_HAVE_DMXIN
         ip_count += (output_port_[port_index].source_a.ip + output_port_[port_index].source_b.ip);
         if (ip_count != 0) {
             break;
@@ -618,9 +619,9 @@ void ArtNetNode::SetNetworkDataLossCondition() {
             dmxnode_output_type_->FullOn();
             break;
         case artnet::Status3::kNetworklossPlayback:
-#if defined(ARTNET_HAVE_FAILSAFE_RECORD)
+#ifdef ARTNET_HAVE_FAILSAFE_RECORD
             FailSafePlayback();
-#endif
+#endif // ARTNET_HAVE_FAILSAFE_RECORD
             break;
         default:
             assert(false && "Invalid kNetworkloss");
@@ -636,9 +637,9 @@ void ArtNetNode::SetNetworkDataLossCondition() {
     board::statusled::SetMode(board::statusled::Mode::kNormal);
     panelled::Off(panelled::kArtnet);
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     SetLocalMerging();
-#endif
+#endif // ARTNET_HAVE_DMXIN
 }
 
 void ArtNetNode::Print() {
@@ -646,7 +647,7 @@ void ArtNetNode::Print() {
     printf(" Long name  : %s\n", reinterpret_cast<char*>(art_poll_reply_.long_name));
 #ifdef ARTNET_HAVE_TIMECODE
     printf(" TimeCode IP: " IPSTR "\n", IP2STR(node_.ip_timecode));
-#endif
+#endif // ARTNET_HAVE_TIMECODE
 
     if (state_.enabled_output_ports != 0) {
         puts(" Output");
@@ -656,18 +657,18 @@ void ArtNetNode::Print() {
                 const auto kUniverse = GetUniverse(port_index);
                 const auto kMergeMode = ((output_port_[port_index].good_output & artnet::GoodOutput::kMergeModeLtp) == artnet::GoodOutput::kMergeModeLtp) ? dmxnode::MergeMode::kLtp : dmxnode::MergeMode::kHtp;
                 printf("  Port %-2u %-4u %s", static_cast<unsigned int>(port_index), static_cast<unsigned int>(kUniverse), dmxnode::GetMergeMode(kMergeMode, true));
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
                 printf(" %s", dmxnode::GetOutputStyle(GetOutputStyle(port_index), true));
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 #if (ARTNET_VERSION >= 4)
                 printf(" %s", artnet::GetProtocolMode(node_.port[port_index].protocol, true));
-#endif
+#endif // (ARTNET_VERSION >= 4)
                 printf(" %s\n", Rdm(port_index) ? "RDM" : "   ");
             }
         }
     }
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     if (state_.enabled_input_ports != 0) {
         puts(" Input");
 
@@ -682,11 +683,11 @@ void ArtNetNode::Print() {
                 printf(" %s\n", artnet::GetProtocolMode(node_.port[port_index].protocol, true));
 #else
                 puts("");
-#endif
+#endif // (ARTNET_VERSION >= 4)
             }
         }
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
 #if (ARTNET_VERSION >= 4)
     if (ArtNetNode::GetActiveOutputPorts() != 0) {
@@ -696,11 +697,11 @@ void ArtNetNode::Print() {
     }
 
     E131Bridge::Print();
-#endif
+#endif // (ARTNET_VERSION >= 4)
 }
 
 void ArtNetNode::HandleTimeSync() {
-#if !defined(DISABLE_RTC)
+#ifndef DISABLE_RTC
     const auto* const kArtTimeSync = reinterpret_cast<artnet::ArtTimeSync*>(receive_buffer_);
     struct tm tm_time;
 
@@ -714,25 +715,25 @@ void ArtNetNode::HandleTimeSync() {
     rtc::Set(&tm_time);
 
     ARTNET_DEBUG_PRINTF("%.4d/%.2d/%.2d %.2d:%.2d:%.2d", 1900 + tm_time.tm_year, 1 + tm_time.tm_mon, tm_time.tm_mday, tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
-#endif
+#endif // DISABLE_RTC
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 static artnet::OpCodes GetOpCode(uint32_t bytes_received, const uint8_t* buffer) {
-    if (__builtin_expect((bytes_received < kArtnetMinHeaderSize), 0)) {
+    if (bytes_received < kArtnetMinHeaderSize) [[unlikely]] {
         return artnet::OpCodes::kOpNotDefined;
     }
 
-    if (__builtin_expect(((buffer[10] != 0) || (buffer[11] != artnet::kProtocolRevision)), 0)) {
+    if ((buffer[10] != 0) || (buffer[11] != artnet::kProtocolRevision)) [[unlikely]] {
         return artnet::OpCodes::kOpNotDefined;
     }
 
-    if (__builtin_expect((memcmp(buffer, artnet::kNodeId, 8) == 0), 1)) {
+    if (memcmp(buffer, artnet::kNodeId, 8) == 0) [[unlikely]] {
         return static_cast<artnet::OpCodes>((static_cast<uint16_t>(buffer[9] << 8)) + buffer[8]);
     }
 
@@ -742,7 +743,7 @@ static artnet::OpCodes GetOpCode(uint32_t bytes_received, const uint8_t* buffer)
 void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
     const auto kOpCode = GetOpCode(size, buffer);
 
-    if (__builtin_expect((kOpCode == artnet::OpCodes::kOpNotDefined), 0)) {
+    if (kOpCode == artnet::OpCodes::kOpNotDefined) [[unlikely]] {
         return;
     }
 
@@ -764,11 +765,11 @@ void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip
             if (dmxnode_output_type_ != nullptr) {
                 HandleDmx();
                 state_.art.dmx_ip = ip_address_from_;
-#if defined(ARTNET_SHOWFILE)
+#ifdef ARTNET_SHOWFILE
                 if (state_.do_record) {
                     showfile::Record(reinterpret_cast<const artnet::ArtDmx*>(buffer), current_millis_);
                 }
-#endif
+#endif // ARTNET_SHOWFILE
             }
             break;
         case artnet::OpCodes::kOpSync:
@@ -787,28 +788,28 @@ void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip
                     state_.art.sync_millis = current_millis_;
                     HandleSync();
                 }
-#if defined(ARTNET_SHOWFILE)
+#ifdef ARTNET_SHOWFILE
                 if (state_.do_record) {
                     showfile::Record(reinterpret_cast<const artnet::ArtSync*>(buffer), current_millis_);
                 }
-#endif
+#endif // ARTNET_SHOWFILE
             }
             break;
-#endif
+#endif // (DMXNODE_PORTS > 0)
         case artnet::OpCodes::kOpAddress:
             HandleAddress();
             break;
-#if defined(ARTNET_HAVE_TIMECODE)
+#ifdef ARTNET_HAVE_TIMECODE
         case artnet::OpCodes::kOpTimecode: {
             const auto* const kArtTimeCode = reinterpret_cast<const artnet::ArtTimeCode*>(buffer);
             art_time_code_callback_function_ptr_(reinterpret_cast<const struct artnet::TimeCode*>(&kArtTimeCode->frames));
         } break;
-#endif
-#if !defined(DISABLE_RTC)
+#endif // ARTNET_HAVE_TIMECODE
+#ifndef DISABLE_RTC
         case artnet::OpCodes::kOpTimesync:
             HandleTimeSync();
             break;
-#endif
+#endif // DISABLE_RTC
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         case artnet::OpCodes::kOpTodrequest:
             if (state_.is_rdm_enabled) {
@@ -835,11 +836,11 @@ void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip
                 HandleRdmSub();
             }
             break;
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         case artnet::OpCodes::kOpIpprog:
             HandleIpProg();
             break;
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
         case artnet::OpCodes::kOpTrigger: {
             const auto* const kArtTrigger = reinterpret_cast<const artnet::ArtTrigger*>(buffer);
             if ((kArtTrigger->oem_code_hi == 0xFF && kArtTrigger->oem_code_lo == 0xFF) || (kArtTrigger->oem_code_hi == ArtNetConst::kOemId[0] && kArtTrigger->oem_code_lo == ArtNetConst::kOemId[1])) {
@@ -847,12 +848,12 @@ void ArtNetNode::InputUdp(const uint8_t* buffer, uint32_t size, uint32_t from_ip
                 art_trigger_callback_function_ptr_(reinterpret_cast<const struct ArtNetTrigger*>(&kArtTrigger->key));
             }
         } break;
-#endif
-#if defined(ARTNET_HAVE_DMXIN)
+#endif // ARTNET_HAVE_TRIGGER
+#ifdef ARTNET_HAVE_DMXIN
         case artnet::OpCodes::kOpInput:
             HandleInput();
             break;
-#endif
+#endif // ARTNET_HAVE_DMXIN
         case artnet::OpCodes::kOpPoll:
             HandlePoll();
             break;
@@ -906,10 +907,10 @@ void ArtNetNode::HandleDmx() {
     const auto* const kArtDmx = reinterpret_cast<artnet::ArtDmx*>(receive_buffer_);
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
         if (rdm_controller_.IsRunning(port_index)) [[unlikely]]
             continue;
-#endif
+#endif // RDM_CONTROLLER
         if (node_.port[port_index].direction != dmxnode::Direction::kOutput) continue;
         if (node_.port[port_index].protocol != artnet::PortProtocol::kArtnet) continue;
         if (node_.port[port_index].port_address != kArtDmx->port_address) continue;
@@ -922,7 +923,7 @@ void ArtNetNode::HandleDmx() {
             }
         }
 
-        const auto kDmxSlots = common::Min(static_cast<uint32_t>(((kArtDmx->length_hi << 8) & 0xff00) | kArtDmx->length), artnet::kDmxLength);
+        const auto kDmxSlots = std::min(static_cast<uint32_t>(((kArtDmx->length_hi << 8) & 0xff00) | kArtDmx->length), artnet::kDmxLength);
         const auto kIpA = output_port_[port_index].source_a.ip;
         const auto kIpB = output_port_[port_index].source_b.ip;
         const auto kMergeMode = ((output_port_[port_index].good_output & artnet::GoodOutput::kMergeModeLtp) == artnet::GoodOutput::kMergeModeLtp) ? dmxnode::MergeMode::kLtp : dmxnode::MergeMode::kHtp;
@@ -1023,12 +1024,12 @@ void ArtNetNode::HandleDmx() {
             puts("WARN: 9. More than two sources, discarding data");
             return;
         }
-#endif
+#endif // NDEBUG
         else [[unlikely]] { // Case 0.
             SendDiag(artnet::PriorityCodes::kDiagHigh, "%u: 0. No cases matched, this shouldn't happen!", port_index);
 #ifndef NDEBUG
             puts("ERROR: 0. No cases matched, this shouldn't happen!");
-#endif
+#endif // NDEBUG
             return;
         }
 

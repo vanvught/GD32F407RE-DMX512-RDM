@@ -39,17 +39,17 @@
 
 namespace httpd {
 inline constexpr auto kPort =
-#if defined(LINUX)
+#ifdef LINUX
     network::iana::Ports::kPortHttpAlt;
 #else
     network::iana::Ports::kPortHttp;
-#endif
+#endif // LINUX
 inline constexpr auto kService =
-#if defined(LINUX)
+#ifdef LINUX
     network::apps::mdns::Services::kHttpAlt;
 #else
     network::apps::mdns::Services::kHttp;
-#endif
+#endif // LINUX
 } // namespace httpd
 
 class HttpDaemon {

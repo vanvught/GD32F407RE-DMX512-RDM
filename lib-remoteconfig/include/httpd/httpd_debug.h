@@ -46,6 +46,6 @@
 #define HTTPD_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_HTTPD
 
 #endif // HTTPD_HTTPD_DEBUG_H_

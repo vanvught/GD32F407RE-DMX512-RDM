@@ -28,23 +28,23 @@
 
 #include <cstdint>
 #include <cstddef>
-#if defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS)
+#ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
 #include <cstring>
-#endif
+#endif // CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
 
-#if defined(NODE_RDMNET_LLRP_ONLY)
-#if defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS)
+#ifdef NODE_RDMNET_LLRP_ONLY
+#ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
 #undef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
-#endif
-#endif
+#endif // CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
+#endif // NODE_RDMNET_LLRP_ONLY
 
-#if defined(ENABLE_RDM_QUEUED_MSG)
+#ifdef ENABLE_RDM_QUEUED_MSG
 #include "rdmqueuedmessage.h"
-#endif
+#endif // ENABLE_RDM_QUEUED_MSG
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace rdmhandler
 {
@@ -116,14 +116,14 @@ class RDMHandler
     void Handlers(Type type, bool broadcast, uint8_t command_class, uint16_t param_id, uint8_t param_data_length, uint16_t subdevice);
 
     // Get
-#if defined(ENABLE_RDM_QUEUED_MSG)
+#ifdef ENABLE_RDM_QUEUED_MSG
     void GetQueuedMessage(uint16_t subdevice);
-#endif
+#endif // ENABLE_RDM_QUEUED_MSG
     void GetSupportedParameters(uint16_t subdevice);
-#if defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS)
+#ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
     void GetParameterDescription(uint16_t subdevice);
     void GetManufacturerPid(uint16_t subdevice);
-#endif
+#endif // CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
     void GetDeviceInfo(uint16_t subdevice);
     void GetProductDetailIdList(uint16_t subdevice);
     void GetDeviceModelDescription(uint16_t subdevice);
@@ -147,13 +147,13 @@ class RDMHandler
     void GetIdentifyDevice(uint16_t subdevice);
     void GetRealTimeClock(uint16_t subdevice);
     void GetPowerState(uint16_t subdevice);
-#if defined(CONFIG_RDM_ENABLE_SELF_TEST)
+#ifdef CONFIG_RDM_ENABLE_SELF_TEST
     void GetPerformSelfTest(uint16_t subdevice);
     void GetSelfTestDescription(uint16_t subdevice);
-#endif
-#if defined(ENABLE_RDM_PRESET_PLAYBACK)
+#endif // CONFIG_RDM_ENABLE_SELF_TEST
+#ifdef ENABLE_RDM_PRESET_PLAYBACK
     void GetPresetPlayback(uint16_t subdevice);
-#endif
+#endif // ENABLE_RDM_PRESET_PLAYBACK
     // ANSI E1.37-1
     void GetIdentifyMode(uint16_t subdevice);
     // ANSI E1.37-2 – 2015
@@ -183,15 +183,15 @@ class RDMHandler
     void SetRealTimeClock(bool is_broadcast, uint16_t subdevice);
     void SetResetDevice(bool is_broadcast, uint16_t subdevice);
     void SetPowerState(bool is_broadcast, uint16_t subdevice);
-#if defined(CONFIG_RDM_ENABLE_SELF_TEST)
+#ifdef CONFIG_RDM_ENABLE_SELF_TEST
     void SetPerformSelfTest(bool is_broadcast, uint16_t subdevice);
-#endif
-#if defined(ENABLE_RDM_PRESET_PLAYBACK)
+#endif // CONFIG_RDM_ENABLE_SELF_TEST
+#ifdef ENABLE_RDM_PRESET_PLAYBACK
     void SetPresetPlayback(bool is_broadcast, uint16_t subdevice);
-#endif
+#endif // ENABLE_RDM_PRESET_PLAYBACK
 #if defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS) && defined(CONFIG_RDM_MANUFACTURER_PIDS_SET)
     void SetManufacturerPid(bool is_broadcast, uint16_t subdevice);
-#endif
+#endif // defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS) && defined(CONFIG_RDM_MANUFACTURER_PIDS_SET)
     // ANSI E1.37-1
     void SetIdentifyMode(bool is_broadcast, uint16_t subdevice);
     // ANSI E1.37-2 – 2015
@@ -210,9 +210,9 @@ class RDMHandler
     bool is_muted_{false};
     uint8_t* m_pRdmDataIn{nullptr};
     uint8_t* m_pRdmDataOut{nullptr};
-#if defined(ENABLE_RDM_QUEUED_MSG)
+#ifdef ENABLE_RDM_QUEUED_MSG
     RDMQueuedMessage m_RDMQueuedMessage;
-#endif
+#endif // ENABLE_RDM_QUEUED_MSG
 
     struct PidDefinition
     {
@@ -232,7 +232,7 @@ class RDMHandler
 
     static const PidDefinition PID_DEFINITIONS[];
     static const PidDefinition PID_DEFINITIONS_SUB_DEVICES[];
-#if defined(CONFIG_RDM_ENABLE_MANUFACTURER_PIDS)
+#ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
     static const PidDefinition PID_DEFINITION_MANUFACTURER_GENERAL;
     static const rdmhandler::ParameterDescription PARAMETER_DESCRIPTIONS[];
 
@@ -243,7 +243,7 @@ class RDMHandler
         memcpy(pParamData, &PARAMETER_DESCRIPTIONS[nIndex], kSize);
         memcpy(&pParamData[kSize], PARAMETER_DESCRIPTIONS[nIndex].description, PARAMETER_DESCRIPTIONS[nIndex].pdl - kSize);
     }
-#endif
+#endif // CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
 };
 
 #endif // RDMHANDLER_H_

@@ -24,6 +24,8 @@
  */
 
 #include <cstring>
+#include <algorithm>
+#include <cstdint>
 
 #include "rdmhandler.h"
 #include "e120.h"
@@ -31,7 +33,6 @@
 #include "network_iface.h"
 #include "network_config.h"
 #include "rdm_debug.h"
-#include "common/utils/utils_math.h"
 
 namespace dhcp {
 enum class Mode : uint8_t {
@@ -169,14 +170,14 @@ static bool ApplyQueuedConfig() {
  */
 
 bool RDMHandler::CheckInterfaceID([[maybe_unused]] const struct TRdmMessageNoSc* rdm_data_in) {
-#if !defined(DMX_WORKSHOP_DEFECT)
+#ifndef DMX_WORKSHOP_DEFECT
     const auto kInterfaceID = static_cast<uint32_t>((rdm_data_in->param_data[0] << 24) + (rdm_data_in->param_data[1] << 16) + (rdm_data_in->param_data[2] << 8) + rdm_data_in->param_data[3]);
 
     if (kInterfaceID != network::iface::InterfaceIndex()) {
         RespondMessageNack(E120_NR_DATA_OUT_OF_RANGE);
         return false;
     }
-#endif
+#endif // DMX_WORKSHOP_DEFECT
     return true;
 }
 
@@ -217,7 +218,7 @@ void RDMHandler::GetInterfaceName([[maybe_unused]] uint16_t subdevice) {
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
 
-    static const auto kLength = common::Min(strlen(network::iface::InterfaceName()), static_cast<size_t>(32));
+    static const auto kLength = std::min(strlen(network::iface::InterfaceName()), static_cast<size_t>(32));
 
     memcpy(reinterpret_cast<char*>(&rdm_data_out->param_data[4]), network::iface::InterfaceName(), kLength);
 
@@ -629,8 +630,3 @@ void RDMHandler::SetDomainName([[maybe_unused]] bool is_broadcast, [[maybe_unuse
 
     RDM_LLRP_DEBUG_EXIT();
 }
-
-#undef RDM_LLRP_DEBUG_ENTRY
-#undef RDM_LLRP_DEBUG_EXIT
-#undef RDM_LLRP_DEBUG_PRINTF
-#undef RDM_LLRP_DEBUG_PUTS

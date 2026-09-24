@@ -37,7 +37,7 @@
 #include "core/ip4/dhcp.h"
 #include "core/protocol/dhcp.h"
 #include "core/protocol/iana.h"
-#if defined(CONFIG_NET_DHCP_USE_ACD)
+#ifdef CONFIG_NET_DHCP_USE_ACD
 #include "core/ip4/acd.h"
 #endif // CONFIG_NET_DHCP_USE_ACD
 #include "firmware/debug/debug_debug.h"
@@ -377,7 +377,7 @@ static void Rebind() {
     DHCP_DEBUG_EXIT();
 }
 
-#if defined(CONFIG_NET_DHCP_USE_ACD)
+#ifdef CONFIG_NET_DHCP_USE_ACD
 static void SendDecline() {
     DHCP_DEBUG_ENTRY();
     auto* dhcp = reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
@@ -469,7 +469,7 @@ static void Discover() {
     auto* dhcp = reinterpret_cast<struct dhcp::Dhcp*>(netif::global::netif_default.dhcp);
     assert(dhcp != nullptr);
 
-#if defined(CONFIG_NET_DHCP_USE_AUTOIP)
+#ifdef CONFIG_NET_DHCP_USE_AUTOIP
     if (dhcp->tries >= DHCP_AUTOIP_COOP_TRIES) {
         autoip::Start();
     }
@@ -750,7 +750,7 @@ void ReleaseAndStop() {
         netif::SetAddr(any, any, any);
     }
 
-#if defined(CONFIG_NET_DHCP_USE_ACD)
+#ifdef CONFIG_NET_DHCP_USE_ACD
     acd::Remove(&dhcp->acd);
 #endif // CONFIG_NET_DHCP_USE_ACD
 
@@ -871,7 +871,7 @@ void Process(const dhcp::Message* const kResponse, uint32_t size) {
         // in requesting state or just reconnected to the network?
         if ((dhcp->state == dhcp::State::kRequesting) || (dhcp->state == dhcp::State::kRebooting)) {
             HandleAck(kResponse);
-#if defined(CONFIG_NET_DHCP_USE_ACD)
+#ifdef CONFIG_NET_DHCP_USE_ACD
             Check();
 #else
             Bind();

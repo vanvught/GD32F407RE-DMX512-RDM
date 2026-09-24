@@ -79,39 +79,39 @@ using DmxNodeNodeType = ArtNetNode;
 using DmxNodeNodeType = E131Bridge;
 #endif // defined(NODE_E131) || defined(NODE_E131_MULTI)
 
-#if defined(NODE_DDP_DISPLAY)
+#ifdef NODE_DDP_DISPLAY
 #define DMXNODE_TYPE_DDP
 #define DMXNODE_NODETYPE_DEFINED
 #include "ddpdisplay.h"
 using DmxNodeNodeType = DdpDisplay;
 #endif // NODE_DDP_DISPLAY
 
-#if defined(NODE_PP)
+#ifdef NODE_PP
 #define DMXNODE_TYPE_PP
 #endif // NODE_PP
 
-#if defined(NODE_DMX)
+#ifdef NODE_DMX
 #define DMXNODE_TYPE_DMX
 #endif // NODE_DMX
 
-#if defined(NODE_LTC_SMPTE)
+#ifdef NODE_LTC_SMPTE
 #define DMXNODE_TYPE_LTC
 #endif // NODE_LTC_SMPTE
 
-#if defined(NODE_OSC_CLIENT)
+#ifdef NODE_OSC_CLIENT
 #define DMXNODE_TYPE_OSCCLIENT
 #endif // NODE_OSC_CLIENT
 
-#if defined(NODE_OSC_SERVER)
+#ifdef NODE_OSC_SERVER
 #define DMXNODE_TYPE_OSCSERVER
 #endif // NODE_OSC_SERVER
 
-#if defined(RDM_RESPONDER)
+#ifdef RDM_RESPONDER
 #define DMXNODE_TYPE_RDM_RESPONDER
 #include "rdmdeviceresponder.h"
 #endif // RDM_RESPONDER
 
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #define DMXNODE_TYPE_RDMNET_LLRP_ONLY
 #endif // NODE_RDMNET_LLRP_ONLY
 
@@ -120,7 +120,7 @@ using DmxNodeNodeType = DdpDisplay;
 #endif // defined(NODE_SHOWFILE) && !defined(DMXNODE_NODETYPE_DEFINED)
 
 namespace dmxnode {
-#if defined(DMXNODE_TYPE_LTC)
+#ifdef DMXNODE_TYPE_LTC
 inline constexpr auto kNodeType = NodeType::kLtc;
 #elif defined(DMXNODE_TYPE_ARTNET)
 inline constexpr auto kNodeType = NodeType::kArtnet;

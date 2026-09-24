@@ -35,7 +35,7 @@
 
 namespace emac::phy {
 bool Read(uint16_t address, uint16_t reg, uint16_t& value) {
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_READ, address, reg, &value) == SUCCESS;
 #else
     const auto kResult = enet_phy_write_read(ENET_PHY_READ, address, reg, &value) == SUCCESS;
@@ -44,7 +44,7 @@ bool Read(uint16_t address, uint16_t reg, uint16_t& value) {
 }
 
 bool Write(uint16_t address, uint16_t reg, uint16_t value) {
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     const auto kResult = enet_phy_write_read(ENETx, ENET_PHY_WRITE, address, reg, &value) == SUCCESS;
 #else
     const auto kResult = enet_phy_write_read(ENET_PHY_WRITE, address, reg, &value) == SUCCESS;
@@ -55,7 +55,7 @@ bool Write(uint16_t address, uint16_t reg, uint16_t value) {
 bool Config(uint16_t address) {
     EMAC_PHY_DEBUG_ENTRY();
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     auto reg = ENET_MAC_PHY_CTL(ENETx);
 #else
     auto reg = ENET_MAC_PHY_CTL;

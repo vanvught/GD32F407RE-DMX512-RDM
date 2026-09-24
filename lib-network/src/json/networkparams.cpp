@@ -41,7 +41,7 @@
 #include "json/networkparamsconst.h"
 #include "json/json_parser.h"
 #include "ip4/ip4_helpers.h"
-#if defined(HAVE_NTP_CLIENT)
+#ifdef HAVE_NTP_CLIENT
 #include "apps/ntpclient.h"
 #endif // HAVE_NTP_CLIENT
 #include "common/utils/utils_flags.h"
@@ -112,10 +112,10 @@ void NetworkParams::Set() {
         network::iface::EnableDhcp();
     }
 
-#if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_NTP_CLIENT
     network::apps::ntpclient::SetServerIp(store_network.ntp_server_ip);
 #endif // CONFIG_NET_ENABLE_NTP_CLIENT
-#if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_PTP_NTP_CLIENT
     network::apps::ntpclient::ptp::SetServerIp(store_network.ntp_server_ip);
 #endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
 
@@ -133,7 +133,7 @@ void NetworkParams::Dump() {
     printf(" %s=" IPSTR "\n", json::NetworkParamsConst::kNetMask.name, IP2STR(store_network.netmask));
     printf(" %s=" IPSTR "\n", json::NetworkParamsConst::kDefaultGateway.name, IP2STR(store_network.gateway_ip));
     printf(" %s=%s\n", json::NetworkParamsConst::kHostname.name, store_network.host_name);
-#if defined(HAVE_NTP_CLIENT)
+#ifdef HAVE_NTP_CLIENT
     printf(" %s=" IPSTR "\n", json::NetworkParamsConst::kNtpServer.name, IP2STR(store_network.ntp_server_ip));
 #endif // HAVE_NTP_CLIENT
 }

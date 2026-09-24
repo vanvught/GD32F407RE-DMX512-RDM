@@ -27,7 +27,7 @@
  * THE SOFTWARE.
  */
 
-#if !defined(CONFIG_REMOTECONFIG_MINIMUM)
+#ifndef CONFIG_REMOTECONFIG_MINIMUM
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
@@ -43,7 +43,7 @@
 #include "emac/emac_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 #include "gd32_ptp.h"
 
 /// Current PTP receive descriptor
@@ -71,7 +71,7 @@ uint32_t Recv(uint8_t** packet) {
     const auto kLength = gd32::enet::DescInformationGet<RXDESC_FRAME_LENGTH>(dma_current_rxdesc);
 
     if (kLength > 0) {
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
         *packet = reinterpret_cast<uint8_t*>(dma_current_ptp_rxdesc->buffer1_addr);
 #else
         *packet = reinterpret_cast<uint8_t*>(dma_current_rxdesc->buffer1_addr);
@@ -83,7 +83,7 @@ uint32_t Recv(uint8_t** packet) {
     return 0;
 }
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 // Handles reception of a PTP frame in normal mode.
 static void PtpFrameReceiveNormalMode() {
     net::globals::ptp::timestamp[0] = dma_current_rxdesc->buffer1_addr;
@@ -93,7 +93,7 @@ static void PtpFrameReceiveNormalMode() {
     dma_current_rxdesc->buffer2_next_desc_addr = dma_current_ptp_rxdesc->buffer2_next_desc_addr;
     dma_current_rxdesc->status = ENET_RDES0_DAV;
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -136,14 +136,14 @@ void FreePkt() {
         __DMB();
     }
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
     PtpFrameReceiveNormalMode();
 #else
     FrameReceive();
 #endif // CONFIG_NET_ENABLE_PTP
 }
 
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 /**
  * @brief Retrieves the DMA buffer for Ethernet transmission with PTP.
  *
@@ -168,7 +168,7 @@ template <bool T> static void PtpFrameTransmit(uint32_t length) {
     dma_current_txdesc->status |= ENET_TDES0_LSG | ENET_TDES0_FSG; ///< Set the segment of frame, frame is transmitted in one descriptor
     dma_current_txdesc->status |= ENET_TDES0_DAV;                  ///< Enable DMA transmission
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -238,7 +238,7 @@ void Send(uint32_t length) {
     status &= ~ENET_TDES0_TTSEN;
     dma_current_txdesc->status = status;
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -263,7 +263,7 @@ void Send(void* buffer, const uint32_t length) {
     status &= ~ENET_TDES0_TTSEN; // Disable timestamping
     dma_current_txdesc->status = status;
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -282,7 +282,7 @@ void SendTimestamp(uint32_t length) {
     status |= ENET_TDES0_TTSEN; ///< Enable timestamping
     dma_current_txdesc->status = status;
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -307,7 +307,7 @@ void SendTimestamp(void* buffer, uint32_t length) {
     status |= ENET_TDES0_TTSEN; // Enable timestamping
     dma_current_txdesc->status = status;
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 
@@ -339,7 +339,7 @@ void Send(uint32_t length) {
     dma_current_txdesc->status |= ENET_TDES0_LSG | ENET_TDES0_FSG; ///< Set the segment of frame, frame is transmitted in one descriptor
     dma_current_txdesc->status |= ENET_TDES0_DAV;                  ///< Enable DMA transmission
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     __DMB();
 #endif // GD32H7XX
 

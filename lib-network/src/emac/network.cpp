@@ -35,7 +35,7 @@
 #if defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 #include "apps/ntpclient.h"
 #endif // defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
 #include "apps/mdns.h"
 #endif // CONFIG_NET_APPS_NO_MDNS
 #include "network_event.h"
@@ -66,14 +66,14 @@
     } while (false)
 #endif // DEBUG_NETWORK
 
-#if !defined(PHY_ADDRESS)
+#ifndef PHY_ADDRESS
 #define PHY_ADDRESS 1
 #endif // PHY_ADDRESS
 
 using common::store::network::Flags;
 
 namespace net {
-#if defined(CONFIG_NET_ENABLE_PTP)
+#ifdef CONFIG_NET_ENABLE_PTP
 __attribute__((weak)) void ptp_init() {}
 #endif // CONFIG_NET_ENABLE_PTP
 
@@ -95,13 +95,13 @@ static void NetifExtCallback(uint16_t reason, [[maybe_unused]] const netif::neti
         printf("ip: " IPSTR " -> " IPSTR "\n", IP2STR(args->ipv4_changed.old_address.addr), IP2STR(netif::IpAddr()));
 
         network::event::Ipv4AddressChanged();
-#if defined(CONFIG_NET_ENABLE_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_NTP_CLIENT
         network::apps::ntpclient::Start();
 #endif // CONFIG_NET_ENABLE_NTP_CLIENT
-#if defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
+#ifdef CONFIG_NET_ENABLE_PTP_NTP_CLIENT
         network::apps::ntpclient::ptp::Start();
 #endif // CONFIG_NET_ENABLE_PTP_NTP_CLIENT
-#if !defined(CONFIG_NET_APPS_NO_MDNS)
+#ifndef CONFIG_NET_APPS_NO_MDNS
         network::apps::mdns::Start();
 #endif // CONFIG_NET_APPS_NO_MDNS
     }

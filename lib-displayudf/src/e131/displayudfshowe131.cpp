@@ -30,7 +30,6 @@
 #include "dmxnode.h"
 #include "displayudf_debug.h"
 #include "dmxnode_outputtype.h"
-#include "common/utils/utils_math.h"
 
 void DisplayUdf::ShowE131Bridge() {
 #if defined(DMX_MAX_PORTS)
@@ -45,7 +44,7 @@ void DisplayUdf::ShowE131Bridge() {
         for (uint32_t config_port_index = 0; config_port_index < dmxnode::kConfigPortCount; config_port_index++) {
             const auto kPortIndex = config_port_index + dmxnode::kDmxportOffset;
 
-            if (kPortIndex >= common::Min(static_cast<uint32_t>(4), dmxnode::kMaxPorts)) {
+            if (kPortIndex >=std::min(static_cast<uint32_t>(4), dmxnode::kMaxPorts)) {
                 break;
             }
 

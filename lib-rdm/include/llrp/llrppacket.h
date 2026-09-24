@@ -28,9 +28,9 @@
 
 #include <cstdint>
 
-#if  ! defined (PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace e133 {
 inline constexpr uint32_t LLRP_KNOWN_UID_SIZE = 200;
@@ -110,4 +110,4 @@ struct LTRDMCommandPDUPacket {
 #define RDM_LLRP_PDU_LENGHT(x)		static_cast<uint8_t>((LLRP_PDU_SIZE + RDM_COMMAND_PDU_LENGTH(x)))
 #define RDM_ROOT_LAYER_LENGTH(x)	static_cast<uint8_t>((LLRP_ROOT_LAYER_SIZE + RDM_LLRP_PDU_LENGHT(x)))
 
-#endif /* LLRPPACKET_H_ */
+#endif // LLRPPACKET_H_

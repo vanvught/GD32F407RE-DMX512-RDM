@@ -32,7 +32,7 @@
 #include "rdm_debug.h"
 #if defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 #include "panelled.h"
-#endif
+#endif // defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 
 namespace rdm::discovery {
 #ifndef NDEBUG
@@ -48,7 +48,7 @@ static constexpr const char* kStateName[] = {
     "LATE_RESPONSE",           //
     "FINISHED"                 //
 };
-#endif
+#endif // NDEBUG
 
 using _cast = union cast {
     uint64_t uint;
@@ -66,7 +66,7 @@ static const uint8_t* ConvertUid(uint64_t uid) {
 static void PrintUid(const uint8_t* uid) {
     printf("%.2x%.2x:%.2x%.2x%.2x%.2x", uid[0], uid[1], uid[2], uid[3], uid[4], uid[5]);
 }
-#endif
+#endif // NDEBUG
 
 #define NEW_STATE(state, late) NewState(state, late, __LINE__);
 #define SAVED_STATE() SavedState(__LINE__);
@@ -79,7 +79,7 @@ StateMachine::StateMachine(const uint8_t* uid) {
     printf("Uid : ");
     rdm::discovery::PrintUid(uid_);
     puts("");
-#endif
+#endif // NDEBUG
 }
 
 uint32_t StateMachine::CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) {
@@ -210,7 +210,7 @@ bool StateMachine::IsValidDiscoveryResponse(uint8_t* uid) {
 #ifndef NDEBUG
         rdm::discovery::PrintUid(uid);
         printf(", checksum %.2x%.2x -> %.4x {%c}\n", checksum[1], checksum[0], rdm_checksum, is_valid ? 'Y' : 'N');
-#endif
+#endif // NDEBUG
     }
 
     return is_valid;
@@ -220,7 +220,7 @@ void StateMachine::SavedState([[maybe_unused]] uint32_t line) {
     assert(saved_state_ != state_);
 #ifndef NDEBUG
     printf("State %s->%s at line %u\n", rdm::discovery::kStateName[static_cast<uint32_t>(state_)], rdm::discovery::kStateName[static_cast<uint32_t>(saved_state_)], line);
-#endif
+#endif // NDEBUG
     state_ = saved_state_;
 }
 
@@ -232,14 +232,14 @@ void StateMachine::NewState(rdm::discovery::State state, bool do_state_late_resp
         assert(static_cast<uint32_t>(state) < sizeof(rdm::discovery::kStateName) / sizeof(rdm::discovery::kStateName[0]));
         printf("State %s->%s [%s] at line %u\n", rdm::discovery::kStateName[static_cast<uint32_t>(state_)], rdm::discovery::kStateName[static_cast<uint32_t>(rdm::discovery::State::kLateResponse)],
                rdm::discovery::kStateName[static_cast<uint32_t>(state)], line);
-#endif
+#endif // NDEBUG
         late_response_.micros = timing::Micros();
         saved_state_ = state;
         state_ = rdm::discovery::State::kLateResponse;
     } else {
 #ifndef NDEBUG
         printf("State %s->%s at line %u\n", rdm::discovery::kStateName[static_cast<uint32_t>(state_)], rdm::discovery::kStateName[static_cast<uint32_t>(state)], line);
-#endif
+#endif // NDEBUG
         state_ = state;
     }
 }
@@ -281,11 +281,11 @@ void StateMachine::Process() {
                 unmute_.micros = timing::Micros();
                 unmute_.is_command_running = true;
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
                 panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
                 panelled::On(panelled::kRdm << port_index_);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
                 return;
             }
 
@@ -314,7 +314,7 @@ void StateMachine::Process() {
                 printf("Device is gone ");
                 rdm::discovery::PrintUid(mute_.uid);
                 putchar('\n');
-#endif
+#endif // NDEBUG
                 tod_->Delete(mute_.uid);
 
                 if (mute_.tod_entries > 0) {
@@ -399,7 +399,7 @@ void StateMachine::Process() {
             putchar(' ');
             rdm::discovery::PrintUid(discovery_.pdl[1]);
             putchar('\n');
-#endif
+#endif // NDEBUG
             message_.SetDstUid(rdm::kUidAll);
             message_.SetCc(E120_DISCOVERY_COMMAND);
             message_.SetPid(E120_DISC_UNIQUE_BRANCH);
@@ -410,11 +410,11 @@ void StateMachine::Process() {
             discovery_.micros = timing::Micros();
             discovery_.is_command_running = true;
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
             panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
             panelled::On(panelled::kRdm << port_index_);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
             return;
             break;
 
@@ -438,11 +438,11 @@ void StateMachine::Process() {
                 discovery_single_device_.micros = timing::Micros();
                 discovery_single_device_.is_command_running = true;
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
                 panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
                 panelled::On(panelled::kRdm << port_index_);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
                 return;
             }
 
@@ -457,7 +457,7 @@ void StateMachine::Process() {
                     printf("AddUid : ");
                     rdm::discovery::PrintUid(discovery_.uid);
                     putchar('\n');
-#endif
+#endif // NDEBUG
                     discovery_single_device_.counter = rdm::discovery::kQuikfindDiscoveryCounter;
                     discovery_single_device_.is_command_running = false;
                     NEW_STATE(rdm::discovery::State::kDiscovery, false);
@@ -480,7 +480,7 @@ void StateMachine::Process() {
             if (response_ == nullptr) {
 #ifndef NDEBUG
                 puts("No responses");
-#endif
+#endif // NDEBUG
                 NEW_STATE(rdm::discovery::State::kDiscovery, false);
                 return;
             }
@@ -512,7 +512,7 @@ void StateMachine::Process() {
                 printf("QuickFind : ");
                 rdm::discovery::PrintUid(quick_find_.uid);
                 putchar('\n');
-#endif
+#endif // NDEBUG
                 message_.SetCc(E120_DISCOVERY_COMMAND);
                 message_.SetPid(E120_DISC_MUTE);
                 message_.SetDstUid(quick_find_.uid);
@@ -523,11 +523,11 @@ void StateMachine::Process() {
                 quick_find_.micros = timing::Micros();
                 quick_find_.is_command_running = true;
 
-#if defined(CONFIG_PANELLED_RDM_PORT)
+#ifdef CONFIG_PANELLED_RDM_PORT
                 panelled::On(panelled::kPortARdm << port_index_);
 #elif defined(CONFIG_PANELLED_RDM_NO_PORT)
                 panelled::On(panelled::kRdm << port_index_);
-#endif
+#endif // CONFIG_PANELLED_RDM_PORT
                 return;
             }
 
@@ -547,7 +547,7 @@ void StateMachine::Process() {
                     printf("AddUid : ");
                     rdm::discovery::PrintUid(quick_find_.uid);
                     putchar('\n');
-#endif
+#endif // NDEBUG
                 }
 
                 quick_find_.counter = rdm::discovery::kQuikfindCounter;
@@ -616,7 +616,7 @@ void StateMachine::Process() {
             is_finished_ = true;
 #ifndef NDEBUG
             tod_->Dump();
-#endif
+#endif // NDEBUG
             NEW_STATE(rdm::discovery::State::kIdle, false);
         } break;
         default:

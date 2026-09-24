@@ -61,7 +61,7 @@
 #ifdef LINUX
 #else
 [[gnu::section(".httpd"), gnu::aligned(alignof(HttpDeamonHandleRequest)), gnu::used]]
-#endif
+#endif // LINUX
 HttpDaemon::HandlerStorage HttpDaemon::s_handle_request_storage[TCP_MAX_TCBS_ALLOWED];
 
 HttpDaemon::HttpDaemon() {

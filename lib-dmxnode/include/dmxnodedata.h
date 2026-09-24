@@ -26,13 +26,13 @@
 #define DMXNODEDATA_H_
 
 #include <cstdint>
+#include <algorithm>
 #include <cstring>
 #include <cassert>
 
 #include "dmxnode.h"
-#include "common/utils/utils_math.h"
 
-#if defined(GD32)
+#ifdef GD32
 // https://www.gd32-dmx.org/memory.html
 #include "gd32.h"
 #if defined(GD32F450VI) || defined(GD32H7XX)
@@ -81,7 +81,7 @@ class Data {
 
         if (merge_mode == MergeMode::kHtp) {
             for (uint32_t i = 0; i < length; i++) {
-                const auto kData = common::Max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
+                const auto kData = std::max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
                 output_port_[port_index].data[i] = kData;
             }
 
@@ -101,7 +101,7 @@ class Data {
 
         if (merge_mode == MergeMode::kHtp) {
             for (uint32_t i = 0; i < length; i++) {
-                const auto kData = common::Max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
+                const auto kData = std::max(output_port_[port_index].source_a.data[i], output_port_[port_index].source_b.data[i]);
                 output_port_[port_index].data[i] = kData;
             }
 
@@ -123,7 +123,7 @@ class Data {
         output_port_[port_index].length = 0;
     }
 
-    uint32_t IGetLength(uint32_t port_index) const {
+    [[nodiscard]] uint32_t IGetLength(uint32_t port_index) const {
         assert(port_index < kPorts);
         return output_port_[port_index].length;
     }
@@ -140,7 +140,7 @@ class Data {
         memcpy(output_port_[port_index].data, data, dmxnode::kUniverseSize);
     }
 
-#if !defined(DMXNODE_PORTS)
+#ifndef DMXNODE_PORTS
 #define DMXNODE_PORTS 0
 #endif // DMXNODE_PORTS
 

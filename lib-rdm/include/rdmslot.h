@@ -66,4 +66,4 @@ enum TRdmSlotDefinition
     SD_UNDEFINED = 0xFFFF,
 };
 
-#endif  // RDMSLOT_H_
+#endif // RDMSLOT_H_

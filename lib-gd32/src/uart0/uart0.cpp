@@ -72,17 +72,17 @@ void Init() {
     gd32::UartBegin(USART0, 115200U, gd32::kUartBits8, gd32::kUartParityNone, gd32::kUartStop1Bit);
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
     // DMA
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif // GD32H7XX
 
     rcu_periph_clock_enable(USART0_RCU_DMAx);
 
     DMA_PARAMETER_STRUCT dma_init_struct;
-#if defined(CONFIG_USART0_ENABLE_TX_DMA)
+#ifdef CONFIG_USART0_ENABLE_TX_DMA
     dma_deinit(USART0_DMAx, USART0_TX_DMA_CHx);
     dma_struct_para_init(&dma_init_struct);
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     dma_init_struct.request = DMA_REQUEST_USART0_TX;
 #endif // GD32H7XX
     dma_deinit(USART0_DMAx, USART0_TX_DMA_CHx);
@@ -103,14 +103,14 @@ void Init() {
     dma_init_struct.priority = DMA_PRIORITY_LOW;
     dma_init(USART0_DMAx, USART0_TX_DMA_CHx, &dma_init_struct);
     dma_circulation_disable(USART0_DMAx, USART0_TX_DMA_CHx);
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
     dma_channel_subperipheral_select(USART0_DMAx, USART0_TX_DMA_CHx, USART0_TX_DMA_SUBPERIx);
 #endif // GD32F4XX
     // USART
     usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
 #endif // CONFIG_USART0_ENABLE_TX_DMA
 
-#if defined(CONFIG_USART0_ENABLE_RX_DMA)
+#ifdef CONFIG_USART0_ENABLE_RX_DMA
     dma_deinit(USART0_DMAx, USART0_RX_DMA_CHx);
     dma_struct_para_init(&dma_init_struct);
 #if defined(GD32H7XX)

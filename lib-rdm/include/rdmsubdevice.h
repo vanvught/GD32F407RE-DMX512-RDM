@@ -197,4 +197,4 @@ private:
  char label_factory_default_[rdm::device::kLabelMaxLength];
 };
 
-#endif  // RDMSUBDEVICE_H_
+#endif // RDMSUBDEVICE_H_

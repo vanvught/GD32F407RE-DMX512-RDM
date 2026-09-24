@@ -33,21 +33,21 @@
 #include "rdmsensor.h"
 #include "firmware/debug/debug_debug.h"
 
-#if !defined(__APPLE__)
+#ifndef __APPLE__
 #define CONFIG_RDM_ENABLE_CPU_SENSOR
-#endif
+#endif // __APPLE__
 
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #undef CONFIG_RDM_ENABLE_SENSORS
 #undef CONFIG_RDM_ENABLE_CPU_SENSOR
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
-#if defined(CONFIG_RDM_ENABLE_CPU_SENSOR)
+#ifdef CONFIG_RDM_ENABLE_CPU_SENSOR
 #include "sensor/cputemperature.h"
-#endif
-#if defined(CONFIG_RDM_ENABLE_SENSORS)
+#endif // CONFIG_RDM_ENABLE_CPU_SENSOR
+#ifdef CONFIG_RDM_ENABLE_SENSORS
 #include "json/rdmsensorsparams.h"
-#endif
+#endif // CONFIG_RDM_ENABLE_SENSORS
 
 class RDMSensors {
    public:
@@ -60,15 +60,15 @@ class RDMSensors {
         rdm_sensor_ = new RDMSensor*[common::store::rdm::sensors::kMaxSensors];
         assert(rdm_sensor_ != nullptr);
 
-#if defined(CONFIG_RDM_ENABLE_CPU_SENSOR)
+#ifdef CONFIG_RDM_ENABLE_CPU_SENSOR
         Add(new CpuTemperature(count_));
-#endif
-#if defined(CONFIG_RDM_ENABLE_SENSORS)
+#endif // CONFIG_RDM_ENABLE_CPU_SENSOR
+#ifdef CONFIG_RDM_ENABLE_SENSORS
         json::RdmSensorsParams params;
         params.Load();
         params.Set();
-#endif
-#endif
+#endif // CONFIG_RDM_ENABLE_SENSORS
+#endif // defined(CONFIG_RDM_ENABLE_SENSORS) || defined(CONFIG_RDM_ENABLE_CPU_SENSOR)
         DEBUG_EXIT();
     }
 

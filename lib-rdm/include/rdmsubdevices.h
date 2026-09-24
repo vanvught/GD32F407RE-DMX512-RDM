@@ -32,13 +32,13 @@
 #include "rdmsubdevice.h"
 #ifndef NDEBUG
 #include "subdevice/rdmsubdevicedummy.h"
-#endif
+#endif // NDEBUG
 #include "rdmpersonality.h"
 #include "firmware/debug/debug_debug.h"
 
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #undef CONFIG_RDM_ENABLE_SUBDEVICES
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
 namespace rdm::subdevices {
 static constexpr auto MAX = 8;
@@ -52,14 +52,14 @@ class RdmSubDevices {
         assert(s_this == nullptr);
         s_this = this;
 
-#if defined(CONFIG_RDM_ENABLE_SUBDEVICES)
+#ifdef CONFIG_RDM_ENABLE_SUBDEVICES
         rdm_sub_device_ = new RDMSubDevice*[rdm::subdevices::MAX];
         assert(rdm_sub_device_ != nullptr);
 
 #ifndef NDEBUG
         Add(new RDMSubDeviceDummy);
-#endif
-#endif
+#endif // NDEBUG
+#endif // CONFIG_RDM_ENABLE_SUBDEVICES
         DEBUG_EXIT();
     }
 
@@ -78,7 +78,7 @@ class RdmSubDevices {
 
     bool Add([[maybe_unused]] RDMSubDevice* rdm_sub_device) {
         DEBUG_ENTRY();
-#if defined(CONFIG_RDM_ENABLE_SUBDEVICES)
+#ifdef CONFIG_RDM_ENABLE_SUBDEVICES
         assert(rdm_sub_device_ != nullptr);
 
         if (rdm_sub_device_ == nullptr) {
@@ -92,7 +92,7 @@ class RdmSubDevices {
 
         assert(rdm_sub_device != nullptr);
         rdm_sub_device_[count_++] = rdm_sub_device;
-#endif
+#endif // CONFIG_RDM_ENABLE_SUBDEVICES
         DEBUG_EXIT();
         return true;
     }

@@ -53,7 +53,7 @@
 #define ARTNET_ADDRESS_DEBUG_PUTS(...) \
     do {                               \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET_ADDRESS_ADDRESS
 
 void ArtNetNode::SetSwitch(uint32_t port_index, uint8_t sw) {
     ARTNET_ADDRESS_DEBUG_ENTRY();
@@ -68,11 +68,11 @@ void ArtNetNode::SetSwitch(uint32_t port_index, uint8_t sw) {
 
 #if (ARTNET_VERSION >= 4)
     SetUniverse4(port_index);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     SetLocalMerging();
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
     ARTNET_ADDRESS_DEBUG_EXIT();
 }
@@ -136,7 +136,7 @@ void ArtNetNode::HandleAddress() {
         SetPriority4(kPortIndex, kArtAddress->acn_priority);
     }
 
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     switch (kArtAddress->command) {
         case artnet::PortCommand::kNone:
@@ -156,7 +156,7 @@ void ArtNetNode::HandleAddress() {
             art_poll_reply_.status1 = static_cast<uint8_t>((art_poll_reply_.status1 & ~artnet::Status1::kIndicatorMask) | artnet::Status1::kIndicatorNormalMode);
 #if (ARTNET_VERSION >= 4)
             E131Bridge::SetEnableDataIndicator(true);
-#endif
+#endif // (ARTNET_VERSION >= 4)
             break;
 
         case artnet::PortCommand::kLedMute:
@@ -164,7 +164,7 @@ void ArtNetNode::HandleAddress() {
             art_poll_reply_.status1 = static_cast<uint8_t>((art_poll_reply_.status1 & ~artnet::Status1::kIndicatorMask) | artnet::Status1::kIndicatorMuteMode);
 #if (ARTNET_VERSION >= 4)
             E131Bridge::SetEnableDataIndicator(false);
-#endif
+#endif // (ARTNET_VERSION >= 4)
             break;
 
         case artnet::PortCommand::kLedLocate:
@@ -172,17 +172,17 @@ void ArtNetNode::HandleAddress() {
             art_poll_reply_.status1 = static_cast<uint8_t>((art_poll_reply_.status1 & ~artnet::Status1::kIndicatorMask) | artnet::Status1::kIndicatorLocateMode);
 #if (ARTNET_VERSION >= 4)
             E131Bridge::SetEnableDataIndicator(false);
-#endif
+#endif // (ARTNET_VERSION >= 4)
             break;
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         case artnet::PortCommand::kReset:
             for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
                 const auto kMask = artnet::GoodInput::kIncludesTestPackets | artnet::GoodInput::kIncludesSip | artnet::GoodInput::kIncludesText | artnet::GoodInput::kErrors;
                 input_port_[port_index].good_input &= static_cast<uint8_t>(~kMask);
             }
             break;
-#endif
+#endif // ARTNET_HAVE_DMXIN
         case artnet::PortCommand::kFailHold:
         case artnet::PortCommand::kFailZero:
         case artnet::PortCommand::kFailFull:
@@ -196,17 +196,17 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kMergeLtp1:
         case artnet::PortCommand::kMergeLtp2:
         case artnet::PortCommand::kMergeLtp3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetMergeMode(kPortIndex, dmxnode::MergeMode::kLtp);
             break;
 
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         case artnet::PortCommand::kDirectionTxO:
 #if (ARTNET_VERSION < 4)
         case artnet::PortCommand::kDirectionTx1:
         case artnet::PortCommand::kDirectionTx2:
         case artnet::PortCommand::kDirectionTx3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetDirection(kPortIndex, dmxnode::Direction::kOutput);
             break;
 
@@ -215,16 +215,16 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kDirectionRx1:
         case artnet::PortCommand::kDirectionRx2:
         case artnet::PortCommand::kDirectionRx3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetDirection(kPortIndex, dmxnode::Direction::kInput);
             break;
-#endif
+#endif // ARTNET_HAVE_DMXIN
         case artnet::PortCommand::kMergeHtp0:
 #if (ARTNET_VERSION < 4)
         case artnet::PortCommand::kMergeHtp1:
         case artnet::PortCommand::kMergeHtp2:
         case artnet::PortCommand::kMergeHtp3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetMergeMode(kPortIndex, dmxnode::MergeMode::kHtp);
             break;
 
@@ -234,7 +234,7 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kArtnetSel1:
         case artnet::PortCommand::kArtnetSel2:
         case artnet::PortCommand::kArtnetSel3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetPortProtocol4(kPortIndex, artnet::PortProtocol::kArtnet);
             break;
 
@@ -243,17 +243,17 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kAcnSel1:
         case artnet::PortCommand::kAcnSel2:
         case artnet::PortCommand::kAcnSel3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetPortProtocol4(kPortIndex, artnet::PortProtocol::kSacn);
             break;
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
         case artnet::PortCommand::kClr0:
 #if (ARTNET_VERSION < 4)
         case artnet::PortCommand::kClr1:
         case artnet::PortCommand::kClr2:
         case artnet::PortCommand::kClr3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             if (node_.port[kPortIndex].protocol == artnet::PortProtocol::kArtnet) {
                 dmxnode::Data::Clear(kPortIndex);
                 dmxnode::DataOutput(dmxnode_output_type_, kPortIndex);
@@ -262,16 +262,16 @@ void ArtNetNode::HandleAddress() {
             if (node_.port[kPortIndex].protocol == artnet::PortProtocol::kSacn) {
                 E131Bridge::Clear(kPortIndex);
             }
-#endif
+#endif // (ARTNET_VERSION >= 4)
             break;
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
         case artnet::PortCommand::kStyleDelta0:
 #if (ARTNET_VERSION < 4)
         case artnet::PortCommand::kStyleDelta1:
         case artnet::PortCommand::kStyleDelta2:
         case artnet::PortCommand::kStyleDelta3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetOutputStyle(kPortIndex, dmxnode::OutputStyle::kDelta);
             break;
 
@@ -280,10 +280,10 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kStyleConstant1:
         case artnet::PortCommand::kStyleConstant2:
         case artnet::PortCommand::kStyleConstant3:
-#endif
+#endif // (ARTNET_VERSION < 4)
             SetOutputStyle(kPortIndex, dmxnode::OutputStyle::kConstant);
             break;
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         case artnet::PortCommand::kRdmEnable0:
@@ -293,7 +293,7 @@ void ArtNetNode::HandleAddress() {
         case artnet::PortCommand::kRdmDisable0:
             SetRdm(kPortIndex, false);
             break;
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         default:
             [[unlikely]] ARTNET_ADDRESS_DEBUG_PRINTF("> Not implemented: %u [%x]", kArtAddress->command, kArtAddress->command);
             break;

@@ -32,9 +32,9 @@
 #include "apps/tftpdaemon.h"
 #include "firmware/debug/debug_debug.h"
 
-#if defined(GD32)
+#ifdef GD32
 #include "gd32.h"
-#endif
+#endif // GD32
 
 #ifdef DEBUG_TFTP
 #define TFTP_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -54,7 +54,7 @@
 #define TFTP_DEBUG_PUTS(...) \
     do {                     \
     } while (false)
-#endif
+#endif // DEBUG_TFTP
 
 namespace tftpfileserver {
 bool is_valid(const void* buffer);

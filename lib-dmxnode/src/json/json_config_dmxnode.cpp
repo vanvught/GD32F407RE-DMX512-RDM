@@ -30,9 +30,9 @@
 #include "json/dmxnodeparams.h"
 #include "json/json_helpers.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json::config {
 uint32_t GetDmxNode(char* buffer, uint32_t length) {
@@ -45,7 +45,7 @@ uint32_t GetDmxNode(char* buffer, uint32_t length) {
         doc[json::DmxNodeParamsConst::kDisableMergeTimeout.name] = dmx_node->GetDisableMergeTimeout() ? 1 : 0;
 
         if constexpr (dmxnode::kConfigPortCount != 0) {
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
             for (uint32_t config_port_index = 0; config_port_index < dmxnode::kConfigPortCount; config_port_index++) {
                 const auto kPortIndex = config_port_index + dmxnode::kDmxportOffset;
 
@@ -61,11 +61,11 @@ uint32_t GetDmxNode(char* buffer, uint32_t length) {
                 doc[json::DmxNodeParamsConst::kUniversePort[config_port_index].name] = universe;
                 doc[json::DmxNodeParamsConst::kDirectionPort[config_port_index].name] = dmxnode::PortDirection(kPortDirection);
                 doc[json::DmxNodeParamsConst::kMergeModePort[config_port_index].name] = dmxnode::GetMergeMode(dmx_node->GetMergeMode(kPortIndex));
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
                 doc[json::DmxNodeParamsConst::kOutputStylePort[config_port_index].name] = dmxnode::GetOutputStyle(dmx_node->GetOutputStyle(kPortIndex));
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
             }
-#endif
+#endif // DMX_MAX_PORTS
         }
     });
 }

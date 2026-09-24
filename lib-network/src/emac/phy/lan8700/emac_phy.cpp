@@ -36,7 +36,7 @@
 #include "emac/emac_phy.h"
 #include "emac/emac_debug.h"
 
-#if !defined(BIT)
+#ifndef BIT
 #define BIT(x) static_cast<uint16_t>(1U << (x))
 #endif // BIT
 

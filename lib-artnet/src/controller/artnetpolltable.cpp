@@ -26,8 +26,8 @@
 #if __GNUC__ < 9
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuseless-cast" // FIXME GCC 8.0.3 Raspbian GNU/Linux 10 (buster)
-#endif
-#endif
+#endif // __GNUC__ < 9
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstring>
@@ -383,7 +383,7 @@ void ArtNetPollTable::Clean() {
             memset(dst->Universe, 0, sizeof(struct artnet::NodeEntryUniverse[artnet::POLL_TABLE_SIZE_NODE_UNIVERSES]));
 #ifndef NDEBUG
             memset(dst->Mac, 0, artnet::kMacSize + artnet::kLongNameLength);
-#endif
+#endif // NDEBUG
         }
 
         table_clean_.universe_index = 0;
@@ -409,7 +409,7 @@ void ArtNetPollTable::Dump() {
         }
         puts("");
     }
-#endif
+#endif // NDEBUG
 }
 
 void ArtNetPollTable::DumpTableUniverses() {
@@ -433,5 +433,5 @@ void ArtNetPollTable::DumpTableUniverses() {
     }
 
     puts("");
-#endif
+#endif // NDEBUG
 }

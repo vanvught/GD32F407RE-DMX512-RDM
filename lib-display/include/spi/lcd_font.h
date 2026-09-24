@@ -55,4 +55,4 @@ extern sFONT Font8x8;
 
 #define LINE(x) ((x) * (((sFONT*)lcd_font_get())->kHeight))
 
-#endif  // SPI_LCD_FONT_H_
+#endif // SPI_LCD_FONT_H_

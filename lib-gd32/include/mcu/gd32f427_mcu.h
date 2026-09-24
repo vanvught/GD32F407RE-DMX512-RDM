@@ -1,8 +1,8 @@
 /**
- * @file utils_math.h
+ * @file gd32f427_mcu.h
  *
  */
-/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,31 +23,34 @@
  * THE SOFTWARE.
  */
 
-#ifndef COMMON_UTILS_UTILS_MATH_H_
-#define COMMON_UTILS_UTILS_MATH_H_
+#ifndef MCU_GD32F427_MCU_H_
+#define MCU_GD32F427_MCU_H_
 
-// <algorithm> is not part of freestanding C++23
+#if !defined(GD32F427)
+#error This file should not be included
+#endif // GD32F427
 
-namespace common {
-template <typename T>
-constexpr T Min(T a, T b) {
-    return b < a ? b : a;
-}
+#if !defined(__cplusplus)
+#error
+#endif // __cplusplus
 
-template <typename T>
-constexpr T Max(T a, T b) {
-    return a < b ? b : a;
-}
+#include <cstdint>
 
-template <class T, class Compare>
-constexpr const T& Clamp(const T& value, const T& low, const T& high, Compare comp) {
-    return comp(value, low) ? low : comp(high, value) ? high : value;
-}
+// rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
+//
+// CK_APB1 = AHB = 168000000
+// TIMER1,2,3,4,5,6,11,12,13
+//
+// CK_APB2 = AHB = 168000000
+// TIMER0,7,8,9,10
 
-template <class T>
-constexpr const T& Clamp(const T& value, const T& low, const T& high) {
-    return clamp(value, low, high, [](const T& a, const T& b) { return a < b; });
-}
-} // namespace common
+#define MCU_CLOCK_FREQ (uint32_t)(200000000)
+#define AHB_CLOCK_FREQ (uint32_t)(200000000)
+#define APB1_CLOCK_FREQ (uint32_t)(50000000)
+#define APB2_CLOCK_FREQ (uint32_t)(100000000)
+#define TIMER_PSC_1MHZ (uint16_t)(199)
+#define TIMER_PSC_10KHZ (uint16_t)(19999)
 
-#endif // UTILS_UTILS_MATH_H_
+#include "gd32f4xx_mcu.h"
+
+#endif // MCU_GD32F427_MCU_H_

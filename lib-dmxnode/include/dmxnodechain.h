@@ -26,12 +26,12 @@
 #define DMXNODECHAIN_H_
 
 #include <cstdint>
+#include <algorithm>
 #include <cassert>
 
 #include "dmxnode.h"
 #include "sparkfundmx.h"
 #include "tlc59711dmx.h"
-#include "common/utils/utils_math.h"
 #include "firmware/debug/debug_debug.h"
 
 class DmxNodeChain {
@@ -79,13 +79,14 @@ class DmxNodeChain {
         }
     }
 
-    template <bool doUpdate> void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
+    template <bool kDoUpdate>
+    void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
         assert(data != nullptr);
         assert(spark_fun_dmx_ != nullptr);
-        spark_fun_dmx_->SetData<doUpdate>(port_index, data, length);
+        spark_fun_dmx_->SetData<kDoUpdate>(port_index, data, length);
 
         if (tlc59711_dmx_ != nullptr) {
-            tlc59711_dmx_->SetData<doUpdate>(port_index, data, length);
+            tlc59711_dmx_->SetData<kDoUpdate>(port_index, data, length);
         }
     }
 
@@ -107,7 +108,7 @@ class DmxNodeChain {
         }
     }
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     void SetOutputStyle([[maybe_unused]] uint32_t port_index, [[maybe_unused]] dmxnode::OutputStyle output_style) {
         DEBUG_ENTRY();
         DEBUG_EXIT();
@@ -186,7 +187,8 @@ class DmxNodeChain {
     }
 
    private:
-    template <class T> void Set(T* t) {
+    template <class T>
+    void Set(T* t) {
         DEBUG_ENTRY();
         assert(t != nullptr);
 
@@ -204,16 +206,17 @@ class DmxNodeChain {
         DEBUG_PRINTF("t->GetDmxStartAddress()=%d, t->GetDmxFootprint()=%d\n", t->GetDmxStartAddress(), t->GetDmxFootprint());
 
         const auto kDmxChannelLastCurrent = static_cast<uint16_t>(dmx_start_address_ + dmx_footprint_);
-        dmx_start_address_ = common::Min(dmx_start_address_, t->GetDmxStartAddress());
+        dmx_start_address_ = std::min(dmx_start_address_, t->GetDmxStartAddress());
 
         const auto kDmxChannelLast = static_cast<uint16_t>(t->GetDmxStartAddress() + t->GetDmxFootprint());
-        dmx_footprint_ = static_cast<uint16_t>(common::Max(kDmxChannelLastCurrent, kDmxChannelLast) - dmx_start_address_);
+        dmx_footprint_ = static_cast<uint16_t>(std::max(kDmxChannelLastCurrent, kDmxChannelLast) - dmx_start_address_);
 
         DEBUG_PRINTF("dmx_start_address_=%d, dmx_footprint_=%d\n", dmx_start_address_, dmx_footprint_);
         DEBUG_EXIT();
     }
 
-    template <class T> bool GetSlotInfo(T* t, uint16_t slot_offset, dmxnode::SlotInfo& slot_info) {
+    template <class T>
+    bool GetSlotInfo(T* t, uint16_t slot_offset, dmxnode::SlotInfo& slot_info) {
         assert(t != nullptr);
 
         const auto kDmxAddress = dmx_start_address_ + slot_offset;

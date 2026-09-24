@@ -26,16 +26,16 @@
 #ifndef DMX_H_
 #define DMX_H_
 
-#if defined(OUTPUT_DMX_SEND_MULTI)
-#if defined(H3)
+#ifdef OUTPUT_DMX_SEND_MULTI
+#ifdef H3
 #include "h3/multi/dmx.h"
 #elif defined(GD32)
 #include "gd32/dmx.h"
 #else
 #include "linux/dmx.h"
-#endif
+#endif // H3
 #else
-#if defined(H3)
+#ifdef H3
 #include "h3/single/dmx.h"
 #elif defined(GD32)
 #include "gd32/dmx.h"
@@ -43,7 +43,7 @@
 #include "rpi/dmx.h"
 #else
 #include "linux/dmx.h"
-#endif
-#endif
+#endif // H3
+#endif // OUTPUT_DMX_SEND_MULTI
 
-#endif  // DMX_H_
+#endif // DMX_H_

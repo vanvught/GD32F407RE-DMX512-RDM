@@ -44,4 +44,4 @@ private:
 	void UpdateEvent(TRDMSubDeviceUpdateEvent tUpdateEvent) override;
 };
 
-#endif /* RDMSUBDEVICEDUMMY_H_ */
+#endif // RDMSUBDEVICEDUMMY_H_

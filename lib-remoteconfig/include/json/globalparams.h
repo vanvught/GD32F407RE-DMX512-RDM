@@ -44,4 +44,4 @@ class GlobalParams : public JsonParamsBase<GlobalParams>
 };
 } // namespace json
 
-#endif  // JSON_GLOBALPARAMS_H_
+#endif // JSON_GLOBALPARAMS_H_

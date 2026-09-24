@@ -34,9 +34,9 @@
 #include "dmxnode.h"
 #include "dmxnodedata.h"
 #include "dmx.h" // IWYU pragma: keep
-#if defined(CONFIG_DMXSEND_ENABLE_CONFIGUDP)
+#ifdef CONFIG_DMXSEND_ENABLE_CONFIGUDP
 #include "dmxconfigudp.h"
-#endif
+#endif // CONFIG_DMXSEND_ENABLE_CONFIGUDP
 #include "panelled.h"
 #include "firmware/debug/debug_debug.h"
 
@@ -117,11 +117,11 @@ class DmxSend {
         }
     }
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) { Dmx::Get()->SetOutputStyle(port_index, output_style == dmxnode::OutputStyle::kConstant ? dmx::OutputStyle::kConstant : dmx::OutputStyle::kDelta); }
 
     [[nodiscard]] dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const { return Dmx::Get()->GetOutputStyle(port_index) == dmx::OutputStyle::kConstant ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta; }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     void Blackout([[maybe_unused]] bool blackout) { Dmx::Get()->Blackout(); }
 
@@ -151,9 +151,9 @@ class DmxSend {
    private:
     constexpr bool IsStarted(uint8_t started, uint32_t port_index) { return (started & (1U << port_index)) == (1U << port_index); }
 
-#if defined(CONFIG_DMXSEND_ENABLE_CONFIGUDP)
+#ifdef CONFIG_DMXSEND_ENABLE_CONFIGUDP
     DmxConfigUdp dmx_config_udp_;
-#endif
+#endif // CONFIG_DMXSEND_ENABLE_CONFIGUDP
     uint8_t started_{0};
 };
 

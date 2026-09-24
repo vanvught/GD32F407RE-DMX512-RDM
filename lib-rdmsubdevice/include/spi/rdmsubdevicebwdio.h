@@ -67,4 +67,4 @@ class RDMSubDeviceBwDio : public RDMSubDevice
     uint8_t data_{0};
 };
 
-#endif  // SPI_RDMSUBDEVICEBWDIO_H_
+#endif // SPI_RDMSUBDEVICEBWDIO_H_
