@@ -89,7 +89,7 @@ ifeq ($(strip $(MCU)),GD32F470ZK)
 endif
 
 ifeq ($(strip $(MCU)),GD32H759IM) 
-  LINKER=$(FIRMWARE_DIR)gd32h7xx_xM_$(BL)flash.ld
+  LINKER=$(FIRMWARE_DIR)gd32h7xx_xM$(BL)_flash.ld
   FAMILY=gd32h7xx
   LINE=gd32h759
 endif

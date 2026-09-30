@@ -58,40 +58,36 @@ void SetFrequency(uint32_t frequency_hz) {
     BOARD_DEBUG_ENTRY();
     BOARD_DEBUG_PRINTF("s_timer_id=%d, frequency_hz=%u", static_cast<int>(s_timer_id), static_cast<unsigned>(frequency_hz));
 
+    switch (frequency_hz) {
+        case 0:
+            if (s_timer_id != kTimerIdNone) {
+                SoftwareTimerDelete(s_timer_id);
+            }
+
+            GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+            BOARD_DEBUG_EXIT();
+            return;
+
+        case 255:
+            if (s_timer_id != kTimerIdNone) {
+                SoftwareTimerDelete(s_timer_id);
+            }
+
+            GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
+            BOARD_DEBUG_EXIT();
+            return;
+
+        default:
+            break;
+    }
+
     if (s_timer_id == kTimerIdNone) {
-        s_timer_id = SoftwareTimerAdd((common::units::kMsPerSecond / frequency_hz), Ledblink);
+        s_timer_id = SoftwareTimerAdd(common::units::kMsPerSecond / frequency_hz, Ledblink);
         BOARD_DEBUG_EXIT();
         return;
     }
 
-    switch (frequency_hz) {
-        case 0:
-            SoftwareTimerDelete(s_timer_id);
-
-            GPIO_BC(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-            break;
-#ifndef CONFIG_HAL_USE_MINIMUM
-        case 1:
-            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 1));
-            break;
-        case 3:
-            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 3));
-            break;
-        case 5:
-            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 5));
-            break;
-        case 8:
-            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / 8));
-            break;
-#endif // CONFIG_HAL_USE_MINIMUM
-        case 255:
-            SoftwareTimerDelete(s_timer_id);
-            GPIO_BOP(LED_BLINK_GPIO_PORT) = LED_BLINK_PIN;
-            break;
-        default:
-            SoftwareTimerChange(s_timer_id, (common::units::kMsPerSecond / frequency_hz));
-            break;
-    }
+    SoftwareTimerChange(s_timer_id, common::units::kMsPerSecond / frequency_hz);
 
     BOARD_DEBUG_EXIT();
 }
