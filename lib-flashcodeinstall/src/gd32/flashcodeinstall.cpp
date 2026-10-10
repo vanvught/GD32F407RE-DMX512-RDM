@@ -31,6 +31,7 @@
 
 #include "flashcodeinstall.h"
 #include "display.h"
+#include "common/utils/utils_print.h"
 #include "firmware/debug/debug_debug.h"
 
 FlashCodeInstall::FlashCodeInstall() {
@@ -43,7 +44,8 @@ FlashCodeInstall::FlashCodeInstall() {
 
     flash_size_ = FlashCode::GetSize();
 
-    printf("FlashCodeInstall: %s, sector size %u, %u bytes [%u kB]\n", FlashCode::GetName(), static_cast<unsigned>(FlashCode::GetSectorSize()), static_cast<unsigned>(flash_size_), static_cast<unsigned>(flash_size_ / 1024U));
+    printf("FlashCodeInstall: %s, sector size %u, ", FlashCode::GetName(), static_cast<unsigned>(FlashCode::GetSectorSize()));
+    common::print::Size(FlashCode::GetSize(), " bytes\n");
     Display::Get()->Write(1, FlashCode::GetName());
 
     DEBUG_EXIT();

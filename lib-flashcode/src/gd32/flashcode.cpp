@@ -23,20 +23,21 @@
  * THE SOFTWARE.
  */
 
- #include <cstdint>
- #include <cassert>
- #include <cstdio>
- #include <span>
+#include <cstdint>
+#include <cassert>
+#include <cstdio>
+#include <span>
 
- #include "flashcode.h"
- #include "gd32_fmc.h"
- #include "gd32.h" // IWYU pragma: keep
- 
- namespace {
- constexpr uint32_t k1KiB = 1024;
- // Backwards compatibility with SPI FLASH
- constexpr auto kFlashSectorSize = 4096;
- } // namespace
+#include "flashcode.h"
+#include "common/utils/utils_print.h"
+#include "gd32_fmc.h"
+#include "gd32.h" // IWYU pragma: keep
+
+namespace {
+constexpr uint32_t k1KiB = 1024;
+// Backwards compatibility with SPI FLASH
+constexpr auto kFlashSectorSize = 4096;
+} // namespace
 
 FlashCode::FlashCode() {
     FLASHCODE_DEBUG_ENTRY();
@@ -45,7 +46,8 @@ FlashCode::FlashCode() {
 
     detected_ = true;
 
-    printf("FMC: %s %u [%u]\n", GetName(), static_cast<unsigned>(GetSize()), static_cast<unsigned>(GetSize() / k1KiB));
+    printf("FMC: %s ", GetName());
+    common::print::Size(GetSize(), "\n");
     FLASHCODE_DEBUG_EXIT();
 }
 
@@ -62,13 +64,13 @@ uint32_t FlashCode::GetSectorSize() const {
 }
 
 bool FlashCode::Read(uint32_t offset, std::span<uint8_t> buffer, flashcode::Result& result) {
-	FLASHCODE_DEBUG_ENTRY();
-	FLASHCODE_DEBUG_PRINTF("offset=%u", static_cast<unsigned>(offset));
-	
+    FLASHCODE_DEBUG_ENTRY();
+    FLASHCODE_DEBUG_PRINTF("offset=%u", static_cast<unsigned>(offset));
+
     const auto kStatus = gd32::fmc::Read(offset, buffer); // Blocking
     result = kStatus ? flashcode::Result::kOk : flashcode::Result::kError;
-	
-	FLASHCODE_DEBUG_EXIT();
+
+    FLASHCODE_DEBUG_EXIT();
     return true;
 }
 
