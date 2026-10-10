@@ -108,6 +108,8 @@ void Init() {
     putchar('\n');
 #endif // BOARD_DEBUG
 
+    debug::stack::Print();
+
     // See https://www.gd32-dmx.org/memory.html
 #ifndef ENABLE_TFTP_SERVER
 #if defined(GD32F207RG) || defined(GD32F4XX) || defined(GD32H7XX)

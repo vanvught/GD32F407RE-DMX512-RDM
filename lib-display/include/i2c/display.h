@@ -78,7 +78,7 @@ class Display {
 
     void PrintInfo() {
         if (lcd_display_ == nullptr) {
-            puts("No display found");
+            puts("No display found.");
             return;
         }
 
@@ -217,7 +217,7 @@ class Display {
         lcd_display_->SetContrast(contrast);
     }
 
-    uint8_t GetContrast() const { return contrast_; }
+    [[nodiscard]] uint8_t GetContrast() const { return contrast_; }
 
     void SetFlipVertically(bool do_flip_vertically) {
         is_flipped_vertically_ = do_flip_vertically;
@@ -237,9 +237,9 @@ class Display {
         lcd_display_->ClearEndOfLine();
     }
 
-    bool GetFlipVertically() const { return is_flipped_vertically_; }
+    [[nodiscard]] bool GetFlipVertically() const { return is_flipped_vertically_; }
 
-    uint32_t GetColumns() const {
+    [[nodiscard]] uint32_t GetColumns() const {
         if (lcd_display_ == nullptr) {
             return 0;
         }
@@ -247,7 +247,7 @@ class Display {
         return lcd_display_->GetColumns();
     }
 
-    uint32_t GetRows() const {
+    [[nodiscard]] uint32_t GetRows() const {
         if (lcd_display_ == nullptr) {
             return 0;
         }
@@ -281,14 +281,14 @@ class Display {
         }
     }
 
-    bool IsSleep() const { return is_sleep_; }
+    [[nodiscard]] bool IsSleep() const { return is_sleep_; }
 
     void SetSleepTimeout(uint32_t sleep_timeout = display::Defaults::kSleepTimeout) {
         sleep_timeout_ = 1000U * 60U * sleep_timeout;
         SetSleepTimer(sleep_timeout_ != 0);
     }
 
-    uint32_t GetSleepTimeout() const { return sleep_timeout_ / 1000U / 60U; }
+    [[nodiscard]] uint32_t GetSleepTimeout() const { return sleep_timeout_ / 1000U / 60U; }
 
     void Run() {
         if (sleep_timeout_ == 0) {
@@ -314,7 +314,6 @@ class Display {
     void Detect(uint32_t rows);
     void SetSleepTimer(bool active);
 
-   private:
     display::Type type_{display::Type::kUnknown};
     uint32_t sleep_timeout_{1000 * 60 * display::Defaults::kSleepTimeout};
     uint8_t contrast_{0x7F};

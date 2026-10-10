@@ -96,22 +96,22 @@ class ConfigStore : StoreDevice {
             while (!StoreDevice::Read(s_start_address, std::span{s_store}, result)) {
             }
             assert(result == storedevice::Result::kOk);
+
+            auto* store = GetStore();
+
+            if (!IsValid()) {
+                CONFIGSTORE_DEBUG_PUTS("Wrong Magic number or version");
+
+                memset(s_store, 0, sizeof(s_store));
+                memcpy(store->magic_number, &kMagicNumber, sizeof(kMagicNumber));
+                memcpy(store->version, &kVersion, sizeof(kVersion));
+
+                SetStatusChanged();
+            }
+
+            // Set global
+            global::SetUtcOffsetIfValid(store->global.utc_offset);
         }
-
-        auto* store = GetStore();
-
-        if (!IsValid()) {
-            CONFIGSTORE_DEBUG_PUTS("Wrong Magic number or version");
-
-            memset(s_store, 0, sizeof(s_store));
-            memcpy(store->magic_number, &kMagicNumber, sizeof(kMagicNumber));
-            memcpy(store->version, &kVersion, sizeof(kVersion));
-
-            SetStatusChanged();
-        }
-
-        // Set global
-        global::SetUtcOffsetIfValid(store->global.utc_offset);
 
         CONFIGSTORE_DEBUG_EXIT();
     }
@@ -561,6 +561,10 @@ class ConfigStore : StoreDevice {
             return false;
         }
 
+        if (!s_have_device) {
+            return false;
+        }
+
         switch (s_state) {
             case State::kChanged:
                 s_state = State::kChangedWaiting;
@@ -590,7 +594,7 @@ class ConfigStore : StoreDevice {
                 storedevice::Result result;
                 if (StoreDevice::Write(s_start_address, std::span{s_store}.first<sizeof(ConfigurationStore)>(), result)) {
                     s_state = State::kIdle;
-					CONFIGSTORE_DEBUG_PUTS(kStateNames[static_cast<unsigned int>(s_state)]);
+                    CONFIGSTORE_DEBUG_PUTS(kStateNames[static_cast<unsigned int>(s_state)]);
                     return false;
                 }
                 assert(result == storedevice::Result::kOk);

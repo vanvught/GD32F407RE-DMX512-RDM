@@ -38,13 +38,7 @@
 #include <cassert>
 
 #include "watchdog.h"
-#include "firmware/ansi_colour.h"
-
-static void Error(const char* func, const char* str) {
-	printf("%s%s: %s%s\n", ansi::Colours::Fg::kRed, func, str, ansi::Colours::Fg::kDefault);
-}
-
-#define ERROR(s) Error(__func__, (s))
+#include "common/utils/utils_print.h"
 
 void DebugHeap();
 
@@ -325,7 +319,6 @@ void* _calloc_r(struct _reent*, size_t n, size_t size) {
 void* _realloc_r(struct _reent*, void* ptr, size_t size) {
     return realloc(ptr, size);
 }
-
 }
 
 #pragma GCC diagnostic pop
