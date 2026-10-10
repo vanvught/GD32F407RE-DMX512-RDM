@@ -30,8 +30,8 @@
 #include <cassert>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <string_view>
 
-#include "common/utils/utils_string.h"
 #include "firmware/debug/debug_config.h"
 
 void DriveSize(const char* path, uint32_t& total_bytes, uint32_t& free_bytes);
@@ -43,7 +43,7 @@ bool Filter(const char* name) {
 }
 
 constexpr char kDirName[] = ".";
-constexpr char kJsonNoStorage[] = R"({"label":"No storage"})";
+constexpr std::string_view kJsonNoStorage = R"({"label":"No storage"})";
 } // namespace
 
 uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
@@ -56,8 +56,8 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
     }
 
     if (dirp == nullptr) {
-        const auto kSize = common::ConstStrLen(kJsonNoStorage);
-        memcpy(out_buffer, kJsonNoStorage, kSize);
+        constexpr auto kSize = kJsonNoStorage.size();
+        memcpy(out_buffer, kJsonNoStorage.data(), kSize);
         return kSize;
     }
 
