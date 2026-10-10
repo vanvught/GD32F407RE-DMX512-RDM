@@ -29,7 +29,7 @@
 #include <cstdint>
 
 namespace network::udp {
-typedef void (*UdpCallbackFunctionPtr)(const uint8_t*, uint32_t, uint32_t, uint16_t);
+using UdpCallbackFunctionPtr = void (*)(const uint8_t*, uint32_t, uint32_t, uint16_t);
 
 int32_t Begin(uint16_t, UdpCallbackFunctionPtr callback);
 int32_t End(uint16_t);

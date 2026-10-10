@@ -195,6 +195,12 @@ struct SendInfo {
     uint8_t CTL;  // NOLINT
 };
 
+static void ResetTcb(Tcb* tcb) {
+    tcb->tx_queue.Clear();
+    tcb->~Tcb();
+    new (tcb) Tcb{};
+}
+
 static void RtxClear(Tcb* tcb) {
     while (tcb->rtx.count > 0) {
         auto& rtx = tcb->rtx.q[tcb->rtx.head];
@@ -619,7 +625,7 @@ static void ScanOptions(struct Header* eth_frame, struct Tcb* const kTcb, int32_
                     const auto* p = &options->data;
                     auto mss = (p[0] << 8) + p[1];
                     // RFC 1122 section 4.2.2.6
-                    mss =std::min(static_cast<int32_t>(mss + 20), static_cast<int32_t>(kTcpDataMss)) - kHeaderSize; // - IP_OPTION_SIZE;
+                    mss = std::min(static_cast<int32_t>(mss + 20), static_cast<int32_t>(kTcpDataMss)) - kHeaderSize; // - IP_OPTION_SIZE;
                     kTcb->SendMSS = static_cast<uint16_t>(mss);
                 }
                 options = reinterpret_cast<struct Options*>(reinterpret_cast<uint8_t*>(options) + options->length);
@@ -635,7 +641,7 @@ static void ScanOptions(struct Header* eth_frame, struct Tcb* const kTcb, int32_
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG
                         bIgnore = false;
-#endif // NDEBUG
+#endif                                                                                                // NDEBUG
                     } else if ((__builtin_bswap32(tsval.u32) > __builtin_bswap32(kTcb->TS.recent))) { // TODO(a)
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG
@@ -727,7 +733,7 @@ __attribute__((hot)) void Run() {
                 continue;
             }
 
-            tcb.rtx_rto =std::min(tcb.rtx_rto * 2U, kTcpRtoMaxMs);
+            tcb.rtx_rto = std::min(tcb.rtx_rto * 2U, kTcpRtoMaxMs);
             tcb.rtx_deadline = timing::Millis() + tcb.rtx_rto;
         }
     }
@@ -774,25 +780,25 @@ static Tcb* FindActiveConn(const Header* const kEthFrame, uint32_t* out_index) {
 // If out_index != nullptr, it receives the connection handle.
 static Tcb* AllocTcb(uint16_t local_port, uint32_t* out_index) {
     for (uint32_t i = 0; i < TCP_MAX_TCBS_ALLOWED; ++i) {
-        Tcb* c = &s_tcbs[i];
+        Tcb* tcb = &s_tcbs[i];
 
         // Free slot = not in use
-        if (!c->in_use) {
-            std::memset(c, 0, sizeof(*c));
+        if (!tcb->in_use) {
+            ResetTcb(tcb);
             // Mark allocated FIRST to avoid reentrancy issues
             // if Input() is ever called from interrupt context.
-            c->in_use = true;
+            tcb->in_use = true;
 
             // Initialize all TCP state for this connection.
             // This resets sequence numbers, windows, state, etc.
-            TcpInitTcb(c, local_port);
+            TcpInitTcb(tcb, local_port);
 
             // Return handle to caller
             if (out_index != nullptr) {
                 *out_index = i;
             }
 
-            return c;
+            return tcb;
         }
     }
 
@@ -832,14 +838,13 @@ static Tcb* AcceptNewConnection(const Header* tcp_segment, uint32_t* out_index) 
     return tcb;
 }
 
-static inline void EnterTimeWait(Tcb* tcb) {
+static void EnterTimeWait(Tcb* tcb) {
     NEW_STATE(tcb, kStateTimeWait);
 
     tcb->timewait_deadline = timing::Millis() + kTimeWaitMs;
 
     // Turn off other timers
-    tcb->rtx.count = 0;    // drop unacked queue
-    tcb->rtx_deadline = 0; // disable rtx timer
+    RtxClear(tcb);
     tcb->rtx_rto = 0;
 }
 
@@ -848,7 +853,7 @@ static void FreeTcb(Tcb* tcb) {
     assert(tcb != nullptr);
 
     RtxClear(tcb);
-    std::memset(tcb, 0, sizeof(*tcb));
+    ResetTcb(tcb);
     tcb->state = kStateClosed; // keep this in case CLOSED != 0
 }
 
@@ -862,8 +867,7 @@ __attribute__((hot)) void Input(struct Header* eth_frame) {
 
     // Special case reject for 443 unchanged
     if (eth_frame->tcp.dstpt == 443 && (eth_frame->tcp.control & Control::SYN)) {
-        Tcb temp;
-        std::memset(&temp, 0, sizeof(temp));
+        Tcb temp{};
 
         temp.local_port = eth_frame->tcp.dstpt;
         std::memcpy(temp.local_ip, eth_frame->ip4.dst, network::ip4::kAddressLength);
@@ -900,8 +904,7 @@ __attribute__((hot)) void Input(struct Header* eth_frame) {
 
         // If still no TCB, behave like CLOSED state: send RST.
         if (tcb == nullptr) {
-            Tcb temp;
-            std::memset(&temp, 0, sizeof(temp));
+            Tcb temp{};
 
             temp.local_port = eth_frame->tcp.dstpt;
             std::memcpy(temp.local_ip, eth_frame->ip4.dst, network::ip4::kAddressLength);

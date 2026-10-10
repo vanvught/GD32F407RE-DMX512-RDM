@@ -103,18 +103,18 @@ void __attribute__((cold)) Shutdown() {
 __attribute__((hot)) void Input(const struct Header* udp) {
     const auto kDestinationPort = __builtin_bswap16(udp->udp.destination_port);
 
-    for (uint32_t port_index = 0; port_index < UDP_MAX_PORTS_ALLOWED; port_index++) {
-        const auto& info = s_ports[port_index].info;
+    for (auto& s_port : s_ports) {
+        const auto& info = s_port.info;
 
         if (info.port == kDestinationPort) {
-            auto& data = s_ports[port_index].data;
+            auto& data = s_port.data;
 
-            if (__builtin_expect((data.size != 0), 0)) {
+            if (data.size != 0) {
                 UDP_DEBUG_PRINTF("%d[%x]", kDestinationPort, kDestinationPort);
             }
 
             const auto kDataLength = __builtin_bswap16(udp->udp.len) - kHeaderSize;
-            const auto kSize =std::min(kDataSize, kDataLength);
+            const auto kSize = std::min(kDataSize, kDataLength);
 
             std::memcpy(data.data, udp->udp.data, kSize);
             data.from_ip = network::MemcpyIp(udp->ip4.src);
@@ -136,7 +136,8 @@ __attribute__((hot)) void Input(const struct Header* udp) {
     UDP_DEBUG_PRINTF(IPSTR ":%d[%x] " MACSTR, udp->ip4.src[0], udp->ip4.src[1], udp->ip4.src[2], udp->ip4.src[3], kDestinationPort, kDestinationPort, MAC2STR(udp->ether.dst));
 }
 
-template <network::arp::EthSend S> static void SendImplementation(int index, const uint8_t* data, uint32_t size, uint32_t remote_ip, uint16_t remote_port) {
+template <network::arp::EthSend S>
+static void SendImplementation(int index, const uint8_t* data, uint32_t size, uint32_t remote_ip, uint16_t remote_port) {
     assert(index >= 0);
     assert(index < UDP_MAX_PORTS_ALLOWED);
     assert(s_ports[index].info.port != 0);
@@ -164,7 +165,7 @@ template <network::arp::EthSend S> static void SendImplementation(int index, con
     out_buffer->udp.len = __builtin_bswap16(static_cast<uint16_t>(size + kHeaderSize));
     out_buffer->udp.checksum = 0;
 
-    size =std::min(kDataSize, size);
+    size = std::min(kDataSize, size);
 
     std::memcpy(out_buffer->udp.data, data, size);
 
@@ -219,37 +220,41 @@ template <network::arp::EthSend S> static void SendImplementation(int index, con
 int32_t Begin(uint16_t localport, UdpCallbackFunctionPtr callback) {
     UDP_DEBUG_PRINTF("localport=%u", static_cast<unsigned>(localport));
 
-    for (auto i = 0; i < UDP_MAX_PORTS_ALLOWED; i++) {
-        auto& info = s_ports[i].info;
+    int32_t index{0};
+
+    for (auto& port : s_ports) {
+        auto& info = port.info;
 
         if (info.port == localport) {
-            return i;
+            return index;
         }
 
         if (info.port == 0) {
             info.callback = callback;
             info.port = localport;
 
-            UDP_DEBUG_PRINTF("i=%d, localport=%d[%x], callback=%p", static_cast<int>(i), static_cast<unsigned>(localport), static_cast<unsigned>(localport), reinterpret_cast<void*>(callback));
-            return i;
+            UDP_DEBUG_PRINTF("i=%d, localport=%d[%x], callback=%p", static_cast<int>(index), static_cast<unsigned>(localport), static_cast<unsigned>(localport), reinterpret_cast<void*>(callback));
+            return index;
         }
+
+        index++;
     }
 
-    ERROR("Max ports reached.\n");
+    ERROR("Max ports reached.");
     return -1;
 }
 
 int32_t End(uint16_t localport) {
     UDP_DEBUG_PRINTF("localport=%u[%x]", static_cast<unsigned>(localport), static_cast<unsigned>(localport));
 
-    for (auto i = 0; i < UDP_MAX_PORTS_ALLOWED; i++) {
-        auto& info = s_ports[i].info;
+    for (auto& port : s_ports) {
+        auto& info = port.info;
 
         if (info.port == localport) {
             info.callback = nullptr;
             info.port = 0;
 
-            auto& data = s_ports[i].data;
+            auto& data = port.data;
             data.size = 0;
             return 0;
         }
@@ -269,32 +274,21 @@ void SendWithTimestamp(int32_t index, const uint8_t* data, uint32_t size, uint32
 }
 #endif // CONFIG_NET_ENABLE_PTP
 
-// Do not use - subject for removal
-uint32_t Recv(int32_t index, const uint8_t** data, uint32_t* from_ip, uint16_t* from_port) {
-    assert(index >= 0);
-    assert(index < UDP_MAX_PORTS_ALLOWED);
+void Dump() {
+    int32_t index{0};
+    uint32_t used{0};
 
-    const auto& info = s_ports[index].info;
+    puts("index port        callback");
 
-    if (__builtin_expect(info.callback != nullptr, 0)) {
-        return 0;
+    for (auto& port : s_ports) {
+        auto& info = port.info;
+        if (info.port != 0) {
+			used++;
+		}
+        printf("%2d   %5d [%4x] %p\n", static_cast<int>(index), static_cast<unsigned>(info.port), static_cast<unsigned>(info.port), reinterpret_cast<void*>(info.callback));
+        index++;
     }
-
-    auto& port_data = s_ports[index].data;
-
-    if (__builtin_expect((port_data.size == 0), 1)) {
-        return 0;
-    }
-
-    *data = port_data.data;
-    *from_ip = port_data.from_ip;
-    *from_port = port_data.from_port;
-
-    const auto kSize = port_data.size;
-
-    port_data.size = 0;
-
-    return kSize;
+    printf("Used %u\n", static_cast<unsigned>(used));
 }
 } // namespace network::udp
 // <---

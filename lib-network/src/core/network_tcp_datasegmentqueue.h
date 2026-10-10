@@ -55,9 +55,9 @@ class Queue {
     Queue(Queue&&) = delete;
     Queue& operator=(Queue&&) = delete;
 
-    bool IsEmpty() const { return !full_ && (front_ == nullptr); }
+    [[nodiscard]] bool IsEmpty() const { return !full_ && (front_ == nullptr); }
 
-    bool IsFull() const { return full_; }
+    [[nodiscard]] bool IsFull() const { return full_; }
 
     bool Push(const uint8_t* data, uint32_t length, bool is_last_segment) {
         assert(data != nullptr);
@@ -106,16 +106,30 @@ class Queue {
             return;
         }
 
-        Node* tmp = front_;
-        front_ = front_->next;
-        memory::Allocator::Instance().Free(tmp);
+        auto* node = front_;
+        front_ = node->next;
+
+        memory::Allocator::Instance().Free(node);
+
+        if (front_ == nullptr) {
+            last_ = nullptr;
+        }
 
         full_ = false;
     }
 
-    const NodeData& GetFront() const {
+    [[nodiscard]] const NodeData& GetFront() const {
         assert(front_ != nullptr);
         return front_->node_data;
+    }
+
+    void Clear() {
+        while (front_ != nullptr) {
+            Pop();
+        }
+
+        last_ = nullptr;
+        full_ = false;
     }
 
    private:

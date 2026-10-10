@@ -249,7 +249,7 @@ static void Send() {
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(s_ntp_client.request.transmit_timestamp_f))); // NOLINT
-#endif // DEBUG_PTP_NTP_CLIENT
+#endif                                                                                           // DEBUG_PTP_NTP_CLIENT
 
     if (s_ntp_client.state.x > 0) {
         s_ntp_client.state.sent_a.seconds = net::globals::ptp::timestamp[1] + ntp::kJan1970;
@@ -393,7 +393,7 @@ static void Process() {
            static_cast<unsigned>(__builtin_bswap32(kReply->receive_timestamp_f)),   // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_s)),  // NOLINT
            static_cast<unsigned>(__builtin_bswap32(kReply->transmit_timestamp_f))); // NOLINT
-#endif // DEBUG_PTP_NTP_CLIENT
+#endif                                                                              // DEBUG_PTP_NTP_CLIENT
     // If the origin timestamp is equal to the transmit timestamp, the response is in the basic mode.
     if ((kReply->origin_timestamp_s == s_ntp_client.request.transmit_timestamp_s) && (kReply->origin_timestamp_f == s_ntp_client.request.transmit_timestamp_f)) {
         if (s_ntp_client.state.x < 0) {
@@ -531,10 +531,15 @@ void Stop(bool do_disable) {
         return;
     }
 
-    SoftwareTimerDelete(s_ntp_client.timer_id);
+    if (s_ntp_client.timer_id != kTimerIdNone) {
+        SoftwareTimerDelete(s_ntp_client.timer_id);
+        s_ntp_client.timer_id = kTimerIdNone;
+    }
 
-    network::udp::End(network::iana::Ports::kPortNtp);
-    s_ntp_client.handle = -1;
+    if (s_ntp_client.handle != -1) {
+        network::udp::End(network::iana::Ports::kPortNtp);
+        s_ntp_client.handle = -1;
+    }
 
     if (!do_disable) {
         SetStatus(ntp::Status::kStopped);
@@ -544,11 +549,19 @@ void Stop(bool do_disable) {
 }
 
 void SetServerIp(uint32_t server_ip) {
-    Stop(false);
+    NTP_CLIENT_DEBUG_ENTRY();
 
     s_ntp_client.server_ip = server_ip;
 
+    if (s_ntp_client.status == ntp::Status::kDisabled) {
+        NTP_CLIENT_DEBUG_EXIT();
+        return;
+    }
+
+    Stop(false);
     Start();
+
+    NTP_CLIENT_DEBUG_EXIT();
 }
 
 uint32_t GetServerIp() {
