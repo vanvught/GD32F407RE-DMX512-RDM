@@ -47,7 +47,7 @@ class Dmx {
 
     void SetPortDirection(uint32_t port_index, dmx::Direction port_direction, bool enable_data = false);
 
-    template <uint32_t port_index, dmx::Direction port_direction, bool enable_data> 
+    template <uint32_t port_index, dmx::Direction port_direction, bool enable_data>
     void SetPortDirection();
 
     [[nodiscard]] dmx::Direction PortDirection(uint32_t port_index) const { return port_direction_[port_index]; }
@@ -69,10 +69,10 @@ class Dmx {
     void SetTransmitSlots(uint16_t slots = dmx::kChannelsMax);
     [[nodiscard]] uint16_t TransmitSlots() const { return transmit_slots_; }
 
-    template <dmx::SendStyle dmxSendStyle> 
+    template <dmx::SendStyle dmxSendStyle>
     void SetTransmitDataWithSC(uint32_t port_index, const uint8_t* data, uint32_t length);
 
-    template <dmx::SendStyle dmxSendStyle> 
+    template <dmx::SendStyle dmxSendStyle>
     void SetTransmitDataWithoutSC(uint32_t port_index, const uint8_t* data, uint32_t length);
 
     void Sync();
@@ -104,10 +104,10 @@ class Dmx {
     void DataEnable(uint32_t port_index);
     void DataDisable(uint32_t port_index);
 
-    template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle> 
+    template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle>
     void SetSendDataInternal(const uint8_t* data, uint32_t length);
 
-    template <uint32_t portIndex> 
+    template <uint32_t portIndex>
     void RdmSendDataInternal(const uint8_t* data, uint32_t length);
 
     void StartSendStyleDirect(uint32_t port_index);
@@ -129,7 +129,8 @@ class Dmx {
     case i:                                \
         return SetSendDataInternal<i, SC, STYLE>(pData, length)
 
-template <dmx::SendStyle dmxSendStyle> void Dmx::SetTransmitDataWithSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
+template <dmx::SendStyle dmxSendStyle>
+void Dmx::SetTransmitDataWithSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
     switch (port_index) {
         DMX_HANDLE_SEND_CASE(0, true, dmxSendStyle);
 #if DMX_MAX_PORTS >= 2
@@ -158,7 +159,7 @@ template <dmx::SendStyle dmxSendStyle> void Dmx::SetTransmitDataWithSC(uint32_t 
     }
 }
 
-template <dmx::SendStyle dmxSendStyle> 
+template <dmx::SendStyle dmxSendStyle>
 void Dmx::SetTransmitDataWithoutSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
     switch (port_index) {
         DMX_HANDLE_SEND_CASE(0, false, dmxSendStyle);

@@ -1165,7 +1165,11 @@ void DMA0_Channel4_IRQHandler() {
     Gd32DmaInterruptFlagClear<DMA0, DMA_CH4, DMA_INTERRUPT_FLAG_CLEAR>();
 }
 #else
+#ifdef GD32F30X
+void DMA1_Channel3_4_IRQHandler() {
+#else
 void DMA1_Channel4_IRQHandler() {
+#endif	
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE>();
 
@@ -2524,7 +2528,7 @@ static void UsartDmaConfig() {
 #ifdef GD32F30X
     NVIC_SetPriority(DMA1_Channel3_Channel4_IRQn, 1);
     NVIC_EnableIRQ(DMA1_Channel3_Channel4_IRQn);
-#elif !defined(GD32F4XX)
+#elifndef GD32F4XX
     NVIC_SetPriority(DMA1_Channel4_IRQn, 1);
     NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 #else
