@@ -27,6 +27,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <string_view>
 
 /**
  * @namespace global
@@ -56,7 +57,39 @@ struct Offset {
 /**
  * @brief List of valid fractional UTC offsets.
  */
-constexpr Offset kValidOffsets[] = {{-9, 30}, {-3, 30}, {3, 30}, {4, 30}, {5, 30}, {5, 45}, {6, 30}, {8, 45}, {9, 30}, {10, 30}, {12, 45}};
+constexpr Offset kValidOffsets[] = {
+    {.hours = -9, .minutes = 30}, //
+    {.hours = -3, .minutes = 30}, //
+    {.hours = 3, .minutes = 30},  //
+    {.hours = 4, .minutes = 30},  //
+    {.hours = 5, .minutes = 30},  //
+    {.hours = 5, .minutes = 45},  //
+    {.hours = 6, .minutes = 30},  //
+    {.hours = 8, .minutes = 45},  //
+    {.hours = 9, .minutes = 30},  //
+    {.hours = 10, .minutes = 30}, //
+    {.hours = 12, .minutes = 45}, //
+};
+
+/**
+ * @brief Validates (hours, minutes)
+ * @param hours Signed hours offset
+ * @param minutes Unsigned minutes offset
+ * @return true if valid; false otherwise
+ */
+inline bool IsValidateOffset(int32_t hours, uint32_t minutes) {
+    if (hours >= kUtcOffsetMin && hours <= kUtcOffsetMax) {
+        if (minutes == 0) {
+            return true;
+        }
+        for (const auto& offset : kValidOffsets) {
+            if (offset.hours == hours && offset.minutes == minutes) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 /**
  * @brief Validates (hours, minutes) and converts to UTC offset in seconds.
@@ -73,7 +106,7 @@ inline bool ValidateOffset(int32_t hours, uint32_t minutes, int32_t& utc_offset_
         }
         for (const auto& offset : kValidOffsets) {
             if (offset.hours == hours && offset.minutes == minutes) {
-                utc_offset_seconds = (hours >= 0) ? ((hours * 3600) + static_cast<int32_t>(minutes) * 60) : (hours * 3600 - static_cast<int32_t>(minutes) * 60);
+                utc_offset_seconds = (hours >= 0) ? ((hours * 3600) + (static_cast<int32_t>(minutes) * 60)) : ((hours * 3600) - (static_cast<int32_t>(minutes) * 60));
                 return true;
             }
         }
@@ -130,7 +163,9 @@ inline void SplitOffset(int32_t utc_offset_seconds, int32_t& hours, uint32_t& mi
  * @return true if parse was successful and valid; false otherwise
  */
 inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hours, uint32_t& minutes) {
-    if (buffer == nullptr) return false;
+    if (buffer == nullptr) {
+        return false;
+    }
 
     if (buffer_length == 5) {
         static constexpr const char kZeroOffset[5] = {'0', '0', ':', '0', '0'};
@@ -141,22 +176,36 @@ inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hou
         }
     }
 
-    if (buffer_length != 6) return false;
-    if (buffer[0] != '+' && buffer[0] != '-') return false;
+    if (buffer_length != 6) {
+        return false;
+    }
+    if (buffer[0] != '+' && buffer[0] != '-') {
+        return false;
+    }
 
     bool negative = (buffer[0] == '-');
 
-    if (buffer[1] < '0' || buffer[1] > '1') return false;
-    if (buffer[2] < '0' || buffer[2] > '9') return false;
-    if (buffer[3] != ':') return false;
-    if (buffer[4] < '0' || buffer[4] > '5') return false;
-    if (buffer[5] < '0' || buffer[5] > '9') return false;
+    if (buffer[1] < '0' || buffer[1] > '1') {
+        return false;
+    }
+    if (buffer[2] < '0' || buffer[2] > '9') {
+        return false;
+    }
+    if (buffer[3] != ':') {
+        return false;
+    }
+    if (buffer[4] < '0' || buffer[4] > '5') {
+        return false;
+    }
+    if (buffer[5] < '0' || buffer[5] > '9') {
+        return false;
+    }
 
-    int32_t h = (buffer[1] - '0') * 10 + (buffer[2] - '0');
+    int32_t h = ((buffer[1] - '0') * 10) + (buffer[2] - '0');
     if (h > 14) {
         return false;
     }
-    uint32_t m = static_cast<uint32_t>((buffer[4] - '0') * 10 + (buffer[5] - '0'));
+    auto m = static_cast<uint32_t>(((buffer[4] - '0') * 10) + (buffer[5] - '0'));
     if (m >= 60) {
         return false;
     }
@@ -166,6 +215,14 @@ inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hou
 
     int32_t dummy;
     return ValidateOffset(hours, minutes, dummy);
+}
+
+inline bool ParseOffset(std::string_view utc_sv, int32_t& hours, uint32_t& minutes) {
+    if (utc_sv.empty() || utc_sv.size() > 6) {
+        return false;
+    }
+
+    return ParseOffset(utc_sv.data(), utc_sv.size(), hours, minutes);
 }
 } // namespace utc
 
