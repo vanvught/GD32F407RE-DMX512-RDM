@@ -85,8 +85,6 @@
 #define SOFTUART_RX_EXTIx EXTI_10
 #define SOFTUART_RX_EXTIx_IRQHandler EXTI10_15_IRQHandler
 #define SOFTUART_RX_EXTIx_IRQn EXTI10_15_IRQn
-#define SOFTUART_RX_GPIO_PORT_SOURCE_GPIOx GPIO_PORT_SOURCE_GPIOA
-#define SOFTUART_RX_GPIO_PIN_SOURCE_x GPIO_PIN_SOURCE_14
 #endif // GD32H7XX
 #endif // SOFTUART_RX_PINx
 static_assert(TIMERx != SOFTUART_RX_TIMERx);
@@ -97,6 +95,8 @@ constexpr uint32_t kBaudRate = 115200;
 constexpr uint8_t kBitsPerFrame = 8;
 constexpr uint32_t kTimerPeriod = ((TIMER_CLOCK_FREQ / kBaudRate) - 1U);
 constexpr uint32_t kBufferSize = 128;
+
+static_assert((kBufferSize & (kBufferSize - 1U)) == 0U);
 
 enum class TxState { kIdle, kStartBit, kData, kStopBit };
 enum class RxState { kIdle, kStart, kData, kStop };
@@ -112,7 +112,7 @@ volatile TxState s_tx_state;
 volatile uint8_t s_tx_data;
 volatile uint8_t s_tx_shift;
 
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
 volatile CircularBuffer s_rx_buffer __attribute__((aligned(4)));
 volatile RxState s_rx_state;
 volatile uint8_t s_rx_data;
@@ -135,6 +135,7 @@ void TIMERx_IRQHandler() {
                 s_tx_buffer.tail = (s_tx_buffer.tail + 1) & (kBufferSize - 1);
                 s_tx_shift = 0;
                 break;
+
             case TxState::kData:
                 if ((s_tx_data & (1U << s_tx_shift)) != 0) {
                     GPIO_BOP(SOFTUART_TX_GPIOx) = SOFTUART_TX_PINx;
@@ -148,6 +149,7 @@ void TIMERx_IRQHandler() {
                     s_tx_state = TxState::kStopBit;
                 }
                 break;
+
             case TxState::kStopBit:
                 GPIO_BOP(SOFTUART_TX_GPIOx) = SOFTUART_TX_PINx;
 
@@ -158,6 +160,7 @@ void TIMERx_IRQHandler() {
                     s_tx_state = TxState::kStartBit;
                 }
                 break;
+
             default:
                 break;
         }
@@ -166,7 +169,7 @@ void TIMERx_IRQHandler() {
     TIMER_INTF(TIMERx) = ~kIntFlag;
 }
 
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
 void SOFTUART_RX_EXTIx_IRQHandler() {
     if (RESET == exti_interrupt_flag_get(SOFTUART_RX_EXTIx)) [[unlikely]] {
         return;
@@ -203,7 +206,7 @@ void SOFTUART_RX_EXTIx_IRQHandler() {
 void SOFTUART_RX_TIMERx_IRQHandler() {
     const auto kIntFlag = TIMER_INTF(SOFTUART_RX_TIMERx);
 
-    if ((kIntFlag & TIMER_INT_FLAG_CH0) == TIMER_INT_FLAG_CH0) [[likely]] {
+    if ((kIntFlag & TIMER_INT_FLAG_UP) == TIMER_INT_FLAG_UP) [[likely]] {
         switch (s_rx_state) {
             case RxState::kIdle:
                 if ((GPIO_ISTAT(SOFTUART_RX_GPIOx) & SOFTUART_RX_PINx) != 0U) {
@@ -218,6 +221,7 @@ void SOFTUART_RX_TIMERx_IRQHandler() {
 
                 s_rx_state = RxState::kData;
                 break;
+
             case RxState::kStart: {
                 auto ctl0 = TIMER_CTL0(SOFTUART_RX_TIMERx);
                 ctl0 &= ~TIMER_CTL0_CEN;
@@ -229,6 +233,7 @@ void SOFTUART_RX_TIMERx_IRQHandler() {
             }
                 s_rx_state = RxState::kData;
                 break;
+
             case RxState::kData:
                 if ((GPIO_ISTAT(SOFTUART_RX_GPIOx) & SOFTUART_RX_PINx) != 0U) {
                     s_rx_data = s_rx_data | (1U << s_rx_shift);
@@ -240,10 +245,18 @@ void SOFTUART_RX_TIMERx_IRQHandler() {
                     s_rx_state = RxState::kStop;
                 }
                 break;
+
             case RxState::kStop:
                 if ((GPIO_ISTAT(SOFTUART_RX_GPIOx) & SOFTUART_RX_PINx) != 0U) {
-                    s_rx_buffer.buffer[s_rx_buffer.head] = s_rx_data;
-                    s_rx_buffer.head = s_rx_buffer.head + 1;
+                    const uint32_t kCurrentHead = s_rx_buffer.head;
+                    const uint32_t kTail = s_rx_buffer.tail;
+                    const uint32_t kNextHead = (kCurrentHead + 1U) & (kBufferSize - 1U);
+
+                    if (kNextHead != kTail) {
+                        s_rx_buffer.buffer[kCurrentHead] = s_rx_data;
+                        __COMPILER_BARRIER();
+                        s_rx_buffer.head = kNextHead;
+                    }
                 }
 
                 s_rx_data = 0;
@@ -265,16 +278,16 @@ auto is_init = false;
 void GpioConfig() {
     rcu_periph_clock_enable(SOFTUART_TX_RCU_GPIOx);
 
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(SOFTUART_TX_GPIOx, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, SOFTUART_TX_PINx);
 #else
     gpio_mode_set(SOFTUART_TX_GPIOx, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, SOFTUART_TX_PINx);
     gpio_output_options_set(SOFTUART_TX_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, SOFTUART_TX_PINx);
 #endif // GPIO_INIT
 
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
     rcu_periph_clock_enable(SOFTUART_RX_RCU_GPIOx);
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(SOFTUART_RX_GPIOx, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, SOFTUART_RX_PINx);
     rcu_periph_clock_enable(RCU_AF);
 #else
@@ -314,7 +327,7 @@ void TimersConfig() {
     NVIC_SetPriority(TIMERx_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); // Lowest priority
     NVIC_EnableIRQ(TIMERx_IRQn);
 
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
     rcu_periph_clock_enable(SOFTUART_RX_RCU_TIMERx);
     timer_deinit(SOFTUART_RX_TIMERx);
     timer_struct_para_init(&timer_initpara);
@@ -373,7 +386,7 @@ void Init() {
     s_tx_state = TxState::kIdle;
     s_tx_buffer.head = 0;
     s_tx_buffer.tail = 0;
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
     s_rx_state = RxState::kIdle;
     s_rx_buffer.head = 0;
     s_rx_buffer.tail = 0;
@@ -406,7 +419,7 @@ void Puts(const char* string) {
 }
 
 int GetChar() {
-#if defined(SOFTUART0_ENABLE_RX)
+#ifdef SOFTUART0_ENABLE_RX
     if (s_rx_buffer.head == s_rx_buffer.tail) [[likely]] {
         return -1;
     }

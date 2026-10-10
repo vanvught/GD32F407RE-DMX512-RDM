@@ -29,28 +29,28 @@
 #include <cstdint>
 
 namespace firmware {
-#if defined(__linux__) || defined (__APPLE__)
+#if defined(__linux__) || defined(__APPLE__)
 inline constexpr char kFileName[] = "dummy.bin";
 #else
-# ifdef H3
-#  if defined(ORANGE_PI)
+#ifdef H3
+#if defined(ORANGE_PI)
 inline constexpr char kFileName[] = "orangepi_zero.uImage.gz";
-#  else
+#else
 inline constexpr char kFileName[] = "orangepi_one.uImage.gz";
-#  endif
-# elifdef GD32
-#  ifdef GD32F10X
+#endif
+#elifdef GD32
+#ifdef GD32F10X
 inline constexpr char kFileName[] = "gd32f107.bin";
-#  elif defined (GD32F20X)
+#elifdef GD32F20X
 inline constexpr char kFileName[] = "gd32f207.bin";
-#  elif defined (GD32F4XX)
+#elifdef GD32F4XX
 inline constexpr char kFileName[] = "gd32f4xx.bin";
-#  elif defined (GD32H7XX)
+#elifdef GD32H7XX
 inline constexpr char kFileName[] = "gd32h7xx.bin";
-#  else
-#   error FAMILY is not defined
-#  endif
-# endif
+#else
+#error FAMILY is not defined
+#endif
+#endif
 #endif
 
 inline constexpr uint32_t kFileNameLength = sizeof(kFileName) - 1U;
@@ -58,54 +58,52 @@ inline constexpr uint32_t kFileNameLength = sizeof(kFileName) - 1U;
 #ifdef H3
 // nuc-i5:~/uboot-spi/u-boot$ grep CONFIG_BOOTCOMMAND include/configs/sunxi-common.h
 // #define CONFIG_BOOTCOMMAND "sf probe; sf read 48000000 180000 22000; bootm 48000000"
-# define FIRMWARE_MAX_SIZE	0x22000			// 136K
-# define OFFSET_UBOOT_SPI	0x000000
-# define OFFSET_UIMAGE		0x180000
-# define IH_LOAD			0x40000000
-# define IH_EP				0x40000000
-#elif defined (GD32)
-# define IH_LOAD			0x08008000
-# define IH_EP				0x08008000
-# define OFFSET_UIMAGE		0x00008000		// 32K
-# if defined (BOARD_GD32F107RC)
-#  define FIRMWARE_MAX_SIZE (76 * 1024)		// 76K
-# elif defined (BOARD_GD32F207RG)
-#  define FIRMWARE_MAX_SIZE (234 * 1024)	// 234K
-# elif defined (BOARD_GD32F207VC_2)
-#  define FIRMWARE_MAX_SIZE (106 * 1024)	// 106K
-# elif defined (BOARD_GD32F207VC_4)
-#  define FIRMWARE_MAX_SIZE (106 * 1024)	// 106K
-# elif defined (BOARD_GD32F207C_EVAL)
-#  define FIRMWARE_MAX_SIZE (106 * 1024)	// 106K
-# elif defined (BOARD_GD32F407RE)
-#  define FIRMWARE_MAX_SIZE (116 * 1024)	// 116K
-# elif defined (BOARD_BW_OPIDMX4)
-#  define FIRMWARE_MAX_SIZE (116 * 1024)	// 116K
-# elif defined (BOARD_DMX3)
-#  define FIRMWARE_MAX_SIZE (116 * 1024)	// 116K
-# elif defined (BOARD_DMX4)
-#  define FIRMWARE_MAX_SIZE (116 * 1024)	// 116K
-# elif defined (BOARD_GD32F450VE)
-#  define FIRMWARE_MAX_SIZE (180 * 1024)	// 180K
-# elif defined (BOARD_GD32F450VI)
-#  define FIRMWARE_MAX_SIZE (234 * 1024)	// 234K
-# elif defined (BOARD_16X4U_PIXEL)
-#  define FIRMWARE_MAX_SIZE (234 * 1024)	// 234K
-# elif defined (BOARD_GD32F470VG)
-#  define FIRMWARE_MAX_SIZE (234 * 1024)	// 234K
-# elif defined (BOARD_GD32F470Z_EVAL)
-#  define FIRMWARE_MAX_SIZE (175 * 1024)	// 175K
-# elif defined (BOARD_GD32H759I_EVAL)
-#  define FIRMWARE_MAX_SIZE (300 * 1024)	// 300K
-# else
-#  error Board is not supported
-# endif
+#define FIRMWARE_MAX_SIZE 0x22000 // 136K
+#define OFFSET_UBOOT_SPI 0x000000
+#define OFFSET_UIMAGE 0x180000
+#define IH_LOAD 0x40000000
+#define IH_EP 0x40000000
+#elifdef GD32
+#define IH_LOAD 0x08008000
+#define IH_EP 0x08008000
+#define OFFSET_UIMAGE 0x00008000 // 32K
+#ifdef BOARD_GD32F107RC
+#define FIRMWARE_MAX_SIZE (76 * 1024) // 76K
+#elifdef BOARD_GD32F207RG
+#define FIRMWARE_MAX_SIZE (234 * 1024) // 234K
+#elifdef BOARD_GD32F207C_EVAL
+#define FIRMWARE_MAX_SIZE (106 * 1024) // 106K
+#elifdef BOARD_GD32F407RE
+#define FIRMWARE_MAX_SIZE (116 * 1024) // 116K
+#elifdef BOARD_BW_OPIDMX4
+#define FIRMWARE_MAX_SIZE (116 * 1024) // 116K
+#elifdef BOARD_DMX3
+#define FIRMWARE_MAX_SIZE (116 * 1024) // 116K
+#elifdef BOARD_DMX4
+#define FIRMWARE_MAX_SIZE (116 * 1024) // 116K
+#elifdef BOARD_GD32F427RE
+#define FIRMWARE_MAX_SIZE (116 * 1024) // 116K
+#elifdef BOARD_GD32F450VE
+#define FIRMWARE_MAX_SIZE (180 * 1024) // 180K
+#elif defined(BOARD_GD32F450VI)
+#define FIRMWARE_MAX_SIZE (234 * 1024) // 234K
+#elif defined(BOARD_16X4U_PIXEL)
+#define FIRMWARE_MAX_SIZE (234 * 1024) // 234K
+#elif defined(BOARD_GD32F470VG)
+#define FIRMWARE_MAX_SIZE (234 * 1024) // 234K
+#elif defined(BOARD_GD32F470Z_EVAL)
+#define FIRMWARE_MAX_SIZE (175 * 1024) // 175K
+#elif defined(BOARD_GD32H759I_EVAL)
+#define FIRMWARE_MAX_SIZE (300 * 1024) // 300K
 #else
-# define IH_LOAD			0x40000000
-# define IH_EP				0x40000000
-# define OFFSET_UIMAGE		0x0
-# define FIRMWARE_MAX_SIZE  4096	// for dummy.bin
+#error Board is not supported
 #endif
-}  // namespace firmware
+#else
+#define IH_LOAD 0x40000000
+#define IH_EP 0x40000000
+#define OFFSET_UIMAGE 0x0
+#define FIRMWARE_MAX_SIZE 4096 // for dummy.bin
+#endif
+} // namespace firmware
 
-#endif  // FIRMWARE_H_
+#endif // FIRMWARE_H_

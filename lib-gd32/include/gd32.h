@@ -43,7 +43,7 @@ uint16_t bkp_data_read(bkp_data_register_enum register_number);
 #define GPIO_INIT
 #endif // !(defined(GD32F4XX) || defined(GD32H7XX))
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 #define GPIO_OSPEED GPIO_OSPEED_60MHZ
 #else
 #define GPIO_OSPEED GPIO_OSPEED_50MHZ

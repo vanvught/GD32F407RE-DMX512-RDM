@@ -42,6 +42,8 @@
 #include "board/gd32f303rc.h"
 #elif defined(BOARD_GD32F407RE)
 #include "board/gd32f407re.h"
+#elif defined(BOARD_GD32F427RE)
+#include "board/gd32f427re.h"
 #elif defined(BOARD_GD32F450VE)
 #include "board/gd32f450ve.h"
 #elif defined(BOARD_GD32F450VI)
@@ -127,5 +129,7 @@ inline void Run() {
 }
 } // namespace board
 #endif // __cplusplus
+
+#include "board/gpio_header.h"
 
 #endif // GD32_BOARD_H_

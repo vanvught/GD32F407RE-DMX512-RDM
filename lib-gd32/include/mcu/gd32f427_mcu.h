@@ -38,10 +38,10 @@
 
 // rcu_timer_clock_prescaler_config(RCU_TIMER_PSC_MUL4);
 //
-// CK_APB1 = AHB = 168000000
+// CK_APB1 = AHB = 200000000
 // TIMER1,2,3,4,5,6,11,12,13
 //
-// CK_APB2 = AHB = 168000000
+// CK_APB2 = AHB = 200000000
 // TIMER0,7,8,9,10
 
 #define MCU_CLOCK_FREQ (uint32_t)(200000000)

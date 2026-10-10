@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-#include "gd32.h" // IWYU pragma: keep
+#include "gd32xxxx.h"
 
 #if !defined(GD32H7XX)
 #define USART_TDATA USART_DATA

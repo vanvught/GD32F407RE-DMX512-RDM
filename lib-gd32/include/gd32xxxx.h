@@ -32,7 +32,7 @@
 #include "gd32f20x.h" // IWYU pragma: keep
 #elif defined(GD32F30X_HD) || defined(GD32F30X_XD)
 #include "gd32f30x.h" // IWYU pragma: keep
-#elif defined(GD32F407) || defined(GD32F450) || defined(GD32F470)
+#elif defined(GD32F407) || defined(GD32F427) || defined(GD32F450) || defined(GD32F470)
 #include "gd32f4xx.h" // IWYU pragma: keep
 #elif defined(GD32H757) || defined(GD32H759)
 #pragma GCC diagnostic ignored "-Wunused-parameter"
