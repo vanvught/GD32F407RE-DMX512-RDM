@@ -29,25 +29,27 @@
 #include <cstdint>
 
 namespace gd32::uid {
-#if defined(GD32H7XX)
-static constexpr uintptr_t kBase = 0x1FF0F7E8;
-#elif defined(GD32F4XX)
-static constexpr uintptr_t kBase = 0x1FFF7A10;
+#ifdef GD32H7XX
+inline constexpr uintptr_t kBase = 0x1FF0F7E8;
+#elifdef GD32F4XX
+inline constexpr uintptr_t kBase = 0x1FFF7A10;
 #else
-static constexpr uintptr_t kBase = 0x1FFFF7E8;
+inline constexpr uintptr_t kBase = 0x1FFFF7E8;
 #endif // GD32H7XX
 
-static inline uint32_t Word(uint32_t index) {
+inline uint32_t Word(uint32_t index) {
     return *reinterpret_cast<volatile const uint32_t*>(kBase + (index * sizeof(uint32_t)));
 }
 
-static inline uint32_t Word0() {
+inline uint32_t Word0() {
     return Word(0);
 }
-static inline uint32_t Word1() {
+
+inline uint32_t Word1() {
     return Word(1);
 }
-static inline uint32_t Word2() {
+
+inline uint32_t Word2() {
     return Word(2);
 }
 } // namespace gd32::uid

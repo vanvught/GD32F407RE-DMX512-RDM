@@ -40,7 +40,7 @@ constexpr uint32_t kSize256Kb = 0x00040000;
 constexpr uint32_t kStartAddress = FLASH_BASE;
 constexpr uint32_t kFmcBanK0StartAddress = kStartAddress;
 constexpr uint32_t kFmcBanK1StartAddress = 0x08100000;
-const auto kEndAddress = (kStartAddress + (FMC_SIZE * 1024) - 1);
+auto kEndAddress = (kStartAddress + (FMC_SIZE * 1024) - 1);
 constexpr uint32_t kFmcMaxEndAddress = 0x08300000U;
 
 constexpr uint32_t kFmcWrongSectorName = 0xFFFFFFFF; // wrong sector name
@@ -60,9 +60,14 @@ struct SectorInfo SectorInfoGet(uint32_t addr) {
     struct SectorInfo sector_info;
     uint32_t temp = 0x00000000;
 
+    if (kEndAddress == 0) {
+        GD32_FMC_DEBUG_PUTS(">> kEndAddress=0 ! <<");
+        kEndAddress = kFmcMaxEndAddress;
+    }
+
     if ((kStartAddress <= addr) && (kEndAddress >= addr)) {
         if ((kFmcBanK1StartAddress > addr)) {
-            // bank0 area
+            GD32_FMC_DEBUG_PUTS("BANK0");
             temp = (addr - kFmcBanK0StartAddress) / kSize16Kb;
             if (4U > temp) {
                 sector_info.name = temp;
@@ -85,7 +90,7 @@ struct SectorInfo SectorInfoGet(uint32_t addr) {
                 sector_info.end_address = sector_info.start_address + kSize128Kb - 1;
             }
         } else {
-            // bank1 area
+            GD32_FMC_DEBUG_PUTS("BANK1");
             temp = (addr - kFmcBanK1StartAddress) / kSize16Kb;
             if (4U > temp) {
                 sector_info.name = (temp + 12);
@@ -116,7 +121,7 @@ struct SectorInfo SectorInfoGet(uint32_t addr) {
             }
         }
     } else {
-        // invalid address
+        GD32_FMC_DEBUG_PUTS("Invalid address");
         sector_info.name = kFmcWrongSectorName;
         sector_info.number = kFmcWrongSectorNum;
         sector_info.size = kFmcInvalidSize;
@@ -159,9 +164,12 @@ bool Read(uint32_t offset, std::span<uint8_t> buffer) {
 
 bool Erase(uint32_t offset, uint32_t length) {
     GD32_FMC_DEBUG_ENTRY();
+    GD32_FMC_DEBUG_PRINTF("kStartAddress=%p, kEndAddress=%p", reinterpret_cast<void*>(kStartAddress), reinterpret_cast<void*>(kEndAddress));
 
     struct SectorInfo sector_info;
     uint32_t address = offset + FLASH_BASE;
+
+    GD32_FMC_DEBUG_PRINTF("offset=%u, length=%u, address=%p", static_cast<unsigned>(offset), static_cast<unsigned>(length), reinterpret_cast<void*>(address));
 
     auto size = static_cast<int>(length);
 
@@ -175,7 +183,7 @@ bool Erase(uint32_t offset, uint32_t length) {
 
         GD32_FMC_DEBUG_PRINTF("Address 0x%08X is located in the : SECTOR_NUMBER_%u", address, sector_info.name);
         GD32_FMC_DEBUG_PRINTF("Sector range: 0x%08X to 0x%08X", sector_info.start_address, sector_info.end_address);
-        GD32_FMC_DEBUG_PRINTF("Sector size: %d KB", (sector_info. size / 1024));
+        GD32_FMC_DEBUG_PRINTF("Sector size: %d KB", (sector_info.size / 1024));
 
         fmc_unlock();
         fmc_flag_clear(FMC_FLAG_END | FMC_FLAG_OPERR | FMC_FLAG_WPERR | FMC_FLAG_PGMERR | FMC_FLAG_PGSERR);

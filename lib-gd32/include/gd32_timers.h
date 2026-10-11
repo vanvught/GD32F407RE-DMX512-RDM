@@ -42,7 +42,7 @@ extern volatile uint32_t gv_systick_millis;
 #endif // CONFIG_TIME_USE_SYSTICK
 
 struct HwTimersSeconds {
-#if !defined(CONFIG_NET_ENABLE_PTP)
+#ifndef CONFIG_NET_ENABLE_PTP
     volatile uint32_t timeval;
 #endif // CONFIG_NET_ENABLE_PTP
     volatile uint32_t uptime;
@@ -84,9 +84,9 @@ inline void DelayUs(uint32_t micros, uint32_t offset_micros = 0) {
 }
 
 [[nodiscard]] inline uint32_t Millis() {
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
     return gv_systick_millis;
-#elif defined(USE_FREE_RTOS)
+#elifdef USE_FREE_RTOS
     return xTaskGetTickCount();
 #else
     return gd32::timers::timer6::Millis();
