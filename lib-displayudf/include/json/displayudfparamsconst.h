@@ -27,7 +27,6 @@
 #define JSON_DISPLAYUDFPARAMSCONST_H_
 
 #include "json/json_key.h"
-#include "common/utils/utils_hash.h"
 #include "dmxnode_outputtype.h" // IWYU pragma: keep
 #include "dmxnode_nodetype.h"
 #ifdef DMXNODE_TYPE_ARTNET
@@ -41,63 +40,63 @@ namespace json {
 struct DisplayUdfParamsConst {
     static constexpr char kFileName[] = "display.json";
 
-    static constexpr auto kIntensity = json::MakeSimpleKey("intensity");
-    static constexpr auto kSleepTimeout = json::MakeSimpleKey("sleep_timeout");
-    static constexpr auto kFlipVertically = json::MakeSimpleKey("flip_vertically");
-    static constexpr json::PortKey kTitle{.name = "title", .length = 5, .hash = Fnv1a32("title", 5)};
-    static constexpr json::PortKey kBoardName{.name = "board_name", .length = 10, .hash = Fnv1a32("board_name", 10)};
-    static constexpr json::PortKey kVersion{.name = "version", .length = 7, .hash = Fnv1a32("version", 7)};
-    static constexpr json::PortKey kActivePorts{.name = "active_ports", .length = 12, .hash = Fnv1a32("active_ports", 12)};
-    static constexpr json::PortKey kHostname{.name = "hostname", .length = 8, .hash = Fnv1a32("hostname", 8)};
-    static constexpr json::PortKey kIpAddress{.name = "ip_address", .length = 10, .hash = Fnv1a32("ip_address", 10)};
-    static constexpr json::PortKey kNetMask{.name = "net_mask", .length = 8, .hash = Fnv1a32("net_mask", 8)};
-    static constexpr json::PortKey kDefaultGateway{.name = "default_gateway", .length = 15, .hash = Fnv1a32("default_gateway", 15)};
-    static constexpr json::PortKey kDmxStartAddress{.name = "dmx_start_address", .length = 17, .hash = Fnv1a32("dmx_start_address", 17)};
+    static constexpr auto kIntensity = json::MakeKey("intensity");
+    static constexpr auto kSleepTimeout = json::MakeKey("sleep_timeout");
+    static constexpr auto kFlipVertically = json::MakeKey("flip_vertically");
+    static constexpr auto kTitle = json::MakeKey("title");
+    static constexpr auto kBoardName = json::MakeKey("board_name");
+    static constexpr auto kVersion = json::MakeKey("version");
+    static constexpr auto kActivePorts = json::MakeKey("active_ports");
+    static constexpr auto kHostname = json::MakeKey("hostname");
+    static constexpr auto kIpAddress = json::MakeKey("ip_address");
+    static constexpr auto kNetMask = json::MakeKey("net_mask");
+    static constexpr auto kDefaultGateway = json::MakeKey("default_gateway");
+    static constexpr auto kDmxStartAddress = json::MakeKey("dmx_start_address");
 
-    static constexpr json::PortKey kLabels[] = {kTitle, 
-                                                kBoardName,
-                                                kVersion,
-                                                kHostname,
-                                                kIpAddress,
-                                                kNetMask,
-                                                kDefaultGateway,
-                                                kActivePorts,
-                                                kDmxStartAddress,
-#if defined(DMX_MAX_PORTS)
+    static constexpr json::KeyDefinition kLabels[] = {kTitle,
+                                                      kBoardName,
+                                                      kVersion,
+                                                      kHostname,
+                                                      kIpAddress,
+                                                      kNetMask,
+                                                      kDefaultGateway,
+                                                      kActivePorts,
+                                                      kDmxStartAddress,
+#ifdef DMX_MAX_PORTS
 #if (DMX_MAX_PORTS == 1)
-                                                DmxNodeParamsConst::kUniversePortA,
+                                                      DmxNodeParamsConst::kUniversePortA,
 #ifdef DMXNODE_TYPE_ARTNET
-                                                ArtNetParamsConst::kDestinationIpPortA
+                                                      ArtNetParamsConst::kDestinationIpPortA
 #endif
 #endif
 #if (DMX_MAX_PORTS == 2)
-                                                    DmxNodeParamsConst::kUniversePortA,
-                                                DmxNodeParamsConst::kUniversePortB,
+                                                      DmxNodeParamsConst::kUniversePortA,
+                                                      DmxNodeParamsConst::kUniversePortB,
 #ifdef DMXNODE_TYPE_ARTNET
-                                                ArtNetParamsConst::kDestinationIpPortA,
-                                                ArtNetParamsConst::kDestinationIpPortB
+                                                      ArtNetParamsConst::kDestinationIpPortA,
+                                                      ArtNetParamsConst::kDestinationIpPortB
 #endif
 #endif
 #if (DMX_MAX_PORTS == 3)
-                                                    DmxNodeParamsConst::kUniversePortA,
-                                                DmxNodeParamsConst::kUniversePortB,
-                                                DmxNodeParamsConst::kUniversePortC,
+                                                      DmxNodeParamsConst::kUniversePortA,
+                                                      DmxNodeParamsConst::kUniversePortB,
+                                                      DmxNodeParamsConst::kUniversePortC,
 #ifdef DMXNODE_TYPE_ARTNET
-                                                ArtNetParamsConst::kDestinationIpPortA,
-                                                ArtNetParamsConst::kDestinationIpPortB,
-                                                ArtNetParamsConst::kDestinationIpPortC
+                                                      ArtNetParamsConst::kDestinationIpPortA,
+                                                      ArtNetParamsConst::kDestinationIpPortB,
+                                                      ArtNetParamsConst::kDestinationIpPortC
 #endif
 #endif
 #if (DMX_MAX_PORTS == 4)
-                                                    DmxNodeParamsConst::kUniversePortA,
-                                                DmxNodeParamsConst::kUniversePortB,
-                                                DmxNodeParamsConst::kUniversePortC,
-                                                DmxNodeParamsConst::kUniversePortD,
+                                                      DmxNodeParamsConst::kUniversePortA,
+                                                      DmxNodeParamsConst::kUniversePortB,
+                                                      DmxNodeParamsConst::kUniversePortC,
+                                                      DmxNodeParamsConst::kUniversePortD,
 #ifdef DMXNODE_TYPE_ARTNET
-                                                ArtNetParamsConst::kDestinationIpPortA,
-                                                ArtNetParamsConst::kDestinationIpPortB,
-                                                ArtNetParamsConst::kDestinationIpPortC,
-                                                ArtNetParamsConst::kDestinationIpPortD
+                                                      ArtNetParamsConst::kDestinationIpPortA,
+                                                      ArtNetParamsConst::kDestinationIpPortB,
+                                                      ArtNetParamsConst::kDestinationIpPortC,
+                                                      ArtNetParamsConst::kDestinationIpPortD
 #endif
 #endif
 #endif

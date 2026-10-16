@@ -34,17 +34,17 @@ class ArtNetParams : public JsonParamsBase<ArtNetParams> {
     void Dump();
 
    private:
-    static void SetEnableRdm(const char* val, uint32_t len);
-    static void SetMapUniverse0(const char* val, uint32_t len);
-    static void SetDestinationIpPort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetProtocolPort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetRdmEnablePort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
+    static void SetEnableRdm(std::string_view value);
+    static void SetMapUniverse0(std::string_view value);
+    static void SetDestinationIpPort(std::string_view key, std::string_view value);
+    static void SetProtocolPort(std::string_view key, std::string_view value);
+    static void SetRdmEnablePort(std::string_view key, std::string_view value);
 
     static constexpr json::Key kArtNetKeys[] = {
         MakeKey(SetMapUniverse0, ArtNetParamsConst::kMapUniverse0),
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
         MakeKey(SetEnableRdm, ArtNetParamsConst::kEnableRdm),
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[0]),
 #if (DMX_MAX_PORTS > 1)
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[1]),
@@ -57,7 +57,7 @@ class ArtNetParams : public JsonParamsBase<ArtNetParams> {
 #endif
 #endif
 #endif
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
         MakeKey(SetDestinationIpPort, ArtNetParamsConst::kDestinationIpPort[0]),
         MakeKey(SetProtocolPort, ArtNetParamsConst::kProtocolPort[0]),
 #if (DMX_MAX_PORTS > 1)

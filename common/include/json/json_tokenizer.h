@@ -26,63 +26,109 @@
 #ifndef JSON_JSON_TOKENIZER_H_
 #define JSON_JSON_TOKENIZER_H_
 
-#include <cstddef>
+#include <string_view>
 
 struct JsonTokenizer {
     const char* p;
     const char* end;
 
-    constexpr JsonTokenizer(const char* buffer, size_t size) : p(buffer), end(buffer + size) {}
+    constexpr explicit JsonTokenizer(std::string_view input) noexcept : p(input.data()), end(input.data() + input.size()) {}
 
-    constexpr void SkipWhitespace() {
+    constexpr void SkipWhitespace() noexcept {
         while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')) {
             ++p;
         }
     }
 
-    bool NextString(const char*& out, size_t& len) {
+    [[nodiscard]] constexpr bool NextString(std::string_view& out) noexcept {
         SkipWhitespace();
+
         if (p >= end || *p != '"') {
             return false;
         }
-        ++p; // skip "
-        out = p;
-        while (p < end && *p != '"') {
+
+        ++p; // Skip opening quote
+        const auto* start = p;
+
+        while (p < end) {
+            if (*p == '"') {
+                out = {start, static_cast<size_t>(p - start)};
+                ++p; // Skip closing quote
+                return true;
+            }
+
+            if (*p == '\\') {
+                ++p;
+
+                if (p >= end) {
+                    return false;
+                }
+
+                // Validate JSON escape character.
+                switch (*p) {
+                    case '"':
+                    case '\\':
+                    case '/':
+                    case 'b':
+                    case 'f':
+                    case 'n':
+                    case 'r':
+                    case 't':
+                        break;
+
+                    case 'u':
+                        // Unicode escapes require four hex digits.
+                        // Not supported by this lightweight tokenizer.
+                        return false;
+
+                    default:
+                        return false;
+                }
+            } else if (static_cast<unsigned char>(*p) < 0x20U) {
+                // Unescaped control characters are invalid in JSON strings.
+                return false;
+            }
+
             ++p;
         }
-        if (p >= end) {
-            return false;
-        }
-        len = static_cast<size_t>(p - out);
-        ++p; // skip "
-        return true;
+
+        return false;
     }
 
-    bool Expect(char character) {
+    [[nodiscard]] constexpr bool Expect(char character) noexcept {
         SkipWhitespace();
+
         if (p >= end || *p != character) {
             return false;
         }
+
         ++p;
         return true;
     }
 
-    bool NextValue(const char*& out, size_t& len) {
+    [[nodiscard]] constexpr bool NextValue(std::string_view& out) noexcept {
         SkipWhitespace();
+
         if (p >= end) {
             return false;
         }
 
         if (*p == '"') {
-            return NextString(out, len);
+            return NextString(out);
         }
 
-        out = p;
+        const auto* start = p;
+
         while (p < end && *p != ',' && *p != '}' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') {
             ++p;
         }
-        len = static_cast<size_t>(p - out);
-        return len > 0;
+
+        if (p == start) {
+            return false;
+        }
+
+        out = {start, static_cast<size_t>(p - start)};
+        return true;
     }
 };
 

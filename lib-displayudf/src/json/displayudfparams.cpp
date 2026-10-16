@@ -43,19 +43,20 @@
 #define DISPLAYUDFPARAMS_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
 #define DISPLAYUDFPARAMS_DEBUG_ENTRY() \
-    do {                     \
+    do {                               \
     } while (false)
 #define DISPLAYUDFPARAMS_DEBUG_EXIT() \
-    do {                    \
+    do {                              \
     } while (false)
 #define DISPLAYUDFPARAMS_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                                   \
     } while (false)
 #define DISPLAYUDFPARAMS_DEBUG_PUTS(...) \
-    do {                       \
+    do {                                 \
     } while (false)
 #endif
 
+using common::SetFlagValue;
 using common::store::displayudf::Flags;
 
 namespace json {
@@ -63,35 +64,35 @@ DisplayUdfParams::DisplayUdfParams() {
     ConfigStore::Instance().Copy(&store_displayudf, &ConfigurationStore::display_udf);
 }
 
-void DisplayUdfParams::SetIntensity(const char* val, uint32_t len) {
-    if (len > 3) {
+void DisplayUdfParams::SetIntensity(std::string_view value) {
+    if (value.size() > 3) {
         return;
     }
-    store_displayudf.intensity = ParseValue<uint8_t>(val, len);
+    store_displayudf.intensity = ParseValue<uint8_t>(value);
 }
 
-void DisplayUdfParams::SetSleepTimeout(const char* val, uint32_t len) {
-    if (len > 3) {
+void DisplayUdfParams::SetSleepTimeout(std::string_view value) {
+    if (value.size() > 3) {
         return;
     }
-    store_displayudf.sleep_timeout = ParseValue<uint8_t>(val, len);
+    store_displayudf.sleep_timeout = ParseValue<uint8_t>(value);
 }
 
-void DisplayUdfParams::SetFlipVertically(const char* val, uint32_t len) {
-    if (len != 1) {
+void DisplayUdfParams::SetFlipVertically(std::string_view value) {
+    if (value.size() != 1) {
         return;
     }
-    store_displayudf.flags = common::SetFlagValue(store_displayudf.flags, Flags::Flag::kFlipVertically, val[0] != '0');
+    store_displayudf.flags = SetFlagValue(store_displayudf.flags, Flags::Flag::kFlipVertically, value.front() != '0');
 }
 
-void DisplayUdfParams::SetLabel(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    if (val_len > 1) {
+void DisplayUdfParams::SetLabel(std::string_view key, std::string_view value) {
+    if (value.size() > 1) {
         return;
     }
 
-    DISPLAYUDFPARAMS_DEBUG_PRINTF("%.*s ->%.*s", static_cast<int>(key_len), key, static_cast<int>(val_len), val);
+    DISPLAYUDFPARAMS_DEBUG_PRINTF("%.*s ->%.*s", static_cast<int>(key.size()), key.data(), static_cast<int>(value.size()), value.data());
 
-    const uint32_t kHash = Fnv1a32Runtime(key, key_len);
+    const uint32_t kHash = Fnv1a32(key);
     bool matched = false;
     size_t i = 0;
     size_t j = 0;
@@ -109,7 +110,7 @@ void DisplayUdfParams::SetLabel(const char* key, uint32_t key_len, const char* v
 
     if (matched) {
         const auto kIndex = i - j;
-        store_displayudf.label_index[kIndex] = ParseValue<uint8_t>(val, val_len);
+        store_displayudf.label_index[kIndex] = ParseValue<uint8_t>(value);
     }
 }
 

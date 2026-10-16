@@ -12,10 +12,8 @@
 #include "json/oscparamsconst.h"
 #include "json/json_params_base.h"
 
-namespace json
-{
-class ShowFileParams : public JsonParamsBase<ShowFileParams>
-{
+namespace json {
+class ShowFileParams : public JsonParamsBase<ShowFileParams> {
    public:
     ShowFileParams();
 
@@ -33,20 +31,20 @@ class ShowFileParams : public JsonParamsBase<ShowFileParams>
     void Dump();
 
    private:
-    static void SetShow(const char* val, uint32_t len);
-    static void SetOptionAutoPlay(const char* val, uint32_t len);
-    static void SetOptionLoop(const char* val, uint32_t len);
-    static void SetIncomingPort(const char* val, uint32_t len);
-    static void SetOutgoingPort(const char* val, uint32_t len);
-    
+    static void SetShow(std::string_view value);
+    static void SetOptionAutoPlay(std::string_view value);
+    static void SetOptionLoop(std::string_view value);
+    static void SetIncomingPort(std::string_view value);
+    static void SetOutgoingPort(std::string_view value);
+
     static constexpr json::Key kShowFileKeys[] = {
-	MakeKey(SetShow, ShowFileParamsConst::kShow), 
-	MakeKey(SetOptionAutoPlay, ShowFileParamsConst::kOptionAutoPlay), 
-	MakeKey(SetOptionLoop, ShowFileParamsConst::kOptionLoop),
-#if defined(CONFIG_SHOWFILE_ENABLE_OSC)
-	MakeKey(SetIncomingPort, OscParamsConst::kIncomingPort),
-	MakeKey(SetOutgoingPort, OscParamsConst::kOutgoingPort)
-#endif        
+        MakeKey(SetShow, ShowFileParamsConst::kShow),                     //
+        MakeKey(SetOptionAutoPlay, ShowFileParamsConst::kOptionAutoPlay), //
+        MakeKey(SetOptionLoop, ShowFileParamsConst::kOptionLoop),         //
+#if defined(CONFIG_SHOWFILE_ENABLE_OSC)                                   //
+        MakeKey(SetIncomingPort, OscParamsConst::kIncomingPort),          //
+        MakeKey(SetOutgoingPort, OscParamsConst::kOutgoingPort),
+#endif
     };
 
     inline static common::store::ShowFile store_showfile;
@@ -55,4 +53,4 @@ class ShowFileParams : public JsonParamsBase<ShowFileParams>
 };
 } // namespace json
 
-#endif  // JSON_SHOWFILEPARAMS_H_
+#endif // JSON_SHOWFILEPARAMS_H_

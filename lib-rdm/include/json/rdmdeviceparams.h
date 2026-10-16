@@ -50,7 +50,7 @@ class RdmDeviceParams : public JsonParamsBase<RdmDeviceParams> {
     void Dump();
 
    private:
-    static void SetLabel(const char* val, uint32_t len);
+    static void SetLabel(std::string_view value);
 
     static constexpr json::Key kRdmDeviceKeys[] = {MakeKey(SetLabel, RdmDeviceParamsConst::kLabel)};
 

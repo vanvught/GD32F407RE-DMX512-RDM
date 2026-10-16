@@ -31,13 +31,13 @@ namespace json {
 struct NetworkParamsConst {
     static constexpr char kFileName[] = "network.json";
 
-    static constexpr auto kSecondaryIp = json::MakeSimpleKey("secondary_ip");
-    static constexpr auto kUseStaticIp = json::MakeSimpleKey("use_static_ip");
-    static constexpr auto kIpAddress = json::MakeSimpleKey("ip_address");
-    static constexpr auto kNetMask = json::MakeSimpleKey("net_mask");
-    static constexpr auto kDefaultGateway = json::MakeSimpleKey("default_gateway");
-    static constexpr auto kHostname = json::MakeSimpleKey("hostname");
-    static constexpr auto kNtpServer = json::MakeSimpleKey("ntp_server");
+    static constexpr auto kSecondaryIp = json::MakeKey("secondary_ip");
+    static constexpr auto kUseStaticIp = json::MakeKey("use_static_ip");
+    static constexpr auto kIpAddress = json::MakeKey("ip_address");
+    static constexpr auto kNetMask = json::MakeKey("net_mask");
+    static constexpr auto kDefaultGateway = json::MakeKey("default_gateway");
+    static constexpr auto kHostname = json::MakeKey("hostname");
+    static constexpr auto kNtpServer = json::MakeKey("ntp_server");
 };
 } // namespace json
 

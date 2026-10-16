@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 
+#include <cassert>
 #include <cstdint>
 
 #include "showfile.h"

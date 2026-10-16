@@ -1169,7 +1169,7 @@ void DMA0_Channel4_IRQHandler() {
 void DMA1_Channel3_4_IRQHandler() {
 #else
 void DMA1_Channel4_IRQHandler() {
-#endif	
+#endif
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE>();
 
@@ -2327,15 +2327,17 @@ void Dmx::SetTransmitPeriodTime(uint32_t period) {
 
 [[gnu::noinline]]
 void Dmx::SetTransmitSlots(uint16_t slots) {
-    if ((slots >= 2) && (slots <= dmx::kChannelsMax)) {
-        transmit_slots_ = slots;
-
-        for (uint32_t& index : transmit_length_) {
-            index = static_cast<uint32_t>(slots);
-        }
-
-        SetTransmitPeriodTime(transmit_period_requested_);
+    if ((slots < 2) && (slots > dmx::kChannelsMax)) {
+        slots = dmx::kChannelsMax;
     }
+
+    transmit_slots_ = slots;
+
+    for (uint32_t& index : transmit_length_) {
+        index = static_cast<uint32_t>(slots);
+    }
+
+    SetTransmitPeriodTime(transmit_period_requested_);
 }
 
 [[gnu::noinline]]

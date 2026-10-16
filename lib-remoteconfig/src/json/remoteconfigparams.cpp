@@ -24,6 +24,7 @@
 */
 
 #include <cstdint>
+#include <algorithm>
 
 #include "json/remoteconfigparams.h"
 #include "json/remoteconfigparamsconst.h"
@@ -32,47 +33,41 @@
 #include "configurationstore.h"
 #include "remoteconfig.h"
 
-namespace json
-{
-RemoteConfigParams::RemoteConfigParams()
-{
+namespace json {
+RemoteConfigParams::RemoteConfigParams() {
     ConfigStore::Instance().Copy(&store_remoteconfig, &ConfigurationStore::remote_config);
 }
 
-void RemoteConfigParams::SetDisplayName(const char* val, uint32_t len)
-{
-    len = len > (common::store::remoteconfig::kDisplayNameLength - 1) ? common::store::remoteconfig::kDisplayNameLength - 1 : len;
-    memcpy(reinterpret_cast<char*>(store_remoteconfig.display_name), val, len);
+void RemoteConfigParams::SetDisplayName(std::string_view value) {
+    constexpr std::size_t kDisplayNameLength = common::store::remoteconfig::kDisplayNameLength;
 
-    for (uint32_t i = len; i < common::store::remoteconfig::kDisplayNameLength; i++)
-    {
-        store_remoteconfig.display_name[i] = '\0';
-    }
+    const auto kLength = std::min(value.size(), kDisplayNameLength - 1);
+    auto* destination = reinterpret_cast<char*>(store_remoteconfig.display_name);
+
+    memcpy(destination, value.data(), kLength);
+    memset(destination + kLength, 0, kDisplayNameLength - kLength);
 }
 
-void RemoteConfigParams::Store(const char* buffer, uint32_t buffer_size)
-{
+void RemoteConfigParams::Store(const char* buffer, uint32_t buffer_size) {
     ParseJsonWithTable(buffer, buffer_size, kRemoteConfigKeys);
     ConfigStore::Instance().Store(&store_remoteconfig, &ConfigurationStore::remote_config);
 
 #ifndef NDEBUG
     Dump();
-#endif // NDEBUG
+#endif
 }
 
-void RemoteConfigParams::Set()
-{
+void RemoteConfigParams::Set() {
     auto& remoteconfig = *RemoteConfig::Get();
-    
-    remoteconfig.SetDisplayName(reinterpret_cast<char *>(store_remoteconfig.display_name));
+
+    remoteconfig.SetDisplayName(reinterpret_cast<char*>(store_remoteconfig.display_name));
 
 #ifndef NDEBUG
     Dump();
-#endif // NDEBUG
+#endif
 }
 
-void RemoteConfigParams::Dump()
-{
+void RemoteConfigParams::Dump() {
     printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::RemoteConfigParamsConst::kFileName);
     printf(" %s=%s\n", RemoteConfigParamsConst::kDisplayName.name, store_remoteconfig.display_name);
 }

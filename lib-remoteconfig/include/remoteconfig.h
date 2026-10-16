@@ -38,11 +38,13 @@
 #include "configstore.h"
 
 #ifdef DEBUG_REMOTECONFIG
+inline constexpr bool kDebugRemoteConfigEnabled = true;
 #define REMOTECONFIG_DEBUG_ENTRY() DEBUG_ENTRY()
 #define REMOTECONFIG_DEBUG_EXIT() DEBUG_EXIT()
 #define REMOTECONFIG_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define REMOTECONFIG_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugRemoteConfigEnabled = false;
 #define REMOTECONFIG_DEBUG_ENTRY() \
     do {                           \
     } while (false)

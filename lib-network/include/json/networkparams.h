@@ -32,10 +32,8 @@
 #include "json/networkparamsconst.h"
 #include "json/json_params_base.h"
 
-namespace json
-{
-class NetworkParams : public JsonParamsBase<NetworkParams>
-{
+namespace json {
+class NetworkParams : public JsonParamsBase<NetworkParams> {
    public:
     NetworkParams();
 
@@ -53,20 +51,20 @@ class NetworkParams : public JsonParamsBase<NetworkParams>
     void Dump();
 
    private:
-    static void SetUseStaticIp(const char* val, uint32_t len);
-    static void SetIpAddress(const char* val, uint32_t len);
-    static void SetNetMask(const char* val, uint32_t len);
-    static void SetDefaultGateway(const char* val, uint32_t len);
-    static void SetHostname(const char* val, uint32_t len);
-    static void SetNtpServer(const char* val, uint32_t len);
-    
-   	static constexpr json::Key kNetworkKeys[] = {
-	json::MakeKey(SetUseStaticIp, NetworkParamsConst::kUseStaticIp), 
-	json::MakeKey(SetIpAddress, NetworkParamsConst::kIpAddress), 
-	json::MakeKey(SetNetMask, NetworkParamsConst::kNetMask),
-	json::MakeKey(SetDefaultGateway, NetworkParamsConst::kDefaultGateway),
-	json::MakeKey(SetHostname, NetworkParamsConst::kHostname),
-	json::MakeKey(SetNtpServer, NetworkParamsConst::kNtpServer)
+    static void SetUseStaticIp(std::string_view value);
+    static void SetIpAddress(std::string_view value);
+    static void SetNetMask(std::string_view value);
+    static void SetDefaultGateway(std::string_view value);
+    static void SetHostname(std::string_view value);
+    static void SetNtpServer(std::string_view value);
+
+    static constexpr json::Key kNetworkKeys[] = {
+        json::MakeKey(SetUseStaticIp, NetworkParamsConst::kUseStaticIp),       //
+        json::MakeKey(SetIpAddress, NetworkParamsConst::kIpAddress),           //
+        json::MakeKey(SetNetMask, NetworkParamsConst::kNetMask),               //
+        json::MakeKey(SetDefaultGateway, NetworkParamsConst::kDefaultGateway), //
+        json::MakeKey(SetHostname, NetworkParamsConst::kHostname),             //
+        json::MakeKey(SetNtpServer, NetworkParamsConst::kNtpServer),           //
     };
 
     inline static common::store::Network store_network;

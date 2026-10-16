@@ -35,22 +35,22 @@
 #include "json/rdmsensorsparams.h"
 
 namespace rdm::sensors {
-enum class Types : uint32_t { 
-	kBH170, 
-	kHTU21D, 
-	kINA219, 
-	kMCP9808, 
-	kSI7021, 
-	kMCP3424, 
-	kUndefined 
+enum class Types : uint32_t {
+    kBH170,
+    kHTU21D,
+    kINA219,
+    kMCP9808,
+    kSI7021,
+    kMCP3424,
+    kUndefined,
 };
 
 static_assert(json::RdmSensorsParams::KeysSize() == static_cast<size_t>(Types::kUndefined));
 
 [[nodiscard]] constexpr const char* GetType(Types type) {
     if (type < rdm::sensors::Types::kUndefined) {
-        const auto& k = json::RdmSensorsParams::Keys();
-        return k[static_cast<uint32_t>(type)].GetName();
+        const auto& key = json::RdmSensorsParams::Keys();
+        return key[static_cast<uint32_t>(type)].GetName().data();
     }
 
     return common::kUnknown;
@@ -63,7 +63,7 @@ inline Types GetType(const char* string) {
     for (uint32_t i = 0; i < json::RdmSensorsParams::KeysSize(); i++)
 
     {
-        if (strcasecmp(string, key[i].GetName()) == 0) {
+        if (string == key[i].GetName()) {
             return static_cast<Types>(i);
         }
     }

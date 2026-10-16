@@ -31,11 +31,11 @@ namespace json {
 struct ShowFileParamsConst {
     static constexpr char kFileName[] = "showfile.json";
 
-    static constexpr auto kShow = json::MakeSimpleKey("show");
-    static constexpr auto kOptionAutoPlay = json::MakeSimpleKey("auto_play");
-    static constexpr auto kOptionLoop = json::MakeSimpleKey("loop");
-    static constexpr auto kOptionSacnSyncUniverse = json::MakeSimpleKey("sync_universe");
-    static constexpr auto kOptionArtnetDisableUnicast = json::MakeSimpleKey("disable_unicast");
+    static constexpr auto kShow = json::MakeKey("show");
+    static constexpr auto kOptionAutoPlay = json::MakeKey("auto_play");
+    static constexpr auto kOptionLoop = json::MakeKey("loop");
+    static constexpr auto kOptionSacnSyncUniverse = json::MakeKey("sync_universe");
+    static constexpr auto kOptionArtnetDisableUnicast = json::MakeKey("disable_unicast");
 };
 } // namespace json
 

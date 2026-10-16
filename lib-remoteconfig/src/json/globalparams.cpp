@@ -38,11 +38,11 @@ GlobalParams::GlobalParams() {
     ConfigStore::Instance().Copy(&store_global, &ConfigurationStore::global);
 }
 
-void GlobalParams::SetUtcOffset(const char* val, uint32_t len) {
+void GlobalParams::SetUtcOffset(std::string_view value) {
     int32_t hours;
     uint32_t minutes;
 
-    if (utc::ParseOffset(val, len, hours, minutes)) {
+    if (utc::ParseOffset(value, hours, minutes)) {
         REMOTECONFIG_DEBUG_PUTS("Parse OK");
 
         int32_t utc_offset;
@@ -60,9 +60,7 @@ void GlobalParams::Store(const char* buffer, uint32_t buffer_size) {
     ParseJsonWithTable(buffer, buffer_size, kGlobalKeys);
     ConfigStore::Instance().Store(&store_global, &ConfigurationStore::global);
 
-#ifdef DEBUG_REMOTECONFIG
     Dump();
-#endif // DEBUG_REMOTECONFIG
 }
 
 void GlobalParams::Set() {
@@ -72,17 +70,17 @@ void GlobalParams::Set() {
     utc::SplitOffset(store_global.utc_offset, hours, minutes);
     global::SetUtcOffsetIfValid(hours, minutes);
 
-#ifdef DEBUG_REMOTECONFIG
     Dump();
-#endif // DEBUG_REMOTECONFIG
 }
 
 void GlobalParams::Dump() {
-    printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::GlobalParamsConst::kFileName);
+    if constexpr (kDebugRemoteConfigEnabled) {
+        printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::GlobalParamsConst::kFileName);
 
-    int32_t hours;
-    uint32_t minutes;
-    utc::SplitOffset(store_global.utc_offset, hours, minutes);
-    printf("  %s=%d:%u [%d]\n", GlobalParamsConst::kUtcOffset.name, static_cast<int>(hours), static_cast<unsigned>(minutes), static_cast<unsigned>(store_global.utc_offset));
+        int32_t hours;
+        uint32_t minutes;
+        utc::SplitOffset(store_global.utc_offset, hours, minutes);
+        printf("  %s=%d:%u [%d]\n", GlobalParamsConst::kUtcOffset.name, static_cast<int>(hours), static_cast<unsigned>(minutes), static_cast<unsigned>(store_global.utc_offset));
+    }
 }
 } // namespace json

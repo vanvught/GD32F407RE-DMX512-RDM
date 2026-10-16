@@ -2,7 +2,7 @@
  * @file displayudfparams.h
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,6 @@ static_assert(common::ArraySize(json::DisplayUdfParamsConst::kLabels) == static_
 namespace json {
 class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
    public:
-
     DisplayUdfParams();
 
     DisplayUdfParams(const DisplayUdfParams&) = delete;
@@ -57,65 +56,65 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
     void Dump();
 
    private:
-    static void SetIntensity(const char* val, uint32_t len);
-    static void SetSleepTimeout(const char* val, uint32_t len);
-    static void SetFlipVertically(const char* val, uint32_t len);
-	static void SetLabel(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
+    static void SetIntensity(std::string_view value);
+    static void SetSleepTimeout(std::string_view value);
+    static void SetFlipVertically(std::string_view value);
+    static void SetLabel(std::string_view key, std::string_view value);
 
     static constexpr Key kDisplayUdfKeys[] = {
-        MakeKey(SetIntensity, DisplayUdfParamsConst::kIntensity),           
-        MakeKey(SetSleepTimeout, DisplayUdfParamsConst::kSleepTimeout),
-        MakeKey(SetFlipVertically, DisplayUdfParamsConst::kFlipVertically), 
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[0]),
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[1]),        
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[2]),
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[3]),                
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[4]),   
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[5]),
-        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[6]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[7]),   
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[8]),
-#if defined (DMX_MAX_PORTS)
-#if (DMX_MAX_PORTS == 1)	
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
-#ifdef DMXNODE_TYPE_ARTNET		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
-#endif		
-#endif		
-#if (DMX_MAX_PORTS == 2)		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
-#ifdef DMXNODE_TYPE_ARTNET		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
-#endif			
+        MakeKey(SetIntensity, DisplayUdfParamsConst::kIntensity),           //
+        MakeKey(SetSleepTimeout, DisplayUdfParamsConst::kSleepTimeout),     //
+        MakeKey(SetFlipVertically, DisplayUdfParamsConst::kFlipVertically), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[0]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[1]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[2]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[3]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[4]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[5]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[6]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[7]),               //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[8]),               //
+#ifdef DMX_MAX_PORTS
+#if (DMX_MAX_PORTS == 1)
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]), //
+#ifdef DMXNODE_TYPE_ARTNET
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]), //
 #endif
-#if (DMX_MAX_PORTS == 3)		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
-#ifdef DMXNODE_TYPE_ARTNET		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]),  
-#endif			
 #endif
-#if (DMX_MAX_PORTS == 4)		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]),  
-#ifdef DMXNODE_TYPE_ARTNET		
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]),  
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[15]),  	
-       MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[16]),  
-#endif			
+#if (DMX_MAX_PORTS == 2)
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]), //
+#ifdef DMXNODE_TYPE_ARTNET
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]), //
 #endif
-#endif 
-   	};
-   	
-   	static_assert((common::ArraySize(kDisplayUdfKeys) - 3) == static_cast<size_t>(displayudf::Labels::kUnknown), "Mismatch between enum and kArray");
+#endif
+#if (DMX_MAX_PORTS == 3)
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]), //
+#ifdef DMXNODE_TYPE_ARTNET
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]), //
+#endif
+#endif
+#if (DMX_MAX_PORTS == 4)
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[9]),  //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[10]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[11]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[12]), //
+#ifdef DMXNODE_TYPE_ARTNET
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[13]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[14]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[15]), //
+        MakeKey(SetLabel, DisplayUdfParamsConst::kLabels[16]), //
+#endif
+#endif
+#endif
+    };
+
+    static_assert((common::ArraySize(kDisplayUdfKeys) - 3) == static_cast<size_t>(displayudf::Labels::kUnknown), "Mismatch between enum and kArray");
 
     inline static common::store::DisplayUdf store_displayudf;
 
@@ -123,4 +122,4 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
 };
 } // namespace json
 
-#endif  // JSON_DISPLAYUDFPARAMS_H_
+#endif // JSON_DISPLAYUDFPARAMS_H_

@@ -26,6 +26,7 @@
 #ifndef COMMON_UTILS_UTILS_STRING_H_
 #define COMMON_UTILS_UTILS_STRING_H_
 
+#include <cassert>
 #include <cstdint>
 #include <string_view>
 
@@ -38,31 +39,6 @@ inline constexpr char kUndefined[] = "Undefined";
 
 constexpr const char* IsSuccess(bool is_success) {
     return is_success ? kSuccess : kError;
-}
-
-inline int32_t Atoi(const char* buffer, uint32_t size) {
-    const char* p = buffer;
-    int32_t sign = 1;
-    int32_t result = 0;
-
-    if (size == 0) {
-        return 0;
-    }
-
-    if (*p == '-') {
-        sign = -1;
-        p++;
-        size--;
-    } else if (*p == '+') {
-        p++;
-        size--;
-    }
-
-    for (; (size > 0) && (*p >= '0' && *p <= '9'); size--, p++) {
-        result = (result * 10) + (*p - '0');
-    }
-
-    return sign * result;
 }
 
 inline int32_t Atoi(std::string_view value) {
@@ -91,44 +67,60 @@ inline int32_t Atoi(std::string_view value) {
     return sign * result;
 }
 
-inline float Atof(const char* buffer, uint32_t size) {
-    const char* p = buffer;
+inline float Atof(std::string_view buffer) {
     float sign = 1.0F;
     float result = 0.0F;
 
-    if (size == 0) {
+    if (buffer.empty()) {
         return 0.0F;
     }
 
-    if (*p == '-') {
+    if (buffer.front() == '-') {
         sign = -1.0F;
-        ++p;
-        --size;
-    } else if (*p == '+') {
-        ++p;
-        --size;
+        buffer.remove_prefix(1);
+    } else if (buffer.front() == '+') {
+        buffer.remove_prefix(1);
     }
 
-    while (size > 0 && *p >= '0' && *p <= '9') {
-        result = (result * 10.0F) + static_cast<float>(*p - '0');
-        ++p;
-        --size;
+    while (!buffer.empty() && buffer.front() >= '0' && buffer.front() <= '9') {
+        result = (result * 10.0F) + static_cast<float>(buffer.front() - '0');
+        buffer.remove_prefix(1);
     }
 
-    if (size > 0 && *p == '.') {
-        ++p;
-        --size;
+    if (!buffer.empty() && buffer.front() == '.') {
+        buffer.remove_prefix(1);
 
         float divisor = 10.0F;
-        while (size > 0 && *p >= '0' && *p <= '9') {
-            result += static_cast<float>(*p - '0') / divisor;
+        while (!buffer.empty() && buffer.front() >= '0' && buffer.front() <= '9') {
+            result += static_cast<float>(buffer.front() - '0') / divisor;
             divisor *= 10.0F;
-            ++p;
-            --size;
+            buffer.remove_prefix(1);
         }
     }
 
     return sign * result;
+}
+
+[[nodiscard]] constexpr std::string_view Slice(std::string_view value, size_t offset, size_t count) noexcept {
+    assert(offset <= value.size());
+    assert(count <= value.size() - offset);
+
+    value.remove_prefix(offset);
+    return std::string_view{value.data(), count}; // NOLINT(bugprone-suspicious-stringview-data-usage)
+}
+
+template <typename T, std::size_t N>
+void CopyString(T (&destination)[N], std::string_view value) {
+    static_assert(N > 0);
+    static_assert(std::is_same_v<T, char> || std::is_same_v<T, uint8_t>);
+
+    const auto kLength = std::min(value.size(), N - 1);
+
+    if (kLength != 0) {
+        memcpy(destination, value.data(), kLength);
+    }
+
+    memset(destination + kLength, 0, N - kLength);
 }
 } // namespace common
 

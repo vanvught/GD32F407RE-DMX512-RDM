@@ -131,9 +131,9 @@ const uint8_t* GetFileContent(const char* file_name, uint32_t& size, http::Conte
 const uint8_t* GetFileContent(const char* file_name, uint32_t& size, http::ContentTypes& content_type, bool& gzip) {
     HTTPD_DEBUG_ENTRY();
 
-    const auto kHash = Fnv1a32Runtime(file_name, strlen(file_name));
+    const auto kHash = Fnv1a32(std::string_view{file_name});
 
-    HTTPD_DEBUG_PRINTF("%s:%x", file_name, static_cast<unsigned>(kHash));
+    HTTPD_DEBUG_PRINTF("%.*s:%x", static_cast<int>(file_name.size()), file_name.data(), static_cast<unsigned>(kHash));
 
     for (const auto& content : kHttpContent) {
         if (kHash == content.hash) {

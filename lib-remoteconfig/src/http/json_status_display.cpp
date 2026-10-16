@@ -29,10 +29,8 @@
 
 namespace json::status {
 uint32_t Display(char* out_buffer, uint32_t out_buffer_size) {
-    const bool kIsOn = !(Display::Get()->IsSleep());
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"display\":%d}", 
-		kIsOn));
+    const bool kIsOn = !Display::Get()->IsSleep();
+    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"display\":%d}", static_cast<int>(kIsOn)));
     return kLength;
 }
 } // namespace json::status

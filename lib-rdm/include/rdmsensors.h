@@ -106,7 +106,7 @@ class RDMSensors {
         return true;
     }
 
-    uint8_t GetCount() const { return count_; }
+    [[nodiscard]] uint8_t GetCount() const { return count_; }
 
     const struct rdm::sensor::Defintion* GetDefintion(uint8_t sensor) {
         assert(sensor < count_);

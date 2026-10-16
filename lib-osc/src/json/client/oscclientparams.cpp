@@ -35,6 +35,7 @@
 #include "configurationstore.h"
 #include "common/utils/utils_flags.h"
 #include "ip4/ip4_address.h"
+#include "osc_debug.h"
 #include "oscclient.h"
 
 using common::store::osc::client::Flags;
@@ -44,87 +45,89 @@ OscClientParams::OscClientParams() {
     ConfigStore::Instance().Copy(&store_oscclient, &ConfigurationStore::osc_client);
 }
 
-void OscClientParams::SetIncomingPort(const char* val, uint32_t len) {
+void OscClientParams::SetIncomingPort(std::string_view value) {
     uint16_t port;
 
-    if (ParseInRange<uint32_t, uint16_t>(val, len, 1U, 65535U, &port)) {
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, 65535U, &port)) {
         store_oscclient.incoming_port = port;
     }
 }
 
-void OscClientParams::SetOutgoingPort(const char* val, uint32_t len) {
+void OscClientParams::SetOutgoingPort(std::string_view value) {
     uint16_t port;
 
-    if (ParseInRange<uint32_t, uint16_t>(val, len, 1U, 65535U, &port)) {
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, 65535U, &port)) {
         store_oscclient.outgoing_port = port;
     }
 }
 
-void OscClientParams::SetServerIp(const char* val, uint32_t len) {
-    store_oscclient.server_ip = net::ParseIpString(val, len);
+void OscClientParams::SetServerIp(std::string_view value) {
+    store_oscclient.server_ip = net::ParseIpString(value);
 }
 
-void OscClientParams::SetPingDisable(const char* val, [[maybe_unused]] uint32_t len) {
-    if (len == 1) {
-        store_oscclient.flags = common::SetFlagValue(store_oscclient.flags, Flags::Flag::kPingDisable, val[0] != '0');
+void OscClientParams::SetPingDisable(std::string_view value) {
+    if (value.size() == 1) {
+        store_oscclient.flags = common::SetFlagValue(store_oscclient.flags, Flags::Flag::kPingDisable, value.front() != '0');
     }
 }
 
-void OscClientParams::SetPingDelay(const char* val, uint32_t len) {
+void OscClientParams::SetPingDelay(std::string_view value) {
     uint8_t ping_delay;
 
-    if (ParseInRange<uint16_t, uint8_t>(val, len, 2U, 60U, &ping_delay)) {
+    if (ParseInRange<uint16_t, uint8_t>(value, 2U, 60U, &ping_delay)) {
         store_oscclient.ping_delay = ping_delay;
     }
 }
 
-void OscClientParams::SetCmd(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    if (val_len > common::store::osc::client::kCmdPathLength - 1) {
+void OscClientParams::SetCmd(std::string_view key, std::string_view value) {
+    const auto kSize = value.size();
+
+    if (kSize > common::store::osc::client::kCmdPathLength - 1) {
         return;
     }
 
-    const char kSuffix = key[key_len - 1];
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - '0');
     auto* dst = store_oscclient.cmd[kIndex];
 
-    if (val_len >= 1) {
-        if (val[0] != '/') {
+    if (kSize >= 1) {
+        if (value.front() != '/') {
             dst[0] = '\0';
             return;
         }
     }
 
-    memcpy(dst, val, val_len);
-    dst[val_len] = '\0';
+    memcpy(dst, value.data(), kSize);
+    dst[kSize] = '\0';
 }
 
-void OscClientParams::SetLed(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    if (val_len > common::store::osc::client::kLedPathLength - 1) {
+void OscClientParams::SetLed(std::string_view key, std::string_view value) {
+    const auto kSize = value.size();
+
+    if (kSize > common::store::osc::client::kLedPathLength - 1) {
         return;
     }
 
-    const char kSuffix = key[key_len - 1];
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - '0');
     auto* dst = store_oscclient.led[kIndex];
 
-    if (val_len >= 1) {
-        if (val[0] != '/') {
+    if (kSize >= 1) {
+        if (value.front() != '/') {
             dst[0] = '\0';
             return;
         }
     }
 
-    memcpy(dst, val, val_len);
-    dst[val_len] = '\0';
+    memcpy(dst, value.data(), kSize);
+    dst[kSize] = '\0';
 }
 
 void OscClientParams::Store(const char* buffer, uint32_t buffer_size) {
     ParseJsonWithTable(buffer, buffer_size, kOscClientKeys);
     ConfigStore::Instance().Store(&store_oscclient, &ConfigurationStore::osc_client);
 
-#ifdef DEBUG_OSCCLIENT
     Dump();
-#endif
 }
 
 void OscClientParams::Set() {
@@ -138,25 +141,25 @@ void OscClientParams::Set() {
     osc_client.CopyCmds(reinterpret_cast<const char*>(&store_oscclient.cmd));
     osc_client.CopyLeds(reinterpret_cast<const char*>(&store_oscclient.led));
 
-#ifdef DEBUG_OSCCLIENT
     Dump();
-#endif
 }
 
 void OscClientParams::Dump() {
-    printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::OscClientParamsConst::kFileName);
-    printf(" %s=" IPSTR "\n", OscClientParamsConst::kServerIp.name, IP2STR(store_oscclient.server_ip));
-    printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, static_cast<unsigned>(store_oscclient.outgoing_port));
-    printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, static_cast<unsigned>(store_oscclient.incoming_port));
-    printf(" %s=%u\n", OscClientParamsConst::kPingDisable.name, static_cast<unsigned>(common::IsFlagSet(store_oscclient.flags, Flags::Flag::kPingDisable)));
-    printf(" %s=%u\n", OscClientParamsConst::kPingDelay.name, static_cast<unsigned>(store_oscclient.ping_delay));
+    if constexpr (kDebugOscClientEnabled) {
+        printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::OscClientParamsConst::kFileName);
+        printf(" %s=" IPSTR "\n", OscClientParamsConst::kServerIp.name, IP2STR(store_oscclient.server_ip));
+        printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, static_cast<unsigned>(store_oscclient.outgoing_port));
+        printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, static_cast<unsigned>(store_oscclient.incoming_port));
+        printf(" %s=%u\n", OscClientParamsConst::kPingDisable.name, static_cast<unsigned>(common::IsFlagSet(store_oscclient.flags, Flags::Flag::kPingDisable)));
+        printf(" %s=%u\n", OscClientParamsConst::kPingDelay.name, static_cast<unsigned>(store_oscclient.ping_delay));
 
-    for (uint32_t i = 0; i < common::store::osc::client::kCmdCount; i++) {
-        printf(" %s=[%s]\n", OscClientParamsConst::kCmd[0].name, reinterpret_cast<char*>(&store_oscclient.cmd[i]));
-    }
+        for (auto& cmd : store_oscclient.cmd) {
+            printf(" %s=[%s]\n", OscClientParamsConst::kCmd[0].name, reinterpret_cast<char*>(&cmd));
+        }
 
-    for (uint32_t i = 0; i < common::store::osc::client::kLedCount; i++) {
-        printf(" %s=[%s]\n", OscClientParamsConst::kLed[0].name, reinterpret_cast<char*>(&store_oscclient.led[i]));
+        for (auto& led : store_oscclient.led) {
+            printf(" %s=[%s]\n", OscClientParamsConst::kLed[0].name, reinterpret_cast<char*>(&led));
+        }
     }
 }
 } // namespace json

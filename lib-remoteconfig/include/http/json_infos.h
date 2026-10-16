@@ -32,7 +32,6 @@
 #include "http/info_utils.h"
 
 namespace json {
-
 struct Info {
     constexpr Info(uint32_t (*get_in)(char*, uint32_t), void (*set_in)(const char*, uint32_t), void (*del_in)(const char*, uint32_t), const char* name_in, uint8_t length_in, uint32_t hash_in, const char* config_in,
                    const char* status_in) noexcept
@@ -48,9 +47,9 @@ struct Info {
     const char* status_label;
 };
 
-template <size_t N>
-constexpr Info MakeJsonFileInfo(uint32_t (*get)(char*, uint32_t), void (*set)(const char*, uint32_t), void (*del)(const char*, uint32_t), const char (&str)[N], uint32_t hash, const char* config_label, const char* status_label) {
-    return Info{get, set, del, str, static_cast<uint8_t>(N - 1), hash, config_label, status_label};
+template <size_t kN>
+constexpr Info MakeJsonFileInfo(uint32_t (*get)(char*, uint32_t), void (*set)(const char*, uint32_t), void (*del)(const char*, uint32_t), const char (&str)[kN], uint32_t hash, const char* config_label, const char* status_label) {
+    return Info{get, set, del, str, static_cast<uint8_t>(kN - 1), hash, config_label, status_label};
 }
 
 constexpr bool HasUniqueHashes(const Info* entries, size_t count) {

@@ -32,6 +32,7 @@
 #include "configstore.h"
 #include "configurationstore.h"
 #include "common/utils/utils_flags.h"
+#include "osc_debug.h"
 
 using common::store::osc::server::Flags;
 
@@ -40,106 +41,110 @@ OscServerParams::OscServerParams() {
     ConfigStore::Instance().Copy(&store_oscserver, &ConfigurationStore::osc_server);
 }
 
-void OscServerParams::SetIncomingPort(const char* val, uint32_t len) {
-    if (len <= 3) {
+void OscServerParams::SetIncomingPort(std::string_view value) {
+    if (value.size() <= 3) {
         return;
     }
 
-    store_oscserver.incoming_port = ParseValue<uint16_t>(val, len);
+    store_oscserver.incoming_port = ParseValue<uint16_t>(value);
 }
 
-void OscServerParams::SetOutgoingPort(const char* val, uint32_t len) {
-    if (len <= 3) {
+void OscServerParams::SetOutgoingPort(std::string_view value) {
+    if (value.size() <= 3) {
         return;
     }
 
-    store_oscserver.outgoing_port = ParseValue<uint16_t>(val, len);
+    store_oscserver.outgoing_port = ParseValue<uint16_t>(value);
 }
 
-void OscServerParams::SetPath(const char* val, uint32_t len) {
-    if (len > common::store::osc::server::kPathLength - 1) {
+void OscServerParams::SetPath(std::string_view value) {
+    const auto kSize = value.size();
+
+    if (kSize > common::store::osc::server::kPathLength - 1) {
         return;
     }
 
     auto* dst = store_oscserver.path;
 
-    if (len >= 1) {
-        if (val[0] != '/') {
+    if (kSize >= 1) {
+        if (value.front() != '/') {
             dst[0] = '\0';
             return;
         }
     }
 
-    memcpy(dst, val, len);
-    dst[len] = '\0';
+    memcpy(dst, value.data(), kSize);
+    dst[kSize] = '\0';
 }
 
-void OscServerParams::SetPathInfo(const char* val, uint32_t len) {
-    if (len > common::store::osc::server::kPathLength - 1) {
+void OscServerParams::SetPathInfo(std::string_view value) {
+    const auto kSize = value.size();
+
+    if (kSize > common::store::osc::server::kPathLength - 1) {
         return;
     }
 
     auto* dst = store_oscserver.path_info;
 
-    if (len >= 1) {
-        if (val[0] != '/') {
+    if (kSize >= 1) {
+        if (value.front() != '/') {
             dst[0] = '\0';
             return;
         }
     }
 
-    memcpy(dst, val, len);
-    dst[len] = '\0';
+    memcpy(dst, value.data(), kSize);
+    dst[kSize] = '\0';
 }
 
-void OscServerParams::SetPathBlackout(const char* val, [[maybe_unused]] uint32_t len) {
-    if (len > common::store::osc::server::kPathLength - 1) {
+void OscServerParams::SetPathBlackout(std::string_view value) {
+    const auto kSize = value.size();
+
+    if (kSize > common::store::osc::server::kPathLength - 1) {
         return;
     }
 
     auto* dst = store_oscserver.path_blackout;
 
-    if (len >= 1) {
-        if (val[0] != '/') {
+    if (kSize >= 1) {
+        if (value.front() != '/') {
             dst[0] = '\0';
             return;
         }
     }
 
-    memcpy(dst, val, len);
-    dst[len] = '\0';
+    memcpy(dst, value.data(), kSize);
+    dst[kSize] = '\0';
 }
 
-void OscServerParams::SetTransmission(const char* val, [[maybe_unused]] uint32_t len) {
-    if (len != 1) {
+void OscServerParams::SetTransmission(std::string_view value) {
+    if (value.size() != 1) {
         return;
     }
 
-    store_oscserver.flags = common::SetFlagValue(store_oscserver.flags, Flags::Flag::kPartialTransmission, val[0] != '0');
+    store_oscserver.flags = common::SetFlagValue(store_oscserver.flags, Flags::Flag::kPartialTransmission, value.front() != '0');
 }
 
 void OscServerParams::Store(const char* buffer, uint32_t buffer_size) {
     ParseJsonWithTable(buffer, buffer_size, kOscServerKeys);
     ConfigStore::Instance().Store(&store_oscserver, &ConfigurationStore::osc_server);
 
-#ifdef DEBUG_OSCSERVER
     Dump();
-#endif
 }
 
 void OscServerParams::Set() {
-#ifdef DEBUG_OSCSERVER
     Dump();
-#endif
 }
 
 void OscServerParams::Dump() {
-    printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::OscServerParamsConst::kFileName);
-    printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, static_cast<unsigned>(store_oscserver.incoming_port));
-    printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, static_cast<unsigned>(store_oscserver.outgoing_port));
-    printf(" %s=%s\n", OscServerParamsConst::kPath.name, store_oscserver.path);
-    printf(" %s=%s\n", OscServerParamsConst::kPathInfo.name, store_oscserver.path_info);
-    printf(" %s=%s\n", OscServerParamsConst::kPathBlackout.name, store_oscserver.path_blackout);
-    printf(" %s=%u\n", OscServerParamsConst::kTransmission.name, static_cast<unsigned>(common::IsFlagSet(store_oscserver.flags, Flags::Flag::kPartialTransmission)));
+    if constexpr (kDebugOscServerEnabled) {
+        printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::OscServerParamsConst::kFileName);
+        printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, static_cast<unsigned>(store_oscserver.incoming_port));
+        printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, static_cast<unsigned>(store_oscserver.outgoing_port));
+        printf(" %s=%s\n", OscServerParamsConst::kPath.name, store_oscserver.path);
+        printf(" %s=%s\n", OscServerParamsConst::kPathInfo.name, store_oscserver.path_info);
+        printf(" %s=%s\n", OscServerParamsConst::kPathBlackout.name, store_oscserver.path_blackout);
+        printf(" %s=%u\n", OscServerParamsConst::kTransmission.name, static_cast<unsigned>(common::IsFlagSet(store_oscserver.flags, Flags::Flag::kPartialTransmission)));
+    }
 }
 } // namespace json

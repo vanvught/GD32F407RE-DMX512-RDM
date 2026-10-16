@@ -41,7 +41,7 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
     for (size_t i = 0; i < kFileInfosSize; ++i) {
         const auto& entry = kFileInfos[i];
         if ((entry.config_label != nullptr) && (entry.config_label[0] != '\0')) {
-            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "\"%s\":\"%s\"%s", entry.name, entry.config_label, (i + 1 < kFileInfosSize) ? "," : ""));
+            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, R"("%s":"%s"%s)", entry.name, entry.config_label, (i + 1 < kFileInfosSize) ? "," : ""));
         }
     }
 

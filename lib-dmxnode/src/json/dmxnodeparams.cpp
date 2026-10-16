@@ -23,7 +23,6 @@
  */
 
 #include <cstdint>
-#include <cstring>
 #include <utility>
 
 #include "json/dmxnodeparams.h"
@@ -41,6 +40,7 @@
 #ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX
+#include "common/utils/utils_string.h"
 
 using common::store::dmxnode::Flags;
 
@@ -49,67 +49,57 @@ DmxNodeParams::DmxNodeParams() {
     ConfigStore::Instance().Copy(&store_dmxnode, &ConfigurationStore::dmx_node);
 }
 
-void DmxNodeParams::SetNodeName(const char* val, uint32_t len) {
-    len = len > (common::store::dmxnode::kNodeNameLength - 1) ? common::store::dmxnode::kNodeNameLength - 1 : len;
-    memcpy(reinterpret_cast<char*>(store_dmxnode.node_name), val, len);
-
-    for (uint32_t i = len; i < common::store::dmxnode::kNodeNameLength - 1; i++) {
-        store_dmxnode.node_name[i] = '\0';
-    }
+void DmxNodeParams::SetNodeName(std::string_view value) {
+    common::CopyString(store_dmxnode.node_name, value);
 }
 
-void DmxNodeParams::SetFailsafe(const char* val, [[maybe_unused]] uint32_t len) {
-    store_dmxnode.fail_safe = std::to_underlying(dmxnode::GetFailsafe(val));
+void DmxNodeParams::SetFailsafe(std::string_view value) {
+    store_dmxnode.fail_safe = std::to_underlying(dmxnode::GetFailsafe(value.data()));
 }
 
-void DmxNodeParams::SetDisableMergeTimeout(const char* val, [[maybe_unused]] uint32_t len) {
-    if (len != 1) {
+void DmxNodeParams::SetDisableMergeTimeout(std::string_view value) {
+    if (value.size() != 1) {
         return;
     }
 
-    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout, val[0] != '0');
+    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout, value.front() != '0');
 }
 
-void DmxNodeParams::SetLabelPort(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void DmxNodeParams::SetLabelPort(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
-    val_len = val_len > (common::store::dmxnode::kPortNameLength - 1) ? common::store::dmxnode::kPortNameLength - 1 : val_len;
-    memcpy(reinterpret_cast<char*>(store_dmxnode.port_name[kIndex]), val, val_len);
-
-    for (uint32_t i = val_len; i < common::store::dmxnode::kPortNameLength - 1; i++) {
-        store_dmxnode.port_name[kIndex][i] = '\0';
-    }
+    common::CopyString(store_dmxnode.port_name[kIndex], value);
 }
 
-void DmxNodeParams::SetUniversePort(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void DmxNodeParams::SetUniversePort(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
-    store_dmxnode.universe[kIndex] = ParseValue<uint16_t>(val, val_len);
+    store_dmxnode.universe[kIndex] = ParseValue<uint16_t>(value);
 }
 
-void DmxNodeParams::SetDirectionPort(const char* key, uint32_t key_len, const char* val, [[maybe_unused]] uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void DmxNodeParams::SetDirectionPort(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto direction = store_dmxnode.direction;
-    common::Set2BitField<dmxnode::Direction>(kIndex, dmxnode::PortDirection(val), direction);
+    common::Set2BitField<dmxnode::Direction>(kIndex, dmxnode::PortDirection(value.data()), direction);
     store_dmxnode.direction = direction;
 }
 
-void DmxNodeParams::SetMergeModePort(const char* key, uint32_t key_len, const char* val, [[maybe_unused]] uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void DmxNodeParams::SetMergeModePort(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto merge_mode = store_dmxnode.merge_mode;
-    common::Set2BitField<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(val), merge_mode);
+    common::Set2BitField<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(value.data()), merge_mode);
     store_dmxnode.merge_mode = merge_mode;
 }
 
-void DmxNodeParams::SetOutputStylePort(const char* key, uint32_t key_len, const char* val, [[maybe_unused]] uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void DmxNodeParams::SetOutputStylePort(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
-    const auto kOutputStyle = dmxnode::GetOutputStyle(val);
+    const auto kOutputStyle = dmxnode::GetOutputStyle(value.data());
 
     if (kOutputStyle != dmxnode::OutputStyle::kDelta) {
         store_dmxnode.output_style |= static_cast<uint8_t>(1U << kIndex);

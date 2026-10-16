@@ -2,7 +2,7 @@
  * @file rdmsensorsparamsconst.h
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,12 @@ namespace json {
 struct RdmSensorsParamsConst {
     static constexpr char kFileName[] = "sensors.json";
 
-    static constexpr auto kBH170 = json::MakeSimpleKey("bh1750");
-    static constexpr auto kHTU21D = json::MakeSimpleKey("htu21d");
-    static constexpr auto kINA219 = json::MakeSimpleKey("ina219");
-    static constexpr auto kMCP9808 = json::MakeSimpleKey("mcp9808");
-    static constexpr auto kSI7021 = json::MakeSimpleKey("si7021");
-    static constexpr auto kMCP3424 = json::MakeSimpleKey("mcp3424");
+    static constexpr auto kBH170 = json::MakeKey("bh1750");
+    static constexpr auto kHTU21D = json::MakeKey("htu21d");
+    static constexpr auto kINA219 = json::MakeKey("ina219");
+    static constexpr auto kMCP9808 = json::MakeKey("mcp9808");
+    static constexpr auto kSI7021 = json::MakeKey("si7021");
+    static constexpr auto kMCP3424 = json::MakeKey("mcp3424");
 };
 } // namespace json
 

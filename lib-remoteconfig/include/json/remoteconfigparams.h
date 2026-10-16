@@ -31,10 +31,8 @@
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 
-namespace json
-{
-class RemoteConfigParams : public JsonParamsBase<RemoteConfigParams>
-{
+namespace json {
+class RemoteConfigParams : public JsonParamsBase<RemoteConfigParams> {
    public:
     RemoteConfigParams();
 
@@ -52,7 +50,7 @@ class RemoteConfigParams : public JsonParamsBase<RemoteConfigParams>
     void Dump();
 
    private:
-    static void SetDisplayName(const char* val, uint32_t len);
+    static void SetDisplayName(std::string_view value);
 
     static constexpr json::Key kRemoteConfigKeys[] = {
         MakeKey(SetDisplayName, RemoteConfigParamsConst::kDisplayName),

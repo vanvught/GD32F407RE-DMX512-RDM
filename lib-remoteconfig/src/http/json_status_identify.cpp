@@ -30,9 +30,7 @@
 namespace json::status {
 uint32_t Identify(char* out_buffer, uint32_t out_buffer_size) {
     const bool kIsOn = board::statusled::GetMode() == board::statusled::Mode::kFast;
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"identify\":%d}", 
-		kIsOn));
+    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"identify\":%d}", static_cast<int>(kIsOn)));
     return kLength;
 }
 } // namespace json::status

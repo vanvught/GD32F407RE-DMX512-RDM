@@ -26,10 +26,8 @@
 #ifndef HTTP_HTTP_H_
 #define HTTP_HTTP_H_
 
-namespace http
-{
-enum class Status
-{
+namespace http {
+enum class Status {
     kOk = 200,
     kNotModified = 304,
     kBadRequest = 400,
@@ -40,25 +38,11 @@ enum class Status
     kInternalServerError = 500,
     kMethodNotImplemented = 501,
     kVersionNotSupported = 505,
-    kUnknownError = 520
+    kUnknownError = 520,
 };
-enum class RequestMethod
-{
-    kGet,
-    kPost,
-    kDelete,
-    kUnknown
-};
+enum class RequestMethod { kGet, kPost, kDelete, kUnknown };
 
-enum class ContentTypes
-{
-    kTextHtml,
-    kTextCss,
-    kTextJs,
-    kApplicationJson,
-    kApplicationOctetStream,
-    kNotDefined
-};
+enum class ContentTypes { kTextHtml, kTextCss, kTextJs, kApplicationJson, kApplicationOctetStream, kNotDefined };
 
 inline constexpr char kRequestMethod[][8] = {"GET", "POST", "DELETE", "UNKNOWN"};
 

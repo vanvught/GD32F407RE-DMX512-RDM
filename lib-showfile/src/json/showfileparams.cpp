@@ -41,33 +41,33 @@ ShowFileParams::ShowFileParams() {
     ConfigStore::Instance().Copy(&store_showfile, &ConfigurationStore::show_file);
 }
 
-void ShowFileParams::SetShow(const char* val, uint32_t len) {
-    if (len < 3) {
-        store_showfile.show = ParseValue<uint8_t>(val, len);
+void ShowFileParams::SetShow(std::string_view value) {
+    if ((!value.empty()) && (value.size() < 3)) {
+        store_showfile.show = ParseValue<uint8_t>(value);
     }
 }
 
-void ShowFileParams::SetOptionAutoPlay(const char* val, uint32_t len) {
-    if (len == 1) {
-        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, val[0] != '0');
+void ShowFileParams::SetOptionAutoPlay(std::string_view value) {
+    if (value.size() == 1) {
+        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, value.front() != '0');
     }
 }
 
-void ShowFileParams::SetOptionLoop(const char* val, uint32_t len) {
-    if (len == 1) {
-        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, val[0] != '0');
+void ShowFileParams::SetOptionLoop(std::string_view value) {
+    if (value.size() == 1) {
+        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, value.front() != '0');
     }
 }
 
-void ShowFileParams::SetIncomingPort(const char* val, uint32_t len) {
-    if (len > 3) {
-        store_showfile.osc_port_incoming = ParseValue<uint16_t>(val, len);
+void ShowFileParams::SetIncomingPort(std::string_view value) {
+    if (value.size() > 3) {
+        store_showfile.osc_port_incoming = ParseValue<uint16_t>(value);
     }
 }
 
-void ShowFileParams::SetOutgoingPort(const char* val, uint32_t len) {
-    if (len > 3) {
-        store_showfile.osc_port_outgoing = ParseValue<uint16_t>(val, len);
+void ShowFileParams::SetOutgoingPort(std::string_view value) {
+    if (value.size() > 3) {
+        store_showfile.osc_port_outgoing = ParseValue<uint16_t>(value);
     }
 }
 
@@ -83,7 +83,7 @@ void ShowFileParams::Set() {
     // Options
     showfile.SetAutoStart(common::IsFlagSet(store_showfile.flags, Flags::Flag::kOptionAutoPlay));
     showfile.DoLoop(common::IsFlagSet(store_showfile.flags, Flags::Flag::kOptionLoop));
-#if defined(CONFIG_SHOWFILE_ENABLE_OSC)
+#ifdef CONFIG_SHOWFILE_ENABLE_OSC
     showfile.SetOscPortIncoming(store_showfile.osc_port_incoming);
     showfile.SetOscPortOutgoing(store_showfile.osc_port_outgoing);
 #endif
@@ -102,7 +102,7 @@ void ShowFileParams::Dump() {
     printf(" %s=%u\n", json::ShowFileParamsConst::kShow.name, store_showfile.show);
     printf(" %s=%u\n", json::ShowFileParamsConst::kOptionAutoPlay.name, common::IsFlagSet(store_showfile.flags, Flags::Flag::kOptionAutoPlay));
     printf(" %s=%u\n", json::ShowFileParamsConst::kOptionLoop.name, common::IsFlagSet(store_showfile.flags, Flags::Flag::kOptionLoop));
-#if defined(CONFIG_SHOWFILE_ENABLE_OSC)
+#ifdef CONFIG_SHOWFILE_ENABLE_OSC
     printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, store_showfile.osc_port_incoming);
     printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, store_showfile.osc_port_outgoing);
 #endif

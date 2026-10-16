@@ -9,6 +9,9 @@ ifneq ($(MAKE_FLAGS),)
 	ifneq (,$(findstring RDM_RESPONDER,$(MAKE_FLAGS)))
 		EXTRA_INCLUDES+=../lib-rdm/include
 	endif
+	ifneq (,$(findstring CONFIG_RDM_ENABLE_SENSORS,$(MAKE_FLAGS)))
+		EXTRA_INCLUDES+=../lib-rdmsensor/include
+	endif
 	ifneq (,$(findstring NODE_RDMNET_LLRP_ONLY,$(MAKE_FLAGS)))
 		EXTRA_INCLUDES+=../lib-rdm/include
 	endif

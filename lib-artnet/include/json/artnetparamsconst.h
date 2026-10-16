@@ -25,30 +25,29 @@
 #ifndef JSON_ARTNETPARAMSCONST_H_
 #define JSON_ARTNETPARAMSCONST_H_
 
-#include "common/utils/utils_hash.h"
 #include "json/json_key.h"
 #include "dmxnode_outputtype.h"
 
 namespace json {
 struct ArtNetParamsConst {
     static constexpr char kFileName[] = "artnet.json";
-    static constexpr auto kMapUniverse0 = json::MakeSimpleKey("map_universe0");
+    static constexpr auto kMapUniverse0 = json::MakeKey("map_universe0");
 
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
-    static constexpr auto kEnableRdm = json::MakeSimpleKey("enable_rdm");
+    static constexpr auto kEnableRdm = json::MakeKey("enable_rdm");
 
-    static constexpr json::PortKey kRdmEnablePortA{.name="rdm_enable_port_a", .length=17, .hash=Fnv1a32("rdm_enable_port_a", 17)};
+    static constexpr auto kRdmEnablePortA = json::MakeKey("rdm_enable_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kRdmEnablePortB{.name="rdm_enable_port_b", .length=17, .hash=Fnv1a32("rdm_enable_port_b", 17)};
+    static constexpr auto kRdmEnablePortB = json::MakeKey("rdm_enable_port_b");
 #endif
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kRdmEnablePortC{"rdm_enable_port_c", 17, Fnv1a32("rdm_enable_port_c", 17)};
+    static constexpr auto kRdmEnablePortC = json::MakeKey("rdm_enable_port_c");
 #endif
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kRdmEnablePortD{"rdm_enable_port_d", 17, Fnv1a32("rdm_enable_port_d", 17)};
+    static constexpr auto kRdmEnablePortD = json::MakeKey("rdm_enable_port_d");
 #endif
 
-    static constexpr json::PortKey kRdmEnablePort[] = {
+    static constexpr json::KeyDefinition kRdmEnablePort[] = {
         kRdmEnablePortA,
 #if (DMX_MAX_PORTS > 1)
         kRdmEnablePortB,
@@ -62,19 +61,19 @@ struct ArtNetParamsConst {
     };
 #endif
 
-#if defined(DMX_MAX_PORTS)
-    static constexpr json::PortKey kDestinationIpPortA{.name="destination_ip_port_a", .length=21, .hash=Fnv1a32("destination_ip_port_a", 21)};
+#ifdef DMX_MAX_PORTS
+    static constexpr auto kDestinationIpPortA = json::MakeKey("destination_ip_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kDestinationIpPortB{.name="destination_ip_port_b", .length=21, .hash=Fnv1a32("destination_ip_port_b", 21)};
+    static constexpr auto kDestinationIpPortB = json::MakeKey("destination_ip_port_b");
 #endif
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kDestinationIpPortC{"destination_ip_port_c", 21, Fnv1a32("destination_ip_port_c", 21)};
+    static constexpr auto kDestinationIpPortC = json::MakeKey("destination_ip_port_c");
 #endif
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kDestinationIpPortD{"destination_ip_port_d", 21, Fnv1a32("destination_ip_port_d", 21)};
+    static constexpr auto kDestinationIpPortD = json::MakeKey("destination_ip_port_d");
 #endif
 
-    static constexpr json::PortKey kDestinationIpPort[] = {
+    static constexpr json::KeyDefinition kDestinationIpPort[] = {
         kDestinationIpPortA,
 #if (DMX_MAX_PORTS > 1)
         kDestinationIpPortB,
@@ -87,18 +86,18 @@ struct ArtNetParamsConst {
 #endif
     };
 
-    static constexpr json::PortKey kProtocolPortA{.name="protocol_port_a", .length=15, .hash=Fnv1a32("protocol_port_a", 15)};
+    static constexpr auto kProtocolPortA = json::MakeKey("protocol_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kProtocolPortB{.name="protocol_port_b", .length=15, .hash=Fnv1a32("protocol_port_b", 15)};
+    static constexpr auto kProtocolPortB = json::MakeKey("protocol_port_b");
 #endif
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kProtocolPortC{"protocol_port_c", 15, Fnv1a32("protocol_port_c", 15)};
+    static constexpr auto kProtocolPortC = json::MakeKey("protocol_port_c");
 #endif
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kProtocolPortD{"protocol_port_d", 15, Fnv1a32("protocol_port_d", 15)};
+    static constexpr auto kProtocolPortD = json::MakeKey("protocol_port_d");
 #endif
 
-    static constexpr json::PortKey kProtocolPort[] = {
+    static constexpr json::KeyDefinition kProtocolPort[] = {
         kProtocolPortA,
 #if (DMX_MAX_PORTS > 1)
         kProtocolPortB,
@@ -111,18 +110,19 @@ struct ArtNetParamsConst {
 #endif
     };
 
-    static constexpr json::PortKey kBgDiscoveryPortA{.name="bg_discovery_port_a", .length=19, .hash=Fnv1a32("bg_discovery_port_a", 19)};
+    static constexpr auto kBgDiscoveryPortA = json::MakeKey("bg_discovery_port_a");
+
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kBgDiscoveryPortB{.name="bg_discovery_port_b", .length=19, .hash=Fnv1a32("bg_discovery_port_b", 19)};
+    static constexpr auto kBgDiscoveryPortB = json::MakeKey("bg_discovery_port_b");
 #endif
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kBgDiscoveryPortC{"bg_discovery_port_c", 19, Fnv1a32("bg_discovery_port_c", 19)};
+    static constexpr auto kBgDiscoveryPortC = json::MakeKey("bg_discovery_port_c");
 #endif
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kBgDiscoveryPortD{"bg_discovery_port_d", 19, Fnv1a32("bg_discovery_port_d", 19)};
+    static constexpr auto kBgDiscoveryPortD = json::MakeKey("bg_discovery_port_d");
 #endif
 
-    static constexpr json::PortKey kBgDiscoveryPort[] = {
+    static constexpr json::KeyDefinition kBgDiscoveryPort[] = {
         kBgDiscoveryPortA,
 #if (DMX_MAX_PORTS > 1)
         kBgDiscoveryPortB,

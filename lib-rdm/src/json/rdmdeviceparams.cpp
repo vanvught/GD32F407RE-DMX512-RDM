@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <string_view>
 
 #include "rdmdevice.h"
 #include "json/rdmdeviceparams.h"
@@ -39,9 +40,10 @@ RdmDeviceParams::RdmDeviceParams() {
     ConfigStore::Instance().Copy(&store_rdmdevice, &ConfigurationStore::rdm_device);
 }
 
-void RdmDeviceParams::SetLabel(const char* val, uint32_t len) {
-    memcpy(store_rdmdevice.device_root_label, val,std::max(len, static_cast<uint32_t>(rdm::device::kLabelMaxLength)));
-    store_rdmdevice.device_root_label_length = static_cast<uint8_t>(len);
+void RdmDeviceParams::SetLabel(std::string_view value) {
+    const auto kLength = std::max(value.size(), static_cast<size_t>(rdm::device::kLabelMaxLength));
+    memcpy(store_rdmdevice.device_root_label, value.data(), kLength);
+    store_rdmdevice.device_root_label_length = static_cast<uint8_t>(kLength);
 }
 
 void RdmDeviceParams::Store(const char* buffer, uint32_t buffer_size) {

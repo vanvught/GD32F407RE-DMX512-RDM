@@ -28,7 +28,6 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <cassert>
 
 namespace format {
 constexpr size_t kFloatBufferSize = 8;   // For "%.2f", "%.1f"

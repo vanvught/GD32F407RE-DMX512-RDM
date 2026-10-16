@@ -41,14 +41,14 @@ E131Params::E131Params() {
     ConfigStore::Instance().Copy(&store_dmxnode, &ConfigurationStore::dmx_node);
 }
 
-void E131Params::SetPriority(const char* key, uint32_t key_len, const char* val, uint32_t val_len) {
-    const char kSuffix = key[key_len - 1];
+void E131Params::SetPriority(std::string_view key, std::string_view value) {
+    const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
-    store_dmxnode.priority[kIndex] = ParseValue<uint8_t>(val, val_len);
+    store_dmxnode.priority[kIndex] = ParseValue<uint8_t>(value);
 }
 
 void E131Params::Store([[maybe_unused]] const char* buffer, [[maybe_unused]] uint32_t buffer_size) {
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
     ParseJsonWithTable(buffer, buffer_size, kE131PriorityKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
 #endif
@@ -76,7 +76,7 @@ void E131Params::Set() {
 void E131Params::Dump() {
     if constexpr (dmxnode::kConfigPortCount != 0) {
         printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::E131ParamsConst::kFileName);
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
             printf("%s=%u\n", json::E131ParamsConst::kPriorityPort[port_index].name, static_cast<unsigned>(store_dmxnode.priority[port_index]));
         }

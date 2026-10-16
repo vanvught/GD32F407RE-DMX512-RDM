@@ -28,25 +28,26 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
+#include <string_view>
 
 #include "common/utils/utils_hash.h"
 #include "json/json_key.h"
 #include "json/json_tokenizer.h"
 
-inline void ParseJsonWithTable(const char* buffer, size_t size, const json::Key* keys, size_t key_count) {
-    JsonTokenizer tok(buffer, size);
+inline void ParseJsonWithTable(std::string_view input, const json::Key* keys, size_t key_count) {
+    JsonTokenizer tok(input);
     tok.SkipWhitespace();
 
     if (tok.p >= tok.end || *tok.p != '{') {
         return;
     }
+
     ++tok.p;
 
     while (tok.p < tok.end) {
-        const char* json_key;
-        size_t json_key_len;
-        if (!tok.NextString(json_key, json_key_len)) {
+        std::string_view json_key;
+
+        if (!tok.NextString(json_key)) {
             break;
         }
 
@@ -54,43 +55,51 @@ inline void ParseJsonWithTable(const char* buffer, size_t size, const json::Key*
             break;
         }
 
-        const char* val;
-        size_t val_len;
-        if (!tok.NextValue(val, val_len)) {
+        std::string_view value;
+
+        if (!tok.NextValue(value)) {
             break;
         }
 
-        uint32_t h = Fnv1a32Runtime(json_key, static_cast<uint32_t>(json_key_len));
-        bool matched = false;
+        const auto kHash = Fnv1a32(json_key);
 
         for (size_t i = 0; i < key_count; ++i) {
-            if (keys[i].GetHash() == h) {
-                if (keys[i].type == json::Key::kSimple) {
-                    keys[i].set_simple(val, val_len);
-                } else {
-                    keys[i].set_keyed(json_key, json_key_len, val, val_len);
-                }
-                matched = true;
-                break;
-            }
-        }
+            const auto& key = keys[i];
 
-        if (!matched) {
-            // Unknown key
+            if (key.GetHash() != kHash || key.GetName() != json_key) {
+                continue;
+            }
+
+            if (key.type == json::Key::kSimple) {
+                key.set_simple(value);
+            } else {
+                key.set_keyed(json_key, value);
+            }
+
+            break;
         }
 
         tok.SkipWhitespace();
+
         if (tok.p < tok.end && *tok.p == ',') {
             ++tok.p;
         } else if (tok.p < tok.end && *tok.p == '}') {
+            break;
+        } else {
             break;
         }
     }
 }
 
-template <size_t N>
-inline void ParseJsonWithTable(const char* buffer, size_t size, const json::Key (&keys)[N]) {
-    ParseJsonWithTable(buffer, size, keys, N);
+template <size_t kN>
+inline void ParseJsonWithTable(std::string_view input, const json::Key (&keys)[kN]) {
+    ParseJsonWithTable(input, keys, kN);
+}
+
+// Temporary compatibility overload.
+template <size_t kN>
+inline void ParseJsonWithTable(const char* buffer, size_t size, const json::Key (&keys)[kN]) {
+    ParseJsonWithTable(std::string_view{buffer, size}, keys);
 }
 
 #endif // JSON_JSON_PARSER_H_

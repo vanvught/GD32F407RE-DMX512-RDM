@@ -27,24 +27,16 @@
 #define COMMON_UTILS_UTILS_HASH_H_
 
 #include <cstdint>
+#include <string_view>
 
-// Compile-time FNV-1a 32-bit hash
-consteval uint32_t Fnv1a32(const char* str, uint8_t length) {
+constexpr uint32_t Fnv1a32(std::string_view str) {
     uint32_t hash = 0x811c9dc5u;
-    for (uint8_t i = 0; i < length; ++i) {
-        hash ^= static_cast<uint8_t>(str[i]);
+
+    for (const auto character : str) {
+        hash ^= static_cast<uint8_t>(character);
         hash *= 0x01000193u;
     }
-    return hash;
-}
 
-// Runtime version for raw filenames
-inline uint32_t Fnv1a32Runtime(const char* str, uint32_t length) {
-    uint32_t hash = 0x811c9dc5u;
-    for (uint32_t i = 0; i < length; ++i) {
-        hash ^= static_cast<uint8_t>(str[i]);
-        hash *= 0x01000193u;
-    }
     return hash;
 }
 

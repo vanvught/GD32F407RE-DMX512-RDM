@@ -43,8 +43,10 @@ uint32_t GetDisplayUdf(char* buffer, uint32_t length) {
         doc[DisplayUdfParamsConst::kFlipVertically.name] = displayudf.GetFlipVertically();
 
         for (uint32_t i = 0; i < common::ArraySize(DisplayUdfParamsConst::kLabels); ++i) {
-#if !defined(RDM_RESPONDER)
-            if (i == 8) continue;
+#ifndef RDM_RESPONDER
+            if (i == 8) {
+                continue;
+            }
 #endif
             const auto kLabel = displayudf.GetLabel(i);
             if (kLabel > common::ArraySize(DisplayUdfParamsConst::kLabels)) {

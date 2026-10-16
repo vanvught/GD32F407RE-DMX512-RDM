@@ -59,14 +59,14 @@ class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
     static_assert(static_cast<uint32_t>(dmxnode::OutputStyle::kDelta) == 0);
     dmxnode::OutputStyle GetOutputStyleSet(uint8_t mask) const { return (store_dmxnode.output_style & mask) == mask ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta; }
 
-    static void SetNodeName(const char* val, uint32_t len);
-    static void SetFailsafe(const char* val, uint32_t len);
-    static void SetDisableMergeTimeout(const char* val, uint32_t len);
-    static void SetLabelPort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetUniversePort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetDirectionPort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetMergeModePort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetOutputStylePort(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
+    static void SetNodeName(std::string_view value);
+    static void SetFailsafe(std::string_view value);
+    static void SetDisableMergeTimeout(std::string_view value);
+    static void SetLabelPort(std::string_view key, std::string_view value);
+    static void SetUniversePort(std::string_view key, std::string_view value);
+    static void SetDirectionPort(std::string_view key, std::string_view value);
+    static void SetMergeModePort(std::string_view key, std::string_view value);
+    static void SetOutputStylePort(std::string_view key, std::string_view value);
 
     static constexpr json::Key kDmxNodeKeys[] = {
         MakeKey(SetNodeName, DmxNodeParamsConst::kNodeName),

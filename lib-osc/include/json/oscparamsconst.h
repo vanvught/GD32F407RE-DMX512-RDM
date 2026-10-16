@@ -26,13 +26,11 @@
 #define JSON_OSCPARAMSCONST_H_
 
 #include "json/json_key.h"
-#include "common/utils/utils_hash.h"
 
 namespace json {
 struct OscParamsConst {
-    static constexpr auto kIncomingPort = json::MakeSimpleKey("incoming_port");
-
-    static constexpr auto kOutgoingPort = json::MakeSimpleKey("outgoing_port");
+    static constexpr auto kIncomingPort = json::MakeKey("incoming_port");
+    static constexpr auto kOutgoingPort = json::MakeKey("outgoing_port");
 };
 } // namespace json
 

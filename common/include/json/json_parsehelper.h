@@ -26,26 +26,27 @@
 #ifndef JSON_JSON_PARSEHELPER_H_
 #define JSON_JSON_PARSEHELPER_H_
 
-#include <cstdint>
 #include <type_traits>
 
 #include "common/utils/utils_string.h"
 
 namespace json {
 template <typename T>
-T ParseValue(const char* val, uint32_t len) {
-    int32_t value = common::Atoi(val, len);
+T ParseValue(std::string_view value) {
+    const auto kValue = common::Atoi(value);
+
     if constexpr (std::is_unsigned_v<T>) {
-        if (value < 0) {
-            return 0; // or handle error
+        if (kValue < 0) {
+            return 0;
         }
     }
-    return static_cast<T>(value);
+
+    return static_cast<T>(kValue);
 }
 
 template <typename T>
-bool ParseInRange(const char* val, uint32_t len, T min, T max, T* out) {
-    const auto kValue = ParseValue<T>(val, len);
+bool ParseInRange(std::string_view val, T min, T max, T* out) {
+    const auto kValue = ParseValue<T>(val);
 
     if ((kValue < min) || (kValue > max)) {
         return false;
@@ -56,8 +57,8 @@ bool ParseInRange(const char* val, uint32_t len, T min, T max, T* out) {
 }
 
 template <typename ParseT, typename StoreT>
-bool ParseInRange(const char* val, uint32_t len, ParseT min, ParseT max, StoreT* out) {
-    const auto kValue = ParseValue<ParseT>(val, len);
+bool ParseInRange(std::string_view val, ParseT min, ParseT max, StoreT* out) {
+    const auto kValue = ParseValue<ParseT>(val);
 
     if ((kValue < min) || (kValue > max)) {
         return false;

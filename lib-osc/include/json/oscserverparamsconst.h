@@ -2,7 +2,7 @@
  * @file oscserverparamsconst.h
  *
  */
-/* Copyright (C) 2022-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2022-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,10 @@ namespace json {
 struct OscServerParamsConst {
     static constexpr char kFileName[] = "oscserver.json";
 
-    static constexpr auto kPath = json::MakeSimpleKey("path");
-    static constexpr auto kPathInfo = json::MakeSimpleKey("path_info");
-    static constexpr auto kPathBlackout = json::MakeSimpleKey("path_blackout");
-    static constexpr auto kTransmission = json::MakeSimpleKey("partial_transmission");
+    static constexpr auto kPath = json::MakeKey("path");
+    static constexpr auto kPathInfo = json::MakeKey("path_info");
+    static constexpr auto kPathBlackout = json::MakeKey("path_blackout");
+    static constexpr auto kTransmission = json::MakeKey("partial_transmission");
 };
 } // namespace json
 

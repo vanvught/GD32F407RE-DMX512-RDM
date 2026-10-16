@@ -33,7 +33,7 @@ uint32_t Phy(char* out_buffer, uint32_t out_buffer_size) {
     ::emac::phy::CustomizedStatus(phy_status);
 
     const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"link\":\"%s\",\"speed\":\"%s\",\"duplex\":\"%s\",\"autonegotiation\":\"%s\"}", 
+		R"({"link":"%s","speed":"%s","duplex":"%s","autonegotiation":"%s"})", 
 		::emac::phy::ToString(phy_status.link),
 		::emac::phy::ToString(phy_status.speed), 
 		::emac::phy::ToString(phy_status.duplex), 

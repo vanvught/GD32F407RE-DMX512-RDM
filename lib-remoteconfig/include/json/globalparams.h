@@ -11,10 +11,8 @@
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 
-namespace json
-{
-class GlobalParams : public JsonParamsBase<GlobalParams>
-{
+namespace json {
+class GlobalParams : public JsonParamsBase<GlobalParams> {
    public:
     GlobalParams();
 
@@ -32,12 +30,12 @@ class GlobalParams : public JsonParamsBase<GlobalParams>
     void Dump();
 
    private:
-    static void SetUtcOffset(const char* val, uint32_t len);
-    
+    static void SetUtcOffset(std::string_view value);
+
     static constexpr json::Key kGlobalKeys[] = {
-		json::MakeKey(SetUtcOffset, GlobalParamsConst::kUtcOffset), 
-	};
-    
+        json::MakeKey(SetUtcOffset, GlobalParamsConst::kUtcOffset),
+    };
+
     inline static common::store::Global store_global;
 
     friend class JsonParamsBase<GlobalParams>;

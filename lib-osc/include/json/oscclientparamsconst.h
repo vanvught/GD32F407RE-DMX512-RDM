@@ -27,39 +27,38 @@
 #define JSON_OSCCLIENTPARAMSCONST_H_
 
 #include "json/json_key.h"
-#include "common/utils/utils_hash.h"
 
 namespace json {
 struct OscClientParamsConst {
     static constexpr char kFileName[] = "oscclient.json";
 
-    static constexpr auto kServerIp = json::MakeSimpleKey("server_ip");
-    static constexpr auto kPingDisable = json::MakeSimpleKey("ping_disable");
-    static constexpr auto kPingDelay = json::MakeSimpleKey("ping_delay");
+    static constexpr auto kServerIp = json::MakeKey("server_ip");
+    static constexpr auto kPingDisable = json::MakeKey("ping_disable");
+    static constexpr auto kPingDelay = json::MakeKey("ping_delay");
 
-    static constexpr json::PortKey kCmd0{"cmd0", 4, Fnv1a32("cmd0", 4)};
-    static constexpr json::PortKey kCmd1{"cmd1", 4, Fnv1a32("cmd1", 4)};
-    static constexpr json::PortKey kCmd2{"cmd2", 4, Fnv1a32("cmd2", 4)};
-    static constexpr json::PortKey kCmd3{"cmd3", 4, Fnv1a32("cmd3", 4)};
-    static constexpr json::PortKey kCmd4{"cmd4", 4, Fnv1a32("cmd4", 4)};
-    static constexpr json::PortKey kCmd5{"cmd5", 4, Fnv1a32("cmd5", 4)};
-    static constexpr json::PortKey kCmd6{"cmd6", 4, Fnv1a32("cmd6", 4)};
-    static constexpr json::PortKey kCmd7{"cmd7", 4, Fnv1a32("cmd7", 4)};
+    static constexpr auto kCmd0 = json::MakeKey("cmd0");
+    static constexpr auto kCmd1 = json::MakeKey("cmd1");
+    static constexpr auto kCmd2 = json::MakeKey("cmd2");
+    static constexpr auto kCmd3 = json::MakeKey("cmd3");
+    static constexpr auto kCmd4 = json::MakeKey("cmd4");
+    static constexpr auto kCmd5 = json::MakeKey("cmd5");
+    static constexpr auto kCmd6 = json::MakeKey("cmd6");
+    static constexpr auto kCmd7 = json::MakeKey("cmd7");
 
-    static constexpr json::PortKey kCmd[] = {
+    static constexpr json::KeyDefinition kCmd[] = {
         kCmd0, kCmd1, kCmd2, kCmd3, kCmd4, kCmd5, kCmd6, kCmd7,
     };
 
-    static constexpr json::PortKey kLed0{"led0", 4, Fnv1a32("led0", 4)};
-    static constexpr json::PortKey kLed1{"led1", 4, Fnv1a32("led1", 4)};
-    static constexpr json::PortKey kLed2{"led2", 4, Fnv1a32("led2", 4)};
-    static constexpr json::PortKey kLed3{"led3", 4, Fnv1a32("led3", 4)};
-    static constexpr json::PortKey kLed4{"led4", 4, Fnv1a32("led4", 4)};
-    static constexpr json::PortKey kLed5{"led5", 4, Fnv1a32("led5", 4)};
-    static constexpr json::PortKey kLed6{"led6", 4, Fnv1a32("led6", 4)};
-    static constexpr json::PortKey kLed7{"led7", 4, Fnv1a32("led7", 4)};
+    static constexpr auto kLed0 = json::MakeKey("led0");
+    static constexpr auto kLed1 = json::MakeKey("led1");
+    static constexpr auto kLed2 = json::MakeKey("led2");
+    static constexpr auto kLed3 = json::MakeKey("led3");
+    static constexpr auto kLed4 = json::MakeKey("led4");
+    static constexpr auto kLed5 = json::MakeKey("led5");
+    static constexpr auto kLed6 = json::MakeKey("led6");
+    static constexpr auto kLed7 = json::MakeKey("led7");
 
-    static constexpr json::PortKey kLed[] = {
+    static constexpr json::KeyDefinition kLed[] = {
         kLed0, kLed1, kLed2, kLed3, kLed4, kLed5, kLed6, kLed7,
     };
 };

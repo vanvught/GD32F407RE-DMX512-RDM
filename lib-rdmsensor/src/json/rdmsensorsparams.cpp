@@ -59,19 +59,33 @@
 
 namespace json {
 
-template <typename F> inline void ParseAddressArray(const char* val, size_t len, F&& callback) {
-    const auto* p = val;
-    const auto* end = val + len;
+template <typename F>
+inline void ParseAddressArray(std::string_view value, F&& callback) {
+    auto p = value.data();
+    const auto* const end = p + value.size();
 
     // Skip to '['
-    while (p < end && *p != '[') ++p;
-    if (p < end) ++p;
+    while (p < end && *p != '[') {
+        ++p;
+    }
+
+    if (p == end) {
+        return;
+    }
+    ++p;
 
     while (p < end) {
         // Skip non-hex leading characters
-        while (p < end && !(((*p >= '0') && (*p <= '9')) || ((*p >= 'a') && (*p <= 'f')) || ((*p >= 'A') && (*p <= 'F')))) ++p;
+        while (p < end && !common::hex::IsChar(*p)) {
+            if (*p == ']') {
+                return;
+            }
+            ++p;
+        }
 
-        if (p + 1 >= end) break; // Need at least two hex characters
+        if (end - p < 2) {
+            break;
+        }
 
         const auto kHi = common::hex::FromChar(*p++);
         const auto kLo = common::hex::FromChar(*p++);
@@ -82,12 +96,15 @@ template <typename F> inline void ParseAddressArray(const char* val, size_t len,
         }
 
         // Skip to next ',' or ']'
-        while (p < end && *p != ',' && *p != ']') ++p;
-        if (*p == ',') {
+        while (p < end && *p != ',' && *p != ']') {
             ++p;
-        } else if (*p == ']') {
+        }
+
+        if (p == end || *p == ']') {
             break;
         }
+
+        ++p;
     }
 }
 
@@ -95,13 +112,13 @@ RdmSensorsParams::RdmSensorsParams() {
     ConfigStore::Instance().Copy(&store_rdmsensors, &ConfigurationStore::rdm_sensors);
 }
 
-void RdmSensorsParams::SetBH170(const char* val, uint32_t len) {
+void RdmSensorsParams::SetBH170(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 0;
         store_rdmsensors.entry[devices].address = address;
@@ -111,13 +128,13 @@ void RdmSensorsParams::SetBH170(const char* val, uint32_t len) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::SetHTU21D(const char* val, uint32_t len) {
+void RdmSensorsParams::SetHTU21D(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 1;
         store_rdmsensors.entry[devices].address = address;
@@ -127,13 +144,13 @@ void RdmSensorsParams::SetHTU21D(const char* val, uint32_t len) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::SetINA219(const char* val, uint32_t len) {
+void RdmSensorsParams::SetINA219(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 2;
         store_rdmsensors.entry[devices].address = address;
@@ -143,13 +160,13 @@ void RdmSensorsParams::SetINA219(const char* val, uint32_t len) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::SetMCP9808(const char* val, uint32_t len) {
+void RdmSensorsParams::SetMCP9808(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 3;
         store_rdmsensors.entry[devices].address = address;
@@ -159,13 +176,13 @@ void RdmSensorsParams::SetMCP9808(const char* val, uint32_t len) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::SetSI7021(const char* val, uint32_t len) {
+void RdmSensorsParams::SetSI7021(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 4;
         store_rdmsensors.entry[devices].address = address;
@@ -175,13 +192,13 @@ void RdmSensorsParams::SetSI7021(const char* val, uint32_t len) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::SetMCP3424(const char* val, uint32_t len) {
+void RdmSensorsParams::SetMCP3424(std::string_view value) {
     auto devices = store_rdmsensors.devices;
     if (devices == common::store::rdm::sensors::kMaxDevices) {
         return;
     }
 
-    ParseAddressArray(val, len, [&devices](uint8_t address) {
+    ParseAddressArray(value, [&devices](uint8_t address) {
         DEBUG_PRINTF("%u:%x", static_cast<unsigned>(devices), address);
         store_rdmsensors.entry[devices].type = 5;
         store_rdmsensors.entry[devices].address = address;

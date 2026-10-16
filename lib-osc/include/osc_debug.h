@@ -29,31 +29,35 @@
 #include "firmware/debug/debug_debug.h"
 
 #ifdef DEBUG_OSCCLIENT
+inline constexpr bool kDebugOscClientEnabled = true;
 #define OSCCLIENT_DEBUG_ENTRY() DEBUG_ENTRY()
 #define OSCCLIENT_DEBUG_EXIT() DEBUG_EXIT()
 #define OSCCLIENT_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define OSCCLIENT_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugOscClientEnabled = false;
 #define OSCCLIENT_DEBUG_ENTRY() \
-    do {                   \
+    do {                        \
     } while (false)
 #define OSCCLIENT_DEBUG_EXIT() \
-    do {                  \
-    } while (false)
-#define OSCCLIENT_DEBUG_PRINTF(...) \
     do {                       \
     } while (false)
+#define OSCCLIENT_DEBUG_PRINTF(...) \
+    do {                            \
+    } while (false)
 #define OSCCLIENT_DEBUG_PUTS(...) \
-    do {                     \
+    do {                          \
     } while (false)
 #endif
 
 #ifdef DEBUG_OSCSERVER
+inline constexpr bool kDebugOscServerEnabled = true;
 #define OSCSERVER_DEBUG_ENTRY() DEBUG_ENTRY()
 #define OSCSERVER_DEBUG_EXIT() DEBUG_EXIT()
 #define OSCSERVER_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define OSCSERVER_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugOscServerEnabled = false;
 #define OSCSERVER_DEBUG_ENTRY() \
     do {                        \
     } while (false)

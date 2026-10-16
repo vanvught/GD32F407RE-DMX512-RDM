@@ -52,37 +52,37 @@ class OscClientParams : public JsonParamsBase<OscClientParams> {
     void Dump();
 
    private:
-    static void SetIncomingPort(const char* val, uint32_t len);
-    static void SetOutgoingPort(const char* val, uint32_t len);
-    static void SetServerIp(const char* val, uint32_t len);
-    static void SetPingDisable(const char* val, uint32_t len);
-    static void SetPingDelay(const char* val, uint32_t len);
-    static void SetCmd(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-    static void SetLed(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
+    static void SetIncomingPort(std::string_view value);
+    static void SetOutgoingPort(std::string_view value);
+    static void SetServerIp(std::string_view value);
+    static void SetPingDisable(std::string_view value);
+    static void SetPingDelay(std::string_view value);
+    static void SetCmd(std::string_view key, std::string_view value);
+    static void SetLed(std::string_view key, std::string_view value);
 
     static constexpr json::Key kOscClientKeys[] = 
     {
 		MakeKey(SetIncomingPort, OscParamsConst::kIncomingPort),
 		MakeKey(SetOutgoingPort, OscParamsConst::kOutgoingPort),
-        MakeKey(SetServerIp, OscClientParamsConst::kServerIp),   
-        MakeKey(SetPingDisable, OscClientParamsConst::kPingDisable),
-        MakeKey(SetPingDelay, OscClientParamsConst::kPingDelay), 
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[0]),
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[1]),          
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[2]),
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[3]),          
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[4]),
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[5]),          
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[6]),
-        MakeKey(SetCmd, OscClientParamsConst::kCmd[7]),
-        MakeKey(SetLed, OscClientParamsConst::kLed[0]),
-        MakeKey(SetLed, OscClientParamsConst::kLed[1]),          
-        MakeKey(SetLed, OscClientParamsConst::kLed[2]),
-        MakeKey(SetLed, OscClientParamsConst::kLed[3]),          
-        MakeKey(SetLed, OscClientParamsConst::kLed[4]),
-        MakeKey(SetLed, OscClientParamsConst::kLed[5]),          
-        MakeKey(SetLed, OscClientParamsConst::kLed[6]),
-        MakeKey(SetLed, OscClientParamsConst::kLed[7])
+    MakeKey(SetServerIp, OscClientParamsConst::kServerIp),   
+    MakeKey(SetPingDisable, OscClientParamsConst::kPingDisable),
+    MakeKey(SetPingDelay, OscClientParamsConst::kPingDelay), 
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[0]),
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[1]),          
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[2]),
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[3]),          
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[4]),
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[5]),          
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[6]),
+    MakeKey(SetCmd, OscClientParamsConst::kCmd[7]),
+    MakeKey(SetLed, OscClientParamsConst::kLed[0]),
+    MakeKey(SetLed, OscClientParamsConst::kLed[1]),          
+    MakeKey(SetLed, OscClientParamsConst::kLed[2]),
+    MakeKey(SetLed, OscClientParamsConst::kLed[3]),          
+    MakeKey(SetLed, OscClientParamsConst::kLed[4]),
+    MakeKey(SetLed, OscClientParamsConst::kLed[5]),          
+    MakeKey(SetLed, OscClientParamsConst::kLed[6]),
+    MakeKey(SetLed, OscClientParamsConst::kLed[7]),
     };
 
     inline static common::store::OscClient store_oscclient;

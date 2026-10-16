@@ -27,7 +27,7 @@
 #define FIRMWARE_DEBUG_DEBUG_CONFIG_H_
 
 namespace debug::config {
-#if defined(NDEBUG)
+#ifdef NDEBUG
 inline constexpr bool kAssertionsEnabled = false;
 #else
 inline constexpr bool kAssertionsEnabled = true;

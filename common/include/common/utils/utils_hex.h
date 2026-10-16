@@ -41,7 +41,7 @@ constexpr char ToCharUppercase(uint32_t value) {
 
 enum class Case { kLower, kUpper };
 
-template <Case letter_case = Case::kLower, size_t N>
+template <Case kLetterCase = Case::kLower, size_t N>
 char* ToString(char (&string)[N + 1], uint32_t value) {
     static_assert(N % 2 == 0, "Hex string length must be even");
     static_assert(N <= 8, "Cannot represent more than 32 bits");
@@ -50,7 +50,7 @@ char* ToString(char (&string)[N + 1], uint32_t value) {
         size_t shift = (N - 1 - i) * 4;
         uint32_t nybble = (value >> shift);
 
-        if constexpr (letter_case == Case::kLower) {
+        if constexpr (kLetterCase == Case::kLower) {
             string[i] = hex::ToCharLowercase(nybble);
         } else {
             string[i] = hex::ToCharUppercase(nybble);
@@ -66,8 +66,8 @@ char* ToStringLower(char (&s)[N + 1], uint32_t v) {
     return ToString<Case::kLower, N>(s, v);
 }
 
-template <size_t N> char*
-ToStringUpper(char (&s)[N + 1], uint32_t v) {
+template <size_t N>
+char* ToStringUpper(char (&s)[N + 1], uint32_t v) {
     return ToString<Case::kUpper, N>(s, v);
 }
 
@@ -75,7 +75,7 @@ constexpr uint8_t FromChar(char c) {
     return (c >= '0' && c <= '9') ? static_cast<uint8_t>(c - '0') : (c >= 'a' && c <= 'f') ? static_cast<uint8_t>(c - 'a' + 10) : (c >= 'A' && c <= 'F') ? static_cast<uint8_t>(c - 'A' + 10) : 0xFF; // Invalid
 }
 
-template <size_t N> 
+template <size_t N>
 constexpr uint32_t FromHex(const char (&string)[N]) {
     static_assert(N > 1, "Hex string must not be empty (must include \\0)");
     static_assert(N <= 9, "Too many hex digits for uint32_t");
@@ -90,6 +90,10 @@ constexpr uint32_t FromHex(const char (&string)[N]) {
         result = (result << 4) | kNibble;
     }
     return result;
+}
+
+constexpr bool IsChar(char c) {
+    return FromChar(c) != 0xFF;
 }
 } // namespace common::hex
 

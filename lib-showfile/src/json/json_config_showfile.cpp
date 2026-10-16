@@ -30,25 +30,22 @@
 #include "json/json_helpers.h"
 #include "json/oscparamsconst.h"
 
-namespace json::config
-{
-uint32_t GetShowFile(char* buffer, uint32_t length)
-{
+namespace json::config {
+uint32_t GetShowFile(char* buffer, uint32_t length) {
     auto& show_file = ShowFile::Instance();
 
-	return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
-	    doc[json::ShowFileParamsConst::kShow.name] = static_cast<uint32_t>(show_file.GetShowFileCurrent());
-	    doc[json::ShowFileParamsConst::kOptionAutoPlay.name] = static_cast<uint32_t>(show_file.IsAutoStart());
-	    doc[json::ShowFileParamsConst::kOptionLoop.name] = static_cast<uint32_t>(show_file.GetDoLoop());
-#if defined(CONFIG_SHOWFILE_ENABLE_OSC)
-	    doc[OscParamsConst::kIncomingPort.name] = show_file.GetOscPortIncoming();
-	    doc[OscParamsConst::kOutgoingPort.name] = show_file.GetOscPortOutgoing();
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
+        doc[json::ShowFileParamsConst::kShow.name] = static_cast<uint32_t>(show_file.GetShowFileCurrent());
+        doc[json::ShowFileParamsConst::kOptionAutoPlay.name] = static_cast<uint32_t>(show_file.IsAutoStart());
+        doc[json::ShowFileParamsConst::kOptionLoop.name] = static_cast<uint32_t>(show_file.GetDoLoop());
+#ifdef CONFIG_SHOWFILE_ENABLE_OSC
+        doc[OscParamsConst::kIncomingPort.name] = show_file.GetOscPortIncoming();
+        doc[OscParamsConst::kOutgoingPort.name] = show_file.GetOscPortOutgoing();
 #endif
     });
 }
 
-void SetShowFile(const char* buffer, uint32_t buffer_size)
-{
+void SetShowFile(const char* buffer, uint32_t buffer_size) {
     ::json::ShowFileParams showfile_params;
     showfile_params.Store(buffer, buffer_size);
     showfile_params.Set();

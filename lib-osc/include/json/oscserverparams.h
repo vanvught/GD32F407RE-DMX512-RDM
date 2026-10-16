@@ -52,20 +52,20 @@ class OscServerParams : public JsonParamsBase<OscServerParams> {
     void Dump();
 
    private:
-    static void SetIncomingPort(const char* val, uint32_t len);
-    static void SetOutgoingPort(const char* val, uint32_t len);
-    static void SetPath(const char* val, uint32_t len);
-    static void SetPathInfo(const char* val, uint32_t len);
-    static void SetPathBlackout(const char* val, uint32_t len);
-    static void SetTransmission(const char* val, uint32_t len);
+    static void SetIncomingPort(std::string_view value);
+    static void SetOutgoingPort(std::string_view value);
+    static void SetPath(std::string_view value);
+    static void SetPathInfo(std::string_view value);
+    static void SetPathBlackout(std::string_view value);
+    static void SetTransmission(std::string_view value);
 
     static constexpr Key kOscServerKeys[] = {
 		MakeKey(SetIncomingPort, OscParamsConst::kIncomingPort),
 		MakeKey(SetOutgoingPort, OscParamsConst::kOutgoingPort),
 		MakeKey(SetPath, OscServerParamsConst::kPath),
  		MakeKey(SetPathInfo, OscServerParamsConst::kPathInfo),
-  		MakeKey(SetPathBlackout, OscServerParamsConst::kPathBlackout),
-  		MakeKey(SetTransmission, OscServerParamsConst::kTransmission)
+  	MakeKey(SetPathBlackout, OscServerParamsConst::kPathBlackout),
+  	MakeKey(SetTransmission, OscServerParamsConst::kTransmission),
     };
 
     inline static common::store::OscServer store_oscserver;

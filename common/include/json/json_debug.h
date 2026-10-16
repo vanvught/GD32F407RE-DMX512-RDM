@@ -27,22 +27,24 @@
 #define JSON_JSON_DEBUG_H_
 
 #ifdef DEBUG_JSON
+inline constexpr bool kDebugJsonEnabled = true;
 #define JSON_DEBUG_ENTRY() DEBUG_ENTRY()
 #define JSON_DEBUG_EXIT() DEBUG_EXIT()
 #define JSON_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define JSON_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugJsonEnabled = false;
 #define JSON_DEBUG_ENTRY() \
-    do {                     \
+    do {                   \
     } while (false)
 #define JSON_DEBUG_EXIT() \
-    do {                    \
+    do {                  \
     } while (false)
 #define JSON_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                       \
     } while (false)
 #define JSON_DEBUG_PUTS(...) \
-    do {                       \
+    do {                     \
     } while (false)
 #endif // DEBUG_JSON
 

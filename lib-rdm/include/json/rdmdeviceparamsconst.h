@@ -31,8 +31,7 @@
 namespace json {
 struct RdmDeviceParamsConst {
     static constexpr char kFileName[] = "rdmdevice.json";
-
-    static constexpr auto kLabel = json::MakeSimpleKey("label");
+    static constexpr auto kLabel = json::MakeKey("label");
 };
 } // namespace json
 

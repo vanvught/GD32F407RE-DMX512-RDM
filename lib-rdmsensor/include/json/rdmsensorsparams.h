@@ -27,16 +27,16 @@
 #define JSON_RDMSENSORSPARAMS_H_
 
 #include <cstdint>
+#include <string_view>
+
 #include "common/utils/utils_array.h"
 #include "configurationstore.h"
 #include "json/rdmsensorsparamsconst.h"
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 
-namespace json
-{
-class RdmSensorsParams : public JsonParamsBase<RdmSensorsParams>
-{
+namespace json {
+class RdmSensorsParams : public JsonParamsBase<RdmSensorsParams> {
    public:
     RdmSensorsParams();
 
@@ -57,12 +57,12 @@ class RdmSensorsParams : public JsonParamsBase<RdmSensorsParams>
     void Dump();
 
    private:
-    static void SetBH170(const char* val, uint32_t len);
-    static void SetHTU21D(const char* val, uint32_t len);
-    static void SetINA219(const char* val, uint32_t len);
-    static void SetMCP9808(const char* val, uint32_t len);
-    static void SetSI7021(const char* val, uint32_t len);
-    static void SetMCP3424(const char* val, uint32_t len);
+    static void SetBH170(std::string_view value);
+    static void SetHTU21D(std::string_view value);
+    static void SetINA219(std::string_view value);
+    static void SetMCP9808(std::string_view value);
+    static void SetSI7021(std::string_view value);
+    static void SetMCP3424(std::string_view value);
 
     static constexpr Key kRdmSensorsKeys[] = {
 		MakeKey(SetBH170, RdmSensorsParamsConst::kBH170), 
@@ -70,10 +70,9 @@ class RdmSensorsParams : public JsonParamsBase<RdmSensorsParams>
 		MakeKey(SetINA219, RdmSensorsParamsConst::kINA219), 
 		MakeKey(SetMCP9808, RdmSensorsParamsConst::kMCP9808),     
 		MakeKey(SetSI7021, RdmSensorsParamsConst::kSI7021), 
-		MakeKey(SetMCP3424, RdmSensorsParamsConst::kMCP3424)
+		MakeKey(SetMCP3424, RdmSensorsParamsConst::kMCP3424),
     };
 
-   private:
     inline static common::store::RdmSensors store_rdmsensors;
 
     friend class JsonParamsBase<RdmSensorsParams>;

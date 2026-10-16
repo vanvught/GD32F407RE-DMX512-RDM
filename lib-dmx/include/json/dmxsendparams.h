@@ -25,6 +25,8 @@
 #ifndef JSON_DMXSENDPARAMS_H_
 #define JSON_DMXSENDPARAMS_H_
 
+#include <string_view>
+
 #include "configurationstore.h"
 #include "json/dmxsendparamsconst.h"
 #include "json/json_key.h"
@@ -49,16 +51,17 @@ class DmxSendParams : public JsonParamsBase<DmxSendParams> {
     void Dump();
 
    private:
-    static void SetBreakTime(const char* val, uint32_t len);
-    static void SetMabTime(const char* val, uint32_t len);
-    static void SetRefreshRate(const char* val, uint32_t len);
-    static void SetSlotsCount(const char* val, uint32_t len);
+    static void SetBreakTime(std::string_view value);
+    static void SetMabTime(std::string_view value);
+    static void SetRefreshRate(std::string_view value);
+    static void SetSlotsCount(std::string_view value);
 
     static constexpr json::Key kDmxSendKeys[] = {
-		MakeKey(SetBreakTime, DmxSendParamsConst::kBreakTime), 
-		MakeKey(SetMabTime, DmxSendParamsConst::kMabTime), 
-		MakeKey(SetRefreshRate, DmxSendParamsConst::kRefreshRate),                     
-		MakeKey(SetSlotsCount, DmxSendParamsConst::kSlotsCount)};
+        MakeKey(SetBreakTime, DmxSendParamsConst::kBreakTime),     //
+        MakeKey(SetMabTime, DmxSendParamsConst::kMabTime),         //
+        MakeKey(SetRefreshRate, DmxSendParamsConst::kRefreshRate), //
+        MakeKey(SetSlotsCount, DmxSendParamsConst::kSlotsCount),
+    };
 
     inline static common::store::DmxSend store_dmx_send;
 

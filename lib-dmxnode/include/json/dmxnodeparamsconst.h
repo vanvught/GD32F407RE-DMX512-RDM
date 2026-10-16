@@ -26,32 +26,31 @@
 #define JSON_DMXNODEPARAMSCONST_H_
 
 #include "json/json_key.h"
-#include "common/utils/utils_hash.h"
 #include "dmxnode_outputtype.h"
 
 namespace json {
 struct DmxNodeParamsConst {
     static constexpr char kFileName[] = "dmxnode.json";
 
-    static constexpr auto kNodeName = json::MakeSimpleKey("node_name");
-    static constexpr auto kFailsafe = json::MakeSimpleKey("failsafe");
-    static constexpr auto kDisableMergeTimeout = json::MakeSimpleKey("disable_merge_timeout");
-    static constexpr auto kDmxStartAddress = json::MakeSimpleKey("dmx_start_address");
-    static constexpr auto kDmxSlotInfo = json::MakeSimpleKey("dmx_slot_info");
+    static constexpr auto kNodeName = json::MakeKey("node_name");
+    static constexpr auto kFailsafe = json::MakeKey("failsafe");
+    static constexpr auto kDisableMergeTimeout = json::MakeKey("disable_merge_timeout");
+    static constexpr auto kDmxStartAddress = json::MakeKey("dmx_start_address");
+    static constexpr auto kDmxSlotInfo = json::MakeKey("dmx_slot_info");
 
 #ifdef DMX_MAX_PORTS
-    static constexpr json::PortKey kLabelPortA{"label_port_a", 12, Fnv1a32("label_port_a", 12)};
+    static constexpr auto kLabelPortA = json::MakeKey("label_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kLabelPortB{"label_port_b", 12, Fnv1a32("label_port_b", 12)};
+    static constexpr auto kLabelPortB = json::MakeKey("label_port_b");
 #endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kLabelPortC{"label_port_c", 12, Fnv1a32("label_port_c", 12)};
+    static constexpr auto kLabelPortC = json::MakeKey("label_port_c");
 #endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kLabelPortD{"label_port_d", 12, Fnv1a32("label_port_d", 12)};
+    static constexpr auto kLabelPortD = json::MakeKey("label_port_d");
 #endif // (DMX_MAX_PORTS == 4)
 
-    static constexpr json::PortKey kLabelPort[] = {
+    static constexpr json::KeyDefinition kLabelPort[] = {
         kLabelPortA,
 #if (DMX_MAX_PORTS > 1)
         kLabelPortB,
@@ -64,18 +63,18 @@ struct DmxNodeParamsConst {
 #endif // (DMX_MAX_PORTS == 4)
     };
 
-    static constexpr json::PortKey kUniversePortA{.name="universe_port_a", .length=15, .hash=Fnv1a32("universe_port_a", 15)};
+    static constexpr auto kUniversePortA = json::MakeKey("universe_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kUniversePortB{"universe_port_b", 15, Fnv1a32("universe_port_b", 15)};
+    static constexpr auto kUniversePortB = json::MakeKey("universe_port_b");
 #endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kUniversePortC{"universe_port_c", 15, Fnv1a32("universe_port_c", 15)};
+    static constexpr auto kUniversePortC = json::MakeKey("universe_port_c");
 #endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kUniversePortD{"universe_port_d", 15, Fnv1a32("universe_port_d", 15)};
+    static constexpr auto kUniversePortD = json::MakeKey("universe_port_d");
 #endif // (DMX_MAX_PORTS == 4)
 
-    static constexpr json::PortKey kUniversePort[] = {
+    static constexpr json::KeyDefinition kUniversePort[] = {
         kUniversePortA,
 #if (DMX_MAX_PORTS > 1)
         kUniversePortB,
@@ -88,18 +87,18 @@ struct DmxNodeParamsConst {
 #endif // (DMX_MAX_PORTS == 4)
     };
 
-    static constexpr json::PortKey kDirectionPortA{"direction_port_a", 16, Fnv1a32("direction_port_a", 16)};
+    static constexpr auto kDirectionPortA = json::MakeKey("direction_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kDirectionPortB{"direction_port_b", 16, Fnv1a32("direction_port_b", 16)};
+    static constexpr auto kDirectionPortB = json::MakeKey("direction_port_b");
 #endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kDirectionPortC{"direction_port_c", 16, Fnv1a32("direction_port_c", 16)};
+    static constexpr auto kDirectionPortC = json::MakeKey("direction_port_c");
 #endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kDirectionPortD{"direction_port_d", 16, Fnv1a32("direction_port_d", 16)};
+    static constexpr auto kDirectionPortD = json::MakeKey("direction_port_d");
 #endif // (DMX_MAX_PORTS == 4)
 
-    static constexpr json::PortKey kDirectionPort[] = {
+    static constexpr json::KeyDefinition kDirectionPort[] = {
         kDirectionPortA,
 #if (DMX_MAX_PORTS > 1)
         kDirectionPortB,
@@ -112,18 +111,18 @@ struct DmxNodeParamsConst {
 #endif // (DMX_MAX_PORTS == 4)
     };
 
-    static constexpr json::PortKey kMergeModePortA{"merge_mode_port_a", 17, Fnv1a32("merge_mode_port_a", 17)};
+    static constexpr auto kMergeModePortA = json::MakeKey("merge_mode_port_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kMergeModePortB{"merge_mode_port_b", 17, Fnv1a32("merge_mode_port_b", 17)};
+    static constexpr auto kMergeModePortB = json::MakeKey("merge_mode_port_b");
 #endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kMergeModePortC{"merge_mode_port_c", 17, Fnv1a32("merge_mode_port_c", 17)};
+    static constexpr auto kMergeModePortC = json::MakeKey("merge_mode_port_c");
 #endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kMergeModePortD{"merge_mode_port_d", 17, Fnv1a32("merge_mode_port_d", 17)};
+    static constexpr auto kMergeModePortD = json::MakeKey("merge_mode_port_d");
 #endif // (DMX_MAX_PORTS == 4)
 
-    static constexpr json::PortKey kMergeModePort[] = {
+    static constexpr json::KeyDefinition kMergeModePort[] = {
         kMergeModePortA,
 #if (DMX_MAX_PORTS > 1)
         kMergeModePortB,
@@ -136,18 +135,18 @@ struct DmxNodeParamsConst {
 #endif // (DMX_MAX_PORTS == 4)
     };
 
-    static constexpr json::PortKey kOutputStylePortA{"output_style_a", 14, Fnv1a32("output_style_a", 14)};
+    static constexpr auto kOutputStylePortA = json::MakeKey("output_style_a");
 #if (DMX_MAX_PORTS > 1)
-    static constexpr json::PortKey kOutputStylePortB{"output_style_b", 14, Fnv1a32("output_style_b", 14)};
+    static constexpr auto kOutputStylePortB = json::MakeKey("output_style_b");
 #endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
-    static constexpr json::PortKey kOutputStylePortC{"output_style_c", 14, Fnv1a32("output_style_c", 14)};
+    static constexpr auto kOutputStylePortC = json::MakeKey("output_style_c");
 #endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
-    static constexpr json::PortKey kOutputStylePortD{"output_style_d", 14, Fnv1a32("output_style_d", 14)};
+    static constexpr auto kOutputStylePortD = json::MakeKey("output_style_d");
 #endif // (DMX_MAX_PORTS == 4)
 
-    static constexpr json::PortKey kOutputStylePort[] = {
+    static constexpr json::KeyDefinition kOutputStylePort[] = {
         kOutputStylePortA,
 #if (DMX_MAX_PORTS > 1)
         kOutputStylePortB,

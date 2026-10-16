@@ -29,22 +29,24 @@
 #include "firmware/debug/debug_debug.h"
 
 #ifdef DEBUG_DMX
+inline constexpr bool kDebugDmxEnabled = true;
 #define DMX_DEBUG_ENTRY() DEBUG_ENTRY()
 #define DMX_DEBUG_EXIT() DEBUG_EXIT()
 #define DMX_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define DMX_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugDmxEnabled = false;
 #define DMX_DEBUG_ENTRY() \
-    do {                       \
+    do {                  \
     } while (false)
 #define DMX_DEBUG_EXIT() \
-    do {                      \
+    do {                 \
     } while (false)
 #define DMX_DEBUG_PRINTF(...) \
-    do {                           \
+    do {                      \
     } while (false)
 #define DMX_DEBUG_PUTS(...) \
-    do {                         \
+    do {                    \
     } while (false)
 #endif // DEBUG_DMX
 

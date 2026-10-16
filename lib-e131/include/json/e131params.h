@@ -34,19 +34,19 @@ class E131Params : public JsonParamsBase<E131Params> {
     void Dump();
 
    private:
-    static void SetPriority(const char* key, uint32_t key_len, const char* val, uint32_t val_len);
-#if defined(DMX_MAX_PORTS)
-    static constexpr json::Key kE131PriorityKeys[] = {
+    static void SetPriority(std::string_view key, std::string_view value);
 
-        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[0]),
+#ifdef DMX_MAX_PORTS
+    static constexpr json::Key kE131PriorityKeys[] = {
+        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[0]), //
 #if (DMX_MAX_PORTS > 1)
-        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[1]),
+        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[1]), //
 #endif
 #if (DMX_MAX_PORTS > 2)
-        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[2]),
+        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[2]), //
 #endif
 #if (DMX_MAX_PORTS == 4)
-        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[3]),
+        MakeKey(SetPriority, E131ParamsConst::kPriorityPort[3]), //
 #endif
 
     };

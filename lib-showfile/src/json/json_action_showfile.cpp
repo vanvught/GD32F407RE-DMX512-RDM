@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/json_key.h"
 #include "json/json_parser.h"
@@ -30,51 +31,55 @@
 #include "showfile.h"
 
 namespace {
-void SetPlayer(const char* val, uint32_t len) {
-    if (memcmp(val, "play", len) == 0) {
+void SetPlayer(std::string_view value) {
+    if (value == "play") {
         ShowFile::Instance().Play();
         return;
     }
 
-    if (memcmp(val, "stop", len) == 0) {
+    if (value == "stop") {
         ShowFile::Instance().Stop();
         return;
     }
 
-    if (memcmp(val, "resume", len) == 0) {
+    if (value == "resume") {
         ShowFile::Instance().Resume();
         return;
     }
 
 #ifndef CONFIG_SHOWFILE_DISABLE_RECORD
-    if (memcmp(val, "record", len) == 0) {
+    if (value == "record") {
         ShowFile::Instance().Record();
         return;
     }
 #endif
 }
 
-void SetLoop(const char* val, uint32_t len) {
-    if (len != 1) {
+void SetLoop(std::string_view value) {
+    if (value.size() != 1) {
         return;
     }
 
-    ShowFile::Instance().DoLoop(val[0] != '0');
+    ShowFile::Instance().DoLoop(value.front() != '0');
 }
 
-void SetShow(const char* val, uint32_t len) {
-    if (len > 2) {
+void SetShow(std::string_view value) {
+    if (value.size() > 2) {
         return;
     }
 
-    ShowFile::Instance().SetPlayerShowFileCurrent(common::Atoi(val, len));
+    ShowFile::Instance().SetPlayerShowFileCurrent(common::Atoi(value));
 }
 
-constexpr auto kPlayer = json::MakeSimpleKey("player");
-constexpr auto kLoop = json::MakeSimpleKey("loop");
-constexpr auto kShow = json::MakeSimpleKey("show");
+constexpr auto kPlayer = json::MakeKey("player");
+constexpr auto kLoop = json::MakeKey("loop");
+constexpr auto kShow = json::MakeKey("show");
 
-constexpr json::Key kActionKeys[] = {json::MakeKey(SetPlayer, kPlayer), json::MakeKey(SetLoop, kLoop), json::MakeKey(SetShow, kShow)};
+constexpr json::Key kActionKeys[] = {
+    json::MakeKey(SetPlayer, kPlayer), //
+    json::MakeKey(SetLoop, kLoop),     //
+    json::MakeKey(SetShow, kShow),     //
+};
 } // namespace
 
 namespace json::action {

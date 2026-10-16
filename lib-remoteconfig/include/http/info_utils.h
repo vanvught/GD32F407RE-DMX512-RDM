@@ -34,8 +34,7 @@
 
 template <typename InfoT>
 int32_t GetFileIndexGeneric(const InfoT* infos, size_t size, const char* name) {
-    const auto kLen = static_cast<uint32_t>(std::strlen(name));
-    const auto kHash = Fnv1a32Runtime(name, kLen);
+    const auto kHash = Fnv1a32(std::string_view{name});
 
     for (uint32_t i = 0; i < size; ++i) {
         if (kHash == infos[i].hash) {

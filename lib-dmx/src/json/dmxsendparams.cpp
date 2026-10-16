@@ -26,6 +26,7 @@
 #include <cstdio>
 
 #include "json/dmxsendparams.h"
+#include "dmx_debug.h"
 #include "json/dmxsendparamsconst.h"
 #include "json/json_parser.h"
 #include "json/json_parsehelper.h"
@@ -48,26 +49,26 @@ DmxSendParams::DmxSendParams() {
     ConfigStore::Instance().Copy(&store_dmx_send, &ConfigurationStore::dmx_send);
 }
 
-void DmxSendParams::SetBreakTime(const char* val, uint32_t len) {
-    const auto kValue = ParseValue<uint16_t>(val, len);
+void DmxSendParams::SetBreakTime(std::string_view value) {
+    const auto kValue = ParseValue<uint16_t>(value);
     store_dmx_send.break_time = kValue > dmx::transmit::kBreakTimeMin ? kValue : dmx::transmit::kBreakTimeMin;
 }
 
-void DmxSendParams::SetMabTime(const char* val, uint32_t len) {
-    const auto kValue = ParseValue<uint16_t>(val, len);
+void DmxSendParams::SetMabTime(std::string_view value) {
+    const auto kValue = ParseValue<uint16_t>(value);
     store_dmx_send.mab_time = kValue > dmx::transmit::kMabTimeMin ? kValue : dmx::transmit::kMabTimeMin;
 }
 
-void DmxSendParams::SetRefreshRate(const char* val, uint32_t len) {
+void DmxSendParams::SetRefreshRate(std::string_view value) {
     uint8_t v;
 
-    if (ParseInRange<uint16_t, uint8_t>(val, len, 1U, 255U, &v)) {
+    if (ParseInRange<uint16_t, uint8_t>(value, 1U, 255U, &v)) {
         store_dmx_send.refresh_rate = v;
     }
 }
 
-void DmxSendParams::SetSlotsCount(const char* val, uint32_t len) {
-    const auto kValue = ParseValue<uint16_t>(val, len);
+void DmxSendParams::SetSlotsCount(std::string_view value) {
+    const auto kValue = ParseValue<uint16_t>(value);
 
     if (kValue >= 2U && kValue <= dmx::kChannelsMax) {
         store_dmx_send.slots_count = RounddownSlots(kValue);
@@ -95,16 +96,16 @@ void DmxSendParams::Set() {
 
     dmx.SetTransmitPeriodTime(period);
 
-#ifdef DEBUG_DMXSEND
     Dump();
-#endif
 }
 
 void DmxSendParams::Dump() {
-    printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::DmxSendParamsConst::kFileName);
-    printf(" %s=%u\n", DmxSendParamsConst::kBreakTime.name, store_dmx_send.break_time);
-    printf(" %s=%u\n", DmxSendParamsConst::kMabTime.name, store_dmx_send.mab_time);
-    printf(" %s=%u\n", DmxSendParamsConst::kRefreshRate.name, store_dmx_send.refresh_rate);
-    printf(" %s=%u [%u]\n", DmxSendParamsConst::kSlotsCount.name, RoundupSlots(store_dmx_send.slots_count), store_dmx_send.slots_count);
+    if constexpr (kDebugDmxEnabled) {
+        printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::DmxSendParamsConst::kFileName);
+        printf(" %s=%u\n", DmxSendParamsConst::kBreakTime.name, store_dmx_send.break_time);
+        printf(" %s=%u\n", DmxSendParamsConst::kMabTime.name, store_dmx_send.mab_time);
+        printf(" %s=%u\n", DmxSendParamsConst::kRefreshRate.name, store_dmx_send.refresh_rate);
+        printf(" %s=%u [%u]\n", DmxSendParamsConst::kSlotsCount.name, RoundupSlots(store_dmx_send.slots_count), store_dmx_send.slots_count);
+    }
 }
 } // namespace json

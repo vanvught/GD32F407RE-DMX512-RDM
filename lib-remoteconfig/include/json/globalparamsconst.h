@@ -30,8 +30,7 @@
 namespace json {
 struct GlobalParamsConst {
     static constexpr char kFileName[] = "global.json";
-
-    inline static constexpr auto kUtcOffset = json::MakeSimpleKey("utc_offset");
+    static constexpr auto kUtcOffset = json::MakeKey("utc_offset");
 };
 } // namespace json
 

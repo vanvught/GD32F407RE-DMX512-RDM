@@ -24,15 +24,16 @@
  */
 
 #undef NDEBUG
-#if !defined (USE_GZIP)
+#if !defined(USE_GZIP)
 #define USE_GZIP
 #endif
- 
+
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>
+#include <string_view>
 #include <cassert>
 
 #include "http/http.h"
@@ -44,10 +45,10 @@ struct SupportedExtension {
 };
 
 static constexpr SupportedExtension kSupportedExtensions[] = {
-	{"html", http::ContentTypes::kTextHtml}, 
-	{"css", http::ContentTypes::kTextCss}, 
-	{"js", http::ContentTypes::kTextJs}, 
-	{"json", http::ContentTypes::kApplicationJson}
+  {.extension="html", .content_type=http::ContentTypes::kTextHtml}, 
+  {.extension="css", .content_type=http::ContentTypes::kTextCss}, 
+  {.extension="js", .content_type=http::ContentTypes::kTextJs}, 
+  {.extension="json", .content_type=http::ContentTypes::kApplicationJson},
 };
 
 static constexpr char kContentHeader[] =
@@ -58,7 +59,7 @@ static constexpr char kContentHeader[] =
     "\tconst uint8_t *content;\n"
     "\tuint32_t content_length;\n"
     "\thttp::ContentTypes content_type;\n"
-	"\tbool gzip;\n"
+    "\tbool gzip;\n"
     "};\n\n"
     "inline constexpr struct FilesContent kHttpContent[] = {\n";
 
@@ -116,28 +117,26 @@ struct FeatureGuard {
     const char* end;
 };
 
-static constexpr FeatureGuard kFeatureGuards[] = {
-    {"dmxnode", kHaveDmxNodeBegin, kHaveDmxNodeEnd},          
-	{"artnet", kHaveNodeArtNetBegin, kHaveNodeArtNetEnd},       
-	{"e131", kHaveNodeE131Begin, kHaveNodeE131End},   
-	{"ltc.js", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
-	{"ltcdisplays.js", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
-	{"oscserver", kHaveNodeOscServerBegin, kHaveNodeOscServerEnd},
-	{"tcnet", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},       
-	{"etc", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd}, 
-	{"gps", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},   
-	{"pixel", kHavePixelBegin, kHavePixelEnd},
-    {"dmxmonitor", kHaveDmxMonitorBegin, kHaveDmxMonitorEnd}, 
-	{"dmxsend", kHaveDmxSendBegin, kHaveDmxSendEnd}, 
-	{"dmxpca9685", kHaveDmxPca9585Begin, kHaveDmxPca9585End},    
-	{"dmx.", kHaveDmxSendBegin, kHaveDmxSendEnd}, 
-	{"rdm", kHaveRdmBegin, kHaveRdmEnd},
-	{"display.js", kHaveDisplayUdfBegin, kHaveDisplayUdfEnd},    
-	{"showfile.js", kHaveShowfileBegin, kHaveShowfileEnd}, 
-	{"time", kHaveTimeBegin, kHaveTimeEnd},       
-	{"rtc", kHaveRtcBegin, kHaveRtcEnd},
-	{"upload", kHaveUploadBegin, kHaveUploadEnd}
-};
+static constexpr FeatureGuard kFeatureGuards[] = {{"dmxnode", kHaveDmxNodeBegin, kHaveDmxNodeEnd},
+                                                  {"artnet", kHaveNodeArtNetBegin, kHaveNodeArtNetEnd},
+                                                  {"e131", kHaveNodeE131Begin, kHaveNodeE131End},
+                                                  {"ltc.js", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
+                                                  {"ltcdisplays.js", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
+                                                  {"oscserver", kHaveNodeOscServerBegin, kHaveNodeOscServerEnd},
+                                                  {"tcnet", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
+                                                  {"etc", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
+                                                  {"gps", kHaveNodeLtcSmpteBegin, kHaveNodeltcSmpteEnd},
+                                                  {"pixel", kHavePixelBegin, kHavePixelEnd},
+                                                  {"dmxmonitor", kHaveDmxMonitorBegin, kHaveDmxMonitorEnd},
+                                                  {"dmxsend", kHaveDmxSendBegin, kHaveDmxSendEnd},
+                                                  {"dmxpca9685", kHaveDmxPca9585Begin, kHaveDmxPca9585End},
+                                                  {"dmx.", kHaveDmxSendBegin, kHaveDmxSendEnd},
+                                                  {"rdm", kHaveRdmBegin, kHaveRdmEnd},
+                                                  {"display.js", kHaveDisplayUdfBegin, kHaveDisplayUdfEnd},
+                                                  {"showfile.js", kHaveShowfileBegin, kHaveShowfileEnd},
+                                                  {"time", kHaveTimeBegin, kHaveTimeEnd},
+                                                  {"rtc", kHaveRtcBegin, kHaveRtcEnd},
+                                                  {"upload", kHaveUploadBegin, kHaveUploadEnd}};
 
 static FILE* file_content;
 static FILE* file_includes;
@@ -246,7 +245,7 @@ static void BuildFinalContentHeader() {
     assert(kJ == 0);
 }
 
-#if defined(USE_GZIP)
+#ifdef USE_GZIP
 static int ConvertToHCompressed(const char* dir_name, const char* file_name) {
     assert(dir_name != nullptr);
     assert(file_name != nullptr);
@@ -442,27 +441,27 @@ static int ConvertToH(const char* dir_name, const char* file_name) {
 #endif
 
 static uint32_t CreateHash(const char* filename) {
-	char hash_name[128];
-	const auto kLength = strlen(filename);
-	assert(kLength + 1 <= sizeof(hash_name));
-	strncpy(hash_name, filename, sizeof(hash_name));
-	hash_name[kLength] = '\0';
-	
-	auto* p = strchr(hash_name, '_');
+    char hash_name[128];
+    const auto kLength = strlen(filename);
+    assert(kLength + 1 <= sizeof(hash_name));
+    strncpy(hash_name, filename, sizeof(hash_name));
+    hash_name[kLength] = '\0';
 
-	if (p != nullptr) {
-	    *p = '/';
-	}
-	
-	printf("Hash name: %s ", hash_name);
-	return Fnv1a32Runtime(hash_name, kLength);
+    auto* p = strchr(hash_name, '_');
+
+    if (p != nullptr) {
+        *p = '/';
+    }
+
+    printf("Hash name: %s ", hash_name);
+    return Fnv1a32(std::string_view{hash_name});
 }
 
 int main(int argc, char* argv[]) // NOLINT
 {
-#if defined(USE_GZIP)
-	puts("Using gzip.");
-#endif	
+#ifdef USE_GZIP
+    puts("Using gzip.");
+#endif
     file_includes = fopen("includes.h", "w");
     assert(file_includes != nullptr);
 
@@ -508,7 +507,7 @@ int main(int argc, char* argv[]) // NOLINT
             fwrite(buffer, sizeof(char), i, file_content);
 
             auto use_gzip = false;
-#if defined(USE_GZIP)
+#ifdef USE_GZIP
             use_gzip = true;
             const auto kContentLength = ConvertToHCompressed(dir_name, dir_entry->d_name);
 #else

@@ -31,8 +31,7 @@
 namespace json {
 struct RemoteConfigParamsConst {
     static constexpr char kFileName[] = "remote.json";
-
-    static constexpr auto kDisplayName = json::MakeSimpleKey("display_name");
+    static constexpr auto kDisplayName = json::MakeKey("display_name");
 };
 } // namespace json
 

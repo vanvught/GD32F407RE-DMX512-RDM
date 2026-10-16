@@ -31,6 +31,8 @@
 #include <cstring>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string_view>
+#include <algorithm>
 
 #include "ip4/ip4_address.h"
 
@@ -56,6 +58,27 @@ inline uint32_t ParseIpString(const char* val, uint32_t len) {
 
     return 0;
 }
+
+inline uint32_t ParseIpString(std::string_view value) {
+    char tmp[kIpBufferSize]{};
+
+    const auto kLength = std::min(value.size(), sizeof(tmp) - 1);
+
+    if (kLength != 0) {
+        memcpy(tmp, value.data(), kLength);
+    }
+
+    // tmp is already zero-initialized and null-terminated.
+
+    struct in_addr addr{};
+
+    if (inet_aton(tmp, &addr) != 0) {
+        return addr.s_addr;
+    }
+
+    return 0;
+}
+
 } // namespace net
 
 #endif // IP4_IP4_HELPERS_H_
