@@ -126,6 +126,6 @@
 #define GD32_FMC_DEBUG_PUTS(...) \
     do {                    \
     } while (false)
-#endif // DEBUG_COMMON_FMC
+#endif // DEBUG_GD32_FMC
 
 #endif // GD32_DEBUG_H_

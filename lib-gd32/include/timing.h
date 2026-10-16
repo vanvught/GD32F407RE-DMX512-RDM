@@ -30,7 +30,7 @@
 
 #include "gd32_timers.h"
 
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
 extern volatile uint32_t gv_systick_millis;
 #elif defined(USE_FREE_RTOS)
 #include "FreeRTOS.h"

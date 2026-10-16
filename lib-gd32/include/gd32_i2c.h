@@ -50,7 +50,7 @@ void Gd32I2cWriteReg(uint8_t address, uint8_t reg, uint16_t value);
 void Gd32I2cReadReg(uint8_t reg, uint8_t& value);
 void Gd32I2cReadReg(uint8_t address, uint8_t reg, uint8_t& value);
 
-#if defined(CONFIG_ENABLE_I2C1)
+#ifdef CONFIG_ENABLE_I2C1
 void Gd32I2c1Begin();
 void Gd32I2c1SetBaudrate(uint32_t baudrate);
 void Gd32I2c1SetAddress(uint8_t address);

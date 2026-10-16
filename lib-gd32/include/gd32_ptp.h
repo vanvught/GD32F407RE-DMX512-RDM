@@ -32,10 +32,10 @@
 
 namespace gd32 {
 namespace ptp {
-#if !defined(MCU_CLOCK_FREQ)
+#ifndef MCU_CLOCK_FREQ
 #error MCU_CLOCK_FREQ is not defined
 #endif // MCU_CLOCK_FREQ
-#if !defined(PTP_ACCARACY_NS)
+#ifndef PTP_ACCARACY_NS
 inline constexpr uint8_t kPtpTick = 20;
 #else
 inline constexpr uint8_t kPtpTick = PTP_ACCARACY_NS;

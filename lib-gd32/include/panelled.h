@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
 #include "gd32.h"
 #endif // PANELLED_595_COUNT
 
@@ -38,7 +38,7 @@ extern uint32_t data;
 }
 
 inline void LedSpi([[maybe_unused]] uint32_t data) {
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
     GPIO_BC(PANELLED_595_CS_GPIOx) = PANELLED_595_CS_GPIO_PINx;
 
 #if (PANELLED_595_COUNT >= 1)
@@ -83,13 +83,13 @@ inline void LedSpi([[maybe_unused]] uint32_t data) {
 }
 
 inline void Init() {
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
 
 #endif // PANELLED_595_COUNT
 }
 
 inline void On([[maybe_unused]] uint32_t on) {
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
     if (global::data == (global::data | on)) {
         return;
     }
@@ -101,7 +101,7 @@ inline void On([[maybe_unused]] uint32_t on) {
 }
 
 inline void Off([[maybe_unused]] uint32_t off) {
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
     if (global::data == (global::data & ~off)) {
         return;
     }
@@ -113,7 +113,7 @@ inline void Off([[maybe_unused]] uint32_t off) {
 }
 
 inline void Run() {
-#if defined(PANELLED_595_COUNT)
+#ifdef PANELLED_595_COUNT
 
 #endif // PANELLED_595_COUNT
 }

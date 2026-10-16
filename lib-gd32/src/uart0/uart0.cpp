@@ -30,7 +30,7 @@
 #include "gd32_uart.h"
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32_dma.h"
-#endif            // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
+#endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32.h" // IWYU pragma: keep
 
 namespace uart0 {
@@ -113,7 +113,7 @@ void Init() {
 #ifdef CONFIG_USART0_ENABLE_RX_DMA
     dma_deinit(USART0_DMAx, USART0_RX_DMA_CHx);
     dma_struct_para_init(&dma_init_struct);
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     dma_init_struct.request = DMA_REQUEST_USART0_RX;
 #endif // GD32H7XX
     dma_init_struct.direction = DMA_PERIPHERAL_TO_MEMORY;
@@ -138,7 +138,7 @@ void Init() {
     dma_init_struct.priority = DMA_PRIORITY_LOW;
     dma_init(USART0_DMAx, USART0_RX_DMA_CHx, &dma_init_struct);
     dma_circulation_disable(USART0_DMAx, USART0_RX_DMA_CHx);
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
     dma_channel_subperipheral_select(USART0_DMAx, USART0_RX_DMA_CHx, USART0_RX_DMA_SUBPERIx);
 #endif // GD32F4XX
     dma_channel_enable(USART0_DMAx, USART0_RX_DMA_CHx);

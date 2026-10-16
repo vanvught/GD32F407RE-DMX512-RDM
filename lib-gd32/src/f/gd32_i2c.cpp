@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_I2C_OPTIMIZE_O2) || defined(CONFIG_I2C_OPTIMIZE_O3)
 #pragma GCC push_options
-#if defined(CONFIG_I2C_OPTIMIZE_O2)
+#ifdef CONFIG_I2C_OPTIMIZE_O2
 #pragma GCC optimize("O2")
 #else
 #pragma GCC optimize("O3")
@@ -300,11 +300,11 @@ void RcuConfigI2c() {
 }
 
 void GpioConfigI2c() {
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(I2C_SCL_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SCL_GPIO_PINx);
     gpio_init(I2C_SDA_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C_SDA_GPIO_PINx);
 
-#if defined(I2C_REMAP)
+#ifdef I2C_REMAP
     static_assert(I2C_REMAP == GPIO_I2C0_REMAP);
     if constexpr (I2C_REMAP == GPIO_I2C0_REMAP) {
         gpio_pin_remap_config(GPIO_I2C0_REMAP, ENABLE);
@@ -321,7 +321,7 @@ void GpioConfigI2c() {
 #endif // GPIO_INIT
 }
 
-#if defined(CONFIG_ENABLE_I2C1)
+#ifdef CONFIG_ENABLE_I2C1
 void RcuConfigI2c1() {
     rcu_periph_clock_enable(RCU_I2C1);
     rcu_periph_clock_enable(I2C1_SCL_RCU_GPIOx);
@@ -329,11 +329,11 @@ void RcuConfigI2c1() {
 }
 
 void GpioConfigI2c1() {
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     gpio_init(I2C1_SCL_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C1_SCL_GPIO_PINx);
     gpio_init(I2C1_SDA_GPIOx, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, I2C1_SDA_GPIO_PINx);
 
-#if defined(I2C1_REMAP)
+#ifdef I2C1_REMAP
     static_assert((I2C1_REMAP == AFIO_PCF5_I2C1_REMAP) || (I2C1_REMAP == GPIO_PCF5_I2C1_REMAP0) || (I2C1_REMAP == GPIO_PCF5_I2C1_REMAP1));
     if constexpr ((I2C1_REMAP == AFIO_PCF5_I2C1_REMAP) || (I2C1_REMAP == GPIO_PCF5_I2C1_REMAP0) || (I2C1_REMAP == GPIO_PCF5_I2C1_REMAP1)) {
         gpio_pin_remap_config(I2C1_REMAP, ENABLE);
@@ -435,7 +435,7 @@ void Gd32I2cReadReg(uint8_t address, uint8_t reg, uint8_t& value) {
 }
 
 // I2C1
-#if defined(CONFIG_ENABLE_I2C1)
+#ifdef CONFIG_ENABLE_I2C1
 void Gd32I2c1Begin() {
     RcuConfigI2c1();
     GpioConfigI2c1();

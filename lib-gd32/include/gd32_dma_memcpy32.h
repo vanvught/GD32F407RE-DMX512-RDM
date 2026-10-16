@@ -69,7 +69,7 @@ inline void StartDma(const void* destination, const void* source, uint32_t lengt
 }
 
 inline bool IsActive() {
-#if !defined(GD32F4XX)
+#ifndef GD32F4XX
     return DMA_CHCNT(DMA0, DMA_CH3) != 0;
 #else
     return DMA_CHCNT(DMA1, DMA_CH0) != 0;

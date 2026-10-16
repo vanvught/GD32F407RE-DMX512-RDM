@@ -171,7 +171,7 @@ uint32_t DescInformationGet(const enet_descriptors_struct* desc) {
  * for the Ethernet DMA. It clears these flags and resumes the DMA transmission. The implementation
  * varies based on whether the target platform is GD32H7XX or not.
  */
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 inline void ClearDmaTxFlagsAndResume() {
     const auto dma_tbu_flag = (ENET_DMA_STAT(ENETx) & ENET_DMA_STAT_TBU);
     const auto dma_tu_flag = (ENET_DMA_STAT(ENETx) & ENET_DMA_STAT_TU);
@@ -204,7 +204,7 @@ inline void ClearDmaTxFlagsAndResume() {
  * @note This function ensures that the DMA reception process continues without interruptions
  * caused by the Rx buffer unavailable condition.
  */
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 inline void HandleRxBufferUnavailable() {
     if (0 != (ENET_DMA_STAT(ENETx) & ENET_DMA_STAT_RBU)) {
         ENET_DMA_STAT(ENETx) = ENET_DMA_STAT_RBU; ///< Clear RBU flag
@@ -220,7 +220,7 @@ inline void HandleRxBufferUnavailable() {
 }
 #endif // GD32H7XX
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 inline void ResetHash() {
     ENET_MAC_HLH(ENETx) = 0;
     ENET_MAC_HLL(ENETx) = 0;
@@ -232,7 +232,7 @@ inline void ResetHash() {
 }
 #endif // GD32H7XX
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 template <uint32_t feature>
 inline void FilterFeatureDisable() {
     auto value = ENET_MAC_FRMF(ENETx);
@@ -248,7 +248,7 @@ inline void FilterFeatureDisable() {
 }
 #endif // GD32H7XX
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 template <uint32_t feature>
 inline void FilterFeatureEnable() {
     auto value = ENET_MAC_FRMF(ENETx);
@@ -264,7 +264,7 @@ inline void FilterFeatureEnable() {
 }
 #endif // GD32H7XX
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 inline void FilterSetHash(uint32_t hash) {
     if (hash > 31) {
         ENET_MAC_HLH(ENETx) |= (1U << (hash - 32));

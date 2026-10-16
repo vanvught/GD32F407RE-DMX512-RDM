@@ -72,7 +72,7 @@ void RcuConfig(uint32_t usart_periph) {
             is_set = true;
 #endif // NDEBUG
             break;
-#if defined(USART5)
+#ifdef USART5
         case USART5:
             rcu_periph_clock_enable(USART5_RCU_USART5);
             rcu_periph_clock_enable(USART5_RCU_GPIOx);
@@ -81,7 +81,7 @@ void RcuConfig(uint32_t usart_periph) {
 #endif // NDEBUG
             break;
 #endif // USART5
-#if defined(UART6)
+#ifdef UART6
         case UART6:
             rcu_periph_clock_enable(UART6_RCU_UART6);
             rcu_periph_clock_enable(UART6_RCU_GPIOx);
@@ -90,7 +90,7 @@ void RcuConfig(uint32_t usart_periph) {
 #endif // NDEBUG
             break;
 #endif // UART6
-#if defined(UART7)
+#ifdef UART7
         case UART7:
             rcu_periph_clock_enable(UART7_RCU_UART7);
             rcu_periph_clock_enable(UART7_RCU_GPIOx);
@@ -116,21 +116,21 @@ void GpioConfig(uint32_t usart_periph) {
         case USART0:
             gpio_init(USART0_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART0_TX_GPIO_PINx);
             gpio_init(USART0_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART0_RX_GPIO_PINx);
-#if defined(USART0_REMAP)
+#ifdef USART0_REMAP
             gpio_pin_remap_config(GPIO_USART0_REMAP, ENABLE);
 #endif // USART0_REMAP
             break;
         case USART1:
             gpio_init(USART1_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART1_TX_GPIO_PINx);
             gpio_init(USART1_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART1_RX_GPIO_PINx);
-#if defined(USART1_REMAP)
+#ifdef USART1_REMAP
             gpio_pin_remap_config(GPIO_USART1_REMAP, ENABLE);
 #endif // USART1_REMAP
             break;
         case USART2:
             gpio_init(USART2_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART2_TX_GPIO_PINx);
             gpio_init(USART2_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART2_RX_GPIO_PINx);
-#if defined(USART2_FULL_REMAP)
+#ifdef USART2_FULL_REMAP
             gpio_pin_remap_config(GPIO_USART2_FULL_REMAP, ENABLE);
 #elif defined(USART2_PARTIAL_REMAP)
             gpio_pin_remap_config(GPIO_USART2_PARTIAL_REMAP, ENABLE);
@@ -139,7 +139,7 @@ void GpioConfig(uint32_t usart_periph) {
         case UART3:
             gpio_init(UART3_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART3_TX_GPIO_PINx);
             gpio_init(UART3_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART3_RX_GPIO_PINx);
-#if defined(UART3_REMAP)
+#ifdef UART3_REMAP
             gpio_pin_remap_config(GPIO_PCF5_UART3_REMAP, ENABLE);
 #endif // UART3_REMAP
             break;
@@ -147,26 +147,26 @@ void GpioConfig(uint32_t usart_periph) {
             gpio_init(UART4_TX_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART4_TX_GPIO_PINx);
             gpio_init(UART4_RX_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART4_RX_GPIO_PINx);
             break;
-#if defined(USART5)
+#ifdef USART5
         case USART5:
             gpio_init(USART5_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, USART5_TX_GPIO_PINx);
             gpio_init(USART5_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, USART5_RX_GPIO_PINx);
-#if defined(USART5_REMAP)
+#ifdef USART5_REMAP
             gpio_pin_remap_config(GPIO_PCF5_USART5_TX_PG14_REMAP, ENABLE);
             gpio_pin_remap_config(GPIO_PCF5_USART5_RX_PG9_REMAP, ENABLE);
 #endif // USART5_REMAP
             break;
 #endif // USART5
-#if defined(UART6)
+#ifdef UART6
         case UART6:
             gpio_init(UART6_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART6_TX_GPIO_PINx);
             gpio_init(UART6_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART6_RX_GPIO_PINx);
-#if defined(UART6_REMAP)
+#ifdef UART6_REMAP
             gpio_pin_remap_config(GPIO_PCF5_UART6_REMAP, ENABLE);
 #endif // UART6_REMAP
             break;
 #endif // UART6
-#if defined(UART7)
+#ifdef UART7
         case UART7:
             gpio_init(UART7_GPIOx, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, UART7_TX_GPIO_PINx);
             gpio_init(UART7_GPIOx, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, UART7_RX_GPIO_PINx);
@@ -221,7 +221,7 @@ void GpioConfig(uint32_t usart_periph) {
             gpio_mode_set(UART4_RX_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, UART4_RX_GPIO_PINx);
             gpio_output_options_set(UART4_RX_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, UART4_RX_GPIO_PINx);
             break;
-#if defined(USART5)
+#ifdef USART5
         case USART5:
             gpio_af_set(USART5_GPIOx, USART5_GPIO_AFx, USART5_TX_GPIO_PINx);
             gpio_mode_set(USART5_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, USART5_TX_GPIO_PINx);
@@ -232,7 +232,7 @@ void GpioConfig(uint32_t usart_periph) {
 
             break;
 #endif // USART5
-#if defined(UART6)
+#ifdef UART6
         case UART6:
             gpio_af_set(UART6_GPIOx, UART6_GPIO_AFx, UART6_TX_GPIO_PINx);
             gpio_mode_set(UART6_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, UART6_TX_GPIO_PINx);
@@ -242,7 +242,7 @@ void GpioConfig(uint32_t usart_periph) {
             gpio_output_options_set(UART6_GPIOx, GPIO_OTYPE_PP, GPIO_OSPEED, UART6_RX_GPIO_PINx);
             break;
 #endif // UART6
-#if defined(UART7)
+#ifdef UART7
         case UART7:
             gpio_af_set(UART7_GPIOx, UART7_GPIO_AFx, UART7_TX_GPIO_PINx);
             gpio_mode_set(UART7_GPIOx, GPIO_MODE_AF, GPIO_PUPD_PULLUP, UART7_TX_GPIO_PINx);

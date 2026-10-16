@@ -28,7 +28,7 @@
 
 void Gd32AdcInit() {
     rcu_periph_clock_enable(RCU_ADC0);
-#if !defined(GD32F4XX)
+#ifndef GD32F4XX
     rcu_adc_clock_config(RCU_CKADC_CKAPB2_DIV12);
 
     /* ADC SCAN function enable */
@@ -97,7 +97,7 @@ float Gd32AdcGetVref() {
     return kVrefValue;
 }
 
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
 float Gd32AdcGetVbat() {
     const float kVrefValue = (static_cast<float>(ADC_IDATA2(ADC0)) * 3.3f / 4096U) * 4U;
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);

@@ -31,11 +31,11 @@
 
 #ifdef GD32F4XX
 #define FMC_SIZE (*reinterpret_cast<uint16_t*>(0x1FFF7A22U))
-#endif
+#endif // GD32F4XX
 
 #ifdef GD32H7XX
 #define FMC_SIZE (((REG32(0x1FF0F7E0) >> 16) & 0xFFFF) * 1024U)
-#endif
+#endif // GD32H7XX
 
 namespace gd32::fmc {
 enum class Result { kOk = 0, kError = 1 };

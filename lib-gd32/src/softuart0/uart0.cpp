@@ -27,7 +27,7 @@
 
 #include "gd32.h"
 
-#if defined(GD32H7XX) // GD32H7XX
+#ifdef GD32H7XX // GD32H7XX
 #define TIMERx TIMER15
 #define RCU_TIMERx RCU_TIMER15
 #define TIMERx_IRQHandler TIMER15_IRQHandler
@@ -35,14 +35,14 @@
 #elif defined(GD32F10X) // GD32F10X
 #define TIMERx TIMER7
 #define RCU_TIMERx RCU_TIMER7
-#if defined(GD32F10X_CL) // GD32F10X_CL
+#ifdef GD32F10X_CL // GD32F10X_CL
 #define TIMERx_IRQHandler TIMER7_UP_IRQHandler
 #define TIMERx_IRQn TIMER7_UP_IRQn
-#endif
+#endif // GD32F10X_CL
 #elif defined(GD32F30X) // GD32F30X
 #define TIMERx TIMER7
 #define RCU_TIMERx RCU_TIMER7
-#if defined(GD32F30X_XD) // GD32F30X_XD
+#ifdef GD32F30X_XD // GD32F30X_XD
 #define TIMERx_IRQHandler TIMER7_UP_TIMER12_IRQHandler
 #define TIMERx_IRQn TIMER7_UP_TIMER12_IRQn
 #else
@@ -56,7 +56,7 @@
 #define TIMERx_IRQn TIMER0_UP_TIMER9_IRQn
 #endif // GD32H7XX
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 #define TIMER_CLOCK_FREQ (AHB_CLOCK_FREQ)
 #elif defined(GD32F4XX)
 #define TIMER_CLOCK_FREQ (APB2_CLOCK_FREQ * 2)
@@ -64,18 +64,18 @@
 #define TIMER_CLOCK_FREQ (APB2_CLOCK_FREQ)
 #endif // GD32H7XX
 
-#if !defined(SOFTUART_TX_PINx)
+#ifndef SOFTUART_TX_PINx
 #define SOFTUART_TX_PINx GPIO_PIN_9
 #define SOFTUART_TX_GPIOx GPIOA
 #define SOFTUART_TX_RCU_GPIOx RCU_GPIOA
 #endif // SOFTUART_TX_PINx
 
-#if defined(SOFTUART0_ENABLE_RX)
-#if !defined(SOFTUART_RX_PINx)
+#ifdef SOFTUART0_ENABLE_RX
+#ifndef SOFTUART_RX_PINx
 #define SOFTUART_RX_PINx GPIO_PIN_10
 #define SOFTUART_RX_GPIOx GPIOA
 #define SOFTUART_RX_RCU_GPIOx RCU_GPIOA
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 #error
 #else
 #define SOFTUART_RX_TIMERx TIMER11

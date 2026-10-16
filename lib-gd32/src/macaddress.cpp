@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-#if defined(DEBUG_MACADDRESS)
+#ifdef DEBUG_MACADDRESS
 #undef NDEBUG
 #endif // DEBUG_MACADDRESS
 

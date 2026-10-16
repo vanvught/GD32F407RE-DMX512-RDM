@@ -26,7 +26,7 @@
 #ifndef GD32_BOARD_H_
 #define GD32_BOARD_H_
 
-#if defined(BOARD_GD32F103RC)
+#ifdef BOARD_GD32F103RC
 #include "board/gd32f103rc.h"
 #elif defined(BOARD_GD32F107RC)
 #include "board/gd32f107rc.h"
@@ -76,7 +76,7 @@
 #error Configuration error
 #endif // defined(USART0_REMAP) && !defined(I2C0_REMAP)
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 #ifdef USE_ENET0
 #define ENETx ENET0
 #define RCU_ENET RCU_ENET0
@@ -95,18 +95,18 @@
 #endif // GD32H7XX
 
 #ifdef __cplusplus
-#if defined(ENABLE_USB_HOST)
+#ifdef ENABLE_USB_HOST
 extern "C" {
 #include "usbh_core.h"
 extern usbh_host usb_host;
 }
 #endif // ENABLE_USB_HOST
 
-#if defined(CONFIG_DEBUG_STACK)
+#ifdef CONFIG_DEBUG_STACK
 #include "firmware/debug/debug_stack.h"
 #endif // CONFIG_DEBUG_STACK
 
-#if defined(DEBUG_EMAC)
+#ifdef DEBUG_EMAC
 void emac_debug_run();
 #endif // DEBUG_EMAC
 
@@ -115,15 +115,15 @@ void emac_debug_run();
 
 namespace board {
 inline void Run() {
-#if defined(ENABLE_USB_HOST)
+#ifdef ENABLE_USB_HOST
     usbh_core_task(&usb_host);
 #endif // ENABLE_USB_HOST
     SoftwareTimerRun();
     panelled::Run();
-#if defined(CONFIG_DEBUG_STACK)
+#ifdef CONFIG_DEBUG_STACK
     debug::stack::Run();
 #endif // CONFIG_DEBUG_STACK
-#if defined(DEBUG_EMAC)
+#ifdef DEBUG_EMAC
     emac_debug_run();
 #endif // DEBUG_EMAC
 }

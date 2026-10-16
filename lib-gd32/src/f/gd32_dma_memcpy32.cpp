@@ -27,7 +27,7 @@
 
 namespace dma::memcpy32 {
 void Init() {
-#if !defined(GD32F4XX)
+#ifndef GD32F4XX
     rcu_periph_clock_enable(RCU_DMA0);
     dma_deinit(DMA0, DMA_CH3);
 
@@ -46,7 +46,7 @@ void Init() {
     dma_circulation_disable(DMA0, DMA_CH3);
     dma_memory_to_memory_enable(DMA0, DMA_CH3);
 
-#if !defined(DMA_MEMCPY32_DISABLE_IRQ)
+#ifndef DMA_MEMCPY32_DISABLE_IRQ
     Gd32DmaInterruptFlagClear<DMA0, DMA_CH3, (DMA_INT_FLAG_FTF | DMA_INT_FLAG_G)>();
 
     NVIC_SetPriority(DMA0_Channel3_IRQn, 0);
@@ -73,7 +73,7 @@ void Init() {
 
     dma_multi_data_mode_init(DMA1, DMA_CH0, &dma_init_parameter);
 
-#if !defined(DMA_MEMCPY32_DISABLE_IRQ)
+#ifndef DMA_MEMCPY32_DISABLE_IRQ
     Gd32DmaInterruptFlagClear<DMA1, DMA_CH0, (DMA_INT_FLAG_FTF | DMA_INT_FLAG_TAE)>();
 
     NVIC_SetPriority(DMA1_Channel0_IRQn, 0);

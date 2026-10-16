@@ -28,7 +28,7 @@
 
 float G32AdcGetTemp();
 float Gd32AdcGetVref();
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
 float Gd32AdcGetVbat();
 #endif // GD32F4XX
 

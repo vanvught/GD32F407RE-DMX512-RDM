@@ -28,7 +28,7 @@
 
 #include "gd32xxxx.h" // IWYU pragma: keep
 
-#if defined(GD32F30X)
+#ifdef GD32F30X
 #define bkp_data_write bkp_write_data
 #define bkp_data_read bkp_read_data
 #endif // GD32F30X

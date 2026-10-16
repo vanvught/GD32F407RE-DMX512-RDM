@@ -54,7 +54,7 @@ inline void StartDma(const void* destination, const void* source, uint32_t lengt
 
     dma_chctl |= DMA_CHXCTL_CHEN;
     DMA_CHCTL(DMA1, DMA_CH0) = dma_chctl;
-#endif
+#endif // GD32F4XX
 }
 
 inline bool IsActive() {

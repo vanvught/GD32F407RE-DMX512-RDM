@@ -32,12 +32,12 @@
 #include "gd32.h" // IWYU pragma: keep
 
 // With the latest GD32F firmware, this function is declared as static.
-#if defined(GD32F20X)
+#ifdef GD32F20X
 extern "C" {
 fmc_state_enum fmc_bank0_state_get(); // NOLINT
 fmc_state_enum fmc_bank1_state_get(); // NOLINT
 }
-#endif
+#endif // GD32F20X
 
 namespace {
 constexpr uint32_t k1KiB = 1024;

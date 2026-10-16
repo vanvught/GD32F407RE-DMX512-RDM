@@ -54,7 +54,7 @@
 #include "dmx_internal.h"
 #ifdef LOGIC_ANALYZER
 #include "logic_analyzer.h" // IWYU pragma: keep
-#endif                      // LOGIC_ANALYZER
+#endif // LOGIC_ANALYZER
 #include "dmx_debug.h"
 
 static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
@@ -1169,7 +1169,7 @@ void DMA0_Channel4_IRQHandler() {
 void DMA1_Channel3_4_IRQHandler() {
 #else
 void DMA1_Channel4_IRQHandler() {
-#endif
+#endif // GD32F30X
     if (Gd32DmaInterruptFlagGet<DMA1, DMA_CH4, DMA_INTERRUPT_FLAG_GET>()) {
         Gd32DmaInterruptDisable<DMA1, DMA_CH4, DMA_INTERRUPT_DISABLE>();
 
@@ -2806,10 +2806,10 @@ Dmx::Dmx() {
     UsartDmaConfig(); // DMX Transmit
 #if defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
     Timer1Config(); // DMX Transmit -> USART0, USART1, USART2, UART3
-#endif              // defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
+#endif // defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
 #if defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
     Timer4Config(); // DMX Transmit -> UART4, USART5, UART6, UART7
-#endif              // defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
+#endif // defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
 
 #if defined(DMX_USE_USART0) || defined(DMX_USE_USART0_RX)
     UartDmxConfig(USART0);

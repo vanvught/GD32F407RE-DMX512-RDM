@@ -54,7 +54,7 @@
 #define GPIO_INT_CFG_NEG_EDGE EXTI_TRIG_FALLING
 #define GPIO_INT_CFG_BOTH EXTI_TRIG_BOTH
 
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
 #define GPIOx_OCTL_OFFSET 0x14U;
 #define GPIOx_BOP_OFFSET 0x18U;
 #define GPIOx_BC_OFFSET 0x28U;
@@ -91,13 +91,13 @@ constexpr void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel) {
         case GPIOH:
             rcu_periph_clock_enable(RCU_GPIOH);
             break;
-#if !defined(GD32H7XX)
+#ifndef GD32H7XX
         case GPIOI:
             rcu_periph_clock_enable(RCU_GPIOI);
             break;
 #endif // GD32H7XX
 #endif // !(defined(GD32F10X) || defined(GD32F30X))
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         case GPIOJ:
             rcu_periph_clock_enable(RCU_GPIOJ);
             break;
@@ -130,7 +130,7 @@ constexpr void Gd32GpioFsel(uint32_t gpio_periph, uint32_t pin, uint32_t fsel) {
 #endif // defined(GD32F10X) || defined(GD32F20X) || defined(GD32F30X)
 }
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 inline void Gd32GpioIntCfg([[maybe_unused]] uint32_t gpio, [[maybe_unused]] uint32_t trig_type) {
     assert(false && "Not implemented");
 }
@@ -182,12 +182,12 @@ constexpr uint32_t Gd32GpioToPeriph(uint32_t gpio) {
 #if !(defined(GD32F10X) || defined(GD32F30X))
         case GD32_GPIO_PORTH:
             return GPIOH;
-#if !defined(GD32H7XX)
+#ifndef GD32H7XX
         case GD32_GPIO_PORTI:
             return GPIOI;
 #endif // GD32H7XX
 #endif // !(defined(GD32F10X) || defined(GD32F30X))
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
         case GD32_GPIO_PORTJ:
             return GPIOJ;
         case GD32_GPIO_PORTK:

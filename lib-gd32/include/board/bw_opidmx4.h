@@ -26,7 +26,7 @@
 #ifndef BOARD_BW_OPIDMX4_H_
 #define BOARD_BW_OPIDMX4_H_
 
-#if !defined(BOARD_BW_OPIDMX4)
+#ifndef BOARD_BW_OPIDMX4
 # error This file should not be included
 #endif // BOARD_BW_OPIDMX4
 
@@ -153,7 +153,7 @@ static constexpr uint32_t kPortATx = 0;
 #define LINK_CHECK_EXTI_LINE			EXTI_0
 #define LINK_CHECK_EXTI_IRQn			EXTI0_IRQn
 #define LINK_CHECK_IRQ_HANDLE			EXTI0_IRQHandler
-#if !defined (GD32F4XX)
+#ifndef GD32F4XX
 # define LINK_CHECK_EXTI_CLK			RCU_AF
 # define LINK_CHECK_EXTI_PORT_SOURCE	GPIO_PORT_SOURCE_GPIOB
 # define LINK_CHECK_EXTI_PIN_SOURCE		GPIO_PIN_SOURCE_0
@@ -165,13 +165,13 @@ static constexpr uint32_t kPortATx = 0;
 # define LINK_CHECK_EXTI_PIN_SOURCE		EXTI_SOURCE_PIN0
 # define LINK_CHECK_EXTI_SOURCE_CONFIG	syscfg_exti_line_config
 # define LINK_CHECK_GPIO_CONFIG			gpio_mode_set(LINK_CHECK_GPIO_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, LINK_CHECK_GPIO_PIN);
-#endif // !defined (GD32F4XX)
+#endif // GD32F4XX
 
 /**
  * MCU and BOARD name
  */
 
-#if defined (GD32F20X_CL)
+#ifdef GD32F20X_CL
 # include "mcu/gd32f207_mcu.h"
 # define GD32_MCU_NAME	"GD32F207RG"
 #elif defined (GD32F407)
@@ -179,7 +179,7 @@ static constexpr uint32_t kPortATx = 0;
 # define GD32_MCU_NAME	"GD32F407RE"
 #else
 # error MCU is not supported
-#endif // defined (GD32F20X_CL)
+#endif // GD32F20X_CL
 
 #define GD32_BOARD_NAME			"BW_OPIDMX4"
 
@@ -203,7 +203,7 @@ static constexpr uint32_t kPortATx = 0;
 #define DISPLAYTIMEOUT_EXTI_LINE			EXTI_14
 #define DISPLAYTIMEOUT_EXTI_IRQn			EXTI10_15_IRQn
 #define DISPLAYTIMEOUT_IRQ_HANDLE			EXTI10_15_IRQHandler
-#if !defined (GD32F4XX)
+#ifndef GD32F4XX
 # define DISPLAYTIMEOUT_EXTI_CLK			RCU_AF
 # define DISPLAYTIMEOUT_EXTI_PORT_SOURCE	GPIO_PORT_SOURCE_GPIOA
 # define DISPLAYTIMEOUT_EXTI_PIN_SOURCE		GPIO_PIN_SOURCE_14
@@ -215,7 +215,7 @@ static constexpr uint32_t kPortATx = 0;
 # define DISPLAYTIMEOUT_EXTI_PIN_SOURCE		EXTI_SOURCE_PIN14
 # define DISPLAYTIMEOUT_EXTI_SOURCE_CONFIG	syscfg_exti_line_config
 # define DISPLAYTIMEOUT_GPIO_CONFIG			gpio_mode_set(DISPLAYTIMEOUT_GPIO_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, DISPLAYTIMEOUT_GPIO_PIN);
-#endif // !defined (GD32F4XX)
+#endif // GD32F4XX
 
 /**
  * SPI LCD
@@ -224,7 +224,7 @@ static constexpr uint32_t kPortATx = 0;
 #define SPI_LCD_RST_PIN			GPIO_EXT_7
 #define SPI_LCD_DC_GPIO 		GPIO_EXT_26
 #define SPI_LCD_BL_GPIO			GPIO_EXT_22
-#if defined(SPI_LCD_HAVE_CS_GPIO)
+#ifdef SPI_LCD_HAVE_CS_GPIO
 # define SPI_LCD_CS_GPIO		GPIO_EXT_24
 #endif // SPI_LCD_HAVE_CS_GPIO
 

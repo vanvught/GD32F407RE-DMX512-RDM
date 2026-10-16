@@ -35,7 +35,7 @@
 #include "gd32_debug.h"
 #include "gd32.h" // IWYU pragma: keep
 
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
 volatile uint32_t gv_systick_millis;
 
 extern "C" void SysTick_Handler() {
@@ -45,7 +45,7 @@ extern "C" void SysTick_Handler() {
 
 struct HwTimersSeconds gv_seconds;
 
-#if defined(CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER)
+#ifdef CONFIG_TIMER6_HAVE_NO_IRQ_HANDLER
 extern "C" void TIMER6_IRQHandler() {
     const auto kIntFlag = TIMER_INTF(TIMER6);
 
@@ -61,7 +61,7 @@ namespace gd32::timers {
 void Start() {
     GD32_TIMERS_DEBUG_ENTRY();
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 #elif defined(GD32F4XX)
     // AHB = SYSCLK = 240 MHz (GD32F470), others = 200 MHz
     // APB1 = AHB / 4 =   50 MHz => APB1PSC = 0b101
@@ -78,10 +78,10 @@ void Start() {
 #endif // GD32H7XX
     timer5::Start();
     timer6::Start();
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
     systick::Start();
 #endif // CONFIG_TIME_USE_SYSTICK
-#if defined(CONFIG_TIME_USE_TIMER)
+#ifdef CONFIG_TIME_USE_TIMER
     timer_time::Start();
 #endif // CONFIG_TIME_USE_TIMER
     dwt::Start();
@@ -159,7 +159,7 @@ uint32_t Micros() {
 #pragma GCC pop_options
 } // namespace dwt
 
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
 namespace systick {
 void Start() {
     GD32_TIMERS_DEBUG_ENTRY();

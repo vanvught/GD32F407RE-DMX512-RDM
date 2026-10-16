@@ -26,11 +26,11 @@
 #ifndef MCU_GD32F407_MCU_H_
 #define MCU_GD32F407_MCU_H_
 
-#if !defined(GD32F407)
+#ifndef GD32F407
 #error This file should not be included
 #endif // GD32F407
 
-#if !defined(__cplusplus)
+#ifndef __cplusplus
 #error
 #endif // __cplusplus
 

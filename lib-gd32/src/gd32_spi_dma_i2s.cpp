@@ -28,9 +28,9 @@
 
 #include "gd32.h"
 
-#if defined(I2S_PERIPH)
+#ifdef I2S_PERIPH
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
 static_assert(I2S_PERIPH != SPI3);
 static_assert(I2S_PERIPH != SPI4);
 #else
@@ -50,12 +50,12 @@ static_assert(I2S_PERIPH != SPI0);
 #endif // defined(GD32F4XX) || defined(GD32H7XX)
 
 #ifndef NDEBUG
-#if !defined(GD32H7XX)
+#ifndef GD32H7XX
 void I2sPscConfigDump(uint32_t spi_periph, uint32_t audiosample, uint32_t frameformat, uint32_t mckout);
 #endif // GD32H7XX
 #endif // NDEBUG
 
-#if !defined(SPI_BUFFER_SIZE)
+#ifndef SPI_BUFFER_SIZE
 #define SPI_BUFFER_SIZE ((24 * 1024) / 2)
 #endif // SPI_BUFFER_SIZE
 
@@ -64,7 +64,7 @@ static uint16_t s_tx_buffer[SPI_BUFFER_SIZE] __attribute__((aligned(4)));
 static void RcuConfig() {
     rcu_periph_clock_enable(I2S_WS_RCU_GPIOx);
 
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     rcu_periph_clock_enable(RCU_AF);
     rcu_periph_clock_enable(I2S_RCU_SPIx);
     rcu_periph_clock_enable(I2S_RCU_GPIOx);
@@ -79,14 +79,14 @@ static void RcuConfig() {
         rcu_periph_clock_enable(RCU_DMA1);
     }
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif // GD32H7XX
 }
 
 static void GpioConfig() {
-#if defined(GPIO_INIT)
-#if defined(I2S_REMAP_GPIO)
+#ifdef GPIO_INIT
+#ifdef I2S_REMAP_GPIO
     gpio_pin_remap_config(I2S_REMAP_GPIO, ENABLE);
     if (I2S_PERIPH == SPI0) {
         gpio_pin_remap_config(GPIO_SWJ_DISABLE_REMAP, ENABLE);
@@ -119,7 +119,7 @@ static void SpiI2sDmaConfig() {
     DMA_PARAMETER_STRUCT dma_init_struct;
     dma_struct_para_init(&dma_init_struct);
 
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     dma_init_struct.request = I2S_DMA_REQUEST_I2S_TX;
 #endif // GD32H7XX
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
@@ -128,7 +128,7 @@ static void SpiI2sDmaConfig() {
 #else
     dma_init_struct.memory_width = DMA_MEMORY_WIDTH_16BIT;
 #endif // defined(GD32F4XX) || defined(GD32H7XX)
-#if defined(GD32H7XX)
+#ifdef GD32H7XX
     dma_init_struct.periph_addr = (uint32_t)&SPI_TDATA(I2S_PERIPH);
 #else
     dma_init_struct.periph_addr = I2S_PERIPH + 0x0CU;
@@ -144,7 +144,7 @@ static void SpiI2sDmaConfig() {
 
     dma_circulation_disable(I2S_DMAx, I2S_DMA_CHx);
     dma_memory_to_memory_disable(I2S_DMAx, I2S_DMA_CHx);
-#if defined(GD32F4XX)
+#ifdef GD32F4XX
     dma_channel_subperipheral_select(I2S_DMAx, I2S_DMA_CHx, I2S_DMA_SUBPERIx);
 #endif // GD32F4XX
 

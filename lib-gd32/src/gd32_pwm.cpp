@@ -32,28 +32,28 @@
 
 #if defined(PWM_RCU_TIMERx) && defined(PWM_TIMERx)
 namespace pwm {
-#if !defined(PWM_CHANNEL_0_DUTYCYCLE)
+#ifndef PWM_CHANNEL_0_DUTYCYCLE
 #define PWM_CHANNEL_0_DUTYCYCLE 50
 #endif // PWM_CHANNEL_0_DUTYCYCLE
-#if !defined(PWM_CHANNEL_1_DUTYCYCLE)
+#ifndef PWM_CHANNEL_1_DUTYCYCLE
 #define PWM_CHANNEL_1_DUTYCYCLE 50
 #endif // PWM_CHANNEL_1_DUTYCYCLE
-#if !defined(PWM_CHANNEL_2_DUTYCYCLE)
+#ifndef PWM_CHANNEL_2_DUTYCYCLE
 #define PWM_CHANNEL_2_DUTYCYCLE 50
 #endif // PWM_CHANNEL_2_DUTYCYCLE
-#if !defined(PWM_CHANNEL_3_DUTYCYCLE)
+#ifndef PWM_CHANNEL_3_DUTYCYCLE
 #define PWM_CHANNEL_3_DUTYCYCLE 50
 #endif // PWM_CHANNEL_3_DUTYCYCLE
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
 static constexpr uint32_t kDefaulChannel0Dutycycle = PWM_CHANNEL_0_DUTYCYCLE;
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
 static constexpr uint32_t kDefaulChannel1Dutycycle = PWM_CHANNEL_1_DUTYCYCLE;
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
 static constexpr uint32_t kDefaulChannel2Dutycycle = PWM_CHANNEL_2_DUTYCYCLE;
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
 static constexpr uint32_t kDefaulChannel3Dutycycle = PWM_CHANNEL_3_DUTYCYCLE;
 #endif // PWM_CH3_RCU_GPIOx
 #if defined(PWM_RCU_TIMERx) && defined(PWM_TIMERx)
@@ -67,29 +67,29 @@ static void Dump() {
 #ifndef NDEBUG
     printf("PWM_TIMERx=0x%.8X\n", PWM_TIMERx - TIMER_BASE);
     printf("PWM_RCU_TIMERx=0x%.8X\n", PWM_RCU_TIMERx);
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     printf("PWM_TIMER_REMAP=0x%.8X\n", PWM_TIMER_REMAP);
 #endif // GPIO_INIT
     puts("--------------------------------");
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
     printf("PWM_CH0_RCU_GPIOx=0x%.8X\n", PWM_CH0_RCU_GPIOx);
     printf("PWM_CH0_GPIOx=0x%.8X\n", PWM_CH0_GPIOx);
     printf("PWM_CH0_GPIO_PINx=0x%.4X\n", PWM_CH0_GPIO_PINx);
     puts("--------------------------------");
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
     printf("PWM_CH1_RCU_GPIOx=0x%.8X\n", PWM_CH1_RCU_GPIOx);
     printf("PWM_CH1_GPIOx=0x%.8X\n", PWM_CH1_GPIOx);
     printf("PWM_CH1_GPIO_PINx=0x%.4X\n", PWM_CH1_GPIO_PINx);
     puts("--------------------------------");
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
     printf("PWM_CH2_RCU_GPIOx=0x%.8X\n", PWM_CH2_RCU_GPIOx);
     printf("PWM_CH2_GPIOx=0x%.8X\n", PWM_CH2_GPIOx);
     printf("PWM_CH2_GPIO_PINx=0x%.4X\n", PWM_CH2_GPIO_PINx);
     puts("--------------------------------");
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
     printf("PWM_CH3_RCU_GPIOx=0x%.8X\n", PWM_CH3_RCU_GPIOx);
     printf("PWM_CH3_GPIOx=0x%.8X\n", PWM_CH3_GPIOx);
     printf("PWM_CH3_GPIO_PINx=0x%.4X\n", PWM_CH3_GPIO_PINx);
@@ -100,22 +100,22 @@ static void Dump() {
 }
 
 static void GpioConfig() {
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
     rcu_periph_clock_enable(PWM_CH0_RCU_GPIOx);
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
     rcu_periph_clock_enable(PWM_CH1_RCU_GPIOx);
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
     rcu_periph_clock_enable(PWM_CH2_RCU_GPIOx);
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
     rcu_periph_clock_enable(PWM_CH3_RCU_GPIOx);
 #endif // PWM_CH3_RCU_GPIOx
 
-#if defined(GPIO_INIT)
+#ifdef GPIO_INIT
     rcu_periph_clock_enable(RCU_AF);
-#if defined(PWM_TIMER_REMAP)
+#ifdef PWM_TIMER_REMAP
     gpio_pin_remap_config(PWM_TIMER_REMAP, ENABLE);
 #endif // PWM_TIMER_REMAP
 #if defined(PWM_CH0_GPIOx) && defined(PWM_CH0_GPIO_PINx)
@@ -177,25 +177,25 @@ static void TimerConfig() {
     timer_ocintpara.ocidlestate = TIMER_OC_IDLE_STATE_LOW;
     timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
 #endif // defined(PWM_CH0_RCU_GPIOx) || defined(PWM_CH1_RCU_GPIOx) || defined(PWM_CH2_RCU_GPIOx) || defined(PWM_CH3_RCU_GPIOx)
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
     timer_channel_output_config(PWM_TIMERx, TIMER_CH_0, &timer_ocintpara);
     timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_0, 1999);
     timer_channel_output_mode_config(PWM_TIMERx, TIMER_CH_0, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(PWM_TIMERx, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
     timer_channel_output_config(PWM_TIMERx, TIMER_CH_1, &timer_ocintpara);
     timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_1, 3999);
     timer_channel_output_mode_config(PWM_TIMERx, TIMER_CH_1, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(PWM_TIMERx, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
     timer_channel_output_config(PWM_TIMERx, TIMER_CH_2, &timer_ocintpara);
     timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_2, 7999);
     timer_channel_output_mode_config(PWM_TIMERx, TIMER_CH_2, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(PWM_TIMERx, TIMER_CH_2, TIMER_OC_SHADOW_DISABLE);
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
     timer_channel_output_config(PWM_TIMERx, TIMER_CH_3, &timer_ocintpara);
     timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_3, 11999);
     timer_channel_output_mode_config(PWM_TIMERx, TIMER_CH_3, TIMER_OC_MODE_PWM0);
@@ -214,16 +214,16 @@ void gd32_pwm_begin() {
     GpioConfig();
     TimerConfig();
 
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
     gd32_pwm_set_duty_cycle(pwm::Channel::PWM_CHANNEL_0, pwm::kDefaulChannel0Dutycycle);
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
     gd32_pwm_set_duty_cycle(pwm::Channel::PWM_CHANNEL_1, pwm::kDefaulChannel1Dutycycle);
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
     gd32_pwm_set_duty_cycle(pwm::Channel::PWM_CHANNEL_2, pwm::kDefaulChannel2Dutycycle);
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
     gd32_pwm_set_duty_cycle(pwm::Channel::PWM_CHANNEL_3, pwm::kDefaulChannel3Dutycycle);
 #endif // PWM_CH3_RCU_GPIOx
 
@@ -238,22 +238,22 @@ void gd32_pwm_set_duty_cycle(pwm::Channel channel, uint32_t duty_cycle) {
     DEBUG_PRINTF("channel=%u, duty_cycle=%u, kPulse=%u", static_cast<unsigned>(channel), duty_cycle, static_cast<unsigned>(kPulse));
 
     switch (channel) {
-#if defined(PWM_CH0_RCU_GPIOx)
+#ifdef PWM_CH0_RCU_GPIOx
         case pwm::Channel::PWM_CHANNEL_0:
             timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_0, kPulse);
             break;
 #endif // PWM_CH0_RCU_GPIOx
-#if defined(PWM_CH1_RCU_GPIOx)
+#ifdef PWM_CH1_RCU_GPIOx
         case pwm::Channel::PWM_CHANNEL_1:
             timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_1, kPulse);
             break;
 #endif // PWM_CH1_RCU_GPIOx
-#if defined(PWM_CH2_RCU_GPIOx)
+#ifdef PWM_CH2_RCU_GPIOx
         case pwm::Channel::PWM_CHANNEL_2:
             timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_2, kPulse);
             break;
 #endif // PWM_CH2_RCU_GPIOx
-#if defined(PWM_CH3_RCU_GPIOx)
+#ifdef PWM_CH3_RCU_GPIOx
         case pwm::Channel::PWM_CHANNEL_3:
             timer_channel_output_pulse_value_config(PWM_TIMERx, TIMER_CH_3, kPulse);
             break;

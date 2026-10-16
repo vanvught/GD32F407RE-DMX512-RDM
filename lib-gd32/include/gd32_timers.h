@@ -28,16 +28,16 @@
 
 #if defined(USE_FREE_RTOS) && defined(CONFIG_TIME_USE_SYSTICK)
 #error
-#endif
+#endif // defined(USE_FREE_RTOS) && defined(CONFIG_TIME_USE_SYSTICK)
 
 #include <cstdint>
 
-#if defined(USE_FREE_RTOS)
+#ifdef USE_FREE_RTOS
 #include "FreeRTOS.h"
 #include "task.h"
 #endif // USE_FREE_RTOS
 
-#if defined(CONFIG_TIME_USE_SYSTICK)
+#ifdef CONFIG_TIME_USE_SYSTICK
 extern volatile uint32_t gv_systick_millis;
 #endif // CONFIG_TIME_USE_SYSTICK
 

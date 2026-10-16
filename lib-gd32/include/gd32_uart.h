@@ -30,7 +30,7 @@
 
 #include "gd32xxxx.h"
 
-#if !defined(GD32H7XX)
+#ifndef GD32H7XX
 #define USART_TDATA USART_DATA
 #define USART_RDATA USART_DATA
 #define USART_TDATA_TDATA USART_DATA_DATA
