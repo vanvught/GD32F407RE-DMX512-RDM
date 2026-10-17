@@ -40,7 +40,7 @@ template <typename Callback> uint32_t Serialize(char* buffer, uint32_t length, C
     JsonDoc doc(buffer, length);
     callback(doc);
     doc.End();
-    return doc.Size();
+    return doc.Ok() ? doc.Size() : 0U;
 }
 } // namespace json::helpers
 

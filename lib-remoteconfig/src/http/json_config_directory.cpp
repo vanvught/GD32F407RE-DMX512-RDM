@@ -22,36 +22,26 @@
  * THE SOFTWARE.
  */
 
-#include <cstddef>
 #include <cstdint>
-#include <cstdio>
-#include <cassert>
 
+#include "json/json_jsondoc.h"
+#include "json/json_helpers.h"
 #include "http/json_infos.h"
 
 namespace json::config {
-uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
-    assert(out_buffer != nullptr);
-    assert(out_buffer_size != 0);
+uint32_t Directory(char* buffer, uint32_t length) {
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
+        doc.BeginObject("files");
 
-    uint32_t total = 0;
+        for (size_t i = 0; i < kFileInfosSize; ++i) {
+            const auto& entry = kFileInfos[i];
 
-    total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "{\"files\":{"));
-
-    for (size_t i = 0; i < kFileInfosSize; ++i) {
-        const auto& entry = kFileInfos[i];
-        if ((entry.config_label != nullptr) && (entry.config_label[0] != '\0')) {
-            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, R"("%s":"%s"%s)", entry.name, entry.config_label, (i + 1 < kFileInfosSize) ? "," : ""));
+            if (entry.config_label != nullptr && entry.config_label[0] != '\0') {
+                doc[entry.name] = entry.config_label;
+            }
         }
-    }
 
-    if (out_buffer[total - 1] == ',') {
-        out_buffer[total - 1] = '}';
-    } else {
-        out_buffer[total++] = '}';
-    }
-
-    out_buffer[total++] = '}';
-    return total;
+        doc.EndObject();
+    });
 }
 } // namespace json::config

@@ -27,12 +27,14 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
-#include <cassert>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string_view>
 
 #include "firmware/debug/debug_config.h"
+#include "common/utils/utils_string.h"
+#include "json/json_jsondoc.h"
+#include "common/utils/utils_print.h"
 
 void DriveSize(const char* path, uint32_t& total_bytes, uint32_t& free_bytes);
 
@@ -47,8 +49,6 @@ constexpr std::string_view kJsonNoStorage = R"({"label":"No storage"})";
 } // namespace
 
 uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
-    const auto kBufferSize = out_buffer_size - 2U;
-
     auto* dirp = opendir(kDirName);
 
     if constexpr (debug::config::kTraceEnabled) {
@@ -65,7 +65,13 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
     uint32_t free_bytes{};
     DriveSize(kDirName, total_bytes, free_bytes);
 
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, R"({"label":"storage","capacity":%u,"free":%u,"files":[)", static_cast<unsigned>(total_bytes), static_cast<unsigned>(free_bytes)));
+    JsonDoc doc(out_buffer, out_buffer_size);
+
+    doc["label"] = "storage";
+    doc["capacity"] = total_bytes;
+    doc["free"] = free_bytes;
+
+    doc.BeginArray("files");
 
     struct dirent* read_dir{};
 
@@ -80,41 +86,39 @@ uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
                 continue;
             }
 
-            const auto kSize = kBufferSize - length;
-
             struct stat buf;
             const auto kStat = stat(read_dir->d_name, &buf);
 
             if (kStat == 0) {
                 time_t epoch_time = buf.st_mtime;
                 auto* local_time = localtime(&epoch_time);
-                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, R"({"name":"%s","size":%u,"date":"%d-%.2d-%.2dT%.2d:%.2d:%.2d"},)", read_dir->d_name, static_cast<unsigned>(buf.st_size),
-                                                                        1900 + local_time->tm_year, 1 + local_time->tm_mon, local_time->tm_mday, local_time->tm_hour, local_time->tm_min, local_time->tm_sec));
+                char date_time[20];
 
-                if (kCharacters > kSize) {
-                    break;
-                }
+                common::DateTimeToString(*local_time, date_time);
 
-                length += kCharacters;
+                doc.BeginObject();
 
-                if (length >= kBufferSize) {
+                doc["name"] = read_dir->d_name;
+                doc["size"] = static_cast<uint32_t>(buf.st_size);
+                doc["date"] = date_time;
+
+                doc.EndObject();
+
+                if (doc.HasOverflow()) {
+                    ERROR("JsonDoc overflow");
                     break;
                 }
             }
         }
     } while (read_dir != nullptr);
 
+    doc.EndArray();
+
     closedir(dirp);
 
-    if (out_buffer[length - 1] == ',') {
-        length--;
-    }
+    doc.End();
 
-    out_buffer[length++] = ']';
-    out_buffer[length++] = '}';
-
-    assert(length <= out_buffer_size);
-    return length;
+    return doc.Ok() ? doc.Size() : 0U;
 }
 } // namespace json::storage
 #endif // DISABLE_FS

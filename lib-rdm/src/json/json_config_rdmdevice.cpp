@@ -30,10 +30,8 @@
 #include "json/rdmdeviceparamsconst.h"
 #include "rdmdevice.h"
 
-namespace json::config
-{
-uint32_t GetRdmDevice(char* buffer, uint32_t length)
-{
+namespace json::config {
+uint32_t GetRdmDevice(char* buffer, uint32_t length) {
     auto& rdmdevice = rdm::device::Device::Instance();
 
     struct rdm::device::InfoData info_data;
@@ -45,8 +43,7 @@ uint32_t GetRdmDevice(char* buffer, uint32_t length)
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) { doc[json::RdmDeviceParamsConst::kLabel.name] = label; });
 }
 
-void SetRdmDevice(const char* buffer, uint32_t buffer_size)
-{
+void SetRdmDevice(const char* buffer, uint32_t buffer_size) {
     ::json::RdmDeviceParams rdmdevice_params;
     rdmdevice_params.Store(buffer, buffer_size);
     rdmdevice_params.Set();

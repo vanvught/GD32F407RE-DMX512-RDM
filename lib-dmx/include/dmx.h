@@ -2,7 +2,7 @@
  * @file dmx.h
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 #ifdef OUTPUT_DMX_SEND_MULTI
 #ifdef H3
 #include "h3/multi/dmx.h"
-#elif defined(GD32)
+#elifdef GD32
 #include "gd32/dmx.h"
 #else
 #include "linux/dmx.h"

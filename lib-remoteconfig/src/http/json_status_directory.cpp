@@ -22,32 +22,26 @@
  * THE SOFTWARE.
  */
 
-#include <cstddef>
 #include <cstdint>
-#include <cstdio>
 
+#include "json/json_jsondoc.h"
+#include "json/json_helpers.h"
 #include "http/json_infos.h"
 
 namespace json::status {
-uint32_t Directory(char* out_buffer, uint32_t out_buffer_size) {
-    uint32_t total = 0;
+uint32_t Directory(char* buffer, uint32_t length) {
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
+        doc.BeginObject("files");
 
-    total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "{\"files\":{"));
+        for (size_t i = 0; i < kFileInfosSize; ++i) {
+            const auto& entry = kFileInfos[i];
 
-    for (size_t i = 0; i < kFileInfosSize; ++i) {
-        const auto& entry = kFileInfos[i];
-        if ((entry.status_label != nullptr) && (entry.status_label[0] != '\0')) {
-            total += static_cast<uint32_t>(snprintf(out_buffer + total, out_buffer_size - total, "\"%s\":\"%s\"%s", entry.name, entry.status_label, (i + 1 < kFileInfosSize) ? "," : ""));
+            if (entry.status_label != nullptr && entry.status_label[0] != '\0') {
+                doc[entry.name] = entry.status_label;
+            }
         }
-    }
 
-    if (out_buffer[total - 1] == ',') {
-        out_buffer[total - 1] = '}';
-    } else {
-        out_buffer[total++] = '}';
-    }
-
-    out_buffer[total++] = '}';
-    return total;
+        doc.EndObject();
+    });
 }
 } // namespace json::status

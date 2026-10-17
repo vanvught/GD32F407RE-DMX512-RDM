@@ -23,23 +23,27 @@
  */
 
 #include <cstdint>
-#include <cstdio>
+#include <string_view>
 
 #include "board.h"
 #include "firmware/firmwareversion.h"
+#include "json/json_jsondoc.h"
+#include "json/json_helpers.h"
 
 namespace json {
+
 uint32_t GetVersion(char* out_buffer, uint32_t out_buffer_size) {
     const auto* version = FirmwareVersion::Get()->GetVersion();
     uint8_t hw_text_length;
 
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		R"({"version":"%.*s","board":"%s","build":{"date":"%.*s","time":"%.*s"}})", 
-		firmwareversion::length::kSoftwareVersion, 
-		version->software_version, 
-		board::BoardName(hw_text_length), 
-		firmwareversion::length::kGccDate, version->build_date, 
-		firmwareversion::length::kGccTime, version->build_time));
-    return kLength;
+    return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) {
+        doc["version"] = std::string_view{version->software_version, firmwareversion::length::kSoftwareVersion};
+        doc["board"] = board::BoardName(hw_text_length);
+
+        doc.BeginObject("build");
+        doc["date"] = std::string_view{version->build_date, firmwareversion::length::kGccDate};
+        doc["time"] = std::string_view{version->build_time, firmwareversion::length::kGccTime};
+        doc.EndObject();
+    });
 }
 } // namespace json

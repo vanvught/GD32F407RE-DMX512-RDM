@@ -30,11 +30,30 @@
 namespace html {
 #define ENTRY(filename_literal, label) MakeHtmlInfo(filename_literal, Fnv1a32(filename_literal), label)
 
-constexpr Info kHtmlInfos[] = {ENTRY("/", "index.html"),
-                               ENTRY("/config", "index.html"),
-                               ENTRY("/status", "status/index.html"),
-                               ENTRY("/rtc", "rtc/index.html"),
-                               ENTRY("/time", "time/index.html"),
+constexpr Info kHtmlInfos[] = {
+    ENTRY("/", "index.html"),       //
+    ENTRY("/config", "index.html"), //
+#ifndef CONFIG_HTTP_HTML_INDEX_ONLY
+    ENTRY("/status", "status/index.html"), //
+#if !defined(CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
+    ENTRY("/dmx", "dmx/index.html"), //
+#endif
+#if !defined(CONFIG_HTTP_HTML_NO_RDM) && defined(RDM_CONTROLLER)
+    ENTRY("/rdm", "rdm/index.html"), //
+#endif
+#if !defined(CONFIG_HTTP_HTML_NO_RTC) && !defined(DISABLE_RTC)
+    ENTRY("/rtc", "rtc/index.html"), //
+#endif
+#ifdef NODE_SHOWFILE
+    ENTRY("/showfile", "showfile/index.html"), //
+#endif
+#ifndef CONFIG_HTTP_HTML_NO_TIME
+    ENTRY("/time", "time/index.html"), //
+#endif
+#ifdef CONFIG_HTTPD_ENABLE_UPLOAD
+    ENTRY("/upload", "upload/index.html"), //
+#endif
+#endif
 };
 
 #undef ENTRY

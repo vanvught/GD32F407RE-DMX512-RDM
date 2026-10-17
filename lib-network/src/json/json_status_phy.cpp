@@ -23,22 +23,19 @@
  * THE SOFTWARE.
  */
 
-#include <cstdio>
-
 #include "emac/emac_phy.h"
+#include "json/json_helpers.h"
 
 namespace json::status::emac {
-uint32_t Phy(char* out_buffer, uint32_t out_buffer_size) {
+uint32_t Phy(char* buffer, uint32_t length) {
     ::emac::phy::Status phy_status;
     ::emac::phy::CustomizedStatus(phy_status);
 
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		R"({"link":"%s","speed":"%s","duplex":"%s","autonegotiation":"%s"})", 
-		::emac::phy::ToString(phy_status.link),
-		::emac::phy::ToString(phy_status.speed), 
-		::emac::phy::ToString(phy_status.duplex), 
-		::emac::phy::ToStringAutonegotiation(phy_status.autonegotiation)));
-
-    return kLength;
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
+        doc["link"] = ::emac::phy::ToString(phy_status.link);
+        doc["speed"] = ::emac::phy::ToString(phy_status.speed);
+        doc["duplex"] = ::emac::phy::ToString(phy_status.duplex);
+        doc["autonegotiation"] = ::emac::phy::ToStringAutonegotiation(phy_status.autonegotiation);
+    });
 }
 } // namespace json::status::emac

@@ -32,6 +32,7 @@
 #include "dmxnode_nodetype.h"
 #include "dmxnode_outputtype.h"
 #include "ip4/ip4_address.h"
+#include "json/json_helpers.h"
 #include "network_config.h"
 
 namespace json {
@@ -74,25 +75,29 @@ uint32_t GetList(char* out_buffer, uint32_t out_buffer_size) {
         output_type = common::kWarning;
     }
 
-    const int kLength = snprintf(out_buffer, out_buffer_size,
-                                "{\"list\":{\"ip\":\"" IPSTR
-                                "\",\"name\":\"%s\","
-                                "\"node\":{\"type\":\"%s\","
-                                "\"output\":{\"type\":\"%s\",\"count\":%u}}}}",
-                                IP2STR(network::GetPrimaryIp()), 
-								reinterpret_cast<const char*>(display_name), 
-								node_type, 
-								output_type, 
-								static_cast<unsigned>(kPortCount));
+    char ip_text[16];
+    const auto kIpLength = common::IpToString(network::GetPrimaryIp(), ip_text);
 
-    if (kLength < 0) {
+    if (kIpLength >= sizeof(ip_text)) {
         return 0U;
     }
 
-    if (static_cast<uint32_t>(kLength) >= out_buffer_size) {
-        return out_buffer_size - 1U;
-    }
+    return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) {
+        doc.BeginObject("list");
 
-    return static_cast<uint32_t>(kLength);
+        doc["ip"] = ip_text;
+        doc["name"] = reinterpret_cast<const char*>(display_name);
+
+        doc.BeginObject("node");
+        doc["type"] = node_type;
+
+        doc.BeginObject("output");
+        doc["type"] = output_type;
+        doc["count"] = kPortCount;
+        doc.EndObject();
+
+        doc.EndObject();
+        doc.EndObject();
+    });
 }
 } // namespace json

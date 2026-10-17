@@ -23,14 +23,13 @@
  */
 
 #include <cstdint>
-#include <cstdio>
 
 #include "display.h"
+#include "json/json_helpers.h"
 
 namespace json::status {
-uint32_t Display(char* out_buffer, uint32_t out_buffer_size) {
+uint32_t Display(char* buffer, uint32_t length) {
     const bool kIsOn = !Display::Get()->IsSleep();
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"display\":%d}", static_cast<int>(kIsOn)));
-    return kLength;
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) { doc["display"] = kIsOn; });
 }
 } // namespace json::status

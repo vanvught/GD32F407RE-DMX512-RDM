@@ -28,6 +28,8 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstring>
+#include <ctime>
 #include <string_view>
 
 namespace common {
@@ -122,6 +124,154 @@ void CopyString(T (&destination)[N], std::string_view value) {
 
     memset(destination + kLength, 0, N - kLength);
 }
+
+inline char* AppendDecimal(char* out, uint8_t value) noexcept {
+    if (value >= 100U) {
+        *out++ = static_cast<char>('0' + value / 100U);
+        value = static_cast<uint8_t>(value % 100U);
+        *out++ = static_cast<char>('0' + value / 10U);
+    } else if (value >= 10U) {
+        *out++ = static_cast<char>('0' + value / 10U);
+    }
+
+    *out++ = static_cast<char>('0' + value % 10U);
+    return out;
+}
+
+inline char* Append2(char* p, uint32_t value) noexcept {
+    *p++ = static_cast<char>('0' + value / 10U);
+    *p++ = static_cast<char>('0' + value % 10U);
+    return p;
+}
+
+inline char* Append4(char* p, uint32_t value) noexcept {
+    p = Append2(p, value / 100U);
+    return Append2(p, value % 100U);
+}
+
+inline char* AppendUnsigned(char* p, uint32_t value) noexcept {
+    char digits[10];
+    uint32_t count = 0;
+
+    do {
+        digits[count++] = static_cast<char>('0' + value % 10U);
+        value /= 10U;
+    } while (value != 0U);
+
+    while (count != 0U) {
+        *p++ = digits[--count];
+    }
+
+    return p;
+}
+
+inline uint32_t DateTimeToString(const tm& value, char (&buffer)[20]) noexcept {
+    auto* p = buffer;
+
+    p = Append4(p, static_cast<uint32_t>(1900 + value.tm_year));
+    *p++ = '-';
+    p = Append2(p, static_cast<uint32_t>(1 + value.tm_mon));
+    *p++ = '-';
+    p = Append2(p, static_cast<uint32_t>(value.tm_mday));
+    *p++ = 'T';
+    p = Append2(p, static_cast<uint32_t>(value.tm_hour));
+    *p++ = ':';
+    p = Append2(p, static_cast<uint32_t>(value.tm_min));
+    *p++ = ':';
+    p = Append2(p, static_cast<uint32_t>(value.tm_sec));
+
+    *p = '\0';
+    return static_cast<uint32_t>(p - buffer);
+}
+
+inline uint32_t DateTimeIso8601(const tm& value, int32_t offset_hours, uint32_t offset_minutes, char (&buffer)[26]) noexcept {
+    auto* p = buffer;
+
+    p = Append4(p, static_cast<uint32_t>(1900 + value.tm_year));
+    *p++ = '-';
+    p = Append2(p, static_cast<uint32_t>(1 + value.tm_mon));
+    *p++ = '-';
+    p = Append2(p, static_cast<uint32_t>(value.tm_mday));
+    *p++ = 'T';
+    p = Append2(p, static_cast<uint32_t>(value.tm_hour));
+    *p++ = ':';
+    p = Append2(p, static_cast<uint32_t>(value.tm_min));
+    *p++ = ':';
+    p = Append2(p, static_cast<uint32_t>(value.tm_sec));
+
+    if (offset_hours == 0 && offset_minutes == 0) {
+        *p++ = 'Z';
+    } else {
+        *p++ = offset_hours < 0 ? '-' : '+';
+
+        const auto kHours = static_cast<uint32_t>(offset_hours < 0 ? -offset_hours : offset_hours);
+
+        p = Append2(p, kHours);
+        *p++ = ':';
+        p = Append2(p, offset_minutes);
+    }
+
+    *p = '\0';
+    return static_cast<uint32_t>(p - buffer);
+}
+
+inline uint32_t IpToString(uint32_t ip, char (&buffer)[16]) noexcept {
+    auto* p = buffer;
+
+    for (uint32_t shift = 0; shift < 32U; shift += 8U) {
+        if (shift != 0U) {
+            *p++ = '.';
+        }
+
+        p = AppendDecimal(p, static_cast<uint8_t>(ip >> shift));
+    }
+
+    *p = '\0';
+    return static_cast<uint32_t>(p - buffer);
+}
+
+class Writer {
+   public:
+    Writer(char* buffer, uint32_t capacity) noexcept : buffer_(buffer), capacity_(capacity) {}
+
+    void Append(std::string_view value) noexcept {
+        if (!ok_) {
+            return;
+        }
+
+        if (size_ > capacity_ || value.size() > capacity_ - size_) {
+            ok_ = false;
+            return;
+        }
+
+        if (!value.empty()) {
+            std::memcpy(buffer_ + size_, value.data(), value.size());
+            size_ += static_cast<uint32_t>(value.size());
+        }
+    }
+
+    void AppendUnsigned(uint32_t value) noexcept {
+        char digits[10];
+        auto* end = common::AppendUnsigned(digits, value);
+        Append(std::string_view{digits, static_cast<size_t>(end - digits)});
+    }
+
+    void AppendIp(uint32_t ip) noexcept {
+        char text[16];
+        const auto kLength = common::IpToString(ip, text);
+        Append(std::string_view{text, kLength});
+    }
+
+    [[nodiscard]] bool Ok() const noexcept { return ok_; }
+
+    [[nodiscard]] uint32_t Size() const noexcept { return ok_ ? size_ : 0U; }
+
+   private:
+    char* buffer_;
+    uint32_t capacity_;
+    uint32_t size_{0};
+    bool ok_{true};
+};
 } // namespace common
 
 #endif // COMMON_UTILS_UTILS_STRING_H_

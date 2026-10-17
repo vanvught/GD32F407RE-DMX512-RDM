@@ -53,10 +53,9 @@
 #include "firmware.h"
 #include "flashcodeinstall.h"
 #include "display.h" // IWYU pragma: keep
-#endif // CONFIG_HTTPD_ENABLE_UPLOAD
+#endif               // CONFIG_HTTPD_ENABLE_UPLOAD
 #include "firmware/debug/debug_dump.h"
 #include "httpd/httpd_debug.h"
-#include "common/utils/utils_string.h"
 
 namespace board {
 void Reboot();
@@ -84,7 +83,8 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
         // Initial incoming HTTP request (header + maybe body)
         status_ = ParseRequest();
 
-        HTTPD_DEBUG_PRINTF("%s %s", http::kRequestMethod[static_cast<uint32_t>(request_method_)], request_content_type_ < http::ContentTypes::kNotDefined ? http::kContentType[static_cast<uint32_t>(request_content_type_)] : common::kUnknown);
+        HTTPD_DEBUG_PRINTF("%s %s", http::kRequestMethod[static_cast<uint32_t>(request_method_)],
+                           request_content_type_ < http::ContentTypes::kNotDefined ? http::kContentType[static_cast<uint32_t>(request_content_type_)] : common::kUnknown);
 
         if (status_ == http::Status::kOk) {
             // Request is syntactically valid and supported.
@@ -167,7 +167,15 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
 
         request_content_type_ = http::ContentTypes::kTextHtml;
         content_ = reinterpret_cast<uint8_t*>(dynamic_content_);
-        content_size_ = static_cast<uint32_t>(snprintf(dynamic_content_, sizeof(dynamic_content_), "%u %s\n", static_cast<unsigned>(status_), status_msg));
+        const auto kLength = snprintf(dynamic_content_, sizeof(dynamic_content_), "%u %s\n", static_cast<unsigned>(status_), status_msg);
+
+        if (kLength < 0 || static_cast<size_t>(kLength) >= sizeof(dynamic_content_)) {
+            network::tcp::Abort(connection_handle_);
+            // Reset request state before returning.
+            return;
+        }
+
+        content_size_ = static_cast<uint32_t>(kLength);
 
         const auto kHeaderLength =
             static_cast<uint32_t>(snprintf(receive_buffer_, network::tcp::kTcpDataMss,

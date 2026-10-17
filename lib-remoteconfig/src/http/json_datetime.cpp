@@ -29,6 +29,8 @@
 #include <cassert>
 
 #include "firmware/global.h"
+#include "json/json_helpers.h"
+#include "json/json_jsondoc.h"
 #include "json/json_key.h"
 #include "json/json_parser.h"
 #include "common/utils/utils_string.h"
@@ -95,16 +97,18 @@ uint32_t GetTimeofday(char* out_buffer, uint32_t out_buffer_size) {
         global::GetUtcOffset(hours, minutes);
 
         if ((hours == 0) && (minutes == 0)) {
-            const auto kLength = static_cast<uint32_t>(
-                snprintf(out_buffer, out_buffer_size, R"({"date":"%d-%.2d-%.2dT%.2d:%.2d:%.2dZ"})", 1900 + local_time->tm_year, 1 + local_time->tm_mon, local_time->tm_mday, local_time->tm_hour, local_time->tm_min, local_time->tm_sec));
-
-            return kLength;
+            char date_time[20];
+            common::DateTimeToString(*local_time, date_time);
+            return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) {
+                // For UTC, use a 21-byte buffer instead to append 'Z'.
+                doc["date"] = date_time;
+            });
         }
 
-        const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, R"({"date":"%d-%.2d-%.2dT%.2d:%.2d:%.2d%s%.2d:%.2u"})", 1900 + local_time->tm_year, 1 + local_time->tm_mon, local_time->tm_mday, local_time->tm_hour,
-                                                            local_time->tm_min, local_time->tm_sec, hours > 0 ? "+" : "", static_cast<int>(hours), static_cast<unsigned int>(minutes)));
+        char date_time[26];
 
-        return kLength;
+        common::DateTimeIso8601(*local_time, hours, minutes, date_time);
+        return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) { doc["date"] = date_time; });
     }
 
     return 0;

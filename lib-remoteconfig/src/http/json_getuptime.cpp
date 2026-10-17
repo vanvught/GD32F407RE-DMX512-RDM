@@ -23,18 +23,13 @@
  */
 
 #include <cstdint>
-#include <cstdio>
-#include <cassert>
 
 #include "timing.h"
+#include "json/json_helpers.h"
 
 namespace json {
-uint32_t GetUptime(char* out_buffer, uint32_t out_buffer_size) {
-    assert(out_buffer != nullptr);
-    assert(out_buffer_size != 0);
-
+uint32_t GetUptime(char* buffer, uint32_t length) {
     const auto kUptime = timing::UpTime();
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, "{\"uptime\":%u}\n", static_cast<unsigned int>(kUptime)));
-    return kLength;
+    return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) { doc["uptime"] = kUptime; });
 }
 } // namespace json
