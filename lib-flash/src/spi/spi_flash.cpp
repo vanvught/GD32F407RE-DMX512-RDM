@@ -87,7 +87,7 @@ uint32_t GetTimer(uint32_t base) {
         return timing::Millis();
     }
 
-    return (timing::Millis()) - base;
+    return timing::Millis() - base;
 }
 
 void SpiFlashAddr(uint32_t address, uint8_t* command) {
@@ -221,6 +221,8 @@ namespace cmd {
 bool Read(uint32_t offset, std::span<uint8_t> data) {
     SPI_FLASH_DEBUG_ENTRY();
 
+    spi::flash::Init();
+
     if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
         return false;
@@ -249,6 +251,8 @@ bool Read(uint32_t offset, std::span<uint8_t> data) {
 
 bool Write(uint32_t offset, std::span<const uint8_t> data) {
     SPI_FLASH_DEBUG_ENTRY();
+
+    spi::flash::Init();
 
     if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
@@ -290,6 +294,8 @@ bool Erase(uint32_t offset, uint32_t length) {
         SPI_FLASH_DEBUG_EXIT();
         return false;
     }
+
+    spi::flash::Init();
 
     if (!SpiFlashCmdWaitReady(kReadyTimeoutMillis)) {
         SPI_FLASH_DEBUG_EXIT();
