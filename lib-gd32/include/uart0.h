@@ -30,7 +30,6 @@ namespace uart0 {
 void Init();
 void PutChar(int c);
 void Puts(const char* s);
-int Printf(const char* fmt, ...);
 int GetChar();
 } // namespace uart0
 
