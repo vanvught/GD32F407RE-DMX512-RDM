@@ -48,7 +48,7 @@ OscClientParams::OscClientParams() {
 void OscClientParams::SetIncomingPort(std::string_view value) {
     uint16_t port;
 
-    if (ParseInRange<uint32_t, uint16_t>(value, 1U, 65535U, &port)) {
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, UINT16_MAX, &port)) {
         store_oscclient.incoming_port = port;
     }
 }
@@ -56,7 +56,7 @@ void OscClientParams::SetIncomingPort(std::string_view value) {
 void OscClientParams::SetOutgoingPort(std::string_view value) {
     uint16_t port;
 
-    if (ParseInRange<uint32_t, uint16_t>(value, 1U, 65535U, &port)) {
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, UINT16_MAX, &port)) {
         store_oscclient.outgoing_port = port;
     }
 }

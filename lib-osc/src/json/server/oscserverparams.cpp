@@ -42,19 +42,19 @@ OscServerParams::OscServerParams() {
 }
 
 void OscServerParams::SetIncomingPort(std::string_view value) {
-    if (value.size() <= 3) {
-        return;
-    }
+    uint16_t port;
 
-    store_oscserver.incoming_port = ParseValue<uint16_t>(value);
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, UINT16_MAX, &port)) {
+        store_oscserver.incoming_port = port;
+    }
 }
 
 void OscServerParams::SetOutgoingPort(std::string_view value) {
-    if (value.size() <= 3) {
-        return;
-    }
+    uint16_t port;
 
-    store_oscserver.outgoing_port = ParseValue<uint16_t>(value);
+    if (ParseInRange<uint32_t, uint16_t>(value, 1U, UINT16_MAX, &port)) {
+        store_oscserver.outgoing_port = port;
+    }
 }
 
 void OscServerParams::SetPath(std::string_view value) {

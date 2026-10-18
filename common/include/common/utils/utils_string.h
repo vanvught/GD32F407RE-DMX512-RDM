@@ -165,6 +165,24 @@ inline char* AppendUnsigned(char* p, uint32_t value) noexcept {
     return p;
 }
 
+inline char* AppendFixed(char* p, float value, uint32_t decimals) noexcept {
+    assert(decimals <= 2U);
+    assert(value >= 0.0F);
+
+    const uint32_t kScale = decimals == 2U ? 100U : 10U;
+    const auto kScaled = static_cast<uint32_t>((value * static_cast<float>(kScale)) + 0.5F);
+
+    p = AppendUnsigned(p, kScaled / kScale);
+    *p++ = '.';
+
+    if (decimals == 2U) {
+        return Append2(p, kScaled % kScale);
+    }
+
+    *p++ = static_cast<char>('0' + kScaled % 10U);
+    return p;
+}
+
 inline uint32_t DateTimeToString(const tm& value, char (&buffer)[20]) noexcept {
     auto* p = buffer;
 
