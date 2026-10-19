@@ -39,8 +39,8 @@ uint32_t GetShowFile(char* buffer, uint32_t length) {
         doc[json::ShowFileParamsConst::kOptionAutoPlay.name] = static_cast<uint32_t>(show_file.IsAutoStart());
         doc[json::ShowFileParamsConst::kOptionLoop.name] = static_cast<uint32_t>(show_file.GetDoLoop());
 #ifdef CONFIG_SHOWFILE_ENABLE_OSC
-        doc[OscParamsConst::kIncomingPort.name] = show_file.GetOscPortIncoming();
-        doc[OscParamsConst::kOutgoingPort.name] = show_file.GetOscPortOutgoing();
+        doc[OscParamsConst::kIncomingPort.name] = static_cast<uint32_t>(show_file.GetOscPortIncoming());
+        doc[OscParamsConst::kOutgoingPort.name] = static_cast<uint32_t>(show_file.GetOscPortOutgoing());
 #endif
     });
 }
