@@ -7,6 +7,10 @@ ifeq ($(FLAGS),)
 	FLAGS:=$(DEFINES)
 endif
 
+ifeq ($(findstring NDEBUG,$(FLAGS)),NDEBUG)
+	DEFINES+=-DDISABLE_PRINTF_FLOAT
+endif
+
 ifneq ($(findstring _TIME_STAMP_YEAR_,$(FLAGS)),_TIME_STAMP_YEAR_)
 	include ../common/make/Timestamp.mk
 endif

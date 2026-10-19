@@ -27,6 +27,7 @@
 #define BOARD_H_
 
 #include <cstdint>
+#include <string_view>
 
 namespace board {
 enum class BootDevice { kUnkown, kFel, kMmc0, kSpi, kHdd, kFlash, kRam };
@@ -38,7 +39,6 @@ void RebootHandler();
 
 BootDevice GetBootDevice();
 
-const char* BoardName(uint8_t& length);
 const char* SocName(uint8_t& length);
 const char* CpuName(uint8_t& length);
 const char* MachineName(uint8_t& length);
@@ -58,5 +58,20 @@ const char* Website();
 #else
 #include "linux_board.h"
 #endif // GD32
+
+namespace board {
+inline constexpr std::string_view kBoardName = GD32_BOARD_NAME;
+
+constexpr std::string_view BoardName() {
+    return kBoardName;
+}
+
+constexpr const char* BoardName(uint8_t& length) {
+    static_assert(kBoardName.size() <= UINT8_MAX);
+
+    length = static_cast<uint8_t>(kBoardName.size());
+    return kBoardName.data();
+}
+} // namespace board
 
 #endif // BOARD_H_

@@ -166,8 +166,6 @@ class Discovery : rdm::discovery::StateMachine {
 
     [[nodiscard]] uint8_t GetBackgroundIntervalMinutes() const { return background_interval_minutes_; }
 
-    uint32_t CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) { return rdm::discovery::StateMachine::CopyWorkingQueue(out_buffer, out_buffer_size); }
-
     [[nodiscard]] bool GetWorkingQueueEntry(uint32_t index, discovery::UidRange& range) const noexcept { return rdm::discovery::StateMachine::GetWorkingQueueEntry(index, range); }
 
     void Run() {

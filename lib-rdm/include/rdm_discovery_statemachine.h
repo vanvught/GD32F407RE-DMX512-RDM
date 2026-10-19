@@ -109,8 +109,6 @@ class StateMachine {
         return false;
     }
 
-    uint32_t CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size);
-
     [[nodiscard]] bool GetWorkingQueueEntry(uint32_t index, UidRange& range) const noexcept;
 
     void Run() {

@@ -28,8 +28,7 @@
 #include "gd32_board.h"
 #include "firmware/firmwareversion.h"
 
-namespace rdm::device
-{
+namespace rdm::device {
 static constexpr char kRootLabel[] =
 #ifdef CONFIG_RDM_DEVICE_ROOT_LABEL
     CONFIG_RDM_DEVICE_ROOT_LABEL;
@@ -37,14 +36,12 @@ static constexpr char kRootLabel[] =
     GD32_BOARD_NAME " RDM Device";
 #endif // CONFIG_RDM_DEVICE_ROOT_LABEL
 
-const char* RootLabel(uint8_t& length)
-{
+const char* RootLabel(uint8_t& length) {
     length = sizeof(rdm::device::kRootLabel) - 1;
     return kRootLabel;
 }
 
-uint16_t DeviceModel()
-{
+uint16_t DeviceModel() {
 #ifdef GD32_BOARD_ID
     return GD32_BOARD_ID;
 #else
@@ -52,8 +49,7 @@ uint16_t DeviceModel()
 #endif // GD32_BOARD_ID
 }
 
-uint32_t BootSoftwareVersionId()
-{
+uint32_t BootSoftwareVersionId() {
 #ifdef RELEASE_ID
     return RELEASE_ID;
 #else
@@ -61,14 +57,13 @@ uint32_t BootSoftwareVersionId()
 #endif // RELEASE_ID
 }
 
-uint32_t SoftwareVersionId()
-{
+uint32_t SoftwareVersionId() {
     return _TIME_STAMP_;
 }
 
-const char* SoftwareVersionLabel(uint32_t& length)
-{
-    length = firmwareversion::length::kSoftwareVersion;
-    return FirmwareVersion::Get()->GetSoftwareVersion();
+const char* SoftwareVersionLabel(uint32_t& length) {
+    const auto& info = FirmwareVersion::Instance().GetVersion();
+    length = static_cast<uint32_t>(info.software_version.size());
+    return info.software_version.data();
 }
 } // namespace rdm::device

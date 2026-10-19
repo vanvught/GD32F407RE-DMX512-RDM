@@ -42,11 +42,6 @@ float CoreTemperatureMax() {
     return kCoreTemperatureMax;
 }
 
-const char* BoardName(uint8_t& length) {
-    length = sizeof(GD32_BOARD_NAME) - 1U;
-    return GD32_BOARD_NAME;
-}
-
 const char* SocName(uint8_t& length) {
     length = 4;
     return "GD32";

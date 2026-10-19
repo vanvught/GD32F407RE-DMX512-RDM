@@ -31,18 +31,15 @@
 #include "json/json_helpers.h"
 
 namespace json {
-
 uint32_t GetVersion(char* out_buffer, uint32_t out_buffer_size) {
-    const auto* version = FirmwareVersion::Get()->GetVersion();
-    uint8_t hw_text_length;
+    const auto kInfo = FirmwareVersion::Instance().GetVersion();
 
     return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) {
-        doc["version"] = std::string_view{version->software_version, firmwareversion::length::kSoftwareVersion};
-        doc["board"] = board::BoardName(hw_text_length);
-
+        doc["version"] = kInfo.software_version;
+        doc["board"] = board::BoardName();
         doc.BeginObject("build");
-        doc["date"] = std::string_view{version->build_date, firmwareversion::length::kGccDate};
-        doc["time"] = std::string_view{version->build_time, firmwareversion::length::kGccTime};
+        doc["date"] = kInfo.build_date;
+        doc["time"] = kInfo.build_time;
         doc.EndObject();
     });
 }

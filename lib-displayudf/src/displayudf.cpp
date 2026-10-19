@@ -58,9 +58,9 @@ void DisplayUdf::Set(uint32_t line, displayudf::Labels label) {
         return;
     }
 
-    for (uint32_t i = 0; i < static_cast<uint32_t>(displayudf::Labels::kUnknown); i++) {
-        if (labels_[i] == static_cast<uint8_t>(line)) {
-            labels_[i] = labels_[static_cast<uint32_t>(label)];
+    for (uint8_t& i : labels_) {
+        if (i == static_cast<uint8_t>(line)) {
+            i = labels_[static_cast<uint32_t>(label)];
             break;
         }
     }
@@ -69,15 +69,15 @@ void DisplayUdf::Set(uint32_t line, displayudf::Labels label) {
 }
 
 void DisplayUdf::Show() {
-#if defined(DMXNODE_TYPE_ARTNET)
+#ifdef DMXNODE_TYPE_ARTNET
     ShowArtNetNode();
-#elif defined(DMXNODE_TYPE_E131)
+#elifdef DMXNODE_TYPE_E131
     ShowE131Bridge();
 #endif
 
-    for (uint32_t i = 0; i < static_cast<uint32_t>(displayudf::Labels::kUnknown); i++) {
-        if (labels_[i] > displayudf::kLabelMaxRows) {
-            labels_[i] = 0xFF;
+    for (unsigned char& label : labels_) {
+        if (label > displayudf::kLabelMaxRows) {
+            label = 0xFF;
         }
 
         DISPLAYUDF_DEBUG_PRINTF("labels_[%u]=%u", static_cast<unsigned>(i), static_cast<unsigned>(labels_[i]));
@@ -89,13 +89,14 @@ void DisplayUdf::Show() {
     ClearEndOfLine();
     Write(labels_[static_cast<uint32_t>(displayudf::Labels::kBoardname)], board::BoardName(hw_text_length));
     ClearEndOfLine();
-    Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kVersion)], "Firmware V%.*s", firmwareversion::length::kSoftwareVersion, FirmwareVersion::Get()->GetVersion()->software_version);
+    const auto& info = FirmwareVersion::Instance().GetVersion();
+    Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kVersion)], "Firmware V%.*s", static_cast<int>(info.software_version.size()), info.software_version.data());
 
-#if defined(RDM_RESPONDER)
+#ifdef RDM_RESPONDER
     ShowDmxStartAddress();
 #endif
 
-#if !defined(NO_EMAC)
+#ifndef NO_EMAC
     ShowIpAddress();
     ShowGatewayIp();
     ShowNetmask();

@@ -25,9 +25,8 @@
 #ifndef FIRMWARE_FIRMWAREVERSION_H_
 #define FIRMWARE_FIRMWAREVERSION_H_
 
-#include <cstdint>
-#include <cstring>
 #include <cstdio>
+#include <string_view>
 #include <cassert>
 
 #include "board.h"
@@ -38,62 +37,42 @@
 #endif // STR_HELPER
 
 namespace firmwareversion {
-namespace length {
-inline constexpr auto kSoftwareVersion = 3;
-inline constexpr auto kGccDate = 11;
-inline constexpr auto kGccTime = 8;
-} // namespace length
 struct Info {
-    char software_version[length::kSoftwareVersion];
-    char build_date[length::kGccDate];
-    char build_time[length::kGccTime];
+    std::string_view software_version;
+    std::string_view build_date;
+    std::string_view build_time;
 };
 } // namespace firmwareversion
 
 class FirmwareVersion {
    public:
-    explicit FirmwareVersion(const char* software_version, const char* date, const char* time) {
-        assert(software_version != nullptr);
-        assert(date != nullptr);
-        assert(time != nullptr);
+    constexpr FirmwareVersion(std::string_view version, std::string_view date, std::string_view time) : info_{.software_version = version, .build_date = date, .build_time = time} { s_this = this; }
 
-        assert(s_this == nullptr);
-        s_this = this;
+    [[nodiscard]] constexpr const firmwareversion::Info& GetVersion() const noexcept { return info_; }
 
-        memcpy(s_firmware_version.software_version, software_version, firmwareversion::length::kSoftwareVersion);
-        memcpy(s_firmware_version.build_date, date, firmwareversion::length::kGccDate);
-        memcpy(s_firmware_version.build_time, time, firmwareversion::length::kGccTime);
-
-        uint8_t hw_text_length;
-
-        snprintf(s_print, sizeof(s_print) - 1, "[V%.*s] %s Compiled on %.*s at %.*s", 
-			firmwareversion::length::kSoftwareVersion, 
-			s_firmware_version.software_version, 
-			board::BoardName(hw_text_length), 
-			firmwareversion::length::kGccDate,
-	        s_firmware_version.build_date, 
-			firmwareversion::length::kGccTime, 
-			s_firmware_version.build_time
-		);
-    }
-
-    void Print(const char* title = nullptr) {
-        puts(s_print);
+    void Print(const char* title = nullptr) const {
+        printf("[V%.*s] %.*s Compiled on %.*s at %.*s\n", 
+          static_cast<int>(info_.software_version.size()), 
+          info_.software_version.data(), 
+          static_cast<int>(board::BoardName().size()), 
+          board::BoardName().data(),
+          static_cast<int>(info_.build_date.size()), 
+          info_.build_date.data(),
+          static_cast<int>(info_.build_time.size()), 
+          info_.build_time.data());
 
         if (title != nullptr) {
             printf("\x1b[32m%s\x1b[0m\n", title);
         }
     }
 
-    const struct firmwareversion::Info* GetVersion() { return &s_firmware_version; }
-    const char* GetPrint() { return s_print; }
-    const char* GetSoftwareVersion() { return s_firmware_version.software_version; }
-
-    static FirmwareVersion* Get() { return s_this; }
+    static FirmwareVersion& Instance() {
+        assert(s_this != nullptr);
+        return *s_this;
+    }
 
    private:
-    static inline firmwareversion::Info s_firmware_version;
-    static inline char s_print[64];
+    firmwareversion::Info info_;
     static inline FirmwareVersion* s_this;
 };
 

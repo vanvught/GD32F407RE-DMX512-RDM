@@ -177,7 +177,7 @@ static void FormatInt(struct Context* ctx, uint32_t arg) {
     }
 }
 
-#if !defined(DISABLE_PRINTF_FLOAT)
+#ifndef DISABLE_PRINTF_FLOAT
 static int Pow10(int n) {
     int r = 10;
     n--;
@@ -321,7 +321,7 @@ static void FormatPointer(struct Context* ctx, unsigned int arg) {
 
 static int Vprintf(int size, const char* fmt, va_list va) {
     struct Context ctx;
-#if !defined(DISABLE_PRINTF_FLOAT)
+#ifndef DISABLE_PRINTF_FLOAT
     float f;
 #endif // DISABLE_PRINTF_FLOAT
     int32_t l;
@@ -397,7 +397,7 @@ static int Vprintf(int size, const char* fmt, va_list va) {
                 }
                 FormatInt(&ctx, static_cast<uint32_t>(l));
                 break;
-#if !defined(DISABLE_PRINTF_FLOAT)
+#ifndef DISABLE_PRINTF_FLOAT
             case 'f':
                 f = static_cast<float>(va_arg(va, double));
                 FormatFloat(&ctx, f);

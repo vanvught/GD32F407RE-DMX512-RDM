@@ -85,31 +85,6 @@ StateMachine::StateMachine(const uint8_t* uid) {
 #endif // NDEBUG
 }
 
-uint32_t StateMachine::CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) {
-    const auto kSize = static_cast<int32_t>(out_buffer_size);
-    int32_t index = 0;
-    int32_t length = 0;
-    uint8_t lower_bound[rdm::kUidSize];
-    uint8_t upper_bound[rdm::kUidSize];
-
-    while (index <= discovery_.stack.top) {
-        memcpy(lower_bound, rdm::discovery::ConvertUid(discovery_.stack.items[index].lower_bound), rdm::kUidSize);
-        memcpy(upper_bound, rdm::discovery::ConvertUid(discovery_.stack.items[index].upper_bound), rdm::kUidSize);
-
-        length += snprintf(&out_buffer[length], static_cast<size_t>(kSize - length), "\"%.2x%.2x:%.2x%.2x%.2x%.2x-%.2x%.2x:%.2x%.2x%.2x%.2x\",", lower_bound[0], lower_bound[1], lower_bound[2], lower_bound[3], lower_bound[4], lower_bound[5],
-                           upper_bound[0], upper_bound[1], upper_bound[2], upper_bound[3], upper_bound[4], upper_bound[5]);
-
-        index++;
-    }
-
-    if (length == 0) {
-        return 0;
-    }
-
-    out_buffer[length - 1] = '\0';
-    return static_cast<uint32_t>(length - 1);
-}
-
 bool StateMachine::GetWorkingQueueEntry(uint32_t index, UidRange& range) const noexcept {
     if (std::cmp_greater(index, discovery_.stack.top)) {
         return false;

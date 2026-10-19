@@ -53,8 +53,8 @@ enum class Command {
     kVersion, //
     kDisplay, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
-    kUptime, //
-#endif // CONFIG_REMOTECONFIG_MINIMUM
+    kUptime,  //
+#endif        // CONFIG_REMOTECONFIG_MINIMUM
     kTftp,    //
     kFactory, //
 };
@@ -70,8 +70,8 @@ constexpr struct RemoteConfig::Commands RemoteConfig::kGet[] = {
     {.handler = &RemoteConfig::HandleVersion, .cmd = "version#", .kLength = 8, .kGreaterThan = false},    //
     {.handler = &RemoteConfig::HandleDisplayGet, .cmd = "display#", .kLength = 8, .kGreaterThan = false}, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
-    {.handler = &RemoteConfig::HandleUptime, .cmd = "uptime#", .kLength = 7, .kGreaterThan = false}, //
-#endif // CONFIG_REMOTECONFIG_MINIMUM
+    {.handler = &RemoteConfig::HandleUptime, .cmd = "uptime#", .kLength = 7, .kGreaterThan = false},   //
+#endif                                                                                                 // CONFIG_REMOTECONFIG_MINIMUM
     {.handler = &RemoteConfig::HandleTftpGet, .cmd = "tftp#", .kLength = 5, .kGreaterThan = false},    //
     {.handler = &RemoteConfig::HandleFactory, .cmd = "factory##", .kLength = 9, .kGreaterThan = false} //
 };
@@ -241,8 +241,22 @@ void RemoteConfig::HandleUptime() {
 void RemoteConfig::HandleVersion() {
     REMOTECONFIG_DEBUG_ENTRY();
 
-    const auto* print = FirmwareVersion::Get()->GetPrint();
-    const auto kLength = snprintf(udp_buffer_, remoteconfig::udp::kBufferSize - 1, "version:%s\n", print);
+    const auto& info = FirmwareVersion::Instance().GetVersion();
+    const auto kLength = snprintf(udp_buffer_, remoteconfig::udp::kBufferSize, "version:[V%.*s] %.*s %.*s at %.*s\n",
+      static_cast<int>(info.software_version.size()), 
+      info.software_version.data(), 
+      static_cast<int>(board::BoardName().size()), 
+      board::BoardName().data(), 
+      static_cast<int>(info.build_date.size()), 
+      info.build_date.data(),
+      static_cast<int>(info.build_time.size()), 
+      info.build_time.data()
+    );
+
+    if (kLength < 0 || static_cast<uint32_t>(kLength) >= remoteconfig::udp::kBufferSize) {
+        return;
+    }
+
     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(udp_buffer_), static_cast<uint32_t>(kLength), ip_from_, remoteconfig::udp::kPort);
 
     REMOTECONFIG_DEBUG_EXIT();
