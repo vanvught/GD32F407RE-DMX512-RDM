@@ -36,8 +36,8 @@ uint32_t GetOscServer(char* buffer, uint32_t length) {
     auto& oscserver = OscServer::Instance();
 
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
-        doc[OscParamsConst::kIncomingPort.name] = oscserver.GetPortIncoming();
-		doc[OscParamsConst::kOutgoingPort.name] = oscserver.GetPortOutgoing();
+        doc[OscParamsConst::kIncomingPort.name] = static_cast<uint32_t>(oscserver.GetPortIncoming());
+        doc[OscParamsConst::kOutgoingPort.name] = static_cast<uint32_t>(oscserver.GetPortOutgoing());
         doc[OscServerParamsConst::kPath.name] = oscserver.GetPath();
         doc[OscServerParamsConst::kPathInfo.name] = oscserver.GetPathInfo();
         doc[OscServerParamsConst::kPathBlackout.name] = oscserver.GetPathBlackOut();

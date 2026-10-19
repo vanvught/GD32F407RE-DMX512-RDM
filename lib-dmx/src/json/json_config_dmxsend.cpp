@@ -1,7 +1,7 @@
 /**
  * @file json_config_dmxsend.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ uint32_t GetDmxSend(char* buffer, uint32_t length) {
         doc[DmxSendParamsConst::kBreakTime.name] = dmx.TransmitBreakTime();
         doc[DmxSendParamsConst::kMabTime.name] = dmx.TransmitMabTime();
         doc[DmxSendParamsConst::kRefreshRate.name] = 1000000U / kPeriod;
-        doc[DmxSendParamsConst::kSlotsCount.name] = dmx.TransmitSlots();
+        doc[DmxSendParamsConst::kSlotsCount.name] = static_cast<uint32_t>(dmx.TransmitSlots());
     });
 }
 

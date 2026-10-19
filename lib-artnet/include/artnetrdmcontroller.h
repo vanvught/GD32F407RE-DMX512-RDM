@@ -27,11 +27,9 @@
 #define ARTNETRDMCONTROLLER_H_
 
 #include <cstdint>
-#include <cstdio>
 #include <cassert>
 
 #include "rdm_discovery.h"
-#include "rdm_device_base.h"
 #include "dmxnode.h"
 
 namespace artnet::rdm::controller {
@@ -44,7 +42,7 @@ void DiscoveryDone(uint32_t port_index);
 class ArtNetRdmController final : rdm::Discovery {
    public:
     ArtNetRdmController() {
-#if !defined(NODE_RDMNET_LLRP_ONLY)
+#ifndef NODE_RDMNET_LLRP_ONLY
         rdm::device::Base::Instance().Print();
 #endif
     }
@@ -66,7 +64,7 @@ class ArtNetRdmController final : rdm::Discovery {
         rdmdiscovery.Disable(port_index);
     }
 
-    bool IsEnabled(uint32_t port_index) const {
+    [[nodiscard]] bool IsEnabled(uint32_t port_index) const {
         auto& rdmdiscovery = rdm::Discovery::Instance();
         return rdmdiscovery.IsEnabled(port_index);
     }
@@ -81,7 +79,7 @@ class ArtNetRdmController final : rdm::Discovery {
         rdmdiscovery.DisableBackground(port_index);
     }
 
-    bool IsEnabledBackground(uint32_t port_index) const {
+    [[nodiscard]] bool IsEnabledBackground(uint32_t port_index) const {
         auto& rdmdiscovery = rdm::Discovery::Instance();
         return rdmdiscovery.IsEnabledBackground(port_index);
     }
@@ -117,11 +115,6 @@ class ArtNetRdmController final : rdm::Discovery {
         rdmdiscovery.Run();
     }
 
-    uint32_t CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) {
-        auto& rdmdiscovery = rdm::Discovery::Instance();
-        return rdmdiscovery.CopyWorkingQueue(out_buffer, out_buffer_size);
-    }
-
     // Discovery process END
 
     uint32_t TodUidCount(uint32_t port_index) {
@@ -134,29 +127,6 @@ class ArtNetRdmController final : rdm::Discovery {
         assert(port_index < dmxnode::kMaxPorts);
         auto& rdmdiscovery = rdm::Discovery::Instance();
         rdmdiscovery.TodCopy(port_index, tod);
-    }
-
-    uint32_t CopyTod(uint32_t port_index, char* out_buffer, uint32_t out_buffer_size) {
-        assert(port_index < dmxnode::kMaxPorts);
-
-        const auto kSize = static_cast<int32_t>(out_buffer_size);
-        int32_t length = 0;
-
-        for (uint32_t count = 0; count < TodUidCount(port_index); count++) {
-            uint8_t uid[rdm::kUidSize];
-
-            CopyTodEntry(port_index, count, uid);
-
-            length += snprintf(&out_buffer[length], static_cast<size_t>(kSize - length), "\"%.2x%.2x:%.2x%.2x%.2x%.2x\",", uid[0], uid[1], uid[2], uid[3], uid[4], uid[5]);
-        }
-
-        if (length == 0) {
-            return 0;
-        }
-
-        out_buffer[length - 1] = '\0';
-
-        return static_cast<uint32_t>(length - 1);
     }
 
     // Gateway

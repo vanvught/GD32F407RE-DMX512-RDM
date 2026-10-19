@@ -1,7 +1,7 @@
 /**
  * @file json_status_showfile.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #include <cassert>
 #include <cstdint>
 
+#include "json/json_helpers.h"
 #include "showfile.h"
 #include "json/showfileparamsconst.h"
 
@@ -33,13 +34,11 @@ uint32_t ShowFile(char* out_buffer, uint32_t out_buffer_size) {
     const auto kStatus = ShowFile::Instance().GetStatus();
     assert(kStatus != ::showfile::Status::kUndefined);
 
-    const auto kLength = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		R"({"mode":"%s","%s":"%u","status":"%s","%s":"%s"})", 
-		ShowFile::Instance().GetMode() == ::showfile::Mode::kRecorder ? "Recorder" : "Player",                                                      
-		ShowFileParamsConst::kShow.name, 
-		static_cast<unsigned int>(ShowFile::Instance().GetShowFileCurrent()),
-		 ::showfile::kStatus[static_cast<int>(kStatus)],
-        ShowFileParamsConst::kOptionLoop.name, ShowFile::Instance().GetDoLoop() ? "1" : "0"));
-    return kLength;
+    return json::helpers::Serialize(out_buffer, out_buffer_size, [&](JsonDoc& doc) {
+        doc["mode"] = ShowFile::Instance().GetMode() == ::showfile::Mode::kRecorder ? "Recorder" : "Player";
+        doc[ShowFileParamsConst::kShow.name] = static_cast<uint32_t>(ShowFile::Instance().GetShowFileCurrent());
+        doc["status"] = ::showfile::kStatus[static_cast<int>(kStatus)];
+        doc[ShowFileParamsConst::kOptionLoop.name] = ShowFile::Instance().GetDoLoop();
+    });
 }
 } // namespace json::status

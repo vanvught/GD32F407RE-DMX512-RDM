@@ -64,7 +64,7 @@ class Discovery : rdm::discovery::StateMachine {
         enabled_ |= Bit(port_index);
     }
 
-    bool IsEnabled(uint32_t port_index) const { return ((Bit(port_index) & enabled_) == Bit(port_index)); }
+    [[nodiscard]] bool IsEnabled(uint32_t port_index) const { return ((Bit(port_index) & enabled_) == Bit(port_index)); }
 
     void Disable(uint32_t port_index) {
         assert(port_index < kPorts);
@@ -168,10 +168,12 @@ class Discovery : rdm::discovery::StateMachine {
 
     uint32_t CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_size) { return rdm::discovery::StateMachine::CopyWorkingQueue(out_buffer, out_buffer_size); }
 
+    [[nodiscard]] bool GetWorkingQueueEntry(uint32_t index, discovery::UidRange& range) const noexcept { return rdm::discovery::StateMachine::GetWorkingQueueEntry(index, range); }
+
     void Run() {
         rdm::discovery::StateMachine::Run();
 
-        if (__builtin_expect((!running_), 1)) {
+        if (!running_) [[likely]] {
             return;
         }
 
@@ -227,8 +229,10 @@ class Discovery : rdm::discovery::StateMachine {
         return s_tod[port_index].UidCount();
     }
 
-    bool TodCopyUidEntry(uint32_t port_index, uint32_t index, uint8_t uid[rdm::kUidSize]) {
-        assert(port_index < kPorts);
+    [[nodiscard]] bool TodCopyUidEntry(uint32_t port_index, uint32_t index, uint8_t uid[rdm::kUidSize]) noexcept {
+        if (port_index >= kPorts) {
+            return false;
+        }
         return s_tod[port_index].CopyUidEntry(index, uid);
     }
 

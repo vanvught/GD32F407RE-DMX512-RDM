@@ -44,8 +44,8 @@ uint32_t GetOscClient(char* buffer, uint32_t length) {
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
         char ip_address[net::kIpBufferSize];
         doc[OscClientParamsConst::kServerIp.name] = net::FormatIp(oscclient.GetServerIP(), ip_address);
-        doc[OscParamsConst::kIncomingPort.name] = oscclient.GetPortIncoming();
-        doc[OscParamsConst::kOutgoingPort.name] = oscclient.GetPortOutgoing();
+        doc[OscParamsConst::kIncomingPort.name] = static_cast<uint32_t>(oscclient.GetPortIncoming());
+        doc[OscParamsConst::kOutgoingPort.name] = static_cast<uint32_t>(oscclient.GetPortOutgoing());
         doc[OscClientParamsConst::kPingDisable.name] = common::IsFlagSet(kFlags, Flags::Flag::kPingDisable);
         doc[OscClientParamsConst::kPingDelay.name] = oscclient.GetPingDelaySeconds();
 

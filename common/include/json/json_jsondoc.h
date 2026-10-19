@@ -51,8 +51,10 @@ class JsonDoc {
         Append(root == Root::kArray ? '[' : '{');
     }
 
-    JsonDoc(char* buffer, uint32_t capacity, Root root = Root::kObject) noexcept
-        : JsonDoc(std::span<char>{buffer, static_cast<std::size_t>(capacity)}, root) {}
+    JsonDoc(char* buffer, uint32_t capacity, Root root = Root::kObject) noexcept : JsonDoc(std::span<char>{buffer, static_cast<std::size_t>(capacity)}, root) {}
+
+    JsonDoc(const JsonDoc&) = delete;
+    JsonDoc& operator=(const JsonDoc&) = delete;
 
     class KeyProxy {
        public:
@@ -66,6 +68,16 @@ class JsonDoc {
         KeyProxy& operator=(const char* value) noexcept {
             assert(value != nullptr);
             return *this = std::string_view{value};
+        }
+
+        KeyProxy& operator=(char value) noexcept {
+            doc_.WriteStringField(first_, second_, std::string_view{&value, 1});
+            return *this;
+        }
+
+        KeyProxy& operator=(bool value) noexcept {
+            doc_.WriteBoolField(first_, second_, value);
+            return *this;
         }
 
         KeyProxy& operator=(uint32_t value) noexcept {
@@ -139,6 +151,13 @@ class JsonDoc {
         if (!overflow_) {
             --depth_;
         }
+    }
+
+    void Add(std::string_view value) noexcept {
+        BeginElement();
+        Append('"');
+        Append(value);
+        Append('"');
     }
 
     void End() noexcept {
@@ -285,6 +304,11 @@ class JsonDoc {
         } while (value != 0U);
 
         Append(std::string_view{p, static_cast<std::size_t>(digits + sizeof(digits) - p)});
+    }
+
+    void WriteBoolField(std::string_view first, std::string_view second, bool value) noexcept {
+        BeginField(first, second);
+        Append(value ? "true" : "false");
     }
 
     std::span<char> buffer_;

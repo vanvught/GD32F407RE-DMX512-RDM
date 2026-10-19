@@ -42,7 +42,7 @@ uint32_t GetDmxNode(char* buffer, uint32_t length) {
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
         doc[json::DmxNodeParamsConst::kNodeName.name] = dmx_node->GetLongName();
         doc[json::DmxNodeParamsConst::kFailsafe.name] = dmxnode::GetFailsafe(dmx_node->GetFailSafe());
-        doc[json::DmxNodeParamsConst::kDisableMergeTimeout.name] = dmx_node->GetDisableMergeTimeout() ? 1 : 0;
+        doc[json::DmxNodeParamsConst::kDisableMergeTimeout.name] = dmx_node->GetDisableMergeTimeout();
 
         if constexpr (dmxnode::kConfigPortCount != 0) {
 #ifdef DMX_MAX_PORTS
@@ -58,7 +58,7 @@ uint32_t GetDmxNode(char* buffer, uint32_t length) {
                 dmx_node->GetUniverse(kPortIndex, universe, kPortDirection);
 
                 doc[json::DmxNodeParamsConst::kLabelPort[config_port_index].name] = dmx_node->GetShortName(kPortIndex);
-                doc[json::DmxNodeParamsConst::kUniversePort[config_port_index].name] = universe;
+                doc[json::DmxNodeParamsConst::kUniversePort[config_port_index].name] = static_cast<uint32_t>(universe);
                 doc[json::DmxNodeParamsConst::kDirectionPort[config_port_index].name] = dmxnode::PortDirection(kPortDirection);
                 doc[json::DmxNodeParamsConst::kMergeModePort[config_port_index].name] = dmxnode::GetMergeMode(dmx_node->GetMergeMode(kPortIndex));
 #ifdef OUTPUT_HAVE_STYLESWITCH

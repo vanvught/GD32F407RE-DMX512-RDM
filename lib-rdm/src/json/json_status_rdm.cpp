@@ -24,110 +24,113 @@
  */
 
 #include <cstdint>
-#include <cstdio>
 
 #include "rdm_discovery.h"
+#include "json/json_jsondoc.h"
 
 namespace json::status {
-static char ToChar(uint32_t port_index, uint8_t data) {
-	const auto kIsSet = (data & (1U << port_index)) == (1U << port_index);
-	return kIsSet ? 'y' : 'n';
+namespace {
+bool ToBool(uint32_t port_index, uint8_t data) {
+    return (data & (1U << port_index)) != 0U;
 }
-static char ToType(uint32_t port_index, uint8_t data) {
-	const auto kIsSet = (data & (1U << port_index)) == (1U << port_index);
-	return kIsSet ? 'f' : 'i';
-}
-static uint32_t PortStatus(uint8_t data[5], char* out_buffer, uint32_t out_buffer_size, uint32_t port_index) {
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, out_buffer_size, 
-		"{\"port\":\"%c\",\"enabled\":\"%c\",\"waiting\":\"%c\",\"type\":\"%c\",\"bg\":\"%c\",\"running\":\"%c\"},", 
-		static_cast<char>('A' + port_index),
-		ToChar(port_index, data[0]),
-		ToChar(port_index, data[1]),
-		ToType(port_index, data[2]),
-		ToChar(port_index, data[3]),
-		ToChar(port_index, data[4])));
 
-    return length;
+char ToType(uint32_t port_index, uint8_t data) {
+    const auto kIsSet = (data & (1U << port_index)) == (1U << port_index);
+    return kIsSet ? 'f' : 'i';
 }
+
+bool PortStatus(JsonDoc& doc, uint8_t data[5], uint32_t port_index) {
+    doc.BeginObject();
+
+    doc["port"] = static_cast<char>('A' + port_index);
+    doc["enabled"] = ToBool(port_index, data[0]);
+    doc["waiting"] = ToBool(port_index, data[1]);
+    doc["type"] = ToType(port_index, data[2]);
+    doc["bg"] = ToBool(port_index, data[3]);
+    doc["running"] = ToBool(port_index, data[4]);
+
+    doc.EndObject();
+
+    const auto kHasNoOverflow = !doc.HasOverflow();
+
+    return kHasNoOverflow;
+}
+} // namespace
 
 uint32_t Rdm(char* out_buffer, uint32_t out_buffer_size) {
-    out_buffer[0] = '[';
-    uint32_t length = 1;
-	
-	auto& discovery = rdm::Discovery::Instance();
-	uint8_t data[5];
-	discovery.GetStatus(data);
+    JsonDoc doc(out_buffer, out_buffer_size);
+
+    doc.BeginArray("rdm");
+
+    uint8_t data[5];
+    rdm::Discovery::Instance().GetStatus(data);
 
     for (uint32_t port_index = 0; port_index < rdm::Discovery::kPorts; port_index++) {
-        length += PortStatus(data, &out_buffer[length], out_buffer_size - length, port_index);
+        if (!PortStatus(doc, data, port_index)) {
+            break;
+        }
     }
 
-    if (length == 1) {
-        length++;
-    }
+    doc.EndArray();
+    doc.End();
 
-    out_buffer[length - 1] = ']';
-
-    return length;
+    return doc.Ok() ? doc.Size() : 0U;
 }
 
 uint32_t RdmQueue(char* out_buffer, uint32_t out_buffer_size) {
-    const auto kBufferSize = out_buffer_size - 2U;
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, "{\"uid\":["));
+    JsonDoc doc(out_buffer, out_buffer_size);
+
+    doc.BeginArray("uid");
 
     auto& discovery = rdm::Discovery::Instance();
 
-    length += discovery.CopyWorkingQueue(&out_buffer[length], kBufferSize - length);
+    rdm::discovery::UidRange range{};
+    for (uint32_t index = 0; discovery.GetWorkingQueueEntry(index, range); ++index) {
+        char lower[rdm::discovery::kUidStringLength + 1];
+        char upper[rdm::discovery::kUidStringLength + 1];
+        char text[28];
 
-    out_buffer[length++] = ']';
-    out_buffer[length++] = '}';
+        rdm::discovery::FormatUid(range.lower_bound, lower);
+        rdm::discovery::FormatUid(range.upper_bound, upper);
 
-    assert(length <= out_buffer_size);
-    return length;
-}
+        memcpy(text, lower, rdm::discovery::kUidStringLength);
+        text[rdm::discovery::kUidStringLength] = '-';
+        memcpy(text + rdm::discovery::kUidStringLength + 1, upper, rdm::discovery::kUidStringLength + 1);
 
-static uint32_t CopyTod(uint32_t port_index, char* out_buffer, uint32_t out_buffer_size) {
-    assert(port_index < rdm::Discovery::kPorts);
-
-    const auto kSize = static_cast<int32_t>(out_buffer_size);
-    int32_t length = 0;
-
-    auto& discovery = rdm::Discovery::Instance();
-
-    for (uint32_t count = 0; count < discovery.TodUidCount(port_index); count++) {
-        uint8_t uid[rdm::kUidSize];
-
-        discovery.TodCopyUidEntry(port_index, count, uid);
-
-        length += snprintf(&out_buffer[length], static_cast<size_t>(kSize - length), 
-		"\"%.2x%.2x:%.2x%.2x%.2x%.2x\",", uid[0], uid[1], uid[2], uid[3], uid[4], uid[5]);
+        doc.Add(std::string_view{text, 27});
     }
 
-    if (length == 0) {
-        return 0;
-    }
+    doc.EndArray();
+    doc.End();
 
-    out_buffer[length - 1] = '\0';
-
-    return static_cast<uint32_t>(length - 1);
+    return doc.Ok() ? doc.Size() : 0U;
 }
 
 uint32_t RdmTod(char* out_buffer, uint32_t out_buffer_size, uint32_t port_index) {
-    if (port_index < rdm::Discovery::kPorts) {
-        const auto kBufferSize = out_buffer_size - 2U;
-        auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, 
-			"{\"port\":\"%c\",\"tod\":[", static_cast<char>(port_index + 'A')));
-
-        length += CopyTod(port_index, &out_buffer[length], kBufferSize - length);
-
-        out_buffer[length++] = ']';
-        out_buffer[length++] = '}';
-
-        assert(length <= out_buffer_size);
-        return length;
+    if (port_index >= rdm::Discovery::kPorts) {
+        return 0;
     }
 
-    return 0;
+    JsonDoc doc(out_buffer, out_buffer_size);
+
+    doc["port"] = static_cast<char>('A' + port_index);
+    doc.BeginArray("tod");
+
+    auto& discovery = rdm::Discovery::Instance();
+
+    uint8_t uid[rdm::kUidSize];
+
+    for (uint32_t index = 0; discovery.TodCopyUidEntry(port_index, index, uid); ++index) {
+        char buffer[rdm::discovery::kUidStringLength + 1];
+        rdm::discovery::FormatUid(uid, buffer);
+
+        doc.Add(std::string_view{buffer, rdm::discovery::kUidStringLength});
+    }
+
+    doc.EndArray();
+    doc.End();
+
+    return doc.Ok() ? doc.Size() : 0U;
 }
 } // namespace json::status
 #endif // RDM_CONTROLLER

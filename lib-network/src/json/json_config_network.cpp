@@ -55,7 +55,7 @@ uint32_t GetNetwork(char* buffer, uint32_t length) {
         char ip[net::kIpBufferSize];
 
         doc[json::NetworkParamsConst::kSecondaryIp.name] = net::FormatIp(network::GetSecondaryIp(), ip);
-        doc[json::NetworkParamsConst::kUseStaticIp.name] = !network::iface::Dhcp() ? 1 : 0;
+        doc[json::NetworkParamsConst::kUseStaticIp.name] = !network::iface::Dhcp();
         doc[json::NetworkParamsConst::kIpAddress.name] = net::FormatIp(network::GetPrimaryIp(), ip);
         doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(network::GetNetmask(), ip);
         doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(network::GetGatewayIp(), ip);

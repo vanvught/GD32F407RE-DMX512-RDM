@@ -38,7 +38,7 @@ uint32_t GetDisplayUdf(char* buffer, uint32_t length) {
     auto& displayudf = *DisplayUdf::Get();
 
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
-        doc[DisplayUdfParamsConst::kIntensity.name] = displayudf.GetContrast();
+        doc[DisplayUdfParamsConst::kIntensity.name] = static_cast<uint32_t>(displayudf.GetContrast());
         doc[DisplayUdfParamsConst::kSleepTimeout.name] = displayudf.GetSleepTimeout();
         doc[DisplayUdfParamsConst::kFlipVertically.name] = displayudf.GetFlipVertically();
 

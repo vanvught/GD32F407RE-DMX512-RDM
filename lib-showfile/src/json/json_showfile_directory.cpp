@@ -2,7 +2,7 @@
  * @file json_showfile_directory.cpp
  *
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,50 +23,38 @@
  * THE SOFTWARE.
  */
 
-#include <cassert>
 #include <cstdint>
-#include <cstdio>
 
+#include "common/utils/utils_print.h"
+#include "json/json_jsondoc.h"
 #include "showfile.h"
 
 namespace json {
 uint32_t ShowFileDirectory(char* out_buffer, uint32_t out_buffer_size) {
-    const auto kBufferSize = out_buffer_size - 2U;
-    auto length = static_cast<uint32_t>(snprintf(out_buffer, kBufferSize, "{\"shows\":["));
+    JsonDoc doc(out_buffer, out_buffer_size);
+    doc.BeginArray("shows");
 
     for (uint32_t show_index = 0; show_index < ShowFile::Instance().GetShows(); show_index++) {
         const auto kShow = ShowFile::Instance().GetPlayerShowFile(show_index);
         if (kShow >= 0) {
             uint32_t file_size;
             if (ShowFile::Instance().GetShowFileSize(kShow, file_size)) {
-                const auto kSize = kBufferSize - length;
-                const auto kCharacters = static_cast<uint32_t>(snprintf(&out_buffer[length], kSize, 
-					R"({"show":%d,"size":%u},)", 
-					static_cast<unsigned>(kShow), 
-					static_cast<unsigned>(file_size))
-				);
+                doc.BeginObject();
+                doc["show"] = static_cast<uint32_t>(kShow);
+                doc["size"] = file_size;
+                doc.EndObject();
 
-                if (kCharacters > kSize) {
-                    break;
-                }
-
-                length += kCharacters;
-
-                if (length >= kBufferSize) {
+                if (doc.HasOverflow()) {
+                    ERROR("JsonDoc overflow");
                     break;
                 }
             }
         }
     }
 
-    if (out_buffer[length - 1] == ',') {
-        length--;
-    }
+    doc.EndArray();
+    doc.End();
 
-    out_buffer[length++] = ']';
-    out_buffer[length++] = '}';
-
-    assert(length <= out_buffer_size);
-    return length;
+    return doc.Ok() ? doc.Size() : 0U;
 }
 } // namespace json

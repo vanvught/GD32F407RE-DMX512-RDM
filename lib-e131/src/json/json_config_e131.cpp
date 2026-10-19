@@ -47,7 +47,7 @@ uint32_t GetE131([[maybe_unused]] char* buffer, [[maybe_unused]] uint32_t length
                 if (kPortIndex >= dmxnode::kMaxPorts) {
                     break;
                 }
-                doc[json::E131ParamsConst::kPriorityPort[config_port_index].name] = E131Bridge::Get()->GetPriority(kPortIndex);
+                doc[json::E131ParamsConst::kPriorityPort[config_port_index].name] = static_cast<uint32_t>(E131Bridge::Get()->GetPriority(kPortIndex));
             }
         }
     });

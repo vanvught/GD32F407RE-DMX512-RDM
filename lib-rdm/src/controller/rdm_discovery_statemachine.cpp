@@ -26,6 +26,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cassert>
+#include <utility>
 
 #include "rdm_discovery_statemachine.h"
 #include "timing.h" // IWYU pragma: keep
@@ -64,9 +65,11 @@ static const uint8_t* ConvertUid(uint64_t uid) {
 
 #ifndef NDEBUG
 static void PrintUid(const uint8_t* uid) {
-    printf("%.2x%.2x:%.2x%.2x%.2x%.2x", uid[0], uid[1], uid[2], uid[3], uid[4], uid[5]);
+    char buffer[kUidStringLength + 1];
+    FormatUid(uid, buffer);
+    printf("%s", buffer);
 }
-#endif // NDEBUG
+#endif
 
 #define NEW_STATE(state, late) NewState(state, late, __LINE__);
 #define SAVED_STATE() SavedState(__LINE__);
@@ -105,6 +108,16 @@ uint32_t StateMachine::CopyWorkingQueue(char* out_buffer, uint32_t out_buffer_si
 
     out_buffer[length - 1] = '\0';
     return static_cast<uint32_t>(length - 1);
+}
+
+bool StateMachine::GetWorkingQueueEntry(uint32_t index, UidRange& range) const noexcept {
+    if (std::cmp_greater(index, discovery_.stack.top)) {
+        return false;
+    }
+
+    range.lower_bound = discovery_.stack.items[index].lower_bound;
+    range.upper_bound = discovery_.stack.items[index].upper_bound;
+    return true;
 }
 
 bool StateMachine::Full(uint32_t port_index, rdm::Tod* tod) {
