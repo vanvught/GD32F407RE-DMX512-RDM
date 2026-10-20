@@ -43,7 +43,7 @@ class RemoteConfigParams : public JsonParamsBase<RemoteConfigParams> {
     RemoteConfigParams& operator=(RemoteConfigParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(RemoteConfigParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

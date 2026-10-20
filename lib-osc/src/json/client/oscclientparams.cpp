@@ -66,9 +66,10 @@ void OscClientParams::SetServerIp(std::string_view value) {
 }
 
 void OscClientParams::SetPingDisable(std::string_view value) {
-    if (value.size() == 1) {
-        store_oscclient.flags = common::SetFlagValue(store_oscclient.flags, Flags::Flag::kPingDisable, value.front() != '0');
+    if (value.empty()) {
+        return;
     }
+    store_oscclient.flags = common::SetFlagValue(store_oscclient.flags, Flags::Flag::kPingDisable, value.front() == 't');
 }
 
 void OscClientParams::SetPingDelay(std::string_view value) {
@@ -123,8 +124,8 @@ void OscClientParams::SetLed(std::string_view key, std::string_view value) {
     dst[kSize] = '\0';
 }
 
-void OscClientParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kOscClientKeys);
+void OscClientParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kOscClientKeys);
     ConfigStore::Instance().Store(&store_oscclient, &ConfigurationStore::osc_client);
 
     Dump();

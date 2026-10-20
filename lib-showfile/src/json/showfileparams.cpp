@@ -42,21 +42,27 @@ ShowFileParams::ShowFileParams() {
 }
 
 void ShowFileParams::SetShow(std::string_view value) {
-    if ((!value.empty()) && (value.size() < 3)) {
-        store_showfile.show = ParseValue<uint8_t>(value);
+    if (value.empty() || (value.size() >= 3)) {
+        return;
     }
+
+    store_showfile.show = ParseValue<uint8_t>(value);
 }
 
 void ShowFileParams::SetOptionAutoPlay(std::string_view value) {
-    if (value.size() == 1) {
-        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, value.front() != '0');
+    if (value.empty()) {
+        return;
     }
+
+    store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionAutoPlay, value.front() == 't');
 }
 
 void ShowFileParams::SetOptionLoop(std::string_view value) {
-    if (value.size() == 1) {
-        store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, value.front() != '0');
+    if (value.empty()) {
+        return;
     }
+
+    store_showfile.flags = common::SetFlagValue(store_showfile.flags, Flags::Flag::kOptionLoop, value.front() == 't');
 }
 
 void ShowFileParams::SetIncomingPort(std::string_view value) {
@@ -71,8 +77,8 @@ void ShowFileParams::SetOutgoingPort(std::string_view value) {
     }
 }
 
-void ShowFileParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kShowFileKeys);
+void ShowFileParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kShowFileKeys);
     ConfigStore::Instance().Store(&store_showfile, &ConfigurationStore::show_file);
 }
 

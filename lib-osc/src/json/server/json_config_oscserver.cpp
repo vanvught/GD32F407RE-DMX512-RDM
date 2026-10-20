@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/json_helpers.h"
 #include "json/oscparamsconst.h"
@@ -45,9 +46,9 @@ uint32_t GetOscServer(char* buffer, uint32_t length) {
     });
 }
 
-void SetOscServer(const char* buffer, uint32_t buffer_size) {
+void SetOscServer(const char* buffer, uint32_t size) {
     ::json::OscServerParams oscserver_params;
-    oscserver_params.Store(buffer, buffer_size);
+    oscserver_params.Store(std::string_view{buffer, size});
     oscserver_params.Set();
 }
 } // namespace json::config

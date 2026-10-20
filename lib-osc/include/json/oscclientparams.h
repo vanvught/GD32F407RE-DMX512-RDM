@@ -45,7 +45,7 @@ class OscClientParams : public JsonParamsBase<OscClientParams> {
     OscClientParams& operator=(OscClientParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(OscClientParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/dmxsendparams.h"
 #include "json/dmxsendparamsconst.h"
@@ -42,9 +43,9 @@ uint32_t GetDmxSend(char* buffer, uint32_t length) {
     });
 }
 
-void SetDmxSend(const char* buffer, uint32_t buffer_size) {
+void SetDmxSend(const char* buffer, uint32_t size) {
     ::json::DmxSendParams dmx_send_params;
-    dmx_send_params.Store(buffer, buffer_size);
+    dmx_send_params.Store(std::string_view{buffer, size});
     dmx_send_params.Set();
 }
 } // namespace json::config

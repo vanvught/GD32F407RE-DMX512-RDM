@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/rdmdeviceparams.h"
 #include "json/json_helpers.h"
@@ -43,9 +44,9 @@ uint32_t GetRdmDevice(char* buffer, uint32_t length) {
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) { doc[json::RdmDeviceParamsConst::kLabel.name] = label; });
 }
 
-void SetRdmDevice(const char* buffer, uint32_t buffer_size) {
+void SetRdmDevice(const char* buffer, uint32_t size) {
     ::json::RdmDeviceParams rdmdevice_params;
-    rdmdevice_params.Store(buffer, buffer_size);
+    rdmdevice_params.Store(std::string_view{buffer, size});
     rdmdevice_params.Set();
 }
 } // namespace json::config

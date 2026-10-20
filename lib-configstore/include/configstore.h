@@ -557,7 +557,7 @@ class ConfigStore : StoreDevice {
     }
 
     bool Flash() {
-        if (__builtin_expect((s_state == State::kIdle), 1)) {
+        if (s_state == State::kIdle) [[likely]] {
             return false;
         }
 

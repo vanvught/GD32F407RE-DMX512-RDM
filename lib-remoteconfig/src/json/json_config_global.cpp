@@ -21,6 +21,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/globalparams.h"
 #include "json/globalparamsconst.h"
@@ -40,9 +41,9 @@ uint32_t GetGlobal(char* buffer, uint32_t length) {
     });
 }
 
-void SetGlobal(const char* buffer, uint32_t buffer_size) {
+void SetGlobal(const char* buffer, uint32_t size) {
     ::json::GlobalParams global_params;
-    global_params.Store(buffer, buffer_size);
+    global_params.Store(std::string_view{buffer, size});
     global_params.Set();
 }
 } // namespace json::config

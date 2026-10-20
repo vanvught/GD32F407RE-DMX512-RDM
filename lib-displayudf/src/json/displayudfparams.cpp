@@ -79,10 +79,11 @@ void DisplayUdfParams::SetSleepTimeout(std::string_view value) {
 }
 
 void DisplayUdfParams::SetFlipVertically(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
-    store_displayudf.flags = SetFlagValue(store_displayudf.flags, Flags::Flag::kFlipVertically, value.front() != '0');
+
+    store_displayudf.flags = SetFlagValue(store_displayudf.flags, Flags::Flag::kFlipVertically, value.front() == 't');
 }
 
 void DisplayUdfParams::SetLabel(std::string_view key, std::string_view value) {
@@ -114,8 +115,8 @@ void DisplayUdfParams::SetLabel(std::string_view key, std::string_view value) {
     }
 }
 
-void DisplayUdfParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kDisplayUdfKeys);
+void DisplayUdfParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer, kDisplayUdfKeys);
     ConfigStore::Instance().Store(&store_displayudf, &ConfigurationStore::display_udf);
 
 #ifndef NDEBUG

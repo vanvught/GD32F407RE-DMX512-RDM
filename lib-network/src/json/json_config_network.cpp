@@ -28,6 +28,7 @@
 #endif // defined(CONFIG_NET_ENABLE_NTP_CLIENT) || defined(CONFIG_NET_ENABLE_PTP_NTP_CLIENT)
 
 #include <cstdint>
+#include <string_view>
 
 #include "network_iface.h"
 #include "network_config.h"
@@ -52,23 +53,23 @@ uint32_t GetNetwork(char* buffer, uint32_t length) {
 #endif // HAVE_NTP_CLIENT
 
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
-        char ip[net::kIpBufferSize];
+        char ip_addres[net::kIpBufferSize];
 
-        doc[json::NetworkParamsConst::kSecondaryIp.name] = net::FormatIp(network::GetSecondaryIp(), ip);
+        doc[json::NetworkParamsConst::kSecondaryIp.name] = net::FormatIp(network::GetSecondaryIp(), ip_addres);
         doc[json::NetworkParamsConst::kUseStaticIp.name] = !network::iface::Dhcp();
-        doc[json::NetworkParamsConst::kIpAddress.name] = net::FormatIp(network::GetPrimaryIp(), ip);
-        doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(network::GetNetmask(), ip);
-        doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(network::GetGatewayIp(), ip);
+        doc[json::NetworkParamsConst::kIpAddress.name] = net::FormatIp(network::GetPrimaryIp(), ip_addres);
+        doc[json::NetworkParamsConst::kNetMask.name] = net::FormatIp(network::GetNetmask(), ip_addres);
+        doc[json::NetworkParamsConst::kDefaultGateway.name] = net::FormatIp(network::GetGatewayIp(), ip_addres);
         doc[json::NetworkParamsConst::kHostname.name] = network::iface::HostName();
 #ifdef HAVE_NTP_CLIENT
-        doc[json::NetworkParamsConst::kNtpServer.name] = net::FormatIp(ntp_server_ip, ip);
+        doc[json::NetworkParamsConst::kNtpServer.name] = net::FormatIp(ntp_server_ip, ip_addres);
 #endif // HAVE_NTP_CLIENT
     });
 }
 
-void SetNetwork(const char* buffer, uint32_t buffer_size) {
+void SetNetwork(const char* buffer, uint32_t size) {
     ::json::NetworkParams network_params;
-    network_params.Store(buffer, buffer_size);
+    network_params.Store(std::string_view{buffer, size});
     network_params.Set();
 }
 } // namespace json::config

@@ -56,8 +56,8 @@ void GlobalParams::SetUtcOffset(std::string_view value) {
     }
 }
 
-void GlobalParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kGlobalKeys);
+void GlobalParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kGlobalKeys);
     ConfigStore::Instance().Store(&store_global, &ConfigurationStore::global);
 
     Dump();

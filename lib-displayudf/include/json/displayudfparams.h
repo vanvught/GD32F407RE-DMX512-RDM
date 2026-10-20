@@ -49,7 +49,7 @@ class DisplayUdfParams : public JsonParamsBase<DisplayUdfParams> {
     DisplayUdfParams& operator=(DisplayUdfParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(DisplayUdfParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void SetAndShow();
 
    protected:

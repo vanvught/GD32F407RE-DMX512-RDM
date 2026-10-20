@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 #include <cassert>
 
 #include "json/json_jsondoc.h"
@@ -49,9 +50,9 @@ uint32_t GetRemoteConfig(char* buffer, uint32_t length) {
     return doc.Size();
 }
 
-void SetRemoteConfig(const char* buffer, uint32_t buffer_size) {
+void SetRemoteConfig(const char* buffer, uint32_t size) {
     ::json::RemoteConfigParams remoteconfig_params;
-    remoteconfig_params.Store(buffer, buffer_size);
+    remoteconfig_params.Store(std::string_view{buffer, size});
     remoteconfig_params.Set();
 }
 } // namespace json::config

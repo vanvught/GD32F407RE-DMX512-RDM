@@ -69,19 +69,19 @@ ArtNetParams::ArtNetParams() {
 }
 
 void ArtNetParams::SetEnableRdm(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kEnableRdm, value.front() != '0');
+    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kEnableRdm, value.front() == 't');
 }
 
 void ArtNetParams::SetMapUniverse0(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kMapUniverse0, value.front() != '0');
+    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kMapUniverse0, value.front() == 't');
 }
 
 void ArtNetParams::SetDestinationIpPort(std::string_view key, std::string_view value) {
@@ -109,7 +109,7 @@ void ArtNetParams::SetProtocolPort(std::string_view key, std::string_view value)
 }
 
 void ArtNetParams::SetRdmEnablePort(std::string_view key, std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
@@ -117,12 +117,12 @@ void ArtNetParams::SetRdmEnablePort(std::string_view key, std::string_view value
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto rdm = store_dmxnode.rdm;
-    common::Set2BitField<dmxnode::Rdm>(kIndex, value.front() != '0' ? dmxnode::Rdm::kEnable : dmxnode::Rdm::kDisable, rdm);
+    common::Set2BitField<dmxnode::Rdm>(kIndex, value.front() == 't' ? dmxnode::Rdm::kEnable : dmxnode::Rdm::kDisable, rdm);
     store_dmxnode.rdm = rdm;
 }
 
-void ArtNetParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kArtNetKeys);
+void ArtNetParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kArtNetKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
 }
 

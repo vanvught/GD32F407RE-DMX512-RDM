@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 #include <cassert>
 
 #include "dmxnode.h"
@@ -72,9 +73,9 @@ uint32_t GetArtNet(char* buffer, uint32_t length) {
     });
 }
 
-void SetArtNet(const char* buffer, uint32_t buffer_size) {
+void SetArtNet(const char* buffer, uint32_t size) {
     ::json::ArtNetParams artnet_params;
-    artnet_params.Store(buffer, buffer_size);
+    artnet_params.Store(std::string_view{buffer, size});
     artnet_params.Set();
 }
 } // namespace json::config

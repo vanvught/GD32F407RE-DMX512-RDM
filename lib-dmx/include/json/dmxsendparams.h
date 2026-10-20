@@ -44,7 +44,7 @@ class DmxSendParams : public JsonParamsBase<DmxSendParams> {
     DmxSendParams& operator=(DmxSendParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(DmxSendParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

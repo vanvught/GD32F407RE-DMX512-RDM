@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/displayudfparams.h"
 #include "json/json_helpers.h"
@@ -58,9 +59,9 @@ uint32_t GetDisplayUdf(char* buffer, uint32_t length) {
     });
 }
 
-void SetDisplayUdf(const char* buffer, uint32_t buffer_size) {
+void SetDisplayUdf(const char* buffer, uint32_t size) {
     ::json::DisplayUdfParams displayudf_params;
-    displayudf_params.Store(buffer, buffer_size);
+    displayudf_params.Store(std::string_view{buffer, size});
     displayudf_params.SetAndShow();
 }
 } // namespace json::config

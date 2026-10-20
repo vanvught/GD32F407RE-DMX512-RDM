@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "ip4/ip4_helpers.h"
 #include "json/oscclientparams.h"
@@ -59,9 +60,9 @@ uint32_t GetOscClient(char* buffer, uint32_t length) {
     });
 }
 
-void SetOscClient(const char* buffer, uint32_t buffer_size) {
+void SetOscClient(const char* buffer, uint32_t size) {
     ::json::OscClientParams oscclient_params;
-    oscclient_params.Store(buffer, buffer_size);
+    oscclient_params.Store(std::string_view{buffer, size});
     oscclient_params.Set();
 }
 } // namespace json::config

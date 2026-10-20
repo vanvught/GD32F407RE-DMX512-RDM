@@ -46,8 +46,8 @@ void RdmDeviceParams::SetLabel(std::string_view value) {
     store_rdmdevice.device_root_label_length = static_cast<uint8_t>(kLength);
 }
 
-void RdmDeviceParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kRdmDeviceKeys);
+void RdmDeviceParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kRdmDeviceKeys);
     ConfigStore::Instance().Store(&store_rdmdevice, &ConfigurationStore::rdm_device);
 
 #ifdef DEBUG_RDM_DEVICE_PARAMS

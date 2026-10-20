@@ -43,7 +43,7 @@ class RdmDeviceParams : public JsonParamsBase<RdmDeviceParams> {
     RdmDeviceParams& operator=(RdmDeviceParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(RdmDeviceParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

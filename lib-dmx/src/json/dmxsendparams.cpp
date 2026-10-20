@@ -77,8 +77,8 @@ void DmxSendParams::SetSlotsCount(std::string_view value) {
     }
 }
 
-void DmxSendParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kDmxSendKeys);
+void DmxSendParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kDmxSendKeys);
     ConfigStore::Instance().Store(&store_dmx_send, &ConfigurationStore::dmx_send);
 }
 

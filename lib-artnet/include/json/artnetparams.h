@@ -27,7 +27,7 @@ class ArtNetParams : public JsonParamsBase<ArtNetParams> {
     ArtNetParams& operator=(ArtNetParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(json::ArtNetParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

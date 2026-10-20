@@ -74,7 +74,7 @@ function locate() {
 	b.classList.toggle('inactive', !on);
 	b.classList.toggle('active', on);
 	b.innerHTML = on ? 'Locate On' : 'Locate Off';
-	postJSON('action', { identify: on ? 1 : 0 });
+	postJSON('action', { identify: on });
 }
 
 function isCorePath(path, corePaths) {

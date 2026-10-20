@@ -122,11 +122,11 @@ void OscServerParams::SetTransmission(std::string_view value) {
         return;
     }
 
-    store_oscserver.flags = common::SetFlagValue(store_oscserver.flags, Flags::Flag::kPartialTransmission, value.front() != '0');
+    store_oscserver.flags = common::SetFlagValue(store_oscserver.flags, Flags::Flag::kPartialTransmission, value.front() == 't');
 }
 
-void OscServerParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kOscServerKeys);
+void OscServerParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kOscServerKeys);
     ConfigStore::Instance().Store(&store_oscserver, &ConfigurationStore::osc_server);
 
     Dump();

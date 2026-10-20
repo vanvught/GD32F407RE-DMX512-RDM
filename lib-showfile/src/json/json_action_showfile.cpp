@@ -56,11 +56,11 @@ void SetPlayer(std::string_view value) {
 }
 
 void SetLoop(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    ShowFile::Instance().DoLoop(value.front() != '0');
+    ShowFile::Instance().DoLoop(value.front() == 't');
 }
 
 void SetShow(std::string_view value) {
@@ -84,6 +84,6 @@ constexpr json::Key kActionKeys[] = {
 
 namespace json::action {
 void SetShowFile(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kActionKeys);
+    ParseJsonWithTable(buffer,kActionKeys);
 }
 } // namespace json::action

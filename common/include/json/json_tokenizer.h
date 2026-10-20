@@ -79,8 +79,6 @@ struct JsonTokenizer {
                     case 'u':
                         // Unicode escapes require four hex digits.
                         // Not supported by this lightweight tokenizer.
-                        return false;
-
                     default:
                         return false;
                 }

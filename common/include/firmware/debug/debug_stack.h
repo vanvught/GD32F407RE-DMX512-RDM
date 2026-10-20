@@ -62,7 +62,7 @@ inline void Print() {
 
     const auto kUsedBytes = static_cast<uint32_t>(end_address - ptr) * sizeof(uint32_t);
     const auto kFreeBytes = static_cast<uint32_t>(ptr - start_address) * sizeof(uint32_t);
-    const auto kFreePct = static_cast<uint32_t>((static_cast<uint64_t>(ptr - start_address) * 100U) / kSizeWords);
+    const auto kFreePct = (kFreeBytes * 100U) / kSizeBytes;
 
     if (s_used_bytes_previous != kUsedBytes) {
         s_used_bytes_previous = kUsedBytes;

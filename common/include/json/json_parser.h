@@ -27,7 +27,7 @@
 #define JSON_JSON_PARSER_H_
 
 #include <cstddef>
-#include <cstdint>
+#include <array>
 #include <string_view>
 
 #include "common/utils/utils_hash.h"
@@ -83,11 +83,10 @@ inline void ParseJsonWithTable(std::string_view input, const json::Key* keys, si
 
         if (tok.p < tok.end && *tok.p == ',') {
             ++tok.p;
-        } else if (tok.p < tok.end && *tok.p == '}') {
-            break;
-        } else {
-            break;
+            continue;
         }
+
+        break;
     }
 }
 
@@ -96,10 +95,9 @@ inline void ParseJsonWithTable(std::string_view input, const json::Key (&keys)[k
     ParseJsonWithTable(input, keys, kN);
 }
 
-// Temporary compatibility overload.
 template <size_t kN>
-inline void ParseJsonWithTable(const char* buffer, size_t size, const json::Key (&keys)[kN]) {
-    ParseJsonWithTable(std::string_view{buffer, size}, keys);
+inline void ParseJsonWithTable(std::string_view input, const std::array<json::Key, kN>& keys) {
+    ParseJsonWithTable(input, keys.data(), keys.size());
 }
 
 #endif // JSON_JSON_PARSER_H_

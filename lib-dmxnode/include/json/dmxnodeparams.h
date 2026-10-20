@@ -49,7 +49,7 @@ class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
     DmxNodeParams& operator=(DmxNodeParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(json::DmxNodeParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

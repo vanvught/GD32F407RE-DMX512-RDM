@@ -24,6 +24,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/rdmsensorsparams.h"
 #include "json/json_helpers.h"
@@ -62,8 +63,8 @@ uint32_t GetRdmSensors(char* buffer, uint32_t length) {
     });
 }
 
-void SetRdmSensors(const char* buffer, uint32_t buffer_size) {
+void SetRdmSensors(const char* buffer, uint32_t size) {
     ::json::RdmSensorsParams rdmsensors_params;
-    rdmsensors_params.Store(buffer, buffer_size);
+    rdmsensors_params.Store(std::string_view{buffer, size});
 }
 } // namespace json::config

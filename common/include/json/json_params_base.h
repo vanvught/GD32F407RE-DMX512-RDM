@@ -29,6 +29,7 @@
 #include <cstdint>
 #ifndef DISABLE_FS
 #include <cstdio>
+#include <string_view>
 #endif
 
 #include "json/json_debug.h"
@@ -48,7 +49,7 @@ class JsonParamsBase {
             fclose(file);
 
             if (size > 0) {
-                static_cast<Derived*>(this)->Store(buffer, static_cast<uint32_t>(size));
+                static_cast<Derived*>(this)->Store(std::string_view{buffer, size});
             } else {
                 JSON_DEBUG_PUTS("Empty or failed read");
             }

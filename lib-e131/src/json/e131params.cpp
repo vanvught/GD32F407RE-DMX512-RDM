@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "json/json_parsehelper.h"
 #include "e131bridge.h"
@@ -47,9 +48,9 @@ void E131Params::SetPriority(std::string_view key, std::string_view value) {
     store_dmxnode.priority[kIndex] = ParseValue<uint8_t>(value);
 }
 
-void E131Params::Store([[maybe_unused]] const char* buffer, [[maybe_unused]] uint32_t buffer_size) {
+void E131Params::Store([[maybe_unused]] std::string_view buffer) {
 #ifdef DMX_MAX_PORTS
-    ParseJsonWithTable(buffer, buffer_size, kE131PriorityKeys);
+    ParseJsonWithTable(buffer, kE131PriorityKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
 #endif
 }

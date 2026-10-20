@@ -25,6 +25,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "e131bridge.h"
 #include "json/e131params.h"
@@ -38,7 +39,7 @@
 
 namespace json::config {
 uint32_t GetE131([[maybe_unused]] char* buffer, [[maybe_unused]] uint32_t length) {
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
     return json::helpers::Serialize(buffer, length, [&](JsonDoc& doc) {
         if constexpr (dmxnode::kConfigPortCount != 0) {
             for (uint32_t config_port_index = 0; config_port_index < dmxnode::kConfigPortCount; config_port_index++) {
@@ -55,9 +56,9 @@ uint32_t GetE131([[maybe_unused]] char* buffer, [[maybe_unused]] uint32_t length
     return 0;
 }
 
-void SetE131(const char* buffer, uint32_t buffer_size) {
+void SetE131(const char* buffer, uint32_t size) {
     ::json::E131Params e131_params;
-    e131_params.Store(buffer, buffer_size);
+    e131_params.Store(std::string_view{buffer, size});
     e131_params.Set();
 }
 } // namespace json::config

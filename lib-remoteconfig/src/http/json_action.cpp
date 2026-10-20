@@ -1,7 +1,7 @@
 /**
  * @file json_action.cpp
  */
-/* Copyright (C) 2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,27 +32,27 @@
 
 namespace {
 void SetDisplay(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    Display::Get()->SetSleep(value[0] == '0');
+    Display::Get()->SetSleep(value.front() == 't');
 }
 
 void SetIdentify(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    board::statusled::SetMode(value[0] != '0' ? board::statusled::Mode::kFast : board::statusled::Mode::kNormal);
+    board::statusled::SetMode(value.front() == 't' ? board::statusled::Mode::kFast : board::statusled::Mode::kNormal);
 }
 
 void SetReboot(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    if (value[0] != '0') {
+    if (value.front() == 't') {
         board::Reboot();
     }
 }
@@ -69,7 +69,7 @@ constexpr json::Key kActionKeys[] = {
 } // namespace
 
 namespace json::action {
-void Set(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kActionKeys);
+void Set(const char* buffer, uint32_t size) {
+    ParseJsonWithTable(std::string_view{buffer, size}, kActionKeys);
 }
 } // namespace json::action

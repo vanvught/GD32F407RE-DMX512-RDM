@@ -57,9 +57,11 @@ NetworkParams::NetworkParams() {
 }
 
 void NetworkParams::SetUseStaticIp(std::string_view value) {
-    if (value.size() == 1) {
-        store_network.flags = common::SetFlagValue(store_network.flags, Flags::Flag::kUseStaticIp, value.front() != '0');
+    if (value.empty()) {
+        return;
     }
+
+    store_network.flags = common::SetFlagValue(store_network.flags, Flags::Flag::kUseStaticIp, value.front() == 't');
 }
 
 void NetworkParams::SetIpAddress(std::string_view value) {
@@ -82,8 +84,8 @@ void NetworkParams::SetNtpServer(std::string_view value) {
     store_network.ntp_server_ip = net::ParseIpString(value);
 }
 
-void NetworkParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kNetworkKeys);
+void NetworkParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kNetworkKeys);
     ConfigStore::Instance().Store(&store_network, &ConfigurationStore::network);
 
 #ifndef NDEBUG

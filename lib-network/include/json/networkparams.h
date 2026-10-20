@@ -44,7 +44,7 @@ class NetworkParams : public JsonParamsBase<NetworkParams> {
     NetworkParams& operator=(NetworkParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(NetworkParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

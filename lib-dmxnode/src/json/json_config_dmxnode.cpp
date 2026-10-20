@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 #include <cassert>
 
 #include "dmxnode_nodetype.h"
@@ -70,9 +71,9 @@ uint32_t GetDmxNode(char* buffer, uint32_t length) {
     });
 }
 
-void SetDmxNode(const char* buffer, uint32_t buffer_size) {
+void SetDmxNode(const char* buffer, uint32_t size) {
     ::json::DmxNodeParams dmxnode_params;
-    dmxnode_params.Store(buffer, buffer_size);
+    dmxnode_params.Store(std::string_view{buffer, size});
     dmxnode_params.Set();
 }
 } // namespace json::config

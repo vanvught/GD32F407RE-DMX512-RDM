@@ -47,7 +47,7 @@ class RdmSensorsParams : public JsonParamsBase<RdmSensorsParams> {
     RdmSensorsParams& operator=(RdmSensorsParams&&) = delete;
 
     void Load() { JsonParamsBase::Load(RdmSensorsParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
     size_t static constexpr KeysSize() { return common::ArraySize(kRdmSensorsKeys); }

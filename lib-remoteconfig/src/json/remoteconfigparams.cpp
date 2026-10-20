@@ -48,8 +48,8 @@ void RemoteConfigParams::SetDisplayName(std::string_view value) {
     memset(destination + kLength, 0, kDisplayNameLength - kLength);
 }
 
-void RemoteConfigParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kRemoteConfigKeys);
+void RemoteConfigParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kRemoteConfigKeys);
     ConfigStore::Instance().Store(&store_remoteconfig, &ConfigurationStore::remote_config);
 
 #ifndef NDEBUG

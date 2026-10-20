@@ -48,7 +48,7 @@ async function saveNetwork() {
 		ip_address: $('ip_address').value,
 		net_mask: $('net_mask').value,
 		default_gateway: $('default_gateway').value,
-		use_static_ip: $('use_static_ip').checked ? 1 : 0
+		use_static_ip: $('use_static_ip')
 	};
 
 	const ntp = $('ntp_server').value.trim();
@@ -96,7 +96,7 @@ async function saveDataKeyForm(path, root, options = {}) {
         }
 
         if (el.type === "checkbox") {
-            values[key] = el.checked ? 1 : 0;
+            values[key] = el.checked;
         } else if (el.type === "number") {
             values[key] = Number(el.value);
         } else {

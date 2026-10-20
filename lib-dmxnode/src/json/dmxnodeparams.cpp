@@ -58,11 +58,11 @@ void DmxNodeParams::SetFailsafe(std::string_view value) {
 }
 
 void DmxNodeParams::SetDisableMergeTimeout(std::string_view value) {
-    if (value.size() != 1) {
+    if (value.empty()) {
         return;
     }
 
-    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout, value.front() != '0');
+    store_dmxnode.flags = common::SetFlagValue(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout, value.front() == 't');
 }
 
 void DmxNodeParams::SetLabelPort(std::string_view key, std::string_view value) {
@@ -108,8 +108,8 @@ void DmxNodeParams::SetOutputStylePort(std::string_view key, std::string_view va
     }
 }
 
-void DmxNodeParams::Store(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer, buffer_size, kDmxNodeKeys);
+void DmxNodeParams::Store(std::string_view buffer) {
+    ParseJsonWithTable(buffer,kDmxNodeKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
 }
 

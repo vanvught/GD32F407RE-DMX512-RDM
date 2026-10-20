@@ -27,7 +27,7 @@ class E131Params : public JsonParamsBase<E131Params> {
     E131Params& operator=(E131Params&&) = delete;
 
     void Load() { JsonParamsBase::Load(json::E131ParamsConst::kFileName); }
-    void Store(const char* buffer, uint32_t buffer_size);
+    void Store(std::string_view buffer);
     void Set();
 
    protected:

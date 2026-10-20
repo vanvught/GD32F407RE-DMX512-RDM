@@ -208,9 +208,9 @@ void RdmSensorsParams::SetMCP3424(std::string_view value) {
     store_rdmsensors.devices = devices;
 }
 
-void RdmSensorsParams::Store(const char* buffer, uint32_t buffer_size) {
+void RdmSensorsParams::Store(std::string_view buffer) {
     store_rdmsensors.devices = 0;
-    ParseJsonWithTable(buffer, buffer_size, kRdmSensorsKeys);
+    ParseJsonWithTable(buffer,kRdmSensorsKeys);
 
     ConfigStore::Instance().Store(&store_rdmsensors, &ConfigurationStore::rdm_sensors);
 

@@ -23,6 +23,7 @@
  */
 
 #include <cstdint>
+#include <string_view>
 
 #include "showfile.h"
 #include "json/showfileparams.h"
@@ -45,9 +46,9 @@ uint32_t GetShowFile(char* buffer, uint32_t length) {
     });
 }
 
-void SetShowFile(const char* buffer, uint32_t buffer_size) {
+void SetShowFile(const char* buffer, uint32_t size) {
     ::json::ShowFileParams showfile_params;
-    showfile_params.Store(buffer, buffer_size);
+    showfile_params.Store(std::string_view{buffer, size});
     showfile_params.Set();
 }
 } // namespace json::config

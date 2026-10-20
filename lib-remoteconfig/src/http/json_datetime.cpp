@@ -116,6 +116,6 @@ uint32_t GetTimeofday(char* out_buffer, uint32_t out_buffer_size) {
 
 void SetTimeofday(const char* buffer, uint32_t buffer_size) {
     debug::Dump(buffer, buffer_size);
-    ParseJsonWithTable(buffer, buffer_size, kActionKeys);
+    ParseJsonWithTable(buffer,kActionKeys);
 }
 } // namespace json
