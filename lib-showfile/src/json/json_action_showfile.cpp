@@ -83,7 +83,7 @@ constexpr json::Key kActionKeys[] = {
 } // namespace
 
 namespace json::action {
-void SetShowFile(const char* buffer, uint32_t buffer_size) {
-    ParseJsonWithTable(buffer,kActionKeys);
+void SetShowFile(const char* buffer, uint32_t size) {
+    ParseJsonWithTable(std::string_view{buffer, size}, kActionKeys);
 }
 } // namespace json::action

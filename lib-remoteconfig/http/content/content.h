@@ -13,17 +13,11 @@
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 #include "upload_index.js.h"
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
-#if defined (NODE_LTC_SMPTE)
-#include "config_etc.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if defined (NODE_OSC_SERVER)
 #include "config_oscserver.js.h"
 #endif // (NODE_OSC_SERVER)
 #include "styles.css.h"
 #include "status_index.js.h"
-#if defined (NODE_LTC_SMPTE)
-#include "config_gps.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if defined (DMXNODE_PORTS)
 #include "config_dmxnode.js.h"
 #endif // (DMXNODE_PORTS)
@@ -38,12 +32,6 @@
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
 #include "config_dmxmonitor.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
-#if defined (NODE_LTC_SMPTE)
-#include "config_ltc.js.h"
-#endif // (NODE_LTC_SMPTE)
-#if defined (NODE_LTC_SMPTE)
-#include "config_tcnet.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
 #include "rtc_index.html.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
@@ -64,9 +52,6 @@
 #if defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
 #include "config_e131.js.h"
 #endif // defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
-#if defined (NODE_LTC_SMPTE)
-#include "config_ltcdisplays.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
 #include "config_rdmdevice.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))
@@ -107,24 +92,18 @@ inline constexpr struct FilesContent kHttpContent[] = {
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 	{ 1750204712,"upload_index.js", upload_index_js_gz, 1631, static_cast<http::ContentTypes>(2), true },
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
-#if defined (NODE_LTC_SMPTE)
-	{ 109007079,"config_etc.js", config_etc_js_gz, 593, static_cast<http::ContentTypes>(2), true },
-#endif // (NODE_LTC_SMPTE)
 #if defined (NODE_OSC_SERVER)
 	{ 3728864745,"config_oscserver.js", config_oscserver_js_gz, 587, static_cast<http::ContentTypes>(2), true },
 #endif // (NODE_OSC_SERVER)
 	{ 2557875310,"styles.css", styles_css_gz, 969, static_cast<http::ContentTypes>(1), true },
 	{ 4156522053,"status_index.js", status_index_js_gz, 273, static_cast<http::ContentTypes>(2), true },
-#if defined (NODE_LTC_SMPTE)
-	{ 610379173,"config_gps.js", config_gps_js_gz, 559, static_cast<http::ContentTypes>(2), true },
-#endif // (NODE_LTC_SMPTE)
 #if defined (DMXNODE_PORTS)
 	{ 3906326706,"config_dmxnode.js", config_dmxnode_js_gz, 1013, static_cast<http::ContentTypes>(2), true },
 #endif // (DMXNODE_PORTS)
 #if !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
 	{ 4089447436,"config_dmxpixel.js", config_dmxpixel_js_gz, 828, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_PIXEL) && (defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI))
-	{ 247271700,"index.js", index_js_gz, 1045, static_cast<http::ContentTypes>(2), true },
+	{ 247271700,"index.js", index_js_gz, 1034, static_cast<http::ContentTypes>(2), true },
 #if !defined (CONFIG_HTTP_HTML_NO_DMX_PCA9685) && defined(OUTPUT_DMX_PCA9685)
 	{ 1666579856,"config_dmxpca9685.js", config_dmxpca9685_js_gz, 704, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX_PCA9685) && defined(OUTPUT_DMX_PCA9685)
@@ -132,12 +111,6 @@ inline constexpr struct FilesContent kHttpContent[] = {
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
 	{ 1186793998,"config_dmxmonitor.js", config_dmxmonitor_js_gz, 538, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
-#if defined (NODE_LTC_SMPTE)
-	{ 1947358610,"config_ltc.js", config_ltc_js_gz, 1868, static_cast<http::ContentTypes>(2), true },
-#endif // (NODE_LTC_SMPTE)
-#if defined (NODE_LTC_SMPTE)
-	{ 3844231377,"config_tcnet.js", config_tcnet_js_gz, 618, static_cast<http::ContentTypes>(2), true },
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
 	{ 1233896314,"rtc_index.html", rtc_index_html_gz, 239, static_cast<http::ContentTypes>(0), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
@@ -154,13 +127,10 @@ inline constexpr struct FilesContent kHttpContent[] = {
 	{ 2057353734,"time_index.html", time_index_html_gz, 520, static_cast<http::ContentTypes>(0), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_TIME)
 	{ 1602327546,"date.js", date_js_gz, 325, static_cast<http::ContentTypes>(2), true },
-	{ 3116920429,"common.js", common_js_gz, 1448, static_cast<http::ContentTypes>(2), true },
+	{ 3116920429,"common.js", common_js_gz, 1445, static_cast<http::ContentTypes>(2), true },
 #if defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
 	{ 4064453935,"config_e131.js", config_e131_js_gz, 641, static_cast<http::ContentTypes>(2), true },
 #endif // defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
-#if defined (NODE_LTC_SMPTE)
-	{ 1194496967,"config_ltcdisplays.js", config_ltcdisplays_js_gz, 565, static_cast<http::ContentTypes>(2), true },
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
 	{ 1557939568,"config_rdmdevice.js", config_rdmdevice_js_gz, 433, static_cast<http::ContentTypes>(2), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))

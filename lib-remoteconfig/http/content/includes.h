@@ -8,17 +8,11 @@
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 #include "upload_index.js.h"
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
-#if defined (NODE_LTC_SMPTE)
-#include "config_etc.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if defined (NODE_OSC_SERVER)
 #include "config_oscserver.js.h"
 #endif // (NODE_OSC_SERVER)
 #include "styles.css.h"
 #include "status_index.js.h"
-#if defined (NODE_LTC_SMPTE)
-#include "config_gps.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if defined (DMXNODE_PORTS)
 #include "config_dmxnode.js.h"
 #endif // (DMXNODE_PORTS)
@@ -33,12 +27,6 @@
 #if !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
 #include "config_dmxmonitor.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_DMX) && defined(OUTPUT_DMX_MONITOR)
-#if defined (NODE_LTC_SMPTE)
-#include "config_ltc.js.h"
-#endif // (NODE_LTC_SMPTE)
-#if defined (NODE_LTC_SMPTE)
-#include "config_tcnet.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
 #include "rtc_index.html.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_RTC) && !defined (DISABLE_RTC)
@@ -59,9 +47,6 @@
 #if defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
 #include "config_e131.js.h"
 #endif // defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
-#if defined (NODE_LTC_SMPTE)
-#include "config_ltcdisplays.js.h"
-#endif // (NODE_LTC_SMPTE)
 #if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
 #include "config_rdmdevice.js.h"
 #endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))
