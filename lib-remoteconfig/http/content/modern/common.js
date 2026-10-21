@@ -63,7 +63,7 @@ async function version() {
 }
 
 function reboot() {
-	postJSON('action', { reboot: 1 });
+	postJSON('action', { reboot: true });
 }
 
 function locate() {

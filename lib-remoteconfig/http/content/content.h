@@ -127,7 +127,7 @@ inline constexpr struct FilesContent kHttpContent[] = {
 	{ 2057353734,"time_index.html", time_index_html_gz, 520, static_cast<http::ContentTypes>(0), true },
 #endif // !defined (CONFIG_HTTP_HTML_NO_TIME)
 	{ 1602327546,"date.js", date_js_gz, 325, static_cast<http::ContentTypes>(2), true },
-	{ 3116920429,"common.js", common_js_gz, 1445, static_cast<http::ContentTypes>(2), true },
+	{ 3116920429,"common.js", common_js_gz, 1443, static_cast<http::ContentTypes>(2), true },
 #if defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
 	{ 4064453935,"config_e131.js", config_e131_js_gz, 641, static_cast<http::ContentTypes>(2), true },
 #endif // defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION == 4)
