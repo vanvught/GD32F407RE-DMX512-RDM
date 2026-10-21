@@ -61,50 +61,6 @@
 namespace dmx::buffer {
 static constexpr auto kSize = 516;
 } // namespace dmx::buffer
-static_assert(dmx::buffer::kSize >= 513);	// 512 with Start Code
-static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 
-// Maximum available USART check
-#if defined(GD32F10X_HD) || defined(GD32F10X_CL)
-static_assert(DMX_MAX_PORTS <= 4, "Too many ports defined");
-#endif // defined(GD32F10X_HD) || defined(GD32F10X_CL)
-#if defined(GD32F20X_CL)
-static_assert(DMX_MAX_PORTS <= 6, "Too many ports defined");
-#endif // GD32F20X_CL
-#if defined(GD32F30X_HD)
-static_assert(DMX_MAX_PORTS <= 5, "Too many ports defined");
-#endif // GD32F30X_HD
-
-// DMA channel check
-#if defined(GD32F10X_HD) || defined(GD32F10X_CL)
-#if defined(DMX_USE_UART4)
-#error There is no DMA channel for UART4
-#endif // DMX_USE_UART4
-#if defined(DMX_USE_USART5)
-#error USART5 is not available
-#endif // DMX_USE_USART5
-#if defined(DMX_USE_UART6)
-#error UART6 is not available
-#endif // DMX_USE_UART6
-#if defined(DMX_USE_UART7)
-#error UART7 is not available
-#endif // DMX_USE_UART7
-#endif // defined(GD32F10X_HD) || defined(GD32F10X_CL)
-
-#if defined(GD32F20X_CL)
-#if defined(DMX_USE_UART4) && defined(DMX_USE_UART7)
-#error DMA1 Channel 3
-#endif // defined(DMX_USE_UART4) && defined(DMX_USE_UART7)
-
-#if defined(DMX_USE_UART3) && defined(DMX_USE_UART6)
-#error DMA1 Channel 4
-#endif // defined(DMX_USE_UART3) && defined(DMX_USE_UART6)
-#endif // GD32F20X_CL
-
-#if defined(GD32F30X_HD)
-#if defined(DMX_USE_UART4)
-#error There is no DMA channel for UART4
-#endif // DMX_USE_UART4
-#endif // GD32F30X_HD
 
 #endif // DMX_DMX_CONFIG_H_

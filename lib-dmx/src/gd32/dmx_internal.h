@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <cassert>
 
+#include "gd32/dmx.h" // IWYU pragma: keep
 #include "gd32_gpio.h"
 
 #ifdef ALIGNED
@@ -90,10 +91,10 @@ constexpr uint32_t GetUsartAf(uint32_t usart_periph) {
 #endif // DMX_USE_UART7
         default:
             [[unlikely]] assert(0);
-			return 0;
+            return 0;
     }
 
-	assert(0);
+    assert(0);
     return 0;
 }
 
@@ -107,7 +108,7 @@ inline void Gd32GpioModeAf() {
     Gd32GpioModeSet<kGpioPeriph, GPIO_MODE_AF, GPIO_PUPD_PULLUP, kPin>();
 
     constexpr uint32_t kAf = GetUsartAf(kUsartPeriph);
-    static_assert(kAf != 0, "Invalid USART peripheral");
+    static_assert(kAf != 0U, "Invalid USART peripheral");
 
     Gd32GpioAfSet<kGpioPeriph, kAf, kPin>();
 }
@@ -122,53 +123,5 @@ inline void Gd32GpioModeAf() {
     gd32_gpio_init<kGpioPeriph, GPIO_MODE_AF_PP, kPin>();
 }
 #endif // defined(GD32F4XX) || defined(GD32H7XX)
-
-inline void DisableTimerIrqUart(uint32_t gpio_periph) {
-    switch (gpio_periph) {
-#ifdef DMX_USE_USART0
-        case USART0:
-            timer_interrupt_disable(TIMER1, TIMER_INT_CH0);
-            break;
-#endif // DMX_USE_USART0
-#ifdef DMX_USE_USART1
-        case USART1:
-            timer_interrupt_disable(TIMER1, TIMER_INT_CH1);
-            break;
-#endif // DMX_USE_USART1
-#ifdef DMX_USE_USART2
-        case USART2:
-            timer_interrupt_disable(TIMER1, TIMER_INT_CH2);
-            break;
-#endif // DMX_USE_USART2
-#ifdef DMX_USE_UART3
-        case UART3:
-            timer_interrupt_disable(TIMER1, TIMER_INT_CH3);
-            break;
-#endif // DMX_USE_UART3
-#ifdef DMX_USE_UART4
-        case UART4:
-            timer_interrupt_disable(TIMER4, TIMER_INT_CH0);
-            break;
-#endif // DMX_USE_UART4
-#ifdef DMX_USE_USART5
-        case USART5:
-            timer_interrupt_disable(TIMER4, TIMER_INT_CH1);
-            break;
-#endif // DMX_USE_USART5
-#ifdef DMX_USE_UART6
-        case UART6:
-            timer_interrupt_disable(TIMER4, TIMER_INT_CH2);
-            break;
-#endif // DMX_USE_UART6
-#ifdef DMX_USE_UART7
-        case UART7:
-            timer_interrupt_disable(TIMER4, TIMER_INT_CH3);
-            break;
-#endif // DMX_USE_UART7
-        default:
-            [[unlikely]] assert(0);
-            break;
-    }
-}
 
 #endif // GD32_DMX_INTERNAL_H_

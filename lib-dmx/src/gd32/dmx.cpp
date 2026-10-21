@@ -38,26 +38,29 @@
 #include <algorithm>
 #include <cassert>
 
+#include "dmx_internal.h"
+#include "dmx/dmx_config.h"
 #include "gd32.h"     // IWYU pragma: keep
 #include "gd32/dmx.h" // IWYU pragma: keep
-#include "dmx/dmx_config.h"
 #include "gd32/dmx_assert.h"
 #include "gd32/dmx_port.h"
+#include "gd32/dmx_validate.h" // IWYU pragma: keep
+#include "gd32_dma.h"
+#include "gd32_uart.h"
+#include "gd32_gpio.h"
 #include "dmxconst.h"
 #include "e120.h"
 #include "rdmconst.h"
 #include "rdm_e120.h"
 #include "timing.h"
-#include "gd32_dma.h"
-#include "gd32_uart.h"
-#include "gd32_gpio.h"
-#include "dmx_internal.h"
+
 #ifdef LOGIC_ANALYZER
 #include "logic_analyzer.h" // IWYU pragma: keep
-#endif // LOGIC_ANALYZER
+#endif                      // LOGIC_ANALYZER
 #include "dmx_debug.h"
 
 static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
+static_assert(dmx::buffer::kSize >= 513);   // 512 with Start Code
 
 namespace dmx {
 namespace {
@@ -2806,10 +2809,10 @@ Dmx::Dmx() {
     UsartDmaConfig(); // DMX Transmit
 #if defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
     Timer1Config(); // DMX Transmit -> USART0, USART1, USART2, UART3
-#endif // defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
+#endif              // defined(DMX_USE_USART0) || defined(DMX_USE_USART1) || defined(DMX_USE_USART2) || defined(DMX_USE_UART3)
 #if defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
     Timer4Config(); // DMX Transmit -> UART4, USART5, UART6, UART7
-#endif // defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
+#endif              // defined(DMX_USE_UART4) || defined(DMX_USE_USART5) || defined(DMX_USE_UART6) || defined(DMX_USE_UART7)
 
 #if defined(DMX_USE_USART0) || defined(DMX_USE_USART0_RX)
     UartDmxConfig(USART0);
