@@ -38,6 +38,9 @@
 #include "dmxconfigudp.h"
 #endif // CONFIG_DMXSEND_ENABLE_CONFIGUDP
 #include "panelled.h"
+#ifdef RDM_RESPONDER
+#include "rdm_slotinfo.h"
+#endif
 #include "firmware/debug/debug_debug.h"
 
 class DmxSend {
@@ -129,9 +132,9 @@ class DmxSend {
 
     void Print() {
         puts("DMX Send");
-        printf(" Break time   : %u\n", static_cast<unsigned int>(Dmx::Get()->TransmitBreakTime()));
-        printf(" MAB time     : %u\n", static_cast<unsigned int>(Dmx::Get()->TransmitMabTime()));
-        printf(" Refresh rate : %u\n", static_cast<unsigned int>(1000000U / Dmx::Get()->TransmitPeriodTime()));
+        printf(" Break time   : %u\n", static_cast<unsigned>(Dmx::Get()->TransmitBreakTime()));
+        printf(" MAB time     : %u\n", static_cast<unsigned>(Dmx::Get()->TransmitMabTime()));
+        printf(" Refresh rate : %u\n", static_cast<unsigned>(1000000U / Dmx::Get()->TransmitPeriodTime()));
         printf(" Slots        : %u\n", Dmx::Get()->TransmitSlots());
     }
 
@@ -139,14 +142,16 @@ class DmxSend {
     uint32_t GetUserData() { return 0; }
     uint32_t GetRefreshRate() { return 1000000U / Dmx::Get()->TransmitPeriodTime(); }
 
+#ifdef RDM_RESPONDER
     uint16_t GetDmxStartAddress() { return dmxnode::kStartAddressDefault; }
     bool SetDmxStartAddress([[maybe_unused]] uint16_t dmx_start_address) { return false; }
     uint16_t GetDmxFootprint() { return dmxnode::kUniverseSize; }
-    bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, dmxnode::SlotInfo& slot_info) {
-        slot_info.type = 0x00;       // ST_PRIMARY
-        slot_info.category = 0x0001; // SD_INTENSITY
+    bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, rdm::slotinfo::SlotInfo& slot_info) {
+        slot_info.type = rdm::slotinfo::SlotType::kStPrimary;
+        slot_info.category = rdm::slotinfo::SlotDefinition::kSdIntensity;
         return true;
     }
+#endif
 
    private:
     constexpr bool IsStarted(uint8_t started, uint32_t port_index) { return (started & (1U << port_index)) == (1U << port_index); }

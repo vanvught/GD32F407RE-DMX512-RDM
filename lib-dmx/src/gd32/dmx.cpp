@@ -63,11 +63,20 @@ static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 static_assert(dmx::buffer::kSize >= 513);   // 512 with Start Code
 
 namespace dmx {
-namespace {
 constexpr uint32_t kDmxSlotsCompleteFlag = 0x8000;
 constexpr uint32_t kRdmSlotsCompleteFlag = 0x4000;
 
-enum class TxRxState { kIdle, kDmxBreak, kDmxMab, kDmxData, kDmxInter, kRdmData, kRdmChecksumh, kRdmChecksuml, kRdmdisc };
+enum class TxRxState {
+    kIdle,
+    kDmxBreak,
+    kDmxMab,
+    kDmxData,
+    kDmxInter,
+    kRdmData,
+    kRdmChecksumh,
+    kRdmChecksuml,
+    kRdmdisc, //
+};
 enum class RdmTxState { kIdle, kBreak, kMab, kData, kDirection };
 enum class PortState { kIdle, kTx, kRx };
 
@@ -92,6 +101,7 @@ struct DmxTxData {
 struct RdmTxDataPacket {
     uint8_t data[sizeof(struct TRdmMessage)];
     uint32_t length;
+    uint32_t int_tx_count;
 };
 
 struct RdmTxPacket {
@@ -131,7 +141,6 @@ struct RxData {
     } rdm ALIGNED;
     volatile TxRxState state;
 } ALIGNED;
-} // namespace
 } // namespace dmx
 
 namespace {
@@ -343,6 +352,28 @@ void IrqHandlerDmxRdmInput() {
     }
 }
 
+template <uint32_t kUsartPeripheral, bool kTransferComplete = false>
+void IrqHandlerRdmOutput() {
+    constexpr auto kPortIndex = GetPortByUart(kUsartPeripheral);
+
+    if constexpr (kTransferComplete) {
+        gd32::UartInterruptDisable<USART_INT_TC>(kUsartPeripheral);
+
+        TIMER_CH0CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::responder::kDataDirectionDelay;
+
+        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kDirection;
+    } else {
+        auto& rdm = s_RdmTxBuffer[kPortIndex].rdm.data;
+
+        USART_TDATA(kUsartPeripheral) = USART_TDATA_TDATA & rdm.data[rdm.int_tx_count++];
+
+        if (rdm.int_tx_count == rdm.length) {
+            gd32::UartInterruptDisable<USART_INT_TBE>(kUsartPeripheral);
+            gd32::UartInterruptEnable<USART_INT_TC>(kUsartPeripheral);
+        }
+    }
+}
+
 template <uint32_t kUsartPeripheral, uint32_t kDmaController, dma_channel_enum kDmaChannel>
 void DmaStartTx(const uint8_t* data, uint32_t length) {
     auto dma_chctl = DMA_CHCTL(kDmaController, kDmaChannel);
@@ -385,6 +416,21 @@ void DmaStartRdmTx(TxBufferType& tx_buffer) {
 
 #define DMA_START_RDM_TX(PORT_INDEX, USARTx, DMAx, CHx) DmaStartRdmTx<USARTx, DMAx, CHx>(s_RdmTxBuffer[PORT_INDEX])
 
+template <uint32_t kUsartPeripheral>
+void IntStartTx() {
+    gd32::UartInterruptEnable<USART_INT_TBE>(kUsartPeripheral);
+}
+
+template <uint32_t kUsartPeripheral, typename TxBufferType>
+void IntStartRdmTx(TxBufferType& tx_buffer) {
+    auto& packet = tx_buffer.rdm.data;
+    packet.int_tx_count = 0;
+
+    IntStartTx<kUsartPeripheral>();
+}
+
+#define INT_START_RDM_TX(PORT_INDEX, USARTx) IntStartRdmTx<USARTx>(s_RdmTxBuffer[PORT_INDEX])
+
 extern "C" {
 #ifndef CONFIG_DMX_TRANSMIT_ONLY
 #if defined(DMX_USE_USART0) || defined(DMX_USE_USART0_RX)
@@ -413,6 +459,16 @@ void UART3_IRQHandler() {
 
 #if defined(DMX_USE_UART4) || defined(DMX_USE_UART4_RX)
 void UART4_IRQHandler() {
+#ifdef UART4_NO_DMA_CHANNEL
+    if (gd32::UsartInterruptFlagGet<USART_INT_FLAG_TBE>(UART4)) {
+        IrqHandlerRdmOutput<UART4>();
+        return;
+    }
+    if (gd32::UsartInterruptFlagGet<USART_INT_FLAG_TC>(UART4)) {
+        IrqHandlerRdmOutput<UART4, true>();
+        return;
+    }
+#endif // UART4_NO_DMA_CHANNEL
     IrqHandlerDmxRdmInput<UART4>();
 }
 #endif // defined(DMX_USE_UART4) || defined(DMX_USE_UART4_RX)
@@ -741,7 +797,11 @@ void TIMER4_IRQHandler() {
 
                 case dmx::TxRxState::kDmxMab:
                     [[likely]] {
+#ifdef UART4_NO_DMA_CHANNEL
+                        assert(false && "Not implemented");
+#else
                         DMA_RESTART_DMX_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
+#endif // UART4_NO_DMA_CHANNEL
                     }
                     break;
 
@@ -761,7 +821,11 @@ void TIMER4_IRQHandler() {
 
                 case dmx::RdmTxState::kMab:
                     [[likely]] {
+#ifdef UART4_NO_DMA_CHANNEL
+                        INT_START_RDM_TX(kPortIndex, UART4);
+#else
                         DMA_START_RDM_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
+#endif // UART4_NO_DMA_CHANNEL
                     }
                     break;
 
@@ -772,8 +836,13 @@ void TIMER4_IRQHandler() {
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
-                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
-                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
+                        if (s_RdmTxBuffer[kPortIndex].rdm.data.data[0] == E120_SC_RDM) {
+                            const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                            sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
+                        } else {
+                            const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.discovery_response + 1;
+                            sv_total_statistics[kPortIndex].rdm.sent.discovery_response = kSent;
+                        }
 #endif // CONFIG_DMX_DISABLE_STATISTICS
                     }
                     break;
@@ -977,7 +1046,7 @@ void TIMER4_IRQHandler() {
         TIMER_INTF(TIMER4) = (~TIMER_INT_FLAG_CH3);
     }
 #endif // DMX_USE_UART7
-    // Clear all remaining interrupt flags (safety measure)
+       // Clear all remaining interrupt flags (safety measure)
     TIMER_INTF(TIMER4) = UINT32_MAX;
 }
 
@@ -1256,7 +1325,9 @@ void DMA0_Channel7_IRQHandler() {
 }
 #endif // defined(GD32F4XX) || defined(GD32H7XX)
 #if defined(GD32F10X) || defined(GD32F30X)
-#error Not available
+#ifndef UART4_NO_DMA_CHANNEL
+#error No DMA channel
+#endif // UART4_NO_DMA_CHANNEL
 #endif // defined(GD32F10X) || defined(GD32F30X)
 #endif // DMX_USE_UART4
 // USART 5
@@ -1642,7 +1713,7 @@ void StartDmxOutputBreak() {
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
-    while (SET != usart_flag_get(kUsartPeripheral, USART_FLAG_TC)) {
+    while (!gd32::UartFlagGet<USART_FLAG_TC>(kUsartPeripheral)) {
     }
 
     switch (kUsartPeripheral) {
@@ -1857,7 +1928,7 @@ void StartRdmOutput() {
     // USART_FLAG_TC is set after power on.
     // The flag is cleared by DMA interrupt when maximum slots - 1 are transmitted.
     // TODO(a): Do we need a timeout just to be safe?
-    while (SET != usart_flag_get(kUsartPeripheral, USART_FLAG_TC)) {
+    while (!gd32::UartFlagGet<USART_FLAG_TC>(kUsartPeripheral)) {
     }
 
     switch (kUsartPeripheral) {
@@ -2104,7 +2175,7 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t*
     assert(length != 0);
 
     // 3.2.2 Responder Packet spacing
-    timing::DelayUs(rdm::responder::kPacketSpacing, gsv_rdm_data_receive_end[port_index]);
+    timing::DelayUs(rdm::responder::kPacketSpacing, timing::CpuTicks{gsv_rdm_data_receive_end[port_index]});
 
     SetPortDirection(port_index, dmx::Direction::kOutput, false);
 
@@ -2132,6 +2203,99 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t*
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
     sv_total_statistics[port_index].rdm.sent.discovery_response = sv_total_statistics[port_index].rdm.sent.discovery_response + 1;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
+}
+
+template <uint32_t kPortIndex>
+void Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length) {
+    static_assert(kPortIndex < dmx::config::max::kPorts);
+
+    assert(data != nullptr);
+    assert(length <= sizeof(TRdmDiscoveryMsg));
+
+    // 3.2.2 Responder Packet spacing
+    timing::DelayUs(rdm::responder::kPacketSpacing, timing::CpuTicks{gsv_rdm_data_receive_end[kPortIndex]});
+
+    SetPortDirection<kPortIndex, dmx::Direction::kOutput, false>();
+
+    auto& tx_buffer = s_RdmTxBuffer[kPortIndex];
+
+    auto* dst_data = tx_buffer.rdm.data.data;
+    auto& dst_length = tx_buffer.rdm.data.length;
+    dst_length = length;
+
+    memcpy(dst_data, data, length);
+
+    constexpr auto kUsartPeripheral = std::to_underlying(kDirGpio[kPortIndex].uart);
+    tx_buffer.state = dmx::RdmTxState::kData;
+
+    switch (kUsartPeripheral) {
+        // TIMER 1
+#ifdef DMX_USE_USART0
+        case USART0: {
+            DMA_START_RDM_TX(kPortIndex, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_USART0
+
+#ifdef DMX_USE_USART1
+        case USART1: {
+            DMA_START_RDM_TX(kPortIndex, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_USART1
+
+#ifdef DMX_USE_USART2
+        case USART2: {
+            DMA_START_RDM_TX(kPortIndex, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_USART2
+
+#ifdef DMX_USE_UART3
+        case UART3: {
+            DMA_START_RDM_TX(kPortIndex, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_UART3
+       // TIMER 4
+#ifdef DMX_USE_UART4
+        case UART4: {
+#ifdef UART4_NO_DMA_CHANNEL
+            INT_START_RDM_TX(kPortIndex, UART4);
+#else
+            DMA_START_RDM_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
+#endif // UART4_NO_DMA_CHANNEL
+            return;
+        } break;
+#endif // DMX_USE_UART4
+
+#ifdef DMX_USE_USART5
+        case USART5: {
+            DMA_START_RDM_TX(kPortIndex, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_USART5
+
+#ifdef DMX_USE_UART6
+        case UART6: {
+            DMA_START_RDM_TX(kPortIndex, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_UART6
+
+#ifdef DMX_USE_UART7
+        case UART7: {
+            DMA_START_RDM_TX(kPortIndex, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
+            return;
+        } break;
+#endif // DMX_USE_UART7
+
+        default:
+            [[unlikely]] assert(false && "switch");
+            break;
+    }
+
+    assert(false && "Not reachable");
 }
 
 // RDM Receive
@@ -2211,11 +2375,15 @@ template void Dmx::SetSendDataInternal<0, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<0, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<0, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
+template void Dmx::RdmTransmitDiscoveryRespondMessage<0>(const uint8_t* data, uint32_t length);
+
 #if DMX_MAX_PORTS >= 2
 template void Dmx::SetSendDataInternal<1, true, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<1, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<1, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<1, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<1>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 2
 
 #if DMX_MAX_PORTS >= 3
@@ -2223,6 +2391,8 @@ template void Dmx::SetSendDataInternal<2, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<2, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<2, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<2, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<2>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 3
 
 #if DMX_MAX_PORTS >= 4
@@ -2230,6 +2400,8 @@ template void Dmx::SetSendDataInternal<3, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<3, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<3, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<3, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<3>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 4
 
 #if DMX_MAX_PORTS >= 5
@@ -2237,6 +2409,8 @@ template void Dmx::SetSendDataInternal<4, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<4, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<4, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<4, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<4>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 5
 
 #if DMX_MAX_PORTS >= 6
@@ -2244,6 +2418,8 @@ template void Dmx::SetSendDataInternal<5, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<5, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<5, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<5, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<5>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 6
 
 #if DMX_MAX_PORTS >= 7
@@ -2251,6 +2427,8 @@ template void Dmx::SetSendDataInternal<6, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<6, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<6, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<6, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<6>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 7
 
 #if DMX_MAX_PORTS == 8
@@ -2258,6 +2436,8 @@ template void Dmx::SetSendDataInternal<7, true, dmx::SendStyle::kDirect>(const u
 template void Dmx::SetSendDataInternal<7, true, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<7, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<7, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
+
+template void Dmx::RdmTransmitDiscoveryRespondMessage<7>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS == 8
 
 #ifndef CONFIG_DMX_NO_OPTIMIZE
@@ -2542,7 +2722,7 @@ static void UsartDmaConfig() {
 #endif // GD32F30X
 #endif // DMX_USE_UART3
 
-#ifdef DMX_USE_UART4
+#if defined DMX_USE_UART4 && !defined(UART4_NO_DMA_CHANNEL)
     // UART 4 TX
     dma_deinit(UART4_DMAx, UART4_TX_DMA_CHx);
 #ifdef GD32H7XX
@@ -2576,7 +2756,7 @@ static void UsartDmaConfig() {
     NVIC_SetPriority(DMA0_Channel7_IRQn, 1);
     NVIC_EnableIRQ(DMA0_Channel7_IRQn);
 #endif // GD32F4XX
-#endif // DMX_USE_UART4
+#endif // defined DMX_USE_UART4 && !defined(UART4_NO_DMA_CHANNEL)
 
 #ifdef DMX_USE_USART5
     // USART 5 TX

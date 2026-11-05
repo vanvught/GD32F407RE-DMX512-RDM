@@ -47,7 +47,7 @@ class Dmx {
 
     void SetPortDirection(uint32_t port_index, dmx::Direction port_direction, bool enable_data = false);
 
-    template <uint32_t port_index, dmx::Direction port_direction, bool enable_data>
+    template <uint32_t kPortIndex, dmx::Direction kPortDirection, bool kEnableData>
     void SetPortDirection();
 
     [[nodiscard]] dmx::Direction PortDirection(uint32_t port_index) const { return port_direction_[port_index]; }
@@ -69,10 +69,10 @@ class Dmx {
     void SetTransmitSlots(uint16_t slots = dmx::kChannelsMax);
     [[nodiscard]] uint16_t TransmitSlots() const { return transmit_slots_; }
 
-    template <dmx::SendStyle dmxSendStyle>
+    template <dmx::SendStyle kDmxSendStyle>
     void SetTransmitDataWithSC(uint32_t port_index, const uint8_t* data, uint32_t length);
 
-    template <dmx::SendStyle dmxSendStyle>
+    template <dmx::SendStyle kDmxSendStyle>
     void SetTransmitDataWithoutSC(uint32_t port_index, const uint8_t* data, uint32_t length);
 
     void Sync();
@@ -94,6 +94,9 @@ class Dmx {
     void RdmTransmit(uint32_t port_index, const uint8_t* data, uint32_t length);
     void RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t* data, uint32_t length);
 
+    template <uint32_t kPortIndex>
+    void RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length);
+
     // RDM Receive
     const uint8_t* RdmReceive(uint32_t port_index);
     const uint8_t* RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms);
@@ -104,10 +107,10 @@ class Dmx {
     void DataEnable(uint32_t port_index);
     void DataDisable(uint32_t port_index);
 
-    template <uint32_t portIndex, bool hasStartCode, dmx::SendStyle dmxSendStyle>
+    template <uint32_t kPortIndex, bool kHasStartCode, dmx::SendStyle kDmxSendStyle>
     void SetSendDataInternal(const uint8_t* data, uint32_t length);
 
-    template <uint32_t portIndex>
+    template <uint32_t kPortIndex>
     void RdmSendDataInternal(const uint8_t* data, uint32_t length);
 
     void StartSendStyleDirect(uint32_t port_index);
@@ -129,60 +132,60 @@ class Dmx {
     case i:                                \
         return SetSendDataInternal<i, SC, STYLE>(pData, length)
 
-template <dmx::SendStyle dmxSendStyle>
+template <dmx::SendStyle kDmxSendStyle>
 void Dmx::SetTransmitDataWithSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
     switch (port_index) {
-        DMX_HANDLE_SEND_CASE(0, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(0, true, kDmxSendStyle);
 #if DMX_MAX_PORTS >= 2
-        DMX_HANDLE_SEND_CASE(1, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(1, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 2
 #if DMX_MAX_PORTS >= 3
-        DMX_HANDLE_SEND_CASE(2, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(2, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 3
 #if DMX_MAX_PORTS >= 4
-        DMX_HANDLE_SEND_CASE(3, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(3, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 4
 #if DMX_MAX_PORTS >= 5
-        DMX_HANDLE_SEND_CASE(4, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(4, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 5
 #if DMX_MAX_PORTS >= 6
-        DMX_HANDLE_SEND_CASE(5, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(5, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 6
 #if DMX_MAX_PORTS >= 7
-        DMX_HANDLE_SEND_CASE(6, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(6, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 7
 #if DMX_MAX_PORTS == 8
-        DMX_HANDLE_SEND_CASE(7, true, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(7, true, kDmxSendStyle);
 #endif // DMX_MAX_PORTS == 8
         default:
             return;
     }
 }
 
-template <dmx::SendStyle dmxSendStyle>
+template <dmx::SendStyle kDmxSendStyle>
 void Dmx::SetTransmitDataWithoutSC(uint32_t port_index, const uint8_t* pData, uint32_t length) {
     switch (port_index) {
-        DMX_HANDLE_SEND_CASE(0, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(0, false, kDmxSendStyle);
 #if DMX_MAX_PORTS >= 2
-        DMX_HANDLE_SEND_CASE(1, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(1, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 2
 #if DMX_MAX_PORTS >= 3
-        DMX_HANDLE_SEND_CASE(2, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(2, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 3
 #if DMX_MAX_PORTS >= 4
-        DMX_HANDLE_SEND_CASE(3, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(3, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 4
 #if DMX_MAX_PORTS >= 5
-        DMX_HANDLE_SEND_CASE(4, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(4, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 5
 #if DMX_MAX_PORTS >= 6
-        DMX_HANDLE_SEND_CASE(5, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(5, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 6
 #if DMX_MAX_PORTS >= 7
-        DMX_HANDLE_SEND_CASE(6, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(6, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS >= 7
 #if DMX_MAX_PORTS == 8
-        DMX_HANDLE_SEND_CASE(7, false, dmxSendStyle);
+        DMX_HANDLE_SEND_CASE(7, false, kDmxSendStyle);
 #endif // DMX_MAX_PORTS == 8
         default:
             return;
