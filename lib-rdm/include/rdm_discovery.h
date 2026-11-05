@@ -46,8 +46,9 @@ void Finished(uint32_t port_index, Type type);
 class Discovery : rdm::discovery::StateMachine {
    public:
     static constexpr auto kPorts = dmx::config::max::kPorts;
+    static_assert(kPorts > 0 && kPorts <= 8);
 
-    Discovery() : rdm::discovery::StateMachine(rdm::device::Base::Instance().GetUID()) {
+    Discovery() noexcept : rdm::discovery::StateMachine(rdm::device::Base::Instance().GetUID()) {
         assert(s_this == nullptr);
         s_this = this;
     }
@@ -90,7 +91,7 @@ class Discovery : rdm::discovery::StateMachine {
             Stop(port_index);
         }
 
-        if (s_bg_discovery == 0) {
+        if (s_bg_discovery == 0 && s_timer_id >= 0) {
             SoftwareTimerDelete(s_timer_id);
         }
     }
@@ -129,9 +130,7 @@ class Discovery : rdm::discovery::StateMachine {
         }
     }
 
-    bool IsRunning(uint32_t portindex, bool& is_incremental) { return rdm::discovery::StateMachine::IsRunning(portindex, is_incremental); }
-
-    bool IsRunning(uint32_t port_index) {
+    [[nodiscard]] bool IsRunning(uint32_t port_index) const {
         assert(port_index < kPorts);
 
         uint32_t portindex;

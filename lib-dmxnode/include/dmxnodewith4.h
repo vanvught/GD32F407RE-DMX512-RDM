@@ -30,9 +30,13 @@
 #include "dmxnode.h"
 #include "dmxnode_outputtype.h"
 #include "dmxsend.h"
+#ifdef RDM_RESPONDER
+#include "rdm_slotinfo.h"
+#endif // RDM_RESPONDER
 #include "firmware/debug/debug_debug.h"
 
-template <uint32_t kMaxPorts> class DmxNodeWith4 {
+template <uint32_t kMaxPorts>
+class DmxNodeWith4 {
    public:
     DmxNodeWith4(DmxPixelOutputType* dmx_pixel_output_type, DmxSend* dmx_send) : dmx_pixel_output_type_(dmx_pixel_output_type), dmx_send_(dmx_send) {
         DEBUG_PRINTF("kMaxPorts=%u DmxPixelOutputType=%p DmxSend=%p", static_cast<unsigned>(kMaxPorts), reinterpret_cast<void*>(dmx_pixel_output_type_), reinterpret_cast<void*>(dmx_send_));
@@ -54,7 +58,7 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
     void Start(uint32_t port_index) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
-                return dmx_pixel_output_type_->Start(port_index);
+                dmx_pixel_output_type_->Start(port_index);
             }
             return;
         }
@@ -66,7 +70,7 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
     void Stop(uint32_t port_index) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
-                return dmx_pixel_output_type_->Stop(port_index);
+                dmx_pixel_output_type_->Stop(port_index);
             }
             return;
         }
@@ -75,7 +79,8 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
         }
     }
 
-    template <bool kDoUpdate> void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
+    template <bool kDoUpdate>
+    void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
                 return dmx_pixel_output_type_->SetData<kDoUpdate>(port_index, data, length);
@@ -90,12 +95,14 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
     void Sync(uint32_t port_index) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
-                return dmx_pixel_output_type_->Sync(port_index);
+                dmx_pixel_output_type_->Sync(port_index);
+                return;
             }
             return;
         }
         if (dmx_send_ != nullptr) {
-            return dmx_send_->Sync(port_index & 0x3);
+            dmx_send_->Sync(port_index & 0x3);
+            return;
         }
     }
 
@@ -109,19 +116,21 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
     }
 
 #ifdef OUTPUT_HAVE_STYLESWITCH
-    void SetOutputStyle(uint32_t port_index, const dmxnode::OutputStyle outputStyle) {
+    void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
-                return dmx_pixel_output_type_->SetOutputStyle(port_index, outputStyle);
+                dmx_pixel_output_type_->SetOutputStyle(port_index, output_style);
+                return;
             }
             return;
         }
         if (dmx_send_ != nullptr) {
-            return dmx_send_->SetOutputStyle(port_index & 0x3, outputStyle);
+            dmx_send_->SetOutputStyle(port_index & 0x3, output_style);
+            return;
         }
     }
 
-    dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const {
+    [[nodiscard]] dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const {
         if (port_index < kMaxPorts) {
             if (dmx_pixel_output_type_ != nullptr) {
                 return dmx_pixel_output_type_->GetOutputStyle(port_index);
@@ -177,13 +186,15 @@ template <uint32_t kMaxPorts> class DmxNodeWith4 {
         return 0;
     }
 
+#ifdef RDM_RESPONDER
     bool SetDmxStartAddress([[maybe_unused]] uint16_t dmx_start_address) { return false; }
 
     uint16_t GetDmxStartAddress() { return dmxnode::kAddressInvalid; }
 
     uint16_t GetDmxFootprint() { return 0; }
 
-    bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, [[maybe_unused]] dmxnode::SlotInfo& slot_info) { return false; }
+    bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, [[maybe_unused]] rdm::slotinfo::SlotInfo& slot_info) { return false; }
+#endif // RDM_RESPONDER
 
     static DmxNodeWith4& Get() {
         assert(s_this != nullptr); // Ensure that s_this is valid

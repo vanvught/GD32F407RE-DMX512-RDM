@@ -26,12 +26,16 @@
 #ifndef RDM_DEBUG_H_
 #define RDM_DEBUG_H_
 
+#include "firmware/debug/debug_debug.h"
+
 #ifdef DEBUG_RDM
+inline constexpr bool kDebugRdmEnabled = true;
 #define RDM_DEBUG_ENTRY() DEBUG_ENTRY()
 #define RDM_DEBUG_EXIT() DEBUG_EXIT()
 #define RDM_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define RDM_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugRdmEnabled = false;
 #define RDM_DEBUG_ENTRY() \
     do {                     \
     } while (false)
@@ -47,11 +51,13 @@
 #endif // DEBUG_RDM
 
 #ifdef DEBUG_RDM_DEVICE_PARAMS
+inline constexpr bool kDebugRdmDeviceParamsEnabled = true;
 #define RDM_DEVICE_PARAMS_DEBUG_ENTRY() DEBUG_ENTRY()
 #define RDM_DEVICE_PARAMS_DEBUG_EXIT() DEBUG_EXIT()
 #define RDM_DEVICE_PARAMS_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define RDM_DEVICE_PARAMS_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugRdmDeviceParamsEnabled = false;
 #define RDM_DEVICE_PARAMS_DEBUG_ENTRY() \
     do {                     \
     } while (false)
@@ -67,11 +73,13 @@
 #endif // DEBUG_RDM_DEVICE_PARAMS
 
 #ifdef DEBUG_RDM_DISCOVERY
+inline constexpr bool kDebugRdmDiscoveryEnabled = true;
 #define RDM_DISCOVERY_DEBUG_ENTRY() DEBUG_ENTRY()
 #define RDM_DISCOVERY_DEBUG_EXIT() DEBUG_EXIT()
 #define RDM_DISCOVERY_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define RDM_DISCOVERY_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugRdmDiscoveryEnabled = false;
 #define RDM_DISCOVERY_DEBUG_ENTRY() \
     do {                     \
     } while (false)

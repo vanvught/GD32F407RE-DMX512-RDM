@@ -29,30 +29,59 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
-#ifndef NDEBUG
 #include <cstdio>
-#endif // NDEBUG
 
+#include "rdm_debug.h"
 #include "rdmconst.h"
-#include "firmware/debug/debug_debug.h"
+#include "common/utils/utils_hex.h"
 
 namespace rdm {
+inline constexpr uint32_t kUidStringLength = 13;
+
+inline void FormatUid(uint64_t uid, char (&buffer)[kUidStringLength + 1]) noexcept {
+    for (uint32_t i = 0; i < 12; ++i) {
+        const auto kShift = (11U - i) * 4U;
+        const auto kDigit = static_cast<uint32_t>((uid >> kShift) & 0xFU);
+        const auto kPos = i < 4U ? i : i + 1U;
+
+        buffer[kPos] = common::hex::ToCharLowercase(kDigit);
+    }
+
+    buffer[4] = ':';
+    buffer[kUidStringLength] = '\0';
+}
+
+inline void FormatUid(const uint8_t* uid, char (&buffer)[kUidStringLength + 1]) noexcept {
+    for (uint32_t i = 0; i < rdm::kUidSize; ++i) {
+        const auto kPos = (2U * i) + (i >= 2U ? 1U : 0U);
+
+        buffer[kPos] = common::hex::ToCharLowercase(uid[i] >> 4U);
+        buffer[kPos + 1U] = common::hex::ToCharLowercase(uid[i]);
+    }
+
+    buffer[4] = ':';
+    buffer[kUidStringLength] = '\0';
+}
+
+inline void PrintUid(const uint8_t* uid) {
+    char buffer[kUidStringLength + 1];
+    FormatUid(uid, buffer);
+    printf("%s", buffer);
+}
+
 class Tod {
    public:
 #ifndef RDM_DISCOVERY_TOD_TABLE_SIZE
 #define RDM_DISCOVERY_TOD_TABLE_SIZE 200U
 #endif // RDM_DISCOVERY_TOD_TABLE_SIZE
     static constexpr uint32_t kTableSize = RDM_DISCOVERY_TOD_TABLE_SIZE;
-    static constexpr uint32_t kMutesTableSize = (kTableSize + 32) / 32;
+    static_assert(kTableSize > 0, "RDM TOD table must not be empty");
+    static constexpr uint32_t kMutesTableSize = (kTableSize + 31) / 32;
     static constexpr uint32_t kInvalidEntry = UINT32_MAX;
 
-    Tod() {
-        for (uint32_t i = 0; i < kTableSize; i++) {
-            memcpy(&tod_[i], rdm::kUidAll, rdm::kUidSize);
-        }
-
-        for (uint32_t i = 0; i < kMutesTableSize; i++) {
-            mutes_[i] = 0;
+    Tod() noexcept {
+        for (auto& tod : tod_) {
+            memcpy(&tod, rdm::kUidAll, rdm::kUidSize);
         }
     }
 
@@ -64,30 +93,40 @@ class Tod {
         }
 
         entries_ = 0;
+        saved_index_ = kInvalidEntry;
 
-        for (uint32_t i = 0; i < kMutesTableSize; i++) {
-            mutes_[i] = 0;
+        for (uint32_t& mute : mutes_) {
+            mute = 0;
         }
     }
 
-    bool AddUid(const uint8_t* uid) {
-        if (entries_ == kTableSize) {
+    [[nodiscard]] uint32_t FindIndex(const uint8_t* uid) const noexcept {
+        for (uint32_t index = 0; index < entries_; index++) {
+            if (memcmp(tod_[index].uid, uid, rdm::kUidSize) == 0) {
+                return index;
+            }
+        }
+
+        return kInvalidEntry;
+    }
+
+    bool AddUid(const uint8_t* uid) noexcept {
+        if (entries_ >= kTableSize) {
             return false;
         }
 
-        if (Exist(uid)) {
+        if (FindIndex(uid) != kInvalidEntry) {
             return false;
         }
 
-        memcpy(&tod_[entries_++], uid, rdm::kUidSize);
-
+        memcpy(tod_[entries_++].uid, uid, rdm::kUidSize);
         return true;
     }
 
-    uint32_t UidCount() const { return entries_; }
+    [[nodiscard]] uint32_t UidCount() const noexcept { return entries_; }
 
-    bool CopyUidEntry(uint32_t index, uint8_t uid[rdm::kUidSize]) {
-        if (index > entries_) {
+    bool CopyUidEntry(uint32_t index, uint8_t uid[rdm::kUidSize]) const noexcept {
+        if (index >= entries_) {
             memcpy(uid, rdm::kUidAll, rdm::kUidSize);
             return false;
         }
@@ -96,66 +135,72 @@ class Tod {
         return true;
     }
 
-    void Copy(uint8_t* table) {
-        DEBUG_ENTRY();
-        DEBUG_PRINTF("entries_=%u", static_cast<unsigned int>(entries_));
+    void Copy(uint8_t* table) const noexcept {
         assert(table != nullptr);
-
-        const auto* src = reinterpret_cast<const uint8_t*>(tod_);
-        auto* dst = table;
-
-        for (uint32_t i = 0; i < (entries_ * rdm::kUidSize); i++) {
-            *dst++ = *src++;
-        }
-
-        DEBUG_EXIT();
+        static_assert(sizeof(Uid) == rdm::kUidSize);
+        memcpy(table, tod_, entries_ * sizeof(Uid));
     }
 
     bool Delete(const uint8_t* uid) {
-        bool found = false;
-        uint32_t entry;
+        uint32_t entry = 0;
 
-        for (entry = 0; entry < entries_; entry++) {
-            if (memcmp(&tod_[entry], uid, rdm::kUidSize) == 0) {
-                found = true;
+        for (; entry < entries_; ++entry) {
+            if (memcmp(tod_[entry].uid, uid, rdm::kUidSize) == 0) {
                 break;
             }
         }
 
-        if (!found) {
+        if (entry == entries_) {
             return false;
         }
 
-        if (entry == kTableSize - 1) {
-            memcpy(&tod_[entry], rdm::kUidAll, rdm::kUidSize);
-        } else {
-            for (; entry < entries_; entry++) {
-                memcpy(&tod_[entry], &tod_[entry + 1], rdm::kUidSize);
+        for (uint32_t i = entry; i + 1 < entries_; i++) {
+            tod_[i] = tod_[i + 1];
+
+            // Move the mute state with its UID.
+            const auto kNext = i + 1U;
+            const bool kMuted = (mutes_[kNext / 32U] & (uint32_t{1} << (kNext % 32U))) != 0;
+            const auto kMask = uint32_t{1} << (i % 32U);
+            auto& mute = mutes_[i / 32U];
+
+            if (kMuted) {
+                mute |= kMask;
+            } else {
+                mute &= ~kMask;
             }
         }
 
         entries_--;
+        memcpy(tod_[entries_].uid, rdm::kUidAll, rdm::kUidSize);
+
+        // Clear the mute bit belonging to the now-unused slot.
+        mutes_[entries_ / 32U] &= ~(uint32_t{1} << (entries_ % 32U));
+
+        // Adjust the saved index.
+        if (saved_index_ == entry) {
+            saved_index_ = kInvalidEntry;
+        } else if (saved_index_ != kInvalidEntry && saved_index_ > entry) {
+            --saved_index_;
+        }
 
         return true;
     }
 
-    bool Exist(const uint8_t* uid) {
-        for (uint32_t index = 0; index < entries_; index++) {
-            if (memcmp(&tod_[index], uid, rdm::kUidSize) == 0) {
-                saved_index_ = index;
-                return true;
-            }
-        }
-
-        saved_index_ = kInvalidEntry;
-        return false;
+    bool Exist(const uint8_t* uid) noexcept {
+        saved_index_ = FindIndex(uid);
+        return saved_index_ != kInvalidEntry;
     }
 
-    const uint8_t* Next() {
-        saved_index_++;
+    [[nodiscard]] const uint8_t* Next() noexcept {
+        if (entries_ == 0) {
+            saved_index_ = kInvalidEntry;
+            return nullptr;
+        }
 
-        if (saved_index_ == entries_) {
+        if (saved_index_ == kInvalidEntry || saved_index_ >= entries_ - 1) {
             saved_index_ = 0;
+        } else {
+            ++saved_index_;
         }
 
         return tod_[saved_index_].uid;
@@ -166,64 +211,63 @@ class Tod {
             return;
         }
 
-        const auto kIndex = saved_index_ / 32;
-        const auto kShift = saved_index_ - (kIndex * 32);
+        const auto kIndex = saved_index_ / 32U;
+        const auto kShift = saved_index_ % 32U;
 
-        mutes_[kIndex] |= (1U << kShift);
+        mutes_[kIndex] |= (uint32_t{1} << kShift);
     }
 
     void UnMute() {
-        if (saved_index_ == kInvalidEntry) {
+        if (saved_index_ >= entries_) {
             return;
         }
 
-        const auto kIndex = saved_index_ / 32;
-        const auto kShift = saved_index_ - (kIndex * 32);
+        const auto kIndex = saved_index_ / 32U;
+        const auto kShift = saved_index_ % 32U;
 
-        mutes_[kIndex] &= ~(1U << kShift);
+        mutes_[kIndex] &= ~(uint32_t{1} << kShift);
     }
 
     void UnMuteAll() {
-        for (uint32_t i = 0; i < kMutesTableSize; i++) {
-            mutes_[i] = 0;
+        for (uint32_t& mute : mutes_) {
+            mute = 0;
         }
     }
 
-    bool IsMuted() {
-        if (saved_index_ == kInvalidEntry) {
+    [[nodiscard]] bool IsMuted() const noexcept {
+        if (saved_index_ >= entries_) {
             return true;
         }
 
-        const auto kIndex = saved_index_ / 32;
-        const auto kMutes = mutes_[kIndex];
-        const auto kShift = saved_index_ - (kIndex * 32);
+        const auto kIndex = saved_index_ / 32U;
+        const auto kShift = saved_index_ % 32U;
 
-        return (kMutes & (1U << kShift)) == (1U << kShift);
+        return (mutes_[kIndex] & (uint32_t{1} << kShift)) != 0;
     }
 
-    void Dump([[maybe_unused]] uint32_t count) {
-#ifndef NDEBUG
-        if (count > kTableSize) {
-            count = kTableSize;
-        }
+    void Dump([[maybe_unused]] uint32_t count) const {
+        if constexpr (kDebugRdmDiscoveryEnabled) {
+            if (count > kTableSize) {
+                count = kTableSize;
+            }
 
-        printf("[%u]\n", static_cast<unsigned int>(count));
-        for (uint32_t i = 0; i < count; i++) {
-            printf("%.2x%.2x:%.2x%.2x%.2x%.2x\n", tod_[i].uid[0], tod_[i].uid[1], tod_[i].uid[2], tod_[i].uid[3], tod_[i].uid[4], tod_[i].uid[5]);
+            printf("[%u]\n", static_cast<unsigned int>(count));
+            for (uint32_t i = 0; i < count; i++) {
+                printf("%.2x%.2x:%.2x%.2x%.2x%.2x\n", tod_[i].uid[0], tod_[i].uid[1], tod_[i].uid[2], tod_[i].uid[3], tod_[i].uid[4], tod_[i].uid[5]);
+            }
         }
-#endif // NDEBUG
     }
 
-    void Dump() {
-#ifndef NDEBUG
-        Dump(entries_);
-#endif // NDEBUG
+    void Dump() const {
+        if constexpr (kDebugRdmDiscoveryEnabled) {
+            Dump(entries_);
+        }
     }
 
    private:
     uint32_t entries_{0};
     uint32_t saved_index_{kInvalidEntry};
-    uint32_t mutes_[kMutesTableSize];
+    uint32_t mutes_[kMutesTableSize]{};
     struct Uid {
         uint8_t uid[rdm::kUidSize];
     };

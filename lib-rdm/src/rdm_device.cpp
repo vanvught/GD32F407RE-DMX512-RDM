@@ -26,10 +26,8 @@
 #include "rdmdevice.h"
 #include "firmware/debug/debug_debug.h"
 
-namespace rdm::device
-{
-__attribute__((weak)) void SetFactoryDefaults()
-{
+namespace rdm::device {
+__attribute__((weak)) void SetFactoryDefaults() {
     DEBUG_PUTS("Not implemented.");
 }
 } // namespace rdm::device

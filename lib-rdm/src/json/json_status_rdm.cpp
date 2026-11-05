@@ -86,16 +86,16 @@ uint32_t RdmQueue(char* out_buffer, uint32_t out_buffer_size) {
 
     rdm::discovery::UidRange range{};
     for (uint32_t index = 0; discovery.GetWorkingQueueEntry(index, range); ++index) {
-        char lower[rdm::discovery::kUidStringLength + 1];
-        char upper[rdm::discovery::kUidStringLength + 1];
+        char lower[rdm::kUidStringLength + 1];
+        char upper[rdm::kUidStringLength + 1];
         char text[28];
 
-        rdm::discovery::FormatUid(range.lower_bound, lower);
-        rdm::discovery::FormatUid(range.upper_bound, upper);
+        rdm::FormatUid(range.lower_bound, lower);
+        rdm::FormatUid(range.upper_bound, upper);
 
-        memcpy(text, lower, rdm::discovery::kUidStringLength);
-        text[rdm::discovery::kUidStringLength] = '-';
-        memcpy(text + rdm::discovery::kUidStringLength + 1, upper, rdm::discovery::kUidStringLength + 1);
+        memcpy(text, lower, rdm::kUidStringLength);
+        text[rdm::kUidStringLength] = '-';
+        memcpy(text + rdm::kUidStringLength + 1, upper, rdm::kUidStringLength + 1);
 
         doc.Add(std::string_view{text, 27});
     }
@@ -120,11 +120,11 @@ uint32_t RdmTod(char* out_buffer, uint32_t out_buffer_size, uint32_t port_index)
 
     uint8_t uid[rdm::kUidSize];
 
-    for (uint32_t index = 0; discovery.TodCopyUidEntry(port_index, index, uid); ++index) {
-        char buffer[rdm::discovery::kUidStringLength + 1];
-        rdm::discovery::FormatUid(uid, buffer);
+    for (uint32_t index = 0; discovery.TodCopyUidEntry(port_index, index, uid); index++) {
+        char buffer[rdm::kUidStringLength + 1];
+        rdm::FormatUid(uid, buffer);
 
-        doc.Add(std::string_view{buffer, rdm::discovery::kUidStringLength});
+        doc.Add(std::string_view{buffer, rdm::kUidStringLength});
     }
 
     doc.EndArray();

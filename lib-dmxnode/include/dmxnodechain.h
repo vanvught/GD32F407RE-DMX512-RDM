@@ -30,6 +30,7 @@
 #include <cassert>
 
 #include "dmxnode.h"
+#include "rdm_slotinfo.h"
 #include "sparkfundmx.h"
 #include "tlc59711dmx.h"
 #include "firmware/debug/debug_debug.h"
@@ -145,10 +146,10 @@ class DmxNodeChain {
 
     uint16_t GetDmxStartAddress() { return dmx_start_address_; }
 
-    bool GetSlotInfo(uint16_t slot_offset, dmxnode::SlotInfo& slot_info) {
+    bool GetSlotInfo(uint16_t slot_offset, rdm::slotinfo::SlotInfo& slot_info) {
         DEBUG_ENTRY();
 
-        if (slot_offset > dmx_footprint_) {
+        if (slot_offset >= dmx_footprint_) {
             DEBUG_EXIT();
             return false;
         }
@@ -216,7 +217,7 @@ class DmxNodeChain {
     }
 
     template <class T>
-    bool GetSlotInfo(T* t, uint16_t slot_offset, dmxnode::SlotInfo& slot_info) {
+    bool GetSlotInfo(T* t, uint16_t slot_offset, rdm::slotinfo::SlotInfo& slot_info) {
         assert(t != nullptr);
 
         const auto kDmxAddress = dmx_start_address_ + slot_offset;

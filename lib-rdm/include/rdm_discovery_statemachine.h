@@ -41,7 +41,6 @@ inline constexpr uint32_t kDiscoveryStackSize = rdm::Tod::kTableSize;
 inline constexpr uint32_t kDiscoveryCounter = 3;
 inline constexpr uint32_t kQuikfindCounter = 5;
 inline constexpr uint32_t kQuikfindDiscoveryCounter = 5;
-inline constexpr uint32_t kUidStringLength = 13;
 
 enum class State { kIdle, kUnmute, kMute, kDiscovery, kDiscoverySingleDevice, kDub, kQuickfind, kQuickfindDiscovery, kLateResponse, kFinished };
 
@@ -49,34 +48,6 @@ struct UidRange {
     uint64_t lower_bound;
     uint64_t upper_bound;
 };
-
-inline void FormatUid(uint64_t uid, char (&buffer)[kUidStringLength + 1]) noexcept {
-    constexpr char kHex[] = "0123456789abcdef";
-
-    for (uint32_t i = 0; i < 12; ++i) {
-        const auto kShift = (11U - i) * 4U;
-        const auto kDigit = static_cast<uint32_t>((uid >> kShift) & 0xFU);
-        const auto kPos = i < 4U ? i : i + 1U;
-
-        buffer[kPos] = kHex[kDigit];
-    }
-
-    buffer[4] = ':';
-    buffer[kUidStringLength] = '\0';
-}
-
-inline void FormatUid(const uint8_t* uid, char (&buffer)[kUidStringLength + 1]) noexcept {
-    constexpr char kHex[] = "0123456789abcdef";
-
-    for (uint32_t i = 0; i < 6; ++i) {
-        const auto kPos = 2U * i + (i >= 2U ? 1U : 0U);
-        buffer[kPos] = kHex[uid[i] >> 4U];
-        buffer[kPos + 1U] = kHex[uid[i] & 0x0FU];
-    }
-
-    buffer[4] = ':';
-    buffer[kUidStringLength] = '\0';
-}
 
 class StateMachine {
    public:
@@ -160,7 +131,7 @@ class StateMachine {
         struct {
             bool Push(uint64_t lower_bound, uint64_t upper_bound) {
                 if (top == rdm::discovery::kDiscoveryStackSize - 1) {
-                    assert(0);
+                    assert(false && "Stack is full.");
                     return false;
                 }
 

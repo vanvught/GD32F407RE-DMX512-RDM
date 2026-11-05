@@ -27,11 +27,11 @@
 
 #include <cstdint>
 #include <cstring>
-#include <cstdio>
 #include <cassert>
 #include <span>
 #include <strings.h>
 
+#include "common/utils/utils_string.h"
 #include "configurationstore.h"
 
 namespace dmxnode {
@@ -98,11 +98,6 @@ enum class OutputStyle {
 };
 
 enum class Rdm { kDisable, kEnable };
-
-struct SlotInfo {
-    uint16_t category;
-    uint8_t type;
-};
 
 inline Personality GetPersonality(const char* personality) {
     assert(personality != nullptr);
@@ -259,20 +254,30 @@ class DmxNode {
 
     void SetShortName(uint32_t port_index, const char* name) {
         assert(port_index < dmxnode::kMaxPorts);
+
+        if ((name == nullptr) || (name[0] == '\0')) {
+            SetShortNameDefault(port_index);
+            return;
+        }
+
         auto& port = port_[port_index];
-
-        if ((name == nullptr) || (name[0] == '\0')) return SetShortNameDefault(port_index);
-
-        strncpy(port.label, name, dmxnode::kPortNameLength - 1);
-        port.label[dmxnode::kPortNameLength - 1] = '\0';
+        common::CopyString(port.label, name);
     }
 
     void SetShortNameDefault(uint32_t port_index) {
         assert(port_index < dmxnode::kMaxPorts);
+
         auto& port = port_[port_index];
 
-        snprintf(port.label, dmxnode::kPortNameLength - 1, "Port %u", static_cast<unsigned>((1U + port_index)));
-        port.label[dmxnode::kPortNameLength - 1] = '\0';
+        constexpr char kPrefix[] = "Port ";
+        constexpr auto kPrefixLength = sizeof(kPrefix) - 1;
+
+        static_assert(dmxnode::kPortNameLength >= kPrefixLength + 11);
+
+        memcpy(port.label, kPrefix, kPrefixLength);
+
+        auto* p = common::AppendUnsigned(port.label + kPrefixLength, port_index + 1U);
+        *p = '\0';
     }
 
     [[nodiscard]] const char* GetPortName(uint32_t port_index) const {

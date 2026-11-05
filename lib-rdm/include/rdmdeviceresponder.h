@@ -37,19 +37,15 @@
 #include "rdmpersonality.h"
 #include "rdmsensors.h"
 #include "rdmsubdevices.h"
-#include "dmxnode.h"
 #include "dmxnode_outputtype.h"
 
-class RDMDeviceResponder
-{
+class RDMDeviceResponder {
     static constexpr char kLanguage[2] = {'e', 'n'};
 
    public:
     static constexpr uint8_t kDefaultCurrentPersonality = 1;
 
-    RDMDeviceResponder(RdmPersonality** personalities, uint32_t personality_count, uint32_t current_personality = kDefaultCurrentPersonality)
-        : personalities_(personalities)
-    {
+    RDMDeviceResponder(RdmPersonality** personalities, uint32_t personality_count, uint32_t current_personality = kDefaultCurrentPersonality) : personalities_(personalities) {
         DEBUG_ENTRY();
 
         assert(s_this == nullptr);
@@ -64,8 +60,7 @@ class RDMDeviceResponder
 
         const auto* dmx_node_output_type = personalities_[current_personality - 1]->GetDmxNodeOutputType();
 
-        if (dmx_node_output_type == nullptr)
-        {
+        if (dmx_node_output_type == nullptr) {
             dmx_start_address_factory_default_ = dmxnode::kAddressInvalid;
         }
 
@@ -74,8 +69,7 @@ class RDMDeviceResponder
 
     virtual ~RDMDeviceResponder() = default;
 
-    void Init()
-    {
+    void Init() {
         DEBUG_ENTRY();
 
         auto& rdm_device = rdm::device::Device::Instance();
@@ -85,13 +79,10 @@ class RDMDeviceResponder
         assert(kCurrentPersonality != 0);
         auto* dmx_node_output_type = personalities_[kCurrentPersonality - 1]->GetDmxNodeOutputType();
 
-        if (dmx_node_output_type == nullptr)
-        {
+        if (dmx_node_output_type == nullptr) {
             rdm_device.SetDmxFootprint(0);
             rdm_device.SetDmxStartAddress(dmx_start_address_factory_default_);
-        }
-        else
-        {
+        } else {
             rdm_device.SetDmxFootprint(dmx_node_output_type->GetDmxFootprint());
             rdm_device.SetDmxStartAddress(dmx_node_output_type->GetDmxStartAddress());
         }
@@ -109,14 +100,11 @@ class RDMDeviceResponder
     void Print() { rdm::device::Device::Instance().Print(); }
 
     // E120_DEVICE_INFO				0x0060
-    struct rdm::device::Info* GetDeviceInfo(uint16_t sub_device = rdm::kRootDevice)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    struct rdm::device::Info* GetDeviceInfo(uint16_t sub_device = rdm::kRootDevice) {
+        if (sub_device != rdm::kRootDevice) {
             const auto* sub_device_info = sub_devices_.GetInfo(sub_device);
 
-            if (sub_device_info != nullptr)
-            {
+            if (sub_device_info != nullptr) {
                 sub_device_info_.dmx_footprint[0] = static_cast<uint8_t>(sub_device_info->dmx_footprint >> 8);
                 sub_device_info_.dmx_footprint[1] = static_cast<uint8_t>(sub_device_info->dmx_footprint);
                 sub_device_info_.current_personality = sub_device_info->current_personality;
@@ -133,20 +121,17 @@ class RDMDeviceResponder
     }
 
     // E120_DEVICE_LABEL			0x0082
-    void SetLabel(uint16_t sub_device, const char* label, uint8_t length)
-    {
+    void SetLabel(uint16_t sub_device, const char* label, uint8_t length) {
         struct rdm::device::InfoData info;
 
-        if (length > rdm::device::kLabelMaxLength)
-        {
+        if (length > rdm::device::kLabelMaxLength) {
             length = rdm::device::kLabelMaxLength;
         }
 
-        if (sub_device != rdm::kRootDevice)
-        {
+        if (sub_device != rdm::kRootDevice) {
             sub_devices_.SetLabel(sub_device, label, length);
-			
-			DEBUG_EXIT();
+
+            DEBUG_EXIT();
             return;
         }
 
@@ -156,10 +141,8 @@ class RDMDeviceResponder
         rdm::device::Device::Instance().SetLabel(&info);
     }
 
-    void GetLabel(uint16_t sub_device, struct rdm::device::InfoData* info)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    void GetLabel(uint16_t sub_device, struct rdm::device::InfoData* info) {
+        if (sub_device != rdm::kRootDevice) {
             sub_devices_.GetLabel(sub_device, info);
             return;
         }
@@ -168,8 +151,7 @@ class RDMDeviceResponder
     }
 
     // E120_FACTORY_DEFAULTS		0x0090
-    void SetFactoryDefaults()
-    {
+    void SetFactoryDefaults() {
         DEBUG_ENTRY();
         auto& rdm_device = rdm::device::Device::Instance();
 
@@ -192,58 +174,50 @@ class RDMDeviceResponder
         DEBUG_EXIT();
     }
 
-    bool GetFactoryDefaults()
-    {
-		DEBUG_ENTRY();
-		
-        if (is_factory_defaults_)
-        {
-            if (!rdm::device::Device::Instance().GetFactoryDefaults())
-            {
+    bool GetFactoryDefaults() {
+        DEBUG_ENTRY();
+
+        if (is_factory_defaults_) {
+            if (!rdm::device::Device::Instance().GetFactoryDefaults()) {
                 is_factory_defaults_ = false;
 
-				DEBUG_EXIT();
+                DEBUG_EXIT();
                 return false;
             }
 
-            if (checksum_ != CalculateChecksum())
-            {
+            if (checksum_ != CalculateChecksum()) {
                 is_factory_defaults_ = false;
 
-				DEBUG_EXIT();
+                DEBUG_EXIT();
                 return false;
             }
 
-            if (!sub_devices_.GetFactoryDefaults())
-            {
+            if (!sub_devices_.GetFactoryDefaults()) {
                 is_factory_defaults_ = false;
 
-				DEBUG_EXIT();
+                DEBUG_EXIT();
                 return false;
             }
         }
 
-		DEBUG_EXIT();
+        DEBUG_EXIT();
         return is_factory_defaults_;
     }
 
     // E120_LANGUAGE				0x00B0
-    void SetLanguage(const char language[2])
-    {
+    void SetLanguage(const char language[2]) {
         language_[0] = language[0];
         language_[1] = language[1];
     }
     const char* GetLanguage() const { return language_; }
 
     // E120_DMX_START_ADDRESS		0x00F0
-    void SetDmxStartAddress(uint16_t sub_device, uint16_t dmx_start_address)
-    {
+    void SetDmxStartAddress(uint16_t sub_device, uint16_t dmx_start_address) {
         DEBUG_ENTRY();
 
         if (dmx_start_address == 0 || dmx_start_address > dmxnode::kUniverseSize) return;
 
-        if (sub_device != rdm::kRootDevice)
-        {
+        if (sub_device != rdm::kRootDevice) {
             sub_devices_.SetDmxStartAddress(sub_device, dmx_start_address);
             return;
         }
@@ -255,10 +229,8 @@ class RDMDeviceResponder
 
         auto* dmx_node_output_type = personality->GetDmxNodeOutputType();
 
-        if (dmx_node_output_type != nullptr)
-        {
-            if (dmx_node_output_type->SetDmxStartAddress(dmx_start_address))
-            {
+        if (dmx_node_output_type != nullptr) {
+            if (dmx_node_output_type->SetDmxStartAddress(dmx_start_address)) {
                 rdm::device::Device::Instance().SetDmxStartAddress(dmx_start_address);
             }
 
@@ -268,10 +240,8 @@ class RDMDeviceResponder
         DEBUG_EXIT();
     }
 
-    uint16_t GetDmxStartAddress(uint16_t sub_device = rdm::kRootDevice)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    uint16_t GetDmxStartAddress(uint16_t sub_device = rdm::kRootDevice) {
+        if (sub_device != rdm::kRootDevice) {
             return sub_devices_.GetDmxStartAddress(sub_device);
         }
 
@@ -279,10 +249,8 @@ class RDMDeviceResponder
     }
 
     // E120_SLOT_INFO				0x0120
-    bool GetSlotInfo(uint16_t sub_device, uint16_t slot_offset, dmxnode::SlotInfo& slot_info)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    bool GetSlotInfo(uint16_t sub_device, uint16_t slot_offset, rdm::slotinfo::SlotInfo& slot_info) {
+        if (sub_device != rdm::kRootDevice) {
             return false; // TODO(a): GetSlotInfo SubDevice
         }
 
@@ -294,10 +262,8 @@ class RDMDeviceResponder
         return dmx_node_output_type->GetSlotInfo(slot_offset, slot_info);
     }
 
-    uint16_t GetDmxFootPrint(uint16_t sub_device = rdm::kRootDevice)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    uint16_t GetDmxFootPrint(uint16_t sub_device = rdm::kRootDevice) {
+        if (sub_device != rdm::kRootDevice) {
             return sub_devices_.GetDmxFootPrint(sub_device);
         }
 
@@ -305,12 +271,10 @@ class RDMDeviceResponder
     }
 
     // Personalities
-    RdmPersonality* GetPersonality(uint16_t sub_device, uint8_t personality)
-    {
+    RdmPersonality* GetPersonality(uint16_t sub_device, uint8_t personality) {
         assert(personality >= 1);
 
-        if (sub_device != rdm::kRootDevice)
-        {
+        if (sub_device != rdm::kRootDevice) {
             return sub_devices_.GetPersonality(sub_device, personality);
         }
 
@@ -319,22 +283,18 @@ class RDMDeviceResponder
         return personalities_[personality - 1];
     }
 
-    uint8_t GetPersonalityCount(uint16_t sub_device = rdm::kRootDevice)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    uint8_t GetPersonalityCount(uint16_t sub_device = rdm::kRootDevice) {
+        if (sub_device != rdm::kRootDevice) {
             return sub_devices_.GetPersonalityCount(sub_device);
         }
 
         return rdm::device::Device::Instance().GetPersonalityCount();
     }
 
-    void SetPersonalityCurrent(uint16_t sub_device, uint8_t personality)
-    {
+    void SetPersonalityCurrent(uint16_t sub_device, uint8_t personality) {
         assert(personality >= 1);
 
-        if (sub_device != rdm::kRootDevice)
-        {
+        if (sub_device != rdm::kRootDevice) {
             sub_devices_.SetPersonalityCurrent(sub_device, personality);
             return;
         }
@@ -350,8 +310,7 @@ class RDMDeviceResponder
 
         auto* dmx_node_output_type = p_personality->GetDmxNodeOutputType();
 
-        if (dmx_node_output_type != nullptr)
-        {
+        if (dmx_node_output_type != nullptr) {
             rdm_device.SetDmxFootprint(dmx_node_output_type->GetDmxFootprint());
             rdm_device.SetDmxStartAddress(dmx_node_output_type->GetDmxStartAddress());
 
@@ -359,10 +318,8 @@ class RDMDeviceResponder
         }
     }
 
-    uint8_t GetPersonalityCurrent(uint16_t sub_device = rdm::kRootDevice)
-    {
-        if (sub_device != rdm::kRootDevice)
-        {
+    uint8_t GetPersonalityCurrent(uint16_t sub_device = rdm::kRootDevice) {
+        if (sub_device != rdm::kRootDevice) {
             return sub_devices_.GetPersonalityCurrent(sub_device);
         }
 
@@ -375,8 +332,7 @@ class RDMDeviceResponder
     static RDMDeviceResponder* Get() { return s_this; }
 
    private:
-    uint16_t CalculateChecksum()
-    {
+    uint16_t CalculateChecksum() {
         auto& rdm_device = rdm::device::Device::Instance();
 
         auto checksum = rdm_device.GetDmxStartAddress();
@@ -384,7 +340,6 @@ class RDMDeviceResponder
         return checksum;
     }
 
-   private:
     RDMSensors sensors_;
     RdmSubDevices sub_devices_;
     RdmPersonality** personalities_;

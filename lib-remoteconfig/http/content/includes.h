@@ -8,6 +8,9 @@
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 #include "upload_index.js.h"
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
+#if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
+#include "status_rdm.js.h"
+#endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))
 #if defined (NODE_OSC_SERVER)
 #include "config_oscserver.js.h"
 #endif // (NODE_OSC_SERVER)

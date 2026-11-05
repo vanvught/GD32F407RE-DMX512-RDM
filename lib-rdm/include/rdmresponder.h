@@ -145,8 +145,8 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
         auto length = rdm::responder::kInvalidResponse;
 
         if (response[0] == E120_SC_RDM) {
-            const auto* p = reinterpret_cast<const struct TRdmMessage*>(response);
-            length = static_cast<int>(p->message_length + rdm::kMessageChecksumSize);
+            const auto* rdm = reinterpret_cast<const struct TRdmMessage*>(response);
+            length = static_cast<int>(rdm->message_length + rdm::kMessageChecksumSize);
             Rdm::TransmitRawRespondMessage(0, response, static_cast<uint16_t>(length));
         } else if (response[0] == 0xFE) {
             length = sizeof(struct TRdmDiscoveryMsg);
@@ -170,7 +170,6 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
 
     void DmxStartAddressUpdate() override { DmxStartAddressUpdate(RDMDeviceResponder::GetDmxStartAddress(rdm::kRootDevice)); }
 
-   private:
     static inline TRdmMessage rdm_command;
     static inline bool is_sub_device_active;
 

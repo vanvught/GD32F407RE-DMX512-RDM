@@ -144,7 +144,7 @@ class DmxSlotInfo {
     }
 
    private:
-    char* Parse(char* s, bool& is_valid, dmxnode::SlotInfo& slot_info) {
+    char* Parse(char* s, bool& is_valid, rdm::slotinfo::SlotInfo& slot_info) {
         assert(s != nullptr);
 
         auto* b = s;

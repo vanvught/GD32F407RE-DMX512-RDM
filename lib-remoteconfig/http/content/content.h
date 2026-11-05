@@ -13,6 +13,9 @@
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 #include "upload_index.js.h"
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
+#if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
+#include "status_rdm.js.h"
+#endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))
 #if defined (NODE_OSC_SERVER)
 #include "config_oscserver.js.h"
 #endif // (NODE_OSC_SERVER)
@@ -92,6 +95,9 @@ inline constexpr struct FilesContent kHttpContent[] = {
 #if defined (CONFIG_HTTPD_ENABLE_UPLOAD)
 	{ 1750204712,"upload_index.js", upload_index_js_gz, 1631, static_cast<http::ContentTypes>(2), true },
 #endif // (CONFIG_HTTPD_ENABLE_UPLOAD)
+#if !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER) || defined (RDM_RESPONDER))
+	{ 3665475666,"status_rdm.js", status_rdm_js_gz, 1196, static_cast<http::ContentTypes>(2), true },
+#endif // !defined (CONFIG_HTTP_HTML_NO_RDM) && (defined (RDM_CONTROLLER || defined (RDM_RESPONDER))
 #if defined (NODE_OSC_SERVER)
 	{ 3728864745,"config_oscserver.js", config_oscserver_js_gz, 587, static_cast<http::ContentTypes>(2), true },
 #endif // (NODE_OSC_SERVER)
