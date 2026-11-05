@@ -91,13 +91,13 @@ class ArtNetController : public ArtNetPollTable {
         }
     }
     uint32_t GetMaster() const { return master_; }
-#endif
+#endif // CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
 
     const uint8_t* GetSoftwareVersion();
 
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
     void SetArtTriggerCallbackFunctionPtr(ArtTriggerCallbackFunctionPtr artTriggerCallbackFunctionPtr) { m_ArtTriggerCallbackFunctionPtr = artTriggerCallbackFunctionPtr; }
-#endif
+#endif // ARTNET_HAVE_TRIGGER
 
     void Input(const uint8_t* buffer, uint32_t size, uint32_t from_ip, uint16_t from_port);
     void static StaticCallbackFunction(const uint8_t* buffer, uint32_t size, uint32_t from_ip, uint16_t from_port) { s_this->Input(buffer, size, from_ip, from_port); }
@@ -143,7 +143,7 @@ class ArtNetController : public ArtNetPollTable {
     uint32_t m_nActiveUniverses{0};
 #ifdef CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
     uint32_t master_{dmxnode::kDmxMaxValue};
-#endif
+#endif // CONFIG_ARTNET_CONTROLLER_ENABLE_MASTER
     static inline ArtNetController* s_this;
 };
 

@@ -46,7 +46,7 @@
 #define ARTNET_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET
 
 #ifdef DEBUG_ARTNET_RDM
 #define ARTNET_RDM_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -66,7 +66,7 @@
 #define ARTNET_RDM_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET_RDM
 
 #ifdef DEBUG_ARTNET_IPPROG
 #define ARTNET_IPPROG_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -86,7 +86,7 @@
 #define ARTNET_IPPROG_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET_IPPROG
 
 #ifdef DEBUG_ARTNET_POLL
 #define ARTNET_POLL_DEBUG_ENTRY() DEBUG_ENTRY()
@@ -106,6 +106,6 @@
 #define ARTNET_POLL_DEBUG_PUTS(...) \
     do {                      \
     } while (false)
-#endif
+#endif // DEBUG_ARTNET_POLL
 
-#endif // _ARTNET_DEBUG_H_
+#endif // ARTNET_DEBUG_H_

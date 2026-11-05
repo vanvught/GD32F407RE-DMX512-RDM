@@ -30,43 +30,43 @@
 #include <cstdarg>
 #include <cstring>
 
-#if !defined(ARTNET_VERSION)
+#ifndef ARTNET_VERSION
 #error ARTNET_VERSION is not defined
-#endif
+#endif // ARTNET_VERSION
 
 #if (ARTNET_VERSION >= 4) && defined(ARTNET_HAVE_DMXIN)
-#if !defined(E131_HAVE_DMXIN)
+#ifndef E131_HAVE_DMXIN
 #define E131_HAVE_DMXIN
-#endif
-#endif
+#endif // E131_HAVE_DMXIN
+#endif // (ARTNET_VERSION >= 4) && defined(ARTNET_HAVE_DMXIN)
 
 #if defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_ARTNET)
 #define ARTNET_SHOWFILE
-#endif
+#endif // defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_ARTNET)
 
 #include "artnet.h"
 #include "artnettimecode.h"
 #include "artnettrigger.h"
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
 #include "artnetrdmcontroller.h"
-#endif
-#if defined(RDM_RESPONDER)
+#endif // RDM_CONTROLLER
+#ifdef RDM_RESPONDER
 #include "artnetrdmresponder.h"
-#endif
-#if defined(ARTNET_HAVE_TIMECODE)
+#endif // RDM_RESPONDER
+#ifdef ARTNET_HAVE_TIMECODE
 #include "network_udp.h"
-#endif
+#endif // ARTNET_HAVE_TIMECODE
 #include "network_config.h"
 #if (ARTNET_VERSION >= 4)
 #include "e131bridge.h"
-#endif
+#endif // (ARTNET_VERSION >= 4)
 #include "dmxnode.h"
 #include "dmxnode_outputtype.h"
 #include "artnet_debug.h"
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
-#endif
+#endif // ALIGNED
 
 namespace artnetnode {
 inline constexpr uint32_t kPollReplyQueueSize = 4;
@@ -82,9 +82,9 @@ struct State {
         uint32_t poll_reply_delay_millis;
         uint32_t dmx_ip;
         uint32_t sync_millis; ///< Latest ArtSync received time
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
         uint32_t tod_request_ip_list[kTodRequestListSize];
-#endif
+#endif // RDM_CONTROLLER
         artnet::ArtPollQueue poll_reply_queue[kPollReplyQueueSize];
         uint8_t poll_reply_queue_index;
         uint8_t poll_reply_port_index;
@@ -166,7 +166,7 @@ inline dmxnode::FailSafe ConvertFailsafe(artnet::FailSafe failsafe) {
 class ArtNetNode : E131Bridge {
 #else
 class ArtNetNode {
-#endif
+#endif // (ARTNET_VERSION >= 4)
    public:
     ArtNetNode();
 
@@ -198,10 +198,10 @@ class ArtNetNode {
     void SetMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode);
     [[nodiscard]] dmxnode::MergeMode GetMergeMode(uint32_t port_index) const;
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style);
-    dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const;
-#endif
+    [[nodiscard]] dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const;
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     void GoodOutputBSet(uint32_t port_index, uint8_t b);
     void GoodOutputBClear(uint32_t port_index, uint8_t b);
@@ -220,14 +220,14 @@ class ArtNetNode {
     void Stop();
     void Run();
 
-#if defined(ARTNET_SHOWFILE)
+#ifdef ARTNET_SHOWFILE
     void HandleShowFile(const artnet::ArtDmx* artdmx) {
         current_millis_ = timing::Millis();
         ip_address_from_ = network::GetPrimaryIp();
         receive_buffer_ = reinterpret_cast<uint8_t*>(const_cast<artnet::ArtDmx*>(artdmx));
         HandleDmx();
     }
-#endif
+#endif // ARTNET_SHOWFILE
 
     void SetRecordShowfile(bool do_record) { state_.do_record = do_record; }
     [[nodiscard]] bool GetRecordShowfile() const { return state_.do_record; }
@@ -246,11 +246,11 @@ class ArtNetNode {
 
     void StopOutputPort(uint32_t port_index);
 
-#if defined(RDM_RESPONDER)
+#ifdef RDM_RESPONDER
     void SetRdmResponder(ArtNetRdmResponder* responder, bool enable = true);
-#endif
+#endif // RDM_RESPONDER
 
-#if defined(ARTNET_HAVE_TIMECODE)
+#ifdef ARTNET_HAVE_TIMECODE
     void SendTimeCode(const struct artnet::TimeCode* timecode) {
         assert(timecode != nullptr);
         memcpy(&art_time_code_.frames, timecode, sizeof(struct artnet::TimeCode));
@@ -260,11 +260,11 @@ class ArtNetNode {
     void SetArtTimeCodeCallbackFunction(ArtTimeCodeCallbackFunctionPtr art_time_code_callback_function_ptr) { art_time_code_callback_function_ptr_ = art_time_code_callback_function_ptr; }
 
     void SetTimeCodeIp(uint32_t destination_ip) { node_.ip_timecode = destination_ip; }
-#endif
+#endif // ARTNET_HAVE_TIMECODE
 
-#if defined(ARTNET_HAVE_TRIGGER)
+#ifdef ARTNET_HAVE_TRIGGER
     void SetArtTriggerCallbackFunctionPtr(ArtTriggerCallbackFunctionPtr art_trigger_callback_function_ptr) { art_trigger_callback_function_ptr_ = art_trigger_callback_function_ptr; }
-#endif
+#endif // ARTNET_HAVE_TRIGGER
 
     void SetDestinationIp(uint32_t port_index, uint32_t destination_ip) {
         if (port_index < dmxnode::kMaxPorts) {
@@ -306,13 +306,13 @@ class ArtNetNode {
 
     [[nodiscard]] uint32_t GetActiveOutputPorts4() const { return E131Bridge::GetActiveOutputPorts(); }
     [[nodiscard]] uint32_t GetActiveInputPorts4() const { return E131Bridge::GetActiveInputPorts(); }
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
    private:
     void SetFailSafe(artnet::FailSafe failsafe);
-    void SetSwitch(uint32_t port_index, uint8_t sw);
+    void SetSwitch(uint32_t port_index, uint8_t swi);
 
-    void SendDiag(artnet::PriorityCodes kPriorityCode, const char* format, ...);
+    void SendDiag(artnet::PriorityCodes priority_code, const char* format, ...);
 
     void HandlePoll();
     void HandleDmx();
@@ -367,9 +367,9 @@ class ArtNetNode {
     artnetnode::InputPort input_port_[dmxnode::kMaxPorts];
 
     artnet::ArtPollReply art_poll_reply_;
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     artnet::ArtDmx art_dmx_;
-#endif
+#endif // ARTNET_HAVE_DMXIN
 #if defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
     union UArtTodPacket {
         artnet::ArtTodData art_tod_data;
@@ -377,19 +377,19 @@ class ArtNetNode {
         artnet::ArtRdm art_rdm;
     };
     UArtTodPacket art_tod_packet_;
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
     ArtNetRdmController rdm_controller_;
-#endif
-#if defined(RDM_RESPONDER)
+#endif // RDM_CONTROLLER
+#ifdef RDM_RESPONDER
     ArtNetRdmResponder* rdm_responder_{nullptr};
-#endif
-#endif
-#if defined(ARTNET_HAVE_TIMECODE)
+#endif // RDM_RESPONDER
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
+#ifdef ARTNET_HAVE_TIMECODE
     artnet::ArtTimeCode art_time_code_;
-#endif
-#if defined(ARTNET_ENABLE_SENDDIAG)
+#endif // ARTNET_HAVE_TIMECODE
+#ifdef ARTNET_ENABLE_SENDDIAG
     artnet::ArtDiagData diag_data_;
-#endif
+#endif // ARTNET_ENABLE_SENDDIAG
 
     static inline ArtNetNode* s_this;
 };
@@ -397,6 +397,6 @@ class ArtNetNode {
 #include "artnetnode_inline_impl.h" // IWYU pragma: keep
 #if (ARTNET_VERSION >= 4)
 #include "artnetnode4_inline_impl.h" // IWYU pragma: keep
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
 #endif // ARTNETNODE_H_

@@ -55,15 +55,15 @@
     } while (false)
 #endif // DEBUG_ARTNET_ADDRESS_ADDRESS
 
-void ArtNetNode::SetSwitch(uint32_t port_index, uint8_t sw) {
+void ArtNetNode::SetSwitch(uint32_t port_index, uint8_t swi) {
     ARTNET_ADDRESS_DEBUG_ENTRY();
     assert(port_index < dmxnode::kMaxPorts);
     assert(state_.status == artnet::Status::kOn);
 
-    node_.port[port_index].sw = sw;
+    node_.port[port_index].sw = swi;
     SetPortAddress(port_index);
 
-    artnet::store::SaveSwitch(port_index, sw);
+    artnet::store::SaveSwitch(port_index, swi);
     artnet::display::Universe(port_index, node_.port[port_index].port_address);
 
 #if (ARTNET_VERSION >= 4)

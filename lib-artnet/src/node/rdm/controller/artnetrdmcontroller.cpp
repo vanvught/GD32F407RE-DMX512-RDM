@@ -40,7 +40,8 @@
 #include "e120.h"
 #include "rdm_e120.h"
 
-static void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) {
+namespace {
+void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) {
     assert(message->start_code == E120_SC_RDM);
 
     message->message_count = 0;
@@ -68,6 +69,7 @@ static void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) 
 
     Rdm::TransmitRawRespondMessage(port_index, reinterpret_cast<uint8_t*>(message), i);
 }
+} // namespace
 
 bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
     assert(port_index < dmxnode::kMaxPorts);
@@ -75,7 +77,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
 
     auto& rdmdiscovery = rdm::Discovery::Instance();
     const auto* rdm_message = reinterpret_cast<const struct TRdmMessage*>(data);
-    auto* uid = rdm_message->destination_uid;
+    const auto* uid = rdm_message->destination_uid;
 
     auto is_rdm_packet_for_me = false;
     auto is_rdm_packet_broadcast = (memcmp(uid, rdm::kUidAll, rdm::kUidSize) == 0);
@@ -98,6 +100,9 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
 
     if (is_rdm_packet_broadcast) {
         uid = rdmdiscovery.TodNext(port_index);
+        if (uid == nullptr) {
+            return false;
+        }
     }
 
     if (rdm_message->command_class == E120_DISCOVERY_COMMAND) {

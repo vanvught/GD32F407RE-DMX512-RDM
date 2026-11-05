@@ -44,14 +44,14 @@ inline void SaveUniverse(uint32_t port_index) {
     uint16_t universe;
 
     if (ArtNetNode::Get()->GetPortAddress(port_index, universe)) {
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
         if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
             port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
         } else {
             DEBUG_EXIT();
             return;
         }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
         DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -63,13 +63,13 @@ inline void SaveUniverse(uint32_t port_index) {
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 13)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-pointer"
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 13)
 
         DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
 
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 13)
 #pragma GCC diagnostic pop
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 13)
 
         ConfigStore::Instance().DmxNodeUpdateIndexed(&common::store::DmxNode::universe, port_index, universe);
     }
@@ -88,14 +88,14 @@ inline void SaveShortName(uint32_t port_index, const char* short_name) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("%u, %s", static_cast<unsigned>(port_index), short_name);
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -119,14 +119,14 @@ inline void SaveDirection(uint32_t port_index, dmxnode::Direction direction) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("%u, %u", static_cast<unsigned>(port_index), static_cast<unsigned>(direction));
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -148,14 +148,14 @@ inline void SaveMergeMode(uint32_t port_index, dmxnode::MergeMode merge_mode) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("%u, %u", static_cast<unsigned>(port_index), static_cast<unsigned>(merge_mode));
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -177,14 +177,14 @@ inline void SaveProtocol(uint32_t port_index, artnet::PortProtocol port_protocol
     DEBUG_ENTRY();
     DEBUG_PRINTF("port_index=%u, portProtocol=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(port_protocol));
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -206,14 +206,14 @@ inline void SaveOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_sty
     DEBUG_ENTRY();
     DEBUG_PRINTF("port_index=%u, output_style=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(output_style));
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 
@@ -239,14 +239,14 @@ inline void SaveRdmEnabled(uint32_t port_index, bool is_enabled) {
     DEBUG_ENTRY();
     DEBUG_PRINTF("port_index=%u, is_enabled=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(is_enabled));
 
-#if defined(CONFIG_DMXNODE_DMX_PORT_OFFSET)
+#ifdef CONFIG_DMXNODE_DMX_PORT_OFFSET
     if (port_index >= CONFIG_DMXNODE_DMX_PORT_OFFSET) {
         port_index -= CONFIG_DMXNODE_DMX_PORT_OFFSET;
     } else {
         DEBUG_EXIT();
         return;
     }
-#endif
+#endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
     DEBUG_PRINTF("port_index=%u", static_cast<unsigned>(port_index));
 

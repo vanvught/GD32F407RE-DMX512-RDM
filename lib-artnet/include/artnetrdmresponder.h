@@ -74,7 +74,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
 
 #ifndef NDEBUG
         rdm::message::PrintNoStartcode(rdm_data_no_sc);
-#endif
+#endif // NDEBUG
 
         RDMHandler::Instance().HandleData(rdm_data_no_sc, reinterpret_cast<uint8_t*>(&s_rdm_command), RDMHandler::Type::kTypeRdm);
 
@@ -85,7 +85,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
 
 #ifndef NDEBUG
         rdm::message::Print(reinterpret_cast<uint8_t*>(&s_rdm_command));
-#endif
+#endif // NDEBUG
 
         DEBUG_EXIT();
         return reinterpret_cast<const uint8_t*>(&s_rdm_command);

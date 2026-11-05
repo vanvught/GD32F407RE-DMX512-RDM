@@ -11,9 +11,9 @@
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json {
 class ArtNetParams : public JsonParamsBase<ArtNetParams> {
@@ -48,31 +48,31 @@ class ArtNetParams : public JsonParamsBase<ArtNetParams> {
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[0]),
 #if (DMX_MAX_PORTS > 1)
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[1]),
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[2]),
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         MakeKey(SetRdmEnablePort, ArtNetParamsConst::kRdmEnablePort[3]),
-#endif
-#endif
-#endif
+#endif // (DMX_MAX_PORTS == 4)
+#endif // DMX_MAX_PORTS
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
 #ifdef DMX_MAX_PORTS
         MakeKey(SetDestinationIpPort, ArtNetParamsConst::kDestinationIpPort[0]),
         MakeKey(SetProtocolPort, ArtNetParamsConst::kProtocolPort[0]),
 #if (DMX_MAX_PORTS > 1)
         MakeKey(SetDestinationIpPort, ArtNetParamsConst::kDestinationIpPort[1]),
         MakeKey(SetProtocolPort, ArtNetParamsConst::kProtocolPort[1]),
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         MakeKey(SetDestinationIpPort, ArtNetParamsConst::kDestinationIpPort[2]),
         MakeKey(SetProtocolPort, ArtNetParamsConst::kProtocolPort[2]),
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         MakeKey(SetDestinationIpPort, ArtNetParamsConst::kDestinationIpPort[3]),
         MakeKey(SetProtocolPort, ArtNetParamsConst::kProtocolPort[3]),
-#endif
-#endif
+#endif // (DMX_MAX_PORTS == 4)
+#endif // DMX_MAX_PORTS
     };
 
     inline static common::store::DmxNode store_dmxnode;

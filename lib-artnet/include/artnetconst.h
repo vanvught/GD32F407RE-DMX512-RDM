@@ -36,4 +36,4 @@ struct ArtNetConst {
 	static const uint8_t kOemId[];
 };
 
-#endif  // ARTNETCONST_H_
+#endif // ARTNETCONST_H_

@@ -28,9 +28,9 @@
 
 #include <cstdint>
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace artnet {
 namespace defaults {
@@ -42,7 +42,7 @@ inline constexpr uint32_t kSwitch = 1;
 inline constexpr uint32_t kVersion = 4;
 #else
 inline constexpr uint32_t kVersion = ARTNET_VERSION;
-#endif
+#endif // ARTNET_VERSION
 inline constexpr uint8_t kProtocolRevision = 14;
 inline constexpr uint32_t kPorts = 4;
 inline constexpr uint16_t kUdpPort = 0x1936;

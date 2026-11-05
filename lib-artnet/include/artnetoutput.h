@@ -27,49 +27,45 @@
 #define ARTNETOUTPUT_H_
 
 #include <cstdint>
+#include <utility>
 
 #include "dmxnode.h"
+#include "rdm_slotinfo.h"
 
-class ArtNetOutput { 
-public:
-	ArtNetOutput();
+class ArtNetOutput {
+   public:
+    ArtNetOutput();
 
-	void Start(uint32_t port_index);
-	void Stop(uint32_t port_index);
+    void Start(uint32_t port_index);
+    void Stop(uint32_t port_index);
 
-	template<bool doUpdate>
-	void SetData(uint32_t port_index, const uint8_t *data, uint32_t length) {
-		SetDataImpl(port_index, data, length);
-	}
+    template <bool kDoUpdate>
+    void SetData(uint32_t port_index, const uint8_t* data, uint32_t length) {
+        SetDataImpl(port_index, data, length);
+    }
 
-	void Sync(uint32_t port_index);
-	void Sync();
+    void Sync(uint32_t port_index);
+    void Sync();
 
-	void Blackout([[maybe_unused]] bool blackout) {}
-	void FullOn() {}
+    void Blackout([[maybe_unused]] bool blackout) {}
+    void FullOn() {}
 
-	bool SetDmxStartAddress([[maybe_unused]] uint16_t dmx_start_address) {
-		return false;
-	}
+    bool SetDmxStartAddress([[maybe_unused]] uint16_t dmx_start_address) { return false; }
 
-	uint16_t GetDmxStartAddress() {
-		return dmxnode::kStartAddressDefault;
-	}
+    uint16_t GetDmxStartAddress() { return dmxnode::kStartAddressDefault; }
 
-	uint16_t GetDmxFootprint() {
-		return dmxnode::kUniverseSize;
-	}
+    uint16_t GetDmxFootprint() { return dmxnode::kUniverseSize; }
 
-	bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, dmxnode::SlotInfo &slot_info) {
-		slot_info.type = 0x00; // ST_PRIMARY
-		slot_info.category = 0x0001; // SD_INTENSITY
-		return true;
-	}
+    bool GetSlotInfo([[maybe_unused]] uint16_t slot_offset, rdm::slotinfo::SlotInfo& slot_info) {
+        slot_info.type = rdm::slotinfo::SlotType::kStPrimary;
+        slot_info.category = rdm::slotinfo::SlotDefinition::kSdIntensity;
+        return true;
+    }
 
-private:
-	void SetDataImpl(uint32_t port_index, const uint8_t *data, uint32_t length);
+   private:
+    void SetDataImpl(uint32_t port_index, const uint8_t* data, uint32_t length);
 
-	uint16_t universe_[DMXNODE_PORTS];
+    uint16_t universe_[DMXNODE_PORTS];
 };
 
-#endif  // ARTNETOUTPUT_H_
+#endif // ARTNETOUTPUT_H_

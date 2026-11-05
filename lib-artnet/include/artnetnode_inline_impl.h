@@ -37,13 +37,13 @@
 #include "dmxnode_outputtype.h"
 #if (ARTNET_VERSION >= 4)
 #include "e131bridge.h"
-#endif
+#endif // (ARTNET_VERSION >= 4)
 #include "timing.h"
 #include "panelled.h"
 #include "board_statusled.h"
-#if defined(ARTNET_ENABLE_SENDDIAG)
+#ifdef ARTNET_ENABLE_SENDDIAG
 #include "network_udp.h"
-#endif
+#endif // ARTNET_ENABLE_SENDDIAG
 
 inline void ArtNetNode::SetPortAddress(uint32_t port_index) {
     node_.port[port_index].port_address = artnet::MakePortAddress(node_.port[port_index].net_switch, node_.port[port_index].sub_switch, node_.port[port_index].sw);
@@ -53,7 +53,7 @@ inline void ArtNetNode::SetOutput(DmxNodeOutputType* dmx_node_output_type) {
     dmxnode_output_type_ = dmx_node_output_type;
 #if (ARTNET_VERSION >= 4)
     E131Bridge::SetOutput(dmx_node_output_type);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 }
 
 inline DmxNodeOutputType* ArtNetNode::GetOutput() const {
@@ -68,7 +68,7 @@ inline void ArtNetNode::SetDisableMergeTimeout(bool disable) {
     state_.disable_merge_timeout = disable;
 #if (ARTNET_VERSION >= 4)
     E131Bridge::SetDisableMergeTimeout(disable);
-#endif
+#endif // (ARTNET_VERSION >= 4)
 }
 
 inline bool ArtNetNode::GetDisableMergeTimeout() const {
@@ -84,7 +84,7 @@ inline uint16_t ArtNetNode::GetUniverse(uint32_t port_index) const {
     if (node_.port[port_index].protocol == artnet::PortProtocol::kSacn) {
         return E131Bridge::GetUniverse(port_index);
     }
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     return 0;
 }
@@ -102,7 +102,7 @@ inline bool ArtNetNode::GetUniverse(uint32_t port_index, uint16_t& universe, dmx
     if (node_.port[port_index].protocol == artnet::PortProtocol::kSacn) {
         return E131Bridge::GetUniverse(port_index, universe, port_direction);
     }
-#endif
+#endif // (ARTNET_VERSION >= 4)
     return false;
 }
 
@@ -174,14 +174,14 @@ inline void ArtNetNode::SetRdm(uint32_t port_index, bool enable) {
 
     if (!enable) {
         output_port_[port_index].good_output_b |= artnet::GoodOutputB::kRdmDisabled;
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
         rdm_controller_.Disable(port_index);
-#endif
+#endif // RDM_CONTROLLER
     } else {
         output_port_[port_index].good_output_b &= static_cast<uint8_t>(~artnet::GoodOutputB::kRdmDisabled);
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
         rdm_controller_.Enable(port_index);
-#endif
+#endif // RDM_CONTROLLER
     }
 
     if (state_.status == artnet::Status::kOn) {
@@ -250,13 +250,13 @@ inline void ArtNetNode::StopOutputPort(uint32_t port_index) {
 }
 
 inline void ArtNetNode::Run() {
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
     HandleDmxIn();
-#endif
+#endif // ARTNET_HAVE_DMXIN
 
 #if (ARTNET_VERSION >= 4)
     E131Bridge::Run();
-#endif
+#endif // (ARTNET_VERSION >= 4)
 
     current_millis_ = timing::Millis();
     const auto kDeltaMillis = current_millis_ - packet_millis_;
@@ -283,9 +283,9 @@ inline void ArtNetNode::Run() {
         } else {
             board::statusled::SetMode(board::statusled::Mode::kNormal);
         }
-#endif
+#endif // (ARTNET_VERSION >= 4)
     }
-#endif
+#endif // (DMXNODE_PORTS > 0)
 
     auto& entry = state_.art.poll_reply_queue[state_.art.poll_reply_queue_index];
 
@@ -312,27 +312,27 @@ inline void ArtNetNode::Run() {
         }
     }
 
-#if defined(RDM_CONTROLLER)
+#ifdef RDM_CONTROLLER
     if (__builtin_expect((state_.is_rdm_enabled), 0)) {
-#if defined(ARTNET_HAVE_DMXIN)
+#ifdef ARTNET_HAVE_DMXIN
         HandleRdmIn();
-#endif
+#endif // ARTNET_HAVE_DMXIN
         rdm_controller_.Run();
     }
-#endif
+#endif // RDM_CONTROLLER
 }
 
-inline void ArtNetNode::SendDiag([[maybe_unused]] const artnet::PriorityCodes kPriorityCode, [[maybe_unused]] const char* format, ...) {
-#if defined(ARTNET_ENABLE_SENDDIAG)
+inline void ArtNetNode::SendDiag([[maybe_unused]] artnet::PriorityCodes priority_code, [[maybe_unused]] const char* format, ...) {
+#ifdef ARTNET_ENABLE_SENDDIAG
     if (!state_.send_art_diag_data) {
         return;
     }
 
-    if (static_cast<uint8_t>(kPriorityCode) < state_.diag_priority) {
+    if (static_cast<uint8_t>(priority_code) < state_.diag_priority) {
         return;
     }
 
-    diag_data_.priority = static_cast<uint8_t>(kPriorityCode);
+    diag_data_.priority = static_cast<uint8_t>(priority_code);
 
     va_list arp;
 
@@ -348,7 +348,7 @@ inline void ArtNetNode::SendDiag([[maybe_unused]] const artnet::PriorityCodes kP
     const uint16_t kSize = sizeof(struct artnet::ArtDiagData) - sizeof(diag_data_.data) + diag_data_.length_lo;
 
     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(&diag_data_), kSize, state_.art.diag_ip, artnet::kUdpPort);
-#endif
+#endif // ARTNET_ENABLE_SENDDIAG
 }
 
 #endif // ARTNETNODE_INLINE_IMPL_H_

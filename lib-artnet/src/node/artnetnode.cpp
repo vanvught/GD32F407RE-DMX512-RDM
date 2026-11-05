@@ -908,12 +908,21 @@ void ArtNetNode::HandleDmx() {
 
     for (uint32_t port_index = 0; port_index < dmxnode::kMaxPorts; port_index++) {
 #ifdef RDM_CONTROLLER
-        if (rdm_controller_.IsRunning(port_index)) [[unlikely]]
+        if (rdm_controller_.IsRunning(port_index)) [[unlikely]] {
             continue;
+        }
 #endif // RDM_CONTROLLER
-        if (node_.port[port_index].direction != dmxnode::Direction::kOutput) continue;
-        if (node_.port[port_index].protocol != artnet::PortProtocol::kArtnet) continue;
-        if (node_.port[port_index].port_address != kArtDmx->port_address) continue;
+        if (node_.port[port_index].direction != dmxnode::Direction::kOutput) {
+            continue;
+        }
+
+        if (node_.port[port_index].protocol != artnet::PortProtocol::kArtnet) {
+            continue;
+        }
+
+        if (node_.port[port_index].port_address != kArtDmx->port_address) {
+            continue;
+        }
 
         output_port_[port_index].good_output |= artnet::GoodOutput::kDataIsBeingTransmitted;
 
@@ -1024,7 +1033,7 @@ void ArtNetNode::HandleDmx() {
             puts("WARN: 9. More than two sources, discarding data");
             return;
         }
-#endif // NDEBUG
+#endif                      // NDEBUG
         else [[unlikely]] { // Case 0.
             SendDiag(artnet::PriorityCodes::kDiagHigh, "%u: 0. No cases matched, this shouldn't happen!", port_index);
 #ifndef NDEBUG

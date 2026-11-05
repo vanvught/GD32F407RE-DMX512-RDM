@@ -39,102 +39,102 @@ struct ArtNetParamsConst {
     static constexpr auto kRdmEnablePortA = json::MakeKey("rdm_enable_port_a");
 #if (DMX_MAX_PORTS > 1)
     static constexpr auto kRdmEnablePortB = json::MakeKey("rdm_enable_port_b");
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
     static constexpr auto kRdmEnablePortC = json::MakeKey("rdm_enable_port_c");
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
     static constexpr auto kRdmEnablePortD = json::MakeKey("rdm_enable_port_d");
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     static constexpr json::KeyDefinition kRdmEnablePort[] = {
         kRdmEnablePortA,
 #if (DMX_MAX_PORTS > 1)
         kRdmEnablePortB,
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         kRdmEnablePortC,
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         kRdmEnablePortD,
-#endif
+#endif // (DMX_MAX_PORTS == 4)
     };
-#endif
+#endif // defined(RDM_CONTROLLER) || defined(RDM_RESPONDER)
 
 #ifdef DMX_MAX_PORTS
     static constexpr auto kDestinationIpPortA = json::MakeKey("destination_ip_port_a");
 #if (DMX_MAX_PORTS > 1)
     static constexpr auto kDestinationIpPortB = json::MakeKey("destination_ip_port_b");
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
     static constexpr auto kDestinationIpPortC = json::MakeKey("destination_ip_port_c");
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
     static constexpr auto kDestinationIpPortD = json::MakeKey("destination_ip_port_d");
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     static constexpr json::KeyDefinition kDestinationIpPort[] = {
         kDestinationIpPortA,
 #if (DMX_MAX_PORTS > 1)
         kDestinationIpPortB,
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         kDestinationIpPortC,
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         kDestinationIpPortD,
-#endif
+#endif // (DMX_MAX_PORTS == 4)
     };
 
     static constexpr auto kProtocolPortA = json::MakeKey("protocol_port_a");
 #if (DMX_MAX_PORTS > 1)
     static constexpr auto kProtocolPortB = json::MakeKey("protocol_port_b");
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
     static constexpr auto kProtocolPortC = json::MakeKey("protocol_port_c");
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
     static constexpr auto kProtocolPortD = json::MakeKey("protocol_port_d");
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     static constexpr json::KeyDefinition kProtocolPort[] = {
         kProtocolPortA,
 #if (DMX_MAX_PORTS > 1)
         kProtocolPortB,
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         kProtocolPortC,
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         kProtocolPortD,
-#endif
+#endif // (DMX_MAX_PORTS == 4)
     };
 
     static constexpr auto kBgDiscoveryPortA = json::MakeKey("bg_discovery_port_a");
 
 #if (DMX_MAX_PORTS > 1)
     static constexpr auto kBgDiscoveryPortB = json::MakeKey("bg_discovery_port_b");
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
     static constexpr auto kBgDiscoveryPortC = json::MakeKey("bg_discovery_port_c");
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
     static constexpr auto kBgDiscoveryPortD = json::MakeKey("bg_discovery_port_d");
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     static constexpr json::KeyDefinition kBgDiscoveryPort[] = {
         kBgDiscoveryPortA,
 #if (DMX_MAX_PORTS > 1)
         kBgDiscoveryPortB,
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         kBgDiscoveryPortC,
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         kBgDiscoveryPortD,
-#endif
+#endif // (DMX_MAX_PORTS == 4)
     };
-#endif
+#endif // DMX_MAX_PORTS
 };
 } // namespace json
 
