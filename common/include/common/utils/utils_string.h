@@ -127,20 +127,20 @@ void CopyString(T (&destination)[N], std::string_view value) {
 
 inline char* AppendDecimal(char* out, uint8_t value) noexcept {
     if (value >= 100U) {
-        *out++ = static_cast<char>('0' + value / 100U);
+        *out++ = static_cast<char>('0' + (value / 100U));
         value = static_cast<uint8_t>(value % 100U);
-        *out++ = static_cast<char>('0' + value / 10U);
+        *out++ = static_cast<char>('0' + (value / 10U));
     } else if (value >= 10U) {
-        *out++ = static_cast<char>('0' + value / 10U);
+        *out++ = static_cast<char>('0' + (value / 10U));
     }
 
-    *out++ = static_cast<char>('0' + value % 10U);
+    *out++ = static_cast<char>('0' + (value % 10U));
     return out;
 }
 
 inline char* Append2(char* p, uint32_t value) noexcept {
-    *p++ = static_cast<char>('0' + value / 10U);
-    *p++ = static_cast<char>('0' + value % 10U);
+    *p++ = static_cast<char>('0' + (value / 10U));
+    *p++ = static_cast<char>('0' + (value % 10U));
     return p;
 }
 
@@ -154,7 +154,7 @@ inline char* AppendUnsigned(char* p, uint32_t value) noexcept {
     uint32_t count = 0;
 
     do {
-        digits[count++] = static_cast<char>('0' + value % 10U);
+        digits[count++] = static_cast<char>('0' + (value % 10U));
         value /= 10U;
     } while (value != 0U);
 
@@ -179,7 +179,7 @@ inline char* AppendFixed(char* p, float value, uint32_t decimals) noexcept {
         return Append2(p, kScaled % kScale);
     }
 
-    *p++ = static_cast<char>('0' + kScaled % 10U);
+    *p++ = static_cast<char>('0' + (kScaled % 10U));
     return p;
 }
 
