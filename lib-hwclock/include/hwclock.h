@@ -121,6 +121,15 @@ inline bool Set([[maybe_unused]] const struct tm* rtc_time) {
     return false;
 #endif // DISABLE_RTC
 }
+inline bool Get([[maybe_unused]] struct tm* rtc_time) {
+#ifndef DISABLE_RTC
+    assert(HwClock::Get() != nullptr);
+    HwClock::Get()->Get(rtc_time);
+    return true;
+#else
+    return false;
+#endif // DISABLE_RTC
+}
 } // namespace rtc
 
 #endif // HWCLOCK_H_
