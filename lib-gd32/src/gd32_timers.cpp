@@ -108,34 +108,11 @@ void Start() {
 #pragma GCC optimize("O2")
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-void DelayUs(uint32_t micros, uint32_t offset_micros) {
+void DelayUs(uint32_t micros, uint32_t start_ticks) {
     const auto kTicks = micros * kTicksPerUs;
+    const auto kStart = (start_ticks == 0) ? DWT->CYCCNT : start_ticks;
 
-    uint32_t ticks_count = 0;
-    uint32_t ticks_previous;
-
-    if (offset_micros == 0) {
-        ticks_previous = DWT->CYCCNT;
-    } else {
-        ticks_previous = offset_micros;
-    }
-
-    while (true) {
-        const auto kTicksNow = DWT->CYCCNT;
-
-        if (kTicksNow != ticks_previous) {
-            if (kTicksNow > ticks_previous) {
-                ticks_count += kTicksNow - ticks_previous;
-            } else {
-                ticks_count += UINT32_MAX - ticks_previous + kTicksNow;
-            }
-
-            if (ticks_count >= kTicks) {
-                break;
-            }
-
-            ticks_previous = kTicksNow;
-        }
+    while ((DWT->CYCCNT - kStart) < kTicks) {
     }
 }
 

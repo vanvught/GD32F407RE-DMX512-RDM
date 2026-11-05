@@ -55,7 +55,7 @@ namespace timers {
 void Start();
 namespace dwt {
 void Start();
-void DelayUs(uint32_t micros, uint32_t offset_micros = 0);
+void DelayUs(uint32_t micros, uint32_t start_ticks = 0);
 [[nodiscard]] uint32_t Micros();
 } // namespace dwt
 namespace systick {
@@ -79,8 +79,8 @@ void Start();
     return gd32::timers::dwt::Micros();
 }
 
-inline void DelayUs(uint32_t micros, uint32_t offset_micros = 0) {
-    gd32::timers::dwt::DelayUs(micros, offset_micros);
+inline void DelayUs(uint32_t micros, uint32_t start_ticks = 0) {
+    gd32::timers::dwt::DelayUs(micros, start_ticks);
 }
 
 [[nodiscard]] inline uint32_t Millis() {

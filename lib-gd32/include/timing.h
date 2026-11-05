@@ -32,7 +32,7 @@
 
 #ifdef CONFIG_TIME_USE_SYSTICK
 extern volatile uint32_t gv_systick_millis;
-#elif defined(USE_FREE_RTOS)
+#elifdef USE_FREE_RTOS
 #include "FreeRTOS.h"
 #include "task.h"
 #endif // CONFIG_TIME_USE_SYSTICK
@@ -47,8 +47,17 @@ namespace timing {
     return gd32::Micros();
 }
 
-inline void DelayUs(uint32_t micros, uint32_t offset_micros = 0) {
-    gd32::DelayUs(micros, offset_micros);
+inline void DelayUs(uint32_t micros) {
+    gd32::DelayUs(micros, 0);
+}
+
+struct CpuTicks {
+    uint32_t value;
+    explicit CpuTicks(uint32_t raw_ticks) : value(raw_ticks) {}
+};
+
+inline void DelayUs(uint32_t micros, CpuTicks start_ticks) {
+    gd32::DelayUs(micros, start_ticks.value);
 }
 
 // Use for:

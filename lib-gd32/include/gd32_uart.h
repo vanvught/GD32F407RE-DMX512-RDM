@@ -77,11 +77,13 @@ inline uint8_t UartGetRxData(uint32_t usart_periph) {
     return static_cast<uint8_t>(GET_BITS(USART_RDATA(usart_periph), 0U, 8U));
 }
 
-template <usart_flag_enum kFlag> bool UartFlagGet(uint32_t usart_periph) {
+template <usart_flag_enum kFlag>
+bool UartFlagGet(uint32_t usart_periph) {
     return (0 != (USART_REG_VAL(usart_periph, kFlag) & BIT(USART_BIT_POS(kFlag))));
 }
 
-template <usart_flag_enum kFlag> void UartFlagClear(uint32_t usart_periph) {
+template <usart_flag_enum kFlag>
+void UartFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
     USART_REG_VAL(usart_periph, kFlag) = ~BIT(USART_BIT_POS(kFlag));
 #elifdef GD32F4XX
@@ -101,15 +103,28 @@ template <usart_flag_enum kFlag> void UartFlagClear(uint32_t usart_periph) {
 #endif // defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
 }
 
-template <uint32_t kInterrupt> void UartInterruptEnable(uint32_t usart_periph) {
+template <uint32_t kInterrupt>
+void UartInterruptEnable(uint32_t usart_periph) {
     USART_REG_VAL(usart_periph, kInterrupt) |= BIT(USART_BIT_POS(kInterrupt));
 }
 
-template <uint32_t kInterrupt> void UartInterruptDisable(uint32_t usart_periph) {
+template <uint32_t kInterrupt>
+void UartInterruptDisable(uint32_t usart_periph) {
     USART_REG_VAL(usart_periph, kInterrupt) &= ~BIT(USART_BIT_POS(kInterrupt));
 }
 
-template <usart_interrupt_flag_enum kFlag> void UartInterruptFlagClear(uint32_t usart_periph) {
+template <usart_interrupt_flag_enum kFlag>
+bool UsartInterruptFlagGet(uint32_t usart_periph) {
+    // get the interrupt enable bit status
+    const auto kIntenable = (USART_REG_VAL(usart_periph, kFlag) & BIT(USART_BIT_POS(kFlag)));
+    // get the corresponding flag bit status
+    const auto kFlagstatus = (USART_REG_VAL2(usart_periph, kFlag) & BIT(USART_BIT_POS2(kFlag)));
+
+    return ((0U != kFlagstatus) && (0U != kIntenable));
+}
+
+template <usart_interrupt_flag_enum kFlag>
+void UartInterruptFlagClear(uint32_t usart_periph) {
 #if defined(GD32F10X) || defined(GD32F30X) || defined(GD32F20X)
     USART_REG_VAL2(usart_periph, kFlag) = ~BIT(USART_BIT_POS2(kFlag));
 #elifdef GD32F4XX
