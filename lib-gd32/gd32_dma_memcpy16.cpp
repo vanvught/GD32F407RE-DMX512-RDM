@@ -49,6 +49,6 @@ void Init() {
     dma_init_parameter.priority = DMA_PRIORITY_LOW;
 
     dma_multi_data_mode_init(DMA1, DMA_CH0, &dma_init_parameter);
-#endif
+#endif // GD32F4XX
 }
 } // namespace ggd32::dma::memcpy16

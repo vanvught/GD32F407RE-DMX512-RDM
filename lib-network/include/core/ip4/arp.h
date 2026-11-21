@@ -35,7 +35,7 @@ enum class Flags { kFlagInsert, kFlagUpdate };
 void Init();
 void Input(const struct network::arp::Header*);
 void Send(void*, const uint32_t, uint32_t);
-#if defined CONFIG_NET_ENABLE_PTP
+#ifdef CONFIG_NET_ENABLE_PTP
 void SendTimestamp(void*, uint32_t, uint32_t);
 #endif // defined CONFIG_NET_ENABLE_PTP
 void AcdProbe(ip4_addr_t ipaddr);

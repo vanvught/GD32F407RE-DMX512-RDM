@@ -54,7 +54,7 @@
 #define DISPLAYUDFPARAMS_DEBUG_PUTS(...) \
     do {                                 \
     } while (false)
-#endif
+#endif // DEBUG_DISPLAYUDFPARAMS
 
 using common::SetFlagValue;
 using common::store::displayudf::Flags;
@@ -121,7 +121,7 @@ void DisplayUdfParams::Store(std::string_view buffer) {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void DisplayUdfParams::SetAndShow() {
@@ -144,7 +144,7 @@ void DisplayUdfParams::SetAndShow() {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void DisplayUdfParams::Dump() {

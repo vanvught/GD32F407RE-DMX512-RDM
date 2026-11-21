@@ -92,7 +92,7 @@ void ShowFileParams::Set() {
 #ifdef CONFIG_SHOWFILE_ENABLE_OSC
     showfile.SetOscPortIncoming(store_showfile.osc_port_incoming);
     showfile.SetOscPortOutgoing(store_showfile.osc_port_outgoing);
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_OSC
 
     if (showfile.IsAutoStart()) {
         showfile.Play();
@@ -100,7 +100,7 @@ void ShowFileParams::Set() {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void ShowFileParams::Dump() {
@@ -111,6 +111,6 @@ void ShowFileParams::Dump() {
 #ifdef CONFIG_SHOWFILE_ENABLE_OSC
     printf(" %s=%u\n", OscParamsConst::kIncomingPort.name, store_showfile.osc_port_incoming);
     printf(" %s=%u\n", OscParamsConst::kOutgoingPort.name, store_showfile.osc_port_outgoing);
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_OSC
 }
 } // namespace json

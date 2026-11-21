@@ -29,32 +29,33 @@
 #include "common/utils/utils_string.h"
 
 namespace dmxnode {
-enum class NodeType { 
-	kArtnet,
-	kE131,
-	kDdp,
-	kPp,
-	kDmx,
-	kLtc,
-	kOscClient,
-	kOscServer,
-	kRdmResponder,
-	kRdmNet,
-	kShowfile,
-	kUndefined
+enum class NodeType {
+    kArtnet,
+    kE131,
+    kDdp,
+    kPp,
+    kDmx,
+    kLtc,
+    kOscClient,
+    kOscServer,
+    kRdmResponder,
+    kRdmNet,
+    kShowfile,
+    kUndefined,
 };
 
 inline constexpr const char* kNodeTypeNames[static_cast<uint32_t>(NodeType::kUndefined)] = {
-	"Art-Net", 
-	"sACN E1.31", 
-	"DDP Display", 
-	"PixelPusher", 
-	"DMX", 
-	"LTC SMPTE", 
-	"OSC Client", 
-	"OSC Server", 
-	"RDM Responder", 
-	"RDMNet LLRP Only"};
+    "Art-Net",          //
+    "sACN E1.31",       //
+    "DDP Display",      //
+    "PixelPusher",      //
+    "DMX",              //
+    "LTC SMPTE",        //
+    "OSC Client",       //
+    "OSC Server",       //
+    "RDM Responder",    //
+    "RDMNet LLRP Only", //
+};
 
 inline const char* GetNodeType(NodeType type) {
     if (type < NodeType::kUndefined) {
@@ -122,9 +123,9 @@ using DmxNodeNodeType = DdpDisplay;
 namespace dmxnode {
 #ifdef DMXNODE_TYPE_LTC
 inline constexpr auto kNodeType = NodeType::kLtc;
-#elif defined(DMXNODE_TYPE_ARTNET)
+#elifdef DMXNODE_TYPE_ARTNET
 inline constexpr auto kNodeType = NodeType::kArtnet;
-#elif defined(DMXNODE_TYPE_E131)
+#elifdef DMXNODE_TYPE_E131
 inline constexpr auto kNodeType = NodeType::kE131;
 #elif defined(DMXNODE_TYPE_DDP)
 inline constexpr auto kNodeType = NodeType::kDdp;

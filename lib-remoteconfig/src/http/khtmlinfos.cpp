@@ -37,23 +37,23 @@ constexpr Info kHtmlInfos[] = {
     ENTRY("/status", "status/index.html"), //
 #if !defined(CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
     ENTRY("/dmx", "dmx/index.html"), //
-#endif
+#endif // !defined(CONFIG_HTTP_HTML_NO_DMX) && (defined(OUTPUT_DMX_SEND) || defined(OUTPUT_DMX_SEND_MULTI))
 #if !defined(CONFIG_HTTP_HTML_NO_RDM) && defined(RDM_CONTROLLER)
     ENTRY("/rdm", "rdm/index.html"), //
-#endif
+#endif // !defined(CONFIG_HTTP_HTML_NO_RDM) && defined(RDM_CONTROLLER)
 #if !defined(CONFIG_HTTP_HTML_NO_RTC) && !defined(DISABLE_RTC)
     ENTRY("/rtc", "rtc/index.html"), //
-#endif
+#endif // !defined(CONFIG_HTTP_HTML_NO_RTC) && !defined(DISABLE_RTC)
 #ifdef NODE_SHOWFILE
     ENTRY("/showfile", "showfile/index.html"), //
-#endif
+#endif // NODE_SHOWFILE
 #ifndef CONFIG_HTTP_HTML_NO_TIME
     ENTRY("/time", "time/index.html"), //
-#endif
+#endif // CONFIG_HTTP_HTML_NO_TIME
 #ifdef CONFIG_HTTPD_ENABLE_UPLOAD
     ENTRY("/upload", "upload/index.html"), //
-#endif
-#endif
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
+#endif // CONFIG_HTTP_HTML_INDEX_ONLY
 };
 
 #undef ENTRY

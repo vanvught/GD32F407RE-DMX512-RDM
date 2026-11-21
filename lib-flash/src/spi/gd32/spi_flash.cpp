@@ -49,12 +49,12 @@ void Init() {
 #ifdef SPI_FLASH_WP_GPIO_PINx
     Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_WP_GPIO_PINx, GPIO_FSEL_OUTPUT);
     GPIO_BOP(SPI_GPIOx) = SPI_FLASH_WP_GPIO_PINx;
-#endif
+#endif // SPI_FLASH_WP_GPIO_PINx
 
 #ifdef SPI_FLASH_HOLD_GPIO_PINx
     Gd32GpioFsel(SPI_GPIOx, SPI_FLASH_HOLD_GPIO_PINx, GPIO_FSEL_OUTPUT);
     GPIO_BOP(SPI_GPIOx) = SPI_FLASH_HOLD_GPIO_PINx;
-#endif
+#endif // SPI_FLASH_HOLD_GPIO_PINx
 }
 
 void Transfer(uint32_t length, const uint8_t* data_out, uint8_t* data_in, uint32_t flags) {

@@ -60,5 +60,5 @@ void DisplayUdf::ShowE131Bridge() {
     }
 
     DISPLAYUDF_DEBUG_EXIT();
-#endif
+#endif // DMX_MAX_PORTS
 }

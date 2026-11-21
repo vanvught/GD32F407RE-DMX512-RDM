@@ -54,7 +54,7 @@ void RemoteConfigParams::Store(std::string_view buffer) {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void RemoteConfigParams::Set() {
@@ -64,7 +64,7 @@ void RemoteConfigParams::Set() {
 
 #ifndef NDEBUG
     Dump();
-#endif
+#endif // NDEBUG
 }
 
 void RemoteConfigParams::Dump() {

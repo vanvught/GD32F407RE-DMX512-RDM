@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_STORE_USE_SPI) || defined(CONFIG_STORE_USE_ROM) || defined(CONFIG_STORE_USE_RAM)
 #error Configuration error
-#endif
+#endif // defined(CONFIG_STORE_USE_SPI) || defined(CONFIG_STORE_USE_ROM) || defined(CONFIG_STORE_USE_RAM)
 
 #include <cstdint>
 #include <cstdio>
@@ -38,7 +38,7 @@
 namespace storedevice {
 #if !defined(CONFIG_FLASHROM_I2C_INDEX)
 #define CONFIG_FLASHROM_I2C_INDEX 0
-#endif
+#endif // CONFIG_FLASHROM_I2C_INDEX
 static constexpr uint8_t kI2CIndex = CONFIG_FLASHROM_I2C_INDEX;
 /* Backwards compatibility with SPI FLASH */
 static constexpr auto kFlashSectorSize = 4096U;

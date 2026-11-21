@@ -27,8 +27,8 @@
 #pragma GCC optimize("O3")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
 #pragma GCC optimize("-funroll-loops")
-#endif
-#endif
+#endif // CONFIG_REMOTECONFIG_MINIMUM
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include <cstdio>
@@ -57,7 +57,7 @@
 #define SUPERLOOP_TIMERS_DEBUG_PUTS(...) \
     do {                                 \
     } while (false)
-#endif
+#endif // DEBUG_SUPERLOOP_TIMERS
 
 namespace {
 void Error(const char* func, const char* string, TimerHandle_t handle) {

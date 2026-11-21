@@ -641,7 +641,7 @@ static void ScanOptions(struct Header* eth_frame, struct Tcb* const kTcb, int32_
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG
                         bIgnore = false;
-#endif                                                                                                // NDEBUG
+#endif // NDEBUG
                     } else if ((__builtin_bswap32(tsval.u32) > __builtin_bswap32(kTcb->TS.recent))) { // TODO(a)
                         kTcb->TS.recent = tsval.u32;
 #ifndef NDEBUG

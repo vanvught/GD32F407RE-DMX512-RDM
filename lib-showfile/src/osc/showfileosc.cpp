@@ -46,7 +46,7 @@ static constexpr char kLoop[] = "loop";
 static constexpr char kBlackout[] = "blackout";
 #if defined(CONFIG_SHOWFILE_ENABLE_MASTER)
 static constexpr char kMaster[] = "master";
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_MASTER
 static constexpr char kTftp[] = "tftp";
 static constexpr char kDelete[] = "delete";
 // TouchOSC specific
@@ -63,7 +63,7 @@ static constexpr uint32_t kLoop = sizeof(cmd::kLoop) - 1;
 static constexpr uint32_t kBo = sizeof(cmd::kBlackout) - 1;
 #if defined(CONFIG_SHOWFILE_ENABLE_MASTER)
 static constexpr uint32_t kMaster = sizeof(cmd::kMaster) - 1;
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_MASTER
 static constexpr uint32_t kTftp = sizeof(cmd::kTftp) - 1;
 static constexpr uint32_t kDelete = sizeof(cmd::kDelete) - 1;
 // TouchOSC specific
@@ -162,7 +162,7 @@ void ShowFileOSC::Process() {
         SHOWFILE_DEBUG_PRINTF("Master %d", value);
         return;
     }
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_MASTER
 
     if (memcmp(&buffer_[showfileosc::kPathLength], cmd::kTftp, length::kTftp) == 0) {
         OscSimpleMessage msg(buffer_, bytes_received_);

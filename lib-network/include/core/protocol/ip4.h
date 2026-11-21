@@ -29,7 +29,7 @@
 
 #include "core/protocol/ethernet.h"
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
 #endif // PACKED
 

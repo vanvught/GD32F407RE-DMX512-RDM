@@ -38,7 +38,7 @@
 #include "firmware/firmwareversion.h" // IWYU pragma: keep
 #include "dmxnode_outputtype.h"       // IWYU pragma: keep
 #include "dmxnode_nodetype.h"
-#ifdef RDM_RESPONDER
+#if defined RDM_RESPONDER && !defined OUTPUT_DMX_MONITOR
 #undef DMX_MAX_PORTS
 #endif
 
@@ -56,7 +56,7 @@ enum class Labels : uint8_t {
     kDefaultGateway,
     kAp,
     kDmxStartAddress,
-#if defined(DMX_MAX_PORTS)
+#ifdef DMX_MAX_PORTS
     kUniversePortA,
 #if (DMX_MAX_PORTS > 1)
     kUniversePortB,
@@ -80,7 +80,7 @@ enum class Labels : uint8_t {
 #endif
 #endif
 #endif
-    kUnknown
+    kUnknown,
 };
 
 namespace defaults {
@@ -111,11 +111,11 @@ class DisplayUdf final : public Display {
     void Show();
 
 // Art-Net
-#if defined(DMXNODE_TYPE_ARTNET)
+#ifdef DMXNODE_TYPE_ARTNET
     void ShowUniverseArtNetNode();
 #endif
 // RDM Responder
-#if defined(RDM_RESPONDER)
+#ifdef RDM_RESPONDER
     void ShowDmxStartAddress() {
         const auto dmx_start_address = RDMDeviceResponder::Get()->GetDmxStartAddress();
         const auto nDmxFootprint = RDMDeviceResponder::Get()->GetDmxFootPrint();
@@ -124,7 +124,7 @@ class DisplayUdf final : public Display {
 #endif
 
 // Network
-#if !defined(NO_EMAC)
+#ifndef NO_EMAC
     void ShowEmacInit() {
         ClearEndOfLine();
         Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kIp)], "Ethernet init");
@@ -181,12 +181,12 @@ class DisplayUdf final : public Display {
 
    private:
 // Art-Net
-#if defined(DMXNODE_TYPE_ARTNET)
+#ifdef DMXNODE_TYPE_ARTNET
     void ShowArtNetNode();
     void ShowDestinationIpArtNetNode();
 #endif
 // sACN E1.31
-#if defined(DMXNODE_TYPE_E131)
+#ifdef DMXNODE_TYPE_E131
     void ShowE131Bridge();
 #endif
 

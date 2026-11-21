@@ -53,7 +53,7 @@
 #include "firmware.h"
 #include "flashcodeinstall.h"
 #include "display.h" // IWYU pragma: keep
-#endif               // CONFIG_HTTPD_ENABLE_UPLOAD
+#endif // CONFIG_HTTPD_ENABLE_UPLOAD
 #include "firmware/debug/debug_dump.h"
 #include "httpd/httpd_debug.h"
 

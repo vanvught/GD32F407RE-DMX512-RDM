@@ -143,9 +143,9 @@ using DmxPixelOutputType = PixelDmxMulti;
 #ifdef DMXNODE_OUTPUT_PIXEL_DMX
 #include "dmxnodewith4.h"
 using DmxNodeOutputType = DmxNodeWith4<CONFIG_DMXNODE_DMX_PORT_OFFSET>;
-#elif defined(DMXNODE_OUTPUT_DMX)
+#elifdef DMXNODE_OUTPUT_DMX
 using DmxNodeOutputType = DmxSend;
-#elif defined(DMXNODE_OUTPUT_RDM_PIXEL)
+#elifdef DMXNODE_OUTPUT_RDM_PIXEL
 #include "dmxnodeoutputrdmpixel.h"
 using DmxNodeOutputType = DmxNodeOutputRdmPixel;
 #elif defined(OUTPUT_DMX_ARTNET)
@@ -176,7 +176,7 @@ using DmxNodeOutputType = TLC59711Dmx;
 namespace dmxnode {
 #if defined(DMXNODE_OUTPUT_DMX) && defined(RDM_CONTROLLER)
 inline constexpr auto kOutputType = OutputType::kDmxRdm;
-#elif defined(DMXNODE_OUTPUT_DMX)
+#elifdef DMXNODE_OUTPUT_DMX
 inline constexpr auto kOutputType = OutputType::kDmx;
 #elif defined(OUTPUT_DMX_PIXEL) || defined(OUTPUT_DMX_PIXEL_MULTI)
 inline constexpr auto kOutputType = OutputType::kPixel;

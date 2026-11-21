@@ -25,7 +25,7 @@
 
 #if defined(CONFIG_STORE_USE_SPI) || defined(CONFIG_STORE_USE_I2C) || defined(CONFIG_STORE_USE_RAM)
 #error Configuration error
-#endif
+#endif // defined(CONFIG_STORE_USE_SPI) || defined(CONFIG_STORE_USE_I2C) || defined(CONFIG_STORE_USE_RAM)
 
 #include <cstdint>
 #include <span>

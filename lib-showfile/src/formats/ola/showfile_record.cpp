@@ -26,7 +26,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC push_options
 # pragma GCC optimize ("O2")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 #include <cstdint>
 #include "formats/showfileformatola.h"
@@ -44,7 +44,7 @@ void Record([[maybe_unused]] const struct artnet::ArtSync *pArtSync, [[maybe_unu
 	// Nothng to do here
 }
 }  // namespace showfile
-#endif
+#endif // defined (CONFIG_SHOWFILE_PROTOCOL_NODE_ARTNET)
 
 #if defined (CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
 #include "e131.h"
@@ -61,4 +61,4 @@ void record([[maybe_unused]] const struct e131::SynchronizationPacket *pE131Sync
 	// Nothing to do here
 }
 }  // namespace showfile
-#endif
+#endif // defined (CONFIG_SHOWFILE_PROTOCOL_NODE_E131)

@@ -37,6 +37,7 @@
 #include "configurationstore.h"
 #include "common/utils/utils_flags.h"
 #include "dmxnode_outputtype.h"
+#include "dmxnode_nodetype.h"
 #ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX

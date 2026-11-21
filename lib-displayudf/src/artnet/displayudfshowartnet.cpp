@@ -42,7 +42,7 @@ void DisplayUdf::ShowArtNetNode() {
     ShowUniverseArtNetNode();
 #ifdef ARTNET_HAVE_DMXIN
     ShowDestinationIpArtNetNode();
-#endif
+#endif // ARTNET_HAVE_DMXIN
     Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kAp)], "AP: %d", artnet_node->GetActiveOutputPorts() + artnet_node->GetActiveInputPorts());
 
     DISPLAYUDF_DEBUG_EXIT();
@@ -72,24 +72,24 @@ void DisplayUdf::ShowUniverseArtNetNode() {
                            "%c %d %s %s %c %s",
 #else
                            "%c %d %s %s %s",
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
                            'A' + config_port_index, universe, dmxnode::GetMergeMode(artnet_node->GetMergeMode(kPortIndex), true),
 
 #if (ARTNET_VERSION >= 4)
                            artnet::GetProtocolMode(artnet_node->GetPortProtocol4(kPortIndex), true),
 #else
                            artnet::kNodeId,
-#endif
+#endif // (ARTNET_VERSION >= 4)
 #ifdef OUTPUT_HAVE_STYLESWITCH
                            artnet_node->GetOutputStyle(kPortIndex) == dmxnode::OutputStyle::kConstant ? 'C' : 'D',
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
                            artnet_node->Rdm(kPortIndex) ? "RDM" : "");
                 }
             }
         }
     }
     DISPLAYUDF_DEBUG_EXIT();
-#endif
+#endif // DMX_MAX_PORTS
 }
 
 void DisplayUdf::ShowDestinationIpArtNetNode() {
@@ -108,6 +108,6 @@ void DisplayUdf::ShowDestinationIpArtNetNode() {
             Printf(labels_[static_cast<uint32_t>(displayudf::Labels::kDestinationIpPortA) + config_port_index], "%c: " IPSTR, 'A' + config_port_index, IP2STR(artnet_node->GetDestinationIp(kPortIndex)));
         }
     }
-#endif
+#endif // ARTNET_HAVE_DMXIN
     DISPLAYUDF_DEBUG_EXIT();
 }

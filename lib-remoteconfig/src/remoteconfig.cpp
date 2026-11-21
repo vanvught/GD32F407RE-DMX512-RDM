@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -54,7 +55,7 @@ enum class Command {
     kDisplay, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
     kUptime,  //
-#endif        // CONFIG_REMOTECONFIG_MINIMUM
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     kTftp,    //
     kFactory, //
 };
@@ -71,7 +72,7 @@ constexpr struct RemoteConfig::Commands RemoteConfig::kGet[] = {
     {.handler = &RemoteConfig::HandleDisplayGet, .cmd = "display#", .kLength = 8, .kGreaterThan = false}, //
 #ifndef CONFIG_REMOTECONFIG_MINIMUM
     {.handler = &RemoteConfig::HandleUptime, .cmd = "uptime#", .kLength = 7, .kGreaterThan = false},   //
-#endif                                                                                                 // CONFIG_REMOTECONFIG_MINIMUM
+#endif // CONFIG_REMOTECONFIG_MINIMUM
     {.handler = &RemoteConfig::HandleTftpGet, .cmd = "tftp#", .kLength = 5, .kGreaterThan = false},    //
     {.handler = &RemoteConfig::HandleFactory, .cmd = "factory##", .kLength = 9, .kGreaterThan = false} //
 };
@@ -146,7 +147,7 @@ void RemoteConfig::SetDisplayName(const char* display_name) {
     len = len > (common::store::remoteconfig::kDisplayNameLength - 1) ? common::store::remoteconfig::kDisplayNameLength - 1 : len;
     memcpy(reinterpret_cast<char*>(array), display_name, len);
 
-    for (uint32_t i = len; i < common::store::remoteconfig::kDisplayNameLength; i++) {
+    for (size_t i = len; i < common::store::remoteconfig::kDisplayNameLength; i++) {
         array[i] = '\0';
     }
 

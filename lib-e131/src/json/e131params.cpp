@@ -35,7 +35,7 @@
 #include "dmxnode_outputtype.h"
 #if defined(DMXNODE_OUTPUT_DMX)
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json {
 E131Params::E131Params() {
@@ -52,7 +52,7 @@ void E131Params::Store([[maybe_unused]] std::string_view buffer) {
 #ifdef DMX_MAX_PORTS
     ParseJsonWithTable(buffer, kE131PriorityKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
-#endif
+#endif // DMX_MAX_PORTS
 }
 
 void E131Params::Set() {
@@ -70,7 +70,7 @@ void E131Params::Set() {
 
 #ifdef DEBUG_E131BRIDGE
         Dump();
-#endif
+#endif // DEBUG_E131BRIDGE
     }
 }
 
@@ -81,7 +81,7 @@ void E131Params::Dump() {
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
             printf("%s=%u\n", json::E131ParamsConst::kPriorityPort[port_index].name, static_cast<unsigned>(store_dmxnode.priority[port_index]));
         }
-#endif
+#endif // DMX_MAX_PORTS
     }
 
     auto& e131bridge = *E131Bridge::Get();

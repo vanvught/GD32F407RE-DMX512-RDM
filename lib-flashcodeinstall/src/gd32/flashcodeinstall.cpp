@@ -25,7 +25,7 @@
 
 #if defined(__clang__)
 #pragma GCC diagnostic ignored "-Wunused-private-field"
-#endif
+#endif // __clang__
 
 #include <cassert>
 

@@ -36,7 +36,7 @@
 #include "e117.h"
 #if defined(E131_HAVE_DMXIN)
 #include "dmx.h"
-#endif
+#endif // E131_HAVE_DMXIN
 #include "dmxnode.h"
 #include "dmxnodedata.h"
 #include "dmxnode_data.h"
@@ -79,7 +79,7 @@ E131Bridge::E131Bridge() {
     SetSourceName(source_name);
 
     UuidCopy(cid_);
-#endif
+#endif // defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
 
     handle_ = network::udp::Begin(e131::kUdpPort, E131Bridge::StaticCallbackFunctionUdp);
     assert(handle_ != -1);
@@ -102,7 +102,7 @@ void E131Bridge::GetLongNameDefault(char* long_name) {
     }
 
     long_name[i] = '\0';
-#endif
+#endif // E131_LONG_NAME
 }
 
 void E131Bridge::Start() {
@@ -122,7 +122,7 @@ void E131Bridge::Start() {
 
     timer_handle_send_discovery_packet_ = SoftwareTimerAdd(e131::kUniverseDiscoveryIntervalSeconds * 1000U, StaticCallbackFunctionSendDiscoveryPacket);
     assert(timer_handle_send_discovery_packet_ >= 0);
-#endif
+#endif // E131_HAVE_DMXIN
 
 #if defined(OUTPUT_HAVE_STYLESWITCH)
     // Make sure that the supported OutputSyle is correctly set
@@ -133,7 +133,7 @@ void E131Bridge::Start() {
             }
         }
     }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     state_.status = e131bridge::Status::kOn;
     board::statusled::SetMode(board::statusled::Mode::kNormal);
@@ -157,7 +157,7 @@ void E131Bridge::Stop() {
             Dmx::Get()->SetPortDirection(port_index, dmx::Direction::kInput, false);
         }
     }
-#endif
+#endif // E131_HAVE_DMXIN
 
     state_.status = e131bridge::Status::kOff;
     board::statusled::SetMode(board::statusled::Mode::kOffOff);
@@ -314,7 +314,7 @@ void E131Bridge::SetUniverse(uint32_t port_index, uint16_t universe) {
     if (state_.status == e131bridge::Status::kOn) {
         SetLocalMerging();
     }
-#endif
+#endif // E131_HAVE_DMXIN
 
     E131BRIDGE_DEBUG_EXIT();
 }
@@ -343,7 +343,7 @@ void E131Bridge::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
             assert(state_.enabled_input_ports > 1);
             state_.enabled_input_ports = static_cast<uint8_t>(state_.enabled_input_ports - 1);
         }
-#endif
+#endif // E131_HAVE_DMXIN
 
         bridge_.port[port_index].direction = dmxnode::Direction::kDisable;
     }
@@ -360,14 +360,14 @@ void E131Bridge::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
 
         bridge_.port[port_index].direction = dmxnode::Direction::kInput;
     }
-#endif
+#endif // E131_HAVE_DMXIN
     else if (port_direction == dmxnode::Direction::kOutput) {
 #if defined(E131_HAVE_DMXIN)
         if (bridge_.port[port_index].direction == dmxnode::Direction::kInput) {
             assert(state_.enabled_input_ports >= 1);
             state_.enabled_input_ports = static_cast<uint8_t>(state_.enabled_input_ports - 1);
         }
-#endif
+#endif // E131_HAVE_DMXIN
 
         state_.enabled_output_ports = static_cast<uint8_t>(state_.enabled_output_ports + 1);
         assert(state_.enabled_output_ports <= dmxnode::kMaxPorts);
@@ -381,23 +381,23 @@ void E131Bridge::SetDirection(uint32_t port_index, dmxnode::Direction port_direc
     if (state_.status == e131bridge::Status::kOn) {
         SetLocalMerging();
     }
-#endif
+#endif // E131_HAVE_DMXIN
 }
 
 #if defined(E131_HAVE_DMXIN)
 static constexpr auto kUuidStringLength = 36;
-#endif
+#endif // E131_HAVE_DMXIN
 
 void E131Bridge::Print() {
 #if defined(E131_HAVE_DMXIN)
     char uuid_str[kUuidStringLength + 1];
     uuid_str[kUuidStringLength] = '\0';
     uuid_unparse(cid_, uuid_str);
-#endif
+#endif // E131_HAVE_DMXIN
     printf("sACN E1.31 V%d.%d\n", E131Const::kVersion[0], E131Const::kVersion[1]);
 #if defined(E131_HAVE_DMXIN)
     printf(" CID      : %s\n", uuid_str);
-#endif
+#endif // E131_HAVE_DMXIN
     if (state_.enabled_output_ports != 0) {
         printf(" Output\n");
 
@@ -420,7 +420,7 @@ void E131Bridge::Print() {
             }
         }
     }
-#endif
+#endif // E131_HAVE_DMXIN
 
     if (state_.disable_synchronize) {
         printf(" Synchronize is disabled\n");
@@ -428,14 +428,14 @@ void E131Bridge::Print() {
 
 #if defined(NODE_RDMNET_LLRP_ONLY)
     LLRPDevice::Print();
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC optimize("O2")
 #pragma GCC optimize("no-tree-loop-distribute-patterns")
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 
 static bool IsValidRoot(const uint8_t* buffer) {
     const auto* const kRaw = reinterpret_cast<const e131::RawPacket*>(buffer);
@@ -767,7 +767,7 @@ void E131Bridge::HandleDmx() {
             puts("ERROR: 0. No cases matched, this shouldn't happen!");
             return;
         }
-#endif
+#endif // NDEBUG
         // This bit indicates whether to lock or revert to an unsynchronized state when synchronization is lost
         // (See Section 11 on Universe Synchronization and 11.1 for discussion on synchronization states).
         // When set to 0, components that had been operating in a synchronized state shall not update with any
@@ -898,11 +898,11 @@ void E131Bridge::SetNetworkDataLossCondition(bool source_a, bool source_b) {
 
 #if defined(E131_HAVE_DMXIN)
     SetLocalMerging();
-#endif
+#endif // E131_HAVE_DMXIN
 
     E131BRIDGE_DEBUG_EXIT();
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC pop_options
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)

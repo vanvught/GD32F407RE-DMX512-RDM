@@ -26,9 +26,9 @@
 #define DMXNODEMSGCONST_H_
 
 struct DmxNodeMsgConst {
-    static inline const char START[] = "Starting DMX Node";
-    static inline const char STARTED[] = "DMX Node started";
-    static inline const char RDM_RUN[] = "Running RDM Discovery";
+    static inline const char kStart[] = "Starting DMX Node";
+    static inline const char kStarted[] = "DMX Node started";
+    static inline const char kRdmRun[] = "Running RDM Discovery";
 };
 
 #endif // DMXNODEMSGCONST_H_

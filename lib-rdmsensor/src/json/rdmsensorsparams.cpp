@@ -35,26 +35,26 @@
 #include "rdmsensors.h"
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_BH170)
 #include "rdmsensorbh1750.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_BH170
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_MCP9808)
 #include "rdmsensormcp9808.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_MCP9808
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_HTU21D)
 #include "rdmsensorhtu21dhumidity.h"
 #include "rdmsensorhtu21dtemperature.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_HTU21D
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_INA219)
 #include "rdmsensorina219current.h"
 #include "rdmsensorina219power.h"
 #include "rdmsensorina219voltage.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_INA219
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_SI7021)
 #include "rdmsensorsi7021humidity.h"
 #include "rdmsensorsi7021temperature.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_SI7021
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_THERMISTOR)
 #include "rdmsensorthermistor.h"
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_THERMISTOR
 #include "rdm_sensor_debug.h"
 
 namespace json {
@@ -216,7 +216,7 @@ void RdmSensorsParams::Store(std::string_view buffer) {
 
 #ifdef DEBUG_RDM_SENSOR
     Dump();
-#endif
+#endif // DEBUG_RDM_SENSOR
 }
 
 static bool Add(RDMSensor* rdm_sensor) {
@@ -244,7 +244,7 @@ void RdmSensorsParams::Set() {
             case rdm::sensors::Types::kBH170:
                 Add(new RDMSensorBH1750(sensor_number, kAddress));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_BH170
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_HTU21D)
             case rdm::sensors::Types::kHTU21D:
                 if (!Add(new RDMSensorHTU21DHumidity(sensor_number++, kAddress))) {
@@ -252,7 +252,7 @@ void RdmSensorsParams::Set() {
                 }
                 Add(new RDMSensorHTU21DTemperature(sensor_number, kAddress));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_HTU21D
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_INA219)
             case rdm::sensors::Types::kINA219:
                 if (!Add(new RDMSensorINA219Current(sensor_number++, kAddress))) {
@@ -263,12 +263,12 @@ void RdmSensorsParams::Set() {
                 }
                 Add(new RDMSensorINA219Voltage(sensor_number, kAddress));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_INA219
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_MCP9808)
             case rdm::sensors::Types::kMCP9808:
                 Add(new RDMSensorMCP9808(sensor_number, kAddress));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_MCP9808
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_SI7021)
             case rdm::sensors::Types::kSI7021:
                 if (!Add(new RDMSensorSI7021Humidity(sensor_number++, kAddress))) {
@@ -276,7 +276,7 @@ void RdmSensorsParams::Set() {
                 }
                 Add(new RDMSensorSI7021Temperature(sensor_number, kAddress));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_SI7021
 #if !defined(CONFIG_RDM_SENSORS_DISABLE_THERMISTOR)
             case rdm::sensors::Types::kMCP3424:
                 if (!Add(new RDMSensorThermistor(sensor_number, kAddress, 0, store_rdmsensors.calibrate[sensor_number]))) {
@@ -293,7 +293,7 @@ void RdmSensorsParams::Set() {
                 sensor_number++;
                 Add(new RDMSensorThermistor(sensor_number, kAddress, 3, store_rdmsensors.calibrate[sensor_number]));
                 break;
-#endif
+#endif // CONFIG_RDM_SENSORS_DISABLE_THERMISTOR
             default:
                 break;
         }
@@ -301,7 +301,7 @@ void RdmSensorsParams::Set() {
 
 #ifdef DEBUG_RDM_SENSOR
     Dump();
-#endif
+#endif // DEBUG_RDM_SENSOR
 }
 
 void RdmSensorsParams::Dump() {

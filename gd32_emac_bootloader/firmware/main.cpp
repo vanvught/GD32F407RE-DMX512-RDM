@@ -49,7 +49,7 @@ int main() {
     rcu_periph_clock_enable(RCU_PMU);
 #if defined(GD32F4XX)
     pmu_backup_ldo_config(PMU_BLDOON_ON);
-#endif
+#endif // GD32F4XX
     rcu_periph_clock_enable(RCU_BKPSRAM);
     pmu_backup_write_enable();
     gpio_mode_set(KEY_BOOTLOADER_TFTP_GPIOx, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, KEY_BOOTLOADER_TFTP_GPIO_PINx);
@@ -62,7 +62,7 @@ int main() {
         }
     }
     gpio_init(KEY_BOOTLOADER_TFTP_GPIOx, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, KEY_BOOTLOADER_TFTP_GPIO_PINx);
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
     const auto kIsNotRemote = (bkp_data_read(BKP_DATA_1) != 0xA5A5);
     const auto kIsNotKey = (gpio_input_bit_get(KEY_BOOTLOADER_TFTP_GPIOx, KEY_BOOTLOADER_TFTP_GPIO_PINx));

@@ -89,7 +89,7 @@ void EnetGpioConfig() {
 
     /* choose DIV4 to get 50MHz from 200MHz on CKOUT0 pin (PA8) to clock the PHY */
     rcu_ckout0_config(RCU_CKOUT0SRC_PLLP, RCU_CKOUT0_DIV4);
-#endif
+#endif // ENET_DISABLE_PA8
 
     syscfg_enet_phy_interface_config(SYSCFG_ENET_PHY_RMII);
 

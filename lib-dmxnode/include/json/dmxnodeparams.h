@@ -57,7 +57,7 @@ class DmxNodeParams : public JsonParamsBase<DmxNodeParams> {
 
    private:
     static_assert(static_cast<uint32_t>(dmxnode::OutputStyle::kDelta) == 0);
-    dmxnode::OutputStyle GetOutputStyleSet(uint8_t mask) const { return (store_dmxnode.output_style & mask) == mask ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta; }
+    [[nodiscard]] dmxnode::OutputStyle GetOutputStyleSet(uint8_t mask) const { return (store_dmxnode.output_style & mask) == mask ? dmxnode::OutputStyle::kConstant : dmxnode::OutputStyle::kDelta; }
 
     static void SetNodeName(std::string_view value);
     static void SetFailsafe(std::string_view value);

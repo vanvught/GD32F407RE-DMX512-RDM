@@ -48,7 +48,7 @@ uint32_t GetDisplayUdf(char* buffer, uint32_t length) {
             if (i == 8) {
                 continue;
             }
-#endif
+#endif // RDM_RESPONDER
             const auto kLabel = displayudf.GetLabel(i);
             if (kLabel > common::ArraySize(DisplayUdfParamsConst::kLabels)) {
                 doc[DisplayUdfParamsConst::kLabels[i].name] = "";

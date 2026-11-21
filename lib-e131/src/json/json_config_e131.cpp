@@ -35,7 +35,7 @@
 #include "dmxnode_outputtype.h"
 #if defined(DMXNODE_OUTPUT_DMX)
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json::config {
 uint32_t GetE131([[maybe_unused]] char* buffer, [[maybe_unused]] uint32_t length) {
@@ -52,7 +52,7 @@ uint32_t GetE131([[maybe_unused]] char* buffer, [[maybe_unused]] uint32_t length
             }
         }
     });
-#endif
+#endif // DMX_MAX_PORTS
     return 0;
 }
 
@@ -62,4 +62,4 @@ void SetE131(const char* buffer, uint32_t size) {
     e131_params.Set();
 }
 } // namespace json::config
-#endif
+#endif // defined(NODE_E131) || defined(NODE_E131_MULTI) || (ARTNET_VERSION >= 4)

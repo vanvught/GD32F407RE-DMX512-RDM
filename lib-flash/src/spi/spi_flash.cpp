@@ -65,19 +65,19 @@ constexpr struct {
         .kIdcode = 0xc8,
         .probe = spi::flash::ProbeGigadevice,
     },
-#endif
+#endif // CONFIG_SPI_FLASH_GIGADEVICE
 #ifdef CONFIG_SPI_FLASH_MACRONIX
     {
         .kIdcode = 0xc2,
         .probe = spi::flash::ProbeMacronix,
     },
-#endif
+#endif // CONFIG_SPI_FLASH_MACRONIX
 #ifdef CONFIG_SPI_FLASH_WINBOND
     {
         .kIdcode = 0xef,
         .probe = spi::flash::ProbeWinbond,
     },
-#endif
+#endif // CONFIG_SPI_FLASH_WINBOND
 };
 
 #define IDCODE_LEN IDCODE_PART_LEN

@@ -26,7 +26,7 @@
 #undef NDEBUG
 #if !defined(USE_GZIP)
 #define USE_GZIP
-#endif
+#endif // USE_GZIP
 
 #include <cstdint>
 #include <cstdlib>
@@ -438,7 +438,7 @@ static int ConvertToH(const char* dir_name, const char* file_name) {
 
     return file_size;
 }
-#endif
+#endif // USE_GZIP
 
 static uint32_t CreateHash(const char* filename) {
     char hash_name[128];
@@ -461,7 +461,7 @@ int main(int argc, char* argv[]) // NOLINT
 {
 #ifdef USE_GZIP
     puts("Using gzip.");
-#endif
+#endif // USE_GZIP
     file_includes = fopen("includes.h", "w");
     assert(file_includes != nullptr);
 
@@ -512,7 +512,7 @@ int main(int argc, char* argv[]) // NOLINT
             const auto kContentLength = ConvertToHCompressed(dir_name, dir_entry->d_name);
 #else
             const auto kContentLength = ConvertToH(dir_name, dir_entry->d_name);
-#endif
+#endif // USE_GZIP
 
             i = snprintf(buffer, sizeof(buffer), ", %d, static_cast<http::ContentTypes>(%d), %s },\n", kContentLength, static_cast<int>(kContentType), use_gzip ? "true" : "false");
             assert(i > 0);

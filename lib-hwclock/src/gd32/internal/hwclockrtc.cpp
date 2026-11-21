@@ -25,19 +25,19 @@
 
 #if !defined(_TIME_STAMP_DAY_)
 #define _TIME_STAMP_DAY_ 0
-#endif
+#endif // _TIME_STAMP_DAY_
 #if !defined(_TIME_STAMP_MONTH_)
 #define _TIME_STAMP_MONTH_ 1
-#endif
+#endif // _TIME_STAMP_MONTH_
 #if !defined(_TIME_STAMP_YEAR_)
 #define _TIME_STAMP_YEAR_ (2026 - 1900)
-#endif
+#endif // _TIME_STAMP_YEAR_
 
 #include <cstdint>
 #if defined(GD32F4XX) || defined(GD32H7XX)
 #else
 #include <cstring>
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 #include <cassert>
 #include <ctime>
 
@@ -55,7 +55,7 @@ static uint8_t DEC2BCD(int val) {
 }
 #define RTC_CLOCK_SOURCE_LXTAL
 static rtc_parameter_struct rtc_initpara;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
 #if defined(GD32F4XX) || defined(GD32H7XX)
 static bool RtcConfiguration() {
@@ -75,7 +75,7 @@ static bool RtcConfiguration() {
     rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
 #else
 #error RTC clock source should be defined.
-#endif
+#endif // RTC_CLOCK_SOURCE_IRC32K
     rcu_periph_clock_enable(RCU_RTC);
 
     if (SUCCESS != rtc_register_sync_wait()) {
@@ -111,7 +111,7 @@ static bool RtcConfiguration() {
 
     return true;
 }
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
 void HwClock::RtcProbe() {
     HWCLOCK_DEBUG_ENTRY();
@@ -125,9 +125,9 @@ void HwClock::RtcProbe() {
     rtc_initpara.factor_asyn = 0x7F;
 #else
 #error RTC clock source should be defined.
-#endif
+#endif // RTC_CLOCK_SOURCE_IRC32K
     rtc_initpara.display_format = RTC_24HOUR;
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
     if (bkp_data_read(BKP_DATA_0) != 0xA5A5) {
         HWCLOCK_DEBUG_PUTS("RTC not yet configured");
@@ -157,7 +157,7 @@ void HwClock::RtcProbe() {
 #if defined(GD32F4XX) || defined(GD32H7XX)
 #else
         rtc_lwoff_wait();
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     }
 
     type_ = rtc::Type::kSocInternal;
@@ -184,7 +184,7 @@ bool HwClock::RtcSet(const struct tm* tm_time) {
     return (SUCCESS == rtc_init(&rtc_initpara));
 #else
     rtc_counter_set(static_cast<uint32_t>(mktime(const_cast<struct tm*>(tm_time))));
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
     return true;
 }
 
@@ -206,7 +206,7 @@ bool HwClock::RtcGet(struct tm* tm_time) {
     const auto kSeconds = static_cast<time_t>(rtc_counter_get());
     const auto* ptm = gmtime(&kSeconds);
     memcpy(tm_time, ptm, sizeof(struct tm));
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
     HWCLOCK_DEBUG_PRINTF("sec=%d, min=%d, hour=%d, mday=%d, mon=%d, year=%d, wday=%d", tm_time->tm_sec, tm_time->tm_min, tm_time->tm_hour, tm_time->tm_mday, tm_time->tm_mon, tm_time->tm_year, tm_time->tm_wday);
     return true;
@@ -242,7 +242,7 @@ bool HwClock::RtcSetAlarm(const struct tm* tm_time) {
     }
 #else
     rtc_alarm_config(static_cast<uint32_t>(mktime(const_cast<struct tm*>(tm_time))));
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
     HWCLOCK_DEBUG_EXIT();
     return true;
@@ -269,7 +269,7 @@ bool HwClock::RtcGetAlarm(struct tm* tm_time) {
     const auto kSeconds = static_cast<time_t>((RTC_ALRMH << 16U) | RTC_ALRML);
     const auto* local_time = localtime(&kSeconds);
     memcpy(tm_time, local_time, sizeof(struct tm));
-#endif
+#endif // defined(GD32F4XX) || defined(GD32H7XX)
 
     HWCLOCK_DEBUG_PRINTF("secs=%d, mins=%d, hours=%d, mday=%d, mon=%d, year=%d, wday=%d, enabled=%d", tm_time->tm_sec, tm_time->tm_min, tm_time->tm_hour, tm_time->tm_mday, tm_time->tm_mon, tm_time->tm_year, tm_time->tm_wday,
                          alarm_enabled_);

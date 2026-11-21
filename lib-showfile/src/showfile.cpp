@@ -34,7 +34,7 @@
 #include "json/showfileparams.h"
 #if defined CONFIG_USB_HOST_MSC
 #include "device/usb/host.h"
-#endif
+#endif // defined CONFIG_USB_HOST_MSC
 #include "board_statusled.h"
 #include "showfile_debug.h"
 
@@ -42,7 +42,7 @@
 ShowFile::ShowFile(uint16_t port_incoming, uint16_t port_outgoing) : showfile_osc_(port_incoming, port_outgoing) {
 #else
 ShowFile::ShowFile() {
-#endif
+#endif // CONFIG_SHOWFILE_ENABLE_OSC
     SHOWFILE_DEBUG_ENTRY();
 
     assert(s_this == nullptr);
@@ -66,7 +66,7 @@ void ShowFile::OpenFile(showfile::Mode mode, int32_t show_file_number) {
             SHOWFILE_DEBUG_EXIT();
             return;
         }
-#endif
+#endif // defined CONFIG_USB_HOST_MSC
 
         if (m_pShowFile != nullptr) {
             if (fclose(m_pShowFile) != 0) {
@@ -129,7 +129,7 @@ void ShowFile::SetRecorderShowFileCurrent(int32_t show_file_number) {
 
     SHOWFILE_DEBUG_EXIT();
 }
-#endif
+#endif // CONFIG_SHOWFILE_DISABLE_RECORD
 
 bool ShowFile::DeleteShowFile(int32_t show_file_number) {
     SHOWFILE_DEBUG_ENTRY();
@@ -294,7 +294,7 @@ void ShowFile::EnableTFTP([[maybe_unused]] bool enable_tftp) {
     }
 
     showfile::DisplayStatus();
-#endif
+#endif // CONFIG_SHOWFILE_DISABLE_TFTP
 
     SHOWFILE_DEBUG_EXIT();
 }

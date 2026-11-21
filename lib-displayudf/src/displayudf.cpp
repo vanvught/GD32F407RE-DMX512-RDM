@@ -73,7 +73,7 @@ void DisplayUdf::Show() {
     ShowArtNetNode();
 #elifdef DMXNODE_TYPE_E131
     ShowE131Bridge();
-#endif
+#endif // DMXNODE_TYPE_ARTNET
 
     for (unsigned char& label : labels_) {
         if (label > displayudf::kLabelMaxRows) {
@@ -94,12 +94,12 @@ void DisplayUdf::Show() {
 
 #ifdef RDM_RESPONDER
     ShowDmxStartAddress();
-#endif
+#endif // RDM_RESPONDER
 
 #ifndef NO_EMAC
     ShowIpAddress();
     ShowGatewayIp();
     ShowNetmask();
     ShowHostName();
-#endif
+#endif // NO_EMAC
 }

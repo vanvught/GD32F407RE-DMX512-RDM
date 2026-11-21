@@ -52,7 +52,7 @@ void SetPlayer(std::string_view value) {
         ShowFile::Instance().Record();
         return;
     }
-#endif
+#endif // CONFIG_SHOWFILE_DISABLE_RECORD
 }
 
 void SetLoop(std::string_view value) {

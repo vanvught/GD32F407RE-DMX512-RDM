@@ -37,7 +37,7 @@
 #include "network_iface.h"
 #include "network_udp.h"  // IWYU pragma: keep
 #include "network_igmp.h" // IWYU pragma: keep
-#if defined(ENABLE_HTTPD)
+#ifdef ENABLE_HTTPD
 #include "network_tcp.h" // IWYU pragma: keep
 #endif // ENABLE_HTTPD
 
