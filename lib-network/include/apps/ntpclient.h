@@ -30,12 +30,14 @@
 #include <cstdint>
 
 #include "core/protocol/ntp.h"
+#ifdef GD32
 #include "gd32_ptp.h"
+#endif // GD32
 
-#if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MIN)
+#ifndef CONFIG_NTP_CLIENT_POLL_POWER_MIN
 #define CONFIG_NTP_CLIENT_POLL_POWER_MIN 3
 #endif // CONFIG_NTP_CLIENT_POLL_POWER_MIN
-#if !defined(CONFIG_NTP_CLIENT_POLL_POWER_MAX)
+#ifndef CONFIG_NTP_CLIENT_POLL_POWER_MAX
 #define CONFIG_NTP_CLIENT_POLL_POWER_MAX 12
 #endif // CONFIG_NTP_CLIENT_POLL_POWER_MAX
 
@@ -61,7 +63,7 @@ namespace systime {
 void TimeUpdated(const timeval& time_val);
 }
 
-// PTP (GD32 only)
+#ifdef GD32
 namespace ptp {
 void Init();
 void Start();
@@ -73,6 +75,6 @@ namespace systime {
 void TimeUpdated(const gd32::ptp::ptptime& time_val);
 }
 } // namespace ptp
+#endif // GD32
 } // namespace network::apps::ntpclient
-
 #endif // APPS_NTPCLIENT_H_
