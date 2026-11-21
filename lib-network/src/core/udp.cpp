@@ -143,9 +143,7 @@ static void SendImplementation(int index, const uint8_t* data, uint32_t size, ui
     assert(s_ports[index].info.port != 0);
 
     auto* out_buffer = reinterpret_cast<Header*>(emac::eth::SendGetDmaBuffer());
-
-    // Ethernet
-    std::memcpy(out_buffer->ether.src, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    network::CopyMacAddress(out_buffer->ether.src, netif::global::netif_default.hwaddr);
     out_buffer->ether.type = __builtin_bswap16(network::ethernet::Type::kIPv4);
 
     // IPv4
@@ -188,7 +186,7 @@ static void SendImplementation(int index, const uint8_t* data, uint32_t size, ui
             s_multicast_mac[4] = multicast_ip.u8[2];
             s_multicast_mac[5] = multicast_ip.u8[3];
 
-            std::memcpy(out_buffer->ether.dst, s_multicast_mac, network::ethernet::kAddressLength);
+            network::CopyMacAddress(out_buffer->ether.dst, s_multicast_mac);
             network::MemcpyIp(out_buffer->ip4.dst, remote_ip);
         } else {
             if constexpr (S == network::arp::EthSend::kIsNormal) {
@@ -283,8 +281,8 @@ void Dump() {
     for (auto& port : s_ports) {
         auto& info = port.info;
         if (info.port != 0) {
-			used++;
-		}
+            used++;
+        }
         printf("%2d   %5d [%4x] %p\n", static_cast<int>(index), static_cast<unsigned>(info.port), static_cast<unsigned>(info.port), reinterpret_cast<void*>(info.callback));
         index++;
     }

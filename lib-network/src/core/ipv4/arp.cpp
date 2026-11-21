@@ -52,40 +52,44 @@
 #include "firmware/debug/debug_dump.h"
 
 #ifdef DEBUG_NETWORK_ARP
+static constexpr bool kDebugNetworkArpEnabled = true;
 #define ARP_DEBUG_ENTRY() DEBUG_ENTRY()
 #define ARP_DEBUG_EXIT() DEBUG_EXIT()
 #define ARP_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define ARP_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+static constexpr bool kDebugNetworkArpEnabled = false;
 #define ARP_DEBUG_ENTRY() \
-    do {                     \
+    do {                  \
     } while (false)
 #define ARP_DEBUG_EXIT() \
-    do {                    \
+    do {                 \
     } while (false)
 #define ARP_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                      \
     } while (false)
 #define ARP_DEBUG_PUTS(...) \
-    do {                       \
+    do {                    \
     } while (false)
 #endif // DEBUG_NETWORK_ARP
-
-#ifndef ARP_MAX_RECORDS
-static constexpr auto kMaxRecords = 16;
-#else
-static constexpr auto kMaxRecords = ARP_MAX_RECORDS;
-#endif // ARP_MAX_RECORDS
 
 namespace network::globals {
 extern uint32_t on_network_mask;
 } // namespace network::globals
 
 namespace network::arp {
-static constexpr uint32_t kTimerInterval = 1000;     ///< 1 second
-static constexpr uint32_t kMaxProbing = 2;           ///< 2 * 1 second
-static constexpr uint32_t kMaxReachable = (10 * 60); ///< (10 * 60) * 1 second = 10 minutes
-static constexpr uint32_t kMaxStale = (5 * 60);      ///< ( 5 * 60) * 1 second =  5 minutes
+namespace {
+constexpr auto kMaxRecords =
+#ifndef ARP_MAX_RECORDS
+    16;
+#else
+    ARP_MAX_RECORDS;
+#endif // ARP_MAX_RECORDS
+
+constexpr uint32_t kTimerInterval = 1000;     ///< 1 second
+constexpr uint32_t kMaxProbing = 2;           ///< 2 * 1 second
+constexpr uint32_t kMaxReachable = (10 * 60); ///< (10 * 60) * 1 second = 10 minutes
+constexpr uint32_t kMaxStale = (5 * 60);      ///< ( 5 * 60) * 1 second =  5 minutes
 
 enum class State {
     kStateEmpty,
@@ -110,38 +114,37 @@ struct Record {
     State state;
 };
 
-static network::arp::Record s_arp_records[kMaxRecords] SECTION_NETWORK ALIGNED;
-static struct network::arp::Header s_arp_request SECTION_NETWORK ALIGNED;
-static struct network::arp::Header s_arp_reply SECTION_NETWORK ALIGNED;
+network::arp::Record s_arp_records[kMaxRecords] SECTION_NETWORK ALIGNED;
+struct network::arp::Header s_arp_request SECTION_NETWORK ALIGNED;
+struct network::arp::Header s_arp_reply SECTION_NETWORK ALIGNED;
 
-#ifndef NDEBUG
-static constexpr char kStates[4][12] = {
+constexpr char kStates[4][12] = {
     "EMPTY",
     "PROBE",
     "REACHABLE",
     "STALE",
 };
 
-void static CacheRecordDump(network::arp::Record* record) {
-    printf("%p %-4d %c " MACSTR " %-10s " IPSTR "\n", record, record->age, record->packet.p == nullptr ? '-' : 'Q', MAC2STR(record->mac_address), kStates[static_cast<unsigned>(record->state)], IP2STR(record->ip));
-}
-
-void static CacheDump() {
-    uint32_t index = 0;
-    for (auto& record : s_arp_records) {
-        printf("%p %02d %-4d" MACSTR " %-10s " IPSTR "\n", &record, index++, record.age, MAC2STR(record.mac_address), kStates[static_cast<unsigned>(record.state)], IP2STR(record.ip));
-        if (index == 6) {
-            return;
-        }
+void CacheRecordDump([[maybe_unused]] network::arp::Record* record) {
+    if constexpr (kDebugNetworkArpEnabled) {
+        printf("%p %-4d %c " MACSTR " %-10s " IPSTR "\n", record, record->age, record->packet.p == nullptr ? '-' : 'Q', MAC2STR(record->mac_address), kStates[static_cast<unsigned>(record->state)], IP2STR(record->ip));
     }
-    puts("");
 }
-#else
-void static CacheRecordDump([[maybe_unused]] network::arp::Record* record) {}
-void static CacheDump() {}
-#endif // NDEBUG
 
-static network::arp::Record* FindRecord(uint32_t destination_ip, [[maybe_unused]] arp::Flags flag) {
+void CacheDump() {
+    if constexpr (kDebugNetworkArpEnabled) {
+        uint32_t index = 0;
+        for (auto& record : s_arp_records) {
+            printf("%p %02d %-4d" MACSTR " %-10s " IPSTR "\n", &record, index++, record.age, MAC2STR(record.mac_address), kStates[static_cast<unsigned>(record.state)], IP2STR(record.ip));
+            if (index == 6) {
+                return;
+            }
+        }
+        puts("");
+    }
+}
+
+network::arp::Record* FindRecord(uint32_t destination_ip, [[maybe_unused]] arp::Flags flag) {
     ARP_DEBUG_ENTRY();
 
     network::arp::Record* stale = nullptr;
@@ -196,7 +199,7 @@ static network::arp::Record* FindRecord(uint32_t destination_ip, [[maybe_unused]
     return nullptr;
 }
 
-static void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag) {
+void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag) {
     ARP_DEBUG_ENTRY();
     ARP_DEBUG_PRINTF(MACSTR " " IPSTR " flag=%u", MAC2STR(mac_address), IP2STR(ip), static_cast<unsigned>(flag));
 
@@ -210,13 +213,13 @@ static void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag
 
     record->state = network::arp::State::kStateReachable;
     record->age = 0;
-    std::memcpy(record->mac_address, mac_address, network::ethernet::kAddressLength);
+    network::CopyMacAddress(record->mac_address, mac_address);
 
     CacheRecordDump(record);
 
     if (record->packet.p != nullptr) {
         auto* udp = reinterpret_cast<struct network::udp::Header*>(record->packet.p);
-        std::memcpy(udp->ether.dst, record->mac_address, network::ethernet::kAddressLength);
+        network::CopyMacAddress(udp->ether.dst, record->mac_address);
         udp->ip4.chksum = 0;
 #ifndef CHECKSUM_BY_HARDWARE
         udp->ip4.chksum = Chksum(reinterpret_cast<void*>(&udp->ip4), sizeof(udp->ip4));
@@ -238,7 +241,7 @@ static void CacheUpdate(const uint8_t* mac_address, uint32_t ip, arp::Flags flag
     ARP_DEBUG_EXIT();
 }
 
-static void SendRequest(uint32_t ip) {
+void SendRequest(uint32_t ip) {
     ARP_DEBUG_PRINTF(IPSTR, IP2STR(ip));
 
     network::MemcpyIp(s_arp_request.arp.target_ip, ip);
@@ -246,7 +249,8 @@ static void SendRequest(uint32_t ip) {
     emac::eth::Send(reinterpret_cast<void*>(&s_arp_request), sizeof(struct network::arp::Header));
 }
 
-template <network::arp::EthSend S> static void Query(uint32_t destination_ip, void* packet, uint32_t size, [[maybe_unused]] arp::Flags flag) {
+template <network::arp::EthSend S>
+void Query(uint32_t destination_ip, void* packet, uint32_t size, [[maybe_unused]] arp::Flags flag) {
     ARP_DEBUG_ENTRY();
     ARP_DEBUG_PRINTF(IPSTR " %c", IP2STR(destination_ip), flag == arp::Flags::kFlagUpdate ? 'U' : 'I');
 
@@ -278,7 +282,7 @@ template <network::arp::EthSend S> static void Query(uint32_t destination_ip, vo
     ARP_DEBUG_EXIT();
 }
 
-static void CacheCleanRecord(network::arp::Record& record) {
+void CacheCleanRecord(network::arp::Record& record) {
     if (record.packet.p != nullptr) {
         network::memory::Allocator::Instance().Free(record.packet.p);
     }
@@ -286,10 +290,10 @@ static void CacheCleanRecord(network::arp::Record& record) {
     std::memset(&record, 0, sizeof(struct network::arp::Record));
 }
 
-static void SendRequestUnicast(uint32_t ip, const uint8_t* mac_address) {
+void SendRequestUnicast(uint32_t ip, const uint8_t* mac_address) {
     ARP_DEBUG_PRINTF(IPSTR, IP2STR(ip));
 
-    std::memcpy(s_arp_request.ether.dst, mac_address, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_request.ether.dst, mac_address);
     network::MemcpyIp(s_arp_request.arp.target_ip, ip);
 
     emac::eth::Send(reinterpret_cast<void*>(&s_arp_request), sizeof(struct network::arp::Header));
@@ -297,7 +301,7 @@ static void SendRequestUnicast(uint32_t ip, const uint8_t* mac_address) {
     network::Memset<0xFF, network::ethernet::kAddressLength>(s_arp_request.ether.dst);
 }
 
-static void Timer([[maybe_unused]] TimerHandle_t handle) {
+void Timer([[maybe_unused]] TimerHandle_t handle) {
     for (auto& record : s_arp_records) {
         const auto kState = record.state;
         if (kState != network::arp::State::kStateEmpty) {
@@ -333,14 +337,14 @@ static void Timer([[maybe_unused]] TimerHandle_t handle) {
     CacheDump();
 }
 
-static void SendReply(const struct network::arp::Header* p_arp) {
+void SendReply(const struct network::arp::Header* p_arp) {
     ARP_DEBUG_ENTRY();
 
     // Ethernet header
-    std::memcpy(s_arp_reply.ether.dst, p_arp->ether.src, network::ethernet::kAddressLength);
+    CopyMacAddress(s_arp_reply.ether.dst, p_arp->ether.src);
     // ARP Header
     const auto kIpTarget = network::MemcpyIp(p_arp->arp.target_ip);
-    std::memcpy(s_arp_reply.arp.target_mac, p_arp->arp.sender_mac, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_reply.arp.target_mac, p_arp->arp.sender_mac);
     std::memcpy(s_arp_reply.arp.target_ip, p_arp->arp.sender_ip, network::ip4::kAddressLength);
     network::MemcpyIp(s_arp_reply.arp.sender_ip, kIpTarget);
 
@@ -348,6 +352,7 @@ static void SendReply(const struct network::arp::Header* p_arp) {
 
     ARP_DEBUG_EXIT();
 }
+} // namespace
 
 // Public interface
 
@@ -360,7 +365,7 @@ void __attribute__((cold)) Init() {
 
     // ARP Request template
     // Ethernet header
-    std::memcpy(s_arp_request.ether.src, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_request.ether.src, netif::global::netif_default.hwaddr);
     std::memset(s_arp_request.ether.dst, 0xFF, network::ethernet::kAddressLength);
     s_arp_request.ether.type = __builtin_bswap16(network::ethernet::Type::kArp);
 
@@ -371,13 +376,13 @@ void __attribute__((cold)) Init() {
     s_arp_request.arp.protocol_size = kProtocolSize;
     s_arp_request.arp.opcode = __builtin_bswap16(network::arp::OpCode::kRqstRqst);
 
-    std::memcpy(s_arp_request.arp.sender_mac, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_request.arp.sender_mac, netif::global::netif_default.hwaddr);
     network::MemcpyIp(s_arp_request.arp.sender_ip, netif::global::netif_default.ip.addr);
     std::memset(s_arp_request.arp.target_mac, 0x00, network::ethernet::kAddressLength);
 
     // ARP Reply Template
     // Ethernet header
-    std::memcpy(s_arp_reply.ether.src, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_reply.ether.src, netif::global::netif_default.hwaddr);
     s_arp_reply.ether.type = __builtin_bswap16(network::ethernet::Type::kArp);
 
     // ARP Header
@@ -387,7 +392,7 @@ void __attribute__((cold)) Init() {
     s_arp_reply.arp.protocol_size = kProtocolSize;
     s_arp_reply.arp.opcode = __builtin_bswap16(network::arp::OpCode::kRqstReply);
 
-    std::memcpy(s_arp_reply.arp.sender_mac, netif::global::netif_default.hwaddr, network::ethernet::kAddressLength);
+    network::CopyMacAddress(s_arp_reply.arp.sender_mac, netif::global::netif_default.hwaddr);
 
     SoftwareTimerAdd(network::arp::kTimerInterval, Timer);
 
@@ -436,7 +441,8 @@ __attribute__((hot)) void Input(const struct network::arp::Header* arp) {
     }
 }
 
-template <network::arp::EthSend S> static void SendImplementation(void* packet, uint32_t size, uint32_t remote_ip) {
+template <network::arp::EthSend S>
+static void SendImplementation(void* packet, uint32_t size, uint32_t remote_ip) {
     ARP_DEBUG_ENTRY();
     ARP_DEBUG_PRINTF(IPSTR, IP2STR(remote_ip));
 
@@ -472,7 +478,7 @@ template <network::arp::EthSend S> static void SendImplementation(void* packet, 
     for (auto& record : s_arp_records) {
         if (record.state >= network::arp::State::kStateReachable) {
             if (record.ip == destination_ip) {
-                std::memcpy(p->ether.dst, record.mac_address, network::ethernet::kAddressLength);
+                network::CopyMacAddress(p->ether.dst, record.mac_address);
 
                 if constexpr (S == network::arp::EthSend::kIsNormal) {
                     emac::eth::Send(packet, size);
