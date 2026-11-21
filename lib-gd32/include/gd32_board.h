@@ -26,6 +26,8 @@
 #ifndef GD32_BOARD_H_
 #define GD32_BOARD_H_
 
+#include <string_view>
+
 #ifdef BOARD_GD32F103RC
 #include "board/gd32f103rc.h"
 #elif defined(BOARD_GD32F107RC)
@@ -114,6 +116,19 @@ void emac_debug_run();
 #include "panelled.h"
 
 namespace board {
+inline constexpr std::string_view kBoardName = GD32_BOARD_NAME;
+
+constexpr std::string_view BoardName() {
+    return kBoardName;
+}
+
+constexpr const char* BoardName(uint8_t& length) {
+    static_assert(kBoardName.size() <= UINT8_MAX);
+
+    length = static_cast<uint8_t>(kBoardName.size());
+    return kBoardName.data();
+}
+
 inline void Run() {
 #ifdef ENABLE_USB_HOST
     usbh_core_task(&usb_host);
@@ -130,6 +145,6 @@ inline void Run() {
 } // namespace board
 #endif // __cplusplus
 
-#include "board/gpio_header.h"
+#include "board/gpio_header.h" // IWYU pragma: keep
 
 #endif // GD32_BOARD_H_

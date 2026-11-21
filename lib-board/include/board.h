@@ -59,19 +59,4 @@ const char* Website();
 #include "linux_board.h"
 #endif // GD32
 
-namespace board {
-inline constexpr std::string_view kBoardName = GD32_BOARD_NAME;
-
-constexpr std::string_view BoardName() {
-    return kBoardName;
-}
-
-constexpr const char* BoardName(uint8_t& length) {
-    static_assert(kBoardName.size() <= UINT8_MAX);
-
-    length = static_cast<uint8_t>(kBoardName.size());
-    return kBoardName.data();
-}
-} // namespace board
-
 #endif // BOARD_H_
