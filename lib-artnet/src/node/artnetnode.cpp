@@ -1033,7 +1033,7 @@ void ArtNetNode::HandleDmx() {
             puts("WARN: 9. More than two sources, discarding data");
             return;
         }
-#endif                      // NDEBUG
+#endif // NDEBUG
         else [[unlikely]] { // Case 0.
             SendDiag(artnet::PriorityCodes::kDiagHigh, "%u: 0. No cases matched, this shouldn't happen!", port_index);
 #ifndef NDEBUG

@@ -39,6 +39,7 @@
 #include "rdmconst.h"
 #include "e120.h"
 #include "rdm_e120.h"
+#include "dmxnode.h"
 
 namespace {
 void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) {
