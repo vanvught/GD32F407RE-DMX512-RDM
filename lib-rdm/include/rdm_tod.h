@@ -207,7 +207,7 @@ class Tod {
     }
 
     void Mute() {
-        if (saved_index_ == kInvalidEntry) {
+        if (saved_index_ >= kInvalidEntry) {
             return;
         }
 
