@@ -115,31 +115,6 @@ inline bool ValidateOffset(int32_t hours, uint32_t minutes, int32_t& utc_offset_
 }
 
 /**
- * @brief Checks if the given UTC offset in seconds is valid.
- * @param utc_offset_seconds UTC offset in seconds
- * @return true if offset is valid; false otherwise
- */
-inline bool IsValidOffset(int32_t utc_offset_seconds) {
-    if (utc_offset_seconds == 0) {
-        return true;
-    }
-    int32_t hours = utc_offset_seconds / 3600;
-    uint32_t minutes = (utc_offset_seconds >= 0) ? static_cast<uint32_t>(utc_offset_seconds - hours * 3600) / 60 : static_cast<uint32_t>((hours * 3600 - utc_offset_seconds)) / 60;
-
-    if (minutes == 0 && hours >= kUtcOffsetMin && hours <= kUtcOffsetMax) {
-        return true;
-    }
-
-    for (const auto& offset : kValidOffsets) {
-        int32_t offset_seconds = (offset.hours >= 0) ? (offset.hours * 3600) + static_cast<int32_t>(offset.minutes * 60) : offset.hours * 3600 - static_cast<int32_t>(offset.minutes * 60);
-        if (utc_offset_seconds == offset_seconds) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
  * @brief Converts UTC offset in seconds to (hours, minutes).
  * @param utc_offset_seconds Offset in seconds
  * @param[out] hours Signed hour component
@@ -155,6 +130,26 @@ inline void SplitOffset(int32_t utc_offset_seconds, int32_t& hours, uint32_t& mi
 }
 
 /**
+ * @brief Checks if the given UTC offset in seconds is valid.
+ * @param utc_offset_seconds UTC offset in seconds
+ * @return true if offset is valid; false otherwise
+ */
+[[nodiscard]] inline bool IsValidOffset(int32_t utc_offset_seconds) {
+    if (utc_offset_seconds % 60 != 0) {
+        return false;
+    }
+
+    int32_t hours;
+    uint32_t minutes;
+
+    SplitOffset(utc_offset_seconds, hours, minutes);
+
+    int32_t validated_seconds;
+
+    return ValidateOffset(hours, minutes, validated_seconds) && validated_seconds == utc_offset_seconds;
+}
+
+/**
  * @brief Parses a UTC string in "+HH:MM" or "-HH:MM" format.
  * @param buffer Pointer to the 6-character buffer
  * @param buffer_length Must be 6
@@ -162,7 +157,7 @@ inline void SplitOffset(int32_t utc_offset_seconds, int32_t& hours, uint32_t& mi
  * @param[out] minutes Unsigned minute component
  * @return true if parse was successful and valid; false otherwise
  */
-inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hours, uint32_t& minutes) {
+inline bool ParseOffset(const char* buffer, size_t buffer_length, int32_t& hours, uint32_t& minutes) {
     if (buffer == nullptr) {
         return false;
     }
@@ -210,11 +205,19 @@ inline bool ParseOffset(const char* buffer, uint32_t buffer_length, int32_t& hou
         return false;
     }
 
-    hours = negative ? -h : h;
-    minutes = m;
+    const auto kParsedHours = negative ? -h : h;
+    const auto kParsedMinutes = m;
 
-    int32_t dummy;
-    return ValidateOffset(hours, minutes, dummy);
+    int32_t offset_seconds;
+
+    if (!ValidateOffset(kParsedHours, kParsedMinutes, offset_seconds)) {
+        return false;
+    }
+
+    hours = kParsedHours;
+    minutes = kParsedMinutes;
+
+    return true;
 }
 
 inline bool ParseOffset(std::string_view utc_sv, int32_t& hours, uint32_t& minutes) {

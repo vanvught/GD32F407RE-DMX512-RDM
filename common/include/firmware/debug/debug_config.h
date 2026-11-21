@@ -33,25 +33,25 @@ inline constexpr bool kAssertionsEnabled = false;
 inline constexpr bool kAssertionsEnabled = true;
 #endif // NDEBUG
 
-#if defined(CONFIG_DEBUG_TRACE) // DEBUG_ENTRY, DEBUG_EXIT, DEBUG_PRINTF
+#ifdef CONFIG_DEBUG_TRACE // DEBUG_ENTRY, DEBUG_EXIT, DEBUG_PRINTF
 inline constexpr bool kTraceEnabled = true;
 #else
 inline constexpr bool kTraceEnabled = false;
 #endif // CONFIG_DEBUG_TRACE
 
-#if defined(CONFIG_DEBUG_DUMP) // Dump(), PrintBits()
+#ifdef CONFIG_DEBUG_DUMP // Dump(), PrintBits()
 inline constexpr bool kDumpEnabled = true;
 #else
 inline constexpr bool kDumpEnabled = false;
 #endif // CONFIG_DEBUG_DUMP
 
-#if defined(CONFIG_DEBUG_STACK) // Stack monitoring
+#ifdef CONFIG_DEBUG_STACK // Stack monitoring
 inline constexpr bool kStackMonitoringEnabled = true;
 #else
 inline constexpr bool kStackMonitoringEnabled = false;
 #endif // CONFIG_DEBUG_STACK
 
-#if defined(CONFIG_DEBUG_I2C) // I2C detect
+#ifdef CONFIG_DEBUG_I2C // I2C detect
 inline constexpr bool kI2cDetectEnabled = true;
 #else
 inline constexpr bool kI2cDetectEnabled = false;

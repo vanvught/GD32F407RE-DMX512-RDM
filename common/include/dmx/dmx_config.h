@@ -28,7 +28,7 @@
 
 #include "gd32.h" // IWYU pragma: keep
 
-#if defined(BOARD_GD32F103RC)
+#ifdef BOARD_GD32F103RC
 #include "board_gd32f103rc.h" // IWYU pragma: keep
 #elif defined(BOARD_GD32F107RC)
 #include "board_gd32f107rc.h" // IWYU pragma: keep

@@ -31,42 +31,30 @@
 
 #include "firmware/debug/debug_config.h"
 
-#define DEBUG_ENTRY()                                                          \
-    do {                                                                       \
-        if constexpr (::debug::config::kTraceEnabled) {                        \
-            const auto location = std::source_location::current();             \
-            printf("-> %s(%u):%s\n",                                           \
-                   location.file_name(),                                       \
-                   static_cast<unsigned>(location.line()),                     \
-                   location.function_name());                                  \
-        }                                                                      \
+#define DEBUG_ENTRY()                                               \
+    do {                                                            \
+        if constexpr (::debug::config::kTraceEnabled) {             \
+            printf("-> %s(%d):%s\n", __FILE__, __LINE__, __func__); \
+        }                                                           \
     } while (false)
 
-#define DEBUG_EXIT()                                                           \
-    do {                                                                       \
-        if constexpr (::debug::config::kTraceEnabled) {                        \
-            const auto location = std::source_location::current();             \
-            printf("<- %s(%u):%s\n",                                           \
-                   location.file_name(),                                       \
-                   static_cast<unsigned>(location.line()),                     \
-                   location.function_name());                                  \
-        }                                                                      \
+#define DEBUG_EXIT()                                                \
+    do {                                                            \
+        if constexpr (::debug::config::kTraceEnabled) {             \
+            printf("<- %s(%d):%s\n", __FILE__, __LINE__, __func__); \
+        }                                                           \
     } while (false)
 
-#define DEBUG_PRINTF(format, ...)                                              \
-    do {                                                                       \
-        if constexpr (::debug::config::kTraceEnabled) {                        \
-            const auto location = std::source_location::current();             \
-            printf("   %s(%u):%s: " format "\n",                               \
-                   location.file_name(),                                       \
-                   static_cast<unsigned>(location.line()),                     \
-                   location.function_name() __VA_OPT__(, ) __VA_ARGS__);       \
-        }                                                                      \
+#define DEBUG_PRINTF(format, ...)                                                                          \
+    do {                                                                                                   \
+        if constexpr (::debug::config::kTraceEnabled) {                                                    \
+            printf("   %s(%d):%s: " format "\n", __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__); \
+        }                                                                                                  \
     } while (false)
 
-#define DEBUG_PUTS(message)                                                    \
-    do {                                                                       \
-        DEBUG_PRINTF("%s", (message));                                         \
+#define DEBUG_PUTS(message)            \
+    do {                               \
+        DEBUG_PRINTF("%s", (message)); \
     } while (false)
 
 #endif // FIRMWARE_DEBUG_DEBUG_DEBUG_H_

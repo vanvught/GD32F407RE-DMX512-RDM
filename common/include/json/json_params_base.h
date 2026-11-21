@@ -30,7 +30,7 @@
 #ifndef DISABLE_FS
 #include <cstdio>
 #include <string_view>
-#endif
+#endif // DISABLE_FS
 
 #include "json/json_debug.h"
 

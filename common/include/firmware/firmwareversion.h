@@ -31,7 +31,7 @@
 
 #include "board.h"
 
-#if !defined(STR_HELPER)
+#ifndef STR_HELPER
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 #endif // STR_HELPER
