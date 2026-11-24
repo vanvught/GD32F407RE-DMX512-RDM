@@ -101,6 +101,8 @@ class Dmx {
     const uint8_t* RdmReceive(uint32_t port_index);
     const uint8_t* RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms);
 
+    bool IsReceiveOngoing(uint32_t port_index);
+
     static Dmx* Get() { return s_this; }
 
    private:
