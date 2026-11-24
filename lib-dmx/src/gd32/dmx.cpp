@@ -1478,9 +1478,9 @@ void Dmx::SetPortDirection(uint32_t port_index, dmx::Direction port_direction, b
     DMX_CHECK_PORT_INDEX_VOID(port_index);
 
     if (port_direction_[port_index] != port_direction) {
-        port_direction_[port_index] = port_direction;
-
         DataDisable(port_index);
+
+        port_direction_[port_index] = port_direction;
 
         if (port_direction == dmx::Direction::kOutput) {
             GPIO_BOP(kDirGpio[port_index].port) = kDirGpio[port_index].pin;
@@ -1508,9 +1508,9 @@ void Dmx::SetPortDirection() {
 
     if constexpr (kDirGpio[kPortIndex].usage == dmx::port::Usage::kTxRx) {
         if (port_direction_[kPortIndex] != kPortDirection) {
-            port_direction_[kPortIndex] = kPortDirection;
-
             DataDisable(kPortIndex);
+
+            port_direction_[kPortIndex] = kPortDirection;
 
             if constexpr (kPortDirection == dmx::Direction::kOutput) {
                 GPIO_BOP(kDirGpio[kPortIndex].port) = kDirGpio[kPortIndex].pin;
@@ -1652,7 +1652,8 @@ void Dmx::FullOn() {
 }
 
 bool Dmx::IsReceiveOngoing(uint32_t port_index) {
-    return sv_rx_buffer[port_index].state != dmx::TxRxState::kIdle;
+    const auto& rx_buffer = sv_rx_buffer[port_index];
+    return (rx_buffer.state != dmx::TxRxState::kIdle) || ((rx_buffer.rdm.index & dmx::kRdmSlotsCompleteFlag) != 0U);
 }
 
 // DMX Send
