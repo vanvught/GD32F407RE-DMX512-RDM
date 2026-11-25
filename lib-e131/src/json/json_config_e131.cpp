@@ -33,7 +33,7 @@
 #include "json/json_helpers.h"
 #include "dmxnode_nodetype.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX
 

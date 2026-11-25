@@ -32,13 +32,13 @@
 #include "e131sync.h"
 #include "dmxnode_outputtype.h"
 #include "softwaretimers.h"
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
 #include "llrp/llrpdevice.h"
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
-#endif
+#endif // ALIGNED
 
 namespace e131bridge {
 enum class Status : uint8_t { kOff, kStandby, kOn };
@@ -100,9 +100,9 @@ struct InputPort {
 } // namespace e131bridge
 
 class E131Bridge
-#if defined(NODE_RDMNET_LLRP_ONLY)
+#ifdef NODE_RDMNET_LLRP_ONLY
     : LLRPDevice
-#endif
+#endif // NODE_RDMNET_LLRP_ONLY
 {
    public:
     E131Bridge();
@@ -142,10 +142,10 @@ class E131Bridge
 
     dmxnode::Direction PortDirection(uint32_t port_index) const;
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
     void SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style);
     dmxnode::OutputStyle GetOutputStyle(uint32_t port_index) const;
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
     void SetPriority(uint32_t port_index, uint8_t priority);
     uint8_t GetPriority(uint32_t port_index) const;
@@ -176,11 +176,11 @@ class E131Bridge
     void SetSourceName(const char* source_name);
     [[nodiscard]] const char* GetSourceName() const;
     [[nodiscard]] const uint8_t* GetCid() const;
-#endif
+#endif // defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
 
 #if defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
     void HandleShowFile(const e131::DataPacket* pE131DataPacket);
-#endif
+#endif // defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
 
     void Print();
 
@@ -240,14 +240,14 @@ class E131Bridge
 #if defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
     char source_name_[e131::kSourceNameLength];
     uint8_t cid_[e117::kCidLength];
-#endif
+#endif // defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
 
-#if defined(E131_HAVE_DMXIN)
+#ifdef E131_HAVE_DMXIN
     e131::DataPacket e131_data_packet_;
     e131::DiscoveryPacket e131_discovery_packet_;
     uint32_t discovery_ip_address_{0};
     TimerHandle_t timer_handle_send_discovery_packet_{-1};
-#endif
+#endif // E131_HAVE_DMXIN
 
     static inline E131Bridge* s_this;
 };

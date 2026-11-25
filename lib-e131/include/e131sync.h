@@ -29,4 +29,4 @@
 
 typedef void (*E131SyncCallbackFunctionPtr)();
 
-#endif  // E131SYNC_H_
+#endif // E131SYNC_H_

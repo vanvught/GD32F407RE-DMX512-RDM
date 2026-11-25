@@ -55,7 +55,7 @@ void DmxNodeParams::SetNodeName(std::string_view value) {
 }
 
 void DmxNodeParams::SetFailsafe(std::string_view value) {
-    store_dmxnode.fail_safe = std::to_underlying(dmxnode::GetFailsafe(value.data()));
+    store_dmxnode.fail_safe = std::to_underlying(dmxnode::GetFailsafe(value));
 }
 
 void DmxNodeParams::SetDisableMergeTimeout(std::string_view value) {
@@ -84,7 +84,7 @@ void DmxNodeParams::SetDirectionPort(std::string_view key, std::string_view valu
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto direction = store_dmxnode.direction;
-    common::Set2BitField<dmxnode::Direction>(kIndex, dmxnode::PortDirection(value.data()), direction);
+    common::Set2BitField<dmxnode::Direction>(kIndex, dmxnode::PortDirection(value), direction);
     store_dmxnode.direction = direction;
 }
 
@@ -93,14 +93,14 @@ void DmxNodeParams::SetMergeModePort(std::string_view key, std::string_view valu
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
 
     auto merge_mode = store_dmxnode.merge_mode;
-    common::Set2BitField<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(value.data()), merge_mode);
+    common::Set2BitField<dmxnode::MergeMode>(kIndex, dmxnode::GetMergeMode(value), merge_mode);
     store_dmxnode.merge_mode = merge_mode;
 }
 
 void DmxNodeParams::SetOutputStylePort(std::string_view key, std::string_view value) {
     const auto kSuffix = key.back();
     const auto kIndex = static_cast<uint8_t>(kSuffix - 'a');
-    const auto kOutputStyle = dmxnode::GetOutputStyle(value.data());
+    const auto kOutputStyle = dmxnode::GetOutputStyle(value);
 
     if (kOutputStyle != dmxnode::OutputStyle::kDelta) {
         store_dmxnode.output_style |= static_cast<uint8_t>(1U << kIndex);
@@ -110,7 +110,7 @@ void DmxNodeParams::SetOutputStylePort(std::string_view key, std::string_view va
 }
 
 void DmxNodeParams::Store(std::string_view buffer) {
-    ParseJsonWithTable(buffer,kDmxNodeKeys);
+    ParseJsonWithTable(buffer, kDmxNodeKeys);
     ConfigStore::Instance().Store(&store_dmxnode, &ConfigurationStore::dmx_node);
 }
 
@@ -154,7 +154,12 @@ void DmxNodeParams::Set() {
 void DmxNodeParams::Dump() {
     printf("%s::%s \'%s\':\n", __FILE__, __FUNCTION__, json::DmxNodeParamsConst::kFileName);
     printf(" %s=%s\n", json::DmxNodeParamsConst::kNodeName.name, store_dmxnode.node_name);
-    printf(" %s=%s [%u]\n", json::DmxNodeParamsConst::kFailsafe.name, dmxnode::GetFailsafe(static_cast<dmxnode::FailSafe>(store_dmxnode.fail_safe)), store_dmxnode.fail_safe);
+    const auto kFailsafeString = dmxnode::GetFailsafe(static_cast<dmxnode::FailSafe>(store_dmxnode.fail_safe));
+    printf(" %s=%.*s [%u]\n",
+           json::DmxNodeParamsConst::kFailsafe.name,                         //
+           static_cast<int>(kFailsafeString.size()), kFailsafeString.data(), //
+           store_dmxnode.fail_safe                                           //
+    );
     printf(" %s=%u\n", json::DmxNodeParamsConst::kDisableMergeTimeout.name, static_cast<unsigned>(common::IsFlagSet(store_dmxnode.flags, Flags::Flag::kDisableMergeTimeout)));
 
     if constexpr (dmxnode::kConfigPortCount != 0) {
@@ -162,12 +167,27 @@ void DmxNodeParams::Dump() {
         for (uint32_t port_index = 0; port_index < dmxnode::kConfigPortCount; port_index++) {
             printf(" %s=%s\n", json::DmxNodeParamsConst::kLabelPort[port_index].name, reinterpret_cast<char*>(store_dmxnode.port_name[port_index]));
             printf(" %s=%u\n", json::DmxNodeParamsConst::kUniversePort[port_index].name, store_dmxnode.universe[port_index]);
-            const auto kPortDirection = common::Get2BitField<dmxnode::Direction>(port_index, store_dmxnode.direction);
-            printf(" %s=%s\n", json::DmxNodeParamsConst::kDirectionPort[port_index].name, dmxnode::PortDirection(kPortDirection));
-            const auto kPortMergeMode = common::Get2BitField<dmxnode::MergeMode>(port_index, store_dmxnode.merge_mode);
-            printf(" %s=%s\n", json::DmxNodeParamsConst::kMergeModePort[port_index].name, dmxnode::GetMergeMode(kPortMergeMode));
+
+            const auto kDirection = common::Get2BitField<dmxnode::Direction>(port_index, store_dmxnode.direction);
+            const auto kDirectionString = dmxnode::PortDirection(kDirection);
+            printf(" %s=%.*s\n",
+                   json::DmxNodeParamsConst::kDirectionPort[port_index].name,         //
+                   static_cast<int>(kDirectionString.size()), kDirectionString.data() //
+            );
+
+            const auto kMergeMode = common::Get2BitField<dmxnode::MergeMode>(port_index, store_dmxnode.merge_mode);
+            const auto kMergeModeString = dmxnode::GetMergeMode(kMergeMode);
+            printf(" %s=%.*s\n",
+                   json::DmxNodeParamsConst::kMergeModePort[port_index].name,         //
+                   static_cast<int>(kMergeModeString.size()), kMergeModeString.data() //
+            );
+
             const auto kOutputStyle = GetOutputStyleSet(1U << port_index);
-            printf(" %s=%s\n", DmxNodeParamsConst::kOutputStylePort[port_index].name, dmxnode::GetOutputStyle(kOutputStyle));
+            const auto kOutputStyleString = dmxnode::GetOutputStyle(kOutputStyle);
+            printf(" %s=%.*s\n",
+                   DmxNodeParamsConst::kOutputStylePort[port_index].name,                 //
+                   static_cast<int>(kOutputStyleString.size()), kOutputStyleString.data() //
+            );
         }
 #endif // DMX_MAX_PORTS
     }

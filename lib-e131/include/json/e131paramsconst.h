@@ -36,27 +36,27 @@ struct E131ParamsConst {
     static constexpr auto kPriorityPortA = json::MakeKey("priority_port_a");
 #if (DMX_MAX_PORTS > 1)
     static constexpr auto kPriorityPortB = json::MakeKey("priority_port_b");
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
     static constexpr auto kPriorityPortC = json::MakeKey("priority_port_c");
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
     static constexpr auto kPriorityPortD = json::MakeKey("priority_port_d");
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     static constexpr json::KeyDefinition kPriorityPort[] = {
         kPriorityPortA,
 #if (DMX_MAX_PORTS > 1)
         kPriorityPortB,
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         kPriorityPortC,
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         kPriorityPortD,
-#endif
+#endif // (DMX_MAX_PORTS == 4)
     };
-#endif
+#endif // DMX_MAX_PORTS
 };
 } // namespace json
 

@@ -29,7 +29,7 @@
 #include <cstring>
 #include <cassert>
 #include <span>
-#include <strings.h>
+#include <string_view>
 
 #include "common/utils/utils_string.h"
 #include "configurationstore.h"
@@ -39,197 +39,219 @@ inline constexpr uint16_t kAddressInvalid = 0xFFFF;
 inline constexpr uint32_t kStartAddressDefault = 1;
 inline constexpr uint32_t kUniverseSize = 512;
 inline constexpr uint8_t kDmxMaxValue = 255;
-/*
- * Art-Net
- */
+// Art-Net
 inline constexpr uint32_t kNodeNameLength = 64; // Long Name
 static_assert(common::store::dmxnode::kNodeNameLength == kNodeNameLength);
 inline constexpr uint32_t kPortNameLength = 18; // Port Name
 static_assert(common::store::dmxnode::kPortNameLength == kPortNameLength);
-/*
- * sACN E1.31
- */
+// sACN E1.31
 namespace priority {
 inline constexpr uint8_t kLowest = 1;
 inline constexpr uint8_t kDefault = 100;
 inline constexpr uint8_t kHighest = 200;
 } // namespace priority
 
+inline constexpr uint32_t kMaxPorts =
 #if !defined(DMXNODE_PORTS) || (DMXNODE_PORTS == 0)
-inline constexpr uint32_t kMaxPorts = 1; // ISO C++ forbids zero-size array
+    1; // ISO C++ forbids zero-size array
 #else
-inline constexpr uint32_t kMaxPorts = DMXNODE_PORTS; // From build config
+    DMXNODE_PORTS; // From build config
 #endif // !defined(DMXNODE_PORTS) || (DMXNODE_PORTS == 0)
 
+inline constexpr uint32_t kDmxportOffset =
 #ifndef CONFIG_DMXNODE_DMX_PORT_OFFSET
-inline constexpr uint32_t kDmxportOffset = 0; // Default if not overridden
+    0; // Default if not overridden
 #else
-inline constexpr uint32_t kDmxportOffset = CONFIG_DMXNODE_DMX_PORT_OFFSET; // From build config
+    CONFIG_DMXNODE_DMX_PORT_OFFSET; // From build config
 #endif // CONFIG_DMXNODE_DMX_PORT_OFFSET
 
-inline constexpr uint32_t kConfigPortCount = ((kMaxPorts - kDmxportOffset) <= common::store::dmxnode::kParamPorts) ? (kMaxPorts - kDmxportOffset) : common::store::dmxnode::kParamPorts;
+static_assert(kDmxportOffset <= kMaxPorts);
+inline constexpr auto kConfigPortCount = std::min<uint32_t>(kMaxPorts - kDmxportOffset, common::store::dmxnode::kParamPorts);
 
-enum class Personality { kArtnet, kSacn, kNode };
+enum class Personality : uint8_t { kArtnet, kSacn, kNode };
 
-enum class MergeMode { kHtp, kLtp };
+namespace personality {
+inline constexpr std::string_view kNode{"node"};
+inline constexpr std::string_view kSacn{"sacn"};
+inline constexpr std::string_view kArtnet{"artnet"};
+} // namespace personality
+
+enum class MergeMode : uint8_t { kHtp, kLtp };
 
 namespace mergemode {
-inline static constexpr const char kHtp[] = "htp";
-inline static constexpr const char kLtp[] = "ltp";
-inline static constexpr const char kHtpUpper[] = "HTP";
-inline static constexpr const char kLtpUpper[] = "LTP";
+inline constexpr std::string_view kHtp{"htp"};
+inline constexpr std::string_view kLtp{"ltp"};
+inline constexpr std::string_view kHtpUpper{"HTP"};
+inline constexpr std::string_view kLtpUpper{"LTP"};
 } // namespace mergemode
 
-enum class Direction { kInput, kOutput, kDisable };
+enum class Direction : uint8_t { kInput, kOutput, kDisable };
+
+namespace direction {
+inline constexpr std::string_view kInput{"input"};
+inline constexpr std::string_view kOutput{"output"};
+inline constexpr std::string_view kDisable{"disable"};
+} // namespace direction
 
 enum class FailSafe : uint8_t { kHold, kOff, kOn, kPlayback, kRecord };
 
 namespace failsafe {
-inline static constexpr const char kHold[] = "hold";
-inline static constexpr const char kOff[] = "off";
-inline static constexpr const char kOn[] = "on";
-inline static constexpr const char kPlayback[] = "playback";
-inline static constexpr const char kRecord[] = "record";
+inline constexpr std::string_view kHold{"hold"};
+inline constexpr std::string_view kOff{"off"};
+inline constexpr std::string_view kOn{"on"};
+inline constexpr std::string_view kPlayback{"playback"};
+inline constexpr std::string_view kRecord{"record"};
 } // namespace failsafe
 
-enum class OutputStyle {
+enum class OutputStyle : uint8_t {
     kDelta,    ///< DMX frame is triggered
     kConstant, ///< DMX output is continuous
 };
 
-enum class Rdm { kDisable, kEnable };
+namespace outputstyle {
+inline constexpr std::string_view kDelta{"delta"};
+inline constexpr std::string_view kConstant{"const"};
+inline constexpr std::string_view kDeltaUpper{"DELTA"};
+inline constexpr std::string_view kConstantUpper{"CONST"};
+} // namespace outputstyle
 
-inline Personality GetPersonality(const char* personality) {
-    assert(personality != nullptr);
-    if (strncasecmp(personality, "node", 4) == 0) {
+enum class Rdm : uint8_t { kDisable, kEnable };
+
+[[nodiscard]] constexpr std::string_view GetPersonality(Personality value) {
+    switch (value) {
+        case Personality::kNode:
+            return personality::kNode;
+        case Personality::kSacn:
+            return personality::kSacn;
+        case Personality::kArtnet:
+            return personality::kArtnet;
+    }
+
+    return personality::kArtnet;
+}
+
+[[nodiscard]] constexpr Personality GetPersonality(std::string_view value) {
+    if (value == personality::kNode) {
         return Personality::kNode;
     }
 
-    if (strncasecmp(personality, "sacn", 4) == 0) {
+    if (value == personality::kSacn) {
         return Personality::kSacn;
     }
 
     return Personality::kArtnet;
 }
 
-[[nodiscard]] constexpr const char* GetPersonality(Personality personality) {
-    if (personality == Personality::kNode) {
-        return "node";
-    }
+static_assert(GetPersonality("node") == Personality::kNode);
+static_assert(GetPersonality("sacn") == Personality::kSacn);
+static_assert(GetPersonality("artnet") == Personality::kArtnet);
 
-    if (personality == Personality::kSacn) {
-        return "sacn";
-    }
+static_assert(GetPersonality("node123") == Personality::kArtnet);
+static_assert(GetPersonality("") == Personality::kArtnet);
 
-    return "artnet";
+static_assert(GetPersonality(Personality::kNode) == "node");
+static_assert(GetPersonality(Personality::kSacn) == "sacn");
+
+[[nodiscard]] constexpr MergeMode GetMergeMode(std::string_view value) {
+    return value == mergemode::kLtp ? MergeMode::kLtp : MergeMode::kHtp;
 }
 
-inline MergeMode GetMergeMode(const char* merge_mode) {
-    assert(merge_mode != nullptr);
-    if (strncasecmp(merge_mode, mergemode::kLtp, sizeof(mergemode::kLtp) - 1) == 0) {
-        return MergeMode::kLtp;
-    }
-
-    return MergeMode::kHtp;
-}
-
-[[nodiscard]] constexpr const char* GetMergeMode(MergeMode merge_mode, bool to_upper = false) {
+[[nodiscard]] constexpr std::string_view GetMergeMode(MergeMode value, bool to_upper = false) {
     if (to_upper) {
-        return (merge_mode == MergeMode::kHtp) ? mergemode::kHtpUpper : mergemode::kLtpUpper;
+        return value == MergeMode::kLtp ? mergemode::kLtpUpper : mergemode::kHtpUpper;
     }
-    return (merge_mode == MergeMode::kHtp) ? mergemode::kHtp : mergemode::kLtp;
+
+    return value == MergeMode::kLtp ? mergemode::kLtp : mergemode::kHtp;
 }
 
-inline const char* GetMergeMode(unsigned m, bool to_upper = false) {
-    return GetMergeMode(static_cast<MergeMode>(m), to_upper);
-}
-
-inline Direction PortDirection(const char* port_direction) {
-    assert(port_direction != nullptr);
-
-    if (strncasecmp(port_direction, "input", 5) == 0) {
+[[nodiscard]] constexpr Direction PortDirection(std::string_view value) {
+    if (value == direction::kInput) {
         return Direction::kInput;
     }
 
-    if (strncasecmp(port_direction, "disable", 7) == 0) {
+    if (value == direction::kDisable) {
         return Direction::kDisable;
     }
 
     return Direction::kOutput;
 }
 
-[[nodiscard]] constexpr const char* PortDirection(Direction port_direction) {
-    if (port_direction == Direction::kInput) {
-        return "input";
+[[nodiscard]] constexpr std::string_view PortDirection(Direction value) {
+    switch (value) {
+        case Direction::kInput:
+            return direction::kInput;
+        case Direction::kOutput:
+            return direction::kOutput;
+        case Direction::kDisable:
+            return direction::kDisable;
     }
 
-    if (port_direction == Direction::kDisable) {
-        return "disable";
-    }
-
-    return "output";
+    return direction::kOutput;
 }
 
-inline FailSafe GetFailsafe(const char* failsafe) {
-    if (strncasecmp(failsafe, failsafe::kHold, sizeof(failsafe::kHold) - 1) == 0) {
-        return FailSafe::kHold;
-    }
+static_assert(PortDirection("input") == Direction::kInput);
+static_assert(PortDirection("output") == Direction::kOutput);
+static_assert(PortDirection("disable") == Direction::kDisable);
 
-    if (strncasecmp(failsafe, failsafe::kOff, sizeof(failsafe::kOff) - 1) == 0) {
+static_assert(PortDirection(Direction::kInput) == "input");
+static_assert(PortDirection(Direction::kOutput) == "output");
+static_assert(PortDirection(Direction::kDisable) == "disable");
+
+// Verify fallback behaviour.
+static_assert(PortDirection("") == Direction::kOutput);
+static_assert(PortDirection("invalid") == Direction::kOutput);
+
+// Verify exact, case-sensitive matching.
+static_assert(PortDirection("INPUT") == Direction::kOutput);
+static_assert(PortDirection("input123") == Direction::kOutput);
+
+[[nodiscard]] constexpr FailSafe GetFailsafe(std::string_view value) {
+    if (value == failsafe::kOff) {
         return FailSafe::kOff;
     }
 
-    if (strncasecmp(failsafe, failsafe::kOn, sizeof(failsafe::kOn) - 1) == 0) {
+    if (value == failsafe::kOn) {
         return FailSafe::kOn;
     }
 
-    if (strncasecmp(failsafe, failsafe::kPlayback, sizeof(failsafe::kPlayback) - 1) == 0) {
+    if (value == failsafe::kPlayback) {
         return FailSafe::kPlayback;
     }
 
-    if (strncasecmp(failsafe, failsafe::kRecord, sizeof(failsafe::kRecord) - 1) == 0) {
+    if (value == failsafe::kRecord) {
         return FailSafe::kRecord;
     }
 
     return FailSafe::kHold;
 }
 
-[[nodiscard]] constexpr const char* GetFailsafe(FailSafe failsafe) {
-    switch (failsafe) {
+[[nodiscard]] constexpr std::string_view GetFailsafe(FailSafe value) {
+    switch (value) {
         case FailSafe::kHold:
             return failsafe::kHold;
-            break;
         case FailSafe::kOff:
             return failsafe::kOff;
-            break;
         case FailSafe::kOn:
             return failsafe::kOn;
-            break;
         case FailSafe::kPlayback:
             return failsafe::kPlayback;
-            break;
         case FailSafe::kRecord:
             return failsafe::kRecord;
-            break;
     }
 
     return failsafe::kHold;
 }
 
-inline OutputStyle GetOutputStyle(const char* output_style) {
-    assert(output_style != nullptr);
-    if (strncasecmp(output_style, "const", 5) == 0) {
-        return OutputStyle::kConstant;
-    }
-
-    return OutputStyle::kDelta;
+[[nodiscard]] constexpr OutputStyle GetOutputStyle(std::string_view value) {
+    return value == outputstyle::kConstant ? OutputStyle::kConstant : OutputStyle::kDelta;
 }
 
-[[nodiscard]] constexpr const char* GetOutputStyle(OutputStyle output_style, bool to_upper = false) {
+[[nodiscard]] constexpr std::string_view GetOutputStyle(OutputStyle value, bool to_upper = false) {
     if (to_upper) {
-        return (output_style == OutputStyle::kDelta) ? "DELTA" : "CONST";
+        return value == OutputStyle::kDelta ? outputstyle::kDeltaUpper : outputstyle::kConstantUpper;
     }
-    return (output_style == OutputStyle::kDelta) ? "delta" : "const";
+
+    return value == OutputStyle::kDelta ? outputstyle::kDelta : outputstyle::kConstant;
 }
 
 namespace scenes {
@@ -252,16 +274,15 @@ class DmxNode {
         return instance;
     }
 
-    void SetShortName(uint32_t port_index, const char* name) {
+    void SetShortName(uint32_t port_index, std::string_view name = {}) {
         assert(port_index < dmxnode::kMaxPorts);
 
-        if ((name == nullptr) || (name[0] == '\0')) {
+        if (name.empty()) {
             SetShortNameDefault(port_index);
             return;
         }
 
-        auto& port = port_[port_index];
-        common::CopyString(port.label, name);
+        common::CopyString(port_[port_index].label, name);
     }
 
     void SetShortNameDefault(uint32_t port_index) {

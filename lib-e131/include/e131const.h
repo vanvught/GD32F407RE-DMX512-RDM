@@ -33,4 +33,4 @@ struct E131Const
     static const uint8_t kVersion[];
 };
 
-#endif  // E131CONST_H_
+#endif // E131CONST_H_

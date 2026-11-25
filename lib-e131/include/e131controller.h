@@ -117,4 +117,4 @@ class E131Controller
     static inline E131Controller* s_this;
 };
 
-#endif  // E131CONTROLLER_H_
+#endif // E131CONTROLLER_H_

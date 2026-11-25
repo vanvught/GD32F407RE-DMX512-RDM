@@ -11,9 +11,9 @@
 #include "json/json_key.h"
 #include "json/json_params_base.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
-#endif
+#endif // DMXNODE_OUTPUT_DMX
 
 namespace json {
 class E131Params : public JsonParamsBase<E131Params> {
@@ -41,16 +41,16 @@ class E131Params : public JsonParamsBase<E131Params> {
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[0]), //
 #if (DMX_MAX_PORTS > 1)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[1]), //
-#endif
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[2]), //
-#endif
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[3]), //
-#endif
+#endif // (DMX_MAX_PORTS == 4)
 
     };
-#endif
+#endif // DMX_MAX_PORTS
 
     inline static common::store::DmxNode store_dmxnode;
 

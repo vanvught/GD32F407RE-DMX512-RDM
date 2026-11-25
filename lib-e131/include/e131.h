@@ -31,9 +31,9 @@
 #include "e117.h"
 #include "ip4/ip4_address.h"
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace e131 {
 inline constexpr auto kMergeTimeoutSeconds = 10;

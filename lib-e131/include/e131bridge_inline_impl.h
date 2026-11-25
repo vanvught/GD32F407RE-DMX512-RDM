@@ -124,7 +124,7 @@ inline bool E131Bridge::GetOutputPort(uint16_t universe, uint32_t& port_index) {
     return false;
 }
 
-#if defined(OUTPUT_HAVE_STYLESWITCH)
+#ifdef OUTPUT_HAVE_STYLESWITCH
 inline void E131Bridge::SetOutputStyle(uint32_t port_index, dmxnode::OutputStyle output_style) {
     assert(port_index < dmxnode::kMaxPorts);
 
@@ -140,7 +140,7 @@ inline dmxnode::OutputStyle E131Bridge::GetOutputStyle(uint32_t port_index) cons
     assert(port_index < dmxnode::kMaxPorts);
     return output_port_[port_index].output_style;
 }
-#endif
+#endif // OUTPUT_HAVE_STYLESWITCH
 
 inline void E131Bridge::SetPriority(uint32_t port_index, uint8_t priority) {
     assert(port_index < dmxnode::kMaxPorts);
@@ -234,7 +234,7 @@ inline const char* E131Bridge::GetSourceName() const {
 inline const uint8_t* E131Bridge::GetCid() const {
     return cid_;
 }
-#endif
+#endif // defined(E131_HAVE_DMXIN) || defined(NODE_SHOWFILE)
 
 #if defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
 inline void E131Bridge::HandleShowFile(const e131::DataPacket* pE131DataPacket) {
@@ -244,12 +244,12 @@ inline void E131Bridge::HandleShowFile(const e131::DataPacket* pE131DataPacket) 
     HandleDmx();
 }
 
-#endif
+#endif // defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
 
 inline void E131Bridge::Run() {
-#if defined(E131_HAVE_DMXIN)
+#ifdef E131_HAVE_DMXIN
     HandleDmxIn();
-#endif
+#endif // E131_HAVE_DMXIN
 
     current_millis_ = timing::Millis();
     const auto kDeltaMillis = current_millis_ - packet_millis_;

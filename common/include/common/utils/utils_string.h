@@ -112,19 +112,18 @@ inline float Atof(std::string_view buffer) {
 }
 
 template <typename T, std::size_t N>
-void CopyString(T (&destination)[N], std::string_view value) {
+    requires(std::same_as<T, char> || std::same_as<T, uint8_t>)
+void CopyString(T (&destination)[N], std::string_view value) noexcept {
     static_assert(N > 0);
-    static_assert(std::is_same_v<T, char> || std::is_same_v<T, uint8_t>);
 
     const auto kLength = std::min(value.size(), N - 1);
 
     if (kLength != 0) {
-        memcpy(destination, value.data(), kLength);
+        std::memmove(destination, value.data(), kLength);
     }
 
-    memset(destination + kLength, 0, N - kLength);
+    std::memset(destination + kLength, 0, N - kLength);
 }
-
 inline char* AppendDecimal(char* out, uint8_t value) noexcept {
     if (value >= 100U) {
         *out++ = static_cast<char>('0' + (value / 100U));

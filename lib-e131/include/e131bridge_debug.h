@@ -46,6 +46,6 @@
 #define E131BRIDGE_DEBUG_PUTS(...) \
     do {                        \
     } while (false)
-#endif
+#endif // DEBUG_E131BRIDGE
 
-#endif // _E131BRIDGE_DEBUG_H_
+#endif // E131BRIDGE_DEBUG_H_

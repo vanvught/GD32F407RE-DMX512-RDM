@@ -28,9 +28,9 @@
 
 #include <cstdint>
 
-#if !defined(PACKED)
+#ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif
+#endif // PACKED
 
 namespace e117
 {
@@ -55,4 +55,4 @@ struct RootLayer
 inline constexpr auto kRootLayerSize = sizeof(struct RootLayer);
 } // namespace e117
 
-#endif  // E117_H_
+#endif // E117_H_

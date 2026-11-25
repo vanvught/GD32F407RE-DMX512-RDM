@@ -61,7 +61,6 @@
 #include "hwclock.h"
 #endif // DISABLE_RTC
 #include "timing.h"
-#include "board.h"
 #include "board_statusled.h"
 #include "artnet_debug.h"
 
@@ -319,9 +318,11 @@ void ArtNetNode::SetLongName(const char* long_name) {
 }
 
 void ArtNetNode::SetShortName(uint32_t port_index, const char* name) {
-    DmxNode::Instance().SetShortName(port_index, name);
+    auto& node = DmxNode::Instance();
 
-    const auto* label = DmxNode::Instance().GetPortName(port_index);
+    node.SetShortName(port_index, name != nullptr ? std::string_view{name} : std::string_view{});
+
+    const auto* label = node.GetPortName(port_index);
 
     if (state_.status == artnet::Status::kOn) {
         artnet::store::SaveShortName(port_index, label);
@@ -656,9 +657,16 @@ void ArtNetNode::Print() {
             if (GetDirection(port_index) == dmxnode::Direction::kOutput) {
                 const auto kUniverse = GetUniverse(port_index);
                 const auto kMergeMode = ((output_port_[port_index].good_output & artnet::GoodOutput::kMergeModeLtp) == artnet::GoodOutput::kMergeModeLtp) ? dmxnode::MergeMode::kLtp : dmxnode::MergeMode::kHtp;
-                printf("  Port %-2u %-4u %s", static_cast<unsigned int>(port_index), static_cast<unsigned int>(kUniverse), dmxnode::GetMergeMode(kMergeMode, true));
+                const auto kMergeModeString = dmxnode::GetMergeMode(kMergeMode, true);
+
+                printf("  Port %-2u %-4u %.*s",
+                       static_cast<unsigned>(port_index),                                 //
+                       static_cast<unsigned>(kUniverse),                                  //
+                       static_cast<int>(kMergeModeString.size()), kMergeModeString.data() //
+                );
 #ifdef OUTPUT_HAVE_STYLESWITCH
-                printf(" %s", dmxnode::GetOutputStyle(GetOutputStyle(port_index), true));
+                const auto kOutputStyleString = dmxnode::GetOutputStyle(GetOutputStyle(port_index), true);
+                printf(" %.*s", static_cast<int>(kOutputStyleString.size()), kOutputStyleString.data());
 #endif // OUTPUT_HAVE_STYLESWITCH
 #if (ARTNET_VERSION >= 4)
                 printf(" %s", artnet::GetProtocolMode(node_.port[port_index].protocol, true));
@@ -892,8 +900,8 @@ void ArtNetNode::CheckMergeTimeouts(uint32_t port_index) {
 
     auto is_merging = false;
 
-    for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
-        is_merging |= ((output_port_[i].good_output & artnet::GoodOutput::kOutputIsMerging) != 0);
+    for (const auto& port : output_port_) {
+        is_merging |= ((port.good_output & artnet::GoodOutput::kOutputIsMerging) != 0);
     }
 
     if (!is_merging) {
@@ -1033,7 +1041,7 @@ void ArtNetNode::HandleDmx() {
             puts("WARN: 9. More than two sources, discarding data");
             return;
         }
-#endif // NDEBUG
+#endif                      // NDEBUG
         else [[unlikely]] { // Case 0.
             SendDiag(artnet::PriorityCodes::kDiagHigh, "%u: 0. No cases matched, this shouldn't happen!", port_index);
 #ifndef NDEBUG

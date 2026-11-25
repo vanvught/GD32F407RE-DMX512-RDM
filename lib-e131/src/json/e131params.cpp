@@ -33,7 +33,7 @@
 #include "dmxnode.h"
 #include "configstore.h"
 #include "dmxnode_outputtype.h"
-#if defined(DMXNODE_OUTPUT_DMX)
+#ifdef DMXNODE_OUTPUT_DMX
 #include "dmx.h"
 #endif // DMXNODE_OUTPUT_DMX
 
