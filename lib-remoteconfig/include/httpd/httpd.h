@@ -2,8 +2,6 @@
  * @file httpd.h
  *  @brief HTTP daemon class for managing HTTP server tasks.
  *
- * This class handles HTTP requests and integrates with the network and mDNS subsystems.
- * It uses placement new to construct and destruct request handlers explicitly.
  */
 /* Copyright (C) 2025-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
@@ -55,7 +53,6 @@ inline constexpr auto kService =
 class HttpDaemon {
    public:
     HttpDaemon();
-
     // The daemon and its handlers live for the lifetime of the firmware.
     ~HttpDaemon() = default;
 

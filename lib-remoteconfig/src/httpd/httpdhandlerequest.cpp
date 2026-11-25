@@ -25,6 +25,7 @@
 // Understanding Cache-Control and ETag for efficient web caching
 // https://dev.to/andreasbergstrom/understanding-cache-control-and-etag-for-efficient-web-caching-2nf5
 
+#include <string_view>
 #if defined(__GNUC__) && !defined(__clang__)
 #ifndef CONFIG_HTTPD_OPTIMIZE_NONE
 #pragma GCC push_options
@@ -40,6 +41,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
+#include <utility>
 #include <strings.h>
 
 #include "http/http.h"
@@ -53,7 +55,7 @@
 #include "firmware.h"
 #include "flashcodeinstall.h"
 #include "display.h" // IWYU pragma: keep
-#endif // CONFIG_HTTPD_ENABLE_UPLOAD
+#endif               // CONFIG_HTTPD_ENABLE_UPLOAD
 #include "firmware/debug/debug_dump.h"
 #include "httpd/httpd_debug.h"
 
@@ -73,9 +75,11 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
     bytes_received_ = bytes_received;
     receive_buffer_ = receive_buffer;
 
-    const char* status_msg = "OK";
-
-    HTTPD_DEBUG_PRINTF("%u: status=%u, bytes received=%u", static_cast<unsigned>(connection_handle_), static_cast<unsigned>(status_), static_cast<unsigned>(bytes_received));
+    HTTPD_DEBUG_PRINTF("%u: status=%u, bytes received=%u",
+                       static_cast<unsigned>(connection_handle_), //
+                       static_cast<unsigned>(status_),            //
+                       static_cast<unsigned>(bytes_received)      //
+    );
 
     // The HTTP handler keeps state across TCP segments (e.g. POST body arriving later).
     // status_ == UNKNOWN_ERROR means "we are not currently processing an in-progress request".
@@ -83,7 +87,8 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
         // Initial incoming HTTP request (header + maybe body)
         status_ = ParseRequest();
 
-        HTTPD_DEBUG_PRINTF("%s %s", http::kRequestMethod[static_cast<uint32_t>(request_method_)],
+        HTTPD_DEBUG_PRINTF("%s %s",
+                           http::kRequestMethod[static_cast<uint32_t>(request_method_)], //
                            request_content_type_ < http::ContentTypes::kNotDefined ? http::kContentType[static_cast<uint32_t>(request_content_type_)] : common::kUnknown);
 
         if (status_ == http::Status::kOk) {
@@ -95,117 +100,149 @@ void HttpDeamonHandleRequest::HandleRequest(uint32_t bytes_received, char* recei
                 // we must wait for next TCP segment(s).
                 if (request_content_length_ > sizeof(dynamic_content_)) {
                     status_ = http::Status::kRequestEntityTooLarge;
-                    HTTPD_DEBUG_PUTS("Content too large.");
-                }
 
-                if ((request_content_length_ != 0U) && (request_data_length_ == 0U)) {
+                    HTTPD_DEBUG_PUTS("Content too large.");
+                } else if ((request_content_length_ != 0U) && (request_data_length_ == 0U)) {
                     HTTPD_DEBUG_PRINTF("There is a POST header only -> no data, request_content_length_=%u", static_cast<unsigned>(request_content_length_));
                     HTTPD_DEBUG_EXIT();
                     return;
+                } else {
+                    status_ = HandlePost();
                 }
-
-                status_ = HandlePost();
             }
         }
     } else if ((status_ == http::Status::kOk) && (request_method_ == http::RequestMethod::kPost)) {
         // Follow-up TCP segment containing POST body data.
-        // We treat the new receive_buffer as body data.
+        if (request_data_length_ > sizeof(dynamic_content_) || bytes_received_ > sizeof(dynamic_content_) - request_data_length_) {
+            status_ = http::Status::kRequestEntityTooLarge;
+        } else if (request_data_length_ > request_content_length_ || bytes_received_ > request_content_length_ - request_data_length_) {
+            status_ = http::Status::kBadRequest;
+        } else {
+            memcpy(&dynamic_content_[request_data_length_], receive_buffer_, bytes_received_);
 
-        memcpy(&dynamic_content_[request_data_length_], receive_buffer_, bytes_received_);
+            request_data_length_ += bytes_received_;
 
-        request_data_length_ += bytes_received_;
+            // If we haven't received the full body yet, wait for more segments.
+            if (request_data_length_ < request_content_length_) {
+                HTTPD_DEBUG_EXIT();
+                return;
+            }
 
-        // If we haven't received the full body yet, wait for more segments.
-        if (request_data_length_ < request_content_length_) {
-            HTTPD_DEBUG_EXIT();
-            return;
+            file_data_ = dynamic_content_;
+
+            status_ = HandlePost();
         }
-
-        file_data_ = dynamic_content_;
-        status_ = HandlePost();
     }
 #ifdef ENABLE_METHOD_DELETE
     else if ((status_ == http::Status::kOk) && (request_method_ == http::RequestMethod::DELETE)) {
         status_ = HandleDelete();
     }
 #endif // ENABLE_METHOD_DELETE
+    if (status_ == http::Status::kNotModified) {
+        // HTTP 304 responses must not contain a message body.
+        content_size_ = 0;
 
-    // If request handling failed, generate an error response or abort.
-    if (status_ != http::Status::kOk) {
-        switch (status_) {
-            case ::http::Status::kNotModified:
-                status_msg = "Not Modified";
-                break;
-            case http::Status::kBadRequest:
-                status_msg = "Bad Request";
-                break;
-            case http::Status::kNotFound:
-                status_msg = "Not Found";
-                break;
-            case http::Status::kRequestEntityTooLarge:
-                status_msg = "Payload Too Large";
-                break;
-            case http::Status::kRequestUriTooLong:
-                status_msg = "URI Too Long";
-                break;
-            case http::Status::kInternalServerError:
-                status_msg = "Internal Server Error";
-                break;
-            case http::Status::kMethodNotImplemented:
-                status_msg = "Not Implemented";
-                break;
-            case http::Status::kVersionNotSupported:
-                status_msg = "HTTP Version Not Supported";
-                break;
-            default:
-                network::tcp::Abort(connection_handle_);
-                status_ = http::Status::kUnknownError;
-                request_method_ = http::RequestMethod::kUnknown;
-                HTTPD_DEBUG_EXIT();
-                return;
+        const auto kHeaderLength = snprintf(receive_buffer_, network::tcp::kTcpDataMss,
+                                            "HTTP/1.1 304 Not Modified\r\n"
+                                            "Server: %s\r\n"
+                                            "Cache-Control: max-age=3600\r\n"
+                                            "ETag: \"%u\"\r\n"
+                                            "Connection: close\r\n"
+                                            "\r\n",
+                                            network::iface::HostName(),         //
+                                            static_cast<unsigned>(_TIME_STAMP_) //
+        );
+
+        if (kHeaderLength < 0 || std::cmp_greater_equal(kHeaderLength, network::tcp::kTcpDataMss)) [[unlikely]] {
+            network::tcp::Abort(connection_handle_);
+
+            HTTPD_DEBUG_EXIT();
+            return;
+        }
+
+        network::tcp::Send(connection_handle_, reinterpret_cast<const uint8_t*>(receive_buffer_), static_cast<uint32_t>(kHeaderLength));
+
+    } else if (status_ != http::Status::kOk) {
+        const auto kStatusMsg = http::GetStatusMessage(status_);
+
+        if (kStatusMsg.empty()) {
+            network::tcp::Abort(connection_handle_);
+
+            status_ = http::Status::kUnknownError;
+            request_method_ = http::RequestMethod::kUnknown;
+
+            HTTPD_DEBUG_EXIT();
+            return;
         }
 
         request_content_type_ = http::ContentTypes::kTextHtml;
         content_ = reinterpret_cast<uint8_t*>(dynamic_content_);
-        const auto kLength = snprintf(dynamic_content_, sizeof(dynamic_content_), "%u %s\n", static_cast<unsigned>(status_), status_msg);
+        const auto kLength = snprintf(dynamic_content_, sizeof(dynamic_content_), "%u %.*s\n", static_cast<unsigned>(status_), static_cast<int>(kStatusMsg.size()), kStatusMsg.data());
 
-        if (kLength < 0 || static_cast<size_t>(kLength) >= sizeof(dynamic_content_)) {
+        if (kLength < 0 || static_cast<size_t>(kLength) >= sizeof(dynamic_content_)) [[unlikely]] {
             network::tcp::Abort(connection_handle_);
-            // Reset request state before returning.
+
+            HTTPD_DEBUG_EXIT();
             return;
         }
 
         content_size_ = static_cast<uint32_t>(kLength);
 
-        const auto kHeaderLength =
-            static_cast<uint32_t>(snprintf(receive_buffer_, network::tcp::kTcpDataMss,
-                                           "HTTP/1.1 %u %s\r\n"
-                                           "Server: %s\r\n"
-                                           "Content-Type: %s\r\n"
-                                           "Content-Length: %u\r\n"
-                                           "Connection: close\r\n"
-                                           "\r\n",
-                                           static_cast<unsigned int>(status_), status_msg, network::iface::HostName(), http::kContentType[static_cast<uint32_t>(request_content_type_)], static_cast<unsigned int>(content_size_)));
+        const auto kHeaderLength = snprintf(receive_buffer_, network::tcp::kTcpDataMss,
+                                            "HTTP/1.1 %u %.*s\r\n"
+                                            "Server: %s\r\n"
+                                            "Content-Type: %s\r\n"
+                                            "Content-Length: %u\r\n"
+                                            "Connection: close\r\n"
+                                            "\r\n",
+                                            static_cast<unsigned>(status_),                                   //
+                                            static_cast<int>(kStatusMsg.size()), kStatusMsg.data(),           //
+                                            network::iface::HostName(),                                       //
+                                            http::kContentType[static_cast<uint32_t>(request_content_type_)], //
+                                            static_cast<unsigned>(content_size_)                              //
+        );
 
-        network::tcp::Send(connection_handle_, reinterpret_cast<const uint8_t*>(receive_buffer_), kHeaderLength);
+        if (kHeaderLength < 0 || std::cmp_greater_equal(kHeaderLength, network::tcp::kTcpDataMss)) [[unlikely]] {
+            network::tcp::Abort(connection_handle_);
+
+            HTTPD_DEBUG_EXIT();
+            return;
+        }
+
+        network::tcp::Send(connection_handle_, reinterpret_cast<const uint8_t*>(receive_buffer_), static_cast<uint32_t>(kHeaderLength));
     } else {
-        const auto kHeaderLength = static_cast<uint32_t>(snprintf(receive_buffer_, network::tcp::kTcpDataMss,
-                                                                  "HTTP/1.1 %u %s\r\n"
-                                                                  "Server: %s\r\n"
-                                                                  "Content-Encoding: %s\r\n"
-                                                                  "Content-Type: %s\r\n"
-                                                                  "Content-Length: %u\r\n"
-                                                                  "Cache-Control: %s\r\n"
-                                                                  "ETag: \"%u\"\r\n"
-                                                                  "Connection: close\r\n"
-                                                                  "\r\n",
-                                                                  static_cast<unsigned int>(status_), status_msg, network::iface::HostName(), gzip_ ? "gzip" : "identity", http::kContentType[static_cast<uint32_t>(request_content_type_)],
-                                                                  static_cast<unsigned int>(content_size_), (content_ == reinterpret_cast<uint8_t*>(dynamic_content_)) ? "no-cache" : "max-age=3600",
-                                                                  (content_ == reinterpret_cast<uint8_t*>(dynamic_content_)) ? static_cast<unsigned int>(timing::Millis()) : static_cast<unsigned int>(_TIME_STAMP_)));
+        const bool kIsDynamic = content_ == reinterpret_cast<uint8_t*>(dynamic_content_);
+        const auto kHeaderLength = snprintf(receive_buffer_, network::tcp::kTcpDataMss,
+                                            "HTTP/1.1 %u OK\r\n"
+                                            "Server: %s\r\n"
+                                            "Content-Encoding: %s\r\n"
+                                            "Content-Type: %s\r\n"
+                                            "Content-Length: %u\r\n"
+                                            "Cache-Control: %s\r\n"
+                                            "ETag: \"%u\"\r\n"
+                                            "Connection: close\r\n"
+                                            "\r\n",
+                                            static_cast<unsigned>(status_),                                                            //
+                                            network::iface::HostName(),                                                                //
+                                            gzip_ ? "gzip" : "identity",                                                               //
+                                            http::kContentType[static_cast<uint32_t>(request_content_type_)],                          //
+                                            static_cast<unsigned>(content_size_),                                                      //
+                                            kIsDynamic ? "no-store" : "max-age=3600",                                                  //
+                                            kIsDynamic ? static_cast<unsigned>(timing::Millis()) : static_cast<unsigned>(_TIME_STAMP_) //
+        );
 
-        network::tcp::Send(connection_handle_, reinterpret_cast<const uint8_t*>(receive_buffer_), kHeaderLength);
+        if (kHeaderLength < 0 || std::cmp_greater_equal(kHeaderLength, network::tcp::kTcpDataMss)) [[unlikely]] {
+            network::tcp::Abort(connection_handle_);
 
-        HTTPD_DEBUG_PRINTF("content_size_=%u, %s", static_cast<unsigned>(content_size_), (content_ == reinterpret_cast<uint8_t*>(dynamic_content_)) ? "Dynamic" : "Static");
+            HTTPD_DEBUG_EXIT();
+            return;
+        }
+
+        network::tcp::Send(connection_handle_, reinterpret_cast<const uint8_t*>(receive_buffer_), static_cast<uint32_t>(kHeaderLength));
+
+        HTTPD_DEBUG_PRINTF("content_size_=%u, %s",
+                           static_cast<unsigned>(content_size_), //
+                           kIsDynamic ? "Dynamic" : "Static");   //
     }
 
     if (content_size_ != 0U) {

@@ -26,6 +26,10 @@
 #ifndef HTTP_HTTP_H_
 #define HTTP_HTTP_H_
 
+#include <algorithm>
+#include <array>
+#include <string_view>
+
 namespace http {
 enum class Status {
     kOk = 200,
@@ -38,15 +42,66 @@ enum class Status {
     kInternalServerError = 500,
     kMethodNotImplemented = 501,
     kVersionNotSupported = 505,
-    kUnknownError = 520,
+    kUnknownError = 520, //
 };
-enum class RequestMethod { kGet, kPost, kDelete, kUnknown };
 
-enum class ContentTypes { kTextHtml, kTextCss, kTextJs, kApplicationJson, kApplicationOctetStream, kNotDefined };
+struct StatusMapping {
+    http::Status status;
+    std::string_view message;
+};
 
-inline constexpr char kRequestMethod[][8] = {"GET", "POST", "DELETE", "UNKNOWN"};
+constexpr std::array kStatusMessages{
+    StatusMapping{.status = Status::kOk, .message = "OK"},
+    StatusMapping{.status = Status::kNotModified, .message = "Not Modified"},
+    StatusMapping{.status = Status::kBadRequest, .message = "Bad Request"},
+    StatusMapping{.status = Status::kNotFound, .message = "Not Found"},
+    StatusMapping{.status = Status::kRequestTimeout, .message = "Request Timeout"},
+    StatusMapping{.status = Status::kRequestEntityTooLarge, .message = "Payload Too Large"},
+    StatusMapping{.status = Status::kRequestUriTooLong, .message = "URI Too Long"},
+    StatusMapping{.status = Status::kInternalServerError, .message = "Internal Server Error"},
+    StatusMapping{.status = Status::kMethodNotImplemented, .message = "Not Implemented"},
+    StatusMapping{.status = Status::kVersionNotSupported, .message = "HTTP Version Not Supported"},
+};
 
-inline constexpr char kContentType[][26] = {"text/html", "text/css", "text/javascript", "application/json", "application/octet-stream"};
+constexpr std::string_view GetStatusMessage(Status status) noexcept {
+    const auto* const kIt = std::ranges::find(kStatusMessages, status, &StatusMapping::status);
+    return kIt != kStatusMessages.end() ? kIt->message : std::string_view{};
+}
+
+static_assert(GetStatusMessage(Status::kNotFound) == "Not Found");
+static_assert(GetStatusMessage(Status::kBadRequest) == "Bad Request");
+static_assert(GetStatusMessage(Status::kUnknownError).empty());
+
+enum class RequestMethod {
+    kGet,
+    kPost,
+    kDelete,
+    kUnknown, //
+};
+
+enum class ContentTypes {
+    kTextHtml,
+    kTextCss,
+    kTextJs,
+    kApplicationJson,
+    kApplicationOctetStream,
+    kNotDefined, //
+};
+
+inline constexpr char kRequestMethod[][8] = {
+    "GET",
+    "POST",
+    "DELETE",
+    "UNKNOWN", //
+};
+
+inline constexpr char kContentType[][26] = {
+    "text/html",
+    "text/css",
+    "text/javascript",
+    "application/json",
+    "application/octet-stream", //
+};
 } // namespace http
 
 #endif // HTTP_HTTP_H_
