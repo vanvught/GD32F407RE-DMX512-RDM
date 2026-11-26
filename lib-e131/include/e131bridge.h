@@ -37,6 +37,7 @@
 #include "llrp/llrpdevice.h"
 #endif // NODE_RDMNET_LLRP_ONLY
 #include "board_statusled.h"
+#include "timing.h"
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
