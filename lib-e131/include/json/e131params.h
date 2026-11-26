@@ -60,13 +60,13 @@ class E131Params : public JsonParamsBase<E131Params> {
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[0]), //
 #if (DMX_MAX_PORTS > 1)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[1]), //
-#endif                                                           // (DMX_MAX_PORTS > 1)
+#endif // (DMX_MAX_PORTS > 1)
 #if (DMX_MAX_PORTS > 2)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[2]), //
-#endif                                                           // (DMX_MAX_PORTS > 2)
+#endif // (DMX_MAX_PORTS > 2)
 #if (DMX_MAX_PORTS == 4)
         MakeKey(SetPriority, E131ParamsConst::kPriorityPort[3]), //
-#endif                                                           // (DMX_MAX_PORTS == 4)
+#endif // (DMX_MAX_PORTS == 4)
 
     };
 #endif // DMX_MAX_PORTS

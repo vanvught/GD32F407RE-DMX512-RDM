@@ -38,6 +38,9 @@
 #endif // NODE_RDMNET_LLRP_ONLY
 #include "board_statusled.h"
 #include "timing.h"
+#if defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
+#include "network_config.h"
+#endif // defined(NODE_SHOWFILE) && defined(CONFIG_SHOWFILE_PROTOCOL_NODE_E131)
 
 #ifndef ALIGNED
 #define ALIGNED __attribute__((aligned(4)))
