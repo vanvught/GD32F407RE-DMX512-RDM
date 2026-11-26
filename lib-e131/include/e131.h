@@ -2,7 +2,7 @@
  * @file e131.h
  *
  */
-/* Copyright (C) 2016-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2016-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -113,9 +113,6 @@ struct DataDMPLayer {
 
 inline constexpr auto kDataLayerSize = sizeof(struct DataDMPLayer);
 
-/**
- *
- */
 struct DataPacket {
     e117::RootLayer root_layer; ///< E1.31 shall use the ACN Root Layer Protocol as defined in the ANSI E1.17 [ACN] “ACN Architecture” document.
     e131::DataFrameLayer frame_layer;
@@ -138,9 +135,7 @@ constexpr uint32_t DataPacketSize(uint32_t x) noexcept {
     return e117::kRootLayerSize + kDataFrameLayerSize + DataLayerLength(x);
 }
 
-/**
- * 6.4 E1.31 Universe Discovery Packet Framing Layer
- */
+///< 6.4 E1.31 Universe Discovery Packet Framing Layer
 struct DiscoveryFrameLayer {
     uint16_t flags_length;                        ///< Protocol flags and length. Low 12 bits = PDU length High 4 bits = 0x7
     uint32_t vector;                              ///< Identifies 1.31 data as Universe Discovery Data. \ref E131_VECTOR_EXTENDED_DISCOVERY
@@ -150,9 +145,7 @@ struct DiscoveryFrameLayer {
 
 inline constexpr auto kDiscoveryFrameLayerSize = sizeof(struct DiscoveryFrameLayer);
 
-/**
- * 8 Universe Discovery Layer
- */
+///< 8 Universe Discovery Layer
 struct UniverseDiscoveryLayer {
     uint16_t flags_length;           ///< Protocol flags and length. Low 12 bits = PDU length High 4 bits = 0x7
     uint32_t vector;                 ///< Identifies Universe Discovery data as universe list. \ref VECTOR_UNIVERSE_DISCOVERY_UNIVERSE_LIST
@@ -163,9 +156,6 @@ struct UniverseDiscoveryLayer {
 
 inline constexpr auto kDiscoveryLayerSize = sizeof(struct UniverseDiscoveryLayer);
 
-/**
- *
- */
 struct DiscoveryPacket {
     e117::RootLayer root_layer; ///< E1.31 shall use the ACN Root Layer Protocol as defined in the ANSI E1.17 [ACN] “ACN Architecture” document.
     DiscoveryFrameLayer frame_layer;
@@ -188,9 +178,7 @@ constexpr uint32_t DiscoveryPacketSize(uint32_t x) noexcept {
     return e117::kRootLayerSize + e131::kDiscoveryFrameLayerSize + e131::DiscoveryLayerLength(x);
 }
 
-/**
- * 6.3 E1.31 Synchronization Packet Framing Layer
- */
+///< 6.3 E1.31 Synchronization Packet Framing Layer
 struct SynchronizationFrameLayer {
     uint16_t flags_length;    ///< Protocol flags and length. Low 12 bits = PDU length High 4 bits = 0x7
     uint32_t vector;          ///< Identifies 1.31 data as DMP Protocol PDU. Fixed 0x00000002
@@ -199,9 +187,7 @@ struct SynchronizationFrameLayer {
     uint16_t reserved;        ///< Reserved. (See Section 6.3.4)
 } PACKED;
 
-/**
- * 4.2 E1.31 Synchronization Packet
- */
+///< 4.2 E1.31 Synchronization Packet
 struct SynchronizationPacket {
     e117::RootLayer root_layer; ///< E1.31 shall use the ACN Root Layer Protocol as defined in the ANSI E1.17 [ACN] “ACN Architecture” document.
     SynchronizationFrameLayer frame_layer;
@@ -211,17 +197,11 @@ inline constexpr auto kSynchronizationFrameLayerSize = sizeof(struct Synchroniza
 inline constexpr auto kSynchronizationRootLayerSize = (e117::kRootLayerSize - 16U + kSynchronizationFrameLayerSize);
 inline constexpr auto kSynchronizationPacketSize = (e117::kRootLayerSize + kSynchronizationFrameLayerSize);
 
-/**
- *
- */
 struct RawFrameLayer {
     uint16_t flags_length; ///< Protocol flags and length. Low 12 bits = PDU length High 4 bits = 0x7
     uint32_t vector;       ///< Identifies 1.31 data as DMP Protocol PDU.
 } PACKED;
 
-/**
- *
- */
 struct RawPacket {
     e117::RootLayer root_layer; ///< E1.31 shall use the ACN Root Layer Protocol as defined in the ANSI E1.17 [ACN] “ACN Architecture” document.
     RawFrameLayer frame_layer;

@@ -26,7 +26,7 @@
 #define JSON_E131PARAMSCONST_H_
 
 #include "json/json_key.h"
-#include "dmxnode_outputtype.h"
+#include "dmxnode_outputtype.h" // IWYU pragma: keep
 
 namespace json {
 struct E131ParamsConst {

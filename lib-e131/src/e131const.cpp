@@ -2,7 +2,7 @@
  * @file e131const.cpp
  *
  */
-/* Copyright (C) 2021-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2021-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,4 +27,4 @@
 
 #include "e131const.h"
 
-const uint8_t E131Const::kVersion[] = {1, 27};
+const uint8_t E131Const::kVersion[] = {1, 28};

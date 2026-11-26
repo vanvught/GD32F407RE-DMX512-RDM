@@ -2,7 +2,7 @@
  * @file e117.h
  *
  */
-/* Copyright (C) 2016-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2016-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,18 +32,15 @@
 #define PACKED __attribute__((packed))
 #endif // PACKED
 
-namespace e117
-{
+namespace e117 {
 inline constexpr uint32_t kAcnPacketIdentifierLength = 12;
 inline constexpr uint8_t kAcnPacketIdentifier[kAcnPacketIdentifierLength] = ///< 5.3 ACN Packet Identifier
     {0x41, 0x53, 0x43, 0x2d, 0x45, 0x31, 0x2e, 0x31, 0x37, 0x00, 0x00, 0x00};
 
 inline constexpr uint32_t kCidLength = 16;
-/**
- * Root Layer (See Section 5)
- */
-struct RootLayer
-{
+
+// Root Layer (See Section 5)
+struct RootLayer {
     uint16_t pre_amble_size;                                   ///< Define RLP Preamble Size. Fixed 0x0010
     uint16_t post_amble_size;                                  ///< RLP Post-amble Size. Fixed 0x0000
     uint8_t acn_packet_identifier[kAcnPacketIdentifierLength]; ///< ACN Packet Identifier

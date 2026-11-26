@@ -2,7 +2,7 @@
  * @file e131controller.h
  *
  */
-/* Copyright (C) 2020-2025 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2020-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,26 +32,20 @@
 #include "dmxnode.h"
 #include "softwaretimers.h"
 
-enum
-{
-    DEFAULT_SYNCHRONIZATION_ADDRESS = 5000
-};
+inline constexpr uint16_t kDefaultSynchronizationAddress = 5000;
 
-struct TE131ControllerState
-{
-    uint16_t nActiveUniverses;
-    uint32_t DiscoveryTime;
+struct TE131ControllerState {
+    uint16_t active_universes;
+    uint32_t discovery_time;
     uint8_t priority;
-    struct TSynchronizationPacket
-    {
-        uint16_t nUniverseNumber;
-        uint32_t nIpAddress;
+    struct TSynchronizationPacket {
+        uint16_t universe;
+        uint32_t ip_address;
         uint8_t sequence_number;
-    } SynchronizationPacket;
+    } synchronization_packet;
 };
 
-class E131Controller
-{
+class E131Controller {
    public:
     E131Controller();
     ~E131Controller();
@@ -61,34 +55,31 @@ class E131Controller
 
     void Print();
 
-    void HandleDmxOut(uint16_t nUniverse, const uint8_t* pDmxData, uint32_t nLength);
+    void HandleDmxOut(uint16_t universe, const uint8_t* data, uint32_t length);
     void HandleSync();
     void HandleBlackout();
 
-    void SetSynchronizationAddress(uint16_t nSynchronizationAddress = DEFAULT_SYNCHRONIZATION_ADDRESS)
-    {
-        state_.SynchronizationPacket.nUniverseNumber = nSynchronizationAddress;
-        state_.SynchronizationPacket.nIpAddress = e131::UniverseToMulticastIp(nSynchronizationAddress);
+    void SetSynchronizationAddress(uint16_t synchronization_address = kDefaultSynchronizationAddress) {
+        state_.synchronization_packet.universe = synchronization_address;
+        state_.synchronization_packet.ip_address = e131::UniverseToMulticastIp(synchronization_address);
     }
-    uint16_t GetSynchronizationAddress() const { return state_.SynchronizationPacket.nUniverseNumber; }
 
-    void SetMaster(uint32_t nMaster = dmxnode::kDmxMaxValue)
-    {
-        if (nMaster < dmxnode::kDmxMaxValue)
-        {
-            master_ = nMaster;
-        }
-        else
-        {
+    [[nodiscard]] uint16_t GetSynchronizationAddress() const { return state_.synchronization_packet.universe; }
+
+    void SetMaster(uint32_t master = dmxnode::kDmxMaxValue) {
+        if (master < dmxnode::kDmxMaxValue) {
+            master_ = master;
+        } else {
             master_ = dmxnode::kDmxMaxValue;
         }
     }
-    uint32_t GetMaster() const { return master_; }
+
+    [[nodiscard]] uint32_t GetMaster() const { return master_; }
 
     const uint8_t* GetSoftwareVersion();
 
-    void SetSourceName(const char* pSourceName);
-    void SetPriority(uint8_t nPriority);
+    void SetSourceName(const char* source_name);
+    void SetPriority(uint8_t priority);
 
     static E131Controller* Get() { return s_this; }
 
@@ -96,19 +87,18 @@ class E131Controller
     void FillDataPacket();
     void FillDiscoveryPacket();
     void FillSynchronizationPacket();
-    uint8_t GetSequenceNumber(uint16_t nUniverse, uint32_t& nMulticastIpAddress);
+    uint8_t GetSequenceNumber(uint16_t universe, uint32_t& multicast_ip_address);
 
     void SendDiscoveryPacket();
 
-    void static StaticCallbackFunctionSendDiscoveryPacket([[maybe_unused]] TimerHandle_t timerHandle) { s_this->SendDiscoveryPacket(); }
+    void static StaticCallbackFunctionSendDiscoveryPacket([[maybe_unused]] TimerHandle_t timer_handle) { s_this->SendDiscoveryPacket(); }
 
-   private:
     int32_t handle_{-1};
     struct TE131ControllerState state_;
-    e131::DataPacket* m_pE131DataPacket{nullptr};
-    e131::DiscoveryPacket* m_pE131DiscoveryPacket{nullptr};
-    e131::SynchronizationPacket* m_pE131SynchronizationPacket{nullptr};
-    uint32_t m_DiscoveryIpAddress{0};
+    e131::DataPacket* data_packet_{nullptr};
+    e131::DiscoveryPacket* discovery_packet_{nullptr};
+    e131::SynchronizationPacket* synchronization_packet_{nullptr};
+    uint32_t discovery_ip_address_{0};
     uint8_t cid_[e117::kCidLength];
     char source_name_[e131::kSourceNameLength];
     uint32_t master_{dmxnode::kDmxMaxValue};

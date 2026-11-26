@@ -86,5 +86,5 @@ void E131Params::Dump() {
 
     auto& e131bridge = *E131Bridge::Get();
     e131bridge.Print();
-} // namespace json
+}
 } // namespace json

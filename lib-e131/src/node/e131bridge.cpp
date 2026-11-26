@@ -35,7 +35,7 @@
 #include "e131const.h"
 #include "e117.h"
 #ifdef E131_HAVE_DMXIN
-#include "dmx.h"
+#include "dmx.h" // IWYU pragma: keep
 #endif // E131_HAVE_DMXIN
 #include "dmxnode.h"
 #include "dmxnodedata.h"
@@ -165,7 +165,11 @@ void E131Bridge::Stop() {
 
 void E131Bridge::SetSynchronizationAddress(bool source_a, bool source_b, uint16_t synchronization_address) {
     E131BRIDGE_DEBUG_ENTRY();
-    E131BRIDGE_DEBUG_PRINTF("source_a=%d, source_b=%d, synchronization_address=%d", static_cast<unsigned>(source_a), static_cast<unsigned>(source_b), static_cast<unsigned>(synchronization_address));
+    E131BRIDGE_DEBUG_PRINTF("source_a=%d, source_b=%d, synchronization_address=%d",
+                            static_cast<unsigned>(source_a),               //
+                            static_cast<unsigned>(source_b),               //
+                            static_cast<unsigned>(synchronization_address) //
+    );
 
     assert(synchronization_address != 0);
 
@@ -201,7 +205,10 @@ void E131Bridge::SetSynchronizationAddress(bool source_a, bool source_b, uint16_
 
 void E131Bridge::JoinUniverse(uint32_t port_index, uint16_t universe) {
     E131BRIDGE_DEBUG_ENTRY();
-    E131BRIDGE_DEBUG_PRINTF("port_index=%d, universe=%d", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
+    E131BRIDGE_DEBUG_PRINTF("port_index=%d, universe=%d",
+                            static_cast<unsigned>(port_index), //
+                            static_cast<unsigned>(universe)    //
+    );
 
     for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
         E131BRIDGE_DEBUG_PRINTF("\toutput_Port[%d].universe=%d", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
@@ -228,16 +235,18 @@ void E131Bridge::LeaveUniverse(uint32_t port_index, uint16_t universe) {
     E131BRIDGE_DEBUG_ENTRY();
     E131BRIDGE_DEBUG_PRINTF("port_index=%u, universe=%u", static_cast<unsigned>(port_index), static_cast<unsigned>(universe));
 
-    for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
-        E131BRIDGE_DEBUG_PRINTF("\toutput_Port[%u].universe=%u", static_cast<unsigned>(i), static_cast<unsigned>(bridge_.port[i].universe));
+    for (uint32_t port = 0; port < dmxnode::kMaxPorts; port++) {
+        E131BRIDGE_DEBUG_PRINTF("\toutput_Port[%u].universe=%u",
+                                static_cast<unsigned>(i),                       //
+                                static_cast<unsigned>(bridge_.port[i].universe) //
+        );
 
-        if (i == port_index) // Check for other ports only
-        {
+        if (port == port_index) { // Check for other ports only
             E131BRIDGE_DEBUG_PUTS("continue");
             continue;
         }
 
-        if (bridge_.port[i].universe == universe) {
+        if (bridge_.port[port].universe == universe) {
             E131BRIDGE_DEBUG_EXIT();
             return;
         }
@@ -535,7 +544,7 @@ void E131Bridge::HandleSynchronization() {
 }
 
 void E131Bridge::InputUdp(const uint8_t* buffer, [[maybe_unused]] uint32_t size, [[maybe_unused]] uint32_t from_ip, [[maybe_unused]] uint16_t from_port) {
-    if (__builtin_expect((!IsValidRoot(buffer)), 0)) {
+    if (!IsValidRoot(buffer)) [[unlikely]] {
         return;
     }
 
@@ -558,7 +567,7 @@ void E131Bridge::InputUdp(const uint8_t* buffer, [[maybe_unused]] uint32_t size,
         const auto kRootVector = __builtin_bswap32(kRaw->root_layer.vector);
 
         if (kRootVector == e131::vector::root::kData) {
-            if (__builtin_expect((IsValidDataPacket(buffer)), 1)) {
+            if (IsValidDataPacket(buffer)) [[likely]] {
                 HandleDmx();
             }
         } else if (kRootVector == e131::vector::root::kExtended) {
@@ -604,8 +613,8 @@ void E131Bridge::CheckMergeTimeouts(uint32_t port_index) {
 
     auto is_merging = false;
 
-    for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
-        is_merging |= output_port_[i].is_merging;
+    for (const auto& port : output_port_) {
+        is_merging |= port.is_merging;
     }
 
     if (!is_merging) {
@@ -707,7 +716,7 @@ void E131Bridge::HandleDmx() {
         }
 
         if (state_.is_merge_mode) {
-            if (__builtin_expect((!state_.disable_merge_timeout), 1)) {
+            if (!state_.disable_merge_timeout) {
                 CheckMergeTimeouts(port_index);
             }
         }
@@ -769,25 +778,28 @@ void E131Bridge::HandleDmx() {
             source_b.millis = packet_millis_;
             UpdateMergeStatus(port_index);
             dmxnode::Data::MergeSourceB(port_index, kDmxData, kDmxSlots, output_port_[port_index].merge_mode);
-        }
-#ifndef NDEBUG
-        else if (kIsSourceA && kIsSourceB) {
-            puts("WARN: 8. Source matches both ip, discarding data");
-            return;
+        } else if (kIsSourceA && kIsSourceB) {
+            if constexpr (kDebugE131BridgeEnabled) {
+                puts("WARN: 8. Source matches both ip, discarding data");
+                return;
+            }
         } else if (!kIsSourceA && !kIsSourceB) {
-            puts("WARN: 9. More than two sources, discarding data");
-            return;
+            if constexpr (kDebugE131BridgeEnabled) {
+                puts("WARN: 9. More than two sources, discarding data");
+                return;
+            }
         } else {
-            puts("ERROR: 0. No cases matched, this shouldn't happen!");
-            return;
+            if constexpr (kDebugE131BridgeEnabled) {
+                puts("ERROR: 0. No cases matched, this shouldn't happen!");
+                return;
+            }
         }
-#endif // NDEBUG
-       // This bit indicates whether to lock or revert to an unsynchronized state when synchronization is lost
-       // (See Section 11 on Universe Synchronization and 11.1 for discussion on synchronization states).
-       // When set to 0, components that had been operating in a synchronized state shall not update with any
-       // new packets until synchronization resumes. When set to 1, once synchronization has been lost,
-       // components that had been operating in a synchronized state need not wait for a new
-       // E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
+        // This bit indicates whether to lock or revert to an unsynchronized state when synchronization is lost
+        // (See Section 11 on Universe Synchronization and 11.1 for discussion on synchronization states).
+        // When set to 0, components that had been operating in a synchronized state shall not update with any
+        // new packets until synchronization resumes. When set to 1, once synchronization has been lost,
+        // components that had been operating in a synchronized state need not wait for a new
+        // E1.31 Synchronization Packet in order to update to the next E1.31 Data Packet.
 
         // If the FORCE_SYNCHRONIZATION bit is 0, the receiver MUST wait for synchronization packets.
         // If it is 1, the receiver MAY update without waiting for synchronization packets.
@@ -863,13 +875,13 @@ void E131Bridge::SetNetworkDataLossCondition(bool source_a, bool source_b) {
     } else {
         for (uint32_t i = 0; i < dmxnode::kMaxPorts; i++) {
             if (output_port_[i].is_transmitting) {
-                if ((source_a) && (output_port_[i].source_a.ip != 0)) {
+                if (source_a && (output_port_[i].source_a.ip != 0)) {
                     output_port_[i].source_a.ip = 0;
                     memset(output_port_[i].source_a.cid, 0, e117::kCidLength);
                     output_port_[i].is_merging = false;
                 }
 
-                if ((source_b) && (output_port_[i].source_b.ip != 0)) {
+                if (source_b && (output_port_[i].source_b.ip != 0)) {
                     output_port_[i].source_b.ip = 0;
                     memset(output_port_[i].source_b.cid, 0, e117::kCidLength);
                     output_port_[i].is_merging = false;

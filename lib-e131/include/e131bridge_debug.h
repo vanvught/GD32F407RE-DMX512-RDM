@@ -26,25 +26,27 @@
 #ifndef E131BRIDGE_DEBUG_H_
 #define E131BRIDGE_DEBUG_H_
 
-#include "firmware/debug/debug_debug.h"
+#include "firmware/debug/debug_debug.h" // IWYU pragma: keep
 
 #ifdef DEBUG_E131BRIDGE
+inline constexpr bool kDebugE131BridgeEnabled = true;
 #define E131BRIDGE_DEBUG_ENTRY() DEBUG_ENTRY()
 #define E131BRIDGE_DEBUG_EXIT() DEBUG_EXIT()
 #define E131BRIDGE_DEBUG_PRINTF(...) DEBUG_PRINTF(__VA_ARGS__)
 #define E131BRIDGE_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
+inline constexpr bool kDebugE131BridgeEnabled = false;
 #define E131BRIDGE_DEBUG_ENTRY() \
-    do {                      \
+    do {                         \
     } while (false)
 #define E131BRIDGE_DEBUG_EXIT() \
-    do {                     \
+    do {                        \
     } while (false)
 #define E131BRIDGE_DEBUG_PRINTF(...) \
-    do {                          \
+    do {                             \
     } while (false)
 #define E131BRIDGE_DEBUG_PUTS(...) \
-    do {                        \
+    do {                           \
     } while (false)
 #endif // DEBUG_E131BRIDGE
 
