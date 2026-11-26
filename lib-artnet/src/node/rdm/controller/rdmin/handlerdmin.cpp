@@ -50,17 +50,17 @@ void ArtNetNode::HandleRdmIn() {
                 continue;
             }
 
-            const auto* rdm_data = Rdm::Receive(port_index);
-            if (rdm_data != nullptr) {
-                if (rdm_controller_.RdmReceive(port_index, rdm_data)) {
+            const auto kRdmData = Rdm::Receive(port_index);
+            if (!kRdmData.empty()) {
+                if (rdm_controller_.RdmReceive(port_index, kRdmData.data())) {
                     art_rdm->op_code = static_cast<uint16_t>(artnet::OpCodes::kOpRdm);
                     art_rdm->rdm_version = 0x01;
                     art_rdm->net = node_.port[port_index].net_switch;
                     art_rdm->command = 0;
                     art_rdm->address = node_.port[port_index].sw;
 
-                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(rdm_data);
-                    memcpy(art_rdm->rdm_packet, &rdm_data[1], message->message_length + 1U);
+                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(kRdmData.data());
+                    memcpy(art_rdm->rdm_packet, &kRdmData[1], message->message_length + 1U);
 
                     const auto* rdm_message = reinterpret_cast<const struct TRdmMessageNoSc*>(art_rdm->rdm_packet);
 
@@ -68,23 +68,23 @@ void ArtNetNode::HandleRdmIn() {
 
 #ifdef CONFIG_PANELLED_RDM_PORT
                     panelled::On(panelled::kPortARdm << port_index);
-#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+#elifdef CONFIG_PANELLED_RDM_NO_PORT
                     panelled::On(panelled::kRdm << port_index);
 #endif // CONFIG_PANELLED_RDM_PORT
                 }
             }
         } else if (node_.port[port_index].direction == dmxnode::Direction::kOutput) {
             if (output_port_[port_index].rdm_destination_ip != 0) {
-                const auto* rdm_data = Rdm::Receive(port_index);
-                if (rdm_data != nullptr) {
+                const auto kRdmData = Rdm::Receive(port_index);
+                if (!kRdmData.empty()) {
                     art_rdm->op_code = static_cast<uint16_t>(artnet::OpCodes::kOpRdm);
                     art_rdm->rdm_version = 0x01;
                     art_rdm->net = node_.port[port_index].net_switch;
                     art_rdm->command = 0;
                     art_rdm->address = node_.port[port_index].sw;
 
-                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(rdm_data);
-                    memcpy(art_rdm->rdm_packet, &rdm_data[1], message->message_length + 1U);
+                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(kRdmData.data());
+                    memcpy(art_rdm->rdm_packet, &kRdmData[1], message->message_length + 1U);
 
                     const auto* rdm_message = reinterpret_cast<const struct TRdmMessageNoSc*>(art_rdm->rdm_packet);
 
@@ -94,7 +94,7 @@ void ArtNetNode::HandleRdmIn() {
 
 #ifdef CONFIG_PANELLED_RDM_PORT
                     panelled::On(panelled::kPortARdm << port_index);
-#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+#elifdef CONFIG_PANELLED_RDM_NO_PORT
                     panelled::On(panelled::kRdm << port_index);
 #endif // CONFIG_PANELLED_RDM_PORT
                 }

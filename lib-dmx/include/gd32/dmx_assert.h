@@ -34,12 +34,11 @@
 #ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_VOID(x) ((void)0)
 #else
-#define DMX_CHECK_PORT_INDEX_VOID(x)                     \
-    do                                                   \
-    {                                                    \
+#define DMX_CHECK_PORT_INDEX_VOID(x)                      \
+    do {                                                  \
         assert((x) < dmx::config::max::kPorts);           \
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
-            return;                                      \
+            return;                                       \
     } while (0)
 #endif // NDEBUG
 
@@ -47,12 +46,11 @@
 #ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_RET(x, ret) ((void)0)
 #else
-#define DMX_CHECK_PORT_INDEX_RET(x, ret)                 \
-    do                                                   \
-    {                                                    \
+#define DMX_CHECK_PORT_INDEX_RET(x, ret)                  \
+    do {                                                  \
         assert((x) < dmx::config::max::kPorts);           \
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
-            return ret;                                  \
+            return ret;                                   \
     } while (0)
 #endif // NDEBUG
 
@@ -60,12 +58,23 @@
 #ifdef NDEBUG
 #define DMX_CHECK_PORT_INDEX_PTR(x) ((void)0)
 #else
-#define DMX_CHECK_PORT_INDEX_PTR(x)                      \
-    do                                                   \
-    {                                                    \
+#define DMX_CHECK_PORT_INDEX_PTR(x)                       \
+    do {                                                  \
         assert((x) < dmx::config::max::kPorts);           \
         if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
-            return nullptr;                              \
+            return nullptr;                               \
+    } while (0)
+#endif // NDEBUG
+
+// For functions that return spans
+#ifdef NDEBUG
+#define DMX_CHECK_PORT_INDEX_SPAN(x) ((void)0)
+#else
+#define DMX_CHECK_PORT_INDEX_SPAN(x)                      \
+    do {                                                  \
+        assert((x) < dmx::config::max::kPorts);           \
+        if ((x) >= dmx::config::max::kPorts) [[unlikely]] \
+            return {};                                    \
     } while (0)
 #endif // NDEBUG
 

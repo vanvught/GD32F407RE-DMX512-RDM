@@ -27,6 +27,7 @@
 #define GD32_DMX_H_
 
 #include <cstdint>
+#include <span>
 
 #include "dmxconst.h"
 #include "dmx/dmx_config.h"
@@ -95,11 +96,11 @@ class Dmx {
     void RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t* data, uint32_t length);
 
     template <uint32_t kPortIndex>
-    void RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length);
+    bool RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length);
 
     // RDM Receive
-    const uint8_t* RdmReceive(uint32_t port_index);
-    const uint8_t* RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms);
+    std::span<const uint8_t> RdmReceive(uint32_t port_index);
+    std::span<const uint8_t> RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms);
 
     bool IsReceiveOngoing(uint32_t port_index);
 

@@ -165,6 +165,10 @@ bool StateMachine::Stop() {
 }
 
 bool StateMachine::IsValidDiscoveryResponse(uint8_t* uid) {
+    if (response_.size() != sizeof(struct TRdmDiscoveryMsg)) {
+        return false;
+    }
+
     uint8_t checksum[2];
     uint16_t rdm_checksum = 6 * 0xFF;
     auto is_valid = false;
@@ -229,7 +233,7 @@ void StateMachine::NewState(rdm::discovery::State state, bool do_state_late_resp
 void StateMachine::Process() {
     switch (state_) {
         case rdm::discovery::State::kLateResponse: ///< LATE_RESPONSE
-            message_.Receive(port_index_);
+            Rdm::Receive(port_index_);
 
             if ((timing::Micros() - late_response_.micros) > rdm::discovery::kLateResponseTimeOut) {
                 SAVED_STATE();
@@ -271,7 +275,7 @@ void StateMachine::Process() {
                 return;
             }
 
-            message_.Receive(port_index_);
+            Rdm::Receive(port_index_);
 
             if ((timing::Micros() - unmute_.micros) > rdm::discovery::kReceiveTimeOut) {
                 assert(unmute_.counter > 0);
@@ -324,9 +328,9 @@ void StateMachine::Process() {
                 return;
             }
 
-            response_ = const_cast<uint8_t*>(message_.Receive(port_index_));
+            response_ = Rdm::Receive(port_index_);
 
-            if (response_ != nullptr) {
+            if (!response_.empty()) {
                 assert(mute_.tod_entries > 0);
                 mute_.tod_entries--;
                 mute_.is_command_running = false;
@@ -345,9 +349,9 @@ void StateMachine::Process() {
 
         case rdm::discovery::State::kDiscovery: ///< DISCOVERY
             if (discovery_.is_command_running) {
-                response_ = const_cast<uint8_t*>(message_.Receive(port_index_));
+                response_ = Rdm::Receive(port_index_);
 
-                if ((response_ != nullptr) || (discovery_.counter == 0)) {
+                if ((!response_.empty()) || (discovery_.counter == 0)) {
                     discovery_.is_command_running = false;
                     NEW_STATE(rdm::discovery::State::kDub, false);
                     return;
@@ -432,10 +436,10 @@ void StateMachine::Process() {
                 return;
             }
 
-            response_ = const_cast<uint8_t*>(message_.Receive(port_index_));
+            response_ = Rdm::Receive(port_index_);
 
-            if (response_ != nullptr) {
-                const auto* response = reinterpret_cast<struct TRdmMessage*>(response_);
+            if (!response_.empty()) {
+                const auto* response = reinterpret_cast<const struct TRdmMessage*>(response_.data());
 
                 if ((response->command_class == E120_DISCOVERY_COMMAND_RESPONSE) && (memcmp(discovery_.uid, response->source_uid, rdm::kUidSize) == 0)) {
                     tod_->AddUid(discovery_.uid);
@@ -465,7 +469,7 @@ void StateMachine::Process() {
             break;
 
         case rdm::discovery::State::kDub: ///< DUB
-            if (response_ == nullptr) {
+            if (response_.empty()) {
                 if constexpr (kDebugRdmDiscoveryEnabled) {
                     puts("No responses");
                 }
@@ -523,10 +527,10 @@ void StateMachine::Process() {
                 return;
             }
 
-            response_ = const_cast<uint8_t*>(message_.Receive(port_index_));
+            response_ = Rdm::Receive(port_index_);
 
-            if ((response_ != nullptr)) {
-                const auto* response = reinterpret_cast<struct TRdmMessage*>(response_);
+            if ((!response_.empty())) {
+                const auto* response = reinterpret_cast<const struct TRdmMessage*>(response_.data());
 
                 if ((response->command_class != E120_DISCOVERY_COMMAND_RESPONSE) || ((static_cast<uint16_t>((response->param_id[0] << 8) + response->param_id[1])) != E120_DISC_MUTE)) {
                     puts("QUICKFIND invalid response");
@@ -580,19 +584,18 @@ void StateMachine::Process() {
                 return;
             }
 
-            response_ = const_cast<uint8_t*>(message_.Receive(port_index_));
+            response_ = Rdm::Receive(port_index_);
 
-            if ((response_ != nullptr) && (IsValidDiscoveryResponse(quick_find_.uid))) {
+            if (!response_.empty()) {
                 quick_find_discovery_.counter = rdm::discovery::kQuikfindDiscoveryCounter;
                 quick_find_discovery_.is_command_running = false;
-                NEW_STATE(rdm::discovery::State::kQuickfind, true);
-                return;
-            }
 
-            if ((response_ != nullptr) && (!IsValidDiscoveryResponse(quick_find_.uid))) {
-                quick_find_discovery_.counter = rdm::discovery::kQuikfindDiscoveryCounter;
-                quick_find_discovery_.is_command_running = false;
-                NEW_STATE(rdm::discovery::State::kDub, false);
+                if (IsValidDiscoveryResponse(quick_find_.uid)) {
+                    NEW_STATE(rdm::discovery::State::kQuickfind, true);
+                } else {
+                    NEW_STATE(rdm::discovery::State::kDub, false);
+                }
+
                 return;
             }
 

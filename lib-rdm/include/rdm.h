@@ -27,6 +27,7 @@
 #define RDM_H_
 
 #include <cstdint>
+#include <span>
 #include <cassert>
 
 #include "dmx.h" // IWYU pragma: keep
@@ -79,8 +80,8 @@ class Rdm {
 
     static void TransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t* rdm_data, uint32_t length) { Dmx::Get()->RdmTransmitDiscoveryRespondMessage(port_index, rdm_data, length); }
 
-    static const uint8_t* Receive(uint32_t port_index) { return Dmx::Get()->RdmReceive(port_index); }
-    static const uint8_t* ReceiveTimeOut(uint32_t port_index, uint16_t time_out) { return Dmx::Get()->RdmReceiveTimeOut(port_index, time_out); }
+    static std::span<const uint8_t> Receive(uint32_t port_index) { return Dmx::Get()->RdmReceive(port_index); }
+    static std::span<const uint8_t> ReceiveTimeOut(uint32_t port_index, uint16_t time_out) { return Dmx::Get()->RdmReceiveTimeOut(port_index, time_out); }
 
    private:
     static uint8_t s_transaction_number[dmx::config::max::kPorts];

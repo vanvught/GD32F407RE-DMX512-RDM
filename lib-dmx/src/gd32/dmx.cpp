@@ -38,8 +38,14 @@
 #include <algorithm>
 #include <cassert>
 
+#include "dmxconst.h"
 #include "dmx_internal.h"
 #include "dmx/dmx_config.h"
+#include "dmx_debug.h"
+#include "e120.h"
+#include "rdmconst.h"
+#include "rdm_e120.h"
+#include "timing.h"
 #include "gd32.h"     // IWYU pragma: keep
 #include "gd32/dmx.h" // IWYU pragma: keep
 #include "gd32/dmx_assert.h"
@@ -48,16 +54,9 @@
 #include "gd32_dma.h"
 #include "gd32_uart.h"
 #include "gd32_gpio.h"
-#include "dmxconst.h"
-#include "e120.h"
-#include "rdmconst.h"
-#include "rdm_e120.h"
-#include "timing.h"
-
 #ifdef LOGIC_ANALYZER
 #include "logic_analyzer.h" // IWYU pragma: keep
 #endif                      // LOGIC_ANALYZER
-#include "dmx_debug.h"
 
 static_assert(dmx::buffer::kSize % 4 == 0); // multiple of uint32_t
 static_assert(dmx::buffer::kSize >= 513);   // 512 with Start Code
@@ -326,6 +325,7 @@ void IrqHandlerDmxRdmInput() {
         case dmx::TxRxState::kRdmChecksuml: {
             auto index = rx_buffer.rdm.index;
             rx_buffer.rdm.data[index] = kData;
+            index++;
             index |= dmx::kRdmSlotsCompleteFlag;
             rx_buffer.rdm.index = index;
             rx_buffer.state = dmx::TxRxState::kIdle;
@@ -335,7 +335,7 @@ void IrqHandlerDmxRdmInput() {
         case dmx::TxRxState::kRdmdisc: {
             auto index = rx_buffer.rdm.index;
 
-            if (index < 24) { // TODO (a) Replace 24 with constexpr
+            if (index < sizeof(rx_buffer.rdm.data)) {
                 rx_buffer.rdm.data[index] = kData;
                 index++;
                 rx_buffer.rdm.index = index;
@@ -542,16 +542,18 @@ void TIMER1_IRQHandler() {
                     }
                     break;
 
-                case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                case dmx::RdmTxState::kDirection:
+                    [[likely]] {
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
-                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
-                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
-                } break;
+                    }
+                    break;
 
                 default:
                     [[unlikely]] assert(false && "switch");
@@ -610,16 +612,18 @@ void TIMER1_IRQHandler() {
                     }
                     break;
 
-                case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                case dmx::RdmTxState::kDirection:
+                    [[likely]] {
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
-                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
-                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
-                } break;
+                    }
+                    break;
 
                 default:
                     [[unlikely]] assert(false && "switch");
@@ -680,16 +684,18 @@ void TIMER1_IRQHandler() {
                     }
                     break;
 
-                case dmx::RdmTxState::kDirection: {
-                    s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
-                    sv_port_state[kPortIndex] = dmx::PortState::kIdle;
-                    Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                case dmx::RdmTxState::kDirection:
+                    [[likely]] {
+                        sv_port_state[kPortIndex] = dmx::PortState::kIdle;
+                        Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
-                    const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
-                    sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
+                        const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
+                        sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
-                } break;
+                    }
+                    break;
 
                 default:
                     [[unlikely]] assert(false && "switch");
@@ -747,9 +753,9 @@ void TIMER1_IRQHandler() {
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
                         sv_port_state[kPortIndex] = dmx::PortState::kIdle;
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
                         const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
@@ -831,9 +837,9 @@ void TIMER4_IRQHandler() {
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
                         sv_port_state[kPortIndex] = dmx::PortState::kIdle;
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
                         if (s_RdmTxBuffer[kPortIndex].rdm.data.data[0] == E120_SC_RDM) {
@@ -907,9 +913,10 @@ void TIMER4_IRQHandler() {
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
                         sv_port_state[kPortIndex] = dmx::PortState::kIdle;
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
                         const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
                         sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
@@ -953,7 +960,7 @@ void TIMER4_IRQHandler() {
             switch (s_RdmTxBuffer[kPortIndex].state) {
                 case dmx::RdmTxState::kBreak:
                     [[likely]] {
-                        Gd32GpioModeAf<UART4_TX_GPIOx, UART4_TX_GPIO_PINx, UART4>();
+                        Gd32GpioModeAf<UART6_GPIOx, UART6_TX_GPIO_PINx, UART6>();
                         s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kMab;
                         TIMER_CH2CV(TIMER4) = TIMER_CNT(TIMER4) + rdm::transmit::kMabTimeTypical;
                     }
@@ -967,9 +974,10 @@ void TIMER4_IRQHandler() {
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
                         sv_port_state[kPortIndex] = dmx::PortState::kIdle;
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
                         const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
                         sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
@@ -1027,9 +1035,10 @@ void TIMER4_IRQHandler() {
 
                 case dmx::RdmTxState::kDirection:
                     [[likely]] {
-                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
                         sv_port_state[kPortIndex] = dmx::PortState::kIdle;
                         Dmx::Get()->SetPortDirection<kPortIndex, dmx::Direction::kInput, true>();
+                        s_RdmTxBuffer[kPortIndex].state = dmx::RdmTxState::kIdle;
+
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
                         const auto kSent = sv_total_statistics[kPortIndex].rdm.sent.classes + 1;
                         sv_total_statistics[kPortIndex].rdm.sent.classes = kSent;
@@ -2211,55 +2220,67 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t*
 }
 
 template <uint32_t kPortIndex>
-void Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length) {
+bool Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t length) {
     static_assert(kPortIndex < dmx::config::max::kPorts);
 
+    auto& rdm = s_RdmTxBuffer[kPortIndex];
+
+    if (rdm.state != dmx::RdmTxState::kIdle) {
+#ifndef CONFIG_DMX_DISABLE_STATISTICS
+        sv_total_statistics[kPortIndex].rdm.sent.discovery_response_busy = sv_total_statistics[kPortIndex].rdm.sent.discovery_response_busy + 1;
+#endif
+        return false;
+    }
+
     assert(data != nullptr);
-    assert(length <= sizeof(TRdmDiscoveryMsg));
+    assert(length != 0);
+    assert(length <= sizeof(rdm.rdm.data.data));
+
+    if ((data == nullptr) || (length == 0) || (length > sizeof(rdm.rdm.data.data))) {
+        return false;
+    }
 
     // 3.2.2 Responder Packet spacing
     timing::DelayUs(rdm::responder::kPacketSpacing, timing::CpuTicks{gsv_rdm_data_receive_end[kPortIndex]});
 
     SetPortDirection<kPortIndex, dmx::Direction::kOutput, false>();
 
-    auto& tx_buffer = s_RdmTxBuffer[kPortIndex];
-
-    auto* dst_data = tx_buffer.rdm.data.data;
-    auto& dst_length = tx_buffer.rdm.data.length;
+    auto* dst_data = rdm.rdm.data.data;
+    auto& dst_length = rdm.rdm.data.length;
     dst_length = length;
 
     memcpy(dst_data, data, length);
 
     constexpr auto kUsartPeripheral = std::to_underlying(kDirGpio[kPortIndex].uart);
-    tx_buffer.state = dmx::RdmTxState::kData;
+    rdm.state = dmx::RdmTxState::kData;
 
     switch (kUsartPeripheral) {
         // TIMER 1
 #ifdef DMX_USE_USART0
         case USART0: {
             DMA_START_RDM_TX(kPortIndex, USART0, USART0_DMAx, USART0_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_USART0
 
 #ifdef DMX_USE_USART1
         case USART1: {
             DMA_START_RDM_TX(kPortIndex, USART1, USART1_DMAx, USART1_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_USART1
 
 #ifdef DMX_USE_USART2
         case USART2: {
             DMA_START_RDM_TX(kPortIndex, USART2, USART2_DMAx, USART2_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_USART2
 
 #ifdef DMX_USE_UART3
         case UART3: {
             DMA_START_RDM_TX(kPortIndex, UART3, UART3_DMAx, UART3_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_UART3
        // TIMER 4
@@ -2270,28 +2291,28 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t lengt
 #else
             DMA_START_RDM_TX(kPortIndex, UART4, UART4_DMAx, UART4_TX_DMA_CHx);
 #endif // UART4_NO_DMA_CHANNEL
-            return;
+            return true;
         } break;
 #endif // DMX_USE_UART4
 
 #ifdef DMX_USE_USART5
         case USART5: {
             DMA_START_RDM_TX(kPortIndex, USART5, USART5_DMAx, USART5_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_USART5
 
 #ifdef DMX_USE_UART6
         case UART6: {
             DMA_START_RDM_TX(kPortIndex, UART6, UART6_DMAx, UART6_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_UART6
 
 #ifdef DMX_USE_UART7
         case UART7: {
             DMA_START_RDM_TX(kPortIndex, UART7, UART7_DMAx, UART7_TX_DMA_CHx);
-            return;
+            return true;
         } break;
 #endif // DMX_USE_UART7
 
@@ -2301,71 +2322,85 @@ void Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t lengt
     }
 
     assert(false && "Not reachable");
+    return false;
 }
 
 // RDM Receive
-const uint8_t* Dmx::RdmReceive(uint32_t port_index) {
-    DMX_CHECK_PORT_INDEX_PTR(port_index);
+// RDM Receive
 
-    if ((sv_rx_buffer[port_index].rdm.index & dmx::kRdmSlotsCompleteFlag) != dmx::kRdmSlotsCompleteFlag) {
-        return nullptr;
+std::span<const uint8_t> Dmx::RdmReceive(uint32_t port_index) {
+    DMX_CHECK_PORT_INDEX_SPAN(port_index);
+
+    auto& rdm = sv_rx_buffer[port_index].rdm;
+    const auto kIndex = rdm.index;
+
+    if ((kIndex & dmx::kRdmSlotsCompleteFlag) == 0) {
+        return {};
     }
 
-    sv_rx_buffer[port_index].rdm.index = 0;
+    const auto kLength = kIndex & ~dmx::kRdmSlotsCompleteFlag;
 
-    const auto* data = const_cast<const uint8_t*>(sv_rx_buffer[port_index].rdm.data);
+    rdm.index = 0;
+
+    if ((kLength == 0) || (kLength > sizeof(rdm.data))) {
+        return {};
+    }
+
+    const auto* data = const_cast<const uint8_t*>(rdm.data);
 
     if (data[0] == E120_SC_RDM) {
-        const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(data);
+        if (kLength >= e120::kMessageLengthMin + 2U) {
+            const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(data);
 
-        uint32_t index;
-        uint16_t checksum = 0;
+            const auto kMessageLength = static_cast<uint32_t>(rdm_command->message_length);
 
-        for (index = 0; index < e120::kMessageLengthMin; index++) {
-            checksum = static_cast<uint16_t>(checksum + data[index]);
-        }
+            if ((kMessageLength >= e120::kMessageLengthMin) && (kLength == kMessageLength + 2U)) {
+                uint16_t checksum = 0;
 
-        for (; index < rdm_command->message_length; index++) {
-            checksum = static_cast<uint16_t>(checksum + data[index]);
-        }
+                for (uint32_t index = 0; index < kMessageLength; index++) {
+                    checksum = static_cast<uint16_t>(checksum + data[index]);
+                }
 
-        if (data[index++] == static_cast<uint8_t>(checksum >> 8)) {
-            if (data[index] == static_cast<uint8_t>(checksum)) {
+                if ((data[kMessageLength] == static_cast<uint8_t>(checksum >> 8)) && (data[kMessageLength + 1U] == static_cast<uint8_t>(checksum))) {
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
-                sv_total_statistics[port_index].rdm.received.good = sv_total_statistics[port_index].rdm.received.good + 1;
+                    sv_total_statistics[port_index].rdm.received.good = sv_total_statistics[port_index].rdm.received.good + 1;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
-                return data;
+
+                    return {data, kLength};
+                }
             }
         }
+
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
         sv_total_statistics[port_index].rdm.received.bad = sv_total_statistics[port_index].rdm.received.bad + 1;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
-        return nullptr;
+
+        return {};
     }
 
 #ifndef CONFIG_DMX_DISABLE_STATISTICS
     sv_total_statistics[port_index].rdm.received.discovery_response = sv_total_statistics[port_index].rdm.received.discovery_response + 1;
 #endif // CONFIG_DMX_DISABLE_STATISTICS
 
-    return data;
+    return {data, kLength};
 }
 
 // RDM Receive with timeout
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-const uint8_t* Dmx::RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms) {
-    DMX_CHECK_PORT_INDEX_PTR(port_index);
+std::span<const uint8_t> Dmx::RdmReceiveTimeOut(uint32_t port_index, uint16_t timeout_ms) {
+    DMX_CHECK_PORT_INDEX_SPAN(port_index);
 
-    uint8_t* data_available = nullptr;
     TIMER_CNT(TIMER5) = 0;
 
     do {
-        data_available = const_cast<uint8_t*>(RdmReceive(port_index));
-        if (data_available != nullptr) {
-            return data_available;
+        const auto kData = RdmReceive(port_index);
+
+        if (!kData.empty()) {
+            return kData;
         }
     } while (TIMER_CNT(TIMER5) < timeout_ms);
 
-    return nullptr;
+    return {};
 }
 
 // Explicit template instantiations
@@ -2380,7 +2415,7 @@ template void Dmx::SetSendDataInternal<0, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<0, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<0, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<0>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<0>(const uint8_t* data, uint32_t length);
 
 #if DMX_MAX_PORTS >= 2
 template void Dmx::SetSendDataInternal<1, true, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
@@ -2388,7 +2423,7 @@ template void Dmx::SetSendDataInternal<1, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<1, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<1, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<1>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<1>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 2
 
 #if DMX_MAX_PORTS >= 3
@@ -2397,7 +2432,7 @@ template void Dmx::SetSendDataInternal<2, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<2, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<2, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<2>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<2>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 3
 
 #if DMX_MAX_PORTS >= 4
@@ -2406,7 +2441,7 @@ template void Dmx::SetSendDataInternal<3, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<3, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<3, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<3>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<3>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 4
 
 #if DMX_MAX_PORTS >= 5
@@ -2415,7 +2450,7 @@ template void Dmx::SetSendDataInternal<4, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<4, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<4, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<4>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<4>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 5
 
 #if DMX_MAX_PORTS >= 6
@@ -2424,7 +2459,7 @@ template void Dmx::SetSendDataInternal<5, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<5, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<5, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<5>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<5>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 6
 
 #if DMX_MAX_PORTS >= 7
@@ -2433,7 +2468,7 @@ template void Dmx::SetSendDataInternal<6, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<6, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<6, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<6>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<6>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS >= 7
 
 #if DMX_MAX_PORTS == 8
@@ -2442,7 +2477,7 @@ template void Dmx::SetSendDataInternal<7, true, dmx::SendStyle::kSync>(const uin
 template void Dmx::SetSendDataInternal<7, false, dmx::SendStyle::kDirect>(const uint8_t*, uint32_t);
 template void Dmx::SetSendDataInternal<7, false, dmx::SendStyle::kSync>(const uint8_t*, uint32_t);
 
-template void Dmx::RdmTransmitDiscoveryRespondMessage<7>(const uint8_t* data, uint32_t length);
+template bool Dmx::RdmTransmitDiscoveryRespondMessage<7>(const uint8_t* data, uint32_t length);
 #endif // DMX_MAX_PORTS == 8
 
 #ifndef CONFIG_DMX_NO_OPTIMIZE

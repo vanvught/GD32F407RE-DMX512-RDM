@@ -44,6 +44,7 @@ struct TotalStatistics {
         struct Sent {
             uint32_t classes;
             uint32_t discovery_response;
+            uint32_t discovery_response_busy;
         } sent;
     } rdm;
 };

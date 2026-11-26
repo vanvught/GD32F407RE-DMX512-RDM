@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <span>
 
 #include "rdmmessage.h"
 #include "rdm_tod.h"
@@ -99,7 +100,7 @@ class StateMachine {
     void NewState(rdm::discovery::State state, bool do_state_late_response, uint32_t line);
 
     RdmMessage message_;
-    uint8_t* response_{nullptr};
+    std::span<const uint8_t> response_;
     uint8_t uid_[rdm::kUidSize];
     uint32_t port_index_{0};
     rdm::Tod* tod_{nullptr};

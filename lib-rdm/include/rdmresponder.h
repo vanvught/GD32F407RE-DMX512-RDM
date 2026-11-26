@@ -92,24 +92,24 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
         }
 #endif // CONFIG_RDM_ENABLE_SUBDEVICES
 
-        const auto* rdm_data_in = Rdm::Receive(0);
+        const auto kRdmDataIn = Rdm::Receive(0);
 
-        if (rdm_data_in == nullptr) [[likely]] {
+        if (kRdmDataIn.empty()) [[likely]] {
             return rdm::responder::kNoData;
         }
 
 #ifndef NDEBUG
-        rdm::message::Print(rdm_data_in);
+        rdm::message::Print(kRdmDataIn.data());
 #endif // NDEBUG
 
-        if (rdm_data_in[0] == E120_SC_RDM) {
-            const auto* rdm_in = reinterpret_cast<const struct TRdmMessage*>(rdm_data_in);
+        if (kRdmDataIn[0] == E120_SC_RDM) {
+            const auto* rdm_in = reinterpret_cast<const struct TRdmMessage*>(kRdmDataIn.data());
 
             switch (rdm_in->command_class) {
                 case E120_DISCOVERY_COMMAND:
                 case E120_GET_COMMAND:
                 case E120_SET_COMMAND:
-                    RDMHandler::Instance().HandleData(&rdm_data_in[1], reinterpret_cast<uint8_t*>(&rdm_command), RDMHandler::Type::kTypeRdm);
+                    RDMHandler::Instance().HandleData(&kRdmDataIn[1], reinterpret_cast<uint8_t*>(&rdm_command), RDMHandler::Type::kTypeRdm);
                     return HandleResponse(reinterpret_cast<uint8_t*>(&rdm_command));
                     break;
                 default:
