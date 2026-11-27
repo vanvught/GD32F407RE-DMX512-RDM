@@ -37,6 +37,8 @@
 #include "panelled.h"
 #endif // defined(CONFIG_PANELLED_RDM_PORT) || defined(CONFIG_PANELLED_RDM_NO_PORT)
 #include "artnet_debug.h"
+#include "rdm_message_print.h"
+#include "rdm_debug.h"
 
 namespace rdm::discovery {
 void Starting(uint32_t port_index, [[maybe_unused]] Type type) {
@@ -296,16 +298,18 @@ void ArtNetNode::HandleRdm() {
 
             const auto* message = reinterpret_cast<const TRdmMessage*>(&kArtRdm->address);
 
-            kArtRdm->address = E120_SC_RDM;
-            Rdm::TransmitRaw(port_index, &kArtRdm->address, message->message_length + rdm::kMessageChecksumSize);
+            const std::span<const uint8_t> kRdmData{&kArtRdm->address, message->message_length + rdm::kMessageChecksumSize};
 
-#ifndef NDEBUG
-            rdm::message::Print(reinterpret_cast<const uint8_t*>(message));
-#endif // NDEBUG
+            kArtRdm->address = E120_SC_RDM;
+            Rdm::TransmitRaw(port_index, kRdmData);
+
+            if constexpr (kDebugRdmEnabled) {
+                rdm::message::Print(kRdmData);
+            }
 
 #ifdef CONFIG_PANELLED_RDM_PORT
             panelled::On(panelled::kPortARdm << port_index);
-#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+#elifdef CONFIG_PANELLED_RDM_NO_PORT
             panelled::On(panelled::kRdm << port_index);
 #endif // CONFIG_PANELLED_RDM_PORT
         } else if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
@@ -313,16 +317,19 @@ void ArtNetNode::HandleRdm() {
 
             if ((rdm_message->command_class == E120_GET_COMMAND_RESPONSE) || (rdm_message->command_class == E120_SET_COMMAND_RESPONSE)) {
                 kArtRdm->address = E120_SC_RDM;
-                Rdm::TransmitRaw(port_index, reinterpret_cast<const uint8_t*>(rdm_message), rdm_message->message_length + rdm::kMessageChecksumSize);
 
-#ifndef NDEBUG
-                rdm::message::Print(reinterpret_cast<const uint8_t*>(rdm_message));
-#endif // NDEBUG
+                const std::span<const uint8_t> kRdmData{&kArtRdm->address, rdm_message->message_length + rdm::kMessageChecksumSize};
+
+                Rdm::TransmitRaw(port_index, kRdmData);
+
+                if constexpr (kDebugRdmEnabled) {
+                    rdm::message::Print(kRdmData);
+                }
             }
 
 #ifdef CONFIG_PANELLED_RDM_PORT
             panelled::On(panelled::kPortARdm << port_index);
-#elif defined(CONFIG_PANELLED_RDM_NO_PORT)
+#elifdef CONFIG_PANELLED_RDM_NO_PORT
             panelled::On(panelled::kRdm << port_index);
 #endif // CONFIG_PANELLED_RDM_PORT
         }

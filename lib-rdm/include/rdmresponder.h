@@ -36,6 +36,7 @@
 #include "dmxreceiver.h"
 #include "dmxnode_outputtype.h"
 #include "rdm_message_print.h"
+#include "rdm_debug.h"
 #include "firmware/debug/debug_debug.h"
 
 #ifdef NODE_RDMNET_LLRP_ONLY
@@ -98,11 +99,13 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
             return rdm::responder::kNoData;
         }
 
-#ifndef NDEBUG
-        rdm::message::Print(kRdmDataIn.data());
-#endif // NDEBUG
+        if constexpr (kDebugRdmEnabled) {
+            rdm::message::Print(kRdmDataIn);
+        }
 
         if (kRdmDataIn[0] == E120_SC_RDM) {
+            assert(kRdmDataIn.size() >= rdm::kMessageMinimumSize + rdm::kMessageChecksumSize);
+
             const auto* rdm_in = reinterpret_cast<const struct TRdmMessage*>(kRdmDataIn.data());
 
             switch (rdm_in->command_class) {
@@ -110,7 +113,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
                 case E120_GET_COMMAND:
                 case E120_SET_COMMAND:
                     RDMHandler::Instance().HandleData(&kRdmDataIn[1], reinterpret_cast<uint8_t*>(&rdm_command), RDMHandler::Type::kTypeRdm);
-                    return HandleResponse(reinterpret_cast<uint8_t*>(&rdm_command));
+                    return HandleResponse({reinterpret_cast<const uint8_t*>(&rdm_command), sizeof(rdm_command)});
                     break;
                 default:
                     DEBUG_PUTS("RDM_RESPONDER_INVALID_DATA_RECEIVED");
@@ -141,26 +144,42 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
     void DmxStartAddressUpdate(uint16_t dmx_start_address) __attribute__((weak));
 
    private:
-    int HandleResponse(const uint8_t* response) {
-        auto length = rdm::responder::kInvalidResponse;
+    int HandleResponse(std::span<const uint8_t> response) {
+        std::span<const uint8_t> response_data;
 
-        if (response[0] == E120_SC_RDM) {
-            const auto* rdm = reinterpret_cast<const struct TRdmMessage*>(response);
-            length = static_cast<int>(rdm->message_length + rdm::kMessageChecksumSize);
-            Rdm::TransmitRawRespondMessage(0, response, static_cast<uint16_t>(length));
-        } else if (response[0] == 0xFE) {
-            length = sizeof(struct TRdmDiscoveryMsg);
-            Rdm::TransmitDiscoveryRespondMessage(0, response, static_cast<uint16_t>(length));
+        if (!response.empty()) {
+            if (response[0] == E120_SC_RDM) {
+                if (response.size() >= rdm::kMessageMinimumSize) {
+                    const auto* rdm = reinterpret_cast<const struct TRdmMessage*>(response.data());
+
+                    const auto kLength = rdm->message_length + rdm::kMessageChecksumSize;
+
+                    if ((rdm->message_length >= rdm::kMessageMinimumSize) && (kLength <= response.size())) {
+                        response_data = response.first(kLength);
+
+                        Rdm::TransmitRawRespondMessage(0, response_data);
+                    }
+                }
+            } else if (response[0] == 0xFE) {
+                constexpr auto kLength = sizeof(struct TRdmDiscoveryMsg);
+
+                if (response.size() >= kLength) {
+                    response_data = response.first(kLength);
+
+                    Rdm::TransmitDiscoveryRespondMessage(0, response_data);
+                }
+            }
         }
 
-#ifndef NDEBUG
-        if (length != rdm::responder::kInvalidResponse) {
-            rdm::message::Print(response);
+        if constexpr (kDebugRdmEnabled) {
+            if (!response_data.empty()) {
+                rdm::message::Print(response_data);
+            }
         }
-#endif // NDEBUG
 
         configstore::Delay();
-        return length;
+
+        return response_data.empty() ? rdm::responder::kInvalidResponse : static_cast<int>(response_data.size());
     }
 
     void PersonalityUpdate(DmxNodeOutputType* dmx_node_output_type) override {

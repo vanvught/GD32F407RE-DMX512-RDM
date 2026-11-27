@@ -48,15 +48,16 @@ void ArtNetNode::HandleRdm() {
         }
 
         if ((kPortAddress == node_.port[port_index].port_address) && (node_.port[port_index].direction == dmxnode::Direction::kOutput)) {
-            const auto* response = const_cast<uint8_t*>(rdm_responder_->Handler(port_index, kArtRdm->rdm_packet));
+            const auto kResponse = rdm_responder_->Handler(port_index, kArtRdm->rdm_packet);
 
-            if (response != nullptr) {
+            if (!kResponse.empty()) {
                 kArtRdm->rdm_version = 0x01;
 
-                const auto kMessageLength = static_cast<uint16_t>(response[2] + 1);
-                memcpy(kArtRdm->rdm_packet, &response[1], kMessageLength);
+                const auto kRdmData = kResponse.subspan(1);
 
-                const auto kLength = sizeof(struct artnet::ArtRdm) - sizeof(kArtRdm->rdm_packet) + kMessageLength;
+                memcpy(kArtRdm->rdm_packet, kRdmData.data(), kRdmData.size());
+
+                const auto kLength = sizeof(struct artnet::ArtRdm) - sizeof(kArtRdm->rdm_packet) + kRdmData.size();
 
                 network::udp::Send(handle_, receive_buffer_, kLength, ip_address_from_, artnet::kUdpPort);
             } else {

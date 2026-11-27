@@ -37,49 +37,52 @@
 
 class Rdm {
    public:
-    static void TransmitRaw(uint32_t port_index, const uint8_t* rdm_data, uint32_t length) {
-        assert(rdm_data != nullptr);
-        assert(length != 0);
-
-        Dmx::Get()->RdmTransmit(port_index, rdm_data, length);
+    static void TransmitRaw(uint32_t port_index, std::span<const uint8_t> rdm_data) {
+        assert(!rdm_data.empty());
+        Dmx::Get()->RdmTransmit(port_index, rdm_data.data(), rdm_data.size());
     }
 
-    static void Transmit(uint32_t port_index, struct TRdmMessage* rdm_command) {
+    static void Transmit(uint32_t port_index, struct TRdmMessage& rdm_command) {
         assert(port_index < dmx::config::max::kPorts);
-        assert(rdm_command != nullptr);
 
-        auto* data = reinterpret_cast<uint8_t*>(rdm_command);
+        auto* data = reinterpret_cast<uint8_t*>(&rdm_command);
+
         uint32_t i;
         uint16_t checksum = 0;
 
-        rdm_command->transaction_number = s_transaction_number[port_index];
+        rdm_command.transaction_number = s_transaction_number[port_index];
 
-        for (i = 0; i < rdm_command->message_length; i++) {
+        for (i = 0; i < rdm_command.message_length; i++) {
             checksum = static_cast<uint16_t>(checksum + data[i]);
         }
 
         data[i++] = static_cast<uint8_t>(checksum >> 8);
-        data[i] = static_cast<uint8_t>(checksum & 0XFF);
+        data[i] = static_cast<uint8_t>(checksum & 0xFF);
 
-        TransmitRaw(port_index, reinterpret_cast<const uint8_t*>(rdm_command), rdm_command->message_length + rdm::kMessageChecksumSize);
+        TransmitRaw(port_index, {data, i + 1U});
 
         s_transaction_number[port_index]++;
     }
 
-    static void TransmitRawRespondMessage(uint32_t port_index, const uint8_t* rdm_data, uint32_t length) {
+    static void TransmitRawRespondMessage(uint32_t port_index, std::span<const uint8_t> rdm_data) {
         assert(port_index < dmx::config::max::kPorts);
-        assert(rdm_data != nullptr);
-        assert(length != 0);
+        assert(!rdm_data.empty());
 
         extern volatile uint32_t gsv_rdm_data_receive_end[dmx::config::max::kPorts];
+
         // 3.2.2 Responder Packet spacing
         timing::DelayUs(rdm::responder::kPacketSpacing, timing::CpuTicks{gsv_rdm_data_receive_end[port_index]});
 
-        TransmitRaw(port_index, rdm_data, length);
+        TransmitRaw(port_index, rdm_data);
     }
 
-    static void TransmitDiscoveryRespondMessage(uint32_t port_index, const uint8_t* rdm_data, uint32_t length) { Dmx::Get()->RdmTransmitDiscoveryRespondMessage(port_index, rdm_data, length); }
+    static void TransmitDiscoveryRespondMessage(uint32_t port_index, std::span<const uint8_t> rdm_data) {
+        assert(port_index < dmx::config::max::kPorts);
+        assert(!rdm_data.empty());
 
+        Dmx::Get()->RdmTransmitDiscoveryRespondMessage(port_index, rdm_data.data(), rdm_data.size());
+    }
+    
     static std::span<const uint8_t> Receive(uint32_t port_index) { return Dmx::Get()->RdmReceive(port_index); }
     static std::span<const uint8_t> ReceiveTimeOut(uint32_t port_index, uint16_t time_out) { return Dmx::Get()->RdmReceiveTimeOut(port_index, time_out); }
 

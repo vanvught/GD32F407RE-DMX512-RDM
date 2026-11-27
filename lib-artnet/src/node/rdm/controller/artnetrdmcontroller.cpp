@@ -57,18 +57,18 @@ void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) {
     }
 
     uint16_t checksum = 0;
-    uint32_t i;
+    uint32_t index;
 
     auto* data = reinterpret_cast<uint8_t*>(message);
 
-    for (i = 0; i < message->message_length; i++) {
-        checksum = static_cast<uint16_t>(checksum + data[i]);
+    for (index = 0; index < message->message_length; index++) {
+        checksum = static_cast<uint16_t>(checksum + data[index]);
     }
 
-    data[i++] = static_cast<uint8_t>(checksum >> 8);
-    data[i++] = static_cast<uint8_t>(checksum & 0XFF);
+    data[index++] = static_cast<uint8_t>(checksum >> 8);
+    data[index++] = static_cast<uint8_t>(checksum & 0XFF);
 
-    Rdm::TransmitRawRespondMessage(port_index, reinterpret_cast<uint8_t*>(message), i);
+    Rdm::TransmitRawRespondMessage(port_index, {data, index});
 }
 } // namespace
 
@@ -133,7 +133,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
                     response->checksum[2] = static_cast<uint8_t>((checksum & 0xFF) | 0xAA);
                     response->checksum[3] = static_cast<uint8_t>((checksum & 0xFF) | 0x55);
 
-                    Rdm::TransmitDiscoveryRespondMessage(port_index, reinterpret_cast<uint8_t*>(response), sizeof(struct TRdmDiscoveryMsg));
+                    Rdm::TransmitDiscoveryRespondMessage(port_index, {reinterpret_cast<const uint8_t*>(response), sizeof(struct TRdmDiscoveryMsg)});
                     return false;
                 }
             }

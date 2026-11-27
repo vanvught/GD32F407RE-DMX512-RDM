@@ -27,10 +27,11 @@
 #define RDM_MESSAGE_PRINT_H_
 
 #include <cstdint>
+#include <span>
 
 namespace rdm::message {
-void Print(const uint8_t* rdm_data);
-void PrintNoStartcode(const uint8_t* rdm_data_no_sc);
+void Print(std::span<const uint8_t> rdm_data);
+void PrintNoStartcode(std::span<const uint8_t> rdm_data_no_sc);
 } // namespace rdm::message
 
 #endif // RDM_MESSAGE_PRINT_H_

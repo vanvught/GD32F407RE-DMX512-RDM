@@ -26,83 +26,134 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include <cassert>
+#include <span>
+#include <limits>
 
 #include "e120.h"
 #include "rdm_e120.h"
 #include "firmware/debug/debug_debug.h"
 
 namespace rdm::message {
-void Print(const uint8_t* rdm_data) {
-    if (rdm_data == nullptr) {
+namespace {
+void PrintRaw(std::span<const uint8_t> data) {
+    for (const auto kByte : data) {
+        printf("%.2x ", kByte);
+    }
+
+    puts("");
+}
+} // namespace
+
+void Print(std::span<const uint8_t> rdm_data) {
+    if (rdm_data.empty()) {
         DEBUG_PUTS("No RDM data");
         return;
     }
 
-    const auto* rdm_message = reinterpret_cast<const struct TRdmMessage*>(rdm_data);
-
-    if (rdm_data[0] == E120_SC_RDM) {
-        const uint8_t* src_uid = rdm_message->source_uid;
-        printf("%.2x%.2x:%.2x%.2x%.2x%.2x -> ", src_uid[0], src_uid[1], src_uid[2], src_uid[3], src_uid[4], src_uid[5]);
-
-        const uint8_t* dst_uid = rdm_message->destination_uid;
-        printf("%.2x%.2x:%.2x%.2x%.2x%.2x ", dst_uid[0], dst_uid[1], dst_uid[2], dst_uid[3], dst_uid[4], dst_uid[5]);
-
-        switch (rdm_message->command_class) {
-            case E120_DISCOVERY_COMMAND:
-                printf("DISCOVERY_COMMAND");
-                break;
-            case E120_DISCOVERY_COMMAND_RESPONSE:
-                printf("DISCOVERY_COMMAND_RESPONSE");
-                break;
-            case E120_GET_COMMAND:
-                printf("GET_COMMAND");
-                break;
-            case E120_GET_COMMAND_RESPONSE:
-                printf("GET_COMMAND_RESPONSE %u", rdm_message->slot16.response_type);
-                break;
-            case E120_SET_COMMAND:
-                printf("SET_COMMAND");
-                break;
-            case E120_SET_COMMAND_RESPONSE:
-                printf("SET_COMMAND_RESPONSE %u", rdm_message->slot16.response_type);
-                break;
-            default:
-                printf("CC {%.2x}", rdm_message->command_class);
-                break;
-        }
-
-        const auto kSubDevice = static_cast<uint16_t>((rdm_message->sub_device[0] << 8) + rdm_message->sub_device[1]);
-        printf(", sub-dev: %d, tn: %d, PID 0x%.2x%.2x, pdl: %d", kSubDevice, rdm_message->transaction_number, rdm_message->param_id[0], rdm_message->param_id[1], rdm_message->param_data_length);
-
-        if (rdm_message->param_data_length != 0) {
-            printf(" -> ");
-            for (uint32_t i = 0; (i < 12) && (i < rdm_message->param_data_length); i++) {
-                printf("%.2x ", rdm_message->param_data[i]);
-            }
-        }
-
-        puts("");
-    } else if (rdm_data[0] == 0xFE) {
-        for (uint32_t i = 0; i < 24; i++) {
-            printf("%.2x ", rdm_data[i]);
-        }
-        puts("");
-    } else {
-        printf("Corrupted? RDM data [0-3]: %.2x:%.2x:%.2x:%.2x\n", rdm_data[0], rdm_data[1], rdm_data[2], rdm_data[3]);
+    if (rdm_data[0] == 0xFE) {
+        printf("RDM discovery response: %zu bytes -> ", rdm_data.size());
+        PrintRaw(rdm_data);
+        return;
     }
+
+    if (rdm_data[0] != E120_SC_RDM) {
+        printf("Unknown RDM data: %zu bytes -> ", rdm_data.size());
+        PrintRaw(rdm_data);
+        return;
+    }
+
+    if (rdm_data.size() < e120::kMessageLengthMin) {
+        printf("Truncated RDM header: %zu bytes -> ", rdm_data.size());
+        PrintRaw(rdm_data);
+        return;
+    }
+
+    const auto* rdm_message = reinterpret_cast<const struct TRdmMessage*>(rdm_data.data());
+
+    const auto kMessageLength = rdm_message->message_length;
+    const auto kPdl = rdm_message->param_data_length;
+
+    if ((kMessageLength < e120::kMessageLengthMin) || (kMessageLength > rdm_data.size()) || (kMessageLength != e120::kMessageLengthMin + kPdl)) {
+        printf("Invalid RDM length: size=%zu, ML=%u, PDL=%u -> ", rdm_data.size(), kMessageLength, kPdl);
+        PrintRaw(rdm_data);
+        return;
+    }
+
+    const auto* src_uid = rdm_message->source_uid;
+
+    printf("%.2x%.2x:%.2x%.2x%.2x%.2x -> ", src_uid[0], src_uid[1], src_uid[2], src_uid[3], src_uid[4], src_uid[5]);
+
+    const auto* dst_uid = rdm_message->destination_uid;
+
+    printf("%.2x%.2x:%.2x%.2x%.2x%.2x ", dst_uid[0], dst_uid[1], dst_uid[2], dst_uid[3], dst_uid[4], dst_uid[5]);
+
+    switch (rdm_message->command_class) {
+        case E120_DISCOVERY_COMMAND:
+            printf("DISCOVERY_COMMAND");
+            break;
+        case E120_DISCOVERY_COMMAND_RESPONSE:
+            printf("DISCOVERY_COMMAND_RESPONSE");
+            break;
+        case E120_GET_COMMAND:
+            printf("GET_COMMAND");
+            break;
+        case E120_GET_COMMAND_RESPONSE:
+            printf("GET_COMMAND_RESPONSE %u", static_cast<unsigned>(rdm_message->slot16.response_type));
+            break;
+        case E120_SET_COMMAND:
+            printf("SET_COMMAND");
+            break;
+        case E120_SET_COMMAND_RESPONSE:
+            printf("SET_COMMAND_RESPONSE %u", static_cast<unsigned>(rdm_message->slot16.response_type));
+            break;
+        default:
+            printf("CC {%.2x}", rdm_message->command_class);
+            break;
+    }
+
+    const auto kSubDevice = static_cast<uint16_t>((rdm_message->sub_device[0] << 8) + rdm_message->sub_device[1]);
+
+    printf(", sub-dev: %u, tn: %u, PID 0x%.2x%.2x, pdl: %u",
+           static_cast<unsigned>(kSubDevice),                      //
+           static_cast<unsigned>(rdm_message->transaction_number), //
+           rdm_message->param_id[0],                               //
+           rdm_message->param_id[1],                               //
+           static_cast<unsigned>(kPdl)                             //
+    );
+
+    if (kPdl != 0) {
+        printf(" -> ");
+
+        for (uint32_t i = 0; (i < 12) && (i < kPdl); i++) {
+            printf("%.2x ", rdm_message->param_data[i]);
+        }
+    }
+
+    puts("");
 }
 
-void PrintNoStartcode(const uint8_t* rdm_data_no_sc) {
-    assert(rdm_data_no_sc != nullptr);
+void PrintNoStartcode(std::span<const uint8_t> rdm_data_no_sc) {
+    if (rdm_data_no_sc.size() < e120::kMessageLengthMin - 1U) {
+        printf("Truncated RDM data without start code: %u bytes -> ", rdm_data_no_sc.size());
+        PrintRaw(rdm_data_no_sc);
+        return;
+    }
 
-    const auto* data = reinterpret_cast<const struct TRdmMessageNoSc*>(rdm_data_no_sc);
+    const auto* data = reinterpret_cast<const struct TRdmMessageNoSc*>(rdm_data_no_sc.data());
+    const auto kMessageLength = data->message_length;
 
     uint8_t message[sizeof(struct TRdmMessage)];
+
+    if ((kMessageLength < e120::kMessageLengthMin) || (kMessageLength - 1U > rdm_data_no_sc.size())) {
+        printf("Invalid RDM message length: %u\n", kMessageLength);
+        PrintRaw(rdm_data_no_sc);
+        return;
+    }
+
     message[0] = E120_SC_RDM;
 
-    memcpy(&message[1], data, data->message_length - 1U);
+    memcpy(&message[1], rdm_data_no_sc.data(), kMessageLength - 1U);
 
-    rdm::message::Print(message);
+    Print({message, kMessageLength});
 }
 } // namespace rdm::message

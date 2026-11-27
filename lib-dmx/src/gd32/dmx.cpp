@@ -2326,8 +2326,6 @@ bool Dmx::RdmTransmitDiscoveryRespondMessage(const uint8_t* data, uint32_t lengt
 }
 
 // RDM Receive
-// RDM Receive
-
 std::span<const uint8_t> Dmx::RdmReceive(uint32_t port_index) {
     DMX_CHECK_PORT_INDEX_SPAN(port_index);
 

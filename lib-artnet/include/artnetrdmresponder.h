@@ -36,6 +36,7 @@
 #include "e120.h"
 #include "rdm_message_print.h"
 #include "firmware/debug/debug_debug.h"
+#include "rdm_debug.h"
 
 class ArtNetRdmResponder final : public RDMDeviceResponder {
    public:
@@ -59,36 +60,48 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
         }
     }
 
-    const uint8_t* Handler(uint32_t port_index, const uint8_t* rdm_data_no_sc) {
+    std::span<const uint8_t> Handler(uint32_t port_index, std::span<const uint8_t> rdm_data_no_sc) {
         DEBUG_ENTRY();
 
         if (port_index != 0) {
             DEBUG_EXIT();
-            return nullptr;
+            return {};
         }
 
-        if (rdm_data_no_sc == nullptr) {
+        if (rdm_data_no_sc.size() < rdm::kMessageMinimumSize - 1U) {
             DEBUG_EXIT();
-            return nullptr;
+            return {};
         }
 
-#ifndef NDEBUG
-        rdm::message::PrintNoStartcode(rdm_data_no_sc);
-#endif // NDEBUG
+        const auto* rdm_in = reinterpret_cast<const TRdmMessageNoSc*>(rdm_data_no_sc.data());
 
-        RDMHandler::Instance().HandleData(rdm_data_no_sc, reinterpret_cast<uint8_t*>(&s_rdm_command), RDMHandler::Type::kTypeRdm);
+        const auto kMessageLength = rdm_in->message_length;
+
+        if ((kMessageLength < rdm::kMessageMinimumSize) || (kMessageLength - 1U > rdm_data_no_sc.size())) {
+            DEBUG_EXIT();
+            return {};
+        }
+
+        if constexpr (kDebugRdmEnabled) {
+            rdm::message::PrintNoStartcode(rdm_data_no_sc);
+        }
+
+        RDMHandler::Instance().HandleData(rdm_data_no_sc.data(), reinterpret_cast<uint8_t*>(&s_rdm_command), RDMHandler::Type::kTypeRdm);
 
         if (s_rdm_command.start_code != E120_SC_RDM) {
             DEBUG_EXIT();
-            return nullptr;
+            return {};
         }
 
-#ifndef NDEBUG
-        rdm::message::Print(reinterpret_cast<uint8_t*>(&s_rdm_command));
-#endif // NDEBUG
+        const std::span<const uint8_t> kResponse{reinterpret_cast<const uint8_t*>(&s_rdm_command), s_rdm_command.message_length + rdm::kMessageChecksumSize};
+
+        if constexpr (kDebugRdmEnabled) {
+            rdm::message::Print(kResponse);
+        }
 
         DEBUG_EXIT();
-        return reinterpret_cast<const uint8_t*>(&s_rdm_command);
+
+        return kResponse;
     }
 
    private:
