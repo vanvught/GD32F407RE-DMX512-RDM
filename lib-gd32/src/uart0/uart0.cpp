@@ -26,29 +26,63 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>
+#include <cstring>
 
 #include "gd32_uart.h"
 #if defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32_dma.h"
-#endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
+#endif            // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 #include "gd32.h" // IWYU pragma: keep
 
 namespace uart0 {
-static char s_printf_buffer[128];
+namespace {
+constexpr uint32_t kPrintfBufferSize =
+#ifndef CONFIG_USART0_PRINTF_BUFFER_SIZE
+    128;
+#else
+    CONFIG_USART0_PRINTF_BUFFER_SIZE;
+#endif
+
+char s_printf_buffer[kPrintfBufferSize];
+} // namespace
 
 #ifdef CONFIG_USART0_ENABLE_TX_DMA
-// static char s_tx_buffer[128];
-// static constexpr uint32_t kSizeTxBuffer = sizeof(s_tx_buffer);
+namespace {
+constexpr uint32_t kTxDmaBufferSize =
+#ifndef CONFIG_USART0_TX_DMA_BUFFER_SIZE
+    256;
+#else
+    CONFIG_USART0_TX_DMA_BUFFER_SIZE;
+#endif
+
+uint8_t s_tx_buffer[kTxDmaBufferSize]{};
+uint8_t dma_buffer_tx[kTxDmaBufferSize]{};
+
+uint32_t s_tx_count{0};
+} // namespace
 #endif // CONFIG_USART0_ENABLE_TX_DMA
 
 #ifdef CONFIG_USART0_ENABLE_RX_DMA
-static char s_rx_buffer[128];
+namespace {
+constexpr uint32_t kRxDmaBufferSize =
+#ifndef CONFIG_USART0_RX_DMA_BUFFER_SIZE
+    128;
+#else
+    CONFIG_USART0_RX_DMA_BUFFER_SIZE;
+#endif
+
+char s_rx_buffer[kRxDmaBufferSize];
+
 struct RxCount {
     uint16_t rx;
     uint16_t tx;
-} static volatile sv_rx_count;
-static volatile uint32_t sv_receive_flag;
-static constexpr uint32_t kSizeRxBuffer = sizeof(s_rx_buffer);
+};
+
+volatile RxCount sv_rx_count;
+
+volatile uint32_t sv_receive_flag;
+constexpr uint32_t kSizeRxBuffer = sizeof(s_rx_buffer);
+} // namespace
 
 extern "C" void USART0_IRQHandler() {
     if (RESET != usart_interrupt_flag_get(USART0, USART_INT_FLAG_IDLE)) {
@@ -85,8 +119,6 @@ void Init() {
 #ifdef GD32H7XX
     dma_init_struct.request = DMA_REQUEST_USART0_TX;
 #endif // GD32H7XX
-    dma_deinit(USART0_DMAx, USART0_TX_DMA_CHx);
-    dma_struct_para_init(&dma_init_struct);
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
 #if defined(GD32F4XX) || defined(GD32H7XX)
@@ -149,15 +181,34 @@ void Init() {
     NVIC_EnableIRQ(USART0_IRQn);
     usart_interrupt_enable(USART0, USART_INT_IDLE);
 #endif // CONFIG_USART0_ENABLE_RX_DMA
+
+#ifdef CONFIG_USART0_ENABLE_TX_DMA
+    s_tx_count = 0;
+#endif
 #endif // defined(CONFIG_USART0_ENABLE_TX_DMA) || defined(CONFIG_USART0_ENABLE_RX_DMA)
 }
 
 #ifdef CONFIG_USART0_ENABLE_TX_DMA
+namespace {
+void WaitDma() {
+    while (DMA_CHCNT(USART0_DMAx, USART0_TX_DMA_CHx) > 0) {
+    }
+}
+} // namespace
+
 void WriteDma(const void* data, uint32_t size) {
     assert(data != nullptr);
+    assert(size != 0);
     assert(size <= DMA_CHXCNT_CNT);
 
-    while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0));
+    if (size == 0) {
+        return;
+    }
+
+    WaitDma();
+
+    while (!gd32::UartFlagGet<USART_FLAG_TC>(USART0)) {
+    }
 
     auto dma_chctl = DMA_CHCTL(USART0_DMAx, USART0_TX_DMA_CHx);
     dma_chctl &= ~DMA_CHXCTL_CHEN;
@@ -168,9 +219,45 @@ void WriteDma(const void* data, uint32_t size) {
     dma_chctl |= DMA_CHXCTL_CHEN;
     DMA_CHCTL(USART0_DMAx, USART0_TX_DMA_CHx) = dma_chctl;
 }
+
+namespace {
+void TxBufferDrain() {
+    if (s_tx_count == 0) {
+        return;
+    }
+
+    WaitDma();
+
+    std::memcpy(dma_buffer_tx, s_tx_buffer, s_tx_count);
+
+    const auto kSize = s_tx_count;
+    s_tx_count = 0;
+
+    WriteDma(dma_buffer_tx, kSize);
+}
+
+void TxBufferPut(uint8_t data) {
+    s_tx_buffer[s_tx_count++] = data;
+
+    if (s_tx_count == kTxDmaBufferSize) {
+        TxBufferDrain();
+    }
+}
+} // namespace
 #endif // CONFIG_USART0_ENABLE_TX_DMA
 
 void PutChar(int character) {
+#ifdef CONFIG_USART0_ENABLE_TX_DMA
+    if (character == '\n') {
+        TxBufferPut(static_cast<uint8_t>('\r'));
+        TxBufferPut(static_cast<uint8_t>('\n'));
+        TxBufferDrain();
+        return;
+    }
+
+    TxBufferPut(static_cast<uint8_t>(character));
+#else
+
     if (character == '\n') {
         while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0)) {
         }
@@ -180,6 +267,7 @@ void PutChar(int character) {
     while (!gd32::UartFlagGet<USART_FLAG_TBE>(USART0)) {
     }
     USART_TDATA(USART0) = static_cast<uint16_t>(USART_TDATA_TDATA & static_cast<uint8_t>(character));
+#endif
 }
 
 int Printf(const char* fmt, ...) {
