@@ -37,6 +37,7 @@
 #include "dmxnode_outputtype.h"
 #include "rdm_message_print.h"
 #include "rdm_debug.h"
+#include "e120.h"
 #include "firmware/debug/debug_debug.h"
 
 #ifdef NODE_RDMNET_LLRP_ONLY
@@ -106,7 +107,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
         if (kRdmDataIn[0] == E120_SC_RDM) {
             assert(kRdmDataIn.size() >= rdm::kMessageMinimumSize + rdm::kMessageChecksumSize);
 
-            const auto* rdm_in = reinterpret_cast<const struct TRdmMessage*>(kRdmDataIn.data());
+            const auto* rdm_in = reinterpret_cast<const struct e120::Message*>(kRdmDataIn.data());
 
             switch (rdm_in->command_class) {
                 case E120_DISCOVERY_COMMAND:
@@ -150,7 +151,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
         if (!response.empty()) {
             if (response[0] == E120_SC_RDM) {
                 if (response.size() >= rdm::kMessageMinimumSize) {
-                    const auto* rdm = reinterpret_cast<const struct TRdmMessage*>(response.data());
+                    const auto* rdm = reinterpret_cast<const struct e120::Message*>(response.data());
 
                     const auto kLength = rdm->message_length + rdm::kMessageChecksumSize;
 
@@ -161,7 +162,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
                     }
                 }
             } else if (response[0] == 0xFE) {
-                constexpr auto kLength = sizeof(struct TRdmDiscoveryMsg);
+                constexpr auto kLength = sizeof(struct e120::DiscoveryMsg);
 
                 if (response.size() >= kLength) {
                     response_data = response.first(kLength);
@@ -189,7 +190,7 @@ class RDMResponder final : DMXReceiver, public RDMDeviceResponder {
 
     void DmxStartAddressUpdate() override { DmxStartAddressUpdate(RDMDeviceResponder::GetDmxStartAddress(rdm::kRootDevice)); }
 
-    static inline TRdmMessage rdm_command;
+    static inline e120::Message rdm_command;
     static inline bool is_sub_device_active;
 
     static inline RDMResponder* s_this;

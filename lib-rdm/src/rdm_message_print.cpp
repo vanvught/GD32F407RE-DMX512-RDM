@@ -68,7 +68,7 @@ void Print(std::span<const uint8_t> rdm_data) {
         return;
     }
 
-    const auto* rdm_message = reinterpret_cast<const struct TRdmMessage*>(rdm_data.data());
+    const auto* rdm_message = reinterpret_cast<const struct e120::Message*>(rdm_data.data());
 
     const auto kMessageLength = rdm_message->message_length;
     const auto kPdl = rdm_message->param_data_length;
@@ -139,10 +139,10 @@ void PrintNoStartcode(std::span<const uint8_t> rdm_data_no_sc) {
         return;
     }
 
-    const auto* data = reinterpret_cast<const struct TRdmMessageNoSc*>(rdm_data_no_sc.data());
+    const auto* data = reinterpret_cast<const struct e120::MessageNoSc*>(rdm_data_no_sc.data());
     const auto kMessageLength = data->message_length;
 
-    uint8_t message[sizeof(struct TRdmMessage)];
+    uint8_t message[sizeof(struct e120::Message)];
 
     if ((kMessageLength < e120::kMessageLengthMin) || (kMessageLength - 1U > rdm_data_no_sc.size())) {
         printf("Invalid RDM message length: %u\n", kMessageLength);

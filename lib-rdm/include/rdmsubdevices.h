@@ -41,8 +41,8 @@
 #endif // NODE_RDMNET_LLRP_ONLY
 
 namespace rdm::subdevices {
-static constexpr auto MAX = 8;
-static constexpr auto STORE = 96; ///< Configuration store in bytes
+static constexpr auto kMax = 8;
+static constexpr auto kStore = 96; ///< Configuration store in bytes
 } // namespace rdm::subdevices
 
 class RdmSubDevices {
@@ -97,7 +97,7 @@ class RdmSubDevices {
         return true;
     }
 
-    uint16_t GetCount() const { return count_; }
+    [[nodiscard]] uint16_t GetCount() const { return count_; }
 
     struct TRDMSubDevicesInfo* GetInfo(uint16_t sub_device) {
         assert((sub_device != 0) && (sub_device <= count_));

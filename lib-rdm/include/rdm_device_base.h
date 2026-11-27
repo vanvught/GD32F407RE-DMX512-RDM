@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <algorithm>
+#include <cstring>
 
 #include "rdmconst.h"
 #include "rdm_e120.h"

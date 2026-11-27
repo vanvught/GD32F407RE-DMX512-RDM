@@ -42,6 +42,8 @@
 #include "rdmqueuedmessage.h"
 #endif // ENABLE_RDM_QUEUED_MSG
 
+#include "e120.h"
+
 #ifndef PACKED
 #define PACKED __attribute__((packed))
 #endif // PACKED
@@ -63,18 +65,18 @@ struct ParameterDescription {
 } PACKED;
 
 struct ManufacturerParamData {
-    uint8_t nPdl;
-    uint8_t* pParamData;
+    uint8_t pdl;
+    uint8_t* param_data;
 };
 
-bool HandleManufactureerPidGet(uint16_t pid, const ManufacturerParamData* in, ManufacturerParamData* out, uint16_t& reason);
-bool HandleManufactureerPidSet(bool is_broadcast, uint16_t pid, const ParameterDescription& parameter_description, const ManufacturerParamData* in, struct ManufacturerParamData* out, uint16_t& reason);
+bool HandleManufactureerPidGet(uint16_t pid, const ManufacturerParamData* param_data_in, ManufacturerParamData* out, uint16_t& reason);
+bool HandleManufactureerPidSet(bool is_broadcast, uint16_t pid, const ParameterDescription& parameter_description, const ManufacturerParamData* param_data_in, struct ManufacturerParamData* param_data_out, uint16_t& reason);
 
 inline constexpr uint32_t kDeviceDescriptionMaxLength = 32;
 
-template <uint16_t Value>
+template <uint16_t kValue>
 struct ManufacturerPid {
-    static constexpr uint16_t kCode = __builtin_bswap16(Value);
+    static constexpr uint16_t kCode = __builtin_bswap16(kValue);
     static_assert(kCode >= __builtin_bswap16(0x8000) && kCode <= __builtin_bswap16(0xFFDF), "The manufacturer specific PID must be in range 0x8000 to 0xFFDF");
 };
 
@@ -194,11 +196,11 @@ class RDMHandler {
     void SetHostName(bool is_broadcast, uint16_t sub_device);
     void SetDomainName(bool is_broadcast, uint16_t sub_device);
     // ANSI E1.37-2 – 2015
-    bool CheckInterfaceID(const struct TRdmMessageNoSc* pRdmDataIn);
+    bool CheckInterfaceID(const struct e120::MessageNoSc* data_in);
 
     bool is_muted_{false};
-    uint8_t* m_pRdmDataIn{nullptr};
-    uint8_t* m_pRdmDataOut{nullptr};
+    uint8_t* data_in_{nullptr};
+    uint8_t* data_out_{nullptr};
 #ifdef ENABLE_RDM_QUEUED_MSG
     RDMQueuedMessage m_RDMQueuedMessage;
 #endif // ENABLE_RDM_QUEUED_MSG

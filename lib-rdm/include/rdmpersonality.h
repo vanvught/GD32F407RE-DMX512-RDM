@@ -61,11 +61,11 @@ public:
 		DEBUG_EXIT();
 	}
 
-	uint16_t GetSlots() const {
+	[[nodiscard]] uint16_t GetSlots() const {
 		return slots_;
 	}
 
-	DmxNodeOutputType *GetDmxNodeOutputType() const {
+	[[nodiscard]] DmxNodeOutputType *GetDmxNodeOutputType() const {
 		return dmxnode_output_type_;
 	}
 
@@ -85,11 +85,11 @@ public:
 		}
 	}
 
-	const char *GetDescription() const {
+	[[nodiscard]] const char *GetDescription() const {
 		return description_;
 	}
 
-	uint8_t GetDescriptionLength() const {
+	[[nodiscard]] uint8_t GetDescriptionLength() const {
 		return static_cast<uint8_t>(description_length_);
 	}
 

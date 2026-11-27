@@ -96,7 +96,7 @@ class RdmMessage final {
 
    private:
     uint32_t transmit_micros_{0};
-    struct TRdmMessage message_;
+    struct e120::Message message_;
 };
 
 #endif // RDMMESSAGE_H_

@@ -42,7 +42,7 @@
 #include "dmxnode.h"
 
 namespace {
-void RespondMessageAck(uint32_t port_index, struct TRdmMessage* message) {
+void RespondMessageAck(uint32_t port_index, struct e120::Message* message) {
     assert(message->start_code == E120_SC_RDM);
 
     message->message_count = 0;
@@ -77,7 +77,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
     assert(data != nullptr);
 
     auto& rdmdiscovery = rdm::Discovery::Instance();
-    const auto* rdm_message = reinterpret_cast<const struct TRdmMessage*>(data);
+    const auto* rdm_message = reinterpret_cast<const struct e120::Message*>(data);
     const auto* uid = rdm_message->destination_uid;
 
     auto is_rdm_packet_for_me = false;
@@ -112,7 +112,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
         if (kParamId == E120_DISC_UNIQUE_BRANCH) {
             if (!rdmdiscovery.TodIsMuted(port_index)) {
                 if ((memcmp(rdm_message->param_data, uid, rdm::kUidSize) <= 0) && (memcmp(uid, rdm_message->param_data + 6, rdm::kUidSize) <= 0)) {
-                    auto* response = reinterpret_cast<struct TRdmDiscoveryMsg*>(const_cast<uint8_t*>(data));
+                    auto* response = reinterpret_cast<struct e120::DiscoveryMsg*>(const_cast<uint8_t*>(data));
 
                     uint16_t checksum = 6 * 0xFF;
 
@@ -133,7 +133,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
                     response->checksum[2] = static_cast<uint8_t>((checksum & 0xFF) | 0xAA);
                     response->checksum[3] = static_cast<uint8_t>((checksum & 0xFF) | 0x55);
 
-                    Rdm::TransmitDiscoveryRespondMessage(port_index, {reinterpret_cast<const uint8_t*>(response), sizeof(struct TRdmDiscoveryMsg)});
+                    Rdm::TransmitDiscoveryRespondMessage(port_index, {reinterpret_cast<const uint8_t*>(response), sizeof(struct e120::DiscoveryMsg)});
                     return false;
                 }
             }
@@ -147,7 +147,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
             if (!is_rdm_packet_broadcast && is_rdm_packet_for_me) {
                 rdmdiscovery.TodUnMute(port_index);
 
-                auto* message_ack = reinterpret_cast<struct TRdmMessage*>(const_cast<uint8_t*>(data));
+                auto* message_ack = reinterpret_cast<struct e120::Message*>(const_cast<uint8_t*>(data));
 
                 message_ack->param_data_length = 2;
                 message_ack->param_data[0] = 0x00; // Control Field
@@ -169,7 +169,7 @@ bool ArtNetRdmController::RdmReceive(uint32_t port_index, const uint8_t* data) {
             if (is_rdm_packet_for_me) {
                 rdmdiscovery.TodMute(port_index);
 
-                auto* message_ack = reinterpret_cast<struct TRdmMessage*>(const_cast<uint8_t*>(data));
+                auto* message_ack = reinterpret_cast<struct e120::Message*>(const_cast<uint8_t*>(data));
 
                 message_ack->param_data_length = 2;
                 message_ack->param_data[0] = 0x00; // Control Field

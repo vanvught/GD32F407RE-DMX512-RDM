@@ -41,7 +41,7 @@ struct TRDMSubDevicesInfo {
 
 enum TRDMSubDeviceUpdateEvent {
 	RDM_SUBDEVICE_UPDATE_EVENT_DMX_STARTADDRESS,
-	RDM_SUBDEVICE_UPDATE_EVENT_PERSONALITY
+	RDM_SUBDEVICE_UPDATE_EVENT_PERSONALITY,å
 };
 
 class RDMSubDevice {
@@ -124,11 +124,11 @@ public:
 		return personalities_[personality - 1];
 	}
 
-	uint8_t GetPersonalityCount() const {
+	[[nodiscard]] uint8_t GetPersonalityCount() const {
 		return sub_devices_info_.personality_count;
 	}
 
-	uint16_t GetDmxFootPrint() const {
+	[[nodiscard]] uint16_t GetDmxFootPrint() const {
 		return sub_devices_info_.dmx_footprint;
 	}
 
@@ -187,7 +187,6 @@ private:
 		return checksum;
 	}
 
-private:
  RdmPersonality** personalities_{nullptr};
  bool is_factory_defaults_{true};
  uint16_t checksum_{0};

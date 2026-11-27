@@ -29,7 +29,6 @@
 #include <cstdint>
 #include <cstring>
 
-#include "rdmdevice.h"
 #include "rdmdeviceresponder.h"
 #include "rdmpersonality.h"
 #include "rdmhandler.h"
@@ -73,7 +72,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
             return {};
         }
 
-        const auto* rdm_in = reinterpret_cast<const TRdmMessageNoSc*>(rdm_data_no_sc.data());
+        const auto* rdm_in = reinterpret_cast<const struct e120::MessageNoSc*>(rdm_data_no_sc.data());
 
         const auto kMessageLength = rdm_in->message_length;
 
@@ -82,7 +81,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
             return {};
         }
 
-        if constexpr (kDebugRdmEnabled) {
+        if constexpr (kShowRdmMessageEnabled) {
             rdm::message::PrintNoStartcode(rdm_data_no_sc);
         }
 
@@ -95,7 +94,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
 
         const std::span<const uint8_t> kResponse{reinterpret_cast<const uint8_t*>(&s_rdm_command), s_rdm_command.message_length + rdm::kMessageChecksumSize};
 
-        if constexpr (kDebugRdmEnabled) {
+        if constexpr (kShowRdmMessageEnabled) {
             rdm::message::Print(kResponse);
         }
 
@@ -105,7 +104,7 @@ class ArtNetRdmResponder final : public RDMDeviceResponder {
     }
 
    private:
-    static inline TRdmMessage s_rdm_command;
+    static inline e120::Message s_rdm_command;
 };
 
 #endif // ARTNETRDMRESPONDER_H_

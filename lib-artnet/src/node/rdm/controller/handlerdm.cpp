@@ -296,14 +296,14 @@ void ArtNetNode::HandleRdm() {
 
             output_port_[port_index].rdm_destination_ip = ip_address_from_;
 
-            const auto* message = reinterpret_cast<const TRdmMessage*>(&kArtRdm->address);
+            const auto* message = reinterpret_cast<const struct::e120::Message*>(&kArtRdm->address);
 
             const std::span<const uint8_t> kRdmData{&kArtRdm->address, message->message_length + rdm::kMessageChecksumSize};
 
             kArtRdm->address = E120_SC_RDM;
             Rdm::TransmitRaw(port_index, kRdmData);
 
-            if constexpr (kDebugRdmEnabled) {
+            if constexpr (kShowRdmMessageEnabled) {
                 rdm::message::Print(kRdmData);
             }
 
@@ -313,7 +313,7 @@ void ArtNetNode::HandleRdm() {
             panelled::On(panelled::kRdm << port_index);
 #endif // CONFIG_PANELLED_RDM_PORT
         } else if (node_.port[port_index].direction == dmxnode::Direction::kInput) {
-            const auto* rdm_message = reinterpret_cast<const TRdmMessage*>(&kArtRdm->address);
+            const auto* rdm_message = reinterpret_cast<const struct::e120::Message*>(&kArtRdm->address);
 
             if ((rdm_message->command_class == E120_GET_COMMAND_RESPONSE) || (rdm_message->command_class == E120_SET_COMMAND_RESPONSE)) {
                 kArtRdm->address = E120_SC_RDM;
@@ -322,7 +322,7 @@ void ArtNetNode::HandleRdm() {
 
                 Rdm::TransmitRaw(port_index, kRdmData);
 
-                if constexpr (kDebugRdmEnabled) {
+                if constexpr (kShowRdmMessageEnabled) {
                     rdm::message::Print(kRdmData);
                 }
             }

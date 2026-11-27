@@ -75,7 +75,7 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS[]{
 #ifdef RDM_RESPONDER
 #ifdef ENABLE_RDM_QUEUED_MSG
     {E120_QUEUED_MESSAGE, &RDMHandler::GetQueuedMessage, nullptr, 1, true, false},                    //
-#endif // ENABLE_RDM_QUEUED_MSG
+#endif                                                                                                // ENABLE_RDM_QUEUED_MSG
     {E120_SUPPORTED_PARAMETERS, &RDMHandler::GetSupportedParameters, nullptr, 0, false, true, false}, //
 #ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
     {E120_PARAMETER_DESCRIPTION, &RDMHandler::GetParameterDescription, nullptr, 2, false, true, false},
@@ -99,7 +99,7 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS[]{
     {E120_DISPLAY_LEVEL, &RDMHandler::GetDisplayLevel, &RDMHandler::SetDisplayLevel, 0, true, true, false}, //
 #ifndef DISABLE_RTC
     {E120_REAL_TIME_CLOCK, &RDMHandler::GetRealTimeClock, &RDMHandler::SetRealTimeClock, 0, true, true, false}, //
-#endif // DISABLE_RTC
+#endif                                                                                                          // DISABLE_RTC
     {E120_POWER_STATE, &RDMHandler::GetPowerState, &RDMHandler::SetPowerState, 0, true, true, false},           //
 #ifdef CONFIG_RDM_ENABLE_SELF_TEST
     {E120_PERFORM_SELFTEST, &RDMHandler::GetPerformSelfTest, &RDMHandler::SetPerformSelfTest, 0, true, true, false},
@@ -107,9 +107,9 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS[]{
 #endif // CONFIG_RDM_ENABLE_SELF_TEST
 #ifdef ENABLE_RDM_PRESET_PLAYBACK
     {E120_PRESET_PLAYBACK, &RDMHandler::GetPresetPlayback, &RDMHandler::SetPresetPlayback, 0, true, true, false},
-#endif // ENABLE_RDM_PRESET_PLAYBACK
+#endif                                                                                                        // ENABLE_RDM_PRESET_PLAYBACK
     {E137_1_IDENTIFY_MODE, &RDMHandler::GetIdentifyMode, &RDMHandler::SetIdentifyMode, 0, true, true, false}, //
-#endif // RDM_RESPONDER
+#endif                                                                                                        // RDM_RESPONDER
 #ifdef NODE_RDMNET_LLRP_ONLY
     {E137_2_LIST_INTERFACES, &RDMHandler::GetInterfaceList, nullptr, 0, false, false, true},
     {E137_2_INTERFACE_LABEL, &RDMHandler::GetInterfaceName, nullptr, 4, false, false, true},
@@ -124,7 +124,7 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS[]{
     {E137_2_IPV4_DEFAULT_ROUTE, &RDMHandler::GetDefaultRoute, &RDMHandler::SetDefaultRoute, 0, false, false, true},
     {E137_2_DNS_HOSTNAME, &RDMHandler::GetHostName, &RDMHandler::SetHostName, 0, false, false, true},
     {E137_2_DNS_DOMAIN_NAME, &RDMHandler::GetDomainName, &RDMHandler::SetDomainName, 0, false, false, true}, //
-#endif // NODE_RDMNET_LLRP_ONLY
+#endif                                                                                                       // NODE_RDMNET_LLRP_ONLY
 };
 
 const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS_SUB_DEVICES[]{
@@ -137,7 +137,7 @@ const RDMHandler::PidDefinition RDMHandler::PID_DEFINITIONS_SUB_DEVICES[]{
     {E120_DMX_PERSONALITY, &RDMHandler::GetPersonality, &RDMHandler::SetPersonality, 0, true, true, false},
     {E120_DMX_PERSONALITY_DESCRIPTION, &RDMHandler::GetPersonalityDescription, nullptr, 1, true, true, false},
     {E120_DMX_START_ADDRESS, &RDMHandler::GetDmxStartAddress, &RDMHandler::SetDmxStartAddress, 0, true, true, false}, //
-#endif // RDM_RESPONDER
+#endif                                                                                                                // RDM_RESPONDER
 };
 
 #ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
@@ -163,7 +163,7 @@ RDMHandler::RDMHandler() {
 }
 
 void RDMHandler::HandleString(const char* string, uint32_t length) {
-    auto* message = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* message = reinterpret_cast<struct e120::Message*>(data_out_);
 
     message->param_data_length = static_cast<uint8_t>(length);
 
@@ -173,8 +173,8 @@ void RDMHandler::HandleString(const char* string, uint32_t length) {
 }
 
 void RDMHandler::CreateRespondMessage(uint8_t type, uint16_t reason) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     out->start_code = E120_SC_RDM;
     out->sub_start_code = in->sub_start_code;
@@ -216,11 +216,11 @@ void RDMHandler::CreateRespondMessage(uint8_t type, uint16_t reason) {
     uint32_t i;
 
     for (i = 0; i < out->message_length; i++) {
-        rdm_checksum = static_cast<uint16_t>(rdm_checksum + m_pRdmDataOut[i]);
+        rdm_checksum = static_cast<uint16_t>(rdm_checksum + data_out_[i]);
     }
 
-    m_pRdmDataOut[i++] = static_cast<uint8_t>(rdm_checksum >> 8);
-    m_pRdmDataOut[i] = static_cast<uint8_t>(rdm_checksum & 0XFF);
+    data_out_[i++] = static_cast<uint8_t>(rdm_checksum >> 8);
+    data_out_[i] = static_cast<uint8_t>(rdm_checksum & 0XFF);
 }
 
 void RDMHandler::RespondMessageAck() {
@@ -243,52 +243,52 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
 
     out[0] = 0xFF; // Invalidate outgoing message;
 
-    m_pRdmDataIn = const_cast<uint8_t*>(in);
-    m_pRdmDataOut = out;
+    data_in_ = const_cast<uint8_t*>(in);
+    data_out_ = out;
 
-    auto* pRdmRequest = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* rdm_request = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
-    if ((pRdmRequest->slot16.port_id == 0) || (pRdmRequest->message_count != 0)) {
+    if ((rdm_request->slot16.port_id == 0) || (rdm_request->message_count != 0)) {
         DEBUG_EXIT();
         return;
     }
 
-#ifndef NDEBUG
-    rdm::message::PrintNoStartcode(in);
-#endif // NDEBUG
+    if constexpr (kShowRdmMessageEnabled) {
+        //       TODO (AvV)  rdm::message::PrintNoStartcode(in);
+    }
 
     const auto* const kUid = rdm::device::Base::Instance().GetUID();
 
-    auto bIsRdmPacketBroadcast = (memcmp(pRdmRequest->destination_uid, rdm::kUidAll, rdm::kUidSize) == 0);
-    auto bIsRdmPacketForMe = false;
+    auto is_rdm_packet_broadcast = (memcmp(rdm_request->destination_uid, rdm::kUidAll, rdm::kUidSize) == 0);
+    auto is_rdm_packet_for_me = false;
 
-    if (!bIsRdmPacketBroadcast) {
-        if (!(memcmp(pRdmRequest->destination_uid, kUid, 2) == 0)) {
+    if (!is_rdm_packet_broadcast) {
+        if (!(memcmp(rdm_request->destination_uid, kUid, 2) == 0)) {
             DEBUG_EXIT();
             return;
         }
 
-        bIsRdmPacketBroadcast = (memcmp(&pRdmRequest->destination_uid[2], rdm::kUidAll, 4) == 0);
+        is_rdm_packet_broadcast = (memcmp(&rdm_request->destination_uid[2], rdm::kUidAll, 4) == 0);
 
-        if (!bIsRdmPacketBroadcast) {
-            bIsRdmPacketForMe = (memcmp(&pRdmRequest->destination_uid[2], &kUid[2], 4) == 0);
+        if (!is_rdm_packet_broadcast) {
+            is_rdm_packet_for_me = (memcmp(&rdm_request->destination_uid[2], &kUid[2], 4) == 0);
         }
     }
 
-    DEBUG_PRINTF("ForMe=%d, Broadcast=%d, Muted=%d", bIsRdmPacketForMe, bIsRdmPacketBroadcast, is_muted_);
+    DEBUG_PRINTF("ForMe=%d, Broadcast=%d, Muted=%d", is_rdm_packet_for_me, is_rdm_packet_broadcast, is_muted_);
 
-    const auto kCommandClass = pRdmRequest->command_class;
-    const auto kParamId = static_cast<uint16_t>((pRdmRequest->param_id[0] << 8) + pRdmRequest->param_id[1]);
+    const auto kCommandClass = rdm_request->command_class;
+    const auto kParamId = static_cast<uint16_t>((rdm_request->param_id[0] << 8) + rdm_request->param_id[1]);
 
-    if ((!bIsRdmPacketForMe) && (!bIsRdmPacketBroadcast)) {
+    if ((!is_rdm_packet_for_me) && (!is_rdm_packet_broadcast)) {
         // Ignore RDM packet
     } else if (kCommandClass == E120_DISCOVERY_COMMAND) {
         if (kParamId == E120_DISC_UNIQUE_BRANCH) {
             if (!is_muted_) {
-                if ((memcmp(pRdmRequest->param_data, kUid, rdm::kUidSize) <= 0) && (memcmp(kUid, pRdmRequest->param_data + 6, rdm::kUidSize) <= 0)) {
+                if ((memcmp(rdm_request->param_data, kUid, rdm::kUidSize) <= 0) && (memcmp(kUid, rdm_request->param_data + 6, rdm::kUidSize) <= 0)) {
                     DEBUG_PUTS("E120_DISC_UNIQUE_BRANCH");
 
-                    auto* p = reinterpret_cast<struct TRdmDiscoveryMsg*>(out);
+                    auto* p = reinterpret_cast<struct e120::DiscoveryMsg*>(out);
                     uint16_t rdm_checksum = 6 * 0xFF;
 
                     for (uint32_t i = 0; i < 7; i++) {
@@ -315,7 +315,7 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
         } else if (kParamId == E120_DISC_UN_MUTE) {
             DEBUG_PUTS("E120_DISC_UN_MUTE");
 
-            if (pRdmRequest->param_data_length != 0) {
+            if (rdm_request->param_data_length != 0) {
                 /* The response RESPONSE_TYPE_NACK_REASON shall only be used in conjunction
                  * with the Command Classes GET_COMMAND_RESPONSE & SET_COMMAND_RESPONSE.
                  */
@@ -324,8 +324,8 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
 
             is_muted_ = false;
 
-            if (!bIsRdmPacketBroadcast && bIsRdmPacketForMe) {
-                auto* response = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+            if (!is_rdm_packet_broadcast && is_rdm_packet_for_me) {
+                auto* response = reinterpret_cast<struct e120::Message*>(data_out_);
 
                 response->param_data_length = 2;
                 response->param_data[0] = 0x00; // Control Field
@@ -342,7 +342,7 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
         } else if (kParamId == E120_DISC_MUTE) {
             DEBUG_PUTS("E120_DISC_MUTE");
 
-            if (pRdmRequest->param_data_length != 0) {
+            if (rdm_request->param_data_length != 0) {
                 /* The response RESPONSE_TYPE_NACK_REASON shall only be used in conjunction
                  * with the Command Classes GET_COMMAND_RESPONSE & SET_COMMAND_RESPONSE.
                  */
@@ -351,8 +351,8 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
 
             is_muted_ = true;
 
-            if (!bIsRdmPacketBroadcast && bIsRdmPacketForMe) {
-                auto* response = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+            if (!is_rdm_packet_broadcast && is_rdm_packet_for_me) {
+                auto* response = reinterpret_cast<struct e120::Message*>(data_out_);
 
                 response->param_data_length = 2;
                 response->param_data[0] = 0x00; // Control Field
@@ -369,8 +369,8 @@ void RDMHandler::HandleData(const uint8_t* in, uint8_t* out, Type type) {
             }
         }
     } else {
-        auto sub_device = static_cast<uint16_t>((pRdmRequest->sub_device[0] << 8) + pRdmRequest->sub_device[1]);
-        Handlers(type, bIsRdmPacketBroadcast, kCommandClass, kParamId, pRdmRequest->param_data_length, sub_device);
+        auto sub_device = static_cast<uint16_t>((rdm_request->sub_device[0] << 8) + rdm_request->sub_device[1]);
+        Handlers(type, is_rdm_packet_broadcast, kCommandClass, kParamId, rdm_request->param_data_length, sub_device);
     }
 
     DEBUG_EXIT();
@@ -401,7 +401,7 @@ void RDMHandler::Handlers(Type type, bool bIsBroadcast, uint8_t nCommandClass, u
     auto is_rdm = false;
     auto is_rdm_net = false;
 
-    for (auto& defintion : PID_DEFINITIONS) {
+    for (const auto& defintion : PID_DEFINITIONS) {
         if (defintion.nPid == nParamId) {
             pid_handler = &defintion;
             is_rdm = defintion.bRDM;
@@ -485,7 +485,7 @@ void RDMHandler::Handlers(Type type, bool bIsBroadcast, uint8_t nCommandClass, u
 
 #ifdef ENABLE_RDM_QUEUED_MSG
 void RDMHandler::GetQueuedMessage([[maybe_unused]] uint16_t sub_device) {
-    m_RDMQueuedMessage.Handler(m_pRdmDataOut);
+    m_RDMQueuedMessage.Handler(data_out_);
     RespondMessageAck();
 }
 #endif // ENABLE_RDM_QUEUED_MSG
@@ -504,7 +504,7 @@ void RDMHandler::GetSupportedParameters(uint16_t sub_device) {
         table_size = sizeof(PID_DEFINITIONS) / sizeof(PID_DEFINITIONS[0]);
     }
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     uint32_t j = 0;
 
     for (uint32_t i = 0; i < table_size; i++) {
@@ -535,7 +535,7 @@ void RDMHandler::GetSupportedParameters(uint16_t sub_device) {
 
 #ifdef CONFIG_RDM_ENABLE_MANUFACTURER_PIDS
 void RDMHandler::GetParameterDescription([[maybe_unused]] uint16_t sub_device) {
-    const auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
     const auto nPid = static_cast<uint16_t>(pRdmDataIn->param_data[0] + (pRdmDataIn->param_data[1] << 8));
 
     if (!(nPid >= __builtin_bswap16(0x8000) && nPid <= __builtin_bswap16(0xFFDF))) {
@@ -547,7 +547,7 @@ void RDMHandler::GetParameterDescription([[maybe_unused]] uint16_t sub_device) {
 
     for (uint32_t i = 0; i < nSupportedParamsManufacturer; i++) {
         if (PARAMETER_DESCRIPTIONS[i].pid == nPid) {
-            auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+            auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
             pRdmDataOut->param_data_length = PARAMETER_DESCRIPTIONS[i].pdl;
             CopyParameterDescription(i, pRdmDataOut->param_data);
@@ -561,8 +561,8 @@ void RDMHandler::GetParameterDescription([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::GetManufacturerPid([[maybe_unused]] uint16_t sub_device) {
-    const auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    const auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     const auto nPid = static_cast<uint16_t>(pRdmDataIn->param_id[0] + (pRdmDataIn->param_id[1] << 8));
     const struct rdmhandler::ManufacturerParamData pIn = {pRdmDataIn->param_data_length, const_cast<uint8_t*>(pRdmDataIn->param_data)};
@@ -570,7 +570,7 @@ void RDMHandler::GetManufacturerPid([[maybe_unused]] uint16_t sub_device) {
     uint16_t nReason;
 
     if (rdmhandler::HandleManufactureerPidGet(nPid, &pIn, &pOut, nReason)) {
-        pRdmDataOut->param_data_length = pOut.nPdl;
+        pRdmDataOut->param_data_length = pOut.pdl;
         RespondMessageAck();
         return;
     }
@@ -579,8 +579,8 @@ void RDMHandler::GetManufacturerPid([[maybe_unused]] uint16_t sub_device) {
 }
 #ifdef CONFIG_RDM_MANUFACTURER_PIDS_SET
 void RDMHandler::SetManufacturerPid(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    const auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    const auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     const auto nPid = static_cast<uint16_t>(pRdmDataIn->param_id[0] + (pRdmDataIn->param_id[1] << 8));
     const struct rdmhandler::ManufacturerParamData pIn = {pRdmDataIn->param_data_length, const_cast<uint8_t*>(pRdmDataIn->param_data)};
@@ -590,7 +590,7 @@ void RDMHandler::SetManufacturerPid(bool is_broadcast, [[maybe_unused]] uint16_t
     for (uint32_t nIndex = 0; nIndex < GetParameterDescriptionCount(); nIndex++) {
         if (PARAMETER_DESCRIPTIONS[nIndex].pid == nPid) {
             if (rdmhandler::HandleManufactureerPidSet(is_broadcast, nPid, PARAMETER_DESCRIPTIONS[nIndex], &pIn, &pOut, nReason)) {
-                pRdmDataOut->param_data_length = pOut.nPdl;
+                pRdmDataOut->param_data_length = pOut.pdl;
                 RespondMessageAck();
                 return;
             }
@@ -609,7 +609,7 @@ void RDMHandler::GetDeviceInfo([[maybe_unused]] uint16_t sub_device) {
 #else
     const auto* const kDeviceInfo = rdm::device::Device::Instance().GetDeviceInfo();
 #endif // RDM_RESPONDER
-    auto* data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* data_out = reinterpret_cast<struct e120::Message*>(data_out_);
     auto* device_info_out = reinterpret_cast<struct rdm::device::Info*>(data_out->param_data);
 
     data_out->param_data_length = sizeof(struct rdm::device::Info);
@@ -619,7 +619,7 @@ void RDMHandler::GetDeviceInfo([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::GetFactoryDefaults([[maybe_unused]] uint16_t sub_device) {
-    auto* data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     data_out->param_data_length = 1;
 #ifdef RDM_RESPONDER
@@ -631,7 +631,7 @@ void RDMHandler::GetFactoryDefaults([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetFactoryDefaults(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* data_in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* data_in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (data_in->param_data_length != 0) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -648,7 +648,7 @@ void RDMHandler::SetFactoryDefaults(bool is_broadcast, [[maybe_unused]] uint16_t
         return;
     }
 
-    auto* data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* data_out = reinterpret_cast<struct e120::Message*>(data_out_);
     data_out->param_data_length = 0;
 
     RespondMessageAck();
@@ -658,7 +658,7 @@ void RDMHandler::SetFactoryDefaults(bool is_broadcast, [[maybe_unused]] uint16_t
 void RDMHandler::GetProductDetailIdList([[maybe_unused]] uint16_t sub_device) {
     const auto kProductDetail = rdm::device::Device::Instance().GetProductDetail();
 
-    auto* data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     data_out->param_data_length = 2;
     data_out->param_data[0] = static_cast<uint8_t>(kProductDetail >> 8);
@@ -698,7 +698,7 @@ void RDMHandler::GetDeviceLabel([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetDeviceLabel(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* data_in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* data_in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (data_in->param_data_length > rdm::device::kLabelMaxLength) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -719,7 +719,7 @@ void RDMHandler::SetDeviceLabel(bool is_broadcast, [[maybe_unused]] uint16_t sub
         return;
     }
 
-    auto* data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* data_out = reinterpret_cast<struct e120::Message*>(data_out_);
     data_out->param_data_length = 0;
     RespondMessageAck();
 }
@@ -733,7 +733,7 @@ void RDMHandler::GetSoftwareVersionLabel([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetResetDevice([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (in->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -747,7 +747,7 @@ void RDMHandler::SetResetDevice([[maybe_unused]] bool is_broadcast, [[maybe_unus
         return;
     }
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     out->param_data_length = 0;
 
     if (kMode == ResetMode::kCold) {
@@ -761,7 +761,7 @@ void RDMHandler::SetResetDevice([[maybe_unused]] bool is_broadcast, [[maybe_unus
 }
 
 void RDMHandler::GetIdentifyDevice([[maybe_unused]] uint16_t sub_device) {
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     out->param_data_length = 1;
 
@@ -772,7 +772,7 @@ void RDMHandler::GetIdentifyDevice([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetIdentifyDevice(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (in->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -794,7 +794,7 @@ void RDMHandler::SetIdentifyDevice(bool is_broadcast, [[maybe_unused]] uint16_t 
         return;
     }
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     out->param_data_length = 0;
     RespondMessageAck();
 }
@@ -808,7 +808,7 @@ void RDMHandler::GetLanguage([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetLanguage(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (in->param_data_length != rdm::device::kSupportedLanguageLength) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -826,14 +826,14 @@ void RDMHandler::SetLanguage(bool is_broadcast, [[maybe_unused]] uint16_t sub_de
         return;
     }
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     out->param_data_length = 0;
 
     RespondMessageAck();
 }
 
 void RDMHandler::GetBootSoftwareVersionId([[maybe_unused]] uint16_t sub_device) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (in->param_data_length != 0) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -842,7 +842,7 @@ void RDMHandler::GetBootSoftwareVersionId([[maybe_unused]] uint16_t sub_device) 
 
     const auto kBootSoftwareVersionId = rdm::device::BootSoftwareVersionId();
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     out->param_data_length = rdm::device::kBootSoftwareVersionIdLength;
     ;
@@ -866,7 +866,7 @@ void RDMHandler::GetPersonality(uint16_t sub_device) {
     const auto kCurrent = RDMDeviceResponder::Get()->GetPersonalityCurrent(sub_device);
     const auto kCount = RDMDeviceResponder::Get()->GetPersonalityCount(sub_device);
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     out->param_data_length = 2;
     out->param_data[0] = kCurrent;
@@ -876,7 +876,7 @@ void RDMHandler::GetPersonality(uint16_t sub_device) {
 }
 
 void RDMHandler::SetPersonality([[maybe_unused]] bool is_broadcast, uint16_t sub_device) {
-    auto* in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (in->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -893,14 +893,14 @@ void RDMHandler::SetPersonality([[maybe_unused]] bool is_broadcast, uint16_t sub
 
     RDMDeviceResponder::Get()->SetPersonalityCurrent(sub_device, kPersonality);
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     out->param_data_length = 0;
 
     RespondMessageAck();
 }
 
 void RDMHandler::GetPersonalityDescription(uint16_t sub_device) {
-    auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
     const auto nPersonality = pRdmDataIn->param_data[0];
     const auto nMaxPersonalities = RDMDeviceResponder::Get()->GetPersonalityCount(sub_device);
 
@@ -911,7 +911,7 @@ void RDMHandler::GetPersonalityDescription(uint16_t sub_device) {
 
     const auto nSlots = RDMDeviceResponder::Get()->GetPersonality(sub_device, nPersonality)->GetSlots();
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     pRdmDataOut->param_data[0] = nPersonality;
     pRdmDataOut->param_data[1] = static_cast<uint8_t>(nSlots >> 8);
@@ -930,7 +930,7 @@ void RDMHandler::GetPersonalityDescription(uint16_t sub_device) {
 void RDMHandler::GetDmxStartAddress(uint16_t sub_device) {
     const auto dmx_start_address = RDMDeviceResponder::Get()->GetDmxStartAddress(sub_device);
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     pRdmDataOut->param_data_length = 2;
     pRdmDataOut->param_data[0] = static_cast<uint8_t>(dmx_start_address >> 8);
@@ -940,7 +940,7 @@ void RDMHandler::GetDmxStartAddress(uint16_t sub_device) {
 }
 
 void RDMHandler::SetDmxStartAddress(bool is_broadcast, uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 2) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -960,14 +960,14 @@ void RDMHandler::SetDmxStartAddress(bool is_broadcast, uint16_t sub_device) {
         return;
     }
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
     output->param_data_length = 0;
 
     RespondMessageAck();
 }
 
 void RDMHandler::GetSensorDefinition([[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     const auto kSensorRequestedSensorRequested = input->param_data[0];
 
@@ -976,7 +976,7 @@ void RDMHandler::GetSensorDefinition([[maybe_unused]] uint16_t sub_device) {
         return;
     }
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
     const auto* sensor_definition = RDMSensors::Get()->GetDefintion(kSensorRequestedSensorRequested);
 
     if (kSensorRequestedSensorRequested != sensor_definition->sensor) {
@@ -1010,7 +1010,7 @@ void RDMHandler::GetSensorDefinition([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::GetSensorValue([[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (pRdmDataIn->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1024,7 +1024,7 @@ void RDMHandler::GetSensorValue([[maybe_unused]] uint16_t sub_device) {
         return;
     }
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
     const auto* pSensorValues = RDMSensors::Get()->GetValues(nSensorRequested);
 
     if (nSensorRequested != pSensorValues->sensor_requested) {
@@ -1048,7 +1048,7 @@ void RDMHandler::GetSensorValue([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetSensorValue(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1068,7 +1068,7 @@ void RDMHandler::SetSensorValue(bool is_broadcast, [[maybe_unused]] uint16_t sub
         return;
     }
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     if (kSensorRequested == rdm::device::kSensorsAll) {
         output->param_data_length = 9;
@@ -1105,7 +1105,7 @@ void RDMHandler::SetSensorValue(bool is_broadcast, [[maybe_unused]] uint16_t sub
 }
 
 void RDMHandler::SetRecordSensors(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1130,7 +1130,7 @@ void RDMHandler::SetRecordSensors(bool is_broadcast, [[maybe_unused]] uint16_t s
         return;
     }
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
     output->param_data_length = 0;
 
     RespondMessageAck();
@@ -1143,7 +1143,7 @@ void RDMHandler::GetDeviceHours([[maybe_unused]] uint16_t sub_device) {
         device_hours = UINT32_MAX;
     }
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data_length = rdm::device::kHoursSize;
     output->param_data[0] = static_cast<uint8_t>(device_hours >> 24);
@@ -1159,7 +1159,7 @@ void RDMHandler::SetDeviceHours([[maybe_unused]] bool is_broadcast, [[maybe_unus
 }
 
 void RDMHandler::GetDisplayInvert([[maybe_unused]] uint16_t sub_device) {
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data_length = 1;
 
@@ -1170,7 +1170,7 @@ void RDMHandler::GetDisplayInvert([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetDisplayInvert([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1186,14 +1186,14 @@ void RDMHandler::SetDisplayInvert([[maybe_unused]] bool is_broadcast, [[maybe_un
     assert(Display::Get() != nullptr);
     Display::Get()->SetFlipVertically(kInvert == 1);
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
     output->param_data_length = 0;
 
     RespondMessageAck();
 }
 
 void RDMHandler::GetDisplayLevel([[maybe_unused]] uint16_t sub_device) {
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data_length = 1;
 
@@ -1205,7 +1205,7 @@ void RDMHandler::GetDisplayLevel([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetDisplayLevel([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1219,7 +1219,7 @@ void RDMHandler::SetDisplayLevel([[maybe_unused]] bool is_broadcast, [[maybe_unu
     Display::Get()->SetSleep(kSetSleep);
     Display::Get()->SetContrast(kContrast);
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
     output->param_data_length = 0;
 
     RespondMessageAck();
@@ -1236,7 +1236,7 @@ void RDMHandler::GetRealTimeClock([[maybe_unused]] uint16_t sub_device) {
 
     const auto kYear = static_cast<uint16_t>(rtc_time.tm_year + 1900);
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data[0] = static_cast<uint8_t>(kYear >> 8);
     output->param_data[1] = static_cast<uint8_t>(kYear);
@@ -1252,7 +1252,7 @@ void RDMHandler::GetRealTimeClock([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetRealTimeClock(bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 7) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1276,7 +1276,7 @@ void RDMHandler::SetRealTimeClock(bool is_broadcast, [[maybe_unused]] uint16_t s
         return;
     }
 
-    auto* out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* out = reinterpret_cast<struct e120::Message*>(data_out_);
     out->param_data_length = 0;
 
     RespondMessageAck();
@@ -1284,7 +1284,7 @@ void RDMHandler::SetRealTimeClock(bool is_broadcast, [[maybe_unused]] uint16_t s
 #endif // DISABLE_RTC
 
 void RDMHandler::GetPowerState([[maybe_unused]] uint16_t sub_device) {
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data_length = 1;
     output->param_data[0] = E120_POWER_STATE_NORMAL;
@@ -1293,7 +1293,7 @@ void RDMHandler::GetPowerState([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetPowerState([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* input = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (input->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1307,7 +1307,7 @@ void RDMHandler::SetPowerState([[maybe_unused]] bool is_broadcast, [[maybe_unuse
         return;
     }
 
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     if (kState == PowerState::kNormal) {
         output->param_data_length = 0;
@@ -1332,7 +1332,7 @@ void RDMHandler::SetPowerState([[maybe_unused]] bool is_broadcast, [[maybe_unuse
 #include "rdm_selftest.h"
 
 void RDMHandler::GetPerformSelfTest([[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     pRdmDataOut->param_data_length = 1;
     pRdmDataOut->param_data[0] = rdm::selftest::Get() != 0 ? 1 : 0;
@@ -1341,7 +1341,7 @@ void RDMHandler::GetPerformSelfTest([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetPerformSelfTest([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (pRdmDataIn->param_data_length != 1) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1353,14 +1353,14 @@ void RDMHandler::SetPerformSelfTest([[maybe_unused]] bool is_broadcast, [[maybe_
         return;
     }
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
     pRdmDataOut->param_data_length = 0;
 
     RespondMessageAck();
 }
 
 void RDMHandler::GetSelfTestDescription([[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
     uint32_t length;
     const auto* pText = rdm::selftest::GetDescription(pRdmDataIn->param_data[0], length);
 
@@ -1373,7 +1373,7 @@ void RDMHandler::GetSelfTestDescription([[maybe_unused]] uint16_t sub_device) {
         length = 32;
     }
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     pRdmDataOut->param_data_length = static_cast<uint8_t>(length + 1);
 
@@ -1391,7 +1391,7 @@ void RDMHandler::GetSelfTestDescription([[maybe_unused]] uint16_t sub_device) {
 #include "rdm_preset_playback.h"
 
 void RDMHandler::GetPresetPlayback([[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
 
     uint16_t mode;
     uint8_t nLevel;
@@ -1407,7 +1407,7 @@ void RDMHandler::GetPresetPlayback([[maybe_unused]] uint16_t sub_device) {
 }
 
 void RDMHandler::SetPresetPlayback([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t sub_device) {
-    auto* pRdmDataIn = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* pRdmDataIn = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (pRdmDataIn->param_data_length != 3) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -1422,7 +1422,7 @@ void RDMHandler::SetPresetPlayback([[maybe_unused]] bool is_broadcast, [[maybe_u
         return;
     }
 
-    auto* pRdmDataOut = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* pRdmDataOut = reinterpret_cast<struct e120::Message*>(data_out_);
     pRdmDataOut->param_data_length = 0;
 
     RespondMessageAck();
@@ -1430,7 +1430,7 @@ void RDMHandler::SetPresetPlayback([[maybe_unused]] bool is_broadcast, [[maybe_u
 #endif // ENABLE_RDM_PRESET_PLAYBACK
 
 void RDMHandler::GetSlotInfo(uint16_t sub_device) {
-    auto* output = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
     const auto kDmxFootPrint = RDMDeviceResponder::Get()->GetDmxFootPrint(sub_device);
 
     rdm::slotinfo::SlotInfo slot_info;
@@ -1455,7 +1455,7 @@ void RDMHandler::GetSlotInfo(uint16_t sub_device) {
 }
 
 void RDMHandler::GetSlotDescription(uint16_t sub_device) {
-    auto* input = reinterpret_cast<TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* input = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     const auto kSlotOffset = static_cast<uint16_t>((input->param_data[0] << 8) | input->param_data[1]);
 
@@ -1476,7 +1476,7 @@ void RDMHandler::GetSlotDescription(uint16_t sub_device) {
     constexpr size_t kMaxDescriptionLength = 32;
     const auto kLength = std::min(kDescription.size(), kMaxDescriptionLength);
 
-    auto* output = reinterpret_cast<TRdmMessage*>(m_pRdmDataOut);
+    auto* output = reinterpret_cast<struct e120::Message*>(data_out_);
 
     output->param_data_length = static_cast<uint8_t>(kLength + 2);
     output->param_data[0] = input->param_data[0];

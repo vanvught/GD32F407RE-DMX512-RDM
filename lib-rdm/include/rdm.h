@@ -42,24 +42,24 @@ class Rdm {
         Dmx::Get()->RdmTransmit(port_index, rdm_data.data(), rdm_data.size());
     }
 
-    static void Transmit(uint32_t port_index, struct TRdmMessage& rdm_command) {
+    static void Transmit(uint32_t port_index, struct e120::Message& rdm_command) {
         assert(port_index < dmx::config::max::kPorts);
 
         auto* data = reinterpret_cast<uint8_t*>(&rdm_command);
 
-        uint32_t i;
+        uint32_t index;
         uint16_t checksum = 0;
 
         rdm_command.transaction_number = s_transaction_number[port_index];
 
-        for (i = 0; i < rdm_command.message_length; i++) {
-            checksum = static_cast<uint16_t>(checksum + data[i]);
+        for (index = 0; index < rdm_command.message_length; index++) {
+            checksum = static_cast<uint16_t>(checksum + data[index]);
         }
 
-        data[i++] = static_cast<uint8_t>(checksum >> 8);
-        data[i] = static_cast<uint8_t>(checksum & 0xFF);
+        data[index++] = static_cast<uint8_t>(checksum >> 8);
+        data[index] = static_cast<uint8_t>(checksum & 0xFF);
 
-        TransmitRaw(port_index, {data, i + 1U});
+        TransmitRaw(port_index, {data, index + 1U});
 
         s_transaction_number[port_index]++;
     }

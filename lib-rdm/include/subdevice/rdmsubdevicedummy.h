@@ -2,7 +2,7 @@
  * @file rdmsubdevicedummy.h
  *
  */
-/* Copyright (C) 2018-2020 by Arjan van Vught mailto:info@gd32-dmx.org
+/* Copyright (C) 2018-2026 by Arjan van Vught mailto:info@gd32-dmx.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,18 +30,18 @@
 
 #include "rdmsubdevice.h"
 
-class RDMSubDeviceDummy: public RDMSubDevice {
-public:
-	RDMSubDeviceDummy(uint16_t dmx_start_address = 1, char chip_select = 0, uint8_t device_address = 0, uint32_t spi_speed_hz = 0);
+class RDMSubDeviceDummy : public RDMSubDevice {
+   public:
+    explicit RDMSubDeviceDummy(uint16_t dmx_start_address = 1, char chip_select = 0, uint8_t device_address = 0, uint32_t spi_speed_hz = 0);
 
-	bool Initialize() override;
+    bool Initialize() override;
 
-	void Start() override;
-	void Stop() override;
-	void Data(const uint8_t *pDdata, uint32_t nLength) override;
+    void Start() override;
+    void Stop() override;
+    void Data(const uint8_t* data, uint32_t nength) override;
 
-private:
-	void UpdateEvent(TRDMSubDeviceUpdateEvent tUpdateEvent) override;
+   private:
+    void UpdateEvent(TRDMSubDeviceUpdateEvent update_event) override;
 };
 
 #endif // RDMSUBDEVICEDUMMY_H_

@@ -62,7 +62,7 @@ class RDMIdentify {
         }
     }
 
-    bool IsEnabled() const { return s_is_enabled; }
+    [[nodiscard]] bool IsEnabled() const { return s_is_enabled; }
 
     void SetMode(Mode mode) {
         if ((mode == Mode::kQuiet) || (mode == Mode::kLoud)) {
@@ -80,7 +80,7 @@ class RDMIdentify {
         }
     }
 
-    Mode GetMode() const { return s_mode; }
+    [[nodiscard]] Mode GetMode() const { return s_mode; }
 
     static RDMIdentify* Get() { return s_this; }
 
@@ -88,7 +88,6 @@ class RDMIdentify {
     void On(Mode mode);
     void Off(Mode mode);
 
-   private:
     static inline bool s_is_enabled;
     static inline Mode s_mode;
     static inline RDMIdentify* s_this;

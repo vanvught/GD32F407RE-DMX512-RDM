@@ -136,7 +136,7 @@ class LLRPDevice {
     static inline int32_t handle_llrp;
     static inline uint32_t ip_address_from;
     static inline uint8_t* llrp;
-    static inline TRdmMessage rdm_command;
+    static inline e120::Message rdm_command;
     static inline LLRPDevice* s_this;
 };
 

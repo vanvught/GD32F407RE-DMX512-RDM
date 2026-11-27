@@ -2,31 +2,38 @@
  * @file rdm_debug.h
  *
  */
- /* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
-  *
-  * Permission is hereby granted, free of charge, to any person obtaining a copy
-  * of this software and associated documentation files (the "Software"), to deal
-  * in the Software without restriction, including without limitation the rights
-  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  * copies of the Software, and to permit persons to whom the Software is
-  * furnished to do so, subject to the following conditions:
+/* Copyright (C) 2026 by Arjan van Vught mailto:info@gd32-dmx.org
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
 
-  * The above copyright notice and this permission notice shall be included in
-  * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
 
-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  * THE SOFTWARE.
-  */
- 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #ifndef RDM_DEBUG_H_
 #define RDM_DEBUG_H_
 
 #include "firmware/debug/debug_debug.h"
+
+inline constexpr bool kShowRdmMessageEnabled =
+#ifdef DEBUG_RDM_SHOW_MESSAGE
+    true;
+#else
+    false;
+#endif
 
 #ifdef DEBUG_RDM
 inline constexpr bool kDebugRdmEnabled = true;
@@ -37,16 +44,16 @@ inline constexpr bool kDebugRdmEnabled = true;
 #else
 inline constexpr bool kDebugRdmEnabled = false;
 #define RDM_DEBUG_ENTRY() \
-    do {                     \
+    do {                  \
     } while (false)
 #define RDM_DEBUG_EXIT() \
-    do {                    \
+    do {                 \
     } while (false)
 #define RDM_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                      \
     } while (false)
 #define RDM_DEBUG_PUTS(...) \
-    do {                       \
+    do {                    \
     } while (false)
 #endif // DEBUG_RDM
 
@@ -59,16 +66,16 @@ inline constexpr bool kDebugRdmDeviceParamsEnabled = true;
 #else
 inline constexpr bool kDebugRdmDeviceParamsEnabled = false;
 #define RDM_DEVICE_PARAMS_DEBUG_ENTRY() \
-    do {                     \
+    do {                                \
     } while (false)
 #define RDM_DEVICE_PARAMS_DEBUG_EXIT() \
-    do {                    \
+    do {                               \
     } while (false)
 #define RDM_DEVICE_PARAMS_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                                    \
     } while (false)
 #define RDM_DEVICE_PARAMS_DEBUG_PUTS(...) \
-    do {                       \
+    do {                                  \
     } while (false)
 #endif // DEBUG_RDM_DEVICE_PARAMS
 
@@ -81,16 +88,16 @@ inline constexpr bool kDebugRdmDiscoveryEnabled = true;
 #else
 inline constexpr bool kDebugRdmDiscoveryEnabled = false;
 #define RDM_DISCOVERY_DEBUG_ENTRY() \
-    do {                     \
+    do {                            \
     } while (false)
 #define RDM_DISCOVERY_DEBUG_EXIT() \
-    do {                    \
+    do {                           \
     } while (false)
 #define RDM_DISCOVERY_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                                \
     } while (false)
 #define RDM_DISCOVERY_DEBUG_PUTS(...) \
-    do {                       \
+    do {                              \
     } while (false)
 #endif // DEBUG_RDM_DISCOVERY
 
@@ -121,16 +128,16 @@ inline constexpr bool kDebugRdmDiscoveryEnabled = false;
 #define RDM_LLRP_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
 #define RDM_LLRP_DEBUG_ENTRY() \
-    do {                     \
+    do {                       \
     } while (false)
 #define RDM_LLRP_DEBUG_EXIT() \
-    do {                    \
+    do {                      \
     } while (false)
 #define RDM_LLRP_DEBUG_PRINTF(...) \
-    do {                         \
+    do {                           \
     } while (false)
 #define RDM_LLRP_DEBUG_PUTS(...) \
-    do {                       \
+    do {                         \
     } while (false)
 #endif // DEBUG_RDM_LLRP
 
@@ -141,16 +148,16 @@ inline constexpr bool kDebugRdmDiscoveryEnabled = false;
 #define LLRP_DEVICE_DEBUG_PUTS(...) DEBUG_PUTS(__VA_ARGS__)
 #else
 #define LLRP_DEVICE_DEBUG_ENTRY() \
-    do {                     \
+    do {                          \
     } while (false)
 #define LLRP_DEVICE_DEBUG_EXIT() \
-    do {                    \
-    } while (false)
-#define LLRP_DEVICE_DEBUG_PRINTF(...) \
     do {                         \
     } while (false)
+#define LLRP_DEVICE_DEBUG_PRINTF(...) \
+    do {                              \
+    } while (false)
 #define LLRP_DEVICE_DEBUG_PUTS(...) \
-    do {                       \
+    do {                            \
     } while (false)
 #endif // DEBUG_LLRP_DEVICE
 

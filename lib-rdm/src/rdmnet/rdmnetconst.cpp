@@ -25,6 +25,6 @@
 
 #include "rdmnetconst.h"
 
-const char RDMNetConst::MSG_CONFIG[] = "Configuring RDMNet";
-const char RDMNetConst::MSG_START[] = "Starting RDMNet";
-const char RDMNetConst::MSG_STARTED[] = "RDMNet started";
+const char RDMNetConst::kMsgConfig[] = "Configuring RDMNet";
+const char RDMNetConst::kMsgStart[] = "Starting RDMNet";
+const char RDMNetConst::kMsgStarted[] = "RDMNet started";

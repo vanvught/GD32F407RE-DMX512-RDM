@@ -98,7 +98,7 @@ struct DmxTxData {
 };
 
 struct RdmTxDataPacket {
-    uint8_t data[sizeof(struct TRdmMessage)];
+    uint8_t data[sizeof(struct e120::Message)];
     uint32_t length;
     uint32_t int_tx_count;
 };
@@ -135,7 +135,7 @@ struct RxData {
         RxDmxData previous;
     } dmx ALIGNED;
     struct Rdm {
-        volatile uint8_t data[sizeof(struct TRdmMessage)] ALIGNED;
+        volatile uint8_t data[sizeof(struct e120::Message)] ALIGNED;
         volatile uint32_t index;
     } rdm ALIGNED;
     volatile TxRxState state;
@@ -305,11 +305,11 @@ void IrqHandlerDmxRdmInput() {
             index++;
             rx_buffer.rdm.index = index;
 
-            const auto* data = reinterpret_cast<volatile struct TRdmMessage*>(&rx_buffer.rdm.data[0]);
+            const auto* data = reinterpret_cast<volatile struct e120::Message*>(&rx_buffer.rdm.data[0]);
 
-            if ((index >= e120::kMessageLengthMin) && (index <= sizeof(struct TRdmMessage)) && (index == data->message_length)) {
+            if ((index >= e120::kMessageLengthMin) && (index <= sizeof(struct e120::Message)) && (index == data->message_length)) {
                 rx_buffer.state = dmx::TxRxState::kRdmChecksumh;
-            } else if (index > sizeof(struct TRdmMessage)) {
+            } else if (index > sizeof(struct e120::Message)) {
                 rx_buffer.state = dmx::TxRxState::kIdle;
             }
         } break;
@@ -2348,7 +2348,7 @@ std::span<const uint8_t> Dmx::RdmReceive(uint32_t port_index) {
 
     if (data[0] == E120_SC_RDM) {
         if (kLength >= e120::kMessageLengthMin + 2U) {
-            const auto* rdm_command = reinterpret_cast<const struct TRdmMessage*>(data);
+            const auto* rdm_command = reinterpret_cast<const struct e120::Message*>(data);
 
             const auto kMessageLength = static_cast<uint32_t>(rdm_command->message_length);
 

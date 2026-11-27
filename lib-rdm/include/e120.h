@@ -37,11 +37,10 @@
 
 namespace e120 {
 inline constexpr uint32_t kMessageLengthMin = 24;                           ///< Excluding 2-bytes checksum
-inline constexpr uint32_t kPdlSize = 231;                                    ///<
+inline constexpr uint32_t kPdlSize = 231;                                   ///<
 inline constexpr uint32_t kMessageLengthMax = kMessageLengthMin + kPdlSize; ///< Excluding 2-bytes checksum
-} // namespace e120
 
-struct TRdmMessage {
+struct Message {
     uint8_t start_code;                     ///< 1	SC_RDM
     uint8_t sub_start_code;                 ///< 2	SC_SUB_MESSAGE
     uint8_t message_length;                 ///< 3	Range 24 to 255
@@ -61,7 +60,7 @@ struct TRdmMessage {
     uint8_t checksum_filler[2];
 } PACKED;
 
-struct TRdmMessageNoSc {
+struct MessageNoSc {
     uint8_t sub_start_code;                 ///< 2	SC_SUB_MESSAGE
     uint8_t message_length;                 ///< 3	Range 24 to 255
     uint8_t destination_uid[rdm::kUidSize]; ///< 4,5,6,7,8,9
@@ -80,11 +79,12 @@ struct TRdmMessageNoSc {
     uint8_t checksum_filler[2];
 } PACKED;
 
-struct TRdmDiscoveryMsg {
+struct DiscoveryMsg {
     uint8_t header_FE[7];         ///<
     uint8_t header_AA;            ///<
     uint8_t masked_device_id[12]; ///<
     uint8_t checksum[4];          ///<
 } PACKED;
+} // namespace e120
 
 #endif // E120_H_

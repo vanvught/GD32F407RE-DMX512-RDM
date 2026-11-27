@@ -165,7 +165,7 @@ bool StateMachine::Stop() {
 }
 
 bool StateMachine::IsValidDiscoveryResponse(uint8_t* uid) {
-    if (response_.size() != sizeof(struct TRdmDiscoveryMsg)) {
+    if (response_.size() != sizeof(struct e120::DiscoveryMsg)) {
         return false;
     }
 
@@ -439,7 +439,7 @@ void StateMachine::Process() {
             response_ = Rdm::Receive(port_index_);
 
             if (!response_.empty()) {
-                const auto* response = reinterpret_cast<const struct TRdmMessage*>(response_.data());
+                const auto* response = reinterpret_cast<const struct e120::Message*>(response_.data());
 
                 if ((response->command_class == E120_DISCOVERY_COMMAND_RESPONSE) && (memcmp(discovery_.uid, response->source_uid, rdm::kUidSize) == 0)) {
                     tod_->AddUid(discovery_.uid);
@@ -530,7 +530,7 @@ void StateMachine::Process() {
             response_ = Rdm::Receive(port_index_);
 
             if ((!response_.empty())) {
-                const auto* response = reinterpret_cast<const struct TRdmMessage*>(response_.data());
+                const auto* response = reinterpret_cast<const struct e120::Message*>(response_.data());
 
                 if ((response->command_class != E120_DISCOVERY_COMMAND_RESPONSE) || ((static_cast<uint16_t>((response->param_id[0] << 8) + response->param_id[1])) != E120_DISC_MUTE)) {
                     puts("QUICKFIND invalid response");

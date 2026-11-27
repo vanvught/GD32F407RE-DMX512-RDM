@@ -59,10 +59,10 @@ void ArtNetNode::HandleRdmIn() {
                     art_rdm->command = 0;
                     art_rdm->address = node_.port[port_index].sw;
 
-                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(kRdmData.data());
+                    const auto* message = reinterpret_cast<const struct e120::Message*>(kRdmData.data());
                     memcpy(art_rdm->rdm_packet, &kRdmData[1], message->message_length + 1U);
 
-                    const auto* rdm_message = reinterpret_cast<const struct TRdmMessageNoSc*>(art_rdm->rdm_packet);
+                    const auto* rdm_message = reinterpret_cast<const struct e120::MessageNoSc*>(art_rdm->rdm_packet);
 
                     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(art_rdm), ((sizeof(struct artnet::ArtRdm)) - 256) + rdm_message->message_length + 1, input_port_[port_index].destination_ip, artnet::kUdpPort);
 
@@ -83,10 +83,10 @@ void ArtNetNode::HandleRdmIn() {
                     art_rdm->command = 0;
                     art_rdm->address = node_.port[port_index].sw;
 
-                    const auto* message = reinterpret_cast<const struct TRdmMessage*>(kRdmData.data());
+                    const auto* message = reinterpret_cast<const struct e120::Message*>(kRdmData.data());
                     memcpy(art_rdm->rdm_packet, &kRdmData[1], message->message_length + 1U);
 
-                    const auto* rdm_message = reinterpret_cast<const struct TRdmMessageNoSc*>(art_rdm->rdm_packet);
+                    const auto* rdm_message = reinterpret_cast<const struct e120::MessageNoSc*>(art_rdm->rdm_packet);
 
                     network::udp::Send(handle_, reinterpret_cast<const uint8_t*>(art_rdm), ((sizeof(struct artnet::ArtRdm)) - 256) + rdm_message->message_length + 1, output_port_[port_index].rdm_destination_ip, artnet::kUdpPort);
 

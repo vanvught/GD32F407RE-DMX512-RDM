@@ -108,6 +108,7 @@ constexpr SlotDefinitionEntry kTableC2[] = {
     {.id = SlotDefinition::kSdUndefined, .description = "No definition"}, //
 };
 } // namespace
+
 std::string_view GetTypeText(SlotType slot_type) {
     for (const auto& entry : kTableC1) {
         if (slot_type == entry.id) {

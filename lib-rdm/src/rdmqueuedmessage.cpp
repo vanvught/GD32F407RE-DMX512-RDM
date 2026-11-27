@@ -41,7 +41,7 @@ RDMQueuedMessage::~RDMQueuedMessage() {
     delete[] queued_message_;
 }
 
-void RDMQueuedMessage::Copy(struct TRdmMessage* rdm_message, uint32_t index) {
+void RDMQueuedMessage::Copy(struct e120::Message* rdm_message, uint32_t index) {
     assert(index < rdm::kMessageCountMax);
 
     rdm_message->command_class = queued_message_[index].command_class;
@@ -59,7 +59,7 @@ uint8_t RDMQueuedMessage::GetMessageCount() const {
 }
 
 void RDMQueuedMessage::Handler(uint8_t* rdm_data) {
-    auto *rdm_response = reinterpret_cast<struct TRdmMessage*>(rdm_data);
+    auto *rdm_response = reinterpret_cast<struct e120::Message*>(rdm_data);
 
     if (is_never_queued_) {
         rdm_response->slot16.response_type = E120_STATUS_MESSAGES;

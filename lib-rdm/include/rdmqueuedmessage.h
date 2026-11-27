@@ -51,7 +51,7 @@ class RDMQueuedMessage
     bool Add(const struct TRdmQueuedMessage* msg);
 
    private:
-    void Copy(struct TRdmMessage* rdm_message, uint32_t index);
+    void Copy(struct e120::Message* rdm_message, uint32_t index);
 
    private:
     uint8_t message_count_{0};

@@ -169,7 +169,7 @@ static bool ApplyQueuedConfig() {
  * ANSI E1.37-2
  */
 
-bool RDMHandler::CheckInterfaceID([[maybe_unused]] const struct TRdmMessageNoSc* rdm_data_in) {
+bool RDMHandler::CheckInterfaceID([[maybe_unused]] const struct e120::MessageNoSc* rdm_data_in) {
 #ifndef DMX_WORKSHOP_DEFECT
     const auto kInterfaceID = static_cast<uint32_t>((rdm_data_in->param_data[0] << 24) + (rdm_data_in->param_data[1] << 16) + (rdm_data_in->param_data[2] << 8) + rdm_data_in->param_data[3]);
 
@@ -186,7 +186,7 @@ void RDMHandler::GetInterfaceList([[maybe_unused]] uint16_t subdevice) {
     // https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
     const uint16_t kInterfaceHardwareType = 0x6; //	IEEE 802 Networks
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     const uint32_t kNetworkInterfaceId = network::iface::InterfaceIndex();
 
@@ -207,14 +207,14 @@ void RDMHandler::GetInterfaceList([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::GetInterfaceName([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
 
@@ -232,14 +232,14 @@ void RDMHandler::GetInterfaceName([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::GetHardwareAddress([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
     network::iface::CopyMacAddressTo(&rdm_data_out->param_data[4]);
@@ -254,14 +254,14 @@ void RDMHandler::GetHardwareAddress([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::GetDHCPMode([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
     rdm_data_out->param_data[4] = network::iface::Dhcp() ? 1 : 0;
@@ -276,7 +276,7 @@ void RDMHandler::GetDHCPMode([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::SetDHCPMode([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
@@ -308,7 +308,7 @@ void RDMHandler::SetDHCPMode([[maybe_unused]] bool is_broadcast, [[maybe_unused]
 void RDMHandler::GetNameServers([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
     const auto kNameServerIndex = rdm_data_in->param_data[0];
 
     if ((kNameServerIndex >= network::iface::NameServerCount()) || (kNameServerIndex > 2)) {
@@ -318,7 +318,7 @@ void RDMHandler::GetNameServers([[maybe_unused]] uint16_t subdevice) {
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     uint32_t ip_address = network::iface::NameServer(kNameServerIndex);
     const auto* ptr = reinterpret_cast<const uint8_t*>(&ip_address);
@@ -336,14 +336,14 @@ void RDMHandler::GetNameServers([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::GetZeroconf([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     memcpy(&rdm_data_out->param_data[0], &rdm_data_in->param_data[0], 4);
     rdm_data_out->param_data[4] = network::iface::IsAutoIpCapable() ? (network::iface::AutoIp()) : 0;
@@ -358,7 +358,7 @@ void RDMHandler::GetZeroconf([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::SetAutoIp([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
@@ -396,7 +396,7 @@ void RDMHandler::SetAutoIp([[maybe_unused]] bool is_broadcast, [[maybe_unused]] 
 void RDMHandler::RenewDhcp([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
@@ -427,14 +427,14 @@ void RDMHandler::RenewDhcp([[maybe_unused]] bool is_broadcast, [[maybe_unused]] 
 void RDMHandler::GetAddressNetmask([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     auto ip_address = network::GetPrimaryIp();
     const auto* ptr = reinterpret_cast<const uint8_t*>(&ip_address);
@@ -454,14 +454,14 @@ void RDMHandler::GetAddressNetmask([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::GetStaticAddress([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     uint32_t ip_address = network::GetPrimaryIp();
     const auto* ptr = reinterpret_cast<const uint8_t*>(&ip_address);
@@ -480,7 +480,7 @@ void RDMHandler::GetStaticAddress([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::SetStaticAddress([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (rdm_data_in->param_data_length != 9) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -508,7 +508,7 @@ void RDMHandler::SetStaticAddress([[maybe_unused]] bool is_broadcast, [[maybe_un
 void RDMHandler::ApplyConfiguration([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
@@ -530,14 +530,14 @@ void RDMHandler::ApplyConfiguration([[maybe_unused]] bool is_broadcast, [[maybe_
 void RDMHandler::GetDefaultRoute([[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (!CheckInterfaceID(rdm_data_in)) {
         RDM_LLRP_DEBUG_EXIT();
         return;
     }
 
-    auto* rdm_data_out = reinterpret_cast<struct TRdmMessage*>(m_pRdmDataOut);
+    auto* rdm_data_out = reinterpret_cast<struct e120::Message*>(data_out_);
 
     uint32_t ip_address = network::GetGatewayIp();
     const auto* ptr = reinterpret_cast<const uint8_t*>(&ip_address);
@@ -555,7 +555,7 @@ void RDMHandler::GetDefaultRoute([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::SetDefaultRoute([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    const auto* rdm_data_in = reinterpret_cast<const struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    const auto* rdm_data_in = reinterpret_cast<const struct e120::MessageNoSc*>(data_in_);
 
     if (rdm_data_in->param_data_length != 8) {
         RespondMessageNack(E120_NR_FORMAT_ERROR);
@@ -594,7 +594,7 @@ void RDMHandler::GetHostName([[maybe_unused]] uint16_t subdevice) {
 void RDMHandler::SetHostName([[maybe_unused]] bool is_broadcast, [[maybe_unused]] uint16_t subdevice) {
     RDM_LLRP_DEBUG_ENTRY();
 
-    auto* rdm_data_in = reinterpret_cast<struct TRdmMessageNoSc*>(m_pRdmDataIn);
+    auto* rdm_data_in = reinterpret_cast<struct e120::MessageNoSc*>(data_in_);
 
     if (rdm_data_in->param_data_length >= 64) {
         RespondMessageNack(E120_NR_HARDWARE_FAULT);

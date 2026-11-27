@@ -26,6 +26,11 @@
 #include <cstring>
 #include <cassert>
 
+#if defined(__linux__) || defined(__APPLE__)
+#define SHOW_LLRP_MESSAGE
+#define DEBUG_RDM_SHOW_MESSAGE
+#endif // defined(__linux__) || defined(__APPLE__)
+
 #include "uuid.h"
 #include "llrp/llrpdevice.h"
 #include "llrp/llrppacket.h"
@@ -37,11 +42,6 @@
 #include "rdm_message_print.h"
 #include "firmware/debug/debug_dump.h"
 #include "rdm_debug.h"
-
-#if defined(__linux__) || defined(__APPLE__)
-#define SHOW_LLRP_MESSAGE
-#define DEBUG_RDM_SHOW_MESSAGE
-#endif // defined(__linux__) || defined(__APPLE__)
 
 void LLRPDevice::HandleRequestMessage() {
     LLRP_DEVICE_DEBUG_ENTRY();
@@ -110,10 +110,10 @@ void LLRPDevice::HandleRdmCommand() {
 
     auto* pdu_packet = reinterpret_cast<struct LTRDMCommandPDUPacket*>(llrp);
 
-#ifdef DEBUG_RDM_SHOW_MESSAGE
-    const auto* rdm_data_in_no_sc = const_cast<uint8_t*>(pdu_packet->RDMCommandPDU.RDMData);
-    rdm::message::PrintNoStartcode(rdm_data_in_no_sc);
-#endif // DEBUG_RDM_SHOW_MESSAGE
+    if constexpr (kShowRdmMessageEnabled) {
+        //        const auto* rdm_data_in_no_sc = const_cast<uint8_t*>(pdu_packet->RDMCommandPDU.RDMData);
+        // // TODO (AvV)       rdm::message::PrintNoStartcode(rdm_data_in_no_sc);
+    }
 
     const auto* reply = LLRPHandleRdmCommand(pdu_packet->RDMCommandPDU.RDMData);
 
@@ -142,9 +142,9 @@ void LLRPDevice::HandleRdmCommand() {
 
     network::udp::Send(handle_llrp, reinterpret_cast<const uint8_t*>(pdu_packet), kLength, llrp::device::kIpV4LlrpResponse, llrp::device::kLlrpPort);
 
-#ifdef DEBUG_RDM_SHOW_MESSAGE
-    rdm::message::Print(reply);
-#endif // DEBUG_RDM_SHOW_MESSAGE
+    if constexpr (kShowRdmMessageEnabled) {
+        //       TODO (AvV) rdm::message::Print(reply);
+    }
 
 #ifndef NDEBUG
     DumpCommon();
