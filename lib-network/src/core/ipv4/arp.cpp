@@ -127,7 +127,14 @@ constexpr char kStates[4][12] = {
 
 void CacheRecordDump([[maybe_unused]] network::arp::Record* record) {
     if constexpr (kDebugNetworkArpEnabled) {
-        printf("%p %-4d %c " MACSTR " %-10s " IPSTR "\n", record, record->age, record->packet.p == nullptr ? '-' : 'Q', MAC2STR(record->mac_address), kStates[static_cast<unsigned>(record->state)], IP2STR(record->ip));
+        printf("%p %-4u %c " MACSTR " %-10s " IPSTR "\n",     //
+               record,                                        //
+               static_cast<unsigned>(record->age),            //
+               record->packet.p == nullptr ? '-' : 'Q',       //
+               MAC2STR(record->mac_address),                  //
+               kStates[static_cast<unsigned>(record->state)], //
+               IP2STR(record->ip)                             //
+        );
     }
 }
 
@@ -135,7 +142,15 @@ void CacheDump() {
     if constexpr (kDebugNetworkArpEnabled) {
         uint32_t index = 0;
         for (auto& record : s_arp_records) {
-            printf("%p %02d %-4d" MACSTR " %-10s " IPSTR "\n", &record, index++, record.age, MAC2STR(record.mac_address), kStates[static_cast<unsigned>(record.state)], IP2STR(record.ip));
+            printf("%p %02u %-4u" MACSTR " %-10s " IPSTR "\n",
+                   &record,                                      //
+                   static_cast<unsigned>(index++),               //
+                   static_cast<unsigned>(record.age),            //
+                   MAC2STR(record.mac_address),                  //
+                   kStates[static_cast<unsigned>(record.state)], //
+                   IP2STR(record.ip)                             //
+            );
+
             if (index == 6) {
                 return;
             }
